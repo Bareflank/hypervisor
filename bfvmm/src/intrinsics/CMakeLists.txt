@@ -24,6 +24,7 @@ if(${BUILD_TARGET_ARCH} STREQUAL x86_64)
             arch/intel_x64/cpuid_x64_mock.cpp
             arch/intel_x64/crs_intel_x64_mock.cpp
             arch/intel_x64/debug_x64_mock.cpp
+            arch/intel_x64/fence_x64_mock.cpp
             arch/intel_x64/gdt_x64_mock.cpp
             arch/intel_x64/idt_x64_mock.cpp
             arch/intel_x64/msrs_x64_mock.cpp
@@ -42,6 +43,7 @@ if(${BUILD_TARGET_ARCH} STREQUAL x86_64)
             arch/intel_x64/cpuid_x64.asm
             arch/intel_x64/crs_intel_x64.asm
             arch/intel_x64/debug_x64.asm
+            arch/intel_x64/fence_x64.asm
             arch/intel_x64/gdt_x64.asm
             arch/intel_x64/idt_x64.asm
             arch/intel_x64/msrs_x64.asm

@@ -19,7 +19,7 @@
 #ifndef INTRINSICS_X2APIC_INTEL_X64_H
 #define INTRINSICS_X2APIC_INTEL_X64_H
 
-#include <array>
+#include <set>
 #include <intrinsics/x86/intel/apic/lapic.h>
 #include <intrinsics/x86/intel/cpuid_intel_x64.h>
 
@@ -2066,16 +2066,105 @@ namespace msrs
 
 namespace x2apic
 {
+    namespace regs
+    {
+        const lapic::reg_info id = { (msrs::ia32_x2apic_apicid::addr & 0xFF), true, false };
+        const lapic::reg_info version = { (msrs::ia32_x2apic_version::addr & 0xFF), true, false };
+        const lapic::reg_info tpr = { (msrs::ia32_x2apic_tpr::addr & 0xFF), true, true };
+        const lapic::reg_info ppr = { (msrs::ia32_x2apic_ppr::addr & 0xFF), true, false };
+        const lapic::reg_info eoi = { (msrs::ia32_x2apic_eoi::addr & 0xFF), false, true };
+        const lapic::reg_info ldr = { (msrs::ia32_x2apic_ldr::addr & 0xFF), true, false };
+        const lapic::reg_info svr = { (msrs::ia32_x2apic_sivr::addr & 0xFF), true, true };
+        const lapic::reg_info isr0 = { (msrs::ia32_x2apic_isr0::addr & 0xFF), true, false };
+        const lapic::reg_info isr1 = { (msrs::ia32_x2apic_isr1::addr & 0xFF), true, false };
+        const lapic::reg_info isr2 = { (msrs::ia32_x2apic_isr2::addr & 0xFF), true, false };
+        const lapic::reg_info isr3 = { (msrs::ia32_x2apic_isr3::addr & 0xFF), true, false };
+        const lapic::reg_info isr4 = { (msrs::ia32_x2apic_isr4::addr & 0xFF), true, false };
+        const lapic::reg_info isr5 = { (msrs::ia32_x2apic_isr5::addr & 0xFF), true, false };
+        const lapic::reg_info isr6 = { (msrs::ia32_x2apic_isr6::addr & 0xFF), true, false };
+        const lapic::reg_info isr7 = { (msrs::ia32_x2apic_isr7::addr & 0xFF), true, false };
+        const lapic::reg_info tmr0 = { (msrs::ia32_x2apic_tmr0::addr & 0xFF), true, false };
+        const lapic::reg_info tmr1 = { (msrs::ia32_x2apic_tmr1::addr & 0xFF), true, false };
+        const lapic::reg_info tmr2 = { (msrs::ia32_x2apic_tmr2::addr & 0xFF), true, false };
+        const lapic::reg_info tmr3 = { (msrs::ia32_x2apic_tmr3::addr & 0xFF), true, false };
+        const lapic::reg_info tmr4 = { (msrs::ia32_x2apic_tmr4::addr & 0xFF), true, false };
+        const lapic::reg_info tmr5 = { (msrs::ia32_x2apic_tmr5::addr & 0xFF), true, false };
+        const lapic::reg_info tmr6 = { (msrs::ia32_x2apic_tmr6::addr & 0xFF), true, false };
+        const lapic::reg_info tmr7 = { (msrs::ia32_x2apic_tmr7::addr & 0xFF), true, false };
+        const lapic::reg_info irr0 = { (msrs::ia32_x2apic_irr0::addr & 0xFF), true, false };
+        const lapic::reg_info irr1 = { (msrs::ia32_x2apic_irr1::addr & 0xFF), true, false };
+        const lapic::reg_info irr2 = { (msrs::ia32_x2apic_irr2::addr & 0xFF), true, false };
+        const lapic::reg_info irr3 = { (msrs::ia32_x2apic_irr3::addr & 0xFF), true, false };
+        const lapic::reg_info irr4 = { (msrs::ia32_x2apic_irr4::addr & 0xFF), true, false };
+        const lapic::reg_info irr5 = { (msrs::ia32_x2apic_irr5::addr & 0xFF), true, false };
+        const lapic::reg_info irr6 = { (msrs::ia32_x2apic_irr6::addr & 0xFF), true, false };
+        const lapic::reg_info irr7 = { (msrs::ia32_x2apic_irr7::addr & 0xFF), true, false };
+        const lapic::reg_info esr = { (msrs::ia32_x2apic_esr::addr & 0xFF), true, true };
+        const lapic::reg_info lvt_cmci = { (msrs::ia32_x2apic_lvt_cmci::addr & 0xFF), true, true };
+        const lapic::reg_info icr = { (msrs::ia32_x2apic_icr::addr & 0xFF), true, true };
+        const lapic::reg_info lvt_timer = { (msrs::ia32_x2apic_lvt_timer ::addr & 0xFF), true, true };
+        const lapic::reg_info lvt_thermal = { (msrs::ia32_x2apic_lvt_thermal::addr & 0xFF), true, true };
+        const lapic::reg_info lvt_perf = { (msrs::ia32_x2apic_lvt_pmi::addr & 0xFF), true, true };
+        const lapic::reg_info lvt_lint0 = { (msrs::ia32_x2apic_lvt_lint0::addr & 0xFF), true, true };
+        const lapic::reg_info lvt_lint1 = { (msrs::ia32_x2apic_lvt_lint1::addr & 0xFF), true, true };
+        const lapic::reg_info lvt_error = { (msrs::ia32_x2apic_lvt_error::addr & 0xFF), true, true };
+        const lapic::reg_info init_count = { (msrs::ia32_x2apic_init_count::addr & 0xFF), true, true };
+        const lapic::reg_info cur_count = { (msrs::ia32_x2apic_cur_count::addr & 0xFF), true, false };
+        const lapic::reg_info div_conf = { (msrs::ia32_x2apic_div_conf::addr & 0xFF), true, true };
+        const lapic::reg_info self_ipi = { (msrs::ia32_x2apic_self_ipi::addr & 0xFF), false, true };
+    }
+
+    using reg_info_set_type = const std::set<intel_x64::lapic::reg_info>;
+    reg_info_set_type reg_set = {
+        regs::id,
+        regs::version,
+        regs::tpr,
+        regs::ppr,
+        regs::eoi,
+        regs::ldr,
+        regs::svr,
+        regs::isr0,
+        regs::isr1,
+        regs::isr2,
+        regs::isr3,
+        regs::isr4,
+        regs::isr5,
+        regs::isr6,
+        regs::isr7,
+        regs::tmr0,
+        regs::tmr1,
+        regs::tmr2,
+        regs::tmr3,
+        regs::tmr4,
+        regs::tmr5,
+        regs::tmr6,
+        regs::tmr7,
+        regs::irr0,
+        regs::irr1,
+        regs::irr2,
+        regs::irr3,
+        regs::irr4,
+        regs::irr5,
+        regs::irr6,
+        regs::irr7,
+        regs::esr,
+        regs::lvt_cmci,
+        regs::icr,
+        regs::lvt_timer,
+        regs::lvt_thermal,
+        regs::lvt_perf,
+        regs::lvt_lint0,
+        regs::lvt_lint1,
+        regs::lvt_error,
+        regs::init_count,
+        regs::cur_count,
+        regs::div_conf,
+        regs::self_ipi
+    };
+
     using namespace intel_x64::msrs;
-    using addr_type = const intel_x64::msrs::field_type;
-    using size_type = const std::size_t;
-    using addr_set_type = const std::array<addr_type, 44>;
-
-    addr_type start_reg = 0x800U;
-    addr_type end_reg = 0xBFFU;
-    size_type total_regs = (end_reg - start_reg) + 1U;
-
-    addr_set_type addr_set = {
+    using addr_set_type = const std::array<lapic::addr_type, 44>;
+    addr_set_type addr_set = {{
         ia32_x2apic_apicid::addr,
         ia32_x2apic_version::addr,
         ia32_x2apic_tpr::addr,
@@ -2120,7 +2209,7 @@ namespace x2apic
         ia32_x2apic_cur_count::addr,
         ia32_x2apic_div_conf::addr,
         ia32_x2apic_self_ipi::addr
-    };
+    }};
 
     inline auto supported() noexcept
     {
@@ -2134,7 +2223,96 @@ namespace x2apic
 /// mode. It is marked final because it is intended to interact
 /// directly with x2apic hardware.
 ///
-struct EXPORT_X2APIC x2apic_control final : public lapic_control {
+struct EXPORT_X2APIC x2apic_control final : public lapic_control
+{
+    //
+    // Check if guest physical address is an APIC register and the desired
+    // read / write operation is allowed.
+    //
+    // @return offset if supplied address maps to a valid register and the
+    //    operation is allowed.
+    // @return -1 if the supplied address doesn't map to a valid register or the
+    //    operation is not allowed.
+    //
+    // @param addr - guest physical address of desired register
+    // @param op - the desired operation (read / write)
+    //
+    int validate_gpa_op(const gpa_type addr, const reg_op op) noexcept override
+    {
+        auto reg_set_iter = x2apic::reg_set.find((addr & 0xFF0U) >> 4);
+
+        if (reg_set_iter != x2apic::reg_set.end()) {
+            switch (op) {
+                case read:
+                    if (reg_set_iter->readable) {
+                        return (addr & 0xFF0U) >> 4;
+                    }
+                    break;
+
+                case write:
+                    if (reg_set_iter->writeable) {
+                        return (addr & 0xFF0U) >> 4;
+                    }
+                    break;
+
+                default:
+                    bferror_info(0, "invalid register operation");
+                    return -1;
+            }
+        }
+
+        return -1;
+    }
+
+    //
+    // Check if MSR address is an APIC register and the desired read / write
+    // operation is allowed.
+    //
+    // @return offset if supplied address maps to a valid register and the
+    //    operation is allowed.
+    // @return -1 if the supplied address doesn't map to a valid register or the
+    //    operation is not allowed.
+    //
+    // @param addr - MSR address of desired register
+    // @param op - the desired operation (read / write)
+    //
+    int validate_msr_op(const msrs::field_type msr, const reg_op op) noexcept override
+    {
+        if (msr < lapic::msr_start_reg || msr > lapic::msr_end_reg) {
+            return -1;
+        }
+        auto reg_set_iter = x2apic::reg_set.find(msr & 0xFFU);
+
+        if (reg_set_iter != x2apic::reg_set.end()) {
+            switch (op) {
+                case read:
+                    if (reg_set_iter->readable) {
+                        return msr & 0xFFU;
+                    }
+                    break;
+
+                case write:
+                    if (reg_set_iter->writeable) {
+                        return msr & 0xFFU;
+                    }
+                    break;
+
+                default:
+                    bferror_info(0, "invalid register operation");
+                    return -1;
+            }
+        }
+
+        return -1;
+    }
+
+    value_type read_register(const uint32_t offset) noexcept override
+    { return msrs::get(offset | lapic::msr_start_reg); }
+
+    void write_register(const uint32_t offset, const value_type val) noexcept override
+    { msrs::set((offset | lapic::msr_start_reg), val); }
+
+
     //
     // Register reads
     //
@@ -2157,25 +2335,25 @@ struct EXPORT_X2APIC x2apic_control final : public lapic_control {
     { return msrs::ia32_x2apic_icr::get(); }
 
 
-    value_type read_isr(index idx) noexcept override
+    value_type read_isr(const index idx) noexcept override
     {
         auto addr = msrs::ia32_x2apic_isr0::addr | idx;
         return msrs::get(addr);
     }
 
-    value_type read_tmr(index idx) noexcept override
+    value_type read_tmr(const index idx) noexcept override
     {
         auto addr = msrs::ia32_x2apic_tmr0::addr | idx;
         return msrs::get(addr);
     }
 
-    value_type read_irr(index idx) noexcept override
+    value_type read_irr(const index idx) noexcept override
     {
         auto addr = msrs::ia32_x2apic_irr0::addr | idx;
         return msrs::get(addr);
     }
 
-    value_type read_lvt(lvt_reg reg) noexcept override
+    value_type read_lvt(const lvt_reg reg) noexcept override
     {
         switch (reg) {
             case cmci:
@@ -2199,7 +2377,7 @@ struct EXPORT_X2APIC x2apic_control final : public lapic_control {
         }
     }
 
-    value_type read_count(count_reg reg) noexcept override
+    value_type read_count(const count_reg reg) noexcept override
     {
         switch (reg) {
             case initial:
@@ -2216,22 +2394,23 @@ struct EXPORT_X2APIC x2apic_control final : public lapic_control {
     value_type read_div_config() noexcept override
     { return msrs::ia32_x2apic_div_conf::get(); }
 
+
     //
     // Register writes
     //
     void write_eoi() noexcept override
     { msrs::ia32_x2apic_eoi::set(0x0ULL); }
 
-    void write_tpr(value_type tpr) noexcept override
+    void write_tpr(const value_type tpr) noexcept override
     { msrs::ia32_x2apic_tpr::set(tpr); }
 
-    void write_svr(value_type svr) noexcept override
+    void write_svr(const value_type svr) noexcept override
     { msrs::ia32_x2apic_sivr::set(svr); }
 
-    void write_icr(value_type icr) noexcept override
+    void write_icr(const value_type icr) noexcept override
     { msrs::ia32_x2apic_icr::set(icr); }
 
-    void write_lvt(lvt_reg reg, value_type val) noexcept override
+    void write_lvt(const lvt_reg reg, const value_type val) noexcept override
     {
         switch (reg) {
             case cmci:
@@ -2262,11 +2441,12 @@ struct EXPORT_X2APIC x2apic_control final : public lapic_control {
         }
     }
 
-    void write_init_count(value_type count) noexcept override
+    void write_init_count(const value_type count) noexcept override
     { msrs::ia32_x2apic_init_count::set(count); }
 
-    void write_div_config(value_type config) noexcept override
+    void write_div_config(const value_type config) noexcept override
     { msrs::ia32_x2apic_div_conf::set(config); }
+
 
     //
     // Send a self-ipi
@@ -2276,7 +2456,7 @@ struct EXPORT_X2APIC x2apic_control final : public lapic_control {
     //
     // @param vec - the vector of the self-ipi
     //
-    void write_self_ipi(vector_type vec) noexcept override
+    void write_self_ipi(const vector_type vec) noexcept override
     { msrs::ia32_x2apic_self_ipi::vector::set(vec); }
 
     //
@@ -2290,9 +2470,8 @@ struct EXPORT_X2APIC x2apic_control final : public lapic_control {
     // @note to ensure an accurate result, the caller should mask
     // the vector prior to the call
     //
-    bool level_triggered(vector_type vec) noexcept override
+    bool level_triggered(const vector_type vec) noexcept override
     {
-
         auto reg = (vec & 0xE0) >> 5;
         auto bit = 1ULL << (vec & 0x1F);
         switch (reg) {
@@ -2330,7 +2509,7 @@ struct EXPORT_X2APIC x2apic_control final : public lapic_control {
     // @note to ensure an accurate result, the caller should mask
     // the vector prior to the call
     //
-    bool in_service(vector_type vec) noexcept override
+    bool in_service(const vector_type vec) noexcept override
     {
         auto reg = (vec & 0xE0) >> 5;
         auto bit = 1ULL << (vec & 0x1F);

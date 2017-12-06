@@ -163,6 +163,11 @@ TEST_CASE("debug_mock_write_dr7")
     CHECK_NOTHROW(_write_dr7(val));
 }
 
+TEST_CASE("fence_mock_sfence")
+{
+    CHECK_NOTHROW(_sfence());
+}
+
 TEST_CASE("gdt_mock_read_gdt")
 {
     gdt_reg_x64_t g_gdt;

@@ -164,7 +164,7 @@ namespace feature_information
             constexpr const auto name = "brand_index";
 
             inline auto get() noexcept
-            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+            { return get_bits(_cpuid_ebx(addr), mask) >> from; }
 
             inline auto get(value_type msr) noexcept
             { return get_bits(msr, mask) >> from; }
@@ -180,7 +180,7 @@ namespace feature_information
             constexpr const auto name = "clflush_line_size";
 
             inline auto get() noexcept
-            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+            { return get_bits(_cpuid_ebx(addr), mask) >> from; }
 
             inline auto get(value_type msr) noexcept
             { return get_bits(msr, mask) >> from; }
@@ -196,7 +196,7 @@ namespace feature_information
             constexpr const auto name = "max_addressable_ids";
 
             inline auto get() noexcept
-            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+            { return get_bits(_cpuid_ebx(addr), mask) >> from; }
 
             inline auto get(value_type msr) noexcept
             { return get_bits(msr, mask) >> from; }
@@ -212,7 +212,7 @@ namespace feature_information
             constexpr const auto name = "initial_apic_id";
 
             inline auto get() noexcept
-            { return get_bits(_cpuid_eax(addr), mask) >> from; }
+            { return get_bits(_cpuid_ebx(addr), mask) >> from; }
 
             inline auto get(value_type msr) noexcept
             { return get_bits(msr, mask) >> from; }
@@ -948,13 +948,13 @@ namespace feature_information
             constexpr const auto name = "fpu";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -970,13 +970,13 @@ namespace feature_information
             constexpr const auto name = "vme";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -992,13 +992,13 @@ namespace feature_information
             constexpr const auto name = "de";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1014,13 +1014,13 @@ namespace feature_information
             constexpr const auto name = "pse";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1036,13 +1036,13 @@ namespace feature_information
             constexpr const auto name = "tsc";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1058,13 +1058,13 @@ namespace feature_information
             constexpr const auto name = "msr";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1080,13 +1080,13 @@ namespace feature_information
             constexpr const auto name = "pae";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1102,13 +1102,13 @@ namespace feature_information
             constexpr const auto name = "mce";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1124,13 +1124,13 @@ namespace feature_information
             constexpr const auto name = "cx8";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1146,13 +1146,13 @@ namespace feature_information
             constexpr const auto name = "apic";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1168,13 +1168,13 @@ namespace feature_information
             constexpr const auto name = "sep";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1190,13 +1190,13 @@ namespace feature_information
             constexpr const auto name = "mtrr";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1212,13 +1212,13 @@ namespace feature_information
             constexpr const auto name = "pge";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1234,13 +1234,13 @@ namespace feature_information
             constexpr const auto name = "mca";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1256,13 +1256,13 @@ namespace feature_information
             constexpr const auto name = "cmov";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1278,13 +1278,13 @@ namespace feature_information
             constexpr const auto name = "pat";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1300,13 +1300,13 @@ namespace feature_information
             constexpr const auto name = "pse_36";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1322,13 +1322,13 @@ namespace feature_information
             constexpr const auto name = "psn";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1344,13 +1344,13 @@ namespace feature_information
             constexpr const auto name = "clfsh";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1366,13 +1366,13 @@ namespace feature_information
             constexpr const auto name = "ds";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1388,13 +1388,13 @@ namespace feature_information
             constexpr const auto name = "acpi";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1410,13 +1410,13 @@ namespace feature_information
             constexpr const auto name = "mmx";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1432,13 +1432,13 @@ namespace feature_information
             constexpr const auto name = "fxsr";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1454,13 +1454,13 @@ namespace feature_information
             constexpr const auto name = "sse";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1476,13 +1476,13 @@ namespace feature_information
             constexpr const auto name = "sse2";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1498,13 +1498,13 @@ namespace feature_information
             constexpr const auto name = "ss";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1520,13 +1520,13 @@ namespace feature_information
             constexpr const auto name = "htt";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1542,13 +1542,13 @@ namespace feature_information
             constexpr const auto name = "tm";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1564,13 +1564,13 @@ namespace feature_information
             constexpr const auto name = "pbe";
 
             inline auto is_enabled()
-            { return is_bit_set(_cpuid_ecx(addr), from); }
+            { return is_bit_set(_cpuid_edx(addr), from); }
 
             inline auto is_enabled(value_type msr)
             { return is_bit_set(msr, from); }
 
             inline auto is_disabled()
-            { return is_bit_cleared(_cpuid_ecx(addr), from); }
+            { return is_bit_cleared(_cpuid_edx(addr), from); }
 
             inline auto is_disabled(value_type msr)
             { return is_bit_cleared(msr, from); }
@@ -1621,7 +1621,6 @@ namespace feature_information
         ecx::dump(level, msg);
         edx::dump(level, msg);
     }
-
 }
 
 namespace extended_feature_flags

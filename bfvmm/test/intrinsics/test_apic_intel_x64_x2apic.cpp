@@ -1508,797 +1508,93 @@ TEST_CASE("x2apic_supported")
     CHECK_FALSE(x2apic::supported());
 }
 
-//TEST_CASE("x2apic_control_read_id")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_apicid::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_id() == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_apicid::addr] = 0x0ULL;
-//    CHECK(ctrl.read_id() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_version")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_version::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_version() == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_version::addr] = 0x0ULL;
-//    CHECK(ctrl.read_version() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_tpr")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    msrs::ia32_x2apic_tpr::set(0xFFFFFFFFFFFFFFFFULL);
-//    CHECK(ctrl.read_tpr() == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    msrs::ia32_x2apic_tpr::set(0x0ULL);
-//    CHECK(ctrl.read_tpr() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_ldr")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_ldr::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_ldr() == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_ldr::addr] = 0x0ULL;
-//    CHECK(ctrl.read_ldr() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_svr")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    msrs::ia32_x2apic_sivr::set(0xFFFFFFFFFFFFFFFFULL);
-//    CHECK(ctrl.read_svr() == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    msrs::ia32_x2apic_sivr::set(0x0ULL);
-//    CHECK(ctrl.read_svr() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_icr")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    msrs::ia32_x2apic_icr::set(0xFFFFFFFFFFFFFFFFULL);
-//    CHECK(ctrl.read_icr() == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    msrs::ia32_x2apic_icr::set(0x0ULL);
-//    CHECK(ctrl.read_icr() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_isr0")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_isr0::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_isr(ctrl.idx0) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_isr0::addr] = 0x0ULL;
-//    CHECK(ctrl.read_isr(ctrl.idx0) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_isr1")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_isr1::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_isr(ctrl.idx1) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_isr1::addr] = 0x0ULL;
-//    CHECK(ctrl.read_isr(ctrl.idx1) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_isr2")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_isr2::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_isr(ctrl.idx2) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_isr2::addr] = 0x0ULL;
-//    CHECK(ctrl.read_isr(ctrl.idx2) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_isr3")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_isr3::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_isr(ctrl.idx3) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_isr3::addr] = 0x0ULL;
-//    CHECK(ctrl.read_isr(ctrl.idx3) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_isr4")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_isr4::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_isr(ctrl.idx4) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_isr4::addr] = 0x0ULL;
-//    CHECK(ctrl.read_isr(ctrl.idx4) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_isr5")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_isr5::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_isr(ctrl.idx5) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_isr5::addr] = 0x0ULL;
-//    CHECK(ctrl.read_isr(ctrl.idx5) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_isr6")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_isr6::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_isr(ctrl.idx6) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_isr6::addr] = 0x0ULL;
-//    CHECK(ctrl.read_isr(ctrl.idx6) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_isr7")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_isr7::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_isr(ctrl.idx7) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_isr7::addr] = 0x0ULL;
-//    CHECK(ctrl.read_isr(ctrl.idx7) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_tmr0")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_tmr0::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx0) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_tmr0::addr] = 0x0ULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx0) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_tmr1")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_tmr1::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx1) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_tmr1::addr] = 0x0ULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx1) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_tmr2")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_tmr2::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx2) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_tmr2::addr] = 0x0ULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx2) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_tmr3")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_tmr3::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx3) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_tmr3::addr] = 0x0ULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx3) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_tmr4")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_tmr4::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx4) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_tmr4::addr] = 0x0ULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx4) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_tmr5")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_tmr5::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx5) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_tmr5::addr] = 0x0ULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx5) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_tmr6")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_tmr6::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx6) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_tmr6::addr] = 0x0ULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx6) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_tmr7")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_tmr7::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx7) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_tmr7::addr] = 0x0ULL;
-//    CHECK(ctrl.read_tmr(ctrl.idx7) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_irr0")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_irr0::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_irr(ctrl.idx0) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_irr0::addr] = 0x0ULL;
-//    CHECK(ctrl.read_irr(ctrl.idx0) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_irr1")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_irr1::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_irr(ctrl.idx1) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_irr1::addr] = 0x0ULL;
-//    CHECK(ctrl.read_irr(ctrl.idx1) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_irr2")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_irr2::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_irr(ctrl.idx2) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_irr2::addr] = 0x0ULL;
-//    CHECK(ctrl.read_irr(ctrl.idx2) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_irr3")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_irr3::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_irr(ctrl.idx3) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_irr3::addr] = 0x0ULL;
-//    CHECK(ctrl.read_irr(ctrl.idx3) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_irr4")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_irr4::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_irr(ctrl.idx4) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_irr4::addr] = 0x0ULL;
-//    CHECK(ctrl.read_irr(ctrl.idx4) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_irr5")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_irr5::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_irr(ctrl.idx5) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_irr5::addr] = 0x0ULL;
-//    CHECK(ctrl.read_irr(ctrl.idx5) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_irr6")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_irr6::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_irr(ctrl.idx6) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_irr6::addr] = 0x0ULL;
-//    CHECK(ctrl.read_irr(ctrl.idx6) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_irr7")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_irr7::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_irr(ctrl.idx7) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_irr7::addr] = 0x0ULL;
-//    CHECK(ctrl.read_irr(ctrl.idx7) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_lvt_cmci")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    msrs::ia32_x2apic_lvt_cmci::set(0xFFFFFFFFFFFFFFFFULL);
-//    CHECK(ctrl.read_lvt(ctrl.cmci) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    msrs::ia32_x2apic_lvt_cmci::set(0x0ULL);
-//    CHECK(ctrl.read_lvt(ctrl.cmci) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_lvt_timer")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    msrs::ia32_x2apic_lvt_timer::set(0xFFFFFFFFFFFFFFFFULL);
-//    CHECK(ctrl.read_lvt(ctrl.timer) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    msrs::ia32_x2apic_lvt_timer::set(0x0ULL);
-//    CHECK(ctrl.read_lvt(ctrl.timer) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_lvt_thermal")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    msrs::ia32_x2apic_lvt_thermal::set(0xFFFFFFFFFFFFFFFFULL);
-//    CHECK(ctrl.read_lvt(ctrl.thermal) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    msrs::ia32_x2apic_lvt_thermal::set(0x0ULL);
-//    CHECK(ctrl.read_lvt(ctrl.thermal) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_lvt_pmi")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    msrs::ia32_x2apic_lvt_pmi::set(0xFFFFFFFFFFFFFFFFULL);
-//    CHECK(ctrl.read_lvt(ctrl.perf) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    msrs::ia32_x2apic_lvt_pmi::set(0x0ULL);
-//    CHECK(ctrl.read_lvt(ctrl.perf) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_lvt_lint0")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    msrs::ia32_x2apic_lvt_lint0::set(0xFFFFFFFFFFFFFFFFULL);
-//    CHECK(ctrl.read_lvt(ctrl.lint0) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    msrs::ia32_x2apic_lvt_lint0::set(0x0ULL);
-//    CHECK(ctrl.read_lvt(ctrl.lint0) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_lvt_lint1")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    msrs::ia32_x2apic_lvt_lint1::set(0xFFFFFFFFFFFFFFFFULL);
-//    CHECK(ctrl.read_lvt(ctrl.lint1) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    msrs::ia32_x2apic_lvt_lint1::set(0x0ULL);
-//    CHECK(ctrl.read_lvt(ctrl.lint1) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_lvt_error")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    msrs::ia32_x2apic_lvt_error::set(0xFFFFFFFFFFFFFFFFULL);
-//    CHECK(ctrl.read_lvt(ctrl.error) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    msrs::ia32_x2apic_lvt_error::set(0x0ULL);
-//    CHECK(ctrl.read_lvt(ctrl.error) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_count_initial")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_init_count::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_count(ctrl.initial) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_init_count::addr] = 0x0ULL;
-//    CHECK(ctrl.read_count(ctrl.initial) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_count_current")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_cur_count::addr] = 0xFFFFFFFFFFFFFFFFULL;
-//    CHECK(ctrl.read_count(ctrl.current) == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    g_msrs[msrs::ia32_x2apic_cur_count::addr] = 0x0ULL;
-//    CHECK(ctrl.read_count(ctrl.current) == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_read_div_config")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    msrs::ia32_x2apic_div_conf::set(0xFFFFFFFFFFFFFFFFULL);
-//    CHECK(ctrl.read_div_config() == 0xFFFFFFFFFFFFFFFFULL);
-//
-//    msrs::ia32_x2apic_div_conf::set(0x0ULL);
-//    CHECK(ctrl.read_div_config() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_eoi")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_eoi();
-//    CHECK(g_msrs[msrs::ia32_x2apic_eoi::addr] == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_tpr")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_tpr(0xFFFFFFFFULL);
-//    CHECK(msrs::ia32_x2apic_tpr::get() == 0xFFFFFFFFULL);
-//
-//    ctrl.write_tpr(0x0ULL);
-//    CHECK(msrs::ia32_x2apic_tpr::get() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_svr")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_svr(0xFFFFFFFFULL);
-//    CHECK(msrs::ia32_x2apic_sivr::get() == 0xFFFFFFFFULL);
-//
-//    ctrl.write_svr(0x0ULL);
-//    CHECK(msrs::ia32_x2apic_sivr::get() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_icr")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_icr(0xFFFFFFFFULL);
-//    CHECK(msrs::ia32_x2apic_icr::get() == 0xFFFFFFFFULL);
-//
-//    ctrl.write_icr(0x0ULL);
-//    CHECK(msrs::ia32_x2apic_icr::get() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_lvt_cmci")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_lvt(ctrl.cmci, 0xFFFFFFFFULL);
-//    CHECK(msrs::ia32_x2apic_lvt_cmci::get() == 0xFFFFFFFFULL);
-//
-//    ctrl.write_lvt(ctrl.cmci, 0x0ULL);
-//    CHECK(msrs::ia32_x2apic_lvt_cmci::get() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_lvt_timer")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_lvt(ctrl.timer, 0xFFFFFFFFULL);
-//    CHECK(msrs::ia32_x2apic_lvt_timer::get() == 0xFFFFFFFFULL);
-//
-//    ctrl.write_lvt(ctrl.timer, 0x0ULL);
-//    CHECK(msrs::ia32_x2apic_lvt_timer::get() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_lvt_thermal")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_lvt(ctrl.thermal, 0xFFFFFFFFULL);
-//    CHECK(msrs::ia32_x2apic_lvt_thermal::get() == 0xFFFFFFFFULL);
-//
-//    ctrl.write_lvt(ctrl.thermal, 0x0ULL);
-//    CHECK(msrs::ia32_x2apic_lvt_thermal::get() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_lvt_perf")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_lvt(ctrl.perf, 0xFFFFFFFFULL);
-//    CHECK(msrs::ia32_x2apic_lvt_pmi::get() == 0xFFFFFFFFULL);
-//
-//    ctrl.write_lvt(ctrl.perf, 0x0ULL);
-//    CHECK(msrs::ia32_x2apic_lvt_pmi::get() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_lvt_lint0")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_lvt(ctrl.lint0, 0xFFFFFFFFULL);
-//    CHECK(msrs::ia32_x2apic_lvt_lint0::get() == 0xFFFFFFFFULL);
-//
-//    ctrl.write_lvt(ctrl.lint0, 0x0ULL);
-//    CHECK(msrs::ia32_x2apic_lvt_lint0::get() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_lvt_lint1")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_lvt(ctrl.lint1, 0xFFFFFFFFULL);
-//    CHECK(msrs::ia32_x2apic_lvt_lint1::get() == 0xFFFFFFFFULL);
-//
-//    ctrl.write_lvt(ctrl.lint1, 0x0ULL);
-//    CHECK(msrs::ia32_x2apic_lvt_lint1::get() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_lvt_error")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_lvt(ctrl.error, 0xFFFFFFFFULL);
-//    CHECK(msrs::ia32_x2apic_lvt_error::get() == 0xFFFFFFFFULL);
-//
-//    ctrl.write_lvt(ctrl.error, 0x0ULL);
-//    CHECK(msrs::ia32_x2apic_lvt_error::get() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_init_count")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_init_count(0xFFFFFFFFULL);
-//    CHECK(msrs::ia32_x2apic_init_count::get() == 0xFFFFFFFFULL);
-//
-//    ctrl.write_init_count(0x0ULL);
-//    CHECK(msrs::ia32_x2apic_init_count::get() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_div_config")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_div_config(0xFFFFFFFFULL);
-//    CHECK(msrs::ia32_x2apic_div_conf::get() == 0xFFFFFFFFULL);
-//
-//    ctrl.write_div_config(0x0ULL);
-//    CHECK(msrs::ia32_x2apic_div_conf::get() == 0x0ULL);
-//}
-//
-//TEST_CASE("x2apic_control_write_self_ipi")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    ctrl.write_self_ipi(0xFFULL);
-//    CHECK(g_msrs[msrs::ia32_x2apic_self_ipi::addr] == 0xFFULL);
-//
-//    ctrl.write_self_ipi(0x88ULL);
-//    CHECK(g_msrs[msrs::ia32_x2apic_self_ipi::addr] == 0x88ULL);
-//}
-//
-//TEST_CASE("x2apic_control_level_triggered")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_tmr0::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.level_triggered(1));
-//    g_msrs[msrs::ia32_x2apic_tmr0::addr] = 0x2ULL;
-//    CHECK(ctrl.level_triggered(1));
-//
-//    g_msrs[msrs::ia32_x2apic_tmr1::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.level_triggered(34));
-//    g_msrs[msrs::ia32_x2apic_tmr1::addr] = 0x4ULL;
-//    CHECK(ctrl.level_triggered(34));
-//
-//    g_msrs[msrs::ia32_x2apic_tmr2::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.level_triggered(67));
-//    g_msrs[msrs::ia32_x2apic_tmr2::addr] = 0x8ULL;
-//    CHECK(ctrl.level_triggered(67));
-//
-//    g_msrs[msrs::ia32_x2apic_tmr3::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.level_triggered(100));
-//    g_msrs[msrs::ia32_x2apic_tmr3::addr] = 0x10ULL;
-//    CHECK(ctrl.level_triggered(100));
-//
-//    g_msrs[msrs::ia32_x2apic_tmr4::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.level_triggered(133));
-//    g_msrs[msrs::ia32_x2apic_tmr4::addr] = 0x20ULL;
-//    CHECK(ctrl.level_triggered(133));
-//
-//    g_msrs[msrs::ia32_x2apic_tmr5::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.level_triggered(166));
-//    g_msrs[msrs::ia32_x2apic_tmr5::addr] = 0x40ULL;
-//    CHECK(ctrl.level_triggered(166));
-//
-//    g_msrs[msrs::ia32_x2apic_tmr6::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.level_triggered(199));
-//    g_msrs[msrs::ia32_x2apic_tmr6::addr] = 0x80ULL;
-//    CHECK(ctrl.level_triggered(199));
-//
-//    g_msrs[msrs::ia32_x2apic_tmr7::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.level_triggered(232));
-//    g_msrs[msrs::ia32_x2apic_tmr7::addr] = 0x100ULL;
-//    CHECK(ctrl.level_triggered(232));
-//}
-//
-//TEST_CASE("x2apic_control_in_service")
-//{
-//    MockRepository mocks;
-//    setup_intrinsics(mocks);
-//    x2apic_control ctrl;
-//
-//    g_msrs[msrs::ia32_x2apic_isr0::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.in_service(1));
-//    g_msrs[msrs::ia32_x2apic_isr0::addr] = 0x2ULL;
-//    CHECK(ctrl.in_service(1));
-//
-//    g_msrs[msrs::ia32_x2apic_isr1::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.in_service(34));
-//    g_msrs[msrs::ia32_x2apic_isr1::addr] = 0x4ULL;
-//    CHECK(ctrl.in_service(34));
-//
-//    g_msrs[msrs::ia32_x2apic_isr2::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.in_service(67));
-//    g_msrs[msrs::ia32_x2apic_isr2::addr] = 0x8ULL;
-//    CHECK(ctrl.in_service(67));
-//
-//    g_msrs[msrs::ia32_x2apic_isr3::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.in_service(100));
-//    g_msrs[msrs::ia32_x2apic_isr3::addr] = 0x10ULL;
-//    CHECK(ctrl.in_service(100));
-//
-//    g_msrs[msrs::ia32_x2apic_isr4::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.in_service(133));
-//    g_msrs[msrs::ia32_x2apic_isr4::addr] = 0x20ULL;
-//    CHECK(ctrl.in_service(133));
-//
-//    g_msrs[msrs::ia32_x2apic_isr5::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.in_service(166));
-//    g_msrs[msrs::ia32_x2apic_isr5::addr] = 0x40ULL;
-//    CHECK(ctrl.in_service(166));
-//
-//    g_msrs[msrs::ia32_x2apic_isr6::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.in_service(199));
-//    g_msrs[msrs::ia32_x2apic_isr6::addr] = 0x80ULL;
-//    CHECK(ctrl.in_service(199));
-//
-//    g_msrs[msrs::ia32_x2apic_isr7::addr] = 0x0ULL;
-//    CHECK_FALSE(ctrl.in_service(232));
-//    g_msrs[msrs::ia32_x2apic_isr7::addr] = 0x100ULL;
-//    CHECK(ctrl.in_service(232));
-//}
+TEST_CASE("x2apic_control_validate_gpa_op")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+    x2apic_control ctrl;
+
+    CHECK(ctrl.validate_gpa_op(0xFEE00000ULL, lapic_control::read) == -1);      // Non-existent Register
+    CHECK(ctrl.validate_gpa_op(0xFEE00030ULL, lapic_control::write) == -1);     // Unwritable Register (version)
+    CHECK(ctrl.validate_gpa_op(0xFEE000B0ULL, lapic_control::read) == -1);      // Unreadable Register (eoi)
+    CHECK(ctrl.validate_gpa_op(0xFEE00020ULL, lapic_control::read) == 0x2U);    // Successful Operation
+
+    // x2apic vs xapic register conflicts
+    CHECK(ctrl.validate_gpa_op(0xFEE00020ULL, lapic_control::write) == -1);     // ID Write
+    CHECK(ctrl.validate_gpa_op(0xFEE00090ULL, lapic_control::read) == -1);      // APR Read
+    CHECK(ctrl.validate_gpa_op(0xFEE00090ULL, lapic_control::write) == -1);     // APR Write
+    CHECK(ctrl.validate_gpa_op(0xFEE000C0ULL, lapic_control::read) == -1);      // RRD Read
+    CHECK(ctrl.validate_gpa_op(0xFEE000C0ULL, lapic_control::write) == -1);     // RRD Write
+    CHECK(ctrl.validate_gpa_op(0xFEE000D0ULL, lapic_control::write) == -1);     // LDR Write
+    CHECK(ctrl.validate_gpa_op(0xFEE000E0ULL, lapic_control::read) == -1);      // DFR Read
+    CHECK(ctrl.validate_gpa_op(0xFEE000E0ULL, lapic_control::write) == -1);     // DFR Write
+    CHECK(ctrl.validate_gpa_op(0xFEE00280ULL, lapic_control::write) == 0x28U);  // ESR Write
+    CHECK(ctrl.validate_gpa_op(0xFEE00310ULL, lapic_control::read) == -1);      // ICR High Read
+    CHECK(ctrl.validate_gpa_op(0xFEE00310ULL, lapic_control::write) == -1);     // ICR High Write
+    CHECK(ctrl.validate_gpa_op(0xFEE003F0ULL, lapic_control::read) == -1);      // Self IPI Read
+    CHECK(ctrl.validate_gpa_op(0xFEE003F0ULL, lapic_control::write) == 0x3FU);  // Self IPI Write
+}
+
+TEST_CASE("x2apic_control_validate_msr_op")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+    x2apic_control ctrl;
+
+    CHECK(ctrl.validate_msr_op(0x00000000ULL, lapic_control::read) == -1);      // Out of Lower Bound Register
+    CHECK(ctrl.validate_msr_op(0xFFFFFFFFULL, lapic_control::read) == -1);      // Out of Upper Bound Register
+    CHECK(ctrl.validate_msr_op(0x00000800ULL, lapic_control::read) == -1);      // Non-existent Register
+    CHECK(ctrl.validate_msr_op(0x00000803ULL, lapic_control::write) == -1);     // Unwritable Register (version)
+    CHECK(ctrl.validate_msr_op(0x0000080BULL, lapic_control::read) == -1);      // Unreadable Register (eoi)
+    CHECK(ctrl.validate_msr_op(0x00000802ULL, lapic_control::read) == 0x2U);    // Successful Operation
+
+    // x2apic vs xapic register conflicts
+    CHECK(ctrl.validate_msr_op(0x00000802ULL, lapic_control::write) == -1);     // ID Write
+    CHECK(ctrl.validate_msr_op(0x00000809ULL, lapic_control::read) == -1);      // APR Read
+    CHECK(ctrl.validate_msr_op(0x00000809ULL, lapic_control::write) == -1);     // APR Write
+    CHECK(ctrl.validate_msr_op(0x0000080CULL, lapic_control::read) == -1);      // RRD Read
+    CHECK(ctrl.validate_msr_op(0x0000080CULL, lapic_control::write) == -1);     // RRD Write
+    CHECK(ctrl.validate_msr_op(0x0000080DULL, lapic_control::write) == -1);     // LDR Write
+    CHECK(ctrl.validate_msr_op(0x0000080EULL, lapic_control::read) == -1);      // DFR Read
+    CHECK(ctrl.validate_msr_op(0x0000080EULL, lapic_control::write) == -1);     // DFR Write
+    CHECK(ctrl.validate_msr_op(0x00000828ULL, lapic_control::write) == 0x28U);  // ESR Write
+    CHECK(ctrl.validate_msr_op(0x00000831ULL, lapic_control::read) == -1);      // ICR High Read
+    CHECK(ctrl.validate_msr_op(0x00000831ULL, lapic_control::write) == -1);     // ICR High Write
+    CHECK(ctrl.validate_msr_op(0x0000083FULL, lapic_control::read) == -1);      // Self IPI Read
+    CHECK(ctrl.validate_msr_op(0x0000083FULL, lapic_control::write) == 0x3FU);  // Self IPI Write
+}
+
+TEST_CASE("x2apic_control_read_register")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+    x2apic_control ctrl;
+
+    g_msrs[msrs::ia32_x2apic_apicid::addr] = 0xFFFFFFFFFFFFFFFFULL;
+    CHECK(ctrl.read_register(0x02U) == 0xFFFFFFFFFFFFFFFFULL);
+
+    g_msrs[msrs::ia32_x2apic_apicid::addr] = 0x0ULL;
+    CHECK(ctrl.read_register(0x02U) == 0x0ULL);
+}
+
+TEST_CASE("x2apic_control_write_register")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+    x2apic_control ctrl;
+
+    ctrl.write_register(0x02U, 0xFFFFFFFFFFFFFFFFULL);
+    CHECK(ctrl.read_id() == 0xFFFFFFFFFFFFFFFFULL);
+
+    ctrl.write_register(0x02U, 0x0ULL);
+    CHECK(ctrl.read_id() == 0x0ULL);
+}
+
+TEST_CASE("x2apic_control_read_id")
+{
+    MockRepository mocks;
+    setup_intrinsics(mocks);
+    x2apic_control ctrl;
+}
 
 #endif

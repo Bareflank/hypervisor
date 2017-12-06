@@ -27,6 +27,7 @@ macro(do_test str)
 endmacro(do_test)
 
 do_test(apic_intel_x64_lapic)
+do_test(apic_intel_x64_xapic)
 do_test(apic_intel_x64_x2apic)
 do_test(cache_x64)
 do_test(cpuid_x64)
