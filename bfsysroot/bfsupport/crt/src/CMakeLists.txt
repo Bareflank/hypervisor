@@ -24,10 +24,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-stack-protector")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-main")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type")
 
-list(APPEND SOURCES
-    crt.cpp
-    start_x64.asm
-)
+if(${BUILD_TARGET_ARCH} STREQUAL x86_64)
+    list(APPEND SOURCES
+        crt.cpp
+        start_x64.asm
+    )
+elseif(${BUILD_TARGET_ARCH} STREQUAL aarch64)
+    list(APPEND SOURCES
+        crt.cpp
+        start_aarch64.S
+    )
+endif()
 
 add_library(bfcrt STATIC ${SOURCES})
 target_compile_definitions(bfcrt PUBLIC STATIC_CRT)
