@@ -30,6 +30,8 @@ if(NOT EXISTS "${BUILD_SYSROOT_VMM}/lib/libc.a" OR NOT EXISTS "${BUILD_SYSROOT_V
         list(APPEND NEWLIB_C_FLAGS
             "-O3"
             "-DNDEBUG"
+            "-no-integrated-as"
+            "-fasm"
         )
     endif()
 
