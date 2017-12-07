@@ -30,6 +30,7 @@
 #include <bfplatform.h>
 #include <bfconstants.h>
 #include <bferrorcodes.h>
+#include <bfarch.h>
 
 #pragma pack(push, 1)
 
@@ -731,21 +732,6 @@ struct bfelf_sym {
 /* ---------------------------------------------------------------------------------------------- */
 
 /*
- * System V ABI 64bit Relocations
- *
- * The following is defined in the ELF 64bit file format specification:
- * http://www.x86-64.org/documentation/abi.pdf, page 71
- *
- * @cond
- */
-#define BFR_X86_64_64 bfscast(bfelf64_xword, 1)
-#define BFR_X86_64_GLOB_DAT bfscast(bfelf64_xword, 6)
-#define BFR_X86_64_JUMP_SLOT bfscast(bfelf64_xword, 7)
-#define BFR_X86_64_RELATIVE bfscast(bfelf64_xword, 8)
-
-/* @endcond */
-
-/*
  * ELF Relocation
  *
  * The following is defined in the ELF 64bit file format specification:
@@ -788,6 +774,7 @@ struct bfelf_rela {
 #define BFELF_REL_TYPE(i) ((i)&0xFFFFFFFFL)
 
 /* @endcond */
+
 
 /* ---------------------------------------------------------------------------------------------- */
 /* ELF Program Header                                                                             */
@@ -1020,55 +1007,36 @@ private_get_sym_global(
 /* ELF Relocations Implementation                                                                 */
 /* ---------------------------------------------------------------------------------------------- */
 
-/* @cond */
+/*
+ * Forward declarations required by relocator
+ *
+ * @cond
+ */
 
 static inline int64_t
-private_relocate_symbol(
-    struct bfelf_loader_t *loader, struct bfelf_file_t *ef, const struct bfelf_rela *rela)
-{
-    const char *str = nullptr;
-    const struct bfelf_sym *found_sym = nullptr;
-    struct bfelf_file_t *found_ef = ef;
-    bfelf64_addr *ptr = bfrcast(bfelf64_addr *, ef->exec_addr + rela->r_offset - ef->start_addr);
+private_get_sym_global(
+    const struct bfelf_loader_t *loader, const char *name,
+    struct bfelf_file_t **ef_found, const struct bfelf_sym **sym);
 
-    if (BFELF_REL_TYPE(rela->r_info) == BFR_X86_64_RELATIVE) {
-        *ptr = bfrcast(bfelf64_addr, ef->exec_virt + rela->r_addend);
-        return BFELF_SUCCESS;
-    }
+/* @endcond */
 
-    found_sym = &(ef->symtab[BFELF_REL_SYM(rela->r_info)]);
+/*
+ * Relocation definitions and relocators
+ *
+ * @cond
+ */
 
-    if (BFELF_SYM_BIND(found_sym->st_info) == bfstb_weak) {
-        found_ef = nullptr;
-    }
+#if defined(BF_AARCH64)
+#   include <bfelf_loader_reloc_aarch64.h>
+#elif defined(BF_X64)
+#   include <bfelf_loader_reloc_x64.h>
+#else
+#   error "Unsupported architecture"
+#endif
 
-    if (found_sym->st_value == 0 || found_ef == nullptr) {
-        int64_t ret = 0;
-        str = &(ef->strtab[found_sym->st_name]);
+/* @endcond */
 
-        ret = private_get_sym_global(loader, str, &found_ef, &found_sym);
-        if (ret != BFELF_SUCCESS) {
-            return ret;
-        }
-    }
-
-    *ptr = bfrcast(bfelf64_addr, found_ef->exec_virt + found_sym->st_value);
-
-    switch (BFELF_REL_TYPE(rela->r_info)) {
-        case BFR_X86_64_64:
-            *ptr += bfscast(bfelf64_addr, rela->r_addend);
-            break;
-
-        case BFR_X86_64_GLOB_DAT:
-        case BFR_X86_64_JUMP_SLOT:
-            break;
-
-        default:
-            return bfunsupported_rel(str);
-    }
-
-    return BFELF_SUCCESS;
-}
+/* @cond */
 
 static inline int64_t
 private_relocate_symbols(struct bfelf_loader_t *loader, struct bfelf_file_t *ef)
@@ -1154,9 +1122,17 @@ private_check_support(struct bfelf_file_t *ef)
         return bfunsupported_file("file must be an executable or shared library");
     }
 
+#ifdef BF_AARCH64
+    if (ef->ehdr->e_machine != bfem_aarch64) {
+        return bfunsupported_file("file must be compiled for aarch64");
+    }
+#endif
+
+#ifdef BF_X64
     if (ef->ehdr->e_machine != bfem_x86_64) {
         return bfunsupported_file("file must be compiled for x86_64");
     }
+#endif
 
     if (ef->ehdr->e_version != bfev_current) {
         return bfunsupported_file("unsupported version");

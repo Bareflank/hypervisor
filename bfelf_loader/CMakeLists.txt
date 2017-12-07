@@ -22,3 +22,5 @@ project(bfelf_loader C CXX)
 set(TIDY_EXCLUSIONS ,-cppcoreguidelines-pro-type-const-cast)
 
 install(FILES include/bfelf_loader.h DESTINATION ${BUILD_SYSROOT_OS}/include)
+install(FILES include/bfelf_loader_reloc_x64.h DESTINATION ${BUILD_SYSROOT_OS}/include)
+install(FILES include/bfelf_loader_reloc_aarch64.h DESTINATION ${BUILD_SYSROOT_OS}/include)
