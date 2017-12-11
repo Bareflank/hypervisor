@@ -31,6 +31,8 @@
 // Load / Store Registers
 // -----------------------------------------------------------------------------
 
+#pragma pack(push, 1)
+
 struct registers_intel_x64_t {
     uint64_t rax;
     uint64_t rdx;
@@ -50,6 +52,8 @@ struct registers_intel_x64_t {
     uint64_t r15;
     uint64_t rip;
 };
+
+#pragma pack(pop)
 
 /// __store_registers_intel_x64
 ///
