@@ -111,6 +111,7 @@ add_custom_target(
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${BF_BUILD_INSTALL_DIR}
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${BF_BUILD_DEPENDS_DIR}
     COMMENT "Cleaning build tree, removing all dependencies, and removing all build artifacts"
+    USES_TERMINAL
 )
 add_custom_target_info(
     TARGET distclean
@@ -139,6 +140,7 @@ add_custom_target(
     quick
     COMMAND ${SUDO} ${BUILD_SYSROOT_OS}/bin/bfm quick
     COMMENT "Loading and starting the VMM: ${BFM_VMM_BIN_PATH}/${BFM_DEFAULT_VMM}"
+    USES_TERMINAL
 )
 add_custom_target_info(
     TARGET quick
@@ -149,6 +151,7 @@ add_custom_target(
     stop
     COMMAND ${SUDO} ${BUILD_SYSROOT_OS}/bin/bfm stop
     COMMENT "Stopping the currently loaded VMM"
+    USES_TERMINAL
 )
 add_custom_target_info(
     TARGET stop
@@ -159,6 +162,7 @@ add_custom_target(
     unload
     COMMAND ${SUDO} ${BUILD_SYSROOT_OS}/bin/bfm unload
     COMMENT "Unloading the currently loaded VMM"
+    USES_TERMINAL
 )
 add_custom_target_info(
     TARGET unload
@@ -169,6 +173,7 @@ add_custom_target(
     dump
     COMMAND ${SUDO} ${BUILD_SYSROOT_OS}/bin/bfm dump
     COMMENT "Dumping debug output from the VMM"
+    USES_TERMINAL
 )
 add_custom_target_info(
     TARGET dump
@@ -179,6 +184,7 @@ add_custom_target(
     status
     COMMAND ${SUDO} ${BUILD_SYSROOT_OS}/bin/bfm status
     COMMENT "Displaying status of the current VMM"
+    USES_TERMINAL
 )
 add_custom_target_info(
     TARGET status
@@ -198,6 +204,7 @@ add_custom_target(
     COMMAND ${CMAKE_COMMAND} --build ${BF_BUILD_DIR_BFDRIVER} --target bfdriver_build
     COMMAND ${SUDO} ${CMAKE_COMMAND} --build ${BF_BUILD_DIR_BFDRIVER} --target bfdriver_load
     COMMENT "Unloading, cleaning, building, and reloading bfdriver"
+    USES_TERMINAL
 )
 add_custom_target_info(
     TARGET driver_quick
@@ -208,6 +215,7 @@ add_custom_target(
     driver_load
     COMMAND ${SUDO} ${CMAKE_COMMAND} --build ${BF_BUILD_DIR_BFDRIVER} --target bfdriver_load
     COMMENT "Loading bfdriver to the local OS"
+    USES_TERMINAL
 )
 add_custom_target_info(
     TARGET driver_load
@@ -218,6 +226,7 @@ add_custom_target(
     driver_unload
     COMMAND ${SUDO} ${CMAKE_COMMAND} --build ${BF_BUILD_DIR_BFDRIVER} --target bfdriver_unload
     COMMENT "Unloading bfdriver from the local OS"
+    USES_TERMINAL
 )
 add_custom_target_info(
     TARGET driver_unload
