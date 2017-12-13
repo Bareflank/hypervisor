@@ -66,7 +66,7 @@ extern int __g_dwarf_sections_num;
 extern dwarf_sections_t __g_dwarf_sections[MAX_NUM_MODULES];
 
 #ifndef ENABLE_UNITTESTING
-EXPORT_SYM void *__dso_handle = nullptr;
+extern "C" EXPORT_SYM void *__dso_handle = nullptr;
 #endif
 
 extern "C" void
