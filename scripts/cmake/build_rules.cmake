@@ -82,6 +82,11 @@ add_build_rule(
     FAIL_MSG "Extended APIs unit tests require VMM unit tests, please enable UNITTEST_VMM"
 )
 
+add_build_rule(
+    FAIL_ON ${UNITTEST_VMM_EXTENSIONS} AND NOT ${UNITTEST_VMM}
+    FAIL_MSG "VMM extension unit tests require VMM unit tests, please enable UNITTEST_VMM"
+)
+
 # ------------------------------------------------------------------------------
 # Developer-mode build rules
 # ------------------------------------------------------------------------------

@@ -23,13 +23,13 @@ project(hypervisor)
 # Cmake global properties
 # ------------------------------------------------------------------------------
 
+include(ExternalProject)
 include(${CMAKE_SOURCE_DIR}/scripts/cmake/global_vars.cmake)
 include(${CMAKE_SOURCE_DIR}/scripts/cmake/macros.cmake)
 include(${BF_CONFIG_DIR}/default.cmake)
 include(${BF_FLAGS_DIR}/flags.cmake)
 include(${BF_SCRIPTS_DIR}/cmake/build_rules.cmake)
 include(${BF_SCRIPTS_DIR}/cmake/targets.cmake)
-include(ExternalProject)
 
 validate_build()
 
@@ -224,5 +224,7 @@ if(ENABLE_UNITTESTING)
     endif()
 endif()
 
+
+add_vmm_extensions()
 print_banner()
 print_usage()
