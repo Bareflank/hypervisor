@@ -51,7 +51,6 @@ CYGWIN_NT-10.0*)
     ;;
 Linux)
     cd $1/src/arch/linux
-    make clean
     make
     ;;
 *)
