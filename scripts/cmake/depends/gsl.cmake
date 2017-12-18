@@ -16,46 +16,16 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-set(GSL_INTERM_INSTALL_DIR ${BF_BUILD_DEPENDS_DIR}/gsl/install)
-
-list(APPEND GSL_CMAKE_ARGS
-    -DCMAKE_INSTALL_PREFIX=${GSL_INTERM_INSTALL_DIR}
-    -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_GSL}
-    -DCMAKE_INSTALL_MESSAGE=LAZY
+add_dependency(
+    gsl
+    GIT_REPOSITORY  https://github.com/Bareflank/gsl.git
+    GIT_TAG         v1.2
+    GIT_SHALLOW     1
+    CMAKE_ARGS      -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_GSL}
 )
 
-ExternalProject_Add(
+install_dependency(
     gsl
-    GIT_REPOSITORY      https://github.com/Bareflank/GSL.git
-    GIT_TAG             v1.2
-    GIT_SHALLOW         1
-    CMAKE_ARGS          ${GSL_CMAKE_ARGS}
-    PREFIX              ${BF_BUILD_DEPENDS_DIR}/gsl
-    SOURCE_DIR          ${BF_BUILD_DEPENDS_DIR}/gsl/src
-    BINARY_DIR          ${BF_BUILD_DEPENDS_DIR}/gsl/build
-    INSTALL_DIR         ${BF_BUILD_DEPENDS_DIR}/gsl/install
-    TMP_DIR             ${BF_BUILD_DEPENDS_DIR}/gsl/tmp
-    STAMP_DIR           ${BF_BUILD_DEPENDS_DIR}/gsl/stamp
-)
-
-ExternalProject_Add_Step(
-    gsl
-    gsl_os_sysroot_install
-    DEPENDEES install
-    COMMAND	${CMAKE_COMMAND}
-        -DGLOB_DIR=${GSL_INTERM_INSTALL_DIR}
-        -DGLOB_EXPR=include/*
-        -DINSTALL_DIR=${BUILD_SYSROOT_OS}
-        -P ${BF_SCRIPTS_DIR}/cmake/copy_files_if_different.cmake
-)
-
-ExternalProject_Add_Step(
-    gsl
-    gsl_vmm_sysroot_install
-    DEPENDEES install
-    COMMAND	${CMAKE_COMMAND}
-        -DGLOB_DIR=${GSL_INTERM_INSTALL_DIR}
-        -DGLOB_EXPR=include/*
-        -DINSTALL_DIR=${BUILD_SYSROOT_VMM}
-        -P ${BF_SCRIPTS_DIR}/cmake/copy_files_if_different.cmake
+    DESTINATIONS ${BUILD_SYSROOT_OS} ${BUILD_SYSROOT_VMM}
+    GLOB_EXPRESSIONS include/*
 )

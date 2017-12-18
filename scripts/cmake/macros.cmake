@@ -238,6 +238,172 @@ macro(add_vmm_extensions)
 endmacro(add_vmm_extensions)
 
 # ------------------------------------------------------------------------------
+# External dependency management
+# ------------------------------------------------------------------------------
+
+# Caluclate the correct dependency source/install prefix based on project
+# dependency cache settings
+macro(get_dependency_prefix out_var)
+    if(ENABLE_DEPENDENCY_CACHE)
+        set(${out_var} ${DEPENDENCY_CACHE_DIR})
+    else()
+        set(${out_var} ${BF_BUILD_DEPENDS_DIR})
+    endif()
+endmacro(get_dependency_prefix)
+
+# Caluclate the correct dependency install directory based on project
+# dependency cache settings
+macro(get_dependency_install_dir name out_var)
+    get_dependency_prefix(DEPENDENCY_PREFIX)
+    if(ENABLE_DEPENDENCY_CACHE)
+        set(_INSTALL_DIR ${DEPENDENCY_PREFIX}/${name}/install-${BUILD_TARGET_ARCH}-${BUILD_TYPE})
+        string(TOLOWER ${_INSTALL_DIR} ${out_var})
+    else()
+        set(${out_var} ${DEPENDENCY_PREFIX}/${name}/install)
+    endif()
+endmacro(get_dependency_install_dir)
+
+# Caluclate the correct dependency source code directory based on project
+# dependency cache settings
+macro(get_dependency_src_dir name out_var)
+    get_dependency_prefix(DEPENDENCY_PREFIX)
+    set(${out_var} ${DEPENDENCY_PREFIX}/${name}/src)
+endmacro(get_dependency_src_dir)
+
+# Add a VMM dependency to the build system. This macro is intended to be used
+# with any arguments compatible with cmake's built-in ExternalProject_Add()
+# function.
+#
+# This macro adds dependencies to the build based on the project's dependency
+# cache settings. When dependency caching is enabled, both source code and build
+# artifacts are saved to the dependency cache. To update the dependency cache,
+# use the ENABLE_DEPENDENCY_UPDATES build configuration.
+macro(add_dependency)
+    set(DEPENDENCY_ARGS ${ARGN})
+    list(GET DEPENDENCY_ARGS 0 DEPENDENCY_NAME)
+    if(NOT DEPENDENCY_NAME)
+        message(FATAL_ERROR "Must specify dependency name as the first argument of add_dependency()")
+    endif()
+
+    # Redirect build output to a log file if BUILD_VERBOSE is not enabled
+    if(BUILD_VERBOSE)
+        set(LOG_DEPENDENCY_OUTPUT 0)
+    else()
+        set(LOG_DEPENDENCY_OUTPUT 1)
+    endif()
+
+    get_dependency_src_dir(${DEPENDENCY_NAME} DEPENDENCY_SOURCE_DIR)
+    get_dependency_install_dir(${DEPENDENCY_NAME} DEPENDENCY_INSTALL_DIR)
+
+    # Common CMake arguments for all dependencies
+    list(APPEND DEPENDENCY_ARGS
+        CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX=${DEPENDENCY_INSTALL_DIR}
+        -DCMAKE_TARGET_MESSAGES=OFF
+        -DCMAKE_INSTALL_MESSAGE=LAZY
+        --no-warn-unused-cli
+    )
+
+    # If the source code is already cached, force a skipped download step
+    # unless depency updates are turned on
+    if(ENABLE_DEPENDENCY_CACHE AND NOT ENABLE_DEPENDENCY_UPDATES AND EXISTS ${DEPENDENCY_SOURCE_DIR})
+        file(GLOB DEPENDENCY_SUBDIRS ${DEPENDENCY_SOURCE_DIR}/*)
+        list(LENGTH DEPENDENCY_SUBDIRS DIRS_LEN)
+        if(${DIRS_LEN} GREATER 0)
+            list(INSERT DEPENDENCY_ARGS 1
+                DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E echo
+                "(skipping ${DEPENDENCY_NAME} download)"
+            )
+        endif()
+    endif()
+
+    # If the build artifacts are already cached, force skipped configure, build
+    # and install steps unless depency updates are turned on
+    if(ENABLE_DEPENDENCY_CACHE AND NOT ENABLE_DEPENDENCY_UPDATES AND EXISTS ${DEPENDENCY_INSTALL_DIR})
+        file(GLOB DEPENDENCY_ARTIFACTS ${DEPENDENCY_INSTALL_DIR}/*)
+        list(LENGTH DEPENDENCY_ARTIFACTS ARTIFACTS_LEN)
+        if(${ARTIFACTS_LEN} GREATER 0)
+            list(INSERT DEPENDENCY_ARGS 1
+                CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo
+                    "(skipping ${DEPENDENCY_NAME} configure)"
+                BUILD_COMMAND ${CMAKE_COMMAND} -E echo
+                    "(skipping ${DEPENDENCY_NAME} build)"
+                INSTALL_COMMAND ${CMAKE_COMMAND} -E echo
+                    "(skipping ${DEPENDENCY_NAME} install)"
+            )
+        endif()
+    endif()
+
+    # NOTE: SOURCE_DIR and INSTALL_DIR can be cached, but PREFIX, BUILD, TMP and
+    # STAMP must be build-specific.
+    ExternalProject_Add(
+        ${DEPENDENCY_ARGS}
+        SOURCE_DIR          ${DEPENDENCY_SOURCE_DIR}
+        INSTALL_DIR         ${DEPENDENCY_INSTALL_DIR}
+        PREFIX              ${BF_BUILD_DEPENDS_DIR}/${DEPENDENCY_NAME}
+        BINARY_DIR          ${BF_BUILD_DEPENDS_DIR}/${DEPENDENCY_NAME}/build
+        TMP_DIR             ${BF_BUILD_DEPENDS_DIR}/${DEPENDENCY_NAME}/tmp
+        STAMP_DIR           ${BF_BUILD_DEPENDS_DIR}/${DEPENDENCY_NAME}/stamp
+        LOG_DOWNLOAD        ${LOG_DEPENDENCY_OUTPUT}
+        LOG_CONFIGURE       ${LOG_DEPENDENCY_OUTPUT}
+        LOG_BUILD           ${LOG_DEPENDENCY_OUTPUT}
+        LOG_INSTALL         ${LOG_DEPENDENCY_OUTPUT}
+    )
+endmacro(add_dependency)
+
+# Adds additional install steps for VMM dependencies. This is useful for
+# installing dependencies to one/multiple sysroots that will rely on the
+# dependency.
+
+# @arg GLOB_DIR: Optional directory to use as the relative directory for the
+#           given GLOB_EXPRESSION. Defaults to the dependency INSTALL_DIR
+# @arg DESTINATIONS: A list of directories to install all matched files to
+# @arg GLOB_EXPRESSIONS: A list of cmake GLOB expressions to generate a list
+#           of files to be installed
+# @arg DEPENDEES: Additional ExternalProject build steps that this install step
+#           depends on, in addition to "install" which is included automatically
+macro(install_dependency)
+    set(oneVal GLOB_DIR)
+    set(multiVal DESTINATIONS GLOB_EXPRESSIONS DEPENDEES)
+    cmake_parse_arguments(_INS_DEP "" "${oneVal}" "${multiVal}" ${ARGN})
+
+    set(DEPENDENCY_ARGS ${ARGN})
+    list(GET DEPENDENCY_ARGS 0 DEPENDENCY_NAME)
+    if(NOT DEPENDENCY_NAME)
+        message(FATAL_ERROR "Must specify dependency name as the first argument of install_dependency()")
+    endif()
+
+    get_dependency_src_dir(${DEPENDENCY_NAME} DEPENDENCY_SOURCE_DIR)
+    get_dependency_install_dir(${DEPENDENCY_NAME} DEPENDENCY_INSTALL_DIR)
+
+    if(NOT _INS_DEP_GLOB_DIR)
+        set(_INS_DEP_GLOB_DIR ${DEPENDENCY_INSTALL_DIR})
+    endif()
+
+    # Install all files that match all given CMake GLOB_EXPRESSIONS to all
+    # specified DESTINATIONS
+    set(INSTALL_STEP_COUNT 1)
+    foreach(dest ${_INS_DEP_DESTINATIONS})
+        foreach(glob_exp ${_INS_DEP_GLOB_EXPRESSIONS})
+            ExternalProject_Add_Step(
+                ${DEPENDENCY_NAME}
+                additional_install_${INSTALL_STEP_COUNT}
+                DEPENDEES install ${_INS_DEP_DEPENDEES}
+                COMMENT "Installing ${_INS_DEP_GLOB_DIR}/${glob_exp} to ${dest}"
+                COMMAND	${CMAKE_COMMAND}
+                    -DGLOB_DIR=${_INS_DEP_GLOB_DIR}
+                    -DGLOB_EXPR=${glob_exp}
+                    -DINSTALL_DIR=${dest}
+                    -P ${BF_SCRIPTS_DIR}/cmake/copy_files_if_different.cmake
+            )
+
+            # Each step for a target needs a unique name, install_${counter}
+            MATH(EXPR INSTALL_STEP_COUNT "${INSTALL_STEP_COUNT}+1")
+        endforeach()
+    endforeach()
+endmacro(install_dependency)
+
+# ------------------------------------------------------------------------------
 # Build configuration and validation
 # ------------------------------------------------------------------------------
 
