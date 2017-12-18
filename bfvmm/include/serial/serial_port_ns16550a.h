@@ -56,32 +56,32 @@
 namespace serial_ns16550a
 {
 
-constexpr const x64::portio::port_8bit_type dlab = 1U << 7;
+constexpr const serial_port_base::value_type_8 dlab = 1U << 7;
 
-constexpr const x64::portio::port_addr_type baud_rate_lo_reg = 0U;
-constexpr const x64::portio::port_addr_type baud_rate_hi_reg = 1U;
-constexpr const x64::portio::port_addr_type interrupt_en_reg = 1U;
-constexpr const x64::portio::port_addr_type fifo_control_reg = 2U;
-constexpr const x64::portio::port_addr_type line_control_reg = 3U;
-constexpr const x64::portio::port_addr_type line_status_reg = 5U;
+constexpr const serial_port_base::port_type baud_rate_lo_reg = 0U;
+constexpr const serial_port_base::port_type baud_rate_hi_reg = 1U;
+constexpr const serial_port_base::port_type interrupt_en_reg = 1U;
+constexpr const serial_port_base::port_type fifo_control_reg = 2U;
+constexpr const serial_port_base::port_type line_control_reg = 3U;
+constexpr const serial_port_base::port_type line_status_reg = 5U;
 
-constexpr const x64::portio::port_8bit_type fifo_control_enable_fifos = 1U << 0;
-constexpr const x64::portio::port_8bit_type fifo_control_clear_recieve_fifo = 1U << 1;
-constexpr const x64::portio::port_8bit_type fifo_control_clear_transmit_fifo = 1U << 2;
-constexpr const x64::portio::port_8bit_type fifo_control_dma_mode_select = 1U << 3;
+constexpr const serial_port_base::value_type_8 fifo_control_enable_fifos = 1U << 0;
+constexpr const serial_port_base::value_type_8 fifo_control_clear_recieve_fifo = 1U << 1;
+constexpr const serial_port_base::value_type_8 fifo_control_clear_transmit_fifo = 1U << 2;
+constexpr const serial_port_base::value_type_8 fifo_control_dma_mode_select = 1U << 3;
 
-constexpr const x64::portio::port_8bit_type line_status_data_ready = 1U << 0;
-constexpr const x64::portio::port_8bit_type line_status_overrun_error = 1U << 1;
-constexpr const x64::portio::port_8bit_type line_status_parity_error = 1U << 2;
-constexpr const x64::portio::port_8bit_type line_status_framing_error = 1U << 3;
-constexpr const x64::portio::port_8bit_type line_status_break_interrupt = 1U << 4;
-constexpr const x64::portio::port_8bit_type line_status_empty_transmitter = 1U << 5;
-constexpr const x64::portio::port_8bit_type line_status_empty_data = 1U << 6;
-constexpr const x64::portio::port_8bit_type line_status_recieved_fifo_error = 1U << 7;
+constexpr const serial_port_base::value_type_8 line_status_data_ready = 1U << 0;
+constexpr const serial_port_base::value_type_8 line_status_overrun_error = 1U << 1;
+constexpr const serial_port_base::value_type_8 line_status_parity_error = 1U << 2;
+constexpr const serial_port_base::value_type_8 line_status_framing_error = 1U << 3;
+constexpr const serial_port_base::value_type_8 line_status_break_interrupt = 1U << 4;
+constexpr const serial_port_base::value_type_8 line_status_empty_transmitter = 1U << 5;
+constexpr const serial_port_base::value_type_8 line_status_empty_data = 1U << 6;
+constexpr const serial_port_base::value_type_8 line_status_recieved_fifo_error = 1U << 7;
 
-constexpr const x64::portio::port_8bit_type line_control_data_mask = 0x03;
-constexpr const x64::portio::port_8bit_type line_control_stop_mask = 0x04;
-constexpr const x64::portio::port_8bit_type line_control_parity_mask = 0x38;
+constexpr const serial_port_base::value_type_8 line_control_data_mask = 0x03;
+constexpr const serial_port_base::value_type_8 line_control_stop_mask = 0x04;
+constexpr const serial_port_base::value_type_8 line_control_parity_mask = 0x38;
 
 }
 
