@@ -33,7 +33,7 @@ include(${BF_SCRIPTS_DIR}/cmake/targets.cmake)
 
 validate_build()
 
-if(ENABLE_DEPEND_UPDATES)
+if(ENABLE_DEPENDENCY_UPDATES)
     set_property(GLOBAL PROPERTY EP_UPDATE_DISCONNECTED OFF)
 else()
     set_property(GLOBAL PROPERTY EP_UPDATE_DISCONNECTED ON)
@@ -49,17 +49,16 @@ set(CMAKE_PREFIX_PATH ${BF_BUILD_INSTALL_DIR})
 # Toolchain components
 # ------------------------------------------------------------------------------
 
-include(${BF_DEPENDS_DIR}/python.cmake)
-include(${BF_DEPENDS_DIR}/git.cmake)
-include(${BF_DEPENDS_DIR}/gsl.cmake)
-include(${BF_DEPENDS_DIR}/json.cmake)
-
 add_subproject(
     SOURCE_DIR ${BF_SOURCE_DIR}/bfsdk
     TARGET bfsdk
     TOOLCHAIN ${TOOLCHAIN_PATH_BFSDK}
-    DEPENDS gsl json
 )
+
+include(${BF_DEPENDS_DIR}/python.cmake)
+include(${BF_DEPENDS_DIR}/git.cmake)
+include(${BF_DEPENDS_DIR}/gsl.cmake)
+include(${BF_DEPENDS_DIR}/json.cmake)
 
 if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
     include(${BF_DEPENDS_DIR}/nasm.cmake)
@@ -76,7 +75,6 @@ endif()
 if(ENABLE_UNITTESTING)
     include(${BF_DEPENDS_DIR}/catch.cmake)
     include(${BF_DEPENDS_DIR}/hippomocks.cmake)
-    add_dependencies(bfsdk catch hippomocks)
 endif()
 
 # ------------------------------------------------------------------------------
@@ -87,8 +85,6 @@ if(${BUILD_VMM})
     include(${BF_DEPENDS_DIR}/binutils.cmake)
     include(${BF_DEPENDS_DIR}/newlib.cmake)
     include(${BF_DEPENDS_DIR}/llvm.cmake)
-    include(${BF_DEPENDS_DIR}/libcxx_download.cmake)
-    include(${BF_DEPENDS_DIR}/libcxxabi.cmake)
     include(${BF_DEPENDS_DIR}/libcxx.cmake)
 
     add_subproject(
@@ -166,7 +162,7 @@ if(ENABLE_UNITTESTING)
         SOURCE_DIR ${BF_SOURCE_DIR}/bfsdk/tests
         TARGET bfsdk_test
         TOOLCHAIN ${TOOLCHAIN_PATH_UNITTEST}
-        DEPENDS bfsdk
+        DEPENDS catch hippomocks gsl json
     )
 
     if(${UNITTEST_BFDRIVER})

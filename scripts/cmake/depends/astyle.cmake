@@ -16,26 +16,16 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-set(ASTYLE_INTERM_INSTALL_DIR ${BF_BUILD_DEPENDS_DIR}/astyle/install)
-
-list(APPEND ASTYLE_CMAKE_ARGS
-    -DCMAKE_INSTALL_PREFIX=${ASTYLE_INTERM_INSTALL_DIR}
-	-DCMAKE_BUILD_TYPE=${BUILD_TYPE}
-    -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_ASTYLE}
-    -DCMAKE_INSTALL_MESSAGE=LAZY
+add_dependency(
+    astyle
+    GIT_REPOSITORY  https://github.com/Bareflank/astyle.git
+    GIT_TAG         v1.2
+    GIT_SHALLOW     1
+    CMAKE_ARGS      -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_ASTYLE}
 )
 
-ExternalProject_Add(
+install_dependency(
     astyle
-	GIT_REPOSITORY      https://github.com/Bareflank/astyle.git
-	GIT_TAG             v1.2
-	GIT_SHALLOW         1
-	CMAKE_ARGS          ${ASTYLE_CMAKE_ARGS}
-    PREFIX              ${BF_BUILD_DEPENDS_DIR}/astyle
-    SOURCE_DIR          ${BF_BUILD_DEPENDS_DIR}/astyle/src
-    BINARY_DIR          ${BF_BUILD_DEPENDS_DIR}/astyle/build
-    INSTALL_DIR         ${BF_BUILD_DEPENDS_DIR}/astyle/install
-    TMP_DIR             ${BF_BUILD_DEPENDS_DIR}/astyle/tmp
-    STAMP_DIR           ${BF_BUILD_DEPENDS_DIR}/astyle/stamp
-    DEPENDS             bfsdk
+    DESTINATIONS ${BUILD_SYSROOT_OS}
+    GLOB_EXPRESSIONS *
 )
