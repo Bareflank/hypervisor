@@ -70,9 +70,19 @@ set(BF_BUILD_DIR ${CMAKE_BINARY_DIR}
     "Top-level build directory"
 )
 
+set(BF_BUILD_PROJECTS_DIR ${BF_BUILD_DIR}/hypervisor
+    CACHE INTERNAL
+    "Build directory for Bareflank hypervisor projects"
+)
+
 set(BF_BUILD_DEPENDS_DIR ${BF_BUILD_DIR}/depends
     CACHE INTERNAL
     "Build directory for external dependencies"
+)
+
+set(BF_BUILD_EXTENSIONS_DIR ${BF_BUILD_DIR}/extensions
+    CACHE INTERNAL
+    "Build directory for Bareflank VMM extensions"
 )
 
 set(BF_BUILD_INSTALL_DIR "${BF_BUILD_DIR}/install"
@@ -80,77 +90,77 @@ set(BF_BUILD_INSTALL_DIR "${BF_BUILD_DIR}/install"
     "Intermediate build installation directory"
 )
 
-set(BF_BUILD_DIR_BFDRIVER "${BF_BUILD_DIR}/bfdriver/build"
+set(BF_BUILD_DIR_BFDRIVER "${BF_BUILD_PROJECTS_DIR}/bfdriver/build"
     CACHE INTERNAL
     "Build directory for bfdriver"
 )
 
-set(BF_BUILD_DIR_BFDRIVER_TEST "${BF_BUILD_DIR}/bfdriver_test/build"
+set(BF_BUILD_DIR_BFDRIVER_TEST "${BF_BUILD_PROJECTS_DIR}/bfdriver_test/build"
     CACHE INTERNAL
     "Build directory for bfdriver unit tests"
 )
 
-set(BF_BUILD_DIR_BFELF_LOADER "${BF_BUILD_DIR}/bfelf_loader/build"
+set(BF_BUILD_DIR_BFELF_LOADER "${BF_BUILD_PROJECTS_DIR}/bfelf_loader/build"
     CACHE INTERNAL
     "Build directory for bfelf_loader"
 )
 
-set(BF_BUILD_DIR_BFELF_LOADER_TEST "${BF_BUILD_DIR}/bfelf_loader_test/build"
+set(BF_BUILD_DIR_BFELF_LOADER_TEST "${BF_BUILD_PROJECTS_DIR}/bfelf_loader_test/build"
     CACHE INTERNAL
     "Build directory for bfelf_loader unit tests"
 )
 
-set(BF_BUILD_DIR_BFM "${BF_BUILD_DIR}/bfm/build"
+set(BF_BUILD_DIR_BFM "${BF_BUILD_PROJECTS_DIR}/bfm/build"
     CACHE INTERNAL
     "Build directory for bfm"
 )
 
-set(BF_BUILD_DIR_BFM_TEST "${BF_BUILD_DIR}/bfm_test/build"
+set(BF_BUILD_DIR_BFM_TEST "${BF_BUILD_PROJECTS_DIR}/bfm_test/build"
     CACHE INTERNAL
     "Build directory for bfm unit tests"
 )
 
-set(BF_BUILD_DIR_BFSDK "${BF_BUILD_DIR}/bfsdk/build"
+set(BF_BUILD_DIR_BFSDK "${BF_BUILD_PROJECTS_DIR}/bfsdk/build"
     CACHE INTERNAL
     "Build directory for bfsdk"
 )
 
-set(BF_BUILD_DIR_BFSDK_TEST "${BF_BUILD_DIR}/bfsdk_test/build"
+set(BF_BUILD_DIR_BFSDK_TEST "${BF_BUILD_PROJECTS_DIR}/bfsdk_test/build"
     CACHE INTERNAL
     "Build directory for bfsdk unit tests"
 )
 
-set(BF_BUILD_DIR_BFSUPPORT "${BF_BUILD_DIR}/bfsupport/build"
+set(BF_BUILD_DIR_BFSUPPORT "${BF_BUILD_PROJECTS_DIR}/bfsupport/build"
     CACHE INTERNAL
     "Build directory for bfsupport unit tests"
 )
 
-set(BF_BUILD_DIR_BFSUPPORT_TEST "${BF_BUILD_DIR}/bfsupport_test/build"
+set(BF_BUILD_DIR_BFSUPPORT_TEST "${BF_BUILD_PROJECTS_DIR}/bfsupport_test/build"
     CACHE INTERNAL
     "Build directory for bfsupport unit tests"
 )
 
-set(BF_BUILD_DIR_BFUNWIND "${BF_BUILD_DIR}/bfunwind/build"
+set(BF_BUILD_DIR_BFUNWIND "${BF_BUILD_PROJECTS_DIR}/bfunwind/build"
     CACHE INTERNAL
     "Build directory for bfunwind"
 )
 
-set(BF_BUILD_DIR_BFVMM "${BF_BUILD_DIR}/bfvmm/build"
+set(BF_BUILD_DIR_BFVMM "${BF_BUILD_PROJECTS_DIR}/bfvmm/build"
     CACHE INTERNAL
     "Build directory for bfvmm"
 )
 
-set(BF_BUILD_DIR_BFVMM_TEST "${BF_BUILD_DIR}/bfvmm_test/build"
+set(BF_BUILD_DIR_BFVMM_TEST "${BF_BUILD_PROJECTS_DIR}/bfvmm_test/build"
     CACHE INTERNAL
     "Build directory for bfvmm tests"
 )
 
-set(BF_BUILD_DIR_EXTENDED_APIS "${BF_BUILD_DIR}/extended_apis/build"
+set(BF_BUILD_DIR_EXTENDED_APIS "${BF_BUILD_PROJECTS_DIR}/extended_apis/build"
     CACHE INTERNAL
     "Build directory for bareflank Extended APIs"
 )
 
-set(BF_BUILD_DIR_EXTENDED_APIS_TEST "${BF_BUILD_DIR}/extended_apis_test/build"
+set(BF_BUILD_DIR_EXTENDED_APIS_TEST "${BF_BUILD_PROJECTS_DIR}/extended_apis_test/build"
     CACHE INTERNAL
     "Build directory for bareflank Extended APIs unit tests"
 )
@@ -199,6 +209,11 @@ endif()
 # ------------------------------------------------------------------------------
 # Miscellaneous
 # ------------------------------------------------------------------------------
+
+set(BF_VMM_EXTENSION ${BF_SCRIPTS_DIR}/cmake/vmm_extension.cmake
+    CACHE INTERNAL
+    "Path to VMM extension cmake include file"
+)
 
 STRING(FIND ${CMAKE_GENERATOR} "Makefile" is_make)
 STRING(FIND ${CMAKE_GENERATOR} "Ninja" is_ninja)
