@@ -19,11 +19,7 @@
 #include <catch/catch.hpp>
 #include <hippomocks.h>
 
-#include <ioctl.h>
-#include <ioctl_driver.h>
-#include <command_line_parser.h>
-
-#include <bfaffinity.h>
+#include <test_support.h>
 
 void bfm_flush();
 void bfm_terminate();
@@ -36,15 +32,6 @@ int bfm_process(
 
 int protected_main(const command_line_parser::arg_list_type &args);
 int ut_main(int argc, const char *argv[]);
-
-#ifdef WIN64
-#include <windows.h>
-HANDLE bfm_ioctl_open();
-HANDLE g_valid = reinterpret_cast<HANDLE>(42);
-#else
-int bfm_ioctl_open();
-int g_valid = 42;
-#endif
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
@@ -92,7 +79,6 @@ TEST_CASE("protected_main help")
 {
     MockRepository mocks;
     mocks.OnCallFunc(bfm_process).Return(0);
-    mocks.OnCallFunc(bfm_ioctl_open).Return(g_valid);
 
     CHECK_NOTHROW(protected_main({"-h"}));
 }
@@ -101,7 +87,6 @@ TEST_CASE("protected_main affinity fail")
 {
     MockRepository mocks;
     mocks.OnCallFunc(bfm_process).Return(0);
-    mocks.OnCallFunc(bfm_ioctl_open).Return(g_valid);
 
     CHECK_THROWS(protected_main({"stop", "--cpuid", "31"}));
 }
@@ -110,7 +95,6 @@ TEST_CASE("protected_main success")
 {
     MockRepository mocks;
     mocks.OnCallFunc(bfm_process).Return(0);
-    mocks.OnCallFunc(bfm_ioctl_open).Return(g_valid);
 
     CHECK_NOTHROW(protected_main({"stop"}));
 }

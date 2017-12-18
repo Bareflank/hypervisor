@@ -16,16 +16,16 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-add_dependency(
-    catch
-	GIT_REPOSITORY      https://github.com/Bareflank/catch.git
-	GIT_TAG             v1.2
-	GIT_SHALLOW         1
-    CMAKE_ARGS          -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_CATCH}
-)
+if(ENABLE_BUILD_TEST)
+    message(STATUS "Including dependency: catch")
 
-install_dependency(
-    catch
-    DESTINATIONS ${BUILD_SYSROOT_TEST}
-    GLOB_EXPRESSIONS *.hpp
-)
+    download_dependency(
+        catch
+        URL         ${CATCH_URL}
+        URL_MD5     ${CATCH_URL_MD5}
+    )
+
+    add_dependency(
+        catch test
+    )
+endif()

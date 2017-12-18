@@ -29,15 +29,15 @@
 #endif
 
 std::vector<std::string> g_filenames = {
-    BAREFLANK_SYSROOT_PATH + "/lib/libdummy_lib1.so"_s,
-    BAREFLANK_SYSROOT_PATH + "/lib/libdummy_lib2.so"_s,
-    BAREFLANK_SYSROOT_PATH + "/lib/libc.so"_s,
-    BAREFLANK_SYSROOT_PATH + "/lib/libc++.so.1.0"_s,
-    BAREFLANK_SYSROOT_PATH + "/lib/libc++abi.so"_s,
-    BAREFLANK_SYSROOT_PATH + "/lib/libpthread.so"_s,
-    BAREFLANK_SYSROOT_PATH + "/lib/libbfsyscall.so"_s,
-    BAREFLANK_SYSROOT_PATH + "/lib/libbfunwind.so"_s,
-    BAREFLANK_SYSROOT_PATH + "/bin/dummy_main"_s
+    VMM_PREFIX_PATH + "/lib/libdummy_lib1_shared.so"_s,
+    VMM_PREFIX_PATH + "/lib/libdummy_lib2_shared.so"_s,
+    VMM_PREFIX_PATH + "/lib/libc.so"_s,
+    VMM_PREFIX_PATH + "/lib/libc++.so.1.0"_s,
+    VMM_PREFIX_PATH + "/lib/libc++abi.so"_s,
+    VMM_PREFIX_PATH + "/lib/libbfpthread_shared.so"_s,
+    VMM_PREFIX_PATH + "/lib/libbfsyscall_shared.so"_s,
+    VMM_PREFIX_PATH + "/lib/libbfunwind_shared.so"_s,
+    VMM_PREFIX_PATH + "/bin/dummy_main_shared"_s
 };
 
 file g_file;

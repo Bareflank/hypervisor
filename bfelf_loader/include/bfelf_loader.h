@@ -1972,10 +1972,12 @@ private_load_binary(struct bfelf_binary_t *binary)
         ret = bfelf_file_get_load_instr(&binary->ef, bfscast(uint64_t, i), &instr);
         bfignored(ret);
 
-        dst = bfadd(char *, binary->exec, instr->mem_offset);
-        src = bfcadd(const char *, binary->file, instr->file_offset);
+        if (instr != nullptr) {
+            dst = bfadd(char *, binary->exec, instr->mem_offset);
+            src = bfcadd(const char *, binary->file, instr->file_offset);
 
-        platform_memcpy(dst, src, instr->filesz);
+            platform_memcpy(dst, src, instr->filesz);
+        }
     }
 
     return BF_SUCCESS;

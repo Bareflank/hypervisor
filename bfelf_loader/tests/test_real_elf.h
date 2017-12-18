@@ -21,7 +21,6 @@
 
 #include <bfgsl.h>
 #include <bffile.h>
-
 #include <bfelf_loader.h>
 
 extern file g_file;

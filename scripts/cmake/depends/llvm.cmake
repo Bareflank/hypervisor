@@ -16,12 +16,13 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-add_dependency(
-	llvm
-	GIT_REPOSITORY      https://github.com/Bareflank/llvm.git
-	GIT_TAG             v1.2
-	GIT_SHALLOW         1
-    CONFIGURE_COMMAND   ${CMAKE_COMMAND} -E echo "Skipping llvm configure"
-    BUILD_COMMAND       ${CMAKE_COMMAND} -E echo "Skipping llvm build"
-    INSTALL_COMMAND     ${CMAKE_COMMAND} -E echo "Skipping llvm install"
-)
+if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
+    message(STATUS "Including dependency: llvm")
+
+    download_dependency(
+        llvm
+        URL         ${LLVM_URL}
+        URL_MD5     ${LLVM_URL_MD5}
+        PREFIX      vmm
+    )
+endif()

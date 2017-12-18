@@ -19,9 +19,7 @@
 #include <catch/catch.hpp>
 #include <hippomocks.h>
 
-#include <ioctl_driver.h>
-#include <bfelf_loader.h>
-#include <bfdriverinterface.h>
+#include <test_support.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
@@ -74,7 +72,7 @@ setup_command_line_parser(MockRepository &mocks, clpc type)
     auto clp = mocks.Mock<command_line_parser>();
 
     mocks.OnCall(clp, command_line_parser::cmd).Return(type);
-    mocks.OnCall(clp, command_line_parser::modules).Return(std::string{});
+    mocks.OnCall(clp, command_line_parser::modules).Return(std::string{"test"});
     mocks.OnCall(clp, command_line_parser::cpuid).Return(0);
     mocks.OnCall(clp, command_line_parser::vcpuid).Return(0);
     mocks.OnCall(clp, command_line_parser::registers).Return(ioctl::registers_type{});
@@ -191,12 +189,14 @@ TEST_CASE("test ioctl driver vmm filename with default filename")
     auto ctl = setup_ioctl(mocks, VMM_UNLOADED);
     auto clp = setup_command_line_parser(mocks, clpc::help);
 
+    mocks.OnCall(clp, command_line_parser::modules).Return(std::string{""});
+
     mocks.OnCallFunc(std::getenv).Do([&](auto) {
         return nullptr;
     });
 
     auto driver = ioctl_driver(fil, ctl, clp);
-    CHECK(!driver.vmm_filename().empty());
+    CHECK_THROWS(driver.vmm_filename());
 }
 
 TEST_CASE("test ioctl driver vmm module list empty module list")

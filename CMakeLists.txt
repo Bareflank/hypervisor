@@ -20,136 +20,94 @@ cmake_minimum_required(VERSION 3.6)
 project(hypervisor)
 
 # ------------------------------------------------------------------------------
-# Cmake global properties
+# Config / Targets
 # ------------------------------------------------------------------------------
 
-include(ExternalProject)
-include(${CMAKE_SOURCE_DIR}/scripts/cmake/global_vars.cmake)
-include(${CMAKE_SOURCE_DIR}/scripts/cmake/macros.cmake)
-include(${BF_CONFIG_DIR}/default.cmake)
-include(${BF_FLAGS_DIR}/flags.cmake)
-include(${BF_SCRIPTS_DIR}/cmake/build_rules.cmake)
-include(${BF_SCRIPTS_DIR}/cmake/targets.cmake)
+include(scripts/cmake/config/default.cmake)
+include_external_config()
 
-validate_build()
-
-if(ENABLE_DEPENDENCY_UPDATES)
-    set_property(GLOBAL PROPERTY EP_UPDATE_DISCONNECTED OFF)
-else()
-    set_property(GLOBAL PROPERTY EP_UPDATE_DISCONNECTED ON)
-endif()
-
-if(NOT ${BUILD_VERBOSE})
-    set_property(GLOBAL PROPERTY TARGET_MESSAGES OFF)
-endif()
-
-set(CMAKE_PREFIX_PATH ${BF_BUILD_INSTALL_DIR})
+message(STATUS "Bareflank Manager VMM: ${BFM_VMM}")
 
 # ------------------------------------------------------------------------------
-# Toolchain components
+# Targets
+# ------------------------------------------------------------------------------
+
+include(scripts/cmake/targets.cmake)
+
+# ------------------------------------------------------------------------------
+# Dependencies
+# ------------------------------------------------------------------------------
+
+include_dependency(gsl)
+include_dependency(json)
+include_dependency(astyle)
+include_dependency(clang_tidy)
+include_dependency(catch)
+include_dependency(hippomocks)
+include_dependency(python)
+include_dependency(binutils)
+include_dependency(newlib)
+include_dependency(llvm)
+include_dependency(libcxxabi)
+include_dependency(libcxx)
+
+# ------------------------------------------------------------------------------
+# No Build Components
 # ------------------------------------------------------------------------------
 
 add_subproject(
-    SOURCE_DIR ${BF_SOURCE_DIR}/bfsdk
-    TARGET bfsdk
-    TOOLCHAIN ${TOOLCHAIN_PATH_BFSDK}
+    bfdriver none
+    NOBUILD
 )
 
-include(${BF_DEPENDS_DIR}/python.cmake)
-include(${BF_DEPENDS_DIR}/git.cmake)
-include(${BF_DEPENDS_DIR}/gsl.cmake)
-include(${BF_DEPENDS_DIR}/json.cmake)
+add_subproject(
+    bfelf_loader none
+    NOBUILD
+)
 
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    include(${BF_DEPENDS_DIR}/nasm.cmake)
-endif()
+add_subproject(
+    bfsdk none
+    NOBUILD
+)
 
-if(ENABLE_ASTYLE)
-    include(${BF_DEPENDS_DIR}/astyle.cmake)
-endif()
-
-if(ENABLE_TIDY)
-    include(${BF_DEPENDS_DIR}/clang_tidy.cmake)
-endif()
-
-if(ENABLE_UNITTESTING)
-    include(${BF_DEPENDS_DIR}/catch.cmake)
-    include(${BF_DEPENDS_DIR}/hippomocks.cmake)
+if(NOT ENABLE_BUILD_TEST)
+    add_subproject(
+        bfdummy none
+        NOBUILD
+    )
 endif()
 
 # ------------------------------------------------------------------------------
 # VMM Components
 # ------------------------------------------------------------------------------
 
-if(${BUILD_VMM})
-    include(${BF_DEPENDS_DIR}/binutils.cmake)
-    include(${BF_DEPENDS_DIR}/newlib.cmake)
-    include(${BF_DEPENDS_DIR}/llvm.cmake)
-    include(${BF_DEPENDS_DIR}/libcxx.cmake)
-
+if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
     add_subproject(
-        SOURCE_DIR ${BF_SOURCE_DIR}/bfsysroot/bfunwind
-        TARGET bfunwind
-        TOOLCHAIN ${TOOLCHAIN_PATH_BFUNWIND}
-        DEPENDS bfsdk binutils newlib
+        bfunwind vmm
+        DEPENDS libcxx
     )
 
     add_subproject(
-        SOURCE_DIR ${BF_SOURCE_DIR}/bfsysroot/bfsupport
-        TARGET bfsupport
-        TOOLCHAIN ${TOOLCHAIN_PATH_BFSUPPORT}
-        DEPENDS bfsdk binutils libcxx libcxxabi newlib gsl
-    )
-
-    add_subproject(
-        SOURCE_DIR ${BF_SOURCE_DIR}/bfvmm
-        TARGET bfvmm
-        TOOLCHAIN ${TOOLCHAIN_PATH_BFVMM}
-        DEPENDS bfsdk binutils bfunwind bfsupport
+        bfruntime vmm
+        DEPENDS libcxx gsl
     )
 endif()
 
-# ------------------------------------------------------------------------------
-# OS Components
-# ------------------------------------------------------------------------------
-
-if(${BUILD_BFELF_LOADER})
+if(ENABLE_BUILD_VMM)
     add_subproject(
-        SOURCE_DIR ${BF_SOURCE_DIR}/bfelf_loader
-        TARGET bfelf_loader
-        TOOLCHAIN ${TOOLCHAIN_PATH_BFELF_LOADER}
-        DEPENDS bfsdk
+        bfintrinsics vmm
+        DEPENDS binutils
     )
-endif()
 
-if(${BUILD_BFDRIVER})
     add_subproject(
-        SOURCE_DIR ${BF_SOURCE_DIR}/bfdriver
-        TARGET bfdriver
-        TOOLCHAIN ${TOOLCHAIN_PATH_BFDRIVER}
-        DEPENDS bfsdk bfelf_loader
+        bfvmm vmm
+        DEPENDS bfunwind bfruntime gsl json
     )
-endif()
 
-if(${BUILD_BFM})
     add_subproject(
-        SOURCE_DIR ${BF_SOURCE_DIR}/bfm
-        TARGET bfm
-        TOOLCHAIN ${TOOLCHAIN_PATH_BFM}
-        DEPENDS bfsdk bfelf_loader gsl json
-    )
-endif()
-
-# ------------------------------------------------------------------------------
-# Extended APIs
-# ------------------------------------------------------------------------------
-
-if(${BUILD_EXTENDED_APIS})
-    add_subproject(
-        SOURCE_DIR ${EXTENDED_APIS_PATH}
-        TARGET extended_apis
-        TOOLCHAIN ${TOOLCHAIN_PATH_EXTENDED_APIS}
-        DEPENDS bfsdk binutils bfvmm
+        bfvmm_main vmm
+        DEPENDS bfvmm bfintrinsics
+        SOURCE_DIR ${SOURCE_BFVMM_DIR}/src/main
     )
 endif()
 
@@ -157,70 +115,99 @@ endif()
 # Unit Tests
 # ------------------------------------------------------------------------------
 
-if(ENABLE_UNITTESTING)
+if(ENABLE_BUILD_TEST)
     add_subproject(
-        SOURCE_DIR ${BF_SOURCE_DIR}/bfsdk/tests
-        TARGET bfsdk_test
-        TOOLCHAIN ${TOOLCHAIN_PATH_UNITTEST}
-        DEPENDS catch hippomocks gsl json
+        bfsdk test
+        SOURCE_DIR ${SOURCE_BFSDK_DIR}/tests
+        DEPENDS gsl json catch hippomocks
     )
-
-    if(${UNITTEST_BFDRIVER})
-        add_subproject(
-            SOURCE_DIR ${BF_SOURCE_DIR}/bfdriver/tests
-            TARGET bfdriver_test
-            TOOLCHAIN ${TOOLCHAIN_PATH_UNITTEST}
-            DEPENDS bfsdk bfsdk_test bfelf_loader bfvmm
-        )
-    endif()
-
-    if(${UNITTEST_BFELF_LOADER})
-        add_subproject(
-            SOURCE_DIR ${BF_SOURCE_DIR}/bfelf_loader/tests
-            TARGET bfelf_loader_test
-            TOOLCHAIN ${TOOLCHAIN_PATH_UNITTEST}
-            DEPENDS bfsdk bfsdk_test bfvmm
-        )
-    endif()
-
-    if(${UNITTEST_BFM})
-        add_subproject(
-            SOURCE_DIR ${BF_SOURCE_DIR}/bfm/tests
-            TARGET bfm_test
-            TOOLCHAIN ${TOOLCHAIN_PATH_UNITTEST}
-            DEPENDS bfsdk bfsdk_test
-        )
-    endif()
-
-    if(${UNITTEST_BFSUPPORT})
-        add_subproject(
-            SOURCE_DIR ${BF_SOURCE_DIR}/bfsysroot/bfsupport/tests
-            TARGET bfsupport_test
-            TOOLCHAIN ${TOOLCHAIN_PATH_UNITTEST}
-            DEPENDS bfsdk bfsdk_test
-        )
-    endif()
-
-    if(${UNITTEST_VMM})
-        add_subproject(
-            SOURCE_DIR ${BF_SOURCE_DIR}/bfvmm/test
-            TARGET bfvmm_test
-            TOOLCHAIN ${TOOLCHAIN_PATH_UNITTEST}
-            DEPENDS bfsdk bfsdk_test
-        )
-    endif()
-
-    if(${UNITTEST_EXTENDED_APIS})
-        add_subproject(
-            SOURCE_DIR ${EXTENDED_APIS_PATH}/tests
-            TARGET extended_apis_test
-            TOOLCHAIN ${TOOLCHAIN_PATH_UNITTEST}
-            DEPENDS bfsdk bfsdk_test bfvmm_test
-        )
-    endif()
 endif()
 
+if(ENABLE_BUILD_TEST AND NOT WIN32)
+    add_subproject(
+        bfdummy vmm
+        TOOLCHAIN ${VMM_TEST_TOOLCHAIN_PATH}
+        DEPENDS bfunwind bfruntime gsl json
+    )
 
-add_vmm_extensions()
+    add_subproject(
+        bfdummy_main vmm
+        TOOLCHAIN ${VMM_TEST_TOOLCHAIN_PATH}
+        SOURCE_DIR ${SOURCE_BFDUMMY_DIR}/src/main
+        DEPENDS bfdummy
+    )
+
+    add_subproject(
+        bfelf_loader test
+        SOURCE_DIR ${SOURCE_BFELF_LOADER_DIR}/tests
+        DEPENDS bfsdk
+        NOINSTALL
+    )
+
+    add_subproject(
+        bfdriver test
+        SOURCE_DIR ${SOURCE_BFDRIVER_DIR}/tests
+        DEPENDS bfsdk
+        NOINSTALL
+    )
+endif()
+
+if(ENABLE_BUILD_TEST)
+    add_subproject(
+        bfm test
+        SOURCE_DIR ${SOURCE_BFM_DIR}/tests
+        DEPENDS bfsdk
+        NOINSTALL
+    )
+
+    add_subproject(
+        bfruntime test
+        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/tests
+        DEPENDS bfsdk
+        NOINSTALL
+    )
+
+    add_subproject(
+        bfintrinsics test
+        SOURCE_DIR ${SOURCE_BFINTRINSICS_DIR}/tests
+        DEPENDS bfsdk
+        NOINSTALL
+    )
+
+    add_subproject(
+        bfvmm test
+        SOURCE_DIR ${SOURCE_BFVMM_DIR}/tests
+        DEPENDS bfsdk
+    )
+endif()
+
+# ------------------------------------------------------------------------------
+# Userspace Components
+# ------------------------------------------------------------------------------
+
+if(ENABLE_BUILD_USERSPACE)
+    add_subproject(
+        bfm userspace
+        DEPENDS json gsl
+    )
+endif()
+
+# ------------------------------------------------------------------------------
+# External Components
+# ------------------------------------------------------------------------------
+
+include_external_extensions()
+
+# ------------------------------------------------------------------------------
+# Validate Build
+# ------------------------------------------------------------------------------
+
+include(scripts/cmake/validate.cmake)
+validate_build()
+
+# ------------------------------------------------------------------------------
+# Banners
+# ------------------------------------------------------------------------------
+
 print_banner()
 print_usage()
