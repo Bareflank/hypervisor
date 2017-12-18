@@ -26,20 +26,36 @@
 # using: cmake /path/to/src -DBFCONFIG=/path/to/config.cmake
 
 # ------------------------------------------------------------------------------
-# Import user configuration file (if specified)
+# Import Bareflank build configuration file
 # ------------------------------------------------------------------------------
 
+# -DBFCONFIG=/path/to/bfconfig.cmake takes first precedence
+# Search relative to the build directory first, then the source tree defaults
 if(BFCONFIG)
-    find_file(_BFCONFIG_PATH ${BFCONFIG} ${BF_CONFIG_DIR})
-    set(_BFCONFIG_PATH ${_BFCONFIG_PATH} CACHE INTERNAL "")
-    if(EXISTS ${_BFCONFIG_PATH})
-        message(STATUS "Configuring Bareflank using: ${_BFCONFIG_PATH}")
-        include(${_BFCONFIG_PATH})
+    # Prevent infinite loop this file is specified
+    if(${BFCONFIG} STREQUAL default.cmake)
+        message(STATUS "Building Bareflank with default settings")
     else()
-        message(FATAL_ERROR "Configuration file ${BFCONFIG} not found")
+        find_file(_BFCONFIG_PATH ${BFCONFIG} PATHS ${BF_BUILD_DIR} ${BF_CONFIG_DIR})
+        if(EXISTS ${_BFCONFIG_PATH})
+            message(STATUS "Configuring Bareflank using: ${_BFCONFIG_PATH}")
+            include(${_BFCONFIG_PATH})
+        else()
+            message(FATAL_ERROR "Configuration file ${BFCONFIG} not found")
+        endif()
     endif()
+# Next, search the current build directory for "bfconfig.cmake"
+elseif(EXISTS ${BF_BUILD_DIR}/bfconfig.cmake)
+    message(STATUS "Configuring Bareflank using: ${BF_BUILD_DIR}/bfconfig.cmake")
+    include(${BF_BUILD_DIR}/bfconfig.cmake)
+# Otherwise, fall back to the empty bfconfig template file
 else()
-    message(STATUS "No configuration specified, using default settings")
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${BF_CONFIG_DIR}/bfconfig_template.cmake
+            ${BF_BUILD_DIR}/bfconfig.cmake
+    )
+    message(STATUS "No build configuration specified, using default settings")
 endif()
 
 # ------------------------------------------------------------------------------
@@ -138,6 +154,13 @@ add_config(
     CONFIG_TYPE PATH
     DEFAULT_VAL ${BF_SOURCE_DIR}/extended_apis
     DESCRIPTION "Path to the Bareflank Extended APIs"
+)
+
+add_config(
+    CONFIG_NAME BUILD_VMM_EXTENSIONS
+    CONFIG_TYPE BOOL
+    DEFAULT_VAL ON
+    DESCRIPTION "Build all configured Bareflank VMM extensions"
 )
 
 if(${CMAKE_VERBOSE_MAKEFILE})
@@ -254,7 +277,18 @@ add_config(
     CONFIG_NAME UNITTEST_VMM
     CONFIG_TYPE BOOL
     DEFAULT_VAL ${ENABLE_UNITTESTING}
-    DESCRIPTION "Build unit tests for the VMM"
+    DESCRIPTION "Build VMM unit tests"
+)
+
+set(_DEFAULT_UNITTEST_VMM_EXTENSIONS OFF CACHE INTERNAL "")
+if(${ENABLE_UNITTESTING} AND ${BUILD_VMM_EXTENSIONS} AND ${UNITTEST_VMM})
+    set(_DEFAULT_UNITTEST_VMM_EXTENSIONS ON)
+endif()
+add_config(
+    CONFIG_NAME UNITTEST_VMM_EXTENSIONS
+    CONFIG_TYPE BOOL
+    DEFAULT_VAL ${_DEFAULT_UNITTEST_VMM_EXTENSIONS}
+    DESCRIPTION "Build VMM extension unit tests"
 )
 
 set(_DEFAULT_UNITTEST_BFDRIVER OFF CACHE INTERNAL "")

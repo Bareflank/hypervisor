@@ -140,7 +140,7 @@ supported platforms and their dependencies:
 
 #### Arch Linux:
 ```
-sudo pacman -S git linux-headers nasm clang cmake
+sudo pacman -S git linux-headers nasm clang cmake base-devel
 ```
 
 #### Ubuntu 17.04 (or Higher):
@@ -177,30 +177,19 @@ bcdedit.exe /set testsigning ON
 ```
 ## Compilation Instructions
 
-To compile, run the following commands:
+To compile with default settings for your host environment, run the following commands:
 
 ```
 git clone -b dev https://github.com/bareflank/hypervisor.git
-mkdir hypervisor/build; cd hypervisor/build
-cmake ..
+mkdir build; cd build
+cmake ../hypervisor
 make -j<# cores + 1>
 ```
 
-Also, if your modifying the hypervisor, we highly recommend enabling
-unit testing and developer mode. This will enable the various different tools
-that are needed to pass all of our CI tests. This also compiles the hypervisor
-in debug mode.
-- `-DENABLE_UNITTESTING=ON`
-- `-DENABLE_DEVELOPER_MODE=ON`
-
-Once this is enabled, you can run the following commands before submitting a
-PR:
-- `make test`
-- `make format`
-- `make tidy`
-
-If you wish to enable the extended APIs, you can do so using the following.
-- `-DENABLE_EXTENDED_APIS=ON` and/or `-DEXTENDED_APIS_PATH=<path>`
+For more detailed build instuctions and configurations, see the
+[detailed build instructions](scripts/docs/build_instructions.md).
+For instructions on building and creating Bareflank extensions, see the
+[extension build instructions](scripts/docs/extension_instructions.md)
 
 ## Usage Instructions
 

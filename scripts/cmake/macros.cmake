@@ -16,29 +16,38 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# Platform independent symbolic link creation
-macro(install_symlink filepath sympath)
-    if(WIN32)
-        install(CODE "execute_process(COMMAND mklink ${sympath} ${filepath})")
-        install(CODE "message(STATUS \"Created symlink: ${sympath} -> ${filepath}\")")
-    else()
-        install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${filepath} ${sympath})")
-        install(CODE "message(STATUS \"Created symlink: ${sympath} -> ${filepath}\")")
-    endif()
-endmacro(install_symlink)
+# ------------------------------------------------------------------------------
+# Sub-project and VMM extension management
+# ------------------------------------------------------------------------------
 
-# Convenience wrapper around cmake's built-in find_program()
-# @arg path: Will hold the path to the program given by "name" on success
-# @arg name: The program to be searched for.
-# If the program given by "name" is not found, cmake exits with an error
-macro(check_program_installed path name)
-    find_program(${path} ${name})
-    if(${path} MATCHES "-NOTFOUND$")
-        message(FATAL_ERROR "Unable to find ${name}, or ${name} is not installed")
-    endif()
-endmacro(check_program_installed)
+# Generate common cmake arguements shared across all projects added to the build
+# system using ExternalProject_Add()
+macro(generate_external_project_args args_out)
+    # Silence noisy cmake warnings
+    list(APPEND ${args_out}
+        -DCMAKE_TARGET_MESSAGES=OFF
+        -DCMAKE_INSTALL_MESSAGE=NEVER
+        --no-warn-unused-cli
+    )
 
-# Add a project directory to be built with a new toolchain
+    # Copy all non-built-in cmake cache variables to the external project scope
+    # (i.e. build configuration variables, build global variables, etc.)
+    get_cmake_property(_vars CACHE_VARIABLES)
+    foreach (_var ${_vars})
+        STRING(REGEX MATCH "^CMAKE" is_cmake_var ${_var})
+        if(NOT is_cmake_var)
+            list(APPEND ${args_out} -D${_var}=${${_var}})
+        endif()
+    endforeach()
+
+    # Support for clang-tidy (if enabled)
+    if(ENABLE_TIDY)
+        list(APPEND ${args_out} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
+    endif()
+
+endmacro(generate_external_project_args)
+
+# Add a sub-project directory to be built with the specified toolchain
 # @arg SOURCE_DIR: Path to a source code directory to be built with cmake
 # @arg TARGET: The name of the cmake target to be created for this project
 # @arg TOOLCHAIN: Path to a cmake toolchain file to use for compiling "project"
@@ -58,13 +67,6 @@ function(add_subproject)
         message(FATAL_ERROR "Unable to find toolchain file ${ADD_SUBPROJECT_TOOLCHAIN}")
     endif()
 
-    list(APPEND _PROJECT_CMAKE_ARGS
-        -DCMAKE_TOOLCHAIN_FILE=${ADD_SUBPROJECT_TOOLCHAIN}
-        -DCMAKE_TARGET_MESSAGES=OFF
-        -DCMAKE_INSTALL_MESSAGE=NEVER
-        --no-warn-unused-cli
-    )
-
     if(${ADD_SUBPROJECT_VERBOSE})
         message(STATUS "Adding subproject: ${ADD_SUBPROJECT_TARGET}")
         message(STATUS "\t${ADD_SUBPROJECT_TARGET} source path: ${ADD_SUBPROJECT_SOURCE_DIR}")
@@ -72,37 +74,183 @@ function(add_subproject)
         message(STATUS "\t${ADD_SUBPROJECT_TARGET} dependencies: ${ADD_SUBPROJECT_DEPENDS}")
     endif()
 
-    # Copy all non-built-in cmake cache variables to the new project scope
-    get_cmake_property(_vars CACHE_VARIABLES)
-    foreach (_var ${_vars})
-        STRING(REGEX MATCH "^CMAKE" is_cmake_var ${_var})
-        if(NOT is_cmake_var)
-            list(APPEND _PROJECT_CMAKE_ARGS -D${_var}=${${_var}})
-        endif()
-    endforeach()
-
-    # If clang-tidy is enabled, each project must generate compile_commands.json
-    if(ENABLE_TIDY)
-        list(APPEND _PROJECT_CMAKE_ARGS -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
-    endif()
+    generate_external_project_args(_PROJECT_CMAKE_ARGS)
+    list(APPEND _PROJECT_CMAKE_ARGS
+        -DCMAKE_TOOLCHAIN_FILE=${ADD_SUBPROJECT_TOOLCHAIN}
+    )
 
     ExternalProject_Add(
         ${ADD_SUBPROJECT_TARGET}
         CMAKE_ARGS ${_PROJECT_CMAKE_ARGS}
         SOURCE_DIR ${ADD_SUBPROJECT_SOURCE_DIR}
-        BINARY_DIR ${BF_BUILD_DIR}/${ADD_SUBPROJECT_TARGET}/build
-        PREFIX ${BF_BUILD_DIR}/${ADD_SUBPROJECT_TARGET}
-        TMP_DIR ${BF_BUILD_DIR}/${ADD_SUBPROJECT_TARGET}/tmp
-        STAMP_DIR ${BF_BUILD_DIR}/${ADD_SUBPROJECT_TARGET}/stamp
+        BINARY_DIR ${BF_BUILD_PROJECTS_DIR}/${ADD_SUBPROJECT_TARGET}/build
+        PREFIX ${BF_BUILD_PROJECTS_DIR}/${ADD_SUBPROJECT_TARGET}
+        TMP_DIR ${BF_BUILD_PROJECTS_DIR}/${ADD_SUBPROJECT_TARGET}/tmp
+        STAMP_DIR ${BF_BUILD_PROJECTS_DIR}/${ADD_SUBPROJECT_TARGET}/stamp
         UPDATE_DISCONNECTED 0
         UPDATE_COMMAND ""
         DEPENDS ${ADD_SUBPROJECT_DEPENDS}
     )
 endfunction(add_subproject)
 
+# Cmake variables to orchestrate adding VMM extensions to the build system
+# using vmm_extension() and add_vmm_extensions()
+set(VMM_EXTENSIONS ""
+    CACHE INTERNAL
+    "A list of target names for VMM extensions to be built"
+)
+set(VMM_EXTENSION_ARGS ""
+    CACHE INTERNAL
+    "A list of arguments to be passed to ExternalProject_Add() for each VMM extension in VMM_EXTENSIONS"
+)
 
-set(_validator_expressions "" CACHE INTERNAL "")
-set(_validator_messages "" CACHE INTERNAL "")
+# Add a VMM extension to the build system. This macro is intended to be used
+# from a build configuration file, using any arguments compatible with cmake's
+# built-in ExternalProject_Add() function.
+#
+# NOTE: Since this macro is intended to be called from a build configuration
+# file, build variables and internal targets will not be defined when
+# this macro is called. Therfore, DO NOT use any build variables inside this
+# macro!! See add_vmm_extensions() for the "second half" of the extension
+# registration process.
+#
+# Usage: vmm_extension(name argn ...)
+#     name = a unique name for this vmm extension
+#     argn = Any number of arguments compatible with ExternlProject_Add()
+#
+# Example: Add the Bareflank extended apis extension from GitHub
+#     vmm_extension(
+#         extended_apis
+#         GIT_REPOSITORY https://github.com/bareflank/extended_apis.git
+#         GIT_TAG dev
+#     )
+macro(vmm_extension)
+    set(EXTENSION_ARGS ${ARGN})
+    list(GET EXTENSION_ARGS 0 EXTENSION_NAME)
+    list(FIND VMM_EXTENSIONS ${EXTENSION_NAME} EXTENSION_IDX)
+    if(NOT ${EXTENSION_IDX} EQUAL -1)
+        message(FATAL_ERROR "VMM extension already registered with name: ${EXTENSION_NAME}")
+    endif()
+
+    # Reserve the suffix "_test" for auto-generated extension unit test targets
+    STRING(REGEX MATCH "_test$" has_test_keyword ${EXTENSION_NAME})
+    if(has_test_keyword)
+        message(
+            FATAL_ERROR
+            "VMM extension names may not end in \"_test\", "
+            "failed to add VMM extension: ${EXTENSION_NAME}"
+        )
+    endif()
+
+    # Auto-generate an extension unit test build with the reserved "_test"
+    # suffix (appended to the given target name)
+    set(TEST_EXTENSION_ARGS ${ARGN})
+    set(TEST_EXTENSION_NAME ${EXTENSION_NAME}_test)
+    list(REMOVE_AT TEST_EXTENSION_ARGS 0)
+    list(INSERT TEST_EXTENSION_ARGS 0 ${TEST_EXTENSION_NAME})
+
+    # For each extension dependency, add the generated name + "_test"
+    # as an additional dependency
+    cmake_parse_arguments(VMM_EX "" "" "DEPENDS" ${ARGN})
+    if(VMM_EX_DEPENDS)
+        list(APPEND TEST_EXTENSION_ARGS "DEPENDS")
+        foreach(depend_name ${VMM_EX_DEPENDS})
+            list(APPEND TEST_EXTENSION_ARGS ${depend_name}_test)
+        endforeach()
+    endif()
+
+    # Add the extension and unit tests to a waiting list, to be added
+    # (registered) to the build system later when add_vmm_extensions() is called
+    string(REPLACE ";" " " ARG_STRING "${EXTENSION_ARGS}")
+    string(REPLACE ";" " " TEST_ARG_STRING "${TEST_EXTENSION_ARGS}")
+    list(APPEND VMM_EXTENSIONS ${EXTENSION_NAME})
+    list(APPEND VMM_EXTENSIONS ${TEST_EXTENSION_NAME})
+    list(APPEND VMM_EXTENSION_ARGS "${ARG_STRING}")
+    list(APPEND VMM_EXTENSION_ARGS "${TEST_ARG_STRING}")
+endmacro(vmm_extension)
+
+# Add all components configured with vmm_extension() to the build system.
+# NOTE: This macro needs to be called at the very end of
+# the top-level CMakeLists.txt
+macro(add_vmm_extensions)
+    if(VMM_EXTENSIONS)
+        generate_external_project_args(_EXTENSION_CMAKE_ARGS)
+
+        list(LENGTH VMM_EXTENSION_ARGS count)
+        math(EXPR count "${count} - 1")
+        foreach(i RANGE ${count})
+            list(GET VMM_EXTENSIONS ${i} EXTENSION_NAME)
+            list(GET VMM_EXTENSION_ARGS ${i} EXTENSION_ARGS)
+            string(REPLACE " " ";" EXTENSION_ARGS ${EXTENSION_ARGS})
+
+            STRING(REGEX MATCH "_test$" IS_TEST_EXTENSION ${EXTENSION_NAME})
+            if(IS_TEST_EXTENSION)
+                # If unit testing for VMM extensions is turned off, don't add
+                # the auto-generated extension test projects
+                if(NOT UNITTEST_VMM_EXTENSIONS OR NOT ENABLE_UNITTESTING)
+                    continue()
+                endif()
+
+                # VMM extension unit test specific cmake arguments
+                list(APPEND EXTENSION_ARGS
+                    DEPENDS bfvmm_test
+                    CMAKE_ARGS
+                        -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_UNITTEST}
+                        -DVMM_EX_IS_UNITTEST_BUILD=ON
+                )
+
+                # Add the unit tests to the 'make test' target
+                add_custom_command(
+                    TARGET test
+                    COMMAND ${CMAKE_COMMAND}
+                        --build ${BF_BUILD_EXTENSIONS_DIR}/${EXTENSION_NAME}/build
+                        --target test
+                )
+                if(ENABLE_DEVELOPER_MODE)
+                    add_dependencies(test ${EXTENSION_NAME})
+                endif()
+            else()
+                # VMM extension specific cmake arguments
+                list(APPEND EXTENSION_ARGS
+                    DEPENDS bfvmm
+                    CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_VMM}
+                )
+            endif()
+
+            # Add the extension to the build system
+            ExternalProject_Add(
+                ${EXTENSION_ARGS}
+                CMAKE_ARGS ${_EXTENSION_CMAKE_ARGS}
+                BINARY_DIR ${BF_BUILD_EXTENSIONS_DIR}/${EXTENSION_NAME}/build
+                PREFIX ${BF_BUILD_EXTENSIONS_DIR}/${EXTENSION_NAME}
+                TMP_DIR ${BF_BUILD_EXTENSIONS_DIR}/${EXTENSION_NAME}/tmp
+                STAMP_DIR ${BF_BUILD_EXTENSIONS_DIR}/${EXTENSION_NAME}/stamp
+                UPDATE_DISCONNECTED 0
+                UPDATE_COMMAND ""
+            )
+
+            list(APPEND REGISTERED_EXTENSIONS ${EXTENSION_NAME})
+        endforeach()
+
+        string(REPLACE ";" " " REGISTERED_EXTENSIONS "${REGISTERED_EXTENSIONS}")
+        message(STATUS "Registered VMM Extensions: ${REGISTERED_EXTENSIONS}")
+    endif()
+endmacro(add_vmm_extensions)
+
+# ------------------------------------------------------------------------------
+# Build configuration and validation
+# ------------------------------------------------------------------------------
+
+# Cmake variables to orchestrate adding build rules to the build system
+# using add_build_rule() and validate_build()
+set(BUILD_RULES ""
+    CACHE INTERNAL
+    "A list of build validation rules added with the add_build_rule() macro"
+)
+set(BUILD_RULE_MESSAGES ""
+    CACHE INTERNAL
+    "Messages to be displayed when each of the above build rules fail"
+)
 
 # Add a new rule to be validated by the build system
 # @arg FAIL_ON: Any valid cmake expression to be evalued by cmake's if(). If the
@@ -114,20 +262,20 @@ macro(add_build_rule)
     cmake_parse_arguments(ADD_BUILD_RULE "" "${oneVal}" "${multiVal}" ${ARGN})
 
     string(REPLACE ";" " " ADD_BUILD_RULE_FAIL_ON "${ADD_BUILD_RULE_FAIL_ON}")
-    list(APPEND _validator_expressions "${ADD_BUILD_RULE_FAIL_ON}")
-    list(APPEND _validator_messages "${ADD_BUILD_RULE_FAIL_MSG}")
+    list(APPEND BUILD_RULES "${ADD_BUILD_RULE_FAIL_ON}")
+    list(APPEND BUILD_RULE_MESSAGES "${ADD_BUILD_RULE_FAIL_MSG}")
 endmacro(add_build_rule)
 
 # Validates the current build configuration against all rules configured using
 # add_build_rule()
 macro(validate_build)
     message(STATUS "Validating build configuration...")
-    list(LENGTH _validator_expressions count)
+    list(LENGTH BUILD_RULES count)
     math(EXPR count "${count} - 1")
 
     foreach(i RANGE ${count})
-        list(GET _validator_expressions ${i} e)
-        list(GET _validator_messages ${i} m)
+        list(GET BUILD_RULES ${i} e)
+        list(GET BUILD_RULE_MESSAGES ${i} m)
         string(REPLACE " " ";" e "${e}")
         if(${e})
             message("ERROR - Build validation failed: ${m}")
@@ -211,6 +359,10 @@ macro(add_config)
     endif()
 endmacro(add_config)
 
+# ------------------------------------------------------------------------------
+# Miscellaneous
+# ------------------------------------------------------------------------------
+
 # Print the Bareflank ASCII-art banner
 macro(print_banner)
     message(STATUS "${BoldMagenta}  ___                __ _           _   ${ColorReset}")
@@ -247,3 +399,25 @@ macro(copy_files_if_different)
         execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_EP_INSTALL_GLOB_DIR}/${file} ${_EP_INSTALL_INSTALL_DIR}/${file})
     endforeach()
 endmacro(copy_files_if_different)
+
+# Platform independent symbolic link creation
+macro(install_symlink filepath sympath)
+    if(WIN32)
+        install(CODE "execute_process(COMMAND mklink ${sympath} ${filepath})")
+        install(CODE "message(STATUS \"Created symlink: ${sympath} -> ${filepath}\")")
+    else()
+        install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${filepath} ${sympath})")
+        install(CODE "message(STATUS \"Created symlink: ${sympath} -> ${filepath}\")")
+    endif()
+endmacro(install_symlink)
+
+# Convenience wrapper around cmake's built-in find_program()
+# @arg path: Will hold the path to the program given by "name" on success
+# @arg name: The program to be searched for.
+# If the program given by "name" is not found, cmake exits with an error
+macro(check_program_installed path name)
+    find_program(${path} ${name})
+    if(${path} MATCHES "-NOTFOUND$")
+        message(FATAL_ERROR "Unable to find ${name}, or ${name} is not installed")
+    endif()
+endmacro(check_program_installed)
