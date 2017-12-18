@@ -238,11 +238,19 @@ private_relocate_symbol(
         }
     }
 
-    *ptr = bfrcast(bfelf64_addr, found_ef->exec_virt + found_sym->st_value);
-
     switch (BFELF_REL_TYPE(rela->r_info)) {
         case BFR_AARCH64_GLOB_DAT:
         case BFR_AARCH64_JUMP_SLOT:
+        case BFR_AARCH64_ABS64:
+            *ptr = bfrcast(bfelf64_addr, found_ef->exec_virt + found_sym->st_value);
+            break;
+
+        case BFR_AARCH64_ABS32:
+            *(uint32_t *) ptr = bfrcast(uint32_t, found_ef->exec_virt + found_sym->st_value);
+            break;
+
+        case BFR_AARCH64_ABS16:
+            *(uint16_t *) ptr = bfrcast(uint16_t, found_ef->exec_virt + found_sym->st_value);
             break;
 
         default:
