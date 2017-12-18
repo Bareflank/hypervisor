@@ -21,8 +21,12 @@ project(bfsupport C CXX)
 include(${BF_FLAGS_DIR}/flags.cmake)
 set(TIDY_EXCLUSIONS ,-cert-err34-c,-misc-misplaced-widening-cast,-cppcoreguidelines-no-malloc)
 
-set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
-enable_language(ASM_NASM)
+if(${BUILD_TARGET_ARCH} STREQUAL x86_64)
+    set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
+    enable_language(ASM_NASM)
+elseif(${BUILD_TARGET_ARCH} STREQUAL aarch64)
+    enable_language(ASM-ATT)
+endif()
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/include
