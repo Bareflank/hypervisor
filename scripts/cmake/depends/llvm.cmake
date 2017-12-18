@@ -16,18 +16,12 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-ExternalProject_Add(
+add_dependency(
 	llvm
 	GIT_REPOSITORY      https://github.com/Bareflank/llvm.git
 	GIT_TAG             v1.2
 	GIT_SHALLOW         1
-    CONFIGURE_COMMAND   ""
-    BUILD_COMMAND       ""
-    INSTALL_COMMAND     ""
-    PREFIX              ${BF_BUILD_DEPENDS_DIR}/llvm
-    SOURCE_DIR          ${BF_BUILD_DEPENDS_DIR}/llvm/src
-    BINARY_DIR          ${BF_BUILD_DEPENDS_DIR}/llvm/build
-    TMP_DIR             ${BF_BUILD_DEPENDS_DIR}/llvm/tmp
-    STAMP_DIR           ${BF_BUILD_DEPENDS_DIR}/llvm/stamp
-    INSTALL_DIR         ${BF_BUILD_DEPENDS_DIR}/llvm/install
+    CONFIGURE_COMMAND   ${CMAKE_COMMAND} -E echo "Skipping llvm configure"
+    BUILD_COMMAND       ${CMAKE_COMMAND} -E echo "Skipping llvm build"
+    INSTALL_COMMAND     ${CMAKE_COMMAND} -E echo "Skipping llvm install"
 )

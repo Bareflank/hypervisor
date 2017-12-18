@@ -23,43 +23,89 @@ generate_flags(
     VERBOSE OFF
 )
 
-list(APPEND LIBCXX_CMAKE_ARGS
-    -DLLVM_PATH=${BF_BUILD_DEPENDS_DIR}/llvm/src
-    -DLIBCXX_CXX_ABI=libcxxabi
-    -DLIBCXX_CXX_ABI_INCLUDE_PATHS=${BF_BUILD_DEPENDS_DIR}/libcxxabi/src/include/
-    -DLIBCXX_SYSROOT=${BUILD_SYSROOT_VMM}
-	-DLIBCXX_HAS_PTHREAD_API=ON
-	-DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF
-    -DCMAKE_INSTALL_PREFIX=${BUILD_SYSROOT_VMM}
-	-DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
-    -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_LIBCXX}
-	-DCMAKE_C_FLAGS=${LIBCXX_C_FLAGS}
-	-DCMAKE_CXX_FLAGS=${LIBCXX_CXX_FLAGS}
-    -DBUILD_SYSROOT_VMM=${BUILD_SYSROOT_VMM}
-    -DCMAKE_INSTALL_MESSAGE=LAZY
+get_dependency_src_dir(libcxx LIBCXX_SRC_DIR)
+get_dependency_src_dir(libcxxabi LIBCXXABI_SRC_DIR)
+get_dependency_src_dir(llvm LLVM_SRC_DIR)
+get_dependency_install_dir(libcxx LIBCXX_INSTALL_DIR)
+get_dependency_install_dir(libcxxabi LIBCXXABI_INSTALL_DIR)
+
+add_dependency(
+    libcxxabi
+    GIT_REPOSITORY  https://github.com/Bareflank/libcxxabi.git
+    GIT_TAG         v1.2
+    GIT_SHALLOW     1
+    DEPENDS         llvm newlib bfsdk binutils
+    CMAKE_ARGS
+        -DLLVM_PATH=${LLVM_SRC_DIR}
+        -DLLVM_ENABLE_LIBCXX=ON
+        -DLIBCXXABI_LIBCXX_PATH=${LIBCXX_SRC_DIR}
+        -DLIBCXXABI_SYSROOT=${BUILD_SYSROOT_VMM}
+        -DLIBCXXABI_HAS_PTHREAD_API=ON
+        -DCMAKE_INSTALL_PREFIX=${LIBCXXABI_INSTALL_DIR}
+        -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+        -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+        -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_LIBCXXABI}
+        -DCMAKE_C_FLAGS=${LIBCXX_C_FLAGS}
+        -DCMAKE_CXX_FLAGS=${LIBCXX_CXX_FLAGS}
+        -DBUILD_SYSROOT_VMM=${BUILD_SYSROOT_VMM}
+        -DLIBCXX_ENABLE_SHARED=ON
+        -DLIBCXX_ENABLE_STATIC=ON
 )
 
-if(BUILD_VMM_SHARED)
-    list(APPEND LIBCXX_CMAKE_ARGS -DLIBCXX_ENABLE_SHARED=ON)
-endif()
-
-if(BUILD_VMM_STATIC)
-    list(APPEND LIBCXX_CMAKE_ARGS -DLIBCXX_ENABLE_STATIC=ON)
-endif()
-
-ExternalProject_Add(
+add_dependency(
     libcxx
-	GIT_REPOSITORY      https://github.com/Bareflank/libcxx.git
-	GIT_TAG             v1.2
-	GIT_SHALLOW         1
-    UPDATE_DISCONNECTED 0
-    UPDATE_COMMAND      ""
-    PREFIX              ${BF_BUILD_DEPENDS_DIR}/libcxx
-    SOURCE_DIR          ${BF_BUILD_DEPENDS_DIR}/libcxx/src
-    BINARY_DIR          ${BF_BUILD_DEPENDS_DIR}/libcxx/build
-    INSTALL_DIR         ${BF_BUILD_DEPENDS_DIR}/libcxx/install
-    TMP_DIR             ${BF_BUILD_DEPENDS_DIR}/libcxx/tmp
-    STAMP_DIR           ${BF_BUILD_DEPENDS_DIR}/libcxx/stamp
-	CMAKE_ARGS      	${LIBCXX_CMAKE_ARGS}
-    DEPENDS libcxx_download libcxxabi_download llvm newlib libcxxabi bfsdk binutils
+    GIT_REPOSITORY  https://github.com/Bareflank/libcxx.git
+    GIT_TAG         v1.2
+    GIT_SHALLOW     1
+    DEPENDS         llvm newlib bfsdk binutils
+    CMAKE_ARGS
+        -DLLVM_PATH=${LLVM_SRC_DIR}
+        -DLIBCXX_CXX_ABI=libcxxabi
+        -DLIBCXX_CXX_ABI_INCLUDE_PATHS=${LIBCXXABI_SRC_DIR}/include/
+        -DLIBCXX_SYSROOT=${BUILD_SYSROOT_VMM}
+        -DLIBCXX_HAS_PTHREAD_API=ON
+        -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF
+        -DCMAKE_INSTALL_PREFIX=${LIBCXX_INSTALL_DIR}
+        -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+        -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_LIBCXX}
+        -DCMAKE_C_FLAGS=${LIBCXX_C_FLAGS}
+        -DCMAKE_CXX_FLAGS=${LIBCXX_CXX_FLAGS}
+        -DBUILD_SYSROOT_VMM=${BUILD_SYSROOT_VMM}
+        -DLIBCXX_ENABLE_SHARED=ON
+        -DLIBCXX_ENABLE_STATIC=ON
+)
+
+install_dependency(
+    libcxxabi
+    DESTINATIONS ${BUILD_SYSROOT_VMM}
+    GLOB_EXPRESSIONS *
+)
+
+install_dependency(
+    libcxx
+    DESTINATIONS ${BUILD_SYSROOT_VMM}
+    GLOB_EXPRESSIONS *
+)
+
+# libcxx and libcxxabi both depend on each other's source code to build, so
+# setup inter-project step dependencies to make sure that they build in the
+# right order.
+ExternalProject_Add_StepTargets(libcxx download)
+ExternalProject_Add_StepTargets(libcxxabi download)
+
+ExternalProject_Add_StepDependencies(
+    libcxx configure
+    libcxx-download
+    libcxxabi-download
+)
+
+ExternalProject_Add_StepDependencies(
+    libcxx build
+    libcxxabi
+)
+
+ExternalProject_Add_StepDependencies(
+    libcxxabi configure
+    libcxx-download
+    libcxxabi-download
 )

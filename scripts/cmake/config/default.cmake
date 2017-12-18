@@ -263,11 +263,33 @@ add_config(
 )
 
 add_config(
-    CONFIG_NAME ENABLE_DEPEND_UPDATES
+    CONFIG_NAME ENABLE_DEPENDENCY_UPDATES
     CONFIG_TYPE BOOL
     DEFAULT_VAL OFF
     DESCRIPTION "Check dependencies for updates on every build"
 )
+
+add_config(
+    CONFIG_NAME DEPENDENCY_CACHE_DIR
+    CONFIG_TYPE PATH
+    DEFAULT_VAL ${BF_SOURCE_DIR}/../bfdepends
+    DESCRIPTION "Path to dependency source code and build artifact cache directory"
+)
+
+if(EXISTS ${DEPENDENCY_CACHE_DIR})
+    set(_DEFAULT_ENABLE_DEPENDENCY_CACHE ON)
+else()
+    set(_DEFAULT_ENABLE_DEPENDENCY_CACHE OFF)
+endif()
+add_config(
+    CONFIG_NAME ENABLE_DEPENDENCY_CACHE
+    CONFIG_TYPE BOOL
+    DEFAULT_VAL ${_DEFAULT_ENABLE_DEPENDENCY_CACHE}
+    DESCRIPTION "Enable dependency source code and build artifact caching"
+)
+if(ENABLE_DEPENDENCY_CACHE)
+    message(STATUS "Using cached dependencies at: ${DEPENDENCY_CACHE_DIR}")
+endif()
 
 # ------------------------------------------------------------------------------
 # Unit Testing
