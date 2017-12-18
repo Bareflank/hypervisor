@@ -1,0 +1,76 @@
+//
+// Bareflank Hypervisor
+// Copyright (C) 2015 Assured Information Security, Inc.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+#include <bftypes.h>
+#include <bfaffinity.h>
+#include <bfelf_loader.h>
+#include <bfdriverinterface.h>
+#include <bfvmcallinterface.h>
+
+#include <ioctl.h>
+#include <ioctl_driver.h>
+#include <command_line_parser.h>
+
+ioctl::ioctl() :
+    m_d{nullptr}
+{ }
+
+void
+ioctl::open()
+{ }
+
+void
+ioctl::call_ioctl_add_module(const binary_data &module_data)
+{
+    bfignored(module_data);
+}
+
+void
+ioctl::call_ioctl_load_vmm()
+{ }
+
+void
+ioctl::call_ioctl_unload_vmm()
+{ }
+
+void
+ioctl::call_ioctl_start_vmm()
+{ }
+
+void
+ioctl::call_ioctl_stop_vmm()
+{ }
+
+void
+ioctl::call_ioctl_dump_vmm(gsl::not_null<drr_pointer> drr, vcpuid_type vcpuid)
+{
+    bfignored(drr);
+    bfignored(vcpuid);
+}
+
+void
+ioctl::call_ioctl_vmm_status(gsl::not_null<status_pointer> status)
+{
+    bfignored(status);
+}
+
+extern "C" void
+_vmcall(vmcall_registers_t *regs)
+{
+    bfignored(regs);
+}

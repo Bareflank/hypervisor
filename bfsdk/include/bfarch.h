@@ -20,25 +20,30 @@
 #ifndef BFARCH_H
 #define BFARCH_H
 
+#ifndef BF_ARCH
+
 #if defined(_MSC_VER)
-#   if defined(_M_X64) && !defined(BF_ARCH)
-#       define BF_ARCH "x64"
+#   if defined(_M_X64)
+#       define BF_ARCH "intel_x64"
 #       define BF_X64
-#   elif !defined(BF_ARCH)
+#       define BF_INTEL_X64
+#   else
 #       error "bfarch.h: unsupported architecture"
 #   endif
 #elif defined(__GNUC__) || defined(__clang__)
-#   if defined(__x86_64__) && !defined(BF_ARCH)
-#       define BF_ARCH "x64"
+#   if defined(__x86_64__)
+#       define BF_ARCH "intel_x64"
 #       define BF_X64
-#   elif defined(__aarch64__) && !defined(BF_ARCH)
+#       define BF_INTEL_X64
+#   elif defined(__aarch64__)
 #       define BF_ARCH "aarch64"
 #       define BF_AARCH64
-#   elif !defined(BF_ARCH)
+#   else
 #       error "bfarch.h: unsupported architecture"
 #   endif
 #else
-#   error "bfarch.h: cannot detect compiler"
+#   error "bfarch.h: unsupported compiler"
 #endif
 
+#endif
 #endif

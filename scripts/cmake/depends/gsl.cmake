@@ -16,16 +16,30 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-add_dependency(
-    gsl
-    GIT_REPOSITORY  https://github.com/Bareflank/gsl.git
-    GIT_TAG         v1.2
-    GIT_SHALLOW     1
-    CMAKE_ARGS      -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_GSL}
-)
+if(ENABLE_BUILD_VMM OR ENABLE_BUILD_USERSPACE OR ENABLE_BUILD_TEST)
+    message(STATUS "Including dependency: gsl")
 
-install_dependency(
-    gsl
-    DESTINATIONS ${BUILD_SYSROOT_OS} ${BUILD_SYSROOT_VMM}
-    GLOB_EXPRESSIONS include/*
-)
+    download_dependency(
+        gsl
+        URL         ${GSL_URL}
+        URL_MD5     ${GSL_URL_MD5}
+    )
+endif()
+
+if(ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST)
+    add_dependency(
+        gsl vmm
+    )
+endif()
+
+if(ENABLE_BUILD_USERSPACE)
+    add_dependency(
+        gsl userspace
+    )
+endif()
+
+if(ENABLE_BUILD_TEST)
+    add_dependency(
+        gsl test
+    )
+endif()

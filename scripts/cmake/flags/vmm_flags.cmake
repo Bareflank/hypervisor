@@ -16,51 +16,51 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# TODO: Move this to an appropriate place and/or get rid of it
-execute_process(COMMAND uname -o OUTPUT_VARIABLE UNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
-if(UNAME STREQUAL "Cygwin" OR WIN32)
-    set(OSTYPE "WIN64" CACHE INTERNAL "")
-    set(ABITYPE "MS64" CACHE INTERNAL "")
-    set(WIN64 ON)
-else()
-    set(OSTYPE "UNIX" CACHE INTERNAL "")
-    set(ABITYPE "SYSV" CACHE INTERNAL "")
-endif()
+unset(BFFLAGS_VMM)
+unset(BFFLAGS_VMM_C)
+unset(BFFLAGS_VMM_CXX)
+unset(BFFLAGS_VMM_X86_64)
+unset(BFFLAGS_VMM_AARCH64)
 
 list(APPEND BFFLAGS_VMM
-    "-fpic"
-    "-mno-red-zone"
-    "-mstackrealign"
-    "-fstack-protector-strong"
-    "-DVMM"
-    "-D${OSTYPE}"
-    "-D${ABITYPE}"
-    "-DMALLOC_PROVIDED"
-    "-DGSL_THROW_ON_CONTRACT_VIOLATION"
-    "-D_HAVE_LONG_DOUBLE"
-    "-D_LDBL_EQ_DBL"
-    "-D_POSIX_TIMERS"
-    "-D_POSIX_PRIORITY_SCHEDULING"
-    "-U__STRICT_ANSI__"
-    "-DCLOCK_MONOTONIC"
+    -isystem ${VMM_PREFIX_PATH}/include/c++/v1
+    -isystem ${VMM_PREFIX_PATH}/include
+)
+
+list(APPEND BFFLAGS_VMM
+    --target=${BUILD_TARGET_ARCH}-vmm-elf
+    --sysroot=${VMM_PREFIX_PATH}
+    -fpic
+    -mno-red-zone
+    -mstackrealign
+    -fstack-protector-strong
+    -DVMM
+    -D${OSTYPE}
+    -D${ABITYPE}
+    -DMALLOC_PROVIDED
+    -DGSL_THROW_ON_CONTRACT_VIOLATION
+    -D_HAVE_LONG_DOUBLE
+    -D_LDBL_EQ_DBL
+    -D_POSIX_TIMERS
+    -D_POSIX_PRIORITY_SCHEDULING
+    -U__STRICT_ANSI__
+    -DCLOCK_MONOTONIC
+    -U__USER_LABEL_PREFIX__
+    -D__USER_LABEL_PREFIX__=
+    -D__ELF__
 )
 
 list(APPEND BFFLAGS_VMM_C
-    "-std=c11"
+    -std=c11
 )
 
 list(APPEND BFFLAGS_VMM_CXX
-    "-x c++"
-    "-std=c++1z"
-    "-DNOSTDINC_CXX"
+    -x c++
+    -std=c++14
 )
 
 list(APPEND BFFLAGS_VMM_X86_64
-    "-msse"
-    "-msse2"
-    "-msse3"
-)
-
-list(APPEND BFFLAGS_VMM_AARCH64
-    ""
+    -msse
+    -msse2
+    -msse3
 )

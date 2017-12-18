@@ -16,76 +16,86 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-get_dependency_src_dir(newlib NEWLIB_SRC_DIR)
-get_dependency_install_dir(newlib NEWLIB_INSTALL_DIR)
+if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
+    message(STATUS "Including dependency: newlib")
 
-set(NEWLIB_TARGET "${BUILD_TARGET_ARCH}-vmm-elf")
+    download_dependency(
+        newlib
+        URL         ${NEWLIB_URL}
+        URL_MD5     ${NEWLIB_URL_MD5}
+    )
 
-list(APPEND NEWLIB_C_FLAGS
-    "-DNOSTDINC_C"
-)
+    set(CC_FOR_TARGET clang)
+    set(CXX_FOR_TARGET clang)
 
-if(BUILD_TYPE STREQUAL "Release")
-    list(APPEND NEWLIB_C_FLAGS
-        "-O3"
-        "-DNDEBUG"
-        "-no-integrated-as"
-        "-fasm"
+    set(AR_FOR_TARGET ${VMM_PREFIX_PATH}/bin/ar)
+    set(AS_FOR_TARGET ${VMM_PREFIX_PATH}/bin/as)
+    set(LD_FOR_TARGET ${VMM_PREFIX_PATH}/bin/ld)
+    set(NM_FOR_TARGET ${VMM_PREFIX_PATH}/bin/nm)
+    set(OBJCOPY_FOR_TARGET ${VMM_PREFIX_PATH}/bin/objcopy)
+    set(OBJDUMP_FOR_TARGET ${VMM_PREFIX_PATH}/bin/objdump)
+    set(RANLIB_FOR_TARGET ${VMM_PREFIX_PATH}/bin/ranlib)
+    set(READELF_FOR_TARGET ${VMM_PREFIX_PATH}/bin/readelf)
+    set(STRIP_FOR_TARGET ${VMM_PREFIX_PATH}/bin/strip)
+
+    generate_flags(
+        vmm
+    )
+
+    list(APPEND LD_FLAGS
+        --sysroot=${VMM_PREFIX_PATH}
+        -z max-page-size=4096
+        -z common-page-size=4096
+        -z relro
+        -z now
+    )
+
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -DNDEBUG")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
+    else()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+    endif()
+
+    list(APPEND NEWLIB_CONFIGURE_FLAGS
+        --disable-libgloss
+        --disable-multilib
+        --disable-newlib-supplied-syscalls
+        --enable-newlib-multithread
+        --enable-newlib-iconv
+        CFLAGS_FOR_TARGET=${CMAKE_C_FLAGS}
+        CXXFLAGS_FOR_TARGET=${CMAKE_CXX_FLAGS}
+        CC_FOR_TARGET=${CC_FOR_TARGET}
+        CXX_FOR_TARGET=${CXX_FOR_TARGET}
+        AR_FOR_TARGET=${AR_FOR_TARGET}
+        AS_FOR_TARGET=${AS_FOR_TARGET}
+        LD_FOR_TARGET=${LD_FOR_TARGET}
+        NM_FOR_TARGET=${NM_FOR_TARGET}
+        OBJCOPY_FOR_TARGET=${OBJCOPY_FOR_TARGET}
+        OBJDUMP_FOR_TARGET=${OBJDUMP_FOR_TARGET}
+        RANLIB_FOR_TARGET=${RANLIB_FOR_TARGET}
+        READELF_FOR_TARGET=${READELF_FOR_TARGET}
+        STRIP_FOR_TARGET=${STRIP_FOR_TARGET}
+        --prefix=${PREFIXES_DIR}
+        --target=${VMM_PREFIX}
+    )
+
+    add_dependency(
+        newlib vmm
+        CONFIGURE_COMMAND   ${CACHE_DIR}/newlib/configure ${NEWLIB_CONFIGURE_FLAGS}
+        BUILD_COMMAND       make -j${BUILD_TARGET_CORES}
+        INSTALL_COMMAND     make install
+        DEPENDS             binutils_${VMM_PREFIX}
+    )
+
+    add_dependency_step(
+        newlib vmm
+        COMMAND eval "${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/tmp"
+        COMMAND eval "${CMAKE_COMMAND} -E copy_if_different ${VMM_PREFIX_PATH}/lib/libc.a ${CMAKE_BINARY_DIR}/tmp"
+        COMMAND eval "${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/tmp ${AR_FOR_TARGET} x libc.a"
+        COMMAND eval "${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/tmp ${LD_FOR_TARGET} -shared -o ${VMM_PREFIX_PATH}/lib/libc.so ${CMAKE_BINARY_DIR}/tmp/*.o ${LD_FLAGS}"
+        COMMAND eval "${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/tmp"
+        COMMAND eval "${CMAKE_COMMAND} -E remove_directory ${PREFIXES_DIR}/share"
     )
 endif()
-
-generate_flags(
-    VMM
-    ADD_C_FLAGS ${NEWLIB_C_FLAGS}
-    C_FLAGS_OUT NEWLIB_C_FLAGS
-    CXX_FLAGS_OUT NEWLIB_CXX_FLAGS
-    VERBOSE OFF
-)
-
-list(APPEND NEWLIB_ARGS
-    "--disable-libgloss"
-    "--disable-multilib"
-    "--disable-newlib-supplied-syscalls"
-    "--enable-newlib-multithread"
-    "--enable-newlib-iconv"
-    "--prefix=${NEWLIB_INSTALL_DIR}"
-    "--target=${NEWLIB_TARGET}"
-    "CC_FOR_TARGET=${TOOLCHAIN_NEWLIB_CC}"
-    "CXX_FOR_TARGET=${TOOLCHAIN_NEWLIB_CC}"
-    "AS_FOR_TARGET=${TOOLCHAIN_NEWLIB_AS}"
-    "AR_FOR_TARGET=${TOOLCHAIN_NEWLIB_AR}"
-    "RANLIB_FOR_TARGET=${TOOLCHAIN_NEWLIB_RANLIB}"
-    "CFLAGS_FOR_TARGET=${NEWLIB_C_FLAGS}"
-)
-
-
-add_dependency(
-    newlib
-    GIT_REPOSITORY      https://github.com/Bareflank/newlib.git
-    GIT_TAG             v1.2
-    GIT_SHALLOW         1
-    CONFIGURE_COMMAND   ${NEWLIB_SRC_DIR}/configure ${NEWLIB_ARGS}
-    BUILD_COMMAND       make
-    INSTALL_COMMAND		make install
-    DEPENDS             bfsdk binutils
-)
-
-ExternalProject_Add_Step(
-    newlib
-    build_shared_lib
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${NEWLIB_INSTALL_DIR}/tmp
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${NEWLIB_INSTALL_DIR}/${NEWLIB_TARGET}/lib/libc.a ${NEWLIB_INSTALL_DIR}/tmp
-    COMMAND ${CMAKE_COMMAND} -E chdir ${NEWLIB_INSTALL_DIR}/tmp ${TOOLCHAIN_NEWLIB_AR} x libc.a
-    COMMAND ${CMAKE_COMMAND} -E chdir ${NEWLIB_INSTALL_DIR}/tmp ${TOOLCHAIN_NEWLIB_CC} -shared -o libc.so *.o
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${NEWLIB_INSTALL_DIR}/tmp/libc.so ${NEWLIB_INSTALL_DIR}/${NEWLIB_TARGET}/lib
-    DEPENDEES install
-    COMMENT "Installing newlib shared library (libc.so) to ${NEWLIB_INSTALL_DIR}/${NEWLIB_TARGET}/lib"
-)
-
-install_dependency(
-    newlib
-    DESTINATIONS ${BUILD_SYSROOT_VMM}
-    GLOB_DIR ${NEWLIB_INSTALL_DIR}/${NEWLIB_TARGET}
-    GLOB_EXPRESSIONS *
-    DEPENDEES build_shared_lib
-)

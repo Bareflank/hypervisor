@@ -16,5 +16,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-check_program_installed(CLANG_TIDY_BIN clang-tidy)
-set(CLANG_TIDY_BIN ${CLANG_TIDY_BIN} CACHE INTERNAL "")
+if(ENABLE_TIDY)
+    message(STATUS "Including dependency: clang-tidy")
+
+    if(NOT CLANG_TIDY_BIN)
+        find_program(CLANG_TIDY_BIN clang-tidy-4.0)
+
+        if(NOT CLANG_TIDY_BIN)
+            message(FATAL_ERROR "Unable to find: clang-tidy-4.0")
+        endif()
+    endif()
+endif()

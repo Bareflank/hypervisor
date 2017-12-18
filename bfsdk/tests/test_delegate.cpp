@@ -75,7 +75,7 @@ TEST_CASE("is valid")
     delegate<int(int)> d0;
 
     CHECK(!d0);
-    CHECK(d0.is_valid() == false);
+    CHECK(!d0.is_valid());
 }
 
 TEST_CASE("test class")

@@ -16,7 +16,5 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-set(ENABLE_UNITTESTING ON)
-set(BUILD_VMM_SHARED ON)
-set(BUILD_VMM_STATIC OFF)
-set(BUILD_BFDRIVER OFF)
+set(BUILD_SHARED_LIBS ON)
+set(BUILD_STATIC_LIBS OFF)
