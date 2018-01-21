@@ -16,209 +16,420 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# ------------------------------------------------------------------------------
-# README
-# ------------------------------------------------------------------------------
-
-# This file defines all CONFIGURABLE cmake variables set to their default value.
-# These variables are configurable through cmake-gui and ccmake.
-# To override the default settings, you can specify an alternate config file
-# using: cmake /path/to/src -DBFCONFIG=/path/to/config.cmake
+include(${CMAKE_SOURCE_DIR}/scripts/cmake/macros.cmake)
 
 # ------------------------------------------------------------------------------
-# Import Bareflank build configuration file
+# Quirks
 # ------------------------------------------------------------------------------
 
-# -DBFCONFIG=/path/to/bfconfig.cmake takes first precedence
-# Search relative to the build directory first, then the source tree defaults
-if(BFCONFIG)
-    # Prevent infinite loop this file is specified
-    if(${BFCONFIG} STREQUAL default.cmake)
-        message(STATUS "Building Bareflank with default settings")
-    else()
-        find_file(_BFCONFIG_PATH ${BFCONFIG} PATHS ${BF_BUILD_DIR} ${BF_CONFIG_DIR})
-        if(EXISTS ${_BFCONFIG_PATH})
-            message(STATUS "Configuring Bareflank using: ${_BFCONFIG_PATH}")
-            include(${_BFCONFIG_PATH})
-        else()
-            message(FATAL_ERROR "Configuration file ${BFCONFIG} not found")
-        endif()
-    endif()
-# Next, search the current build directory for "bfconfig.cmake"
-elseif(EXISTS ${BF_BUILD_DIR}/bfconfig.cmake)
-    message(STATUS "Configuring Bareflank using: ${BF_BUILD_DIR}/bfconfig.cmake")
-    include(${BF_BUILD_DIR}/bfconfig.cmake)
-# Otherwise, fall back to the empty bfconfig template file
+execute_process(COMMAND uname -o OUTPUT_VARIABLE UNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(UNAME STREQUAL "Cygwin" OR WIN32)
+    set(OSTYPE "WIN64" CACHE INTERNAL "")
+    set(ABITYPE "MS64" CACHE INTERNAL "")
 else()
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${BF_CONFIG_DIR}/bfconfig_template.cmake
-            ${BF_BUILD_DIR}/bfconfig.cmake
-    )
-    message(STATUS "No build configuration specified, using default settings")
+    set(OSTYPE "UNIX" CACHE INTERNAL "")
+    set(ABITYPE "SYSV" CACHE INTERNAL "")
 endif()
+
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+    set(HOST_FORMAT_TYPE "pe" CACHE INTERNAL "")
+    set(HOST_SYSTEM_NAME "Windows" CACHE INTERNAL "")
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "CYGWIN")
+    set(HOST_FORMAT_TYPE "pe" CACHE INTERNAL "")
+    set(HOST_SYSTEM_NAME "Windows" CACHE INTERNAL "")
+else()
+    set(HOST_FORMAT_TYPE "elf" CACHE INTERNAL "")
+    set(HOST_SYSTEM_NAME "Linux" CACHE INTERNAL "")
+endif()
+
+if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    set(HOST_SYSTEM_PROCESSOR "x86_64" CACHE INTERNAL "")
+elseif(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "AMD64")
+    set(HOST_SYSTEM_PROCESSOR "x86_64" CACHE INTERNAL "")
+else()
+    set(HOST_SYSTEM_PROCESSOR "unknown" CACHE INTERNAL "")
+endif()
+
+ProcessorCount(HOST_NUMBER_CORES)
+
+# ------------------------------------------------------------------------------
+# Source tree structure
+# ------------------------------------------------------------------------------
+
+set(SOURCE_ROOT_DIR ${CMAKE_SOURCE_DIR}
+    CACHE INTERNAL
+    "Source root direfctory"
+)
+
+set(SOURCE_CMAKE_DIR ${CMAKE_SOURCE_DIR}/scripts/cmake
+    CACHE INTERNAL
+    "Cmake directory"
+)
+
+set(SOURCE_CONFIG_DIR ${CMAKE_SOURCE_DIR}/scripts/cmake/config
+    CACHE INTERNAL
+    "Cmake configurations directory"
+)
+
+set(SOURCE_CONFIG_DIR ${CMAKE_SOURCE_DIR}/scripts/cmake/config
+    CACHE INTERNAL
+    "Cmake configurations directory"
+)
+
+set(SOURCE_DEPENDS_DIR ${CMAKE_SOURCE_DIR}/scripts/cmake/depends
+    CACHE INTERNAL
+    "Cmake dependencies directory"
+)
+
+set(SOURCE_FLAGS_DIR ${CMAKE_SOURCE_DIR}/scripts/cmake/flags
+    CACHE INTERNAL
+    "Cmake compiler flags directory"
+)
+
+set(SOURCE_TOOLCHAIN_DIR ${CMAKE_SOURCE_DIR}/scripts/cmake/toolchain
+    CACHE INTERNAL
+    "Cmake toolchain files directory"
+)
+
+set(SOURCE_UTIL_DIR ${CMAKE_SOURCE_DIR}/scripts/util
+    CACHE INTERNAL
+    "Utility directory"
+)
+
+set(SOURCE_BFDRIVER_DIR ${CMAKE_SOURCE_DIR}/bfdriver
+    CACHE INTERNAL
+    "bfdriver source dir"
+)
+
+set(SOURCE_BFDUMMY_DIR ${CMAKE_SOURCE_DIR}/bfdummy
+    CACHE INTERNAL
+    "bfdummy source dir"
+)
+
+set(SOURCE_BFELF_LOADER_DIR ${CMAKE_SOURCE_DIR}/bfelf_loader
+    CACHE INTERNAL
+    "bfelf_loader source dir"
+)
+
+set(SOURCE_BFINTRINSICS_DIR ${CMAKE_SOURCE_DIR}/bfintrinsics
+    CACHE INTERNAL
+    "bfintrinsics source dir"
+)
+
+set(SOURCE_BFM_DIR ${CMAKE_SOURCE_DIR}/bfm
+    CACHE INTERNAL
+    "bfm source dir"
+)
+
+set(SOURCE_BFRUNTIME_DIR ${CMAKE_SOURCE_DIR}/bfruntime
+    CACHE INTERNAL
+    "bfruntime source dir"
+)
+
+set(SOURCE_BFSDK_DIR ${CMAKE_SOURCE_DIR}/bfsdk
+    CACHE INTERNAL
+    "bfsdk source dir"
+)
+
+set(SOURCE_BFUNWIND_DIR ${CMAKE_SOURCE_DIR}/bfunwind
+    CACHE INTERNAL
+    "bfunwind source dir"
+)
+
+set(SOURCE_BFVMM_DIR ${CMAKE_SOURCE_DIR}/bfvmm
+    CACHE INTERNAL
+    "bfvmm source dir"
+)
+
+# ------------------------------------------------------------------------------
+# Build tree structure
+# ------------------------------------------------------------------------------
+
+set(BUILD_ROOT_DIR ${CMAKE_BINARY_DIR}
+    CACHE INTERNAL
+    "Build root directory"
+)
+
+set(BUILD_BFDRIVER_DIR ${CMAKE_BINARY_DIR}/bfdriver
+    CACHE INTERNAL
+    "bfdriver build dir"
+)
+
+set(BUILD_BFDUMMY_DIR ${CMAKE_BINARY_DIR}/bfdummy
+    CACHE INTERNAL
+    "bfdummy build dir"
+)
+
+set(BUILD_BFDUMMY_MAIN_DIR ${CMAKE_BINARY_DIR}/bfdummy_main
+    CACHE INTERNAL
+    "bfdummy main build dir"
+)
+
+set(BUILD_BFELF_LOADER_DIR ${CMAKE_BINARY_DIR}/bfelf_loader
+    CACHE INTERNAL
+    "bfelf_loader build dir"
+)
+
+set(BUILD_BFINTRINSICS_DIR ${CMAKE_BINARY_DIR}/bfintrinsics
+    CACHE INTERNAL
+    "bfintrinsics build dir"
+)
+
+set(BUILD_BFM_DIR ${CMAKE_BINARY_DIR}/bfm
+    CACHE INTERNAL
+    "bfm build dir"
+)
+
+set(BUILD_BFRUNTIME_DIR ${CMAKE_BINARY_DIR}/bfruntime
+    CACHE INTERNAL
+    "bfruntime build dir"
+)
+
+set(BUILD_BFSDK_DIR ${CMAKE_BINARY_DIR}/bfsdk
+    CACHE INTERNAL
+    "bfsdk build dir"
+)
+
+set(BUILD_BFUNWIND_DIR ${CMAKE_BINARY_DIR}/bfunwind
+    CACHE INTERNAL
+    "bfunwind build dir"
+)
+
+set(BUILD_BFVMM_DIR ${CMAKE_BINARY_DIR}/bfvmm
+    CACHE INTERNAL
+    "bfvmm build dir"
+)
+
+set(BUILD_BFVMM_MAIN_DIR ${CMAKE_BINARY_DIR}/bfvmm_main
+    CACHE INTERNAL
+    "bfvmm main build dir"
+)
+
+# ------------------------------------------------------------------------------
+# Configurable directories
+# ------------------------------------------------------------------------------
+
+set(DEFAULT_CACHE_DIR ${CMAKE_SOURCE_DIR}/../cache
+    CACHE INTERNAL
+    "Default cache directory"
+)
+
+set(DEFAULT_DEPENDS_DIR ${CMAKE_SOURCE_DIR}/../depends
+    CACHE INTERNAL
+    "Default external dependencies directory"
+)
+
+set(DEFAULT_PREFIXES_DIR ${CMAKE_SOURCE_DIR}/../prefixes
+    CACHE INTERNAL
+    "Default prefixes directory"
+)
+
+if(EXISTS ${DEFAULT_CACHE_DIR})
+    get_filename_component(DEFAULT_CACHE_DIR "${DEFAULT_CACHE_DIR}" ABSOLUTE)
+else()
+    set(DEFAULT_CACHE_DIR ${CMAKE_BINARY_DIR}/cache)
+endif()
+
+if(EXISTS ${DEFAULT_DEPENDS_DIR})
+    get_filename_component(DEFAULT_DEPENDS_DIR "${DEFAULT_DEPENDS_DIR}" ABSOLUTE)
+else()
+    set(DEFAULT_DEPENDS_DIR ${CMAKE_BINARY_DIR}/depends)
+endif()
+
+if(EXISTS ${DEFAULT_PREFIXES_DIR})
+    get_filename_component(DEFAULT_PREFIXES_DIR "${DEFAULT_PREFIXES_DIR}" ABSOLUTE)
+else()
+    set(DEFAULT_PREFIXES_DIR ${CMAKE_BINARY_DIR}/prefixes)
+endif()
+
+add_config(
+    CONFIG_NAME CACHE_DIR
+    CONFIG_TYPE PATH
+    DEFAULT_VAL ${DEFAULT_CACHE_DIR}
+    DESCRIPTION "Cache directory"
+    SKIP_VALIDATION
+)
+
+add_config(
+    CONFIG_NAME DEPENDS_DIR
+    CONFIG_TYPE PATH
+    DEFAULT_VAL ${DEFAULT_DEPENDS_DIR}
+    DESCRIPTION "External dependencies directory"
+    SKIP_VALIDATION
+)
+
+add_config(
+    CONFIG_NAME PREFIXES_DIR
+    CONFIG_TYPE PATH
+    DEFAULT_VAL ${DEFAULT_PREFIXES_DIR}
+    DESCRIPTION "Prefixes directory"
+    SKIP_VALIDATION
+)
 
 # ------------------------------------------------------------------------------
 # Build attributes
 # ------------------------------------------------------------------------------
 
-set(_BUILD_TYPE_DEFAULT "Release" CACHE INTERNAL "")
-if(CMAKE_BUILD_TYPE)
-    set(_BUILD_TYPE_DEFAULT ${CMAKE_BUILD_TYPE})
-endif()
-set(_BUILD_TYPE_DEFAULT ${CMAKE_BUILD_TYPE})
-add_config(
-    CONFIG_NAME BUILD_TYPE
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ${_BUILD_TYPE_DEFAULT}
-    DESCRIPTION "The type of build"
-    OPTIONS Release Debug
-)
-
-set(_TARGET_ARCH_DEFAULT ${CMAKE_HOST_SYSTEM_PROCESSOR} CACHE INTERNAL "")
-# Cmake + Windows sets CMAKE_HOST_SYSTEM_PROCESSOR to 'AMD64' instead of 'x86_64'
-if(${_TARGET_ARCH_DEFAULT} STREQUAL "AMD64")
-    set(_TARGET_ARCH_DEFAULT "x86_64")
-endif()
 add_config(
     CONFIG_NAME BUILD_TARGET_ARCH
     CONFIG_TYPE STRING
-    DEFAULT_VAL ${_TARGET_ARCH_DEFAULT}
+    DEFAULT_VAL ${HOST_SYSTEM_PROCESSOR}
     DESCRIPTION "The target architecture for the build"
     OPTIONS x86_64 aarch64
 )
 
-set(_TARGET_OS_DEFAULT ${CMAKE_HOST_SYSTEM_NAME} CACHE INTERNAL "")
-if(_TARGET_OS_DEFAULT STREQUAL "CYGWIN")
-    set(_TARGET_OS_DEFAULT "Windows")
-endif()
 add_config(
     CONFIG_NAME BUILD_TARGET_OS
     CONFIG_TYPE STRING
-    DEFAULT_VAL ${_TARGET_OS_DEFAULT}
+    DEFAULT_VAL ${HOST_SYSTEM_NAME}
     DESCRIPTION "The target operating system for the build"
     OPTIONS Linux Windows
 )
 
 add_config(
-    CONFIG_NAME BUILD_VMM
+    CONFIG_NAME BUILD_TARGET_CORES
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ${HOST_NUMBER_CORES}
+    DESCRIPTION "The target number of cores"
+)
+
+# ------------------------------------------------------------------------------
+# Config
+# ------------------------------------------------------------------------------
+
+add_config(
+    CONFIG_NAME CMAKE_TARGET_MESSAGES
     CONFIG_TYPE BOOL
-    DEFAULT_VAL ON
-    DESCRIPTION "Include VMM components in this build"
+    DEFAULT_VAL OFF
+    DESCRIPTION "Enables target messages"
 )
 
 add_config(
-    CONFIG_NAME BUILD_VMM_SHARED
+    CONFIG_NAME CMAKE_INSTALL_MESSAGE
+    CONFIG_TYPE STRING
+    DEFAULT_VAL LAZY
+    DESCRIPTION "Defines the install output"
+    OPTIONS ALWAYS LAZY NEVER
+)
+
+add_config(
+    CONFIG_NAME CMAKE_BUILD_TYPE
+    CONFIG_TYPE STRING
+    DEFAULT_VAL Release
+    DESCRIPTION "Defines the build type"
+    Release Debug
+)
+
+add_config(
+    CONFIG_NAME CMAKE_VERBOSE_MAKEFILE
+    CONFIG_TYPE BOOL
+    DEFAULT_VAL OFF
+    DESCRIPTION "Enables verbose output"
+)
+
+# ------------------------------------------------------------------------------
+# VMM build type
+# ------------------------------------------------------------------------------
+
+add_config(
+    CONFIG_NAME BUILD_SHARED_LIBS
     CONFIG_TYPE BOOL
     DEFAULT_VAL ON
     DESCRIPTION "Build VMM components as shared libraries"
 )
 
 add_config(
-    CONFIG_NAME BUILD_VMM_STATIC
+    CONFIG_NAME BUILD_STATIC_LIBS
     CONFIG_TYPE BOOL
     DEFAULT_VAL OFF
     DESCRIPTION "Build VMM components as static libraries"
 )
 
+# ------------------------------------------------------------------------------
+# Sysroots
+# ------------------------------------------------------------------------------
+
 add_config(
-    CONFIG_NAME BUILD_BFELF_LOADER
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ON
-    DESCRIPTION "Include the Bareflank elf loader in this build"
+    CONFIG_NAME VMM_PREFIX
+    CONFIG_TYPE PATH
+    DEFAULT_VAL ${BUILD_TARGET_ARCH}-vmm-elf
+    DESCRIPTION "VMM prefix name"
+    SKIP_VALIDATION
 )
 
 add_config(
-    CONFIG_NAME BUILD_BFDRIVER
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ON
-    DESCRIPTION "Include the Bareflank driver in this build"
+    CONFIG_NAME USERSPACE_PREFIX
+    CONFIG_TYPE PATH
+    DEFAULT_VAL ${BUILD_TARGET_ARCH}-userspace-${HOST_FORMAT_TYPE}
+    DESCRIPTION "Userspace prefix name"
+    SKIP_VALIDATION
 )
 
 add_config(
-    CONFIG_NAME BUILD_BFM
+    CONFIG_NAME TEST_PREFIX
+    CONFIG_TYPE PATH
+    DEFAULT_VAL ${BUILD_TARGET_ARCH}-test-${HOST_FORMAT_TYPE}
+    DESCRIPTION "Test prefix name"
+    SKIP_VALIDATION
+)
+
+set(VMM_PREFIX_PATH ${PREFIXES_DIR}/${VMM_PREFIX}
+    CACHE INTERNAL
+    "VMM prefix path"
+)
+
+set(USERSPACE_PREFIX_PATH ${PREFIXES_DIR}/${USERSPACE_PREFIX}
+    CACHE INTERNAL
+    "Userspace prefix path"
+)
+
+set(TEST_PREFIX_PATH ${PREFIXES_DIR}/${TEST_PREFIX}
+    CACHE INTERNAL
+    "Test prefix path"
+)
+
+# ------------------------------------------------------------------------------
+# Scripts
+# ------------------------------------------------------------------------------
+
+set(ASTYLE_SCRIPT "${SOURCE_UTIL_DIR}/bareflank_astyle_format.sh"
+    CACHE INTERNAL
+    "Astyle script"
+)
+
+set(TIDY_SCRIPT "${SOURCE_UTIL_DIR}/bareflank_clang_tidy.sh"
+    CACHE INTERNAL
+    "Clang Tidy script"
+)
+
+# ------------------------------------------------------------------------------
+# Build switches
+# ------------------------------------------------------------------------------
+
+add_config(
+    CONFIG_NAME ENABLE_BUILD_VMM
     CONFIG_TYPE BOOL
     DEFAULT_VAL ON
-    DESCRIPTION "Include the Bareflank Manager utility in this build"
+    DESCRIPTION "Build VMM components"
 )
 
 add_config(
-    CONFIG_NAME BUILD_EXTENDED_APIS
+    CONFIG_NAME ENABLE_BUILD_USERSPACE
+    CONFIG_TYPE BOOL
+    DEFAULT_VAL ON
+    DESCRIPTION "Build userspace components"
+)
+
+add_config(
+    CONFIG_NAME ENABLE_BUILD_TEST
     CONFIG_TYPE BOOL
     DEFAULT_VAL OFF
-    DESCRIPTION "Include the Bareflank Extended APIs in this build"
-)
-
-add_config(
-    CONFIG_NAME EXTENDED_APIS_PATH
-    CONFIG_TYPE PATH
-    DEFAULT_VAL ${BF_SOURCE_DIR}/extended_apis
-    DESCRIPTION "Path to the Bareflank Extended APIs"
-)
-
-add_config(
-    CONFIG_NAME BUILD_VMM_EXTENSIONS
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ON
-    DESCRIPTION "Build all configured Bareflank VMM extensions"
-)
-
-if(${CMAKE_VERBOSE_MAKEFILE})
-    set(_BUILD_VERBOSE ON CACHE INTERNAL "")
-else()
-    set(_BUILD_VERBOSE OFF CACHE INTERNAL "")
-endif()
-add_config(
-    CONFIG_NAME BUILD_VERBOSE
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ${_BUILD_VERBOSE}
-    DESCRIPTION "Display verbose output during build"
-)
-
-STRING(TOLOWER "${BF_BUILD_INSTALL_DIR}/${BUILD_TARGET_OS}-${BUILD_TARGET_ARCH}-${BUILD_TYPE}" _BUILD_SYSROOT_OS)
-set(_BUILD_SYSROOT_OS ${_BUILD_SYSROOT_OS} CACHE INTERNAL "")
-add_config(
-    CONFIG_NAME BUILD_SYSROOT_OS
-    CONFIG_TYPE PATH
-    DEFAULT_VAL ${_BUILD_SYSROOT_OS}
-    DESCRIPTION "Path to userspace build-system sysroot"
-)
-
-STRING(TOLOWER "${BF_BUILD_INSTALL_DIR}/vmm-${BUILD_TARGET_ARCH}-${BUILD_TYPE}" _BUILD_SYSROOT_VMM)
-set(_BUILD_SYSROOT_VMM ${_BUILD_SYSROOT_VMM} CACHE INTERNAL "")
-add_config(
-    CONFIG_NAME BUILD_SYSROOT_VMM
-    CONFIG_TYPE PATH
-    DEFAULT_VAL ${_BUILD_SYSROOT_VMM}
-    DESCRIPTION "Path to vmm build-system sysroot"
-)
-
-STRING(TOLOWER "${BF_BUILD_INSTALL_DIR}/${BUILD_TARGET_OS}-${BUILD_TARGET_ARCH}-test" _BUILD_SYSROOT_TEST)
-set(_BUILD_SYSROOT_TEST ${_BUILD_SYSROOT_TEST} CACHE INTERNAL "")
-add_config(
-    CONFIG_NAME BUILD_SYSROOT_TEST
-    CONFIG_TYPE PATH
-    DEFAULT_VAL ${_BUILD_SYSROOT_TEST}
-    DESCRIPTION "Path to test build-system sysroot"
+    DESCRIPTION "Build unit test components"
 )
 
 # ------------------------------------------------------------------------------
 # Developer Features
 # ------------------------------------------------------------------------------
-
-add_config(
-    CONFIG_NAME ENABLE_DEVELOPER_MODE
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL OFF
-    DESCRIPTION "Run unit tests, astyle format, and clang-tidy checks on every build"
-)
-
-add_config(
-    CONFIG_NAME ENABLE_UNITTESTING
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ${ENABLE_DEVELOPER_MODE}
-    DESCRIPTION "Enable unit testing"
-)
 
 add_config(
     CONFIG_NAME ENABLE_COMPILER_WARNINGS
@@ -251,117 +462,82 @@ add_config(
 add_config(
     CONFIG_NAME ENABLE_TIDY
     CONFIG_TYPE BOOL
-    DEFAULT_VAL ${ENABLE_DEVELOPER_MODE}
+    DEFAULT_VAL OFF
     DESCRIPTION "Enable clang-tidy"
 )
 
 add_config(
-    CONFIG_NAME ENABLE_ASTYLE
+    CONFIG_NAME ENABLE_FORMAT
     CONFIG_TYPE BOOL
-    DEFAULT_VAL ${ENABLE_DEVELOPER_MODE}
+    DEFAULT_VAL OFF
     DESCRIPTION "Enable astyle formatting"
 )
 
-add_config(
-    CONFIG_NAME ENABLE_DEPENDENCY_UPDATES
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL OFF
-    DESCRIPTION "Check dependencies for updates on every build"
-)
-
-add_config(
-    CONFIG_NAME DEPENDENCY_CACHE_DIR
-    CONFIG_TYPE PATH
-    DEFAULT_VAL ${BF_SOURCE_DIR}/../bfdepends
-    DESCRIPTION "Path to dependency source code and build artifact cache directory"
-)
-
-if(EXISTS ${DEPENDENCY_CACHE_DIR})
-    set(_DEFAULT_ENABLE_DEPENDENCY_CACHE ON)
-else()
-    set(_DEFAULT_ENABLE_DEPENDENCY_CACHE OFF)
-endif()
-add_config(
-    CONFIG_NAME ENABLE_DEPENDENCY_CACHE
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ${_DEFAULT_ENABLE_DEPENDENCY_CACHE}
-    DESCRIPTION "Enable dependency source code and build artifact caching"
-)
-if(ENABLE_DEPENDENCY_CACHE)
-    message(STATUS "Using cached dependencies at: ${DEPENDENCY_CACHE_DIR}")
-endif()
-
 # ------------------------------------------------------------------------------
-# Unit Testing
+# Tidy Exclusions
 # ------------------------------------------------------------------------------
 
 add_config(
-    CONFIG_NAME UNITTEST_VMM
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ${ENABLE_UNITTESTING}
-    DESCRIPTION "Build VMM unit tests"
-)
-
-set(_DEFAULT_UNITTEST_VMM_EXTENSIONS OFF CACHE INTERNAL "")
-if(${ENABLE_UNITTESTING} AND ${BUILD_VMM_EXTENSIONS} AND ${UNITTEST_VMM})
-    set(_DEFAULT_UNITTEST_VMM_EXTENSIONS ON)
-endif()
-add_config(
-    CONFIG_NAME UNITTEST_VMM_EXTENSIONS
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ${_DEFAULT_UNITTEST_VMM_EXTENSIONS}
-    DESCRIPTION "Build VMM extension unit tests"
-)
-
-set(_DEFAULT_UNITTEST_BFDRIVER OFF CACHE INTERNAL "")
-if(${ENABLE_UNITTESTING} AND ${BUILD_BFDRIVER} AND ${BUILD_VMM} AND ${BUILD_VMM_SHARED})
-    set(_DEFAULT_UNITTEST_BFDRIVER ON)
-endif()
-add_config(
-    CONFIG_NAME UNITTEST_BFDRIVER
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ${_DEFAULT_UNITTEST_BFDRIVER}
-    DESCRIPTION "Build driver unit tests"
-)
-
-set(_DEFAULT_UNITTEST_BFELF_LOADER OFF CACHE INTERNAL "")
-if(${ENABLE_UNITTESTING} AND ${BUILD_BFELF_LOADER} AND ${BUILD_VMM} AND ${BUILD_VMM_SHARED})
-    set(_DEFAULT_UNITTEST_BFELF_LOADER ON)
-endif()
-add_config(
-    CONFIG_NAME UNITTEST_BFELF_LOADER
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ${_DEFAULT_UNITTEST_BFELF_LOADER}
-    DESCRIPTION "Build elf loader unit tests"
-)
-
-set(_DEFAULT_UNITTEST_BFM OFF CACHE INTERNAL "")
-if(${ENABLE_UNITTESTING} AND ${BUILD_BFM})
-    set(_DEFAULT_UNITTEST_BFM ON)
-endif()
-add_config(
-    CONFIG_NAME UNITTEST_BFM
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ${_DEFAULT_UNITTEST_BFM}
-    DESCRIPTION "Build bfm unit tests"
+    CONFIG_NAME TIDY_EXCLUSION_DRIVER
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ""
+    DESCRIPTION "Cland Tidy exclusions for bfdriver"
 )
 
 add_config(
-    CONFIG_NAME UNITTEST_BFSUPPORT
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ${ENABLE_UNITTESTING}
-    DESCRIPTION "Build C runtime support unit tests"
+    CONFIG_NAME TIDY_EXCLUSION_BFDUMMY
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ""
+    DESCRIPTION "Cland Tidy exclusions for bfdummy"
 )
 
-set(_DEFAULT_UNITTEST_EAPIS OFF CACHE INTERNAL "")
-if(${ENABLE_UNITTESTING} AND ${BUILD_EXTENDED_APIS})
-    set(_DEFAULT_UNITTEST_EAPIS ON)
-endif()
 add_config(
-    CONFIG_NAME UNITTEST_EXTENDED_APIS
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ${_DEFAULT_UNITTEST_EAPIS}
-    DESCRIPTION "Build Bareflank Extended APIs unit tests"
+    CONFIG_NAME TIDY_EXCLUSION_BFELF_LOADER
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ",-cppcoreguidelines-pro-type-const-cast"
+    DESCRIPTION "Cland Tidy exclusions for bfelf_loader"
+)
+
+add_config(
+    CONFIG_NAME TIDY_EXCLUSION_BFINTRINSICS
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ""
+    DESCRIPTION "Cland Tidy exclusions for bfintrinsics"
+)
+
+add_config(
+    CONFIG_NAME TIDY_EXCLUSION_BFM
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ""
+    DESCRIPTION "Cland Tidy exclusions for bfm"
+)
+
+add_config(
+    CONFIG_NAME TIDY_EXCLUSION_BFRUNTIME
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ",-cppcoreguidelines-pro*,-cert-err34-c,-misc-misplaced-widening-cast"
+    DESCRIPTION "Cland Tidy exclusions for bfruntime"
+)
+
+add_config(
+    CONFIG_NAME TIDY_EXCLUSION_BFSDK
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ""
+    DESCRIPTION "Cland Tidy exclusions for bfsdk"
+)
+
+add_config(
+    CONFIG_NAME TIDY_EXCLUSION_BFUNWIND
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ""
+    DESCRIPTION "Cland Tidy exclusions for bfunwind"
+)
+
+add_config(
+    CONFIG_NAME TIDY_EXCLUSION_BFVMM
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ""
+    DESCRIPTION "Cland Tidy exclusions for bfvmm"
 )
 
 # ------------------------------------------------------------------------------
@@ -369,211 +545,33 @@ add_config(
 # ------------------------------------------------------------------------------
 
 add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_USERSPACE
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${BF_TOOLCHAIN_DIR}/gcc_host.cmake
-    DESCRIPTION "Path to the default cmake toolchain file for building userspace components"
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_KERNEL
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${BF_TOOLCHAIN_DIR}/default_kernel.cmake
-    DESCRIPTION "Path to the default cmake toolchain file for building kernel components"
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_VMM
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${BF_TOOLCHAIN_DIR}/clang_${BUILD_TARGET_ARCH}_vmm_elf.cmake
+    CONFIG_NAME VMM_TOOLCHAIN_PATH
+    CONFIG_TYPE FILEPATH
+    DEFAULT_VAL ${SOURCE_TOOLCHAIN_DIR}/clang_${BUILD_TARGET_ARCH}_vmm.cmake
     DESCRIPTION "Path to the default cmake toolchain file for building vmm components"
 )
 
 add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_UNITTEST
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_USERSPACE}
+    CONFIG_NAME VMM_TEST_TOOLCHAIN_PATH
+    CONFIG_TYPE FILEPATH
+    DEFAULT_VAL ${SOURCE_TOOLCHAIN_DIR}/clang_${BUILD_TARGET_ARCH}_vmm_test.cmake
+    DESCRIPTION "Path to the default cmake toolchain file for building vmm components for testing"
+)
+
+add_config(
+    CONFIG_NAME USERSPACE_TOOLCHAIN_PATH
+    CONFIG_TYPE FILEPATH
+    DEFAULT_VAL ""
+    DESCRIPTION "Path to the default cmake toolchain file for building userspace components"
+    SKIP_VALIDATION
+)
+
+add_config(
+    CONFIG_NAME TEST_TOOLCHAIN_PATH
+    CONFIG_TYPE FILEPATH
+    DEFAULT_VAL ""
     DESCRIPTION "Path to the default cmake toolchain file for building unit tests"
-)
-
-# ------------------------------------------------------------------------------
-# Advanced (granular) cmake toolchains
-# ------------------------------------------------------------------------------
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_ASTYLE
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_USERSPACE}
-    DESCRIPTION "Path to a cmake toolchain file for building astyle"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_BINUTILS
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_USERSPACE}
-    DESCRIPTION "Path to a cmake toolchain file for building GNU binutils"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_CATCH
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_USERSPACE}
-    DESCRIPTION "Path to a cmake toolchain file for building catch"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_EXTENDED_APIS
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_VMM}
-    DESCRIPTION "Path to a cmake toolchain file for building the bareflank extended apis"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_GSL
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_USERSPACE}
-    DESCRIPTION "Path to a cmake toolchain file for building C++ guidelines support library"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_HIPPOMOCKS
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_USERSPACE}
-    DESCRIPTION "Path to a cmake toolchain file for building hippomocks"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_JSON
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_USERSPACE}
-    DESCRIPTION "Path to a cmake toolchain file for building JSON"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_LIBCXX
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_VMM}
-    DESCRIPTION "Path to a cmake toolchain file for building libc++"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_LIBCXXABI
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_VMM}
-    DESCRIPTION "Path to a cmake toolchain file for building libc++abi"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_BFDRIVER
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_KERNEL}
-    DESCRIPTION "Path to a cmake toolchain file for building bfdriver"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_BFELF_LOADER
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_USERSPACE}
-    DESCRIPTION "Path to a cmake toolchain file for building bfelf_loader"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_BFM
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_USERSPACE}
-    DESCRIPTION "Path to a cmake toolchain file for building bfm"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_BFSDK
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_USERSPACE}
-    DESCRIPTION "Path to a cmake toolchain file for building bfsdk"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_BFSYSROOT
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_VMM}
-    DESCRIPTION "Path to a cmake toolchain file for building bfsysroot"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_BFSUPPORT
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_VMM}
-    DESCRIPTION "Path to a cmake toolchain file for building bfsupport"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_BFUNWIND
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_VMM}
-    DESCRIPTION "Path to a cmake toolchain file for building bfunwind"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_PATH_BFVMM
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${TOOLCHAIN_PATH_VMM}
-    DESCRIPTION "Path to a cmake toolchain file for building bfvmm"
-    ADVANCED
-)
-
-# ------------------------------------------------------------------------------
-# Non-cmake toolchains
-# ------------------------------------------------------------------------------
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_NEWLIB_CC
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${BUILD_SYSROOT_VMM}/bin/${BUILD_TARGET_ARCH}-vmm-clang
-    DESCRIPTION "Path to compiler for building newlib"
     SKIP_VALIDATION
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_NEWLIB_AS
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${BUILD_SYSROOT_VMM}/bin/${BUILD_TARGET_ARCH}-vmm-elf-as
-    DESCRIPTION "Path to an assembler for building newlib"
-    SKIP_VALIDATION
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_NEWLIB_AR
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${BUILD_SYSROOT_VMM}/bin/${BUILD_TARGET_ARCH}-vmm-elf-ar
-    DESCRIPTION "Path to binutils archiver for building newlib"
-    SKIP_VALIDATION
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME TOOLCHAIN_NEWLIB_RANLIB
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${BUILD_SYSROOT_VMM}/bin/${BUILD_TARGET_ARCH}-vmm-elf-ranlib
-    DESCRIPTION "Path to binutils ranlib for building newlib"
-    SKIP_VALIDATION
-    ADVANCED
 )
 
 # ------------------------------------------------------------------------------
@@ -608,6 +606,164 @@ add_config(
     DESCRIPTION "Additional C++ compiler flags for userspace components"
 )
 
+add_config(
+    CONFIG_NAME C_FLAGS_TEST
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ""
+    DESCRIPTION "Additional C compiler flags for test components"
+)
+
+add_config(
+    CONFIG_NAME CXX_FLAGS_TEST
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ""
+    DESCRIPTION "Additional C++ compiler flags for test components"
+)
+
+# ------------------------------------------------------------------------------
+# Links
+# ------------------------------------------------------------------------------
+
+add_config(
+    CONFIG_NAME GSL_URL
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "https://github.com/Bareflank/gsl/archive/v1.2.zip"
+    DESCRIPTION "GSL URL"
+)
+
+add_config(
+    CONFIG_NAME GSL_URL_MD5
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "629de6bd0ee501223919cf395fb6ffed"
+    DESCRIPTION "GSL URL MD5 hash"
+)
+
+add_config(
+    CONFIG_NAME JSON_URL
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "https://github.com/Bareflank/json/archive/v1.2.zip"
+    DESCRIPTION "JSON URL"
+)
+
+add_config(
+    CONFIG_NAME JSON_URL_MD5
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "7d61cb7accecdbc0fa32d89a52a32153"
+    DESCRIPTION "JSON URL MD5 hash"
+)
+
+add_config(
+    CONFIG_NAME ASTYLE_URL
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "https://github.com/Bareflank/astyle/archive/v1.2.zip"
+    DESCRIPTION "Astyle URL"
+)
+
+add_config(
+    CONFIG_NAME ASTYLE_URL_MD5
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "339d6ce8d4f34a3737e1c44b95c3b4dd"
+    DESCRIPTION "Astyle URL MD5 hash"
+)
+
+add_config(
+    CONFIG_NAME BINUTILS_URL
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "http://ftp.gnu.org/gnu/binutils/binutils-2.28.tar.gz"
+    DESCRIPTION "Binutils URL"
+)
+
+add_config(
+    CONFIG_NAME BINUTILS_URL_MD5
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "d5d270fd0b698ed59ca5ade8e1b5059c"
+    DESCRIPTION "Binutils URL MD5 hash"
+)
+
+add_config(
+    CONFIG_NAME NEWLIB_URL
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "https://github.com/Bareflank/newlib/archive/v1.2.zip"
+    DESCRIPTION "Newlib URL"
+)
+
+add_config(
+    CONFIG_NAME NEWLIB_URL_MD5
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "6a634f488170ab2204db899407cc2d6d"
+    DESCRIPTION "Newlib URL MD5 hash"
+)
+
+add_config(
+    CONFIG_NAME LLVM_URL
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "https://github.com/Bareflank/llvm/archive/v1.2.zip"
+    DESCRIPTION "LLVM URL"
+)
+
+add_config(
+    CONFIG_NAME LLVM_URL_MD5
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "561bfc6a4cefbf287a2e9ca6815c7ee0"
+    DESCRIPTION "LLVM URL MD5 hash"
+)
+
+add_config(
+    CONFIG_NAME LIBCXX_URL
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "https://github.com/Bareflank/libcxx/archive/v1.2.zip"
+    DESCRIPTION "Libc++ URL"
+)
+
+add_config(
+    CONFIG_NAME LIBCXX_URL_MD5
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "562ea68e9f483ab7ca62b21fdbf0ee89"
+    DESCRIPTION "Libc++ URL MD5 hash"
+)
+
+add_config(
+    CONFIG_NAME LIBCXXABI_URL
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "https://github.com/Bareflank/libcxxabi/archive/v1.2.zip"
+    DESCRIPTION "Libc++abi URL"
+)
+
+add_config(
+    CONFIG_NAME LIBCXXABI_URL_MD5
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "a118c53b17110f23dcb567f2b8c73d9a"
+    DESCRIPTION "Libc++abi URL MD5 hash"
+)
+
+add_config(
+    CONFIG_NAME CATCH_URL
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "https://github.com/Bareflank/catch/archive/v1.2.zip"
+    DESCRIPTION "Catch URL"
+)
+
+add_config(
+    CONFIG_NAME CATCH_URL_MD5
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "ed2f6eec62fc8e825e622deedf50f6b4"
+    DESCRIPTION "Catch URL MD5 hash"
+)
+
+add_config(
+    CONFIG_NAME HIPPOMOCKS_URL
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "https://github.com/Bareflank/hippomocks/archive/v1.2.zip"
+    DESCRIPTION "Hippomocks URL"
+)
+
+add_config(
+    CONFIG_NAME HIPPOMOCKS_URL_MD5
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "6a0928dfee03fbf4c12c36219c696bae"
+    DESCRIPTION "Hippomocks URL MD5 hash"
+)
+
 # ------------------------------------------------------------------------------
 # BFM Configs
 # ------------------------------------------------------------------------------
@@ -615,7 +771,7 @@ add_config(
 add_config(
     CONFIG_NAME BFM_VMM_BIN_PATH
     CONFIG_TYPE PATH
-    DEFAULT_VAL ${BUILD_SYSROOT_VMM}/bin
+    DEFAULT_VAL ${VMM_PREFIX_PATH}/bin
     DESCRIPTION "Default path to vmm binaries to be loaded by bfm"
     SKIP_VALIDATION
 )
@@ -623,24 +779,21 @@ add_config(
 add_config(
     CONFIG_NAME BFM_VMM_LIB_PATH
     CONFIG_TYPE PATH
-    DEFAULT_VAL ${BUILD_SYSROOT_VMM}/lib
+    DEFAULT_VAL ${VMM_PREFIX_PATH}/lib
     DESCRIPTION "Default path to vmm libraries to be loaded by bfm"
     SKIP_VALIDATION
 )
 
-if(BUILD_VMM_SHARED AND BUILD_EXTENDED_APIS)
-    set(_BFM_DEFAULT_VMM_NAME "eapis_shared")
-elseif(BUILD_VMM_STATIC AND BUILD_EXTENDED_APIS)
-    set(_BFM_DEFAULT_VMM_NAME "eapis_static")
-elseif(BUILD_VMM_STATIC)
-    set(_BFM_DEFAULT_VMM_NAME "bfvmm_static")
-else()
-    set(_BFM_DEFAULT_VMM_NAME "bfvmm_shared")
-endif()
-add_config(
-    CONFIG_NAME BFM_DEFAULT_VMM
-    CONFIG_TYPE FILE
-    DEFAULT_VAL ${_BFM_DEFAULT_VMM_NAME}
-    DESCRIPTION "Name of the default vmm to be loaded by bfm when no vmm is specified"
-    SKIP_VALIDATION
-)
+set_bfm_vmm(bfvmm DEFAULT)
+
+# ------------------------------------------------------------------------------
+# Default Flags
+# ------------------------------------------------------------------------------
+
+include(scripts/cmake/flags/asan_flags.cmake)
+include(scripts/cmake/flags/codecov_flags.cmake)
+include(scripts/cmake/flags/test_flags.cmake)
+include(scripts/cmake/flags/usan_flags.cmake)
+include(scripts/cmake/flags/userspace_flags.cmake)
+include(scripts/cmake/flags/vmm_flags.cmake)
+include(scripts/cmake/flags/warning_flags.cmake)

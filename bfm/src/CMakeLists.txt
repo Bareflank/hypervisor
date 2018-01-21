@@ -20,10 +20,42 @@
 # Targets
 # ------------------------------------------------------------------------------
 
+if(BUILD_TARGET_OS STREQUAL "Linux")
+    list(APPEND SOURCES
+        platform/linux/ioctl.cpp
+        platform/linux/ioctl_private.cpp
+    )
+    include_directories(platform/linux/)
+elseif(BUILD_TARGET_OS STREQUAL "Windows")
+    list(APPEND SOURCES
+        platform/windows/ioctl.cpp
+        platform/windows/ioctl_private.cpp
+    )
+    include_directories(platform/windows/)
+else()
+    message(FATAL_ERROR "Unsupported OS: ${BUILD_TARGET_OS}")
+endif()
+
+if(BUILD_TARGET_ARCH STREQUAL "x86_64")
+    list(APPEND SOURCES
+        arch/intel_x64/bfvmcall.asm
+    )
+else()
+    message(FATAL_ERROR "Unsupported architecture: ${BUILD_TARGET_ARCH}")
+endif()
+
 list(APPEND SOURCES
     command_line_parser.cpp
     ioctl_driver.cpp
+    main.cpp
 )
 
-add_library(bfm_src OBJECT ${SOURCES})
-target_compile_definitions(bfm_src PUBLIC STATIC_BFM_SRC)
+add_executable(bfm ${SOURCES})
+target_compile_definitions(bfm PUBLIC MAIN=main)
+target_compile_definitions(bfm PUBLIC ABORT=abort)
+
+if(CYGWIN OR WIN32)
+    target_link_libraries(bfm setupapi)
+endif()
+
+install(TARGETS bfm DESTINATION bin)

@@ -16,17 +16,16 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-list(APPEND BFFLAGS_CODECOV_C
-    "-g"
-    "-O0"
-    "-fprofile-arcs"
-    "-ftest-coverage"
-)
+unset(BFFLAGS_CODECOV)
+unset(BFFLAGS_CODECOV_LINKER)
 
-list(APPEND BFFLAGS_CODECOV_CXX
-    ${BFFLAGS_CODECOV_C}
+list(APPEND BFFLAGS_CODECOV
+    -g
+    -O0
+    -fprofile-arcs
+    -ftest-coverage
 )
 
 list(APPEND BFFLAGS_CODECOV_LINKER
-    "--coverage"
+    --coverage
 )

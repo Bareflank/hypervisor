@@ -16,16 +16,16 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-add_dependency(
-    hippomocks
-    GIT_REPOSITORY  https://github.com/Bareflank/hippomocks.git
-    GIT_TAG         v1.2
-    GIT_SHALLOW     1
-    CMAKE_ARGS      -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_HIPPOMOCKS}
-)
+if(ENABLE_BUILD_TEST)
+    message(STATUS "Including dependency: hippomocks")
 
-install_dependency(
-    hippomocks
-    DESTINATIONS ${BUILD_SYSROOT_TEST}
-    GLOB_EXPRESSIONS include/*
-)
+    download_dependency(
+        hippomocks
+        URL         ${HIPPOMOCKS_URL}
+        URL_MD5     ${HIPPOMOCKS_URL_MD5}
+    )
+
+    add_dependency(
+        hippomocks test
+    )
+endif()

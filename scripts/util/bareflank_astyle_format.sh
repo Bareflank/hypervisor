@@ -21,30 +21,32 @@ OUTPUT=$PWD/.astyle_results.txt
 
 rm -f $OUTPUT
 
-if [[ "$#" -lt 1 ]]; then
+if [[ "$#" -lt 2 ]]; then
     echo "ERROR: missing arguments"
     exit 1
 fi
 
-if [[ "$#" == 2 ]]; then
-    echo $2
-    cd $2
+if [[ "$#" == 3 ]]; then
+    echo $3
+    cd $3
 fi
 
-if [[ ! "$1" == "all" ]] && [[ ! "$1" == "diff" ]]; then
-    echo "ERROR: invalid opcode '$1'. Expecting 'all' or 'diff'"
+if [[ ! "$2" == "all" ]] && [[ ! "$2" == "diff" ]]; then
+    echo "ERROR: invalid opcode '$2'. Expecting 'all' or 'diff'"
     exit 1
 fi
 
-if [[ "$1" == "all" ]]; then
+if [[ "$2" == "all" ]]; then
     files=$(git ls-files | grep -Ee "\.(cpp|h|c)$" || true)
 else
     files=$(git diff --relative --name-only HEAD $PWD | grep -Ee "\.(cpp|h|c)$" || true)
 
-    echo "Files undergoing astyle checks:"
-    for f in $files; do
-        echo "  - $f"
-    done
+    if [[ ! -z "$files" ]]; then
+        echo "  Files undergoing astyle checks:"
+        for f in $files; do
+            echo "    - $f"
+        done
+    fi
 fi
 
 if [[ -z "${files// }" ]]; then
@@ -52,12 +54,7 @@ if [[ -z "${files// }" ]]; then
     exit 0
 fi
 
-if [[ ! -x "$(which astyle)" ]]; then
-   echo "ERROR: astyle not found in PATH"
-   exit 1
-fi
-
-astyle \
+$1 \
     --style=1tbs \
     --lineend=linux \
     --suffix=none \

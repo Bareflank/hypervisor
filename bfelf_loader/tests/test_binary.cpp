@@ -19,7 +19,6 @@
 #include <catch/catch.hpp>
 #include <hippomocks.h>
 
-#include <fstream>
 #include <test_real_elf.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
@@ -30,13 +29,13 @@ TEST_CASE("bfelf_binary: binary load fails")
     mocks.OnCallFunc(bfelf_load).Return(-1);
 
     file f;
-    CHECK_THROWS(binaries_info(&f, g_filenames.back(), {BAREFLANK_SYSROOT_PATH + "/lib/"_s}));
+    CHECK_THROWS(binaries_info(&f, g_filenames.back(), {VMM_PREFIX_PATH + "/lib/"_s}));
 }
 
 TEST_CASE("bfelf_binary: binary success")
 {
     file f;
-    CHECK_NOTHROW(binaries_info(&f, g_filenames.back(), {BAREFLANK_SYSROOT_PATH + "/lib/"_s}));
+    CHECK_NOTHROW(binaries_info(&f, g_filenames.back(), {VMM_PREFIX_PATH + "/lib/"_s}));
 }
 
 TEST_CASE("bfelf_binary: module list load fails")

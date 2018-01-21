@@ -69,7 +69,7 @@
 /* Testing                                                                    */
 /* -------------------------------------------------------------------------- */
 
-#ifdef ENABLE_UNITTESTING
+#ifdef ENABLE_BUILD_TEST
 #define VIRTUAL virtual
 #else
 #define VIRTUAL

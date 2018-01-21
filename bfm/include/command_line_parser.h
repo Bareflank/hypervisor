@@ -37,22 +37,6 @@ enum class command_line_parser_command {
     vmcall = 9
 };
 
-// -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_BFM_SRC
-#ifdef SHARED_BFM_SRC
-#define EXPORT_BFM_SRC EXPORT_SYM
-#else
-#define EXPORT_BFM_SRC IMPORT_SYM
-#endif
-#else
-#define EXPORT_BFM_SRC
-#endif
-
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -70,7 +54,7 @@ enum class command_line_parser_command {
 /// this class. Other classes can use the information that this class gathers
 /// to decide how to operate.
 ///
-class EXPORT_BFM_SRC command_line_parser
+class command_line_parser
 {
 public:
 

@@ -26,6 +26,7 @@ doxygen_warnings.txt
 .vscode/
 .DS_Store
 ._.DS_Store
+config.cmake
 
 bfdriver/src/.common.o.cmd
 bfdriver/src/arch/linux/.bareflank.ko.cmd

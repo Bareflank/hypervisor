@@ -26,22 +26,6 @@
 #include <bfvmcallinterface.h>
 #include <bfdebugringinterface.h>
 
-// -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_BFM_IOCTL
-#ifdef SHARED_BFM_IOCTL
-#define EXPORT_BFM_IOCTL EXPORT_SYM
-#else
-#define EXPORT_BFM_IOCTL IMPORT_SYM
-#endif
-#else
-#define EXPORT_BFM_IOCTL
-#endif
-
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -55,7 +39,7 @@
 ///
 /// Only needed for dynamic cast
 ///
-class EXPORT_BFM_IOCTL ioctl_private_base
+class ioctl_private_base
 {
 public:
 
@@ -74,7 +58,7 @@ public:
 /// that for this class to function, the driver entry must be loaded, and
 /// bfm must be executed with the proper permissions.
 ///
-class EXPORT_BFM_IOCTL ioctl
+class ioctl
 {
 public:
 

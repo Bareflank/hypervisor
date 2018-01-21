@@ -17,61 +17,29 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 cmake_minimum_required(VERSION 3.6)
-project(bfm_test C CXX)
-include(${BF_SCRIPTS_DIR}/cmake/flags/flags.cmake)
-include(CTest)
-enable_testing(true)
-enable_language(ASM_NASM)
+project(bfsdk_test C CXX)
 
-set(PROJECT_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/../src)
-set(PROJECT_TEST_DIR ${CMAKE_CURRENT_LIST_DIR}/../tests)
-set(PROJECT_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/../include)
+include(${SOURCE_CMAKE_DIR}/project.cmake)
+init_project()
 
-include_directories(
-    ${PROJECT_INC_DIR}
-    ${BUILD_SYSROOT_TEST}/include
-    ${BUILD_SYSROOT_OS}/include
-)
+add_library(test_catch STATIC test_catch.cpp)
+install(TARGETS test_catch DESTINATION lib)
 
-link_directories(
-    ${BUILD_SYSROOT_TEST}/lib
-)
-
-add_library(test_catch STATIC test.cpp)
-install(TARGETS test_catch DESTINATION ${BUILD_SYSROOT_TEST}/lib)
-
-set(BFSDK_TEST_FLAGS "-DENABLE_UNITTESTING")
-generate_flags(
-    USERSPACE
-    ADD_C_FLAGS ${BFSDK_TEST_FLAGS}
-    ADD_CXX_FLAGS ${BFSDK_TEST_FLAGS}
-    VERBOSE ${BUILD_VERBOSE}
-)
-
-macro(do_test str)
-    add_executable(test_${str} test_${str}.cpp)
-    target_link_libraries(test_${str} test_catch)
-    add_test(test_${str} test_${str})
-    install(TARGETS test_${str} DESTINATION ${BUILD_SYSROOT_TEST}/bin/bfsdk)
-endmacro(do_test)
-
-do_test(affinity)
-do_test(benchmark)
-do_test(bitmanip)
-do_test(buffer)
-do_test(debug)
-do_test(debugringinterface)
-do_test(delegate)
-do_test(errorcodes)
-do_test(exceptions)
-do_test(file)
-do_test(gsl)
-do_test(json)
-do_test(newdelete)
-do_test(shuffle)
-do_test(string)
-do_test(types)
-do_test(upperlower)
-do_test(vector)
-
-install(TARGETS test_catch DESTINATION ${BUILD_SYSROOT_TEST}/lib)
+do_test(test_affinity)
+do_test(test_benchmark)
+do_test(test_bitmanip)
+do_test(test_buffer)
+do_test(test_debug)
+do_test(test_debugringinterface)
+do_test(test_delegate)
+do_test(test_errorcodes)
+do_test(test_exceptions)
+do_test(test_file)
+do_test(test_gsl)
+do_test(test_json)
+do_test(test_newdelete)
+do_test(test_shuffle)
+do_test(test_string)
+do_test(test_types)
+do_test(test_upperlower)
+do_test(test_vector)

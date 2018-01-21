@@ -18,37 +18,12 @@
 
 cmake_minimum_required(VERSION 3.6)
 project(bfvmm C CXX)
-include(${BF_FLAGS_DIR}/flags.cmake)
 
-# set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
-enable_language(ASM_NASM)
+include(${SOURCE_CMAKE_DIR}/project.cmake)
+init_project()
 
-list(APPEND VMM_C_FLAGS
-    "-fvisibility=hidden"
-)
-
-list(APPEND VMM_CXX_FLAGS
-    "-fvisibility=hidden"
-    "-fvisibility-inlines-hidden"
-)
-
-generate_flags(
-    VMM
-    ADD_C_FLAGS ${VMM_C_FLAGS}
-    ADD_CXX_FLAGS ${VMM_CXX_FLAGS}
-    VERBOSE ${BUILD_VERBOSE}
-)
-
-include_directories(
-    ${CMAKE_CURRENT_LIST_DIR}/include
-    ${BUILD_SYSROOT_VMM}/include/c++/v1
-    ${BUILD_SYSROOT_VMM}/include
-)
-
-link_directories(
-    ${BUILD_SYSROOT_VMM}/lib
-)
-
-add_subdirectory(src)
-
-install(DIRECTORY include/ DESTINATION ${BUILD_SYSROOT_VMM}/include)
+add_subdirectory(src/debug)
+add_subdirectory(src/memory_manager)
+add_subdirectory(src/hve)
+add_subdirectory(src/vcpu)
+add_subdirectory(src/entry)

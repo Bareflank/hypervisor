@@ -23,7 +23,6 @@
 #include <bfplatform.h>
 
 #include <list>
-#include <fstream>
 #include <test_real_elf.h>
 
 TEST_CASE("bfelf_load: invalid binaries")
