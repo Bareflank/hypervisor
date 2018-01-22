@@ -25,12 +25,27 @@
 #define BFTHREADCONTEXT
 
 #include <bftypes.h>
+#include <bfconstants.h>
 
 #pragma pack(push, 1)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * Return CPUID
+ *
+ * @return returns the CPUID for the currently executing thread
+ */
+uint64_t thread_context_cpuid(void);
+
+/**
+ * Return TLS data
+ *
+ * @return returns the TLS data for the currently executing thread
+ */
+uint64_t thread_context_tlsptr(void);
 
 /**
  * @struct thread_context_t
@@ -62,6 +77,34 @@ struct thread_context_t {
     uint64_t reserved1;
     uint64_t reserved2;
 };
+
+/**
+ * Setup Stack
+ *
+ * The following function sets up the stack to match the algorithm defined
+ * in the following issue:
+ *
+ * https://github.com/Bareflank/hypervisor/issues/213
+ *
+ * @param stack the stack pointer
+ * @return the stack pointer (in interger form)
+ */
+static inline uint64_t
+setup_stack(void *stack)
+{
+    struct thread_context_t *tc;
+    uint64_t stack_int = bfrcast(uint64_t, stack);
+
+    uint64_t stack_top = stack_int + (STACK_SIZE * 2);
+    stack_top = (stack_top & ~(STACK_SIZE - 1)) - 1;
+    stack_int = stack_top - sizeof(struct thread_context_t) - 1;
+
+    tc = bfrcast(struct thread_context_t *, stack_top - sizeof(struct thread_context_t));
+    tc->cpuid = thread_context_cpuid();
+    tc->tlsptr = thread_context_tlsptr();
+
+    return stack_int;
+}
 
 #ifdef __cplusplus
 }

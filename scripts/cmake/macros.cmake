@@ -16,574 +16,1248 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+include(ProcessorCount)
+include(ExternalProject)
+
+if(ENABLE_BUILD_TEST)
+    include(CTest)
+    enable_testing(true)
+endif()
+
 # ------------------------------------------------------------------------------
-# Sub-project and VMM extension management
+# colors
 # ------------------------------------------------------------------------------
 
-# Generate common cmake arguements shared across all projects added to the build
-# system using ExternalProject_Add()
-macro(generate_external_project_args args_out)
-    # Silence noisy cmake warnings
-    list(APPEND ${args_out}
-        -DCMAKE_TARGET_MESSAGES=OFF
-        -DCMAKE_INSTALL_MESSAGE=NEVER
-        --no-warn-unused-cli
+if(NOT WIN32)
+    string(ASCII 27 Esc)
+    set(ColorReset  "${Esc}[m")
+    set(ColorBold   "${Esc}[1m")
+    set(Red         "${Esc}[31m")
+    set(Green       "${Esc}[32m")
+    set(Yellow      "${Esc}[33m")
+    set(Blue        "${Esc}[34m")
+    set(Magenta     "${Esc}[35m")
+    set(Cyan        "${Esc}[36m")
+    set(White       "${Esc}[37m")
+    set(BoldRed     "${Esc}[1;31m")
+    set(BoldGreen   "${Esc}[1;32m")
+    set(BoldYellow  "${Esc}[1;33m")
+    set(BoldBlue    "${Esc}[1;34m")
+    set(BoldMagenta "${Esc}[1;35m")
+    set(BoldCyan    "${Esc}[1;36m")
+    set(BoldWhite   "${Esc}[1;37m")
+endif()
+
+# ------------------------------------------------------------------------------
+# add_config
+# ------------------------------------------------------------------------------
+
+# Add Config
+#
+# Add a configurable varibale to the CMake build. This function ensures each
+# variable is properly set, and ensures it's properly visible in ccmake.
+#
+# @param ADVANCED Only show this variable in the advanced mode for ccmake
+# @param SKIP_VALIDATION do not validate that the varibale is properly set
+# @param CONFIG_NAME The name of the variable
+# @param CONFIG_TYPE The variable's type: STRING, PATH, FILEPATH, BOOL
+# @param DEFAULT_VAL The default value for the variable
+# @param DESCRIPTION A description of the variable
+# @param OPTIONS Possible values for the the variable. Only applies to STRING
+#    type variables.
+#
+macro(add_config)
+    set(options ADVANCED SKIP_VALIDATION)
+    set(oneVal CONFIG_NAME CONFIG_TYPE DEFAULT_VAL DESCRIPTION)
+    set(multiVal OPTIONS)
+    cmake_parse_arguments(ARG "${options}" "${oneVal}" "${multiVal}" ${ARGN})
+
+    if(NOT DEFINED ${ARG_CONFIG_NAME})
+        set(${ARG_CONFIG_NAME} ${ARG_DEFAULT_VAL} CACHE ${ARG_CONFIG_TYPE} ${ARG_DESCRIPTION})
+    else()
+        set(${ARG_CONFIG_NAME} ${${ARG_CONFIG_NAME}} CACHE ${ARG_CONFIG_TYPE} ${ARG_DESCRIPTION})
+    endif()
+
+    if(ARG_OPTIONS AND ARG_CONFIG_TYPE STREQUAL "STRING")
+        set_property(CACHE ${ARG_CONFIG_NAME} PROPERTY STRINGS ${ARG_OPTIONS})
+    endif()
+
+    if(NOT ARG_SKIP_VALIDATION)
+        if(ARG_OPTIONS AND ARG_CONFIG_TYPE STREQUAL "STRING")
+            if(NOT ARG_DEFAULT_VAL IN_LIST ARG_OPTIONS)
+                message(FATAL_ERROR "${ARG_CONFIG_NAME} invalid option \'${ARG_DEFAULT_VAL}\'")
+            endif()
+        endif()
+
+        if(ARG_CONFIG_TYPE STREQUAL "PATH")
+            if(NOT EXISTS "${ARG_DEFAULT_VAL}")
+                message(FATAL_ERROR "${ARG_CONFIG_NAME} path not found: ${ARG_DEFAULT_VAL}")
+            endif()
+        endif()
+
+        if(ARG_CONFIG_TYPE STREQUAL "FILEPATH")
+            if(NOT EXISTS "${ARG_DEFAULT_VAL}")
+                message(FATAL_ERROR "${ARG_CONFIG_NAME} file not found: ${ARG_DEFAULT_VAL}")
+            endif()
+        endif()
+
+        if(ARG_CONFIG_TYPE STREQUAL "BOOL")
+            if(NOT ARG_DEFAULT_VAL STREQUAL ON AND NOT ARG_DEFAULT_VAL STREQUAL OFF)
+                message(FATAL_ERROR "${ARG_CONFIG_NAME} must be set to ON or OFF")
+            endif()
+        endif()
+    endif()
+
+    if(ARG_ADVANCED)
+        mark_as_advanced(${ARG_CONFIG_NAME})
+    endif()
+endmacro(add_config)
+
+# ------------------------------------------------------------------------------
+# include_external_config
+# ------------------------------------------------------------------------------
+
+# Private
+#
+macro(include_external_config)
+    if(CONFIG)
+        foreach(c ${CONFIG})
+            if(EXISTS "${SOURCE_CONFIG_DIR}/${c}.cmake")
+                message(STATUS "Config: ${SOURCE_CONFIG_DIR}/${c}.cmake")
+                include(${SOURCE_CONFIG_DIR}/${c}.cmake)
+                continue()
+            endif()
+            if(NOT IS_ABSOLUTE "${c}")
+                get_filename_component(c "${BUILD_ROOT_DIR}/${c}" ABSOLUTE)
+            endif()
+            if(EXISTS "${c}")
+                message(STATUS "Config: ${c}")
+                include(${c})
+                continue()
+            endif()
+
+            message(FATAL_ERROR "File not found: ${c}")
+        endforeach(c)
+    elseif(EXISTS "${CMAKE_SOURCE_DIR}/../config.cmake")
+        get_filename_component(CONFIG "${CMAKE_SOURCE_DIR}/../config.cmake" ABSOLUTE)
+        message(STATUS "Config: ${CONFIG}")
+        include(${CONFIG})
+    endif()
+endmacro(include_external_config)
+
+# ------------------------------------------------------------------------------
+# include_external_extensions
+# ------------------------------------------------------------------------------
+
+# Private
+#
+macro(include_external_extensions)
+    if(EXTENSIONS)
+        foreach(e ${EXTENSIONS})
+            if(NOT IS_ABSOLUTE "${e}")
+                get_filename_component(e "${BUILD_ROOT_DIR}/${e}" ABSOLUTE)
+            endif()
+            if(EXISTS "${e}")
+                message(STATUS "Extension: ${e}")
+                include(${e})
+            else()
+                message(FATAL_ERROR "File not found: ${e}")
+            endif()
+        endforeach(e)
+    elseif(EXISTS "${CMAKE_SOURCE_DIR}/../extension.cmake")
+        get_filename_component(EXTENSIONS "${CMAKE_SOURCE_DIR}/../extension.cmake" ABSOLUTE)
+        message(STATUS "Extension: ${EXTENSIONS}")
+        include(${EXTENSIONS})
+    endif()
+endmacro(include_external_extensions)
+
+# ------------------------------------------------------------------------------
+# generate_flags
+# ------------------------------------------------------------------------------
+
+# Generate Flags
+#
+# Sets up CMAKE_C_FLAGS and CMAKE_CXX_FLAGS based on the provided flags and
+# prefix value. Each time this is executed, CMAKE_XXX_FLAGS are overwritten
+# and globally set. The add_subproject function performs this action on your
+# behalf, and this function generally should not be used unless you are
+# compiling a dependency, in which case, you will need to run this manually.
+#
+# @param PREFIX (macro arg) Defines which prefix the flags belong too. Valid
+#     values are: vmm, userspace, and test
+# @param C_FLAGS Additional C flags to add to CMAKE_C_FLAGS
+# @param CXX_FLAGS Additional CXX flags to add to CMAKE_CXX_FLAGS
+#
+function(generate_flags PREFIX)
+    set(multiVal C_FLAGS CXX_FLAGS)
+    cmake_parse_arguments(ARG "" "${oneVal}" "${multiVal}" ${ARGN})
+
+    list(APPEND _C_FLAGS ${ARG_C_FLAGS})
+    list(APPEND _CXX_FLAGS ${ARG_CXX_FLAGS})
+
+    if(PREFIX STREQUAL "vmm")
+        list(APPEND _C_FLAGS ${BFFLAGS_VMM} ${BFFLAGS_VMM_C} ${C_FLAGS_VMM})
+        list(APPEND _CXX_FLAGS ${BFFLAGS_VMM} ${BFFLAGS_VMM_CXX} ${CXX_FLAGS_VMM})
+        if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
+            list(APPEND _C_FLAGS ${BFFLAGS_VMM_X86_64})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_VMM_X86_64})
+        endif()
+        if(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
+            list(APPEND _C_FLAGS ${BFFLAGS_VMM_AARCH64})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_VMM_AARCH64})
+        endif()
+    elseif(PREFIX STREQUAL "userspace")
+        list(APPEND _C_FLAGS ${BFFLAGS_USERSPACE} ${BFFLAGS_USERSPACE_C} ${C_FLAGS_USERSPACE})
+        list(APPEND _CXX_FLAGS ${BFFLAGS_USERSPACE} ${BFFLAGS_USERSPACE_CXX} ${CXX_FLAGS_USERSPACE})
+        if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
+            list(APPEND _C_FLAGS ${BFFLAGS_USERSPACE_X86_64})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_USERSPACE_X86_64})
+        endif()
+        if(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
+            list(APPEND _C_FLAGS ${BFFLAGS_USERSPACE_AARCH64})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_USERSPACE_AARCH64})
+        endif()
+        if(ENABLE_ASAN)
+            list(APPEND _C_FLAGS ${BFFLAGS_ASAN})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_ASAN})
+        endif()
+        if(ENABLE_USAN)
+            list(APPEND _C_FLAGS ${BFFLAGS_USAN})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_USAN})
+        endif()
+        if(ENABLE_CODECOV)
+            list(APPEND _C_FLAGS ${BFFLAGS_CODECOV})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_CODECOV})
+        endif()
+    elseif(PREFIX STREQUAL "test")
+        list(APPEND _C_FLAGS ${BFFLAGS_TEST} ${BFFLAGS_TEST_C} ${C_FLAGS_TEST})
+        list(APPEND _CXX_FLAGS ${BFFLAGS_TEST} ${BFFLAGS_TEST_CXX} ${CXX_FLAGS_TEST})
+        if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
+            list(APPEND _C_FLAGS ${BFFLAGS_TEST_X86_64})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_TEST_X86_64})
+        endif()
+        if(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
+            list(APPEND _C_FLAGS ${BFFLAGS_TEST_AARCH64})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_TEST_AARCH64})
+        endif()
+        if(ENABLE_ASAN)
+            list(APPEND _C_FLAGS ${BFFLAGS_ASAN})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_ASAN})
+        endif()
+        if(ENABLE_USAN)
+            list(APPEND _C_FLAGS ${BFFLAGS_USAN})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_USAN})
+        endif()
+        if(ENABLE_CODECOV)
+            list(APPEND _C_FLAGS ${BFFLAGS_CODECOV})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_CODECOV})
+        endif()
+    else()
+        message(FATAL_ERROR "Invalid prefix: ${PREFIX}")
+    endif()
+
+    if(ENABLE_COMPILER_WARNINGS)
+        list(APPEND _C_FLAGS ${BFFLAGS_WARNING_C})
+        list(APPEND _CXX_FLAGS ${BFFLAGS_WARNING_CXX})
+    endif()
+
+    if(BUILD_TYPE STREQUAL "Release")
+        list(APPEND _C_FLAGS -O3 -DNDEBUG)
+        list(APPEND _CXX_FLAGS -O3 -DNDEBUG)
+    endif()
+
+    string(REPLACE ";" " " _C_FLAGS "${_C_FLAGS}")
+    string(REPLACE ";" " " _CXX_FLAGS "${_CXX_FLAGS}")
+
+    set(CMAKE_C_FLAGS ${_C_FLAGS} PARENT_SCOPE)
+    set(CMAKE_CXX_FLAGS ${_CXX_FLAGS} PARENT_SCOPE)
+endfunction(generate_flags)
+
+# ------------------------------------------------------------------------------
+# include_dependency
+# ------------------------------------------------------------------------------
+
+# Private
+#
+function(include_dependency NAME)
+    include(${SOURCE_DEPENDS_DIR}/${NAME}.cmake)
+endfunction(include_dependency)
+
+# ------------------------------------------------------------------------------
+# download_dependency
+# ------------------------------------------------------------------------------
+
+# Download Dependency
+#
+# Downloads a dependency from a URL. Dependencies can either be
+# a tarball or a zip file. These downloaded files are placeed in the CACHE_DIR.
+# If the provided MD5 hash does not match, the cached download is redownloaded.
+#
+# @param NAME the name of the dependency
+# @param URL The URL for the dependency
+# @param URL_MD5 The MD5 of the file being downloaded
+# @param PREFIX An optional prefix. This is only needed if downloading the
+#     dependency is the only required step, in which case this function will
+#     create the custom target for dependency tracking.
+#
+function(download_dependency NAME)
+    set(oneVal URL URL_MD5 GIT_REPOSITORY GIT_TAG PREFIX)
+    cmake_parse_arguments(ARG "" "${oneVal}" "" ${ARGN})
+
+    set(SRC ${CACHE_DIR}/${NAME})
+
+    if(ARG_URL)
+        if(NOT ARG_URL_MD5)
+            message(FATAL_ERROR "Invalid URL MD5: ${ARG_URL_MD5}")
+        endif()
+
+        string(REGEX REPLACE "\\.[^.]*$" "" FILENAME ${ARG_URL})
+        string(REPLACE "${FILENAME}" "" EXT ${ARG_URL})
+        get_filename_component(LONG_EXT ${ARG_URL} EXT)
+        if(NOT LONG_EXT MATCHES "(\\.|=)(7z|tar\\.bz2|tar\\.gz|tar\\.xz|tbz2|tgz|txz|zip)$")
+            message(FATAL_ERROR "Unsupported file format: ${ARG_URL}")
+        endif()
+
+        if(LONG_EXT MATCHES ".tar.gz$")
+            set(EXT ".tar.gz")
+        endif()
+
+        if(LONG_EXT MATCHES ".tar.xz$")
+            set(EXT ".tar.xz")
+        endif()
+
+        if(LONG_EXT MATCHES ".tar.bz2$")
+            set(EXT ".tar.bz2")
+        endif()
+
+        set(TMP ${CACHE_DIR}/${NAME}_tmp)
+        set(TAR ${CACHE_DIR}/${NAME}${EXT})
+
+        if(EXISTS "${TAR}")
+            file(MD5 ${TAR} MD5)
+            if(NOT ${MD5} STREQUAL "${ARG_URL_MD5}")
+                message(STATUS "    md5 mismatch: ${ARG_URL_MD5} ${MD5}")
+                file(REMOVE_RECURSE ${SRC})
+                file(REMOVE_RECURSE ${TMP})
+                file(REMOVE_RECURSE ${TAR})
+                file(REMOVE_RECURSE ${DEPENDS_DIR})
+            endif()
+        endif()
+
+        if(NOT EXISTS "${TAR}")
+            message(STATUS "    downloading: ${ARG_URL} -> ${TAR}")
+            file(DOWNLOAD ${ARG_URL} ${TAR})
+            if(NOT EXISTS ${TAR})
+                message(FATAL_ERROR "Failed to download: ${ARG_URL}")
+            endif()
+            message(STATUS "    downloading: complete")
+
+            message(STATUS "    verifying md5: ${ARG_URL_MD5}")
+            file(MD5 ${TAR} MD5)
+            if(NOT ${MD5} STREQUAL "${ARG_URL_MD5}")
+                message(FATAL_ERROR "Invalid MD5 hash: expecting: ${ARG_URL_MD5}, got: ${MD5}")
+            else()
+                message(STATUS "    verifying md5: complete")
+            endif()
+        endif()
+
+        if(NOT EXISTS "${SRC}")
+            file(REMOVE_RECURSE ${TMP})
+            file(REMOVE_RECURSE ${SRC})
+            file(MAKE_DIRECTORY ${TMP})
+
+            message(STATUS "    extracting: ${TAR}")
+            execute_process(
+                COMMAND ${CMAKE_COMMAND} -E tar xfz ${TAR}
+                WORKING_DIRECTORY ${TMP}
+            )
+
+            file(GLOB CONTENTS "${TMP}/*")
+
+            list(LENGTH CONTENTS LEN)
+            if(NOT LEN EQUAL 1 OR NOT IS_DIRECTORY ${CONTENTS})
+                message(FATAL_ERROR "Invalid tarball: ${ARG_URL}")
+            endif()
+
+            get_filename_component(CONTENTS ${CONTENTS} ABSOLUTE)
+            execute_process(
+                COMMAND ${CMAKE_COMMAND} -E rename ${CONTENTS} ${SRC}
+            )
+
+            file(REMOVE_RECURSE ${TMP})
+        endif()
+    endif()
+
+    if(ARG_GIT_REPOSITORY)
+        if(ARG_GIT_TAG)
+            set(ARG_GIT_TAG -b ${ARG_GIT_TAG})
+        endif()
+        if(NOT EXISTS "${SRC}")
+            execute_process(COMMAND git clone ${ARG_GIT_REPOSITORY} ${ARG_GIT_TAG} ${SRC})
+        endif()
+    endif()
+
+    if(ARG_PREFIX)
+        if(ARG_PREFIX STREQUAL "vmm")
+            add_custom_target(${NAME}_${VMM_PREFIX})
+        elseif(ARG_PREFIX STREQUAL "userspace")
+            add_custom_target(${NAME}_${USERSPACE_PREFIX})
+        elseif(ARG_PREFIX STREQUAL "test")
+            add_custom_target(${NAME}_${TEST_PREFIX})
+        else()
+            message(FATAL_ERROR "Invalid prefix: ${PREFIX}")
+        endif()
+    endif()
+endfunction(download_dependency)
+
+# ------------------------------------------------------------------------------
+# add_dependency
+# ------------------------------------------------------------------------------
+
+# Add Dependency
+#
+# Uses ExternalProject_Add to add the dependency to the build. All of the
+# optional arguments are passed directly to ExternalProject_Add, so most of
+# ExternalProject_Add's options are supported by this function.
+#
+# @param NAME the name of the dependency
+# @param PREFIX the prefix this dependency belongs too. Valid values are:
+#     vmm, userspace and test.
+#
+function(add_dependency NAME PREFIX)
+    if(PREFIX STREQUAL "vmm")
+        set(PREFIX ${VMM_PREFIX})
+    elseif(PREFIX STREQUAL "userspace")
+        set(PREFIX ${USERSPACE_PREFIX})
+    elseif(PREFIX STREQUAL "test")
+        set(PREFIX ${TEST_PREFIX})
+    else()
+        message(FATAL_ERROR "Invalid prefix: ${PREFIX}")
+    endif()
+
+    if(EXISTS "${CACHE_DIR}/${NAME}/CMakeLists.txt")
+        list(APPEND ARGN
+            CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PREFIXES_DIR}/${PREFIX}
+            CMAKE_ARGS -DCMAKE_INSTALL_MESSAGE=${CMAKE_INSTALL_MESSAGE}
+            CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
+        )
+        if(NOT WIN32)
+            list(APPEND ARGN
+                CMAKE_ARGS -DCMAKE_TARGET_MESSAGES=${CMAKE_TARGET_MESSAGES}
+                CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            )
+        endif()
+    else()
+        list(APPEND ARGN
+            LOG_CONFIGURE 1
+            LOG_BUILD 1
+            LOG_INSTALL 1
+        )
+    endif()
+
+    add_custom_command(
+        TARGET clean-all
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${DEPENDS_DIR}/${NAME}
     )
 
-    # Copy all non-built-in cmake cache variables to the external project scope
-    # (i.e. build configuration variables, build global variables, etc.)
+    add_custom_command(
+        TARGET clean-depends
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${DEPENDS_DIR}/${NAME}
+    )
+
+    ExternalProject_Add(
+        ${NAME}_${PREFIX}
+        ${ARGN}
+        PREFIX              ${DEPENDS_DIR}/${NAME}/${PREFIX}
+        STAMP_DIR           ${DEPENDS_DIR}/${NAME}/${PREFIX}/stamp
+        TMP_DIR             ${DEPENDS_DIR}/${NAME}/${PREFIX}/tmp
+        BINARY_DIR          ${DEPENDS_DIR}/${NAME}/${PREFIX}/build
+        SOURCE_DIR          ${CACHE_DIR}/${NAME}
+    )
+
+    ExternalProject_Add_Step(
+        ${NAME}_${PREFIX}
+        ${NAME}_${PREFIX}_cleanup
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${DEPENDS_DIR}/${NAME}/${PREFIX}/src
+        DEPENDEES configure
+    )
+endfunction(add_dependency)
+
+# Add Dependency Step
+#
+# Uses ExternalProject_Add_Step to add an additional step to external project
+# add after "install" is executed by ExternalProject_Add. Only one additional
+# step is supported. Like add_dependency, add_dependency_step passes all
+# optional parameters to ExternalProject_Add_Step, so most options are
+# supported.
+#
+# @param NAME the name of the dependency
+# @param PREFIX the prefix this dependency belongs too. Valid values are:
+#     vmm, userspace and test.
+#
+function(add_dependency_step NAME PREFIX)
+    if(PREFIX STREQUAL "vmm")
+        set(PREFIX ${VMM_PREFIX})
+    elseif(PREFIX STREQUAL "userspace")
+        set(PREFIX ${USERSPACE_PREFIX})
+    elseif(PREFIX STREQUAL "test")
+        set(PREFIX ${TEST_PREFIX})
+    else()
+        message(FATAL_ERROR "Invalid prefix: ${PREFIX}")
+    endif()
+
+    ExternalProject_Add_Step(
+        ${NAME}_${PREFIX}
+        step_${NAME}_${PREFIX}
+        ${ARGN}
+        DEPENDEES install
+    )
+endfunction(add_dependency_step)
+
+# ------------------------------------------------------------------------------
+# add_targets
+# ------------------------------------------------------------------------------
+
+# Private
+#
+function(add_format_targets NAME PREFIX SOURCE_DIR)
+    if(PREFIX STREQUAL "vmm")
+        set(PREFIX ${VMM_PREFIX})
+    elseif(PREFIX STREQUAL "userspace")
+        set(PREFIX ${USERSPACE_PREFIX})
+    elseif(PREFIX STREQUAL "test")
+        set(PREFIX ${TEST_PREFIX})
+    endif()
+
+    if(NOT EXISTS "${SOURCE_DIR}")
+        return()
+    endif()
+
+    add_custom_command(
+        TARGET format
+        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle diff ${SOURCE_DIR}
+    )
+
+    add_custom_command(
+        TARGET format-all
+        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle all ${SOURCE_DIR}
+    )
+
+    add_custom_command(
+        TARGET format-${NAME}_${PREFIX}
+        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle diff ${SOURCE_DIR}
+    )
+
+    add_custom_command(
+        TARGET format-${NAME}_${PREFIX}-all
+        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle all ${SOURCE_DIR}
+    )
+endfunction(add_format_targets)
+
+# Private
+#
+function(add_targets NAME PREFIX SOURCE_DIR)
+    if(PREFIX STREQUAL "vmm")
+        set(FULLPREFIX ${VMM_PREFIX})
+    elseif(PREFIX STREQUAL "userspace")
+        set(FULLPREFIX ${USERSPACE_PREFIX})
+    elseif(PREFIX STREQUAL "test")
+        set(FULLPREFIX ${TEST_PREFIX})
+    elseif(PREFIX STREQUAL "none")
+        set(FULLPREFIX ${PREFIX})
+    endif()
+
+    if(NOT PREFIX STREQUAL "none")
+        add_custom_target(
+            clean-${NAME}_${FULLPREFIX}
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}
+        )
+
+        add_custom_command(
+            TARGET clean-all
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}
+        )
+
+        add_custom_command(
+            TARGET clean-subprojects
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}
+        )
+
+        add_custom_target(
+            rebuild-${NAME}_${FULLPREFIX}
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}
+            COMMAND ${CMAKE_COMMAND} --build . --target ${NAME}_${FULLPREFIX}
+        )
+    endif()
+
+    if(ENABLE_FORMAT)
+        add_custom_target(format-${NAME}_${FULLPREFIX})
+        add_custom_target(format-${NAME}_${FULLPREFIX}-all)
+        add_format_targets(${NAME} ${PREFIX} ${SOURCE_DIR})
+    endif()
+
+    if(PREFIX STREQUAL "test")
+        string(TOUPPER "TIDY_EXCLUSION_${NAME}" TIDY_EXCLUSION)
+
+        add_custom_command(
+            TARGET unittest
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
+                ctest --output-on-failure
+        )
+
+        add_custom_command(
+            TARGET test
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
+                ctest --output-on-failure
+        )
+
+        add_custom_target(
+            test-${NAME}_${FULLPREFIX}
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
+                ctest --output-on-failure
+        )
+
+        if(ENABLE_TIDY)
+            add_custom_command(
+                TARGET tidy
+                COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
+                    ${TIDY_SCRIPT} diff ${SOURCE_DIR} ${${TIDY_EXCLUSION}}
+            )
+
+            add_custom_command(
+                TARGET tidy-all
+                COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
+                    ${TIDY_SCRIPT} all ${SOURCE_DIR} ${${TIDY_EXCLUSION}}
+            )
+
+            add_custom_target(
+                tidy-${NAME}_${FULLPREFIX}
+                COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
+                    ${TIDY_SCRIPT} diff ${SOURCE_DIR} ${${TIDY_EXCLUSION}}
+            )
+
+            add_custom_target(
+                tidy-${NAME}_${FULLPREFIX}-all
+                COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
+                    ${TIDY_SCRIPT} all ${SOURCE_DIR} ${${TIDY_EXCLUSION}}
+            )
+        endif()
+    endif()
+endfunction(add_targets)
+
+# ------------------------------------------------------------------------------
+# right_justify
+# ------------------------------------------------------------------------------
+
+# Private
+#
+function(right_justify text width output)
+    set(str "")
+    string(LENGTH "${text}" text_len)
+    foreach(i RANGE ${text_len} ${width})
+        set(str " ${str}")
+    endforeach(i)
+    set(${output} ${str} PARENT_SCOPE)
+endfunction(right_justify)
+
+# ------------------------------------------------------------------------------
+# add_custom_target_category
+# ------------------------------------------------------------------------------
+
+# Private
+#
+macro(add_custom_target_category TEXT)
+    if(NOT WIN32)
+        add_custom_command(
+            TARGET info
+            COMMAND ${CMAKE_COMMAND} -E cmake_echo_color " "
+            COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "${TEXT}:"
+        )
+    endif()
+endmacro(add_custom_target_category)
+
+# ------------------------------------------------------------------------------
+# add_custom_target_info
+# ------------------------------------------------------------------------------
+
+# Private
+#
+macro(add_custom_target_info)
+    if(NOT WIN32)
+        set(oneVal TARGET COMMENT)
+        cmake_parse_arguments(ARG "" "${oneVal}" "" ${ARGN})
+
+        if(NOT_ARG_TARGET)
+            right_justify("${BUILD_COMMAND}" 20 JUSTIFY_STR)
+            add_custom_command(
+                TARGET info
+                COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --no-newline "    ${BUILD_COMMAND}"
+                COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --no-newline "${JUSTIFY_STR}- "
+                COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --white "${ARG_COMMENT}"
+            )
+        else()
+            right_justify("${BUILD_COMMAND} ${ARG_TARGET}" 20 JUSTIFY_STR)
+            add_custom_command(
+                TARGET info
+                COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --no-newline "    ${BUILD_COMMAND} ${ARG_TARGET}"
+                COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --no-newline "${JUSTIFY_STR}- "
+                COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --white "${ARG_COMMENT}"
+            )
+        endif()
+    endif()
+endmacro(add_custom_target_info)
+
+# ------------------------------------------------------------------------------
+# add_subproject
+# ------------------------------------------------------------------------------
+
+# Add Sub Project
+#
+# Adds a Bareflank specific project to the build. Unlike dependencies,
+# sub projects are checked for changes. This function is not only used
+# internally by the main build system, but can also be used by extensions
+# for adding additional logic to the hypervisor.
+#
+# @param NOBUILD Include the sub project, but don't build the code. This is
+#     mainly used to register targets for a given sub project, and the prefix
+#     is usually "none".
+# @param NOINSTALL Skip the install step for the sub project
+# @param
+#
+#
+function(add_subproject NAME PREFIX)
+    set(options NOBUILD NOINSTALL)
+    set(oneVal SOURCE_DIR TOOLCHAIN)
+    set(multiVal C_FLAGS CXX_FLAGS DEPENDS)
+    cmake_parse_arguments(ARG "${options}" "${oneVal}" "${multiVal}" ${ARGN})
+
+    if(PREFIX STREQUAL "vmm" AND NOT ENABLE_BUILD_VMM AND NOT ENABLE_BUILD_TEST)
+        return()
+    endif()
+
+    if(PREFIX STREQUAL "userspace" AND NOT ENABLE_BUILD_USERSPACE)
+        return()
+    endif()
+
+    if(PREFIX STREQUAL "test" AND NOT ENABLE_BUILD_TEST)
+        return()
+    endif()
+
+    if(ARG_SOURCE_DIR)
+        set(SOURCE_DIR ${ARG_SOURCE_DIR})
+    else()
+        if(PREFIX STREQUAL "test")
+            set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/${NAME}/tests)
+        else()
+            set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/${NAME}/src)
+        endif()
+    endif()
+
+    add_targets(${NAME} ${PREFIX} ${SOURCE_DIR})
+
+    if(ENABLE_FORMAT)
+        if(NOT ARG_SOURCE_DIR AND NOT PREFIX STREQUAL "test")
+            add_format_targets(${NAME} ${PREFIX} ${CMAKE_CURRENT_LIST_DIR}/${NAME}/include)
+        endif()
+    endif()
+
+    if(ARG_NOBUILD)
+        return()
+    endif()
+
+    if(NOT ARG_TOOLCHAIN)
+        if(PREFIX STREQUAL "vmm")
+            set(TOOLCHAIN ${VMM_TOOLCHAIN_PATH})
+        elseif(PREFIX STREQUAL "userspace")
+            set(TOOLCHAIN ${USERSPACE_TOOLCHAIN_PATH})
+        elseif(PREFIX STREQUAL "test")
+            set(TOOLCHAIN ${TEST_TOOLCHAIN_PATH})
+        else()
+            message(FATAL_ERROR "Invalid prefix: ${PREFIX}")
+        endif()
+    else()
+        set(TOOLCHAIN ${ARG_TOOLCHAIN})
+    endif()
+
+    generate_flags(
+        ${PREFIX}
+        C_FLAGS ${ARG_C_FLAGS}
+        CXX_FLAGS ${ARG_CXX_FLAGS}
+    )
+
+    if(PREFIX STREQUAL "vmm")
+        set(PREFIX ${VMM_PREFIX})
+    elseif(PREFIX STREQUAL "userspace")
+        set(PREFIX ${USERSPACE_PREFIX})
+    elseif(PREFIX STREQUAL "test")
+        set(PREFIX ${TEST_PREFIX})
+    else()
+        message(FATAL_ERROR "Invalid prefix: ${PREFIX}")
+    endif()
+
+    set(DEPENDS "")
+    foreach(d ${ARG_DEPENDS})
+        list(APPEND DEPENDS "${d}_${PREFIX}")
+    endforeach(d)
+
     get_cmake_property(_vars CACHE_VARIABLES)
     foreach (_var ${_vars})
         STRING(REGEX MATCH "^CMAKE" is_cmake_var ${_var})
         if(NOT is_cmake_var)
-            list(APPEND ${args_out} -D${_var}=${${_var}})
+            list(APPEND CMAKE_ARGS -D${_var}=${${_var}})
         endif()
     endforeach()
 
-    # Support for clang-tidy (if enabled)
-    if(ENABLE_TIDY)
-        list(APPEND ${args_out} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
+    if(ENABLE_BUILD_TEST)
+        list(APPEND CMAKE_ARGS -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
     endif()
 
-endmacro(generate_external_project_args)
-
-# Add a sub-project directory to be built with the specified toolchain
-# @arg SOURCE_DIR: Path to a source code directory to be built with cmake
-# @arg TARGET: The name of the cmake target to be created for this project
-# @arg TOOLCHAIN: Path to a cmake toolchain file to use for compiling "project"
-# @arg DEPENDS: A list of other targets this project depends on
-# @arg VERBOSE: Display debug messages
-function(add_subproject)
-    set(options VERBOSE)
-    set(oneVal SOURCE_DIR TARGET TOOLCHAIN)
-    set(multiVal DEPENDS)
-    cmake_parse_arguments(ADD_SUBPROJECT "${options}" "${oneVal}" "${multiVal}" ${ARGN})
-
-    if(NOT EXISTS ${ADD_SUBPROJECT_SOURCE_DIR})
-        message(FATAL_ERROR "Unable to find project at path ${ADD_SUBPROJECT_SOURCE_DIR}")
-    endif()
-
-    if(NOT EXISTS ${ADD_SUBPROJECT_TOOLCHAIN})
-        message(FATAL_ERROR "Unable to find toolchain file ${ADD_SUBPROJECT_TOOLCHAIN}")
-    endif()
-
-    if(${ADD_SUBPROJECT_VERBOSE})
-        message(STATUS "Adding subproject: ${ADD_SUBPROJECT_TARGET}")
-        message(STATUS "\t${ADD_SUBPROJECT_TARGET} source path: ${ADD_SUBPROJECT_SOURCE_DIR}")
-        message(STATUS "\t${ADD_SUBPROJECT_TARGET} toolchain file: ${ADD_SUBPROJECT_TOOLCHAIN}")
-        message(STATUS "\t${ADD_SUBPROJECT_TARGET} dependencies: ${ADD_SUBPROJECT_DEPENDS}")
-    endif()
-
-    generate_external_project_args(_PROJECT_CMAKE_ARGS)
-    list(APPEND _PROJECT_CMAKE_ARGS
-        -DCMAKE_TOOLCHAIN_FILE=${ADD_SUBPROJECT_TOOLCHAIN}
+    list(APPEND CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX=${PREFIXES_DIR}/${PREFIX}
+        -DCMAKE_INSTALL_MESSAGE=${CMAKE_INSTALL_MESSAGE}
+        -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
+        -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN}
+        -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
     )
 
-    ExternalProject_Add(
-        ${ADD_SUBPROJECT_TARGET}
-        CMAKE_ARGS ${_PROJECT_CMAKE_ARGS}
-        SOURCE_DIR ${ADD_SUBPROJECT_SOURCE_DIR}
-        BINARY_DIR ${BF_BUILD_PROJECTS_DIR}/${ADD_SUBPROJECT_TARGET}/build
-        PREFIX ${BF_BUILD_PROJECTS_DIR}/${ADD_SUBPROJECT_TARGET}
-        TMP_DIR ${BF_BUILD_PROJECTS_DIR}/${ADD_SUBPROJECT_TARGET}/tmp
-        STAMP_DIR ${BF_BUILD_PROJECTS_DIR}/${ADD_SUBPROJECT_TARGET}/stamp
-        UPDATE_DISCONNECTED 0
-        UPDATE_COMMAND ""
-        DEPENDS ${ADD_SUBPROJECT_DEPENDS}
-    )
-endfunction(add_subproject)
-
-# Cmake variables to orchestrate adding VMM extensions to the build system
-# using vmm_extension() and add_vmm_extensions()
-set(VMM_EXTENSIONS ""
-    CACHE INTERNAL
-    "A list of target names for VMM extensions to be built"
-)
-set(VMM_EXTENSION_ARGS ""
-    CACHE INTERNAL
-    "A list of arguments to be passed to ExternalProject_Add() for each VMM extension in VMM_EXTENSIONS"
-)
-
-# Add a VMM extension to the build system. This macro is intended to be used
-# from a build configuration file, using any arguments compatible with cmake's
-# built-in ExternalProject_Add() function.
-#
-# NOTE: Since this macro is intended to be called from a build configuration
-# file, build variables and internal targets will not be defined when
-# this macro is called. Therfore, DO NOT use any build variables inside this
-# macro!! See add_vmm_extensions() for the "second half" of the extension
-# registration process.
-#
-# Usage: vmm_extension(name argn ...)
-#     name = a unique name for this vmm extension
-#     argn = Any number of arguments compatible with ExternlProject_Add()
-#
-# Example: Add the Bareflank extended apis extension from GitHub
-#     vmm_extension(
-#         extended_apis
-#         GIT_REPOSITORY https://github.com/bareflank/extended_apis.git
-#         GIT_TAG dev
-#     )
-macro(vmm_extension)
-    set(EXTENSION_ARGS ${ARGN})
-    list(GET EXTENSION_ARGS 0 EXTENSION_NAME)
-    list(FIND VMM_EXTENSIONS ${EXTENSION_NAME} EXTENSION_IDX)
-    if(NOT ${EXTENSION_IDX} EQUAL -1)
-        message(FATAL_ERROR "VMM extension already registered with name: ${EXTENSION_NAME}")
-    endif()
-
-    # Reserve the suffix "_test" for auto-generated extension unit test targets
-    STRING(REGEX MATCH "_test$" has_test_keyword ${EXTENSION_NAME})
-    if(has_test_keyword)
-        message(
-            FATAL_ERROR
-            "VMM extension names may not end in \"_test\", "
-            "failed to add VMM extension: ${EXTENSION_NAME}"
+    if(NOT WIN32)
+        list(APPEND CMAKE_ARGS
+            -DCMAKE_TARGET_MESSAGES=${CMAKE_TARGET_MESSAGES}
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         )
     endif()
 
-    # Auto-generate an extension unit test build with the reserved "_test"
-    # suffix (appended to the given target name)
-    set(TEST_EXTENSION_ARGS ${ARGN})
-    set(TEST_EXTENSION_NAME ${EXTENSION_NAME}_test)
-    list(REMOVE_AT TEST_EXTENSION_ARGS 0)
-    list(INSERT TEST_EXTENSION_ARGS 0 ${TEST_EXTENSION_NAME})
-
-    # For each extension dependency, add the generated name + "_test"
-    # as an additional dependency
-    cmake_parse_arguments(VMM_EX "" "" "DEPENDS" ${ARGN})
-    if(VMM_EX_DEPENDS)
-        list(APPEND TEST_EXTENSION_ARGS "DEPENDS")
-        foreach(depend_name ${VMM_EX_DEPENDS})
-            list(APPEND TEST_EXTENSION_ARGS ${depend_name}_test)
-        endforeach()
+    if(ARG_NOINSTALL)
+        list(APPEND EPA_ARGS
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "-- Install step ignored"
+        )
     endif()
 
-    # Add the extension and unit tests to a waiting list, to be added
-    # (registered) to the build system later when add_vmm_extensions() is called
-    string(REPLACE ";" " " ARG_STRING "${EXTENSION_ARGS}")
-    string(REPLACE ";" " " TEST_ARG_STRING "${TEST_EXTENSION_ARGS}")
-    list(APPEND VMM_EXTENSIONS ${EXTENSION_NAME})
-    list(APPEND VMM_EXTENSIONS ${TEST_EXTENSION_NAME})
-    list(APPEND VMM_EXTENSION_ARGS "${ARG_STRING}")
-    list(APPEND VMM_EXTENSION_ARGS "${TEST_ARG_STRING}")
-endmacro(vmm_extension)
-
-# Add all components configured with vmm_extension() to the build system.
-# NOTE: This macro needs to be called at the very end of
-# the top-level CMakeLists.txt
-macro(add_vmm_extensions)
-    if(VMM_EXTENSIONS)
-        generate_external_project_args(_EXTENSION_CMAKE_ARGS)
-
-        list(LENGTH VMM_EXTENSION_ARGS count)
-        math(EXPR count "${count} - 1")
-        foreach(i RANGE ${count})
-            list(GET VMM_EXTENSIONS ${i} EXTENSION_NAME)
-            list(GET VMM_EXTENSION_ARGS ${i} EXTENSION_ARGS)
-            string(REPLACE " " ";" EXTENSION_ARGS ${EXTENSION_ARGS})
-
-            STRING(REGEX MATCH "_test$" IS_TEST_EXTENSION ${EXTENSION_NAME})
-            if(IS_TEST_EXTENSION)
-                # If unit testing for VMM extensions is turned off, don't add
-                # the auto-generated extension test projects
-                if(NOT UNITTEST_VMM_EXTENSIONS OR NOT ENABLE_UNITTESTING)
-                    continue()
-                endif()
-
-                # VMM extension unit test specific cmake arguments
-                list(APPEND EXTENSION_ARGS
-                    DEPENDS bfvmm_test
-                    CMAKE_ARGS
-                        -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_UNITTEST}
-                        -DVMM_EX_IS_UNITTEST_BUILD=ON
-                )
-
-                # Add the unit tests to the 'make test' target
-                add_custom_command(
-                    TARGET test
-                    COMMAND ${CMAKE_COMMAND}
-                        --build ${BF_BUILD_EXTENSIONS_DIR}/${EXTENSION_NAME}/build
-                        --target test
-                )
-                if(ENABLE_DEVELOPER_MODE)
-                    add_dependencies(test ${EXTENSION_NAME})
-                endif()
-            else()
-                # VMM extension specific cmake arguments
-                list(APPEND EXTENSION_ARGS
-                    DEPENDS bfvmm
-                    CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_VMM}
-                )
-            endif()
-
-            # Add the extension to the build system
-            ExternalProject_Add(
-                ${EXTENSION_ARGS}
-                CMAKE_ARGS ${_EXTENSION_CMAKE_ARGS}
-                BINARY_DIR ${BF_BUILD_EXTENSIONS_DIR}/${EXTENSION_NAME}/build
-                PREFIX ${BF_BUILD_EXTENSIONS_DIR}/${EXTENSION_NAME}
-                TMP_DIR ${BF_BUILD_EXTENSIONS_DIR}/${EXTENSION_NAME}/tmp
-                STAMP_DIR ${BF_BUILD_EXTENSIONS_DIR}/${EXTENSION_NAME}/stamp
-                UPDATE_DISCONNECTED 0
-                UPDATE_COMMAND ""
-            )
-
-            list(APPEND REGISTERED_EXTENSIONS ${EXTENSION_NAME})
-        endforeach()
-
-        string(REPLACE ";" " " REGISTERED_EXTENSIONS "${REGISTERED_EXTENSIONS}")
-        message(STATUS "Registered VMM Extensions: ${REGISTERED_EXTENSIONS}")
-    endif()
-endmacro(add_vmm_extensions)
-
-# ------------------------------------------------------------------------------
-# External dependency management
-# ------------------------------------------------------------------------------
-
-# Caluclate the correct dependency source/install prefix based on project
-# dependency cache settings
-macro(get_dependency_prefix out_var)
-    if(ENABLE_DEPENDENCY_CACHE)
-        set(${out_var} ${DEPENDENCY_CACHE_DIR})
-    else()
-        set(${out_var} ${BF_BUILD_DEPENDS_DIR})
-    endif()
-endmacro(get_dependency_prefix)
-
-# Caluclate the correct dependency install directory based on project
-# dependency cache settings
-macro(get_dependency_install_dir name out_var)
-    get_dependency_prefix(DEPENDENCY_PREFIX)
-    if(ENABLE_DEPENDENCY_CACHE)
-        set(_INSTALL_DIR ${DEPENDENCY_PREFIX}/${name}/install-${BUILD_TARGET_ARCH}-${BUILD_TYPE})
-        string(TOLOWER ${_INSTALL_DIR} ${out_var})
-    else()
-        set(${out_var} ${DEPENDENCY_PREFIX}/${name}/install)
-    endif()
-endmacro(get_dependency_install_dir)
-
-# Caluclate the correct dependency source code directory based on project
-# dependency cache settings
-macro(get_dependency_src_dir name out_var)
-    get_dependency_prefix(DEPENDENCY_PREFIX)
-    set(${out_var} ${DEPENDENCY_PREFIX}/${name}/src)
-endmacro(get_dependency_src_dir)
-
-# Add a VMM dependency to the build system. This macro is intended to be used
-# with any arguments compatible with cmake's built-in ExternalProject_Add()
-# function.
-#
-# This macro adds dependencies to the build based on the project's dependency
-# cache settings. When dependency caching is enabled, both source code and build
-# artifacts are saved to the dependency cache. To update the dependency cache,
-# use the ENABLE_DEPENDENCY_UPDATES build configuration.
-macro(add_dependency)
-    set(DEPENDENCY_ARGS ${ARGN})
-    list(GET DEPENDENCY_ARGS 0 DEPENDENCY_NAME)
-    if(NOT DEPENDENCY_NAME)
-        message(FATAL_ERROR "Must specify dependency name as the first argument of add_dependency()")
-    endif()
-
-    # Redirect build output to a log file if BUILD_VERBOSE is not enabled
-    if(BUILD_VERBOSE)
-        set(LOG_DEPENDENCY_OUTPUT 0)
-    else()
-        set(LOG_DEPENDENCY_OUTPUT 1)
-    endif()
-
-    get_dependency_src_dir(${DEPENDENCY_NAME} DEPENDENCY_SOURCE_DIR)
-    get_dependency_install_dir(${DEPENDENCY_NAME} DEPENDENCY_INSTALL_DIR)
-
-    # Common CMake arguments for all dependencies
-    list(APPEND DEPENDENCY_ARGS
-        CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=${DEPENDENCY_INSTALL_DIR}
-        -DCMAKE_TARGET_MESSAGES=OFF
-        -DCMAKE_INSTALL_MESSAGE=LAZY
-        --no-warn-unused-cli
-    )
-
-    # If the source code is already cached, force a skipped download step
-    # unless depency updates are turned on
-    if(ENABLE_DEPENDENCY_CACHE AND NOT ENABLE_DEPENDENCY_UPDATES AND EXISTS ${DEPENDENCY_SOURCE_DIR})
-        file(GLOB DEPENDENCY_SUBDIRS ${DEPENDENCY_SOURCE_DIR}/*)
-        list(LENGTH DEPENDENCY_SUBDIRS DIRS_LEN)
-        if(${DIRS_LEN} GREATER 0)
-            list(INSERT DEPENDENCY_ARGS 1
-                DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E echo
-                "(skipping ${DEPENDENCY_NAME} download)"
-            )
-        endif()
-    endif()
-
-    # If the build artifacts are already cached, force skipped configure, build
-    # and install steps unless depency updates are turned on
-    if(ENABLE_DEPENDENCY_CACHE AND NOT ENABLE_DEPENDENCY_UPDATES AND EXISTS ${DEPENDENCY_INSTALL_DIR})
-        file(GLOB DEPENDENCY_ARTIFACTS ${DEPENDENCY_INSTALL_DIR}/*)
-        list(LENGTH DEPENDENCY_ARTIFACTS ARTIFACTS_LEN)
-        if(${ARTIFACTS_LEN} GREATER 0)
-            list(INSERT DEPENDENCY_ARGS 1
-                CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo
-                    "(skipping ${DEPENDENCY_NAME} configure)"
-                BUILD_COMMAND ${CMAKE_COMMAND} -E echo
-                    "(skipping ${DEPENDENCY_NAME} build)"
-                INSTALL_COMMAND ${CMAKE_COMMAND} -E echo
-                    "(skipping ${DEPENDENCY_NAME} install)"
-            )
-        endif()
-    endif()
-
-    # NOTE: SOURCE_DIR and INSTALL_DIR can be cached, but PREFIX, BUILD, TMP and
-    # STAMP must be build-specific.
     ExternalProject_Add(
-        ${DEPENDENCY_ARGS}
-        SOURCE_DIR          ${DEPENDENCY_SOURCE_DIR}
-        INSTALL_DIR         ${DEPENDENCY_INSTALL_DIR}
-        PREFIX              ${BF_BUILD_DEPENDS_DIR}/${DEPENDENCY_NAME}
-        BINARY_DIR          ${BF_BUILD_DEPENDS_DIR}/${DEPENDENCY_NAME}/build
-        TMP_DIR             ${BF_BUILD_DEPENDS_DIR}/${DEPENDENCY_NAME}/tmp
-        STAMP_DIR           ${BF_BUILD_DEPENDS_DIR}/${DEPENDENCY_NAME}/stamp
-        LOG_DOWNLOAD        ${LOG_DEPENDENCY_OUTPUT}
-        LOG_CONFIGURE       ${LOG_DEPENDENCY_OUTPUT}
-        LOG_BUILD           ${LOG_DEPENDENCY_OUTPUT}
-        LOG_INSTALL         ${LOG_DEPENDENCY_OUTPUT}
+        ${NAME}_${PREFIX}
+        ${EPA_ARGS}
+        PREFIX          ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}
+        STAMP_DIR       ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}/stamp
+        TMP_DIR         ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}/tmp
+        BINARY_DIR      ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}/build
+        SOURCE_DIR      ${SOURCE_DIR}
+        CMAKE_ARGS      ${CMAKE_ARGS}
+        DEPENDS         ${DEPENDS}
+        UPDATE_COMMAND  ${CMAKE_COMMAND} -E echo "-- checking for updates"
     )
-endmacro(add_dependency)
 
-# Adds additional install steps for VMM dependencies. This is useful for
-# installing dependencies to one/multiple sysroots that will rely on the
-# dependency.
-
-# @arg GLOB_DIR: Optional directory to use as the relative directory for the
-#           given GLOB_EXPRESSION. Defaults to the dependency INSTALL_DIR
-# @arg DESTINATIONS: A list of directories to install all matched files to
-# @arg GLOB_EXPRESSIONS: A list of cmake GLOB expressions to generate a list
-#           of files to be installed
-# @arg DEPENDEES: Additional ExternalProject build steps that this install step
-#           depends on, in addition to "install" which is included automatically
-macro(install_dependency)
-    set(oneVal GLOB_DIR)
-    set(multiVal DESTINATIONS GLOB_EXPRESSIONS DEPENDEES)
-    cmake_parse_arguments(_INS_DEP "" "${oneVal}" "${multiVal}" ${ARGN})
-
-    set(DEPENDENCY_ARGS ${ARGN})
-    list(GET DEPENDENCY_ARGS 0 DEPENDENCY_NAME)
-    if(NOT DEPENDENCY_NAME)
-        message(FATAL_ERROR "Must specify dependency name as the first argument of install_dependency()")
-    endif()
-
-    get_dependency_src_dir(${DEPENDENCY_NAME} DEPENDENCY_SOURCE_DIR)
-    get_dependency_install_dir(${DEPENDENCY_NAME} DEPENDENCY_INSTALL_DIR)
-
-    if(NOT _INS_DEP_GLOB_DIR)
-        set(_INS_DEP_GLOB_DIR ${DEPENDENCY_INSTALL_DIR})
-    endif()
-
-    # Install all files that match all given CMake GLOB_EXPRESSIONS to all
-    # specified DESTINATIONS
-    set(INSTALL_STEP_COUNT 1)
-    foreach(dest ${_INS_DEP_DESTINATIONS})
-        foreach(glob_exp ${_INS_DEP_GLOB_EXPRESSIONS})
-            ExternalProject_Add_Step(
-                ${DEPENDENCY_NAME}
-                additional_install_${INSTALL_STEP_COUNT}
-                DEPENDEES install ${_INS_DEP_DEPENDEES}
-                COMMENT "Installing ${_INS_DEP_GLOB_DIR}/${glob_exp} to ${dest}"
-                COMMAND	${CMAKE_COMMAND}
-                    -DGLOB_DIR=${_INS_DEP_GLOB_DIR}
-                    -DGLOB_EXPR=${glob_exp}
-                    -DINSTALL_DIR=${dest}
-                    -P ${BF_SCRIPTS_DIR}/cmake/copy_files_if_different.cmake
-            )
-
-            # Each step for a target needs a unique name, install_${counter}
-            MATH(EXPR INSTALL_STEP_COUNT "${INSTALL_STEP_COUNT}+1")
-        endforeach()
-    endforeach()
-endmacro(install_dependency)
+    ExternalProject_Add_Step(
+        ${NAME}_${PREFIX}
+        ${NAME}_${PREFIX}_cleanup
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}/src
+        DEPENDEES configure
+    )
+endfunction(add_subproject)
 
 # ------------------------------------------------------------------------------
-# Build configuration and validation
+# vmm_extension
 # ------------------------------------------------------------------------------
 
-# Cmake variables to orchestrate adding build rules to the build system
-# using add_build_rule() and validate_build()
-set(BUILD_RULES ""
-    CACHE INTERNAL
-    "A list of build validation rules added with the add_build_rule() macro"
-)
-set(BUILD_RULE_MESSAGES ""
-    CACHE INTERNAL
-    "Messages to be displayed when each of the above build rules fail"
-)
+function(vmm_extension NAME)
+    list(APPEND ARGN
+        DEPENDS bfvmm bfintrinsics
+    )
 
-# Add a new rule to be validated by the build system
-# @arg FAIL_ON: Any valid cmake expression to be evalued by cmake's if(). If the
-#       given expression evaultes TRUE, the build will fail
-# @arg FAIL_MSG: A message to be displayed by cmake if FAIL_ON evaluates TRUE
-macro(add_build_rule)
-    set(oneVal FAIL_MSG)
-    set(multiVal FAIL_ON)
-    cmake_parse_arguments(ADD_BUILD_RULE "" "${oneVal}" "${multiVal}" ${ARGN})
+    add_subproject(
+        ${NAME} vmm
+        ${ARGN}
+    )
+endfunction(vmm_extension)
 
-    string(REPLACE ";" " " ADD_BUILD_RULE_FAIL_ON "${ADD_BUILD_RULE_FAIL_ON}")
-    list(APPEND BUILD_RULES "${ADD_BUILD_RULE_FAIL_ON}")
-    list(APPEND BUILD_RULE_MESSAGES "${ADD_BUILD_RULE_FAIL_MSG}")
-endmacro(add_build_rule)
+# ------------------------------------------------------------------------------
+# init_project
+# ------------------------------------------------------------------------------
 
-# Validates the current build configuration against all rules configured using
-# add_build_rule()
-macro(validate_build)
-    message(STATUS "Validating build configuration...")
-    list(LENGTH BUILD_RULES count)
-    math(EXPR count "${count} - 1")
+# Private
+#
+macro(enable_asm)
+    if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
+        find_program(NASM_BIN nasm)
 
-    foreach(i RANGE ${count})
-        list(GET BUILD_RULES ${i} e)
-        list(GET BUILD_RULE_MESSAGES ${i} m)
-        string(REPLACE " " ";" e "${e}")
-        if(${e})
-            message("ERROR - Build validation failed: ${m}")
-            message(SEND_ERROR "")
-            set(BUILD_VALIDATOR_ERROR ON)
+        if(NOT NASM_BIN)
+            set(NASM_BIN "c:\\Program Files\\NASM\\nasm.exe")
+            if(NOT EXISTS ${NASM_BIN})
+                message(FATAL_ERROR "Unable to find nasm, or nasm is not installed")
+            endif()
         endif()
-    endforeach()
 
+        execute_process(COMMAND ${NASM_BIN} -v OUTPUT_VARIABLE NASM_ID OUTPUT_STRIP_TRAILING_WHITESPACE)
+        set(CMAKE_ASM_NASM_COMPILER_ID ${NASM_ID})
+
+        if(PREFIX STREQUAL "vmm")
+            set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
+        endif()
+        enable_language(ASM_NASM)
+
+        set(CMAKE_ASM_NASM_FLAGS "-d ${ABITYPE}")
+        set(CMAKE_ASM_NASM_CREATE_SHARED_LIBRARY TRUE)
+        set(CMAKE_ASM_NASM_CREATE_STATIC_LIBRARY TRUE)
+    endif()
+    if(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
+        message(WARNING "unimplemented")
+    endif()
+endmacro(enable_asm)
+
+# Init Project
+#
+# Initializes a sub project or extension. This function should be used right
+# after running project(), and enables ASM, sets up include and library
+# folders and addition flags.
+#
+# @param TIDY_EXCLUSIONS Exclusions for Clang Tidy
+# @param C_FLAGS Additonal flags to add to CMAKE_C_FLAGS
+# @param CXX_FLAGS Additonal flags to add to CMAKE_CXX_FLAGS
+# @param INCLUDES Additional includes
+#
+macro(init_project)
+    set(multiVal C_FLAGS CXX_FLAGS INCLUDES)
+    cmake_parse_arguments(ARG "" "" "${multiVal}" ${ARGN})
+
+    if(CMAKE_INSTALL_PREFIX STREQUAL "${VMM_PREFIX_PATH}")
+        set(PREFIX "vmm")
+    elseif(CMAKE_INSTALL_PREFIX STREQUAL "${USERSPACE_PREFIX_PATH}")
+        set(PREFIX "userspace")
+    elseif(CMAKE_INSTALL_PREFIX STREQUAL "${TEST_PREFIX_PATH}")
+        set(PREFIX "test")
+    else()
+        message(FATAL_ERROR "Invalid prefix: ${CMAKE_INSTALL_PREFIX}")
+    endif()
+    message(STATUS "Prefix: ${CMAKE_INSTALL_PREFIX}")
+
+    if(PREFIX STREQUAL "vmm")
+        set(CMAKE_SKIP_RPATH TRUE)
+    endif()
+
+    if(PREFIX STREQUAL "test")
+        set(ENABLE_MOCKING ON)
+        set(CMAKE_BUILD_TYPE "Debug")
+        set(BUILD_STATIC_LIBS ON)
+        set(BUILD_SHARED_LIBS OFF)
+    endif()
+
+    enable_asm()
+
+    list(APPEND CMAKE_C_FLAGS ${ARG_C_FLAGS})
+    list(APPEND CMAKE_CXX_FLAGS ${ARG_CXX_FLAGS})
+
+    string(REPLACE ";" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
+    include_directories(
+        ${ARG_INCLUDES}
+        ${SOURCE_BFSDK_DIR}/include
+        ${SOURCE_BFELF_LOADER_DIR}/include
+        ${SOURCE_BFINTRINSICS_DIR}/include
+        ${SOURCE_BFVMM_DIR}/include
+        ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/include
+        ${CMAKE_CURRENT_LIST_DIR}/../include
+    )
+
+    if(NOT PREFIX STREQUAL "vmm")
+        include_directories(
+            SYSTEM ${CMAKE_INSTALL_PREFIX}/include
+        )
+    endif()
+
+    link_directories(
+        ${CMAKE_INSTALL_PREFIX}/lib
+    )
+
+    get_cmake_property(_vars CACHE_VARIABLES)
+    foreach (_var ${_vars})
+        set(${_var} ${${_var}})
+    endforeach()
+endmacro(init_project)
+
+# ------------------------------------------------------------------------------
+# validate_build / invalid_config
+# ------------------------------------------------------------------------------
+
+# Private
+#
+macro(validate_build)
     if(BUILD_VALIDATOR_ERROR)
         message(FATAL_ERROR "Build validation failed")
     endif()
 endmacro(validate_build)
 
-# Add a build configuration to the build system
-# @arg CONFIG_NAME: The name of the build configuration variable
-# @arg DEFAULT_VAL: The default value for the configuration, if the variable
-#       'CONFIG_NAME' is not already set
-# @arg CONFIG_TYPE: A cmake cache variable type, to be used by cmake-gui/ccmake
-#       Accepted values: BOOL, PATH, FILE, STRING
-# @arg DESCRIPTION: A description of this configuration to be displayed in
-#       cmake-gui and ccmake
-# @arg ADVANCED: Hide this variable by default in cmake-gui/ccmake, showing the
-#       variable when the user choses to see "advanced" variables
-# @arg SKIP_VALIDATION: Do not perform any validation on this build config
-# @arg OPTIONS: Set which options are valid for this configuration (applies to
-#       STRING type variables only)
-macro(add_config)
-    set(bools ADVANCED SKIP_VALIDATION)
-    set(oneVal CONFIG_NAME CONFIG_TYPE DEFAULT_VAL DESCRIPTION)
-    set(multiVal OPTIONS)
-    cmake_parse_arguments(_AC "${bools}" "${oneVal}" "${multiVal}" ${ARGN})
+# Invalidate Config
+#
+# Use this function to invalidate the configuration of the build. Unlike
+# message(FATAL_ERROR), this function will queue up errors, and exit when
+# the build is validated ensuring all errors are reported at once.
+#
+# @param MSG the message to report on error
+#
+macro(invalid_config MSG)
+    message(SEND_ERROR "${MSG}")
+    set(BUILD_VALIDATOR_ERROR ON)
+endmacro(invalid_config)
 
-    # If this configuration has already been set, don't update the value, but
-    # do update the cmake CACHE type and description
-    if(DEFINED ${_AC_CONFIG_NAME})
-        set(${_AC_CONFIG_NAME} ${${_AC_CONFIG_NAME}} CACHE ${_AC_CONFIG_TYPE} ${_AC_DESCRIPTION})
-        # Otherwise, use the specified DEFAULT value
-    else()
-        set(${_AC_CONFIG_NAME} ${_AC_DEFAULT_VAL} CACHE ${_AC_CONFIG_TYPE} ${_AC_DESCRIPTION})
+# ------------------------------------------------------------------------------
+# add_xxx_library
+# ------------------------------------------------------------------------------
+
+# Add Shared Library
+#
+# Creates a shared library, sets the appropriate defintions and dependencies
+# and installs the library into the prefix
+#
+# @param NAME The name of the library. "_shared" is added for you
+# @param ALWAYS Always compile this library regardless of BUILD_SHARED_LIBS
+# @param SOURCES The source files for the library
+# @param DEFINES The definitions to add to the library
+# @param DEPENDS The dependency for the library. "_shared" is added for you
+#
+macro(add_shared_library NAME)
+    set(options ALWAYS)
+    set(multiVal SOURCES DEFINES DEPENDS)
+    cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
+
+    if(BUILD_SHARED_LIBS OR ARG_ALWAYS)
+        if(NOT ARG_SOURCES)
+            message(FATAL_ERROR "SOURCES must be defined when creating a library")
+        endif()
+
+        set(DEPENDS "")
+        foreach(d ${ARG_DEPENDS})
+            list(APPEND DEPENDS "${d}_shared")
+        endforeach(d)
+
+        add_library(${NAME}_shared SHARED ${ARG_SOURCES})
+        set_target_properties(${NAME}_shared PROPERTIES LINKER_LANGUAGE C)
+        target_compile_definitions(${NAME}_shared PRIVATE ${ARG_DEFINES})
+        target_link_libraries(${NAME}_shared ${DEPENDS})
+        install(TARGETS ${NAME}_shared DESTINATION lib)
     endif()
-    set(_config_val ${${_AC_CONFIG_NAME}})
+endmacro(add_shared_library)
 
-    # STRING type configs support the OPTIONS parameter
-    if(_AC_OPTIONS AND ${_AC_CONFIG_TYPE} STREQUAL "STRING")
-        # Set cmake-gui selectable options for STRING type configurations
-        set_property(CACHE ${_AC_CONFIG_NAME} PROPERTY STRINGS ${_AC_OPTIONS})
-        # Validate this configuration agaist the specified options
-        if(NOT _AC_SKIP_VALIDATION)
-            string(REPLACE ";" " " _options_str "${_AC_OPTIONS}")
-            if(NOT ${_config_val} IN_LIST _AC_OPTIONS)
-                set(_invalid_option 1)
-            else()
-                set(_invalid_option 0)
-            endif()
-            add_build_rule(
-                FAIL_ON ${_invalid_option}
-                FAIL_MSG "${_AC_CONFIG_NAME} invalid option \'${_config_val}\' Options: ${_options_str}"
+# Add Static Library
+#
+# Creates a static library, sets the appropriate defintions and dependencies
+# and installs the library into the prefix
+#
+# @param NAME The name of the library. "_static" is added for you
+# @param ALWAYS Always compile this library regardless of BUILD_STATIC_LIBS
+# @param SOURCES The source files for the library
+# @param DEFINES The definitions to add to the library
+#
+macro(add_static_library NAME)
+    set(options ALWAYS)
+    set(multiVal SOURCES DEFINES)
+    cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
+
+    if(BUILD_STATIC_LIBS OR ARG_ALWAYS)
+        if(NOT ARG_SOURCES)
+            message(FATAL_ERROR "SOURCES must be defined when creating a library")
+        endif()
+
+        add_library(${NAME}_static STATIC ${ARG_SOURCES})
+        set_target_properties(${NAME}_static PROPERTIES LINKER_LANGUAGE C)
+        target_compile_definitions(${NAME}_static PRIVATE ${ARG_DEFINES})
+        install(TARGETS ${NAME}_static DESTINATION lib)
+    endif()
+endmacro(add_static_library)
+
+# ------------------------------------------------------------------------------
+# add_vmm
+# ------------------------------------------------------------------------------
+
+# Add VMM Executable
+#
+# Creates a VMM executable. Specifically, this takes a set of sources,
+# compiles them, and then links the result to the provided libraries and
+# installs the result into the VMM prefix.
+#
+# @param NOVMMLIBS Do not include the bfvmm libraries.
+# @param LIBRARIES Additional libraries to link the new executable against.
+# @param SOURCES Sources to compile for the executable. If this is left blank,
+#     a null.cpp file will be compiled for you.
+# @param DEFINES Additional definitions to add to the executable
+#
+macro(add_vmm_executable NAME)
+    set(options NOVMMLIBS)
+    set(multiVal LIBRARIES SOURCES DEFINES)
+    cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
+
+    if(NOT ARG_SOURCES)
+        if(NOT EXISTS ${CMAKE_BINARY_DIR}/null.cpp)
+            file(WRITE
+                ${CMAKE_BINARY_DIR}/null.cpp ""
             )
         endif()
+        set(ARG_SOURCES ${CMAKE_BINARY_DIR}/null.cpp)
     endif()
 
-    # Validate that all FILE type configurations exist
-    if(${_AC_CONFIG_TYPE} STREQUAL "FILE" AND NOT _AC_SKIP_VALIDATION)
-        add_build_rule(
-            FAIL_ON NOT EXISTS ${_config_val}
-            FAIL_MSG "Configuration ${_AC_CONFIG_NAME} file not found: ${_config_val}"
+    if(BUILD_SHARED_LIBS)
+        add_executable(${NAME}_shared ${ARG_SOURCES})
+        target_compile_definitions(${NAME}_shared PRIVATE ${ARG_DEFINES})
+
+        if(NOT ARG_NOVMMLIBS)
+            list(APPEND ARG_LIBRARIES
+                --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_entry_static.a --no-whole-archive
+                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_vcpu_shared.so
+                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_hve_shared.so
+                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_memory_manager_shared.so
+                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_debug_shared.so
+                ${CMAKE_INSTALL_PREFIX}/lib/libbfintrinsics_shared.so
+            )
+        endif()
+
+        list(APPEND ARG_LIBRARIES
+            ${CMAKE_INSTALL_PREFIX}/lib/libc++.so
+            ${CMAKE_INSTALL_PREFIX}/lib/libc++abi.so
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfpthread_shared.so
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfunwind_shared.so
+            ${CMAKE_INSTALL_PREFIX}/lib/libc.so
+            --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall_shared.so
         )
+
+        target_link_libraries(${NAME}_shared ${ARG_LIBRARIES})
+        install(TARGETS ${NAME}_shared DESTINATION bin)
     endif()
 
-    # Validate that all BOOL type configurations are set to ON or OFF
-    if(${_AC_CONFIG_TYPE} STREQUAL "BOOL" AND NOT _AC_SKIP_VALIDATION)
-        add_build_rule(
-            FAIL_ON NOT ${_config_val} STREQUAL ON AND NOT ${_config_val} STREQUAL OFF
-            FAIL_MSG "Boolean configuration ${_AC_CONFIG_NAME} must be set to ON or OFF, current value is \'${_config_val}\'"
+    if(BUILD_STATIC_LIBS)
+        add_executable(${NAME}_static ${ARG_SOURCES})
+        target_compile_definitions(${NAME}_static PRIVATE ${ARG_DEFINES})
+
+        if(NOT ARG_NOVMMLIBS)
+            list(APPEND ARG_LIBRARIES
+                --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_entry_static.a --no-whole-archive
+                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_vcpu_static.a
+                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_hve_static.a
+                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_memory_manager_static.a
+                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_debug_static.a
+                ${CMAKE_INSTALL_PREFIX}/lib/libbfintrinsics_static.a
+            )
+        endif()
+
+        list(APPEND ARG_LIBRARIES
+            ${CMAKE_INSTALL_PREFIX}/lib/libc++.a
+            ${CMAKE_INSTALL_PREFIX}/lib/libc++abi.a
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfpthread_static.a
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfunwind_static.a
+            ${CMAKE_INSTALL_PREFIX}/lib/libc.a
+            --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall_static.a
         )
-    endif()
 
-    # Make variable "advanced" for cmake-gui/ccmake
-    if(_AC_ADVANCED)
-        mark_as_advanced(${_AC_CONFIG_NAME})
+
+        target_link_libraries(${NAME}_static ${ARG_LIBRARIES})
+        install(TARGETS ${NAME}_static DESTINATION bin)
     endif()
-endmacro(add_config)
+endmacro(add_vmm_executable)
 
 # ------------------------------------------------------------------------------
-# Miscellaneous
+# set_bfm_vmm
 # ------------------------------------------------------------------------------
 
-# Print the Bareflank ASCII-art banner
-macro(print_banner)
+# Set BFM VMM
+#
+# Sets the VMM that BFM will use when running "make load" or "make quick". This
+# does not hard code the VMM into BFM. BFM must either be given the VMM to
+# load, or an enviroment variable must be set.
+#
+# @param NAME The name of the VMM to load
+# @param DEFAULT If the VMM has not yet been set, this default value will be
+#     used instead. This should not be used by extensions
+#
+macro(set_bfm_vmm NAME)
+    set(options DEFAULT)
+    cmake_parse_arguments(ARG "${options}" "" "" ${ARGN})
+
+    if(NOT ARG_DEFAULT OR (ARG_DEFAULT AND NOT BFM_VMM))
+        if(BUILD_SHARED_LIBS)
+            set(BFM_VMM "${NAME}_shared")
+        endif()
+
+        if(BUILD_STATIC_LIBS)
+            set(BFM_VMM "${NAME}_static")
+        endif()
+    endif()
+endmacro(set_bfm_vmm)
+
+# ------------------------------------------------------------------------------
+# do_test
+# ------------------------------------------------------------------------------
+
+# Do Test
+#
+# Adds a unit test.
+#
+# @param FILENAME the file name of the test. Must start with "test_"
+# @param DEFINES Additional definitions for the test
+# @param DEPENDS Additional dependencies for the test. "_static" is added
+#     for you
+# @param SOURCES The source files to use for the test. If this is not defined,
+#     the file used is ${FILENAME}.cpp. This is only needed if the test file
+#     is not in the same directory, allowing you to pass a source file with
+#     a directory. Nomrally FILENAME should still match the filename being
+#     used.
+#
+macro(do_test FILENAME)
+    set(multiVal DEFINES DEPENDS SOURCES)
+    cmake_parse_arguments(ARG "" "" "${multiVal}" ${ARGN})
+
+    set(DEPENDS "")
+    foreach(d ${ARG_DEPENDS})
+        list(APPEND DEPENDS "${d}_static")
+    endforeach(d)
+
+    if(NOT ARG_SOURCES)
+        set(ARG_SOURCES "${FILENAME}.cpp")
+    endif()
+
+    string(REPLACE "test_" "" NAME "${FILENAME}")
+
+    add_executable(test_${NAME} ${ARG_SOURCES})
+    target_link_libraries(test_${NAME} ${DEPENDS} test_catch)
+    target_compile_definitions(test_${NAME} PRIVATE ${ARG_DEFINES})
+    add_test(test_${NAME} test_${NAME})
+    if(CYGWIN OR WIN32)
+        target_link_libraries(test_${NAME} setupapi)
+    endif()
+endmacro(do_test)
+
+# ------------------------------------------------------------------------------
+# print_xxx
+# ------------------------------------------------------------------------------
+
+# Private
+#
+function(print_banner)
     message(STATUS "${BoldMagenta}  ___                __ _           _   ${ColorReset}")
     message(STATUS "${BoldMagenta} | _ ) __ _ _ _ ___ / _| |__ _ _ _ | |__${ColorReset}")
     message(STATUS "${BoldMagenta} | _ \\/ _` | '_/ -_)  _| / _` | ' \\| / /${ColorReset}")
     message(STATUS "${BoldMagenta} |___/\\__,_|_| \\___|_| |_\\__,_|_||_|_\\_\\${ColorReset}")
     message(STATUS "")
-    message(STATUS "${Green} Please give us a star on:${White} https://github.com/Bareflank/hypervisor${ColorReset}")
+    message(STATUS "${Green} Please give us a star on: ${White}https://github.com/Bareflank/hypervisor${ColorReset}")
     message(STATUS "")
-endmacro(print_banner)
+endfunction(print_banner)
 
-# Print the Bareflank build system top-level usage instructions:
+# Private
+#
 macro(print_usage)
     message(STATUS "${Green} Bareflank is ready to build, usage:${ColorReset}")
-    message(STATUS "${Yellow}    ${BF_BUILD_COMMAND}${ColorReset}")
+    message(STATUS "${Yellow}    ${BUILD_COMMAND}${ColorReset}")
     message(STATUS "")
-    message(STATUS "${Green} For more build options:${ColorReset}")
-    message(STATUS "${Yellow}    ${BF_BUILD_COMMAND} info${ColorReset}")
-    message(STATUS "")
-endmacro(print_usage)
 
-# Copies all files that match the given recursive GLOB expression (relative to
-# to the given GLOB directory) only if the matched source file has changed.
-# @arg GLOB_EXPR: A cmake GLOB_RECURSE expression to generate a list of files
-#           to be copied
-# @arg GLOB_DIR: The directory that GLOB_EXPR will be calculated relative to
-# @arg INSTALL_DIR: The directory to install all files that matched GLOB_EXPR to
-macro(copy_files_if_different)
-    set(oneVal GLOB_DIR GLOB_EXPR INSTALL_DIR)
-    cmake_parse_arguments(_EP_INSTALL "" "${oneVal}" "" ${ARGN})
-
-    file(GLOB_RECURSE out_files RELATIVE ${_EP_INSTALL_GLOB_DIR} ${_EP_INSTALL_GLOB_DIR}/${_EP_INSTALL_GLOB_EXPR})
-    foreach(file ${out_files})
-        execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_EP_INSTALL_GLOB_DIR}/${file} ${_EP_INSTALL_INSTALL_DIR}/${file})
-    endforeach()
-endmacro(copy_files_if_different)
-
-# Platform independent symbolic link creation
-macro(install_symlink filepath sympath)
-    if(WIN32)
-        install(CODE "execute_process(COMMAND mklink ${sympath} ${filepath})")
-        install(CODE "message(STATUS \"Created symlink: ${sympath} -> ${filepath}\")")
+    if(NOT WIN32)
+        message(STATUS "${Green} For more build options:${ColorReset}")
+        message(STATUS "${Yellow}    ${BUILD_COMMAND} info${ColorReset}")
+        message(STATUS "")
     else()
-        install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${filepath} ${sympath})")
-        install(CODE "message(STATUS \"Created symlink: ${sympath} -> ${filepath}\")")
+        message(STATUS "${Green} Additional build options:${ColorReset}")
+        message(STATUS "${Yellow}    cmake --build . --target test${ColorReset}")
+        message(STATUS "${Yellow}    cmake --build . --target clean-all${ColorReset}")
+        message(STATUS "")
     endif()
-endmacro(install_symlink)
-
-# Convenience wrapper around cmake's built-in find_program()
-# @arg path: Will hold the path to the program given by "name" on success
-# @arg name: The program to be searched for.
-# If the program given by "name" is not found, cmake exits with an error
-macro(check_program_installed path name)
-    find_program(${path} ${name})
-    if(${path} MATCHES "-NOTFOUND$")
-        message(FATAL_ERROR "Unable to find ${name}, or ${name} is not installed")
-    endif()
-endmacro(check_program_installed)
+endmacro(print_usage)

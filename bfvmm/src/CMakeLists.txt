@@ -16,18 +16,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-add_subdirectory(debug_ring)
-add_subdirectory(intrinsics)
-add_subdirectory(memory_manager)
-add_subdirectory(serial)
-add_subdirectory(vmxon)
-add_subdirectory(vmcs)
-add_subdirectory(exit_handler)
-add_subdirectory(vcpu)
-add_subdirectory(vcpu_factory)
-add_subdirectory(vcpu_manager)
+cmake_minimum_required(VERSION 3.6)
+project(bfvmm C CXX)
 
-if(NOT ${PROJECT_NAME} STREQUAL bfvmm_test)
-    add_subdirectory(support)
-    add_subdirectory(main)
-endif()
+include(${SOURCE_CMAKE_DIR}/project.cmake)
+init_project()
+
+add_subdirectory(debug)
+add_subdirectory(memory_manager)
+add_subdirectory(hve)
+add_subdirectory(vcpu)
+add_subdirectory(entry)

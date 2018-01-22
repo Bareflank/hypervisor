@@ -157,7 +157,7 @@ TEST_CASE("common_load_vmm: add modules mdl fails")
     CHECK(common_fini() == BF_SUCCESS);
 }
 
-extern "C" int64_t add_modules_mdl(void);
+extern "C" int64_t private_add_modules_mdl(void);
 
 TEST_CASE("common_load_vmm: add tss mdl fails")
 {
@@ -168,7 +168,7 @@ TEST_CASE("common_load_vmm: add tss mdl fails")
     }
 
     MockRepository mocks;
-    mocks.OnCallFunc(add_modules_mdl).Return(BF_SUCCESS);
+    mocks.OnCallFunc(private_add_modules_mdl).Return(BF_SUCCESS);
 
     CHECK(common_load_vmm() == ENTRY_ERROR_UNKNOWN);
     CHECK(common_fini() == BF_SUCCESS);

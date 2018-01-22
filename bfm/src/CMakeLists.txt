@@ -16,14 +16,55 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
+cmake_minimum_required(VERSION 3.6)
+project(bfruntime C CXX)
+
+list(APPEND BFM_CXX_FLAGS
+    -DBFM_VMM_BIN_PATH=${BFM_VMM_BIN_PATH}
+    -DBFM_VMM_LIB_PATH=${BFM_VMM_LIB_PATH}
+)
+
+include(${SOURCE_CMAKE_DIR}/project.cmake)
+init_project(
+    CXX_FLAGS ${BFM_CXX_FLAGS}
+)
+
+if(BUILD_TARGET_OS STREQUAL "Linux")
+    list(APPEND SOURCES
+        platform/linux/ioctl.cpp
+        platform/linux/ioctl_private.cpp
+    )
+    include_directories(platform/linux/)
+elseif(BUILD_TARGET_OS STREQUAL "Windows")
+    list(APPEND SOURCES
+        platform/windows/ioctl.cpp
+        platform/windows/ioctl_private.cpp
+    )
+    include_directories(platform/windows/)
+else()
+    message(FATAL_ERROR "Unsupported OS: ${BUILD_TARGET_OS}")
+endif()
+
+if(BUILD_TARGET_ARCH STREQUAL "x86_64")
+    list(APPEND SOURCES
+        arch/intel_x64/bfvmcall.asm
+    )
+else()
+    message(FATAL_ERROR "Unsupported architecture: ${BUILD_TARGET_ARCH}")
+endif()
 
 list(APPEND SOURCES
     command_line_parser.cpp
     ioctl_driver.cpp
+    main.cpp
 )
 
-add_library(bfm_src OBJECT ${SOURCES})
-target_compile_definitions(bfm_src PUBLIC STATIC_BFM_SRC)
+add_executable(bfm ${SOURCES})
+target_compile_definitions(bfm PUBLIC MAIN=main)
+target_compile_definitions(bfm PUBLIC ABORT=abort)
+
+if(CYGWIN OR WIN32)
+    target_link_libraries(bfm setupapi)
+endif()
+
+install(TARGETS bfm DESTINATION bin)

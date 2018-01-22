@@ -16,16 +16,30 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-add_dependency(
-    json
-    GIT_REPOSITORY  https://github.com/Bareflank/json.git
-    GIT_TAG         v1.2
-    GIT_SHALLOW     1
-    CMAKE_ARGS      -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_JSON}
-)
+if(ENABLE_BUILD_VMM OR ENABLE_BUILD_USERSPACE OR ENABLE_BUILD_TEST)
+    message(STATUS "Including dependency: json")
 
-install_dependency(
-    json
-    DESTINATIONS ${BUILD_SYSROOT_OS} ${BUILD_SYSROOT_VMM}
-    GLOB_EXPRESSIONS *.hpp
-)
+    download_dependency(
+        json
+        URL         ${JSON_URL}
+        URL_MD5     ${JSON_URL_MD5}
+    )
+endif()
+
+if(ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST)
+    add_dependency(
+        json vmm
+    )
+endif()
+
+if(ENABLE_BUILD_USERSPACE)
+    add_dependency(
+        json userspace
+    )
+endif()
+
+if(ENABLE_BUILD_TEST)
+    add_dependency(
+        json test
+    )
+endif()

@@ -19,7 +19,7 @@
 #include <bfbitmanip.h>
 #include <memory_manager/page_table_entry_x64.h>
 
-#include <intrinsics/x86/common_x64.h>
+#include <intrinsics.h>
 using namespace x64;
 
 page_table_entry_x64::page_table_entry_x64(gsl::not_null<pointer> pte) noexcept :

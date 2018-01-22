@@ -16,96 +16,42 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-generate_flags(
-    VMM
-    C_FLAGS_OUT LIBCXX_C_FLAGS
-    CXX_FLAGS_OUT LIBCXX_CXX_FLAGS
-    VERBOSE OFF
-)
+if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
+    message(STATUS "Including dependency: libcxx")
 
-get_dependency_src_dir(libcxx LIBCXX_SRC_DIR)
-get_dependency_src_dir(libcxxabi LIBCXXABI_SRC_DIR)
-get_dependency_src_dir(llvm LLVM_SRC_DIR)
-get_dependency_install_dir(libcxx LIBCXX_INSTALL_DIR)
-get_dependency_install_dir(libcxxabi LIBCXXABI_INSTALL_DIR)
+    download_dependency(
+        libcxx
+        URL          ${LIBCXX_URL}
+        URL_MD5      ${LIBCXX_URL_MD5}
+    )
 
-add_dependency(
-    libcxxabi
-    GIT_REPOSITORY  https://github.com/Bareflank/libcxxabi.git
-    GIT_TAG         v1.2
-    GIT_SHALLOW     1
-    DEPENDS         llvm newlib bfsdk binutils
-    CMAKE_ARGS
-        -DLLVM_PATH=${LLVM_SRC_DIR}
-        -DLLVM_ENABLE_LIBCXX=ON
-        -DLIBCXXABI_LIBCXX_PATH=${LIBCXX_SRC_DIR}
-        -DLIBCXXABI_SYSROOT=${BUILD_SYSROOT_VMM}
-        -DLIBCXXABI_HAS_PTHREAD_API=ON
-        -DCMAKE_INSTALL_PREFIX=${LIBCXXABI_INSTALL_DIR}
-        -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
-        -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
-        -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_LIBCXXABI}
-        -DCMAKE_C_FLAGS=${LIBCXX_C_FLAGS}
-        -DCMAKE_CXX_FLAGS=${LIBCXX_CXX_FLAGS}
-        -DBUILD_SYSROOT_VMM=${BUILD_SYSROOT_VMM}
-        -DLIBCXX_ENABLE_SHARED=ON
-        -DLIBCXX_ENABLE_STATIC=ON
-)
+    generate_flags(
+        vmm
+    )
 
-add_dependency(
-    libcxx
-    GIT_REPOSITORY  https://github.com/Bareflank/libcxx.git
-    GIT_TAG         v1.2
-    GIT_SHALLOW     1
-    DEPENDS         llvm newlib bfsdk binutils
-    CMAKE_ARGS
-        -DLLVM_PATH=${LLVM_SRC_DIR}
+    list(APPEND LIBCXX_CONFIGURE_FLAGS
+        -DLLVM_PATH=${CACHE_DIR}/llvm
         -DLIBCXX_CXX_ABI=libcxxabi
-        -DLIBCXX_CXX_ABI_INCLUDE_PATHS=${LIBCXXABI_SRC_DIR}/include/
-        -DLIBCXX_SYSROOT=${BUILD_SYSROOT_VMM}
+        -DLIBCXX_CXX_ABI_INCLUDE_PATHS=${CACHE_DIR}/libcxxabi/include
+        -DLIBCXX_SYSROOT=${VMM_PREFIX_PATH}
         -DLIBCXX_HAS_PTHREAD_API=ON
+        -DLIBCXX_ENABLE_FILESYSTEM=OFF
         -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF
-        -DCMAKE_INSTALL_PREFIX=${LIBCXX_INSTALL_DIR}
-        -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
-        -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_PATH_LIBCXX}
-        -DCMAKE_C_FLAGS=${LIBCXX_C_FLAGS}
-        -DCMAKE_CXX_FLAGS=${LIBCXX_CXX_FLAGS}
-        -DBUILD_SYSROOT_VMM=${BUILD_SYSROOT_VMM}
-        -DLIBCXX_ENABLE_SHARED=ON
-        -DLIBCXX_ENABLE_STATIC=ON
-)
+        -DCMAKE_TOOLCHAIN_FILE=${VMM_TOOLCHAIN_PATH}
+        -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+    )
 
-install_dependency(
-    libcxxabi
-    DESTINATIONS ${BUILD_SYSROOT_VMM}
-    GLOB_EXPRESSIONS *
-)
+    add_dependency(
+        libcxx vmm
+        CMAKE_ARGS  ${LIBCXX_CONFIGURE_FLAGS}
+        DEPENDS     llvm_${VMM_PREFIX}
+        DEPENDS     newlib_${VMM_PREFIX}
+        DEPENDS     libcxxabi_${VMM_PREFIX}
+    )
 
-install_dependency(
-    libcxx
-    DESTINATIONS ${BUILD_SYSROOT_VMM}
-    GLOB_EXPRESSIONS *
-)
-
-# libcxx and libcxxabi both depend on each other's source code to build, so
-# setup inter-project step dependencies to make sure that they build in the
-# right order.
-ExternalProject_Add_StepTargets(libcxx download)
-ExternalProject_Add_StepTargets(libcxxabi download)
-
-ExternalProject_Add_StepDependencies(
-    libcxx configure
-    libcxx-download
-    libcxxabi-download
-)
-
-ExternalProject_Add_StepDependencies(
-    libcxx build
-    libcxxabi
-)
-
-ExternalProject_Add_StepDependencies(
-    libcxxabi configure
-    libcxx-download
-    libcxxabi-download
-)
+    add_dependency_step(
+        libcxx vmm
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${VMM_PREFIX_PATH}/lib/libc++.so.1.0 ${VMM_PREFIX_PATH}/lib/libc++.so
+    )
+endif()

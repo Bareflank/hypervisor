@@ -18,7 +18,6 @@
 
 #include <catch/catch.hpp>
 
-#include <fstream>
 #include <test_fake_elf.h>
 #include <test_real_elf.h>
 
