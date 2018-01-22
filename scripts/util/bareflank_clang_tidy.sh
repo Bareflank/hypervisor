@@ -129,6 +129,7 @@ if [[ ! "$1" == "all" ]] && [[ ! "$1" == "diff" ]]; then
     exit 1
 fi
 
+echo $PWD
 get_changed_files $1 $2
 
 #

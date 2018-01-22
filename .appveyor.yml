@@ -60,7 +60,7 @@ build_script:
   #
   - mkdir build_msbuild
   - cd build_msbuild
-  - cmake -G "Visual Studio 14 2015 Win64" -DENABLE_UNITTESTING=ON ..
+  - cmake -G "Visual Studio 14 2015 Win64" -DENABLE_BUILD_VMM=OFF -DENABLE_BUILD_USERSPACE=OFF -DENABLE_BUILD_TEST=ON ..
   - msbuild /m:3 hypervisor.sln
   - cmake --build . --target test
 
@@ -68,6 +68,6 @@ build_script:
   # Cygwin (Shared Libraries)
   #
   - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; mkdir build_cygwin"'
-  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; cmake -DENABLE_UNITTESTING=ON -DBUILD_SHARED_LIBS=ON .."'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; cmake -DENABLE_BUILD_TEST=ON .."'
   - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make -j3"'
-  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make test"'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make unittest"'

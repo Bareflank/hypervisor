@@ -17,8 +17,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <catch/catch.hpp>
-
-#include <fstream>
 #include <test_real_elf.h>
 
 TEST_CASE("bfelf_file_get_relro: invalid elf file")

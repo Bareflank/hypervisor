@@ -67,6 +67,6 @@ TEST_CASE("bfelf_set_integer_args: success")
     bfelf_binary_t binary{};
 
     CHECK_NOTHROW(
-        bfelf_read_binary_and_get_needed_list(&f, g_filenames.back(), {BAREFLANK_SYSROOT_PATH + "/lib/"_s}, buffer, binary)
+        bfelf_read_binary_and_get_needed_list(&f, g_filenames.back(), {VMM_PREFIX_PATH + "/lib/"_s}, buffer, binary)
     );
 }

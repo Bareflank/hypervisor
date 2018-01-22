@@ -376,8 +376,8 @@ ioctl_driver::library_path()
         paths.emplace_back(path);
     }
 
-    paths.emplace_back(bfstringify(BAREFLANK_VMM_BIN_PATH));
-    paths.emplace_back(bfstringify(BAREFLANK_VMM_LIB_PATH));
+    paths.emplace_back(bfstringify(BFM_VMM_BIN_PATH));
+    paths.emplace_back(bfstringify(BFM_VMM_LIB_PATH));
 
     return paths;
 }
@@ -391,11 +391,11 @@ ioctl_driver::vmm_filename()
         return filename;
     }
 
-    if (auto vmm_path = std::getenv("BF_VMM_PATH")) {
-        return {vmm_path};
+    if (auto bfm_vmm = std::getenv("BFM_VMM")) {
+        return {bfm_vmm};
     }
 
-    return bfstringify(BAREFLANK_VMM_BIN_PATH) "/" bfstringify(BFM_DEFAULT_VMM);
+    throw std::runtime_error("bfm vmm not set");
 }
 
 ioctl_driver::list_type

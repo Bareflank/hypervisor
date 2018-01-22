@@ -16,35 +16,34 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# TODO: This file currently only builds binutils for whatever host architecture
-# cmake is currently running on. Update to build against the
-# ${BUILD_TARGET_ARCH} build configuration, or remove the need for building
-# binutils from source at all.
+if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
+    message(STATUS "Including dependency: binutils")
 
-get_dependency_src_dir(binutils BINUTILS_SRC_DIR)
-get_dependency_install_dir(binutils BINUTILS_INSTALL_DIR)
+    download_dependency(
+        binutils
+        URL         ${BINUTILS_URL}
+        URL_MD5     ${BINUTILS_URL_MD5}
+    )
 
-list(APPEND BINUTILS_ARGS
-    --prefix=${BINUTILS_INSTALL_DIR}
-    --target=${BUILD_TARGET_ARCH}-vmm-elf
-    --disable-nls
-    --disable-werror
-    --with-sysroot
-)
+    list(APPEND BINUTILS_CONFIGURE_FLAGS
+        --disable-nls
+        --disable-werror
+        --with-sysroot
+        --prefix=${PREFIXES_DIR}
+        --target=${VMM_PREFIX}
+    )
 
-add_dependency(
-    binutils
-    URL                 http://ftp.gnu.org/gnu/binutils/binutils-2.28.tar.gz
-    URL_MD5             d5d270fd0b698ed59ca5ade8e1b5059c
-    CONFIGURE_COMMAND   ${BINUTILS_SRC_DIR}/configure ${BINUTILS_ARGS}
-    UPDATE_DISCONNECTED 0
-    UPDATE_COMMAND      ""
-    BUILD_COMMAND       make
-    INSTALL_COMMAND     make install
-)
+    add_dependency(
+        binutils vmm
+        CONFIGURE_COMMAND   ${CACHE_DIR}/binutils/configure ${BINUTILS_CONFIGURE_FLAGS}
+        BUILD_COMMAND       make -j${BUILD_TARGET_CORES}
+        INSTALL_COMMAND     make install
+    )
 
-install_dependency(
-    binutils
-    DESTINATIONS ${BUILD_SYSROOT_VMM}
-    GLOB_EXPRESSIONS bin/*
-)
+    add_dependency_step(
+        binutils vmm
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${VMM_PREFIX}/lib/ldscripts
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${PREFIXES_DIR}/bin
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${PREFIXES_DIR}/share
+    )
+endif()

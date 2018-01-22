@@ -19,7 +19,7 @@
 #ifndef MEM_ATTR_X64_H
 #define MEM_ATTR_X64_H
 
-#include <intrinsics/x86/common_x64.h>
+#include <intrinsics.h>
 
 // @cond
 // *INDENT-OFF*

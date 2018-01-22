@@ -34,7 +34,7 @@ TEST_CASE("bfelf_loader_resolve_symbol: real test (list)")
 
 TEST_CASE("bfelf_loader_resolve_symbol: real test (needed)")
 {
-    binaries_info binaries{&g_file, g_filenames.back(), {BAREFLANK_SYSROOT_PATH + "/lib/"_s}};
+    binaries_info binaries{&g_file, g_filenames.back(), {VMM_PREFIX_PATH + "/lib/"_s}};
 
     std::array<const char *, 2> argv{{"1000", "2000"}};
     binaries.set_args(gsl::narrow_cast<int>(argv.size()), argv.data());

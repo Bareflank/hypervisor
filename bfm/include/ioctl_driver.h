@@ -22,22 +22,6 @@
 #include <ioctl.h>
 #include <command_line_parser.h>
 
-// -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_BFM_SRC
-#ifdef SHARED_BFM_SRC
-#define EXPORT_BFM_SRC EXPORT_SYM
-#else
-#define EXPORT_BFM_SRC IMPORT_SYM
-#endif
-#else
-#define EXPORT_BFM_SRC
-#endif
-
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -57,7 +41,7 @@
 /// If certain conditions are not meet, the IOCTL driver will error out on
 /// it's attempt to process, and return an error.
 ///
-class EXPORT_BFM_SRC ioctl_driver
+class ioctl_driver
 {
 public:
 
@@ -99,7 +83,7 @@ public:
     ///
     void process();
 
-#ifndef ENABLE_UNITTESTING
+#ifndef ENABLE_BUILD_TEST
 private:
 #endif
 
