@@ -21,6 +21,7 @@ project(bfunwind C CXX)
 
 include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project(
+    INCLUDES ${CMAKE_CURRENT_LIST_DIR}/../include
     TIDY_EXCLUSIONS -cppcoreguidelines-pro*
 )
 

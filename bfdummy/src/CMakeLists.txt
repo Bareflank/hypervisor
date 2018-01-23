@@ -20,6 +20,8 @@ cmake_minimum_required(VERSION 3.6)
 project(bfdummy C CXX)
 
 include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
+init_project(
+    INCLUDES ${CMAKE_CURRENT_LIST_DIR}/../include
+)
 
 add_subdirectory(libs)
