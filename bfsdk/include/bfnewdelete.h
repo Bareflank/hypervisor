@@ -30,20 +30,11 @@
 
 size_t g_new_throws_bad_alloc = 0;
 
-#ifdef _WIN32
-#include <malloc.h>
-#define aligned_alloc _aligned_malloc
-#endif
-
 inline void *
 custom_new(std::size_t size)
 {
     if (size == g_new_throws_bad_alloc || size == 0xFFFFFFFFFFFFFFFF) {
         throw std::bad_alloc();
-    }
-
-    if ((size & (MAX_PAGE_SIZE - 1)) == 0) {
-        return aligned_alloc(0x1000, size);
     }
 
     return malloc(size);
