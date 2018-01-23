@@ -16,41 +16,30 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DEXIT_HANDLER_TEST")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DEXIT_HANDLER_TEST")
-
-do_test(test_exit_handler
-    SOURCES arch/intel_x64/exit_handler/test_exit_handler.cpp
+list(APPEND ARGN
     DEPENDS bfvmm_hve
     DEPENDS bfvmm_memory_manager
     DEFINES STATIC_HVE
     DEFINES STATIC_MEMORY_MANAGER
     DEFINES STATIC_INTRINSICS
+)
+
+do_test(test_exit_handler
+    SOURCES arch/intel_x64/exit_handler/test_exit_handler.cpp
+    ${ARGN}
 )
 
 do_test(test_exit_handler_entry
     SOURCES arch/intel_x64/exit_handler/test_exit_handler_entry.cpp
-    DEPENDS bfvmm_hve
-    DEPENDS bfvmm_memory_manager
-    DEFINES STATIC_HVE
-    DEFINES STATIC_MEMORY_MANAGER
-    DEFINES STATIC_INTRINSICS
+    ${ARGN}
 )
 
-# do_test(test_vmcs
-#     SOURCES arch/intel_x64/vmcs/test_vmcs.cpp
-#     DEPENDS bfvmm_hve
-#     DEPENDS bfvmm_memory_manager
-#     DEFINES STATIC_HVE
-#     DEFINES STATIC_MEMORY_MANAGER
-#     DEFINES STATIC_INTRINSICS
-# )
+do_test(test_vmcs
+    SOURCES arch/intel_x64/vmcs/test_vmcs.cpp
+    ${ARGN}
+)
 
-# do_test(test_vmxon
-#     SOURCES arch/intel_x64/vmxon/test_vmxon.cpp
-#     DEPENDS bfvmm_hve
-#     DEPENDS bfvmm_memory_manager
-#     DEFINES STATIC_HVE
-#     DEFINES STATIC_MEMORY_MANAGER
-#     DEFINES STATIC_INTRINSICS
-# )
+do_test(test_vmxon
+    SOURCES arch/intel_x64/vmxon/test_vmxon.cpp
+    ${ARGN}
+)
