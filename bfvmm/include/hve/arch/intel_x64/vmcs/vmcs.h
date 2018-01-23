@@ -174,6 +174,28 @@ public:
     ///
     VIRTUAL void load();
 
+    /// Set Pre Launch Delegate
+    ///
+    /// Sets the pre launch delegate. This delegate function will be called
+    /// right before the launch occurs, and can be used by extensions to
+    /// make mods to the VMCS prior to launch
+    ///
+    /// @param d the delegate function to use. Ownership is taken.
+    ///
+    void set_pre_launch_delegate(const pre_launch_delegate_t &d) noexcept;
+
+    /// Set Post Launch Delegate
+    ///
+    /// Sets the post launch delegate. This delegate function will be called
+    /// right after the launch occurs, and can be used by extensions to
+    /// make mods to the VMCS after the launch.
+    ///
+    /// @note This is only called on demotions.
+    ///
+    /// @param d the delegate function to use. Ownership is taken.
+    ///
+    void set_post_launch_delegate(const post_launch_delegate_t &d) noexcept;
+
 #ifndef ENABLE_BUILD_TEST
 protected:
 #endif
@@ -181,9 +203,6 @@ protected:
     /// @cond
 
     VIRTUAL void clear();
-
-    void set_pre_launch_delegate(const pre_launch_delegate_t &d) noexcept;
-    void set_post_launch_delegate(const post_launch_delegate_t &d) noexcept;
 
     /// @endcond
 
