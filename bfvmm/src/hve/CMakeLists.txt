@@ -25,7 +25,7 @@ list(APPEND SOURCES
     arch/intel_x64/vmxon/vmxon.cpp
 )
 
-if(NOT WIN32)
+if(NOT WIN32 AND NOT ENABLE_MOCKING)
     list(APPEND SOURCES
         arch/intel_x64/exit_handler/exit_handler_support.asm
         arch/intel_x64/vmcs/vmcs_launch.asm

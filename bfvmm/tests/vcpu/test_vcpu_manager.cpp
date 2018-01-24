@@ -16,6 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <bftypes.h>
+
 #include <catch/catch.hpp>
 #include <hippomocks.h>
 
@@ -50,6 +52,19 @@ mock_no_delete(MockRepository &mocks)
     mocks.OnCallDestructor(ptr);
 
     return ptr;
+}
+
+WEAK_SYM std::unique_ptr<vcpu>
+vcpu_factory::make_vcpu(vcpuid::type vcpuid, user_data *data)
+{
+    bfignored(data);
+    return std::make_unique<vcpu>(vcpuid);
+}
+
+TEST_CASE("vcpu_manager: support")
+{
+    vcpu_factory factory{};
+    CHECK_NOTHROW(factory.make_vcpu(0, nullptr));
 }
 
 TEST_CASE("vcpu_manager: create_valid")
