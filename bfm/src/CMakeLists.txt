@@ -26,6 +26,7 @@ list(APPEND BFM_CXX_FLAGS
 
 include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project(
+    INCLUDES ${CMAKE_CURRENT_LIST_DIR}/../include
     CXX_FLAGS ${BFM_CXX_FLAGS}
 )
 
