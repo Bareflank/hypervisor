@@ -666,7 +666,7 @@ endfunction(right_justify)
 
 # Private
 #
-macro(add_custom_target_category TEXT)
+function(add_custom_target_category TEXT)
     if(NOT WIN32)
         add_custom_command(
             TARGET info
@@ -674,7 +674,7 @@ macro(add_custom_target_category TEXT)
             COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "${TEXT}:"
         )
     endif()
-endmacro(add_custom_target_category)
+endfunction(add_custom_target_category)
 
 # ------------------------------------------------------------------------------
 # add_custom_target_info
@@ -682,7 +682,7 @@ endmacro(add_custom_target_category)
 
 # Private
 #
-macro(add_custom_target_info)
+function(add_custom_target_info)
     if(NOT WIN32)
         set(oneVal TARGET COMMENT)
         cmake_parse_arguments(ARG "" "${oneVal}" "" ${ARGN})
@@ -705,7 +705,7 @@ macro(add_custom_target_info)
             )
         endif()
     endif()
-endmacro(add_custom_target_info)
+endfunction(add_custom_target_info)
 
 # ------------------------------------------------------------------------------
 # add_subproject
@@ -957,7 +957,6 @@ macro(init_project)
         ${SOURCE_BFVMM_DIR}/include
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/include
-        ${CMAKE_CURRENT_LIST_DIR}/../include
     )
 
     if(NOT PREFIX STREQUAL "vmm")
@@ -982,11 +981,11 @@ endmacro(init_project)
 
 # Private
 #
-macro(validate_build)
+function(validate_build)
     if(BUILD_VALIDATOR_ERROR)
         message(FATAL_ERROR "Build validation failed")
     endif()
-endmacro(validate_build)
+endfunction(validate_build)
 
 # Invalidate Config
 #
@@ -1016,7 +1015,7 @@ endmacro(invalid_config)
 # @param DEFINES The definitions to add to the library
 # @param DEPENDS The dependency for the library. "_shared" is added for you
 #
-macro(add_shared_library NAME)
+function(add_shared_library NAME)
     set(options ALWAYS)
     set(multiVal SOURCES DEFINES DEPENDS)
     cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
@@ -1037,7 +1036,7 @@ macro(add_shared_library NAME)
         target_link_libraries(${NAME}_shared ${DEPENDS})
         install(TARGETS ${NAME}_shared DESTINATION lib)
     endif()
-endmacro(add_shared_library)
+endfunction(add_shared_library)
 
 # Add Static Library
 #
@@ -1049,7 +1048,7 @@ endmacro(add_shared_library)
 # @param SOURCES The source files for the library
 # @param DEFINES The definitions to add to the library
 #
-macro(add_static_library NAME)
+function(add_static_library NAME)
     set(options ALWAYS)
     set(multiVal SOURCES DEFINES)
     cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
@@ -1064,7 +1063,7 @@ macro(add_static_library NAME)
         target_compile_definitions(${NAME}_static PRIVATE ${ARG_DEFINES})
         install(TARGETS ${NAME}_static DESTINATION lib)
     endif()
-endmacro(add_static_library)
+endfunction(add_static_library)
 
 # ------------------------------------------------------------------------------
 # add_vmm
@@ -1082,7 +1081,7 @@ endmacro(add_static_library)
 #     a null.cpp file will be compiled for you.
 # @param DEFINES Additional definitions to add to the executable
 #
-macro(add_vmm_executable NAME)
+function(add_vmm_executable NAME)
     set(options NOVMMLIBS)
     set(multiVal LIBRARIES SOURCES DEFINES)
     cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
@@ -1100,8 +1099,13 @@ macro(add_vmm_executable NAME)
         add_executable(${NAME}_shared ${ARG_SOURCES})
         target_compile_definitions(${NAME}_shared PRIVATE ${ARG_DEFINES})
 
+        set(LIBRARIES "")
+        foreach(d ${ARG_LIBRARIES})
+            list(APPEND LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/lib${d}_shared.so")
+        endforeach(d)
+
         if(NOT ARG_NOVMMLIBS)
-            list(APPEND ARG_LIBRARIES
+            list(APPEND LIBRARIES
                 --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_entry_static.a --no-whole-archive
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_vcpu_shared.so
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_hve_shared.so
@@ -1111,7 +1115,7 @@ macro(add_vmm_executable NAME)
             )
         endif()
 
-        list(APPEND ARG_LIBRARIES
+        list(APPEND LIBRARIES
             ${CMAKE_INSTALL_PREFIX}/lib/libc++.so
             ${CMAKE_INSTALL_PREFIX}/lib/libc++abi.so
             ${CMAKE_INSTALL_PREFIX}/lib/libbfpthread_shared.so
@@ -1121,7 +1125,7 @@ macro(add_vmm_executable NAME)
             ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall_shared.so
         )
 
-        target_link_libraries(${NAME}_shared ${ARG_LIBRARIES})
+        target_link_libraries(${NAME}_shared ${LIBRARIES})
         install(TARGETS ${NAME}_shared DESTINATION bin)
     endif()
 
@@ -1129,8 +1133,13 @@ macro(add_vmm_executable NAME)
         add_executable(${NAME}_static ${ARG_SOURCES})
         target_compile_definitions(${NAME}_static PRIVATE ${ARG_DEFINES})
 
+        set(LIBRARIES "")
+        foreach(d ${ARG_LIBRARIES})
+            list(APPEND LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/lib${d}_static.a")
+        endforeach(d)
+
         if(NOT ARG_NOVMMLIBS)
-            list(APPEND ARG_LIBRARIES
+            list(APPEND LIBRARIES
                 --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_entry_static.a --no-whole-archive
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_vcpu_static.a
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_hve_static.a
@@ -1140,7 +1149,7 @@ macro(add_vmm_executable NAME)
             )
         endif()
 
-        list(APPEND ARG_LIBRARIES
+        list(APPEND LIBRARIES
             ${CMAKE_INSTALL_PREFIX}/lib/libc++.a
             ${CMAKE_INSTALL_PREFIX}/lib/libc++abi.a
             ${CMAKE_INSTALL_PREFIX}/lib/libbfpthread_static.a
@@ -1150,11 +1159,10 @@ macro(add_vmm_executable NAME)
             ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall_static.a
         )
 
-
-        target_link_libraries(${NAME}_static ${ARG_LIBRARIES})
+        target_link_libraries(${NAME}_static ${LIBRARIES})
         install(TARGETS ${NAME}_static DESTINATION bin)
     endif()
-endmacro(add_vmm_executable)
+endfunction(add_vmm_executable)
 
 # ------------------------------------------------------------------------------
 # set_bfm_vmm
@@ -1203,7 +1211,7 @@ endmacro(set_bfm_vmm)
 #     a directory. Nomrally FILENAME should still match the filename being
 #     used.
 #
-macro(do_test FILENAME)
+function(do_test FILENAME)
     set(multiVal DEFINES DEPENDS SOURCES)
     cmake_parse_arguments(ARG "" "" "${multiVal}" ${ARGN})
 
@@ -1225,7 +1233,7 @@ macro(do_test FILENAME)
     if(CYGWIN OR WIN32)
         target_link_libraries(test_${NAME} setupapi)
     endif()
-endmacro(do_test)
+endfunction(do_test)
 
 # ------------------------------------------------------------------------------
 # print_xxx
@@ -1245,7 +1253,7 @@ endfunction(print_banner)
 
 # Private
 #
-macro(print_usage)
+function(print_usage)
     message(STATUS "${Green} Bareflank is ready to build, usage:${ColorReset}")
     message(STATUS "${Yellow}    ${BUILD_COMMAND}${ColorReset}")
     message(STATUS "")
@@ -1260,4 +1268,4 @@ macro(print_usage)
         message(STATUS "${Yellow}    cmake --build . --target clean-all${ColorReset}")
         message(STATUS "")
     endif()
-endmacro(print_usage)
+endfunction(print_usage)

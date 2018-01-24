@@ -26,8 +26,8 @@ init_project(
 )
 
 list(APPEND LIBRARIES
-    ${CMAKE_INSTALL_PREFIX}/lib/libdummy_lib1_shared.so
-    ${CMAKE_INSTALL_PREFIX}/lib/libdummy_lib2_shared.so
+    dummy_lib1
+    dummy_lib2
 )
 
 add_vmm_executable(dummy_main
