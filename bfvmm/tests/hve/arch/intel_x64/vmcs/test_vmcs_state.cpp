@@ -16,12 +16,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <catch/catch.hpp>
-
-#include <vmcs/vmcs_intel_x64_state.h>
-#include <intrinsics/x86/common_x64.h>
-
-using namespace x64;
+#include <support/arch/intel_x64/test_support.h>
 
 TEST_CASE("vmcs: state")
 {

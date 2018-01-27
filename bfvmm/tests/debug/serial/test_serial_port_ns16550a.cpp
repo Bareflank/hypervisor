@@ -44,6 +44,14 @@ extern "C" void
 _outd(uint16_t port, uint32_t val) noexcept
 { g_ports[port] = val; }
 
+TEST_CASE("serial: support")
+{
+    CHECK_NOTHROW(_inb(0));
+    CHECK_NOTHROW(_outb(0, 0));
+    CHECK_NOTHROW(_ind(0));
+    CHECK_NOTHROW(_outd(0, 0));
+}
+
 TEST_CASE("serial: constructor_null_intrinsics")
 {
     CHECK_NOTHROW(std::make_unique<serial_port_ns16550a>());

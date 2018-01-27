@@ -16,10 +16,20 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <catch/catch.hpp>
-#include <hve/arch/intel_x64/vmcs/vmcs_intel_x64_launch.h>
+#include <bftypes.h>
 
-TEST_CASE("")
+#include <catch/catch.hpp>
+#include <vcpu/vcpu_factory.h>
+
+WEAK_SYM std::unique_ptr<vcpu>
+vcpu_factory::make_vcpu(vcpuid::type vcpuid, user_data *data)
 {
-    CHECK_NOTHROW(vmcs_launch(nullptr));
+    bfignored(data);
+    return std::make_unique<vcpu>(vcpuid);
+}
+
+TEST_CASE("vcpu_factory: make_vcpu")
+{
+    vcpu_factory factory;
+    CHECK(factory.make_vcpu(0, nullptr) != nullptr);
 }

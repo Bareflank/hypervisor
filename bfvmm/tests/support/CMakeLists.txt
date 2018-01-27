@@ -16,33 +16,17 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
-
-list(APPEND SOURCES
-    debug_ring/debug_ring.cpp
-    serial/serial_port_ns16550a.cpp
-    serial/serial_port_pl011.cpp
-    serial/serial_port_base.cpp
-)
-
-if(NOT ENABLE_MOCKING)
-    list(APPEND SOURCES
-        unistd.cpp
-    )
-endif()
-
-add_shared_library(
-    bfvmm_debug
-    SOURCES ${SOURCES}
-    DEFINES SHARED_DEBUG
-    DEFINES SHARED_INTRINSICS
-)
-
-add_static_library(
-    bfvmm_debug
-    SOURCES ${SOURCES}
-    DEFINES STATIC_DEBUG
+list(APPEND ARGN
+    DEPENDS bfvmm_vcpu
+    DEPENDS bfvmm_hve
+    DEPENDS bfvmm_memory_manager
+    DEFINES STATIC_VCPU
+    DEFINES STATIC_HVE
+    DEFINES STATIC_MEMORY_MANAGER
     DEFINES STATIC_INTRINSICS
+)
+
+do_test(test_support
+    SOURCES arch/intel_x64/test_support.cpp
+    ${ARGN}
 )

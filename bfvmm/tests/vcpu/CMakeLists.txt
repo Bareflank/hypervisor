@@ -16,19 +16,32 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-macro(do_test str)
-    add_executable(test_${str} test_${str}.cpp)
-    target_compile_definitions(test_${str} PRIVATE STATIC_VCPU)
-    target_link_libraries(test_${str} bfvmm_vcpu_static)
-    target_link_libraries(test_${str} bfvmm_exit_handler_static)
-    target_link_libraries(test_${str} bfvmm_vmcs_static)
-    target_link_libraries(test_${str} bfvmm_vmxon_static)
-    target_link_libraries(test_${str} bfvmm_memory_manager_static)
-    target_link_libraries(test_${str} bfvmm_intrinsics_static)
-    target_link_libraries(test_${str} test_catch)
-    add_test(test_${str} test_${str})
-    install(TARGETS test_${str} DESTINATION ${BUILD_SYSROOT_TEST}/bin/bfvmm)
-endmacro(do_test)
+list(APPEND ARGN
+    DEPENDS bfvmm_vcpu
+    DEPENDS bfvmm_hve
+    DEPENDS bfvmm_memory_manager
+    DEFINES STATIC_VCPU
+    DEFINES STATIC_HVE
+    DEFINES STATIC_MEMORY_MANAGER
+    DEFINES STATIC_INTRINSICS
+)
 
-do_test(vcpu)
-do_test(vcpu_intel_x64)
+do_test(test_vcpu
+    SOURCES test_vcpu.cpp
+    ${ARGN}
+)
+
+do_test(test_vcpu_manager
+    SOURCES test_vcpu_manager.cpp
+    ${ARGN}
+)
+
+do_test(test_vcpu_factory
+    SOURCES test_vcpu_factory.cpp
+    ${ARGN}
+)
+
+do_test(test_vcpu_intel_x64
+    SOURCES arch/intel_x64/test_vcpu.cpp
+    ${ARGN}
+)

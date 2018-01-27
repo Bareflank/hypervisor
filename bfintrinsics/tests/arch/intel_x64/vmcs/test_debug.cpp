@@ -54,6 +54,8 @@ proc_ctl_disallow1(uint64_t mask)
 
 TEST_CASE("debug_dump")
 {
+    CHECK_NOTHROW(_cpuid_eax(0));
+
     proc_ctl_disallow1(msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
     CHECK_THROWS(dump());
 

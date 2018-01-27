@@ -16,7 +16,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include "../test_support.h"
+#include <support/arch/intel_x64/test_support.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
@@ -37,7 +37,7 @@ setup_vmcs_unhandled(MockRepository &mocks, vmcs::value_type reason)
     g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = 0xFFFFFFFF00000000UL;
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFF00000000UL;
 
-    g_exit_reason = reason;
+    g_vmcs_fields[vmcs::exit_reason::addr] = reason;
     return vmcs;
 }
 
@@ -56,7 +56,7 @@ setup_vmcs_handled(MockRepository &mocks, vmcs::value_type reason)
     }
 
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFFFFFFFFFFUL;
-    g_exit_reason = reason;
+    g_vmcs_fields[vmcs::exit_reason::addr] = reason;
 
     return vmcs;
 }
@@ -73,7 +73,7 @@ setup_vmcs_halt(MockRepository &mocks, vmcs::value_type reason)
     mocks.NeverCall(vmcs, vmcs_intel_x64::resume);
 
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFFFFFFFFFFUL;
-    g_exit_reason = reason;
+    g_vmcs_fields[vmcs::exit_reason::addr] = reason;
 
     return vmcs;
 }
@@ -90,7 +90,7 @@ setup_vmcs_promote(MockRepository &mocks, vmcs::value_type reason)
     mocks.NeverCall(vmcs, vmcs_intel_x64::resume);
 
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFFFFFFFFFFUL;
-    g_exit_reason = reason;
+    g_vmcs_fields[vmcs::exit_reason::addr] = reason;
 
     return vmcs;
 }
@@ -102,7 +102,7 @@ setup_ehlr(gsl::not_null<vmcs_intel_x64 *> vmcs)
     ehlr.set_vmcs(vmcs);
     ehlr.set_state_save(&g_state_save);
 
-    g_rip = ehlr.m_state_save->rip + g_exit_instruction_length;
+    g_rip = ehlr.m_state_save->rip + g_vmcs_fields[vmcs::vm_exit_instruction_length::addr];
     return ehlr;
 }
 
@@ -1025,18 +1025,18 @@ TEST_CASE("exit_handler: vm_exit_reason_vmxoff")
     setup_mm(mocks);
     setup_pt(mocks);
 
-    g_guest_cr3 = 0x1000;
-    g_guest_gdtr_limit = 0x4;
-    g_guest_gdtr_base = 0x432000;
+    g_vmcs_fields[vmcs::guest_cr3::addr] = 0x1000;
+    g_vmcs_fields[vmcs::guest_gdtr_limit::addr] = 0x4;
+    g_vmcs_fields[vmcs::guest_gdtr_base::addr] = 0x432000;
 
     auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::vmxoff);
     auto ehlr = setup_ehlr(vmcs);
 
     CHECK_THROWS(ehlr.dispatch());
 
-    g_guest_cr3 = 0x0;
-    g_guest_gdtr_limit = 0x0;
-    g_guest_gdtr_base = 0x0;
+    g_vmcs_fields[vmcs::guest_cr3::addr] = 0x0;
+    g_vmcs_fields[vmcs::guest_gdtr_limit::addr] = 0x0;
+    g_vmcs_fields[vmcs::guest_gdtr_base::addr] = 0x0;
 }
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_debug_ctl")
@@ -1045,12 +1045,11 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_debug_ctl")
     auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::rdmsr);
     auto ehlr = setup_ehlr(vmcs);
 
-    g_value = 0x0000000200000001;
+    g_vmcs_fields[vmcs::guest_ia32_debugctl::addr] = 0x0000000200000001;
     ehlr.m_state_save->rcx = intel_x64::msrs::ia32_debugctl::addr;
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_debugctl::addr);
     CHECK(ehlr.m_state_save->rax == 0x1);
     CHECK(ehlr.m_state_save->rdx == 0x2);
     CHECK(ehlr.m_state_save->rip == g_rip);
@@ -1062,14 +1061,13 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_pat")
     auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::rdmsr);
     auto ehlr = setup_ehlr(vmcs);
 
-    g_value = 0x0000000300000002;
+    g_vmcs_fields[vmcs::guest_ia32_pat::addr] = 0x0000000300000002;
     ehlr.m_state_save->rcx = x64::msrs::ia32_pat::addr;
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] =
         intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask << 32;
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_pat::addr);
     CHECK(ehlr.m_state_save->rax == 0x2);
     CHECK(ehlr.m_state_save->rdx == 0x3);
     CHECK(ehlr.m_state_save->rip == g_rip);
@@ -1081,14 +1079,13 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_efer")
     auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::rdmsr);
     auto ehlr = setup_ehlr(vmcs);
 
-    g_value = 0x0000000400000003;
+    g_vmcs_fields[vmcs::guest_ia32_efer::addr] = 0x0000000400000003;
     ehlr.m_state_save->rcx = intel_x64::msrs::ia32_efer::addr;
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] =
         intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask << 32;
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_efer::addr);
     CHECK(ehlr.m_state_save->rax == 0x3);
     CHECK(ehlr.m_state_save->rdx == 0x4);
     CHECK(ehlr.m_state_save->rip == g_rip);
@@ -1100,14 +1097,13 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_perf")
     auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::rdmsr);
     auto ehlr = setup_ehlr(vmcs);
 
-    g_value = 0x0000000400000003;
+    g_vmcs_fields[vmcs::guest_ia32_perf_global_ctrl::addr] = 0x0000000400000003;
     ehlr.m_state_save->rcx = intel_x64::msrs::ia32_perf_global_ctrl::addr;
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] =
         intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::mask << 32;
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_perf_global_ctrl::addr);
     CHECK(ehlr.m_state_save->rax == 0x3);
     CHECK(ehlr.m_state_save->rdx == 0x4);
     CHECK(ehlr.m_state_save->rip == g_rip);
@@ -1119,12 +1115,11 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_cs")
     auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::rdmsr);
     auto ehlr = setup_ehlr(vmcs);
 
-    g_value = 0x0000000500000004;
+    g_vmcs_fields[vmcs::guest_ia32_sysenter_cs::addr] = 0x0000000500000004;
     ehlr.m_state_save->rcx = intel_x64::msrs::ia32_sysenter_cs::addr;
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_sysenter_cs::addr);
     CHECK(ehlr.m_state_save->rax == 0x4);
     CHECK(ehlr.m_state_save->rdx == 0x5);
     CHECK(ehlr.m_state_save->rip == g_rip);
@@ -1136,12 +1131,11 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_esp")
     auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::rdmsr);
     auto ehlr = setup_ehlr(vmcs);
 
-    g_value = 0x0000000600000005;
+    g_vmcs_fields[vmcs::guest_ia32_sysenter_esp::addr] = 0x0000000600000005;
     ehlr.m_state_save->rcx = intel_x64::msrs::ia32_sysenter_esp::addr;
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_sysenter_esp::addr);
     CHECK(ehlr.m_state_save->rax == 0x5);
     CHECK(ehlr.m_state_save->rdx == 0x6);
     CHECK(ehlr.m_state_save->rip == g_rip);
@@ -1153,12 +1147,11 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_eip")
     auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::rdmsr);
     auto ehlr = setup_ehlr(vmcs);
 
-    g_value = 0x0000000700000006;
+    g_vmcs_fields[vmcs::guest_ia32_sysenter_eip::addr] = 0x0000000700000006;
     ehlr.m_state_save->rcx = intel_x64::msrs::ia32_sysenter_eip::addr;
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_sysenter_eip::addr);
     CHECK(ehlr.m_state_save->rax == 0x6);
     CHECK(ehlr.m_state_save->rdx == 0x7);
     CHECK(ehlr.m_state_save->rip == g_rip);
@@ -1170,12 +1163,11 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_fs_base")
     auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::rdmsr);
     auto ehlr = setup_ehlr(vmcs);
 
-    g_value = 0x0000000800000007;
+    g_vmcs_fields[vmcs::guest_fs_base::addr] = 0x0000000800000007;
     ehlr.m_state_save->rcx = intel_x64::msrs::ia32_fs_base::addr;
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_fs_base::addr);
     CHECK(ehlr.m_state_save->rax == 0x7);
     CHECK(ehlr.m_state_save->rdx == 0x8);
     CHECK(ehlr.m_state_save->rip == g_rip);
@@ -1187,12 +1179,11 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_gs_base")
     auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::rdmsr);
     auto ehlr = setup_ehlr(vmcs);
 
-    g_value = 0x0000000900000008;
+    g_vmcs_fields[vmcs::guest_gs_base::addr] = 0x0000000900000008;
     ehlr.m_state_save->rcx = intel_x64::msrs::ia32_gs_base::addr;
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_gs_base::addr);
     CHECK(ehlr.m_state_save->rax == 0x8);
     CHECK(ehlr.m_state_save->rdx == 0x9);
     CHECK(ehlr.m_state_save->rip == g_rip);
@@ -1242,8 +1233,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_debug_ctrl")
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_debugctl::addr);
-    CHECK(g_value == 0x0000000200000001);
+    CHECK(g_vmcs_fields[ vmcs::guest_ia32_debugctl::addr] == 0x0000000200000001);
     CHECK(ehlr.m_state_save->rip == g_rip);
 }
 
@@ -1261,8 +1251,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_pat")
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_pat::addr);
-    CHECK(g_value == 0x0000000300000002);
+    CHECK(g_vmcs_fields[vmcs::guest_ia32_pat::addr] == 0x0000000300000002);
     CHECK(ehlr.m_state_save->rip == g_rip);
 }
 
@@ -1280,8 +1269,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_efer")
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_efer::addr);
-    CHECK(g_value == 0x0000000400000003);
+    CHECK(g_vmcs_fields[vmcs::guest_ia32_efer::addr] == 0x0000000400000003);
     CHECK(ehlr.m_state_save->rip == g_rip);
 }
 
@@ -1299,8 +1287,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_perf")
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_perf_global_ctrl::addr);
-    CHECK(g_value == 0x0000000400000003);
+    CHECK(g_vmcs_fields[vmcs::guest_ia32_perf_global_ctrl::addr] == 0x0000000400000003);
     CHECK(ehlr.m_state_save->rip == g_rip);
 }
 
@@ -1316,8 +1303,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_cs")
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_sysenter_cs::addr);
-    CHECK(g_value == 0x0000000500000004);
+    CHECK(g_vmcs_fields[vmcs::guest_ia32_sysenter_cs::addr] == 0x0000000500000004);
     CHECK(ehlr.m_state_save->rip == g_rip);
 }
 
@@ -1333,8 +1319,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_esp")
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_sysenter_esp::addr);
-    CHECK(g_value == 0x0000000600000005);
+    CHECK(g_vmcs_fields[vmcs::guest_ia32_sysenter_esp::addr] == 0x0000000600000005);
     CHECK(ehlr.m_state_save->rip == g_rip);
 }
 
@@ -1350,8 +1335,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_eip")
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_ia32_sysenter_eip::addr);
-    CHECK(g_value == 0x0000000700000006);
+    CHECK(g_vmcs_fields[vmcs::guest_ia32_sysenter_eip::addr] == 0x0000000700000006);
     CHECK(ehlr.m_state_save->rip == g_rip);
 }
 
@@ -1367,8 +1351,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_fs_base")
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_fs_base::addr);
-    CHECK(g_value == 0x0000000800000007);
+    CHECK(g_vmcs_fields[vmcs::guest_fs_base::addr] == 0x0000000800000007);
     CHECK(ehlr.m_state_save->rip == g_rip);
 }
 
@@ -1384,8 +1367,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_gs_base")
 
     CHECK_NOTHROW(ehlr.dispatch());
 
-    CHECK(g_field == vmcs::guest_gs_base::addr);
-    CHECK(g_value == 0x0000000900000008);
+    CHECK(g_vmcs_fields[vmcs::guest_gs_base::addr] == 0x0000000900000008);
     CHECK(ehlr.m_state_save->rip == g_rip);
 }
 

@@ -15,68 +15,14 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 
-#include <catch/catch.hpp>
-#include <hippomocks.h>
-#include <intrinsics/x86/intel_x64.h>
-#include <intrinsics/x86/common_x64.h>
-#include <test/vmcs_utils.h>
-#include <string>
+#include <support/arch/intel_x64/test_support.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
-
-TEST_CASE("test name goes here")
-{
-    CHECK(true);
-}
-
-using namespace intel_x64;
-using namespace msrs;
-using namespace vmcs;
-
-std::map<uint32_t, uint64_t> g_msrs;
-std::map<uint64_t, uint64_t> g_vmcs_fields;
-std::map<uint32_t, uint32_t> g_eax_cpuid;
-
-uint32_t
-test_cpuid_eax(uint32_t val) noexcept
-{ return g_eax_cpuid[val]; }
-
-uint64_t
-test_read_msr(uint32_t addr) noexcept
-{ return g_msrs[addr]; }
-
-static bool
-test_vmread(uint64_t field, uint64_t *val) noexcept
-{
-    *val = g_vmcs_fields[field];
-    return true;
-}
-
-static bool
-test_vmwrite(uint64_t field, uint64_t val) noexcept
-{
-    g_vmcs_fields[field] = val;
-    return true;
-}
-
-static void
-setup_intrinsics(MockRepository &mocks)
-{
-    mocks.OnCallFunc(_cpuid_eax).Do(test_cpuid_eax);
-    mocks.OnCallFunc(_read_msr).Do(test_read_msr);
-    mocks.OnCallFunc(_vmread).Do(test_vmread);
-    mocks.OnCallFunc(_vmwrite).Do(test_vmwrite);
-}
-
-static struct control_flow_path path;
 
 void
 test_vmcs_check(std::vector<struct control_flow_path> cfg, void(*func)())
 {
     for (auto p : cfg) {
-        MockRepository mocks;
-        setup_intrinsics(mocks);
-
         p.setup();
 
         if (p.throws_exception) {
@@ -93,16 +39,16 @@ setup_check_host_cr0_for_unsupported_bits_paths(std::vector<struct control_flow_
 {
     path.setup = [&] {
         host_cr0::set(0U);
-        g_msrs[ia32_vmx_cr0_fixed0::addr] = 0;
-        g_msrs[ia32_vmx_cr0_fixed1::addr] = 0;
+        g_msrs[intel_x64::msrs::ia32_vmx_cr0_fixed0::addr] = 0;
+        g_msrs[intel_x64::msrs::ia32_vmx_cr0_fixed1::addr] = 0;
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&] {
         host_cr0::set(0xFFFFFFFFFFFFFFFFULL);
-        g_msrs[ia32_vmx_cr0_fixed0::addr] = 0x00000000FFFFFFFFULL;
-        g_msrs[ia32_vmx_cr0_fixed1::addr] = 0xFFFFFFFF00000000ULL;
+        g_msrs[intel_x64::msrs::ia32_vmx_cr0_fixed0::addr] = 0x00000000FFFFFFFFULL;
+        g_msrs[intel_x64::msrs::ia32_vmx_cr0_fixed1::addr] = 0xFFFFFFFF00000000ULL;
     };
     path.throws_exception = true;
     cfg.push_back(path);
@@ -113,12 +59,12 @@ setup_check_host_cr4_for_unsupported_bits_paths(std::vector<struct control_flow_
 {
     path.setup = [&] {
         host_cr4::set(0U);
-        g_msrs[ia32_vmx_cr4_fixed0::addr] = 0;
+        g_msrs[intel_x64::msrs::ia32_vmx_cr4_fixed0::addr] = 0;
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
-    path.setup = [&] { g_msrs[ia32_vmx_cr4_fixed0::addr] = 1; };
+    path.setup = [&] { g_msrs[intel_x64::msrs::ia32_vmx_cr4_fixed0::addr] = 1; };
     path.throws_exception = true;
     cfg.push_back(path);
 }
@@ -165,14 +111,14 @@ static void
 setup_check_host_verify_load_ia32_perf_global_ctrl_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] {
-        exit_ctl_allow0(ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::mask);
+        exit_ctl_allow0(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::mask);
         vm_exit_controls::load_ia32_perf_global_ctrl::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&] {
-        exit_ctl_allow1(ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::mask);
+        exit_ctl_allow1(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_perf_global_ctrl::mask);
         vm_exit_controls::load_ia32_perf_global_ctrl::enable();
         host_ia32_perf_global_ctrl::set(0xcU);
     };
@@ -188,14 +134,14 @@ static void
 setup_check_host_verify_load_ia32_pat_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] {
-        exit_ctl_allow0(ia32_vmx_true_exit_ctls::load_ia32_pat::mask);
+        exit_ctl_allow0(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask);
         vm_exit_controls::load_ia32_pat::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&] {
-        exit_ctl_allow1(ia32_vmx_true_exit_ctls::load_ia32_pat::mask);
+        exit_ctl_allow1(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_pat::mask);
         vm_exit_controls::load_ia32_pat::enable();
         host_ia32_pat::pa0::memory_type::set(2ULL);
     };
@@ -260,14 +206,14 @@ static void
 setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] {
-        exit_ctl_allow0(ia32_vmx_true_exit_ctls::load_ia32_efer::mask);
+        exit_ctl_allow0(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::mask);
         vm_exit_controls::load_ia32_efer::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&] {
-        exit_ctl_allow1(ia32_vmx_true_exit_ctls::load_ia32_efer::mask);
+        exit_ctl_allow1(intel_x64::msrs::ia32_vmx_true_exit_ctls::load_ia32_efer::mask);
         vm_exit_controls::load_ia32_efer::enable();
         host_ia32_efer::reserved::set(0xEUL);
     };
@@ -275,7 +221,7 @@ setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_pat
     cfg.push_back(path);
 
     path.setup = [&] {
-        exit_ctl_allow0(ia32_vmx_true_exit_ctls::host_address_space_size::mask);
+        exit_ctl_allow0(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask);
         vm_exit_controls::host_address_space_size::disable();
         host_ia32_efer::reserved::set(0x0UL);
         host_ia32_efer::lma::enable();
@@ -284,7 +230,7 @@ setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_pat
     cfg.push_back(path);
 
     path.setup = [&] {
-        exit_ctl_allow1(ia32_vmx_true_exit_ctls::host_address_space_size::mask);
+        exit_ctl_allow1(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask);
         vm_exit_controls::host_address_space_size::enable();
         host_ia32_efer::lma::disable();
     };
@@ -307,7 +253,7 @@ setup_check_host_verify_load_ia32_efer_paths(std::vector<struct control_flow_pat
     cfg.push_back(path);
 
     path.setup = [&] {
-        exit_ctl_allow0(ia32_vmx_true_exit_ctls::host_address_space_size::mask);
+        exit_ctl_allow0(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask);
         vm_exit_controls::host_address_space_size::disable();
         host_ia32_efer::lme::enable();
         host_ia32_efer::lma::disable();
@@ -480,14 +426,14 @@ static void
 setup_check_host_ss_not_equal_zero_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] {
-        exit_ctl_allow1(ia32_vmx_true_exit_ctls::host_address_space_size::mask);
+        exit_ctl_allow1(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask);
         vm_exit_controls::host_address_space_size::enable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&] {
-        exit_ctl_allow0(ia32_vmx_true_exit_ctls::host_address_space_size::mask);
+        exit_ctl_allow0(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask);
         vm_exit_controls::host_address_space_size::disable();
         host_ss_selector::set(0U);
     };
@@ -562,13 +508,13 @@ setup_check_host_tr_canonical_base_address_paths(std::vector<struct control_flow
 static void
 setup_check_host_if_outside_ia32e_mode_paths(std::vector<struct control_flow_path> &cfg)
 {
-    path.setup = [&] { g_msrs[ia32_efer::addr] = msrs::ia32_efer::lma::mask; };
+    path.setup = [&] { g_msrs[intel_x64::msrs::ia32_efer::addr] = intel_x64::msrs::ia32_efer::lma::mask; };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&] {
-        g_msrs[ia32_efer::addr] = 0;
-        entry_ctl_allow1(ia32_vmx_true_entry_ctls::ia_32e_mode_guest::mask);
+        g_msrs[intel_x64::msrs::ia32_efer::addr] = 0;
+        entry_ctl_allow1(intel_x64::msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::mask);
         vm_entry_controls::ia_32e_mode_guest::enable();
     };
     path.throws_exception = true;
@@ -582,7 +528,7 @@ setup_check_host_if_outside_ia32e_mode_paths(std::vector<struct control_flow_pat
     cfg.push_back(path);
 
     path.setup = [&] {
-        exit_ctl_allow0(ia32_vmx_true_exit_ctls::host_address_space_size::mask);
+        exit_ctl_allow0(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask);
         vm_exit_controls::host_address_space_size::disable();
     };
     path.throws_exception = false;
@@ -593,20 +539,20 @@ static void
 setup_check_host_address_space_size_exit_ctl_is_set_paths(std::vector<struct control_flow_path>
         &cfg)
 {
-    path.setup = [&] { g_msrs[ia32_efer::addr] = 0; };
+    path.setup = [&] { g_msrs[intel_x64::msrs::ia32_efer::addr] = 0; };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&] {
-        g_msrs[ia32_efer::addr] = msrs::ia32_efer::lma::mask;
-        exit_ctl_allow0(ia32_vmx_true_exit_ctls::host_address_space_size::mask);
+        g_msrs[intel_x64::msrs::ia32_efer::addr] = intel_x64::msrs::ia32_efer::lma::mask;
+        exit_ctl_allow0(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask);
         vm_exit_controls::host_address_space_size::disable();
     };
     path.throws_exception = true;
     cfg.push_back(path);
 
     path.setup = [&] {
-        exit_ctl_allow1(ia32_vmx_true_exit_ctls::host_address_space_size::mask);
+        exit_ctl_allow1(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask);
         vm_exit_controls::host_address_space_size::enable();
     };
     path.throws_exception = false;
@@ -617,15 +563,15 @@ static void
 setup_check_host_address_space_disabled_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] {
-        exit_ctl_allow1(ia32_vmx_true_exit_ctls::host_address_space_size::mask);
+        exit_ctl_allow1(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask);
         vm_exit_controls::host_address_space_size::enable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&] {
-        exit_ctl_allow0(ia32_vmx_true_exit_ctls::host_address_space_size::mask);
-        entry_ctl_allow1(ia32_vmx_true_entry_ctls::ia_32e_mode_guest::mask);
+        exit_ctl_allow0(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask);
+        entry_ctl_allow1(intel_x64::msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::mask);
         vm_exit_controls::host_address_space_size::disable();
         vm_entry_controls::ia_32e_mode_guest::enable();
     };
@@ -633,7 +579,7 @@ setup_check_host_address_space_disabled_paths(std::vector<struct control_flow_pa
     cfg.push_back(path);
 
     path.setup = [&] {
-        entry_ctl_allow0(ia32_vmx_true_entry_ctls::ia_32e_mode_guest::mask);
+        entry_ctl_allow0(intel_x64::msrs::ia32_vmx_true_entry_ctls::ia_32e_mode_guest::mask);
         vm_entry_controls::ia_32e_mode_guest::disable();
         host_cr4::pcid_enable_bit::enable();
     };
@@ -656,14 +602,14 @@ static void
 setup_check_host_address_space_enabled_paths(std::vector<struct control_flow_path> &cfg)
 {
     path.setup = [&] {
-        exit_ctl_allow0(ia32_vmx_true_exit_ctls::host_address_space_size::mask);
+        exit_ctl_allow0(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask);
         vm_exit_controls::host_address_space_size::disable();
     };
     path.throws_exception = false;
     cfg.push_back(path);
 
     path.setup = [&] {
-        exit_ctl_allow1(ia32_vmx_true_exit_ctls::host_address_space_size::mask);
+        exit_ctl_allow1(intel_x64::msrs::ia32_vmx_true_exit_ctls::host_address_space_size::mask);
         vm_exit_controls::host_address_space_size::enable();
         host_cr4::physical_address_extensions::disable();
     };
