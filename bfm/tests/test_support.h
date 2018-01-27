@@ -16,7 +16,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <catch/catch.hpp>
+#include <hippomocks.h>
+
 #include <bftypes.h>
+#include <bfvcpuid.h>
 #include <bfaffinity.h>
 #include <bfelf_loader.h>
 #include <bfdriverinterface.h>
@@ -73,4 +77,20 @@ extern "C" void
 _vmcall(vmcall_registers_t *regs)
 {
     bfignored(regs);
+}
+
+TEST_CASE("support")
+{
+    ioctl ctl{};
+    int64_t status;
+    auto drr = ioctl::drr_type{};
+    auto data = ioctl::binary_data{};
+
+    CHECK_NOTHROW(ctl.call_ioctl_add_module(data));
+    CHECK_NOTHROW(ctl.call_ioctl_load_vmm());
+    CHECK_NOTHROW(ctl.call_ioctl_unload_vmm());
+    CHECK_NOTHROW(ctl.call_ioctl_start_vmm());
+    CHECK_NOTHROW(ctl.call_ioctl_stop_vmm());
+    CHECK_NOTHROW(ctl.call_ioctl_dump_vmm(&drr, 0));
+    CHECK_NOTHROW(ctl.call_ioctl_vmm_status(&status));
 }

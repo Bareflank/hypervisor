@@ -16,11 +16,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <catch/catch.hpp>
-
-#include <bfstring.h>
-#include <bfvcpuid.h>
-#include <command_line_parser.h>
+#include <test_support.h>
 
 TEST_CASE("test command line parser with no args")
 {

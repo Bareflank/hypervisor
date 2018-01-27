@@ -24,6 +24,16 @@ list(APPEND ARGN
     DEFINES STATIC_INTRINSICS
 )
 
+do_test(test_gdt
+    SOURCES arch/x64/test_gdt.cpp
+    ${ARGN}
+)
+
+do_test(test_idt
+    SOURCES arch/x64/test_idt.cpp
+    ${ARGN}
+)
+
 do_test(test_exit_handler
     SOURCES arch/intel_x64/exit_handler/test_exit_handler.cpp
     ${ARGN}
@@ -31,6 +41,36 @@ do_test(test_exit_handler
 
 do_test(test_exit_handler_entry
     SOURCES arch/intel_x64/exit_handler/test_exit_handler_entry.cpp
+    ${ARGN}
+)
+
+do_test(test_vmcs_check_controls
+    SOURCES arch/intel_x64/vmcs/test_vmcs_check_controls.cpp
+    ${ARGN}
+)
+
+do_test(test_vmcs_check_guest
+    SOURCES arch/intel_x64/vmcs/test_vmcs_check_guest.cpp
+    ${ARGN}
+)
+
+do_test(test_vmcs_check_host
+    SOURCES arch/intel_x64/vmcs/test_vmcs_check_host.cpp
+    ${ARGN}
+)
+
+do_test(test_vmcs_state_hvm
+    SOURCES arch/intel_x64/vmcs/test_vmcs_state_hvm.cpp
+    ${ARGN}
+)
+
+do_test(test_vmcs_state_vmm
+    SOURCES arch/intel_x64/vmcs/test_vmcs_state_vmm.cpp
+    ${ARGN}
+)
+
+do_test(test_vmcs_state
+    SOURCES arch/intel_x64/vmcs/test_vmcs_state.cpp
     ${ARGN}
 )
 

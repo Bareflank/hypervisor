@@ -27,12 +27,18 @@ dist: trusty
 #
 cache:
   directories:
-  - build/cache
+  - ../cache
 
 #
 # Build Dependencies
 #
 before_script:
+
+  #
+  # Cache / Depends
+  #
+  - mkdir -p ../cache
+  - mkdir -p ../depends
 
   #
   # Build Enviornment
@@ -166,29 +172,28 @@ matrix:
       - make -j3
       - make tidy
 
-  # #
-  # # Codecov
-  # #
-  # - os: linux
-  #   addons:
-  #     apt:
-  #       sources:
-  #         - ubuntu-toolchain-r-test
-  #         - llvm-toolchain-trusty-4.0
-  #       packages:
-  #         - gcc-6
-  #         - g++-6
-  #         - clang-4.0
-  #         - nasm
-  #   env:
-  #     - TEST="Codecov"
-  #   script:
-  #     - cmake -DCONFIG=travis_codecov ..
-  #     - make -j3
-  #     - make test
-  #     - rm -Rf depends
-  #     - cd ..
-  #     - bash <(curl -s https://codecov.io/bash)
+  #
+  # Codecov
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-4.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-4.0
+          - nasm
+    env:
+      - TEST="Codecov"
+    script:
+      - cmake -DCONFIG=travis_codecov ..
+      - make -j3
+      - make test
+      - cd ..
+      - bash <(curl -s https://codecov.io/bash)
 
   #
   # Google Address Sanitizer

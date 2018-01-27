@@ -16,7 +16,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include "../test_support.h"
+#include <support/arch/intel_x64/test_support.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
@@ -41,10 +41,8 @@ TEST_CASE("vmcs: launch_vmlaunch_failure")
     auto guest_state = setup_vmcs_state(mocks);
 
     setup_msrs();
-    mocks.OnCallFunc(check::all);
-    mocks.OnCallFunc(debug::dump);
-    mocks.OnCall(guest_state, vmcs_intel_x64_state::is_guest).Return(true);
 
+    mocks.OnCall(guest_state, vmcs_intel_x64_state::is_guest).Return(true);
     mocks.OnCallFunc(vmcs_launch);
 
     vmcs_intel_x64 vmcs{};
@@ -59,6 +57,7 @@ TEST_CASE("vmcs: launch_vmlaunch_demote_failure")
     auto guest_state = setup_vmcs_state(mocks);
 
     setup_msrs();
+
     mocks.OnCallFunc(check::all);
     mocks.OnCallFunc(debug::dump);
     mocks.OnCall(guest_state, vmcs_intel_x64_state::is_guest).Return(false);
@@ -160,6 +159,28 @@ TEST_CASE("vmcs: resume_failure")
 
     vmcs_intel_x64 vmcs{};
     CHECK_THROWS(vmcs.resume());
+}
+
+TEST_CASE("vmcs: clear")
+{
+    vmcs_intel_x64 vmcs{};
+    CHECK_NOTHROW(vmcs.clear());
+}
+
+TEST_CASE("vmcs: set_pre_launch_delegate")
+{
+    vmcs_intel_x64::pre_launch_delegate_t d;
+
+    vmcs_intel_x64 vmcs{};
+    CHECK_NOTHROW(vmcs.set_pre_launch_delegate(d));
+}
+
+TEST_CASE("vmcs: set_post_launch_delegate")
+{
+    vmcs_intel_x64::post_launch_delegate_t d;
+
+    vmcs_intel_x64 vmcs{};
+    CHECK_NOTHROW(vmcs.set_post_launch_delegate(d));
 }
 
 #endif
