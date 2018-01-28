@@ -174,13 +174,33 @@ vmcs_promote:
     vmread rdi, rsi
     call _write_cr0 wrt ..plt
 
+    ;
+    ; Save the guest's cr3
+    ;
+
     mov rsi, VMCS_GUEST_CR3
     vmread rdi, rsi
-    call _write_cr3 wrt ..plt
+    push rdi
 
+    ;
+    ; Clear cr3[11:0] and then update cr4. This ensures that
+    ; if cr4.pcide is changing to 1, we avoid a #GP if the
+    ; guest's original cr3[11:0] != 0 (see section 4.10.1).
+    ;
+
+    mov rax, 0xFFFFFFFFFFFFF000
+    and rdi, rax
+    call _write_cr3 wrt ..plt
     mov rsi, VMCS_GUEST_CR4
     vmread rdi, rsi
     call _write_cr4 wrt ..plt
+
+    ;
+    ; Restore the guest's actual cr3
+    ;
+
+    pop rdi
+    call _write_cr3 wrt ..plt
 
     mov rsi, VMCS_GUEST_DR7
     vmread rdi, rsi
