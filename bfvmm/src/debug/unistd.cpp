@@ -19,8 +19,8 @@
 #include <bfgsl.h>
 #include <bfexports.h>
 
-#include <debug/debug_ring/debug_ring.h>
-#include <debug/serial/serial_port_ns16550a.h>
+#include <bfvmm/debug/debug_ring/debug_ring.h>
+#include <bfvmm/debug/serial/serial_port_ns16550a.h>
 
 #include <mutex>
 std::mutex g_write_mutex;

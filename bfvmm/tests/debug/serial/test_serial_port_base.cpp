@@ -23,7 +23,7 @@
 
 #include <map>
 #include <string>
-#include <debug/serial/serial_port_base.h>
+#include <bfvmm/debug/serial/serial_port_base.h>
 
 static std::map<serial_port_base::port_type, serial_port_base::value_type_32> g_ports;
 

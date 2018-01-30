@@ -25,7 +25,7 @@
 #include <bfconstants.h>
 
 #include <intrinsics.h>
-#include <debug/serial/serial_port_base.h>
+#include <bfvmm/debug/serial/serial_port_base.h>
 
 // -----------------------------------------------------------------------------
 // Exports

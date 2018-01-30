@@ -24,7 +24,7 @@
 #include <map>
 
 #include <bfgsl.h>
-#include <debug/serial/serial_port_pl011.h>
+#include <bfvmm/debug/serial/serial_port_pl011.h>
 
 static std::map<serial_port_pl011::port_type, serial_port_pl011::value_type_32> g_ports;
 

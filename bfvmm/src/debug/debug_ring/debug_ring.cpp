@@ -19,7 +19,7 @@
 #include <bfgsl.h>
 
 #include <map>
-#include <debug/debug_ring/debug_ring.h>
+#include <bfvmm/debug/debug_ring/debug_ring.h>
 
 // -----------------------------------------------------------------------------
 // Mutex

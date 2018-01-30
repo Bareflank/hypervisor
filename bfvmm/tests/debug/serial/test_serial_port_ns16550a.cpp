@@ -24,7 +24,7 @@
 #include <map>
 
 #include <bfgsl.h>
-#include <debug/serial/serial_port_ns16550a.h>
+#include <bfvmm/debug/serial/serial_port_ns16550a.h>
 
 static std::map<serial_port_ns16550a::port_type, serial_port_ns16550a::value_type_8> g_ports;
 

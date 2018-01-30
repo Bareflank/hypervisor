@@ -20,7 +20,7 @@
 
 #include <bfgsl.h>
 #include <bfnewdelete.h>
-#include <debug/debug_ring/debug_ring.h>
+#include <bfvmm/debug/debug_ring/debug_ring.h>
 
 debug_ring_resources_t *drr;
 

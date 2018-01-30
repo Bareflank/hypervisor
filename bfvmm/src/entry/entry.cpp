@@ -26,7 +26,7 @@
 #include <user_data.h>
 
 #include <vcpu/vcpu_manager.h>
-#include <debug/debug_ring/debug_ring.h>
+#include <bfvmm/debug/debug_ring/debug_ring.h>
 #include <memory_manager/memory_manager_x64.h>
 
 extern "C" int64_t

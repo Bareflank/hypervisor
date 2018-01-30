@@ -17,7 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <bfgsl.h>
-#include <debug/serial/serial_port_pl011.h>
+#include <bfvmm/debug/serial/serial_port_pl011.h>
 
 using namespace serial_pl011;
 

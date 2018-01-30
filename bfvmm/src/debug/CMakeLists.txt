@@ -51,4 +51,4 @@ add_static_library(
 # Install
 # ------------------------------------------------------------------------------
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/../include/debug DESTINATION include/bfvmm/debug)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/../../include/bfvmm/debug DESTINATION include/bfvmm)
