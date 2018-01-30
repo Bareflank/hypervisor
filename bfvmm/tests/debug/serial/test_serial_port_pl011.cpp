@@ -30,7 +30,7 @@ static std::map<serial_port_pl011::port_type, serial_port_pl011::value_type_32> 
 
 extern "C" uint8_t
 _inb(uint16_t port) noexcept
-{ return g_ports[port]; }
+{ return gsl::narrow_cast<uint8_t>(g_ports[port]); }
 
 extern "C" void
 _outb(uint16_t port, uint8_t val) noexcept
