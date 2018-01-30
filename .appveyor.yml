@@ -31,7 +31,8 @@ environment:
     BFPATH: '%PATH%'
     PATH: '%PATH%;C:\Program Files\NASM'
 
-test: off
+cache:
+  - ../cache
 
 #
 # Setup Cygwin
@@ -63,6 +64,7 @@ build_script:
   - cmake -G "Visual Studio 14 2015 Win64" -DENABLE_BUILD_VMM=OFF -DENABLE_BUILD_USERSPACE=OFF -DENABLE_BUILD_TEST=ON ..
   - msbuild /m:3 hypervisor.sln
   - cmake --build . --target test
+  - cmake --build . --target test
 
   #
   # Cygwin (Shared Libraries)
@@ -71,3 +73,9 @@ build_script:
   - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; cmake -DENABLE_BUILD_TEST=ON .."'
   - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make -j3"'
   - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make unittest"'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make unittest"'
+
+#
+# No AppVeyor Tests
+#
+test: off

@@ -124,7 +124,7 @@ std::map<uint64_t, void *> g_mock_mem {{
 struct control_flow_path {
     std::function<void()> setup{};
     bool throws_exception{false};
-} path;
+} g_path;
 
 struct cpuid_regs {
     uint32_t eax;
@@ -363,15 +363,15 @@ physint_to_virtptr(uintptr_t ptr)
 
 extern "C" void
 vmcs_launch(state_save_intel_x64 *state_save) noexcept
-{ }
+{ bfignored(state_save); }
 
 extern "C" void
 vmcs_promote(state_save_intel_x64 *state_save, const void *guest_gdt) noexcept
-{ }
+{ bfignored(state_save); bfignored(guest_gdt); }
 
 extern "C" void
 vmcs_resume(state_save_intel_x64 *state_save) noexcept
-{ }
+{ bfignored(state_save); }
 
 extern "C" void
 exit_handler_entry(void) noexcept
