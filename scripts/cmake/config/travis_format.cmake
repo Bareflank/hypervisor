@@ -17,6 +17,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 set(ENABLE_FORMAT ON)
+
 set(ENABLE_BUILD_VMM ON)
 set(ENABLE_BUILD_USERSPACE ON)
 set(ENABLE_BUILD_TEST ON)
+
+set(CMAKE_BUILD_TYPE Debug)
+set(ENABLE_COMPILER_WARNINGS ON)

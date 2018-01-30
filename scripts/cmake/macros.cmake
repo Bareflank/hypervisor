@@ -189,8 +189,9 @@ endmacro(include_external_extensions)
 # @param CXX_FLAGS Additional CXX flags to add to CMAKE_CXX_FLAGS
 #
 function(generate_flags PREFIX)
+    set(options NOWARNINGS)
     set(multiVal C_FLAGS CXX_FLAGS)
-    cmake_parse_arguments(ARG "" "${oneVal}" "${multiVal}" ${ARGN})
+    cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
 
     list(APPEND _C_FLAGS ${ARG_C_FLAGS})
     list(APPEND _CXX_FLAGS ${ARG_CXX_FLAGS})
@@ -244,14 +245,21 @@ function(generate_flags PREFIX)
         message(FATAL_ERROR "Invalid prefix: ${PREFIX}")
     endif()
 
-    if(ENABLE_COMPILER_WARNINGS)
-        list(APPEND _C_FLAGS ${BFFLAGS_WARNING_C})
-        list(APPEND _CXX_FLAGS ${BFFLAGS_WARNING_CXX})
-    endif()
+    if(NOT ARG_NOWARNINGS)
+        if(ENABLE_COMPILER_WARNINGS)
+            list(APPEND _C_FLAGS ${BFFLAGS_WARNING_C})
+            list(APPEND _CXX_FLAGS ${BFFLAGS_WARNING_CXX})
+        endif()
 
-    if(BUILD_TYPE STREQUAL "Release")
-        list(APPEND _C_FLAGS -O3 -DNDEBUG)
-        list(APPEND _CXX_FLAGS -O3 -DNDEBUG)
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            if(NOT WIN32)
+                list(APPEND _C_FLAGS -Werror)
+                list(APPEND _CXX_FLAGS -Werror)
+            else()
+                list(APPEND _C_FLAGS /WX)
+                list(APPEND _CXX_FLAGS /WX)
+            endif()
+        endif()
     endif()
 
     string(REPLACE ";" " " _C_FLAGS "${_C_FLAGS}")
@@ -942,7 +950,6 @@ macro(init_project)
         ${SOURCE_BFSDK_DIR}/include
         ${SOURCE_BFELF_LOADER_DIR}/include
         ${SOURCE_BFINTRINSICS_DIR}/include
-        ${SOURCE_BFVMM_DIR}/include
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/include
     )

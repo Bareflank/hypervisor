@@ -30,7 +30,7 @@ static std::map<serial_port_ns16550a::port_type, serial_port_ns16550a::value_typ
 
 extern "C" uint8_t
 _inb(uint16_t port) noexcept
-{ return g_ports[port]; }
+{ return gsl::narrow_cast<serial_port_ns16550a::value_type_8>(g_ports[port]); }
 
 extern "C" void
 _outb(uint16_t port, uint8_t val) noexcept
@@ -42,7 +42,7 @@ _ind(uint16_t port) noexcept
 
 extern "C" void
 _outd(uint16_t port, uint32_t val) noexcept
-{ g_ports[port] = val; }
+{ g_ports[port] = gsl::narrow_cast<serial_port_ns16550a::value_type_8>(val); }
 
 TEST_CASE("serial: support")
 {
