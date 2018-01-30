@@ -16,6 +16,9 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#ifndef TEST_SUPPORT_H
+#define TEST_SUPPORT_H
+
 #include <catch/catch.hpp>
 #include <hippomocks.h>
 
@@ -94,3 +97,5 @@ TEST_CASE("support")
     CHECK_NOTHROW(ctl.call_ioctl_dump_vmm(&drr, 0));
     CHECK_NOTHROW(ctl.call_ioctl_vmm_status(&status));
 }
+
+#endif
