@@ -306,11 +306,22 @@ add_config(
 # Config
 # ------------------------------------------------------------------------------
 
+set(CMAKE_BUILD_TYPE "Release"
+    CACHE INTERNAL
+    "Defines the build type"
+)
+
+set(CMAKE_VERBOSE_MAKEFILE OFF
+    CACHE INTERNAL
+    "Enables verbose output"
+)
+
 add_config(
     CONFIG_NAME CMAKE_TARGET_MESSAGES
     CONFIG_TYPE BOOL
-    DEFAULT_VAL OFF
+    DEFAULT_VAL ${CMAKE_VERBOSE_MAKEFILE}
     DESCRIPTION "Enables target messages"
+    ADVANCED
 )
 
 add_config(
@@ -319,21 +330,7 @@ add_config(
     DEFAULT_VAL LAZY
     DESCRIPTION "Defines the install output"
     OPTIONS ALWAYS LAZY NEVER
-)
-
-add_config(
-    CONFIG_NAME CMAKE_BUILD_TYPE
-    CONFIG_TYPE STRING
-    DEFAULT_VAL Release
-    DESCRIPTION "Defines the build type"
-    Release Debug
-)
-
-add_config(
-    CONFIG_NAME CMAKE_VERBOSE_MAKEFILE
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL OFF
-    DESCRIPTION "Enables verbose output"
+    ADVANCED
 )
 
 # ------------------------------------------------------------------------------
@@ -364,6 +361,7 @@ add_config(
     DEFAULT_VAL ${BUILD_TARGET_ARCH}-vmm-elf
     DESCRIPTION "VMM prefix name"
     SKIP_VALIDATION
+    ADVANCED
 )
 
 add_config(
@@ -372,6 +370,7 @@ add_config(
     DEFAULT_VAL ${BUILD_TARGET_ARCH}-userspace-${HOST_FORMAT_TYPE}
     DESCRIPTION "Userspace prefix name"
     SKIP_VALIDATION
+    ADVANCED
 )
 
 add_config(
@@ -380,6 +379,7 @@ add_config(
     DEFAULT_VAL ${BUILD_TARGET_ARCH}-test-${HOST_FORMAT_TYPE}
     DESCRIPTION "Test prefix name"
     SKIP_VALIDATION
+    ADVANCED
 )
 
 set(VMM_PREFIX_PATH ${PREFIXES_DIR}/${VMM_PREFIX}
@@ -568,6 +568,7 @@ add_config(
     CONFIG_TYPE FILEPATH
     DEFAULT_VAL ${SOURCE_TOOLCHAIN_DIR}/clang_${BUILD_TARGET_ARCH}_vmm.cmake
     DESCRIPTION "Path to the default cmake toolchain file for building vmm components"
+    ADVANCED
 )
 
 add_config(
@@ -575,6 +576,7 @@ add_config(
     CONFIG_TYPE FILEPATH
     DEFAULT_VAL ${DEFAULT_VMM_TEST_TOOLCHAIN_PATH}
     DESCRIPTION "Path to the default cmake toolchain file for building vmm components for testing"
+    ADVANCED
 )
 
 add_config(
@@ -583,6 +585,7 @@ add_config(
     DEFAULT_VAL ""
     DESCRIPTION "Path to the default cmake toolchain file for building userspace components"
     SKIP_VALIDATION
+    ADVANCED
 )
 
 add_config(
@@ -591,6 +594,7 @@ add_config(
     DEFAULT_VAL ""
     DESCRIPTION "Path to the default cmake toolchain file for building unit tests"
     SKIP_VALIDATION
+    ADVANCED
 )
 
 # ------------------------------------------------------------------------------
@@ -793,6 +797,7 @@ add_config(
     DEFAULT_VAL ${VMM_PREFIX_PATH}/bin
     DESCRIPTION "Default path to vmm binaries to be loaded by bfm"
     SKIP_VALIDATION
+    ADVANCED
 )
 
 add_config(
@@ -801,6 +806,7 @@ add_config(
     DEFAULT_VAL ${VMM_PREFIX_PATH}/lib
     DESCRIPTION "Default path to vmm libraries to be loaded by bfm"
     SKIP_VALIDATION
+    ADVANCED
 )
 
 set_bfm_vmm(bfvmm DEFAULT)
