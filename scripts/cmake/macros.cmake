@@ -72,6 +72,10 @@ macro(add_config)
     set(multiVal OPTIONS)
     cmake_parse_arguments(ARG "${options}" "${oneVal}" "${multiVal}" ${ARGN})
 
+    if(ARG_CONFIG_TYPE STREQUAL "BOOL" AND NOT ARG_DEFAULT_VAL)
+        set(ARG_DEFAULT_VAL OFF)
+    endif()
+
     if(NOT DEFINED ${ARG_CONFIG_NAME})
         set(${ARG_CONFIG_NAME} ${ARG_DEFAULT_VAL} CACHE ${ARG_CONFIG_TYPE} ${ARG_DESCRIPTION})
     else()
