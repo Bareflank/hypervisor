@@ -247,32 +247,10 @@ set(DEFAULT_CACHE_DIR ${CMAKE_SOURCE_DIR}/../cache
     "Default cache directory"
 )
 
-set(DEFAULT_DEPENDS_DIR ${CMAKE_SOURCE_DIR}/../depends
-    CACHE INTERNAL
-    "Default external dependencies directory"
-)
-
-set(DEFAULT_PREFIXES_DIR ${CMAKE_SOURCE_DIR}/../prefixes
-    CACHE INTERNAL
-    "Default prefixes directory"
-)
-
 if(EXISTS ${DEFAULT_CACHE_DIR})
     get_filename_component(DEFAULT_CACHE_DIR "${DEFAULT_CACHE_DIR}" ABSOLUTE)
 else()
     set(DEFAULT_CACHE_DIR ${CMAKE_BINARY_DIR}/cache)
-endif()
-
-if(EXISTS ${DEFAULT_DEPENDS_DIR})
-    get_filename_component(DEFAULT_DEPENDS_DIR "${DEFAULT_DEPENDS_DIR}" ABSOLUTE)
-else()
-    set(DEFAULT_DEPENDS_DIR ${CMAKE_BINARY_DIR}/depends)
-endif()
-
-if(EXISTS ${DEFAULT_PREFIXES_DIR})
-    get_filename_component(DEFAULT_PREFIXES_DIR "${DEFAULT_PREFIXES_DIR}" ABSOLUTE)
-else()
-    set(DEFAULT_PREFIXES_DIR ${CMAKE_BINARY_DIR}/prefixes)
 endif()
 
 add_config(
@@ -283,20 +261,18 @@ add_config(
     SKIP_VALIDATION
 )
 
-add_config(
-    CONFIG_NAME DEPENDS_DIR
-    CONFIG_TYPE PATH
-    DEFAULT_VAL ${DEFAULT_DEPENDS_DIR}
-    DESCRIPTION "External dependencies directory"
-    SKIP_VALIDATION
+# ------------------------------------------------------------------------------
+# Non-configurable directories
+# ------------------------------------------------------------------------------
+
+set(DEPENDS_DIR ${CMAKE_BINARY_DIR}/depends
+    CACHE INTERNAL
+    "External dependencies directory"
 )
 
-add_config(
-    CONFIG_NAME PREFIXES_DIR
-    CONFIG_TYPE PATH
-    DEFAULT_VAL ${DEFAULT_PREFIXES_DIR}
-    DESCRIPTION "Prefixes directory"
-    SKIP_VALIDATION
+set(PREFIXES_DIR ${CMAKE_BINARY_DIR}/prefixes
+    CACHE INTERNAL
+    "Prefixes directory"
 )
 
 # ------------------------------------------------------------------------------

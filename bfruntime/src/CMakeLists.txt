@@ -22,6 +22,7 @@ project(bfruntime C CXX)
 include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project(
     TIDY_EXCLUSIONS -cert-err34-c,-misc-misplaced-widening-cast
+    CXX_FLAGS -Wno-main
 )
 
 add_subdirectory(crt)

@@ -40,6 +40,7 @@ if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
 
     generate_flags(
         vmm
+        NOWARNINGS
     )
 
     list(APPEND LD_FLAGS

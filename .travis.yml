@@ -38,7 +38,6 @@ before_script:
   # Cache / Depends
   #
   - mkdir -p ../cache
-  - mkdir -p ../depends
 
   #
   # Build Enviornment

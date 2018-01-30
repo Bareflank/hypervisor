@@ -99,10 +99,10 @@ namespace es
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_es(gsl::narrow_cast<value_type>(set_bits(_read_es(), mask, val << from))); }
+        { _write_es(gsl::narrow_cast<value_type>(set_bits(_read_es(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_es(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_es(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -155,10 +155,10 @@ namespace es
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_es(gsl::narrow_cast<value_type>(set_bits(_read_es(), mask, val << from))); }
+        { _write_es(gsl::narrow_cast<value_type>(set_bits(_read_es(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_es(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_es(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -196,10 +196,10 @@ namespace cs
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_cs(gsl::narrow_cast<value_type>(set_bits(_read_cs(), mask, val << from))); }
+        { _write_cs(gsl::narrow_cast<value_type>(set_bits(_read_cs(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_cs(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_cs(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -252,10 +252,10 @@ namespace cs
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_cs(gsl::narrow_cast<value_type>(set_bits(_read_cs(), mask, val << from))); }
+        { _write_cs(gsl::narrow_cast<value_type>(set_bits(_read_cs(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_cs(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_cs(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -293,10 +293,10 @@ namespace ss
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_ss(gsl::narrow_cast<value_type>(set_bits(_read_ss(), mask, val << from))); }
+        { _write_ss(gsl::narrow_cast<value_type>(set_bits(_read_ss(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_ss(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_ss(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -349,10 +349,10 @@ namespace ss
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_ss(gsl::narrow_cast<value_type>(set_bits(_read_ss(), mask, val << from))); }
+        { _write_ss(gsl::narrow_cast<value_type>(set_bits(_read_ss(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_ss(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_ss(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -390,10 +390,10 @@ namespace ds
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_ds(gsl::narrow_cast<value_type>(set_bits(_read_ds(), mask, val << from))); }
+        { _write_ds(gsl::narrow_cast<value_type>(set_bits(_read_ds(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_ds(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_ds(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -446,10 +446,10 @@ namespace ds
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_ds(gsl::narrow_cast<value_type>(set_bits(_read_ds(), mask, val << from))); }
+        { _write_ds(gsl::narrow_cast<value_type>(set_bits(_read_ds(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_ds(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_ds(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -487,10 +487,10 @@ namespace fs
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_fs(gsl::narrow_cast<value_type>(set_bits(_read_fs(), mask, val << from))); }
+        { _write_fs(gsl::narrow_cast<value_type>(set_bits(_read_fs(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_fs(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_fs(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -543,10 +543,10 @@ namespace fs
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_fs(gsl::narrow_cast<value_type>(set_bits(_read_fs(), mask, val << from))); }
+        { _write_fs(gsl::narrow_cast<value_type>(set_bits(_read_fs(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_fs(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_fs(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -584,10 +584,10 @@ namespace gs
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_gs(gsl::narrow_cast<value_type>(set_bits(_read_gs(), mask, val << from))); }
+        { _write_gs(gsl::narrow_cast<value_type>(set_bits(_read_gs(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_gs(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_gs(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -640,10 +640,10 @@ namespace gs
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_gs(gsl::narrow_cast<value_type>(set_bits(_read_gs(), mask, val << from))); }
+        { _write_gs(gsl::narrow_cast<value_type>(set_bits(_read_gs(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_gs(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_gs(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -681,10 +681,10 @@ namespace ldtr
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_ldtr(gsl::narrow_cast<value_type>(set_bits(_read_ldtr(), mask, val << from))); }
+        { _write_ldtr(gsl::narrow_cast<value_type>(set_bits(_read_ldtr(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_ldtr(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_ldtr(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -737,10 +737,10 @@ namespace ldtr
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_ldtr(gsl::narrow_cast<value_type>(set_bits(_read_ldtr(), mask, val << from))); }
+        { _write_ldtr(gsl::narrow_cast<value_type>(set_bits(_read_ldtr(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_ldtr(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_ldtr(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -778,10 +778,10 @@ namespace tr
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_tr(gsl::narrow_cast<value_type>(set_bits(_read_tr(), mask, val << from))); }
+        { _write_tr(gsl::narrow_cast<value_type>(set_bits(_read_tr(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_tr(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_tr(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -834,10 +834,10 @@ namespace tr
         { return gsl::narrow_cast<value_type>(get_bits(sr, mask) >> from); }
 
         inline void set(value_type val)
-        { _write_tr(gsl::narrow_cast<value_type>(set_bits(_read_tr(), mask, val << from))); }
+        { _write_tr(gsl::narrow_cast<value_type>(set_bits(_read_tr(), mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline auto set(value_type sr, value_type val)
-        { _write_tr(gsl::narrow_cast<value_type>(set_bits(sr, mask, val << from))); }
+        { _write_tr(gsl::narrow_cast<value_type>(set_bits(sr, mask, gsl::narrow_cast<value_type>(val << from)))); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
