@@ -19,9 +19,9 @@
 #ifndef VMCS_INTEL_X64_CHECK_H
 #define VMCS_INTEL_X64_CHECK_H
 
-#include "vmcs_check_host.h"
-#include "vmcs_check_guest.h"
-#include "vmcs_check_controls.h"
+#include "check_vmcs_host_fields.h"
+#include "check_vmcs_guest_fields.h"
+#include "check_vmcs_controls_fields.h"
 
 /// Intel x86_64 VMCS Check
 ///
@@ -31,9 +31,9 @@
 
 // *INDENT-OFF*
 
-namespace intel_x64
+namespace bfvmm
 {
-namespace vmcs
+namespace intel_x64
 {
 namespace check
 {
@@ -41,11 +41,9 @@ namespace check
 inline void
 all()
 {
-    host_state_all();
-    guest_state_all();
     vmx_controls_all();
-}
-
+    host_state_all();
+    guest_state_all();}
 }
 }
 }

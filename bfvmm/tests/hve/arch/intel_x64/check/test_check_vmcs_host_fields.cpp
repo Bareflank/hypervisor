@@ -633,7 +633,7 @@ TEST_CASE("check_host_state_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_state_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_state_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_state_all);
 }
 
 TEST_CASE("check_host_control_registers_and_msrs_all")
@@ -641,7 +641,7 @@ TEST_CASE("check_host_control_registers_and_msrs_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_control_registers_and_msrs_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_control_registers_and_msrs_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_control_registers_and_msrs_all);
 }
 
 TEST_CASE("check_host_segment_and_descriptor_table_registers_all")
@@ -649,7 +649,7 @@ TEST_CASE("check_host_segment_and_descriptor_table_registers_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_segment_and_descriptor_table_registers_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_segment_and_descriptor_table_registers_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_segment_and_descriptor_table_registers_all);
 }
 
 TEST_CASE("check_host_address_space_size_all")
@@ -657,7 +657,7 @@ TEST_CASE("check_host_address_space_size_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_address_space_size_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_address_space_size_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_address_space_size_all);
 }
 
 TEST_CASE("check_host_cr0_for_unsupported_bits")
@@ -665,7 +665,7 @@ TEST_CASE("check_host_cr0_for_unsupported_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_cr0_for_unsupported_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_cr0_for_unsupported_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_cr0_for_unsupported_bits);
 }
 
 TEST_CASE("check_host_cr4_for_unsupported_bits")
@@ -673,7 +673,7 @@ TEST_CASE("check_host_cr4_for_unsupported_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_cr4_for_unsupported_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_cr4_for_unsupported_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_cr4_for_unsupported_bits);
 }
 
 TEST_CASE("check_host_cr3_for_unsupported_bits")
@@ -681,7 +681,7 @@ TEST_CASE("check_host_cr3_for_unsupported_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_cr3_for_unsupported_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_cr3_for_unsupported_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_cr3_for_unsupported_bits);
 }
 
 TEST_CASE("check_host_ia32_sysenter_esp_canonical_address")
@@ -689,7 +689,7 @@ TEST_CASE("check_host_ia32_sysenter_esp_canonical_address")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_ia32_sysenter_esp_canonical_address_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_ia32_sysenter_esp_canonical_address);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_ia32_sysenter_esp_canonical_address);
 }
 
 TEST_CASE("check_host_ia32_sysenter_eip_canonical_address")
@@ -697,7 +697,7 @@ TEST_CASE("check_host_ia32_sysenter_eip_canonical_address")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_ia32_sysenter_eip_canonical_address_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_ia32_sysenter_eip_canonical_address);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_ia32_sysenter_eip_canonical_address);
 }
 
 TEST_CASE("check_host_verify_load_ia32_perf_global_ctrl")
@@ -705,7 +705,7 @@ TEST_CASE("check_host_verify_load_ia32_perf_global_ctrl")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_verify_load_ia32_perf_global_ctrl_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_verify_load_ia32_perf_global_ctrl);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_verify_load_ia32_perf_global_ctrl);
 }
 
 TEST_CASE("check_host_verify_load_ia32_pat")
@@ -713,7 +713,7 @@ TEST_CASE("check_host_verify_load_ia32_pat")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_verify_load_ia32_pat_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_verify_load_ia32_pat);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_verify_load_ia32_pat);
 }
 
 TEST_CASE("check_host_verify_load_ia32_efer")
@@ -721,7 +721,7 @@ TEST_CASE("check_host_verify_load_ia32_efer")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_verify_load_ia32_efer_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_verify_load_ia32_efer);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_verify_load_ia32_efer);
 }
 
 TEST_CASE("check_host_es_selector_rpl_ti_equal_zero")
@@ -729,7 +729,7 @@ TEST_CASE("check_host_es_selector_rpl_ti_equal_zero")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_es_selector_rpl_ti_equal_zero_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_es_selector_rpl_ti_equal_zero);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_es_selector_rpl_ti_equal_zero);
 }
 
 TEST_CASE("check_host_cs_selector_rpl_ti_equal_zero")
@@ -737,7 +737,7 @@ TEST_CASE("check_host_cs_selector_rpl_ti_equal_zero")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_cs_selector_rpl_ti_equal_zero_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_cs_selector_rpl_ti_equal_zero);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_cs_selector_rpl_ti_equal_zero);
 }
 
 TEST_CASE("check_host_ss_selector_rpl_ti_equal_zero")
@@ -745,7 +745,7 @@ TEST_CASE("check_host_ss_selector_rpl_ti_equal_zero")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_ss_selector_rpl_ti_equal_zero_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_ss_selector_rpl_ti_equal_zero);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_ss_selector_rpl_ti_equal_zero);
 }
 
 TEST_CASE("check_host_ds_selector_rpl_ti_equal_zero")
@@ -753,7 +753,7 @@ TEST_CASE("check_host_ds_selector_rpl_ti_equal_zero")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_ds_selector_rpl_ti_equal_zero_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_ds_selector_rpl_ti_equal_zero);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_ds_selector_rpl_ti_equal_zero);
 }
 
 TEST_CASE("check_host_fs_selector_rpl_ti_equal_zero")
@@ -761,7 +761,7 @@ TEST_CASE("check_host_fs_selector_rpl_ti_equal_zero")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_fs_selector_rpl_ti_equal_zero_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_fs_selector_rpl_ti_equal_zero);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_fs_selector_rpl_ti_equal_zero);
 }
 
 TEST_CASE("check_host_gs_selector_rpl_ti_equal_zero")
@@ -769,7 +769,7 @@ TEST_CASE("check_host_gs_selector_rpl_ti_equal_zero")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_gs_selector_rpl_ti_equal_zero_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_gs_selector_rpl_ti_equal_zero);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_gs_selector_rpl_ti_equal_zero);
 }
 
 TEST_CASE("check_host_tr_selector_rpl_ti_equal_zero")
@@ -777,7 +777,7 @@ TEST_CASE("check_host_tr_selector_rpl_ti_equal_zero")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_tr_selector_rpl_ti_equal_zero_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_tr_selector_rpl_ti_equal_zero);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_tr_selector_rpl_ti_equal_zero);
 }
 
 TEST_CASE("check_host_cs_not_equal_zero")
@@ -785,7 +785,7 @@ TEST_CASE("check_host_cs_not_equal_zero")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_cs_not_equal_zero_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_cs_not_equal_zero);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_cs_not_equal_zero);
 }
 
 TEST_CASE("check_host_tr_not_equal_zero")
@@ -793,7 +793,7 @@ TEST_CASE("check_host_tr_not_equal_zero")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_tr_not_equal_zero_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_tr_not_equal_zero);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_tr_not_equal_zero);
 }
 
 TEST_CASE("check_host_ss_not_equal_zero")
@@ -801,7 +801,7 @@ TEST_CASE("check_host_ss_not_equal_zero")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_ss_not_equal_zero_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_ss_not_equal_zero);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_ss_not_equal_zero);
 }
 
 TEST_CASE("check_host_fs_canonical_base_address")
@@ -809,7 +809,7 @@ TEST_CASE("check_host_fs_canonical_base_address")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_fs_canonical_base_address_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_fs_canonical_base_address);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_fs_canonical_base_address);
 }
 
 TEST_CASE("check_host_gs_canonical_base_address")
@@ -817,7 +817,7 @@ TEST_CASE("check_host_gs_canonical_base_address")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_gs_canonical_base_address_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_gs_canonical_base_address);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_gs_canonical_base_address);
 }
 
 TEST_CASE("check_host_gdtr_canonical_base_address")
@@ -825,7 +825,7 @@ TEST_CASE("check_host_gdtr_canonical_base_address")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_gdtr_canonical_base_address_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_gdtr_canonical_base_address);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_gdtr_canonical_base_address);
 }
 
 TEST_CASE("check_host_idtr_canonical_base_address")
@@ -833,7 +833,7 @@ TEST_CASE("check_host_idtr_canonical_base_address")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_idtr_canonical_base_address_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_idtr_canonical_base_address);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_idtr_canonical_base_address);
 }
 
 TEST_CASE("check_host_tr_canonical_base_address")
@@ -841,7 +841,7 @@ TEST_CASE("check_host_tr_canonical_base_address")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_tr_canonical_base_address_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_tr_canonical_base_address);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_tr_canonical_base_address);
 }
 
 TEST_CASE("check_host_if_outside_ia32e_mode")
@@ -849,7 +849,7 @@ TEST_CASE("check_host_if_outside_ia32e_mode")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_if_outside_ia32e_mode_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_if_outside_ia32e_mode);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_if_outside_ia32e_mode);
 }
 
 TEST_CASE("check_host_address_space_size_exit_ctl_is_set")
@@ -857,7 +857,7 @@ TEST_CASE("check_host_address_space_size_exit_ctl_is_set")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_address_space_size_exit_ctl_is_set_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_address_space_size_exit_ctl_is_set);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_address_space_size_exit_ctl_is_set);
 }
 
 TEST_CASE("check_host_address_space_disabled")
@@ -865,7 +865,7 @@ TEST_CASE("check_host_address_space_disabled")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_address_space_disabled_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_address_space_disabled);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_address_space_disabled);
 }
 
 TEST_CASE("check_host_address_space_enabled")
@@ -873,7 +873,7 @@ TEST_CASE("check_host_address_space_enabled")
     std::vector<struct control_flow_path> cfg;
     setup_check_host_address_space_enabled_paths(cfg);
 
-    test_vmcs_check(cfg, check::host_address_space_enabled);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_address_space_enabled);
 }
 
 #endif
