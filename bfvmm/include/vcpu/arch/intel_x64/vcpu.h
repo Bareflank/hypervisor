@@ -19,12 +19,12 @@
 #ifndef VCPU_INTEL_X64_H
 #define VCPU_INTEL_X64_H
 
-#include <vcpu/vcpu.h>
-#include <hve/arch/intel_x64/vmxon/vmxon.h>
-#include <hve/arch/intel_x64/vmcs/vmcs.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_state_vmm.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_state_hvm.h>
-#include <hve/arch/intel_x64/exit_handler/exit_handler.h>
+#include "../../vcpu.h"
+#include "../../../hve/arch/intel_x64/vmxon/vmxon.h"
+#include "../../../hve/arch/intel_x64/vmcs/vmcs.h"
+#include "../../../hve/arch/intel_x64/vmcs/vmcs_state_vmm.h"
+#include "../../../hve/arch/intel_x64/vmcs/vmcs_state_hvm.h"
+#include "../../../hve/arch/intel_x64/exit_handler/exit_handler.h"
 
 // -----------------------------------------------------------------------------
 // Exports

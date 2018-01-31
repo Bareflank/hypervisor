@@ -25,9 +25,9 @@
 #include <mutex>
 #include <vector>
 
-#include <memory_manager/pat_x64.h>
-#include <memory_manager/mem_attr_x64.h>
-#include <memory_manager/page_table_x64.h>
+#include "pat_x64.h"
+#include "mem_attr_x64.h"
+#include "page_table_x64.h"
 
 #include <intrinsics.h>
 

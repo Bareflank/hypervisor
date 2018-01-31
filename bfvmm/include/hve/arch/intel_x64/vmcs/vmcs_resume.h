@@ -19,7 +19,7 @@
 #ifndef VMCS_INTEL_X64_RESUME_H
 #define VMCS_INTEL_X64_RESUME_H
 
-#include <hve/arch/intel_x64/state_save.h>
+#include "../state_save.h"
 
 /// Resume VMCS
 ///

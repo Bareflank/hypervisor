@@ -22,8 +22,8 @@
 #include <bfdelegate.h>
 
 #include <intrinsics.h>
-#include <hve/arch/intel_x64/state_save.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_state.h>
+#include "../state_save.h"
+#include "vmcs_state.h"
 
 // -----------------------------------------------------------------------------
 // Exports

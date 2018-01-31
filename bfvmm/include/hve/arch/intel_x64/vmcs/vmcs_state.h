@@ -22,8 +22,8 @@
 #include <bftypes.h>
 
 #include <intrinsics.h>
-#include <hve/arch/x64/gdt.h>
-#include <hve/arch/x64/idt.h>
+#include "../../x64/gdt.h"
+#include "../../x64/idt.h"
 
 // -----------------------------------------------------------------------------
 // Exports

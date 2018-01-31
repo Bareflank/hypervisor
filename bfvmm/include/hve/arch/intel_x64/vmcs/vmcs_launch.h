@@ -19,7 +19,7 @@
 #ifndef VMCS_INTEL_X64_LAUNCH_H
 #define VMCS_INTEL_X64_LAUNCH_H
 
-#include <hve/arch/intel_x64/state_save.h>
+#include "../state_save.h"
 
 /// Launch VMCS
 ///
