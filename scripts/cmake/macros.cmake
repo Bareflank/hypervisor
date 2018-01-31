@@ -441,9 +441,13 @@ function(add_dependency NAME PREFIX)
             CMAKE_ARGS -DCMAKE_INSTALL_MESSAGE=${CMAKE_INSTALL_MESSAGE}
             CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
         )
-        if(NOT WIN32)
+        if(NOT WIN32 AND NOT CMAKE_GENERATOR STREQUAL "Ninja")
             list(APPEND ARGN
                 CMAKE_ARGS -DCMAKE_TARGET_MESSAGES=${CMAKE_TARGET_MESSAGES}
+            )
+        endif()
+        if(NOT WIN32)
+            list(APPEND ARGN
                 CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             )
         endif()
@@ -821,9 +825,13 @@ function(add_subproject NAME PREFIX)
         -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
     )
 
-    if(NOT WIN32)
+    if(NOT WIN32 AND NOT CMAKE_GENERATOR STREQUAL "Ninja")
         list(APPEND CMAKE_ARGS
             -DCMAKE_TARGET_MESSAGES=${CMAKE_TARGET_MESSAGES}
+        )
+    endif()
+    if(NOT WIN32)
+        list(APPEND CMAKE_ARGS
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         )
     endif()
