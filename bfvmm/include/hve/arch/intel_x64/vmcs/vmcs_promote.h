@@ -20,7 +20,7 @@
 #define VMCS_INTEL_X64_PROMOTE_H
 
 #include <cstdint>
-#include <hve/arch/intel_x64/state_save.h>
+#include "../state_save.h"
 
 /// Promote VMCS
 ///

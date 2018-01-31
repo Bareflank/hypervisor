@@ -25,7 +25,7 @@
 #include <vector>
 #include <memory>
 
-#include <memory_manager/page_table_entry_x64.h>
+#include "page_table_entry_x64.h"
 
 // -----------------------------------------------------------------------------
 // Exports

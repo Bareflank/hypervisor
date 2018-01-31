@@ -22,7 +22,7 @@
 #include <memory>
 
 #include <bfdebug.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_state.h>
+#include "vmcs_state.h"
 
 // -----------------------------------------------------------------------------
 // Exports

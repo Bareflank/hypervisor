@@ -29,10 +29,10 @@
 #include <bfexception.h>
 #include <bfupperlower.h>
 
-#include <memory_manager/pat_x64.h>
-#include <memory_manager/mem_attr_x64.h>
-#include <memory_manager/memory_manager_x64.h>
-#include <memory_manager/root_page_table_x64.h>
+#include "pat_x64.h"
+#include "mem_attr_x64.h"
+#include "memory_manager_x64.h"
+#include "root_page_table_x64.h"
 
 #include <intrinsics.h>
 

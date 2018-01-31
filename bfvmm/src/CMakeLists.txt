@@ -29,3 +29,9 @@ add_subdirectory(memory_manager)
 add_subdirectory(hve)
 add_subdirectory(vcpu)
 add_subdirectory(entry)
+
+# ------------------------------------------------------------------------------
+# Install
+# ------------------------------------------------------------------------------
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/../include DESTINATION include/bfvmm)
