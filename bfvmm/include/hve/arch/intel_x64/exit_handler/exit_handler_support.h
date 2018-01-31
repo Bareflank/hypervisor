@@ -19,7 +19,7 @@
 #ifndef EXIT_HANDLER_INTEL_X64_SUPPORT_H
 #define EXIT_HANDLER_INTEL_X64_SUPPORT_H
 
-#include <hve/arch/intel_x64/exit_handler/exit_handler.h>
+#include "exit_handler.h"
 
 /// Exit Handler Entry
 ///
