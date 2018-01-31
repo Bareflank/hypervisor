@@ -19,7 +19,7 @@
 #include <bfgsl.h>
 
 #include <vcpu/arch/intel_x64/vcpu.h>
-#include <hve/arch/intel_x64/exit_handler/exit_handler_support.h>
+#include <bfvmm/hve/arch/intel_x64/exit_handler/exit_handler_support.h>
 
 vcpu_intel_x64::vcpu_intel_x64(
     vcpuid::type id,

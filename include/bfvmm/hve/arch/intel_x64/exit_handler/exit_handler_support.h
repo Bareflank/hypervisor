@@ -16,18 +16,23 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VMCS_INTEL_X64_LAUNCH_H
-#define VMCS_INTEL_X64_LAUNCH_H
+#ifndef EXIT_HANDLER_INTEL_X64_SUPPORT_H
+#define EXIT_HANDLER_INTEL_X64_SUPPORT_H
 
-#include <hve/arch/intel_x64/state_save.h>
+#include <bfvmm/hve/arch/intel_x64/exit_handler/exit_handler.h>
 
-/// Launch VMCS
+/// Exit Handler Entry
 ///
-/// Performs a VMLAUNCH, executing the guest described by this VMCS. This
-/// function can be executed by the exit handler when it is done emulating
-/// and instruction, or it can be executed to schedule another guest
+/// This is the starting point of the VMM. It is written in pure assembly
+/// in order to ensure the state of the guest is handled properly. This
+/// code saves / restores the guest's CPU state, and then hands control off
+/// to the "C" portion of the code to continue execution, and begin the
+/// process of handling the VM exit.
 ///
-extern "C" void vmcs_launch(
-    state_save_intel_x64 *state_save) noexcept;
+/// @expects none
+/// @ensures none
+///
+extern "C" EXPORT_HVE void exit_handler_entry(
+    void) noexcept;
 
 #endif

@@ -23,11 +23,11 @@
 
 #include <memory_manager/memory_manager_x64.h>
 
-#include <hve/arch/intel_x64/vmcs/vmcs.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_launch.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_resume.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_promote.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_check.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_launch.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_resume.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_promote.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_check.h>
 
 #include <intrinsics.h>
 

@@ -16,21 +16,18 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef EXIT_HANDLER_INTEL_X64_ENTRY_H
-#define EXIT_HANDLER_INTEL_X64_ENTRY_H
+#ifndef VMCS_INTEL_X64_LAUNCH_H
+#define VMCS_INTEL_X64_LAUNCH_H
 
-#include <hve/arch/intel_x64/exit_handler/exit_handler.h>
+#include <bfvmm/hve/arch/intel_x64/state_save.h>
 
-/// Exit Handler
+/// Launch VMCS
 ///
-/// This is the "C" portion of the exit handler. Once the entry point has
-/// finished its job, it hands control to this function, which trampolines
-/// to a C++ exit handler dispatch which will ultimately handle the VM exit
+/// Performs a VMLAUNCH, executing the guest described by this VMCS. This
+/// function can be executed by the exit handler when it is done emulating
+/// and instruction, or it can be executed to schedule another guest
 ///
-/// @expects none
-/// @ensures none
-///
-extern "C" EXPORT_HVE void exit_handler(
-    exit_handler_intel_x64 *exit_handler) noexcept;
+extern "C" void vmcs_launch(
+    state_save_intel_x64 *state_save) noexcept;
 
 #endif

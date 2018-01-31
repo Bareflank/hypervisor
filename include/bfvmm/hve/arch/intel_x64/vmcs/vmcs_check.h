@@ -16,18 +16,40 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VMCS_INTEL_X64_RESUME_H
-#define VMCS_INTEL_X64_RESUME_H
+#ifndef VMCS_INTEL_X64_CHECK_H
+#define VMCS_INTEL_X64_CHECK_H
 
-#include <hve/arch/intel_x64/state_save.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_check_controls.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_check_guest.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_check_host.h>
 
-/// Resume VMCS
+/// Intel x86_64 VMCS Check
 ///
-/// Performs a VMRESUME, executing the guest described by this VMCS. This
-/// function can be executed by the exit handler when it is done emulating
-/// and instruction, or it can be executed to schedule another guest
+/// This namespace implements the checks found in sections 26.1 through
+/// 26.3, Vol. 3 of the SDM.
 ///
-extern "C" void vmcs_resume(
-    state_save_intel_x64 *state_save) noexcept;
+
+// *INDENT-OFF*
+
+namespace intel_x64
+{
+namespace vmcs
+{
+namespace check
+{
+
+inline void
+all()
+{
+    vmx_controls_all();
+    host_state_all();
+    guest_state_all();
+}
+
+}
+}
+}
+
+// *INDENT-ON*
 
 #endif

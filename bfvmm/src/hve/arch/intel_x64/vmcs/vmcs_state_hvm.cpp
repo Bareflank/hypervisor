@@ -17,7 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <intrinsics.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_state_hvm.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_state_hvm.h>
 
 using namespace x64;
 using namespace intel_x64;

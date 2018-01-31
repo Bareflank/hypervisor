@@ -21,7 +21,7 @@ project(bfvmm C CXX)
 
 include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project(
-    INCLUDES ${CMAKE_CURRENT_LIST_DIR}/../include
+    INCLUDES ${CMAKE_CURRENT_LIST_DIR}/../include ${CMAKE_CURRENT_LIST_DIR}/../../include
 )
 
 add_subdirectory(debug)
