@@ -18,7 +18,7 @@
 
 #include <intrinsics.h>
 #include <memory_manager/root_page_table_x64.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_state_vmm.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_state_vmm.h>
 
 using namespace x64;
 using namespace intel_x64;

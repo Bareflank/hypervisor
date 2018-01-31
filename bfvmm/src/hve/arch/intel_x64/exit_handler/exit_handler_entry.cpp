@@ -17,8 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <bfexception.h>
-#include <hve/arch/intel_x64/exit_handler/exit_handler.h>
-#include <hve/arch/intel_x64/exit_handler/exit_handler_entry.h>
+#include <bfvmm/hve/arch/intel_x64/exit_handler/exit_handler.h>
+#include <bfvmm/hve/arch/intel_x64/exit_handler/exit_handler_entry.h>
 
 // -----------------------------------------------------------------------------
 // Implementation

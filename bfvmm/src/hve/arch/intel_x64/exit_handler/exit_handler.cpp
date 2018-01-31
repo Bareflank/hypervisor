@@ -22,10 +22,10 @@
 #include <bfexception.h>
 #include <bferrorcodes.h>
 
-#include <hve/arch/intel_x64/vmcs/vmcs_check.h>
-#include <hve/arch/intel_x64/exit_handler/exit_handler.h>
-#include <hve/arch/intel_x64/exit_handler/exit_handler_entry.h>
-#include <hve/arch/intel_x64/exit_handler/exit_handler_support.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_check.h>
+#include <bfvmm/hve/arch/intel_x64/exit_handler/exit_handler.h>
+#include <bfvmm/hve/arch/intel_x64/exit_handler/exit_handler_entry.h>
+#include <bfvmm/hve/arch/intel_x64/exit_handler/exit_handler_support.h>
 
 #include <intrinsics.h>
 #include <memory_manager/memory_manager_x64.h>

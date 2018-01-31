@@ -16,20 +16,18 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VMCS_INTEL_X64_PROMOTE_H
-#define VMCS_INTEL_X64_PROMOTE_H
+#ifndef VMCS_INTEL_X64_RESUME_H
+#define VMCS_INTEL_X64_RESUME_H
 
-#include <cstdint>
-#include <hve/arch/intel_x64/state_save.h>
+#include <bfvmm/hve/arch/intel_x64/state_save.h>
 
-/// Promote VMCS
+/// Resume VMCS
 ///
-/// Promote the guest described by this VMCS to VMX-root operation. In
-/// the process of doing this, the VMM's state is lost.
+/// Performs a VMRESUME, executing the guest described by this VMCS. This
+/// function can be executed by the exit handler when it is done emulating
+/// and instruction, or it can be executed to schedule another guest
 ///
-/// @note this function does not return
-///
-extern "C" void vmcs_promote(
-    state_save_intel_x64 *state_save, const void *guest_gdt) noexcept;
+extern "C" void vmcs_resume(
+    state_save_intel_x64 *state_save) noexcept;
 
 #endif

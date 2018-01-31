@@ -19,23 +19,23 @@
 #include <catch/catch.hpp>
 #include <hippomocks.h>
 
-#include <hve/arch/intel_x64/vmxon/vmxon.h>
+#include <bfvmm/hve/arch/intel_x64/vmxon/vmxon.h>
 
-#include <hve/arch/intel_x64/exit_handler/exit_handler.h>
-#include <hve/arch/intel_x64/exit_handler/exit_handler_entry.h>
-#include <hve/arch/intel_x64/exit_handler/exit_handler_support.h>
+#include <bfvmm/hve/arch/intel_x64/exit_handler/exit_handler.h>
+#include <bfvmm/hve/arch/intel_x64/exit_handler/exit_handler_entry.h>
+#include <bfvmm/hve/arch/intel_x64/exit_handler/exit_handler_support.h>
 
-#include <hve/arch/intel_x64/vmcs/vmcs.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_check.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_launch.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_resume.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_promote.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_state.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_state_hvm.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_state_vmm.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_check.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_launch.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_resume.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_promote.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_state.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_state_hvm.h>
+#include <bfvmm/hve/arch/intel_x64/vmcs/vmcs_state_vmm.h>
 
-#include <hve/arch/x64/gdt.h>
-#include <hve/arch/x64/idt.h>
+#include <bfvmm/hve/arch/x64/gdt.h>
+#include <bfvmm/hve/arch/x64/idt.h>
 
 #include <vcpu/arch/intel_x64/vcpu.h>
 

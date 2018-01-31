@@ -54,4 +54,4 @@ add_static_library(
 # Install
 # ------------------------------------------------------------------------------
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/../include/hve DESTINATION include/bfvmm/hve)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/../../include/bfvmm/hve DESTINATION include/bfvmm)

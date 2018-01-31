@@ -16,40 +16,21 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VMCS_INTEL_X64_CHECK_H
-#define VMCS_INTEL_X64_CHECK_H
+#ifndef EXIT_HANDLER_INTEL_X64_ENTRY_H
+#define EXIT_HANDLER_INTEL_X64_ENTRY_H
 
-#include <hve/arch/intel_x64/vmcs/vmcs_check_controls.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_check_guest.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_check_host.h>
+#include <bfvmm/hve/arch/intel_x64/exit_handler/exit_handler.h>
 
-/// Intel x86_64 VMCS Check
+/// Exit Handler
 ///
-/// This namespace implements the checks found in sections 26.1 through
-/// 26.3, Vol. 3 of the SDM.
+/// This is the "C" portion of the exit handler. Once the entry point has
+/// finished its job, it hands control to this function, which trampolines
+/// to a C++ exit handler dispatch which will ultimately handle the VM exit
 ///
-
-// *INDENT-OFF*
-
-namespace intel_x64
-{
-namespace vmcs
-{
-namespace check
-{
-
-inline void
-all()
-{
-    vmx_controls_all();
-    host_state_all();
-    guest_state_all();
-}
-
-}
-}
-}
-
-// *INDENT-ON*
+/// @expects none
+/// @ensures none
+///
+extern "C" EXPORT_HVE void exit_handler(
+    exit_handler_intel_x64 *exit_handler) noexcept;
 
 #endif
