@@ -1392,7 +1392,7 @@ TEST_CASE("exit_handler: vm_exit_failure_check")
     auto vmcs = setup_vmcs_unhandled(mocks, exit_reason::basic_exit_reason::xrstors | 0x80000000);
     auto ehlr = setup_ehlr(vmcs);
 
-    mocks.OnCallFunc(vmcs::check::all);
+    mocks.OnCallFunc(bfvmm::intel_x64::check::all);
 
     CHECK_NOTHROW(ehlr.dispatch());
 }

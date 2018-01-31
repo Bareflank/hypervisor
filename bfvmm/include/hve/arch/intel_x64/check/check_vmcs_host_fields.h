@@ -30,9 +30,9 @@
 /// section 26.2.2, Vol. 3 of the SDM.
 ///
 
-namespace intel_x64
+namespace bfvmm
 {
-namespace vmcs
+namespace intel_x64
 {
 namespace check
 {
@@ -40,9 +40,9 @@ namespace check
 inline void
 host_cr0_for_unsupported_bits()
 {
-    auto cr0 = vmcs::host_cr0::get();
-    auto ia32_vmx_cr0_fixed0 = msrs::ia32_vmx_cr0_fixed0::get();
-    auto ia32_vmx_cr0_fixed1 = msrs::ia32_vmx_cr0_fixed1::get();
+    auto cr0 = ::intel_x64::vmcs::host_cr0::get();
+    auto ia32_vmx_cr0_fixed0 = ::intel_x64::msrs::ia32_vmx_cr0_fixed0::get();
+    auto ia32_vmx_cr0_fixed1 = ::intel_x64::msrs::ia32_vmx_cr0_fixed1::get();
 
     if (0 != ((~cr0 & ia32_vmx_cr0_fixed0) | (cr0 & ~ia32_vmx_cr0_fixed1))) {
         bfdebug_transaction(0, [&](std::string * msg) {
@@ -59,9 +59,9 @@ host_cr0_for_unsupported_bits()
 inline void
 host_cr4_for_unsupported_bits()
 {
-    auto cr4 = vmcs::host_cr4::get();
-    auto ia32_vmx_cr4_fixed0 = msrs::ia32_vmx_cr4_fixed0::get();
-    auto ia32_vmx_cr4_fixed1 = msrs::ia32_vmx_cr4_fixed1::get();
+    auto cr4 = ::intel_x64::vmcs::host_cr4::get();
+    auto ia32_vmx_cr4_fixed0 = ::intel_x64::msrs::ia32_vmx_cr4_fixed0::get();
+    auto ia32_vmx_cr4_fixed1 = ::intel_x64::msrs::ia32_vmx_cr4_fixed1::get();
 
     if (0 != ((~cr4 & ia32_vmx_cr4_fixed0) | (cr4 & ~ia32_vmx_cr4_fixed1))) {
         bfdebug_transaction(0, [&](std::string * msg) {
@@ -78,7 +78,7 @@ host_cr4_for_unsupported_bits()
 inline void
 host_cr3_for_unsupported_bits()
 {
-    if (!x64::is_physical_address_valid(vmcs::host_cr3::get())) {
+    if (!::x64::is_physical_address_valid(::intel_x64::vmcs::host_cr3::get())) {
         throw std::logic_error("host cr3 too large");
     }
 }
@@ -86,7 +86,7 @@ host_cr3_for_unsupported_bits()
 inline void
 host_ia32_sysenter_esp_canonical_address()
 {
-    if (!x64::is_address_canonical(vmcs::host_ia32_sysenter_esp::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::host_ia32_sysenter_esp::get())) {
         throw std::logic_error("host sysenter esp must be canonical");
     }
 }
@@ -94,7 +94,7 @@ host_ia32_sysenter_esp_canonical_address()
 inline void
 host_ia32_sysenter_eip_canonical_address()
 {
-    if (!x64::is_address_canonical(vmcs::host_ia32_sysenter_eip::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::host_ia32_sysenter_eip::get())) {
         throw std::logic_error("host sysenter eip must be canonical");
     }
 }
@@ -102,11 +102,11 @@ host_ia32_sysenter_eip_canonical_address()
 inline void
 host_verify_load_ia32_perf_global_ctrl()
 {
-    if (vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::is_disabled()) {
+    if (::intel_x64::vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::is_disabled()) {
         return;
     }
 
-    if (vmcs::host_ia32_perf_global_ctrl::reserved::get() != 0) {
+    if (::intel_x64::vmcs::host_ia32_perf_global_ctrl::reserved::get() != 0) {
         throw std::logic_error("host perf global ctrl msr reserved bits must be 0");
     }
 }
@@ -114,39 +114,39 @@ host_verify_load_ia32_perf_global_ctrl()
 inline void
 host_verify_load_ia32_pat()
 {
-    if (vmcs::vm_exit_controls::load_ia32_pat::is_disabled()) {
+    if (::intel_x64::vmcs::vm_exit_controls::load_ia32_pat::is_disabled()) {
         return;
     }
 
-    if (memory_type_reserved(host_ia32_pat::pa0::memory_type::get())) {
+    if (::intel_x64::vmcs::memory_type_reserved(::intel_x64::vmcs::host_ia32_pat::pa0::memory_type::get())) {
         throw std::logic_error("pat0 has a reserved memory type");
     }
 
-    if (memory_type_reserved(host_ia32_pat::pa1::memory_type::get())) {
+    if (::intel_x64::vmcs::memory_type_reserved(::intel_x64::vmcs::host_ia32_pat::pa1::memory_type::get())) {
         throw std::logic_error("pat1 has a reserved memory type");
     }
 
-    if (memory_type_reserved(host_ia32_pat::pa2::memory_type::get())) {
+    if (::intel_x64::vmcs::memory_type_reserved(::intel_x64::vmcs::host_ia32_pat::pa2::memory_type::get())) {
         throw std::logic_error("pat2 has a reserved memory type");
     }
 
-    if (memory_type_reserved(host_ia32_pat::pa3::memory_type::get())) {
+    if (::intel_x64::vmcs::memory_type_reserved(::intel_x64::vmcs::host_ia32_pat::pa3::memory_type::get())) {
         throw std::logic_error("pat3 has a reserved memory type");
     }
 
-    if (memory_type_reserved(host_ia32_pat::pa4::memory_type::get())) {
+    if (::intel_x64::vmcs::memory_type_reserved(::intel_x64::vmcs::host_ia32_pat::pa4::memory_type::get())) {
         throw std::logic_error("pat4 has a reserved memory type");
     }
 
-    if (memory_type_reserved(host_ia32_pat::pa5::memory_type::get())) {
+    if (::intel_x64::vmcs::memory_type_reserved(::intel_x64::vmcs::host_ia32_pat::pa5::memory_type::get())) {
         throw std::logic_error("pat5 has a reserved memory type");
     }
 
-    if (memory_type_reserved(host_ia32_pat::pa6::memory_type::get())) {
+    if (::intel_x64::vmcs::memory_type_reserved(::intel_x64::vmcs::host_ia32_pat::pa6::memory_type::get())) {
         throw std::logic_error("pat6 has a reserved memory type");
     }
 
-    if (memory_type_reserved(host_ia32_pat::pa7::memory_type::get())) {
+    if (::intel_x64::vmcs::memory_type_reserved(::intel_x64::vmcs::host_ia32_pat::pa7::memory_type::get())) {
         throw std::logic_error("pat7 has a reserved memory type");
     }
 }
@@ -154,27 +154,27 @@ host_verify_load_ia32_pat()
 inline void
 host_verify_load_ia32_efer()
 {
-    if (vmcs::vm_exit_controls::load_ia32_efer::is_disabled()) {
+    if (::intel_x64::vmcs::vm_exit_controls::load_ia32_efer::is_disabled()) {
         return;
     }
 
-    if (vmcs::host_ia32_efer::reserved::get() != 0) {
+    if (::intel_x64::vmcs::host_ia32_efer::reserved::get() != 0) {
         throw std::logic_error("host_ia32_efer reserved bits must be 0 if "
                                "load_ia32_efer exit control is enabled");
     }
 
-    auto lma = vmcs::host_ia32_efer::lma::is_enabled();
-    auto lme = vmcs::host_ia32_efer::lme::is_enabled();
+    auto lma = ::intel_x64::vmcs::host_ia32_efer::lma::is_enabled();
+    auto lme = ::intel_x64::vmcs::host_ia32_efer::lme::is_enabled();
 
-    if (vmcs::vm_exit_controls::host_address_space_size::is_disabled() && lma) {
+    if (::intel_x64::vmcs::vm_exit_controls::host_address_space_size::is_disabled() && lma) {
         throw std::logic_error("host addr space is 0, but efer.lma is 1");
     }
 
-    if (vmcs::vm_exit_controls::host_address_space_size::is_enabled() && !lma) {
+    if (::intel_x64::vmcs::vm_exit_controls::host_address_space_size::is_enabled() && !lma) {
         throw std::logic_error("host addr space is 1, but efer.lma is 0");
     }
 
-    if (vmcs::host_cr0::paging::is_disabled()) {
+    if (::intel_x64::vmcs::host_cr0::paging::is_disabled()) {
         return;
     }
 
@@ -190,11 +190,11 @@ host_verify_load_ia32_efer()
 inline void
 host_es_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_es_selector::ti::is_enabled()) {
+    if (::intel_x64::vmcs::host_es_selector::ti::is_enabled()) {
         throw std::logic_error("host es ti flag must be 0");
     }
 
-    if (vmcs::host_es_selector::rpl::get() != 0) {
+    if (::intel_x64::vmcs::host_es_selector::rpl::get() != 0) {
         throw std::logic_error("host es rpl flag must be 0");
     }
 }
@@ -202,11 +202,11 @@ host_es_selector_rpl_ti_equal_zero()
 inline void
 host_cs_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_cs_selector::ti::is_enabled()) {
+    if (::intel_x64::vmcs::host_cs_selector::ti::is_enabled()) {
         throw std::logic_error("host cs ti flag must be 0");
     }
 
-    if (vmcs::host_cs_selector::rpl::get() != 0) {
+    if (::intel_x64::vmcs::host_cs_selector::rpl::get() != 0) {
         throw std::logic_error("host cs rpl flag must be 0");
     }
 }
@@ -214,11 +214,11 @@ host_cs_selector_rpl_ti_equal_zero()
 inline void
 host_ss_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_ss_selector::ti::is_enabled()) {
+    if (::intel_x64::vmcs::host_ss_selector::ti::is_enabled()) {
         throw std::logic_error("host ss ti flag must be 0");
     }
 
-    if (vmcs::host_ss_selector::rpl::get() != 0) {
+    if (::intel_x64::vmcs::host_ss_selector::rpl::get() != 0) {
         throw std::logic_error("host ss rpl flag must be 0");
     }
 }
@@ -226,11 +226,11 @@ host_ss_selector_rpl_ti_equal_zero()
 inline void
 host_ds_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_ds_selector::ti::is_enabled()) {
+    if (::intel_x64::vmcs::host_ds_selector::ti::is_enabled()) {
         throw std::logic_error("host ds ti flag must be 0");
     }
 
-    if (vmcs::host_ds_selector::rpl::get() != 0) {
+    if (::intel_x64::vmcs::host_ds_selector::rpl::get() != 0) {
         throw std::logic_error("host ds rpl flag must be 0");
     }
 }
@@ -238,11 +238,11 @@ host_ds_selector_rpl_ti_equal_zero()
 inline void
 host_fs_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_fs_selector::ti::is_enabled()) {
+    if (::intel_x64::vmcs::host_fs_selector::ti::is_enabled()) {
         throw std::logic_error("host fs ti flag must be 0");
     }
 
-    if (vmcs::host_fs_selector::rpl::get() != 0) {
+    if (::intel_x64::vmcs::host_fs_selector::rpl::get() != 0) {
         throw std::logic_error("host fs rpl flag must be 0");
     }
 }
@@ -250,11 +250,11 @@ host_fs_selector_rpl_ti_equal_zero()
 inline void
 host_gs_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_gs_selector::ti::is_enabled()) {
+    if (::intel_x64::vmcs::host_gs_selector::ti::is_enabled()) {
         throw std::logic_error("host gs ti flag must be 0");
     }
 
-    if (vmcs::host_gs_selector::rpl::get() != 0) {
+    if (::intel_x64::vmcs::host_gs_selector::rpl::get() != 0) {
         throw std::logic_error("host gs rpl flag must be 0");
     }
 }
@@ -262,11 +262,11 @@ host_gs_selector_rpl_ti_equal_zero()
 inline void
 host_tr_selector_rpl_ti_equal_zero()
 {
-    if (vmcs::host_tr_selector::ti::is_enabled()) {
+    if (::intel_x64::vmcs::host_tr_selector::ti::is_enabled()) {
         throw std::logic_error("host tr ti flag must be 0");
     }
 
-    if (vmcs::host_tr_selector::rpl::get() != 0) {
+    if (::intel_x64::vmcs::host_tr_selector::rpl::get() != 0) {
         throw std::logic_error("host tr rpl flag must be 0");
     }
 }
@@ -274,7 +274,7 @@ host_tr_selector_rpl_ti_equal_zero()
 inline void
 host_cs_not_equal_zero()
 {
-    if (vmcs::host_cs_selector::get() == 0) {
+    if (::intel_x64::vmcs::host_cs_selector::get() == 0) {
         throw std::logic_error("host cs cannot equal 0");
     }
 }
@@ -282,7 +282,7 @@ host_cs_not_equal_zero()
 inline void
 host_tr_not_equal_zero()
 {
-    if (vmcs::host_tr_selector::get() == 0) {
+    if (::intel_x64::vmcs::host_tr_selector::get() == 0) {
         throw std::logic_error("host tr cannot equal 0");
     }
 }
@@ -290,11 +290,11 @@ host_tr_not_equal_zero()
 inline void
 host_ss_not_equal_zero()
 {
-    if (vmcs::vm_exit_controls::host_address_space_size::is_enabled()) {
+    if (::intel_x64::vmcs::vm_exit_controls::host_address_space_size::is_enabled()) {
         return;
     }
 
-    if (vmcs::host_ss_selector::get() == 0) {
+    if (::intel_x64::vmcs::host_ss_selector::get() == 0) {
         throw std::logic_error("host ss cannot equal 0");
     }
 }
@@ -302,7 +302,7 @@ host_ss_not_equal_zero()
 inline void
 host_fs_canonical_base_address()
 {
-    if (!x64::is_address_canonical(vmcs::host_fs_base::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::host_fs_base::get())) {
         throw std::logic_error("host fs base must be canonical");
     }
 }
@@ -310,7 +310,7 @@ host_fs_canonical_base_address()
 inline void
 host_gs_canonical_base_address()
 {
-    if (!x64::is_address_canonical(vmcs::host_gs_base::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::host_gs_base::get())) {
         throw std::logic_error("host gs base must be canonical");
     }
 }
@@ -318,7 +318,7 @@ host_gs_canonical_base_address()
 inline void
 host_gdtr_canonical_base_address()
 {
-    if (!x64::is_address_canonical(vmcs::host_gdtr_base::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::host_gdtr_base::get())) {
         throw std::logic_error("host gdtr base must be canonical");
     }
 }
@@ -326,7 +326,7 @@ host_gdtr_canonical_base_address()
 inline void
 host_idtr_canonical_base_address()
 {
-    if (!x64::is_address_canonical(vmcs::host_idtr_base::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::host_idtr_base::get())) {
         throw std::logic_error("host idtr base must be canonical");
     }
 }
@@ -334,7 +334,7 @@ host_idtr_canonical_base_address()
 inline void
 host_tr_canonical_base_address()
 {
-    if (!x64::is_address_canonical(vmcs::host_tr_base::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::host_tr_base::get())) {
         throw std::logic_error("host tr base must be canonical");
     }
 }
@@ -342,15 +342,15 @@ host_tr_canonical_base_address()
 inline void
 host_if_outside_ia32e_mode()
 {
-    if (msrs::ia32_efer::lma::is_enabled()) {
+    if (::intel_x64::msrs::ia32_efer::lma::is_enabled()) {
         return;
     }
 
-    if (vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled()) {
+    if (::intel_x64::vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled()) {
         throw std::logic_error("ia 32e mode must be 0 if efer.lma == 0");
     }
 
-    if (vmcs::vm_exit_controls::host_address_space_size::is_enabled()) {
+    if (::intel_x64::vmcs::vm_exit_controls::host_address_space_size::is_enabled()) {
         throw std::logic_error("host addr space must be 0 if efer.lma == 0");
     }
 }
@@ -358,11 +358,11 @@ host_if_outside_ia32e_mode()
 inline void
 host_address_space_size_exit_ctl_is_set()
 {
-    if (!msrs::ia32_efer::lma::is_enabled()) {
+    if (!::intel_x64::msrs::ia32_efer::lma::is_enabled()) {
         return;
     }
 
-    if (vmcs::vm_exit_controls::host_address_space_size::is_disabled()) {
+    if (::intel_x64::vmcs::vm_exit_controls::host_address_space_size::is_disabled()) {
         throw std::logic_error("host addr space must be 1 if efer.lma == 1");
     }
 }
@@ -370,19 +370,19 @@ host_address_space_size_exit_ctl_is_set()
 inline void
 host_address_space_disabled()
 {
-    if (vmcs::vm_exit_controls::host_address_space_size::is_enabled()) {
+    if (::intel_x64::vmcs::vm_exit_controls::host_address_space_size::is_enabled()) {
         return;
     }
 
-    if (vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled()) {
+    if (::intel_x64::vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled()) {
         throw std::logic_error("ia 32e mode must be disabled if host addr space is disabled");
     }
 
-    if (vmcs::host_cr4::pcid_enable_bit::is_enabled()) {
+    if (::intel_x64::vmcs::host_cr4::pcid_enable_bit::is_enabled()) {
         throw std::logic_error("cr4 pcide must be disabled if host addr space is disabled");
     }
 
-    if ((vmcs::host_rip::get() & 0xFFFFFFFF00000000) != 0) {
+    if ((::intel_x64::vmcs::host_rip::get() & 0xFFFFFFFF00000000) != 0) {
         throw std::logic_error("rip bits 63:32 must be 0 if host addr space is disabled");
     }
 }
@@ -390,15 +390,15 @@ host_address_space_disabled()
 inline void
 host_address_space_enabled()
 {
-    if (vmcs::vm_exit_controls::host_address_space_size::is_disabled()) {
+    if (::intel_x64::vmcs::vm_exit_controls::host_address_space_size::is_disabled()) {
         return;
     }
 
-    if (vmcs::host_cr4::physical_address_extensions::is_disabled()) {
+    if (::intel_x64::vmcs::host_cr4::physical_address_extensions::is_disabled()) {
         throw std::logic_error("cr4 pae must be enabled if host addr space is enabled");
     }
 
-    if (!x64::is_address_canonical(vmcs::host_rip::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::host_rip::get())) {
         throw std::logic_error("host rip must be canonical");
     }
 }

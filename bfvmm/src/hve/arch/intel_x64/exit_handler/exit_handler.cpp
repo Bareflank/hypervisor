@@ -22,7 +22,7 @@
 #include <bfexception.h>
 #include <bferrorcodes.h>
 
-#include <hve/arch/intel_x64/vmcs/vmcs_check.h>
+#include <hve/arch/intel_x64/check/check.h>
 #include <hve/arch/intel_x64/exit_handler/exit_handler.h>
 #include <hve/arch/intel_x64/exit_handler/exit_handler_entry.h>
 #include <hve/arch/intel_x64/exit_handler/exit_handler_support.h>
@@ -372,7 +372,7 @@ exit_handler_intel_x64::unimplemented_handler() noexcept
     if (vmcs::exit_reason::vm_entry_failure::is_enabled()) {
 
         guard_exceptions([&] {
-            vmcs::check::all();
+            bfvmm::intel_x64::check::all();
         });
 
         guard_exceptions([&] {

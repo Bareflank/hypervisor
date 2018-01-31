@@ -27,7 +27,8 @@
 #include <hve/arch/intel_x64/vmcs/vmcs_launch.h>
 #include <hve/arch/intel_x64/vmcs/vmcs_resume.h>
 #include <hve/arch/intel_x64/vmcs/vmcs_promote.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_check.h>
+
+#include <hve/arch/intel_x64/check/check.h>
 
 #include <intrinsics.h>
 
@@ -96,7 +97,7 @@ vmcs_intel_x64::launch(host_state_t host_state, guest_state_t guest_state)
     });
 
     auto ___ = gsl::on_failure([&] {
-        vmcs::check::all();
+        bfvmm::intel_x64::check::all();
     });
 
     if (guest_state->is_guest()) {

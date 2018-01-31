@@ -58,8 +58,8 @@ TEST_CASE("vmcs: launch_vmlaunch_demote_failure")
 
     setup_msrs();
 
-    mocks.OnCallFunc(check::all);
     mocks.OnCallFunc(debug::dump);
+    mocks.OnCallFunc(bfvmm::intel_x64::check::all);
     mocks.OnCall(guest_state, vmcs_intel_x64_state::is_guest).Return(false);
 
     g_vmlaunch_fails = true;
