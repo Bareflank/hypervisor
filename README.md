@@ -140,7 +140,9 @@ supported platforms and their dependencies:
 
 #### Arch Linux:
 ```
-sudo pacman -S git linux-headers nasm clang cmake base-devel
+sudo pacman -S git linux-headers nasm clang clang-tools-extra cmake base-devel yaourt
+sudo yaourt -S downgrade
+downgrade clang clang-tools-extra llvm-libs     # select clang 4.0
 ```
 
 #### Ubuntu 17.04 (or Higher):
