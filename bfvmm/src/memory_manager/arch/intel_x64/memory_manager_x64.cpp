@@ -20,10 +20,10 @@
 #include <bfconstants.h>
 #include <bfexception.h>
 
-#include <memory_manager/mem_pool.h>
-#include <memory_manager/map_ptr_x64.h>
-#include <memory_manager/page_table_x64.h>
-#include <memory_manager/memory_manager_x64.h>
+#include <bfvmm/memory_manager/mem_pool.h>
+#include <bfvmm/memory_manager/map_ptr_x64.h>
+#include <bfvmm/memory_manager/page_table_x64.h>
+#include <bfvmm/memory_manager/memory_manager_x64.h>
 
 #include <intrinsics.h>
 using namespace x64;

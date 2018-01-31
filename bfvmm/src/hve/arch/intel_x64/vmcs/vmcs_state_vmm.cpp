@@ -17,7 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <intrinsics.h>
-#include <memory_manager/root_page_table_x64.h>
+#include <bfvmm/memory_manager/root_page_table_x64.h>
 #include <hve/arch/intel_x64/vmcs/vmcs_state_vmm.h>
 
 using namespace x64;

@@ -24,8 +24,8 @@ TEST_CASE("test name goes here")
 }
 
 // #include <test.h>
-// #include <memory_manager/map_ptr_x64.h>
-// #include <memory_manager/memory_manager_x64.h>
+// #include <bfvmm/memory_manager/map_ptr_x64.h>
+// #include <bfvmm/memory_manager/memory_manager_x64.h>
 
 // #include <map>
 // #include <exception>

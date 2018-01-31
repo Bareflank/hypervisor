@@ -28,7 +28,7 @@
 #include <hve/arch/intel_x64/exit_handler/exit_handler_support.h>
 
 #include <intrinsics.h>
-#include <memory_manager/memory_manager_x64.h>
+#include <bfvmm/memory_manager/memory_manager_x64.h>
 
 using namespace x64;
 using namespace intel_x64;

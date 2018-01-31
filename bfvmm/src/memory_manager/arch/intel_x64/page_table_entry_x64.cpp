@@ -17,7 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <bfbitmanip.h>
-#include <memory_manager/page_table_entry_x64.h>
+#include <bfvmm/memory_manager/page_table_entry_x64.h>
 
 #include <intrinsics.h>
 using namespace x64;

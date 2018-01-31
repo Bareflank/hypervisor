@@ -22,7 +22,7 @@
 #include <memory>
 
 #include <intrinsics.h>
-#include <memory_manager/map_ptr_x64.h>
+#include <bfvmm/memory_manager/map_ptr_x64.h>
 #include <hve/arch/intel_x64/vmcs/vmcs.h>
 
 #include <bfjson.h>

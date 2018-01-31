@@ -26,7 +26,7 @@ TEST_CASE("test name goes here")
 // #include <test.h>
 
 // #include <bfbitmanip.h>
-// #include <memory_manager/page_table_entry_x64.h>
+// #include <bfvmm/memory_manager/page_table_entry_x64.h>
 
 // using pte_type = page_table_entry_x64::integer_pointer;
 

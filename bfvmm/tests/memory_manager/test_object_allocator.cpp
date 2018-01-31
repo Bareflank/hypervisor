@@ -26,7 +26,7 @@
 
 #include <bfgsl.h>
 #include <bfbenchmark.h>
-#include <memory_manager/object_allocator.h>
+#include <bfvmm/memory_manager/object_allocator.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
