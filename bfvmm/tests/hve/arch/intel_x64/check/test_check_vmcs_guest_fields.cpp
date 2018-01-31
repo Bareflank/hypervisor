@@ -3389,7 +3389,7 @@ TEST_CASE("check_guest_state_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_state_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_state_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_state_all);
 }
 
 TEST_CASE("check_guest_control_registers_debug_registers_and_msrs_all")
@@ -3397,7 +3397,7 @@ TEST_CASE("check_guest_control_registers_debug_registers_and_msrs_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_control_registers_debug_registers_and_msrs_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_control_registers_debug_registers_and_msrs_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_control_registers_debug_registers_and_msrs_all);
 }
 
 TEST_CASE("check_guest_segment_registers_all")
@@ -3405,7 +3405,7 @@ TEST_CASE("check_guest_segment_registers_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_segment_registers_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_segment_registers_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_segment_registers_all);
 }
 
 TEST_CASE("check_guest_descriptor_table_registers_all")
@@ -3413,7 +3413,7 @@ TEST_CASE("check_guest_descriptor_table_registers_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_descriptor_table_registers_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_descriptor_table_registers_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_descriptor_table_registers_all);
 }
 
 TEST_CASE("check_guest_rip_and_rflags_all")
@@ -3421,7 +3421,7 @@ TEST_CASE("check_guest_rip_and_rflags_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_rip_and_rflags_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_rip_and_rflags_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_rip_and_rflags_all);
 }
 
 TEST_CASE("check_guest_non_register_state_all")
@@ -3429,7 +3429,7 @@ TEST_CASE("check_guest_non_register_state_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_non_register_state_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_non_register_state_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_non_register_state_all);
 }
 
 TEST_CASE("check_guest_pdptes_all")
@@ -3437,7 +3437,7 @@ TEST_CASE("check_guest_pdptes_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_pdptes_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_pdptes_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_pdptes_all);
 }
 
 TEST_CASE("check_guest_cr0_for_unsupported_bits")
@@ -3445,7 +3445,7 @@ TEST_CASE("check_guest_cr0_for_unsupported_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cr0_for_unsupported_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cr0_for_unsupported_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cr0_for_unsupported_bits);
 }
 
 TEST_CASE("check_guest_cr0_verify_paging_enabled")
@@ -3453,7 +3453,7 @@ TEST_CASE("check_guest_cr0_verify_paging_enabled")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cr0_verify_paging_enabled_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cr0_verify_paging_enabled);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cr0_verify_paging_enabled);
 }
 
 TEST_CASE("check_guest_cr4_for_unsupported_bits")
@@ -3461,7 +3461,7 @@ TEST_CASE("check_guest_cr4_for_unsupported_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cr4_for_unsupported_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cr4_for_unsupported_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cr4_for_unsupported_bits);
 }
 
 TEST_CASE("check_guest_load_debug_controls_verify_reserved")
@@ -3470,7 +3470,7 @@ TEST_CASE("check_guest_load_debug_controls_verify_reserved")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_load_debug_controls_verify_reserved_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_load_debug_controls_verify_reserved);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_load_debug_controls_verify_reserved);
 }
 
 TEST_CASE("check_guest_verify_ia_32e_mode_enabled")
@@ -3478,7 +3478,7 @@ TEST_CASE("check_guest_verify_ia_32e_mode_enabled")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_verify_ia_32e_mode_enabled_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_verify_ia_32e_mode_enabled);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_verify_ia_32e_mode_enabled);
 }
 
 TEST_CASE("check_guest_verify_ia_32e_mode_disabled")
@@ -3486,7 +3486,7 @@ TEST_CASE("check_guest_verify_ia_32e_mode_disabled")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_verify_ia_32e_mode_disabled_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_verify_ia_32e_mode_disabled);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_verify_ia_32e_mode_disabled);
 }
 
 TEST_CASE("check_guest_cr3_for_unsupported_bits")
@@ -3494,7 +3494,7 @@ TEST_CASE("check_guest_cr3_for_unsupported_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cr3_for_unsupported_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cr3_for_unsupported_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cr3_for_unsupported_bits);
 }
 
 TEST_CASE("check_guest_load_debug_controls_verify_dr7")
@@ -3502,7 +3502,7 @@ TEST_CASE("check_guest_load_debug_controls_verify_dr7")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_load_debug_controls_verify_dr7_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_load_debug_controls_verify_dr7);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_load_debug_controls_verify_dr7);
 }
 
 TEST_CASE("check_guest_ia32_sysenter_esp_canonical_address")
@@ -3510,7 +3510,7 @@ TEST_CASE("check_guest_ia32_sysenter_esp_canonical_address")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ia32_sysenter_esp_canonical_address_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ia32_sysenter_esp_canonical_address);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ia32_sysenter_esp_canonical_address);
 }
 
 TEST_CASE("check_guest_ia32_sysenter_eip_canonical_address")
@@ -3518,7 +3518,7 @@ TEST_CASE("check_guest_ia32_sysenter_eip_canonical_address")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ia32_sysenter_eip_canonical_address_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ia32_sysenter_eip_canonical_address);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ia32_sysenter_eip_canonical_address);
 }
 
 TEST_CASE("check_guest_verify_load_ia32_perf_global_ctrl")
@@ -3526,7 +3526,7 @@ TEST_CASE("check_guest_verify_load_ia32_perf_global_ctrl")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_verify_load_ia32_perf_global_ctrl_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_verify_load_ia32_perf_global_ctrl);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_verify_load_ia32_perf_global_ctrl);
 }
 
 TEST_CASE("check_guest_verify_load_ia32_pat")
@@ -3534,7 +3534,7 @@ TEST_CASE("check_guest_verify_load_ia32_pat")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_verify_load_ia32_pat_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_verify_load_ia32_pat);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_verify_load_ia32_pat);
 }
 
 TEST_CASE("check_guest_verify_load_ia32_efer")
@@ -3542,7 +3542,7 @@ TEST_CASE("check_guest_verify_load_ia32_efer")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_verify_load_ia32_efer_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_verify_load_ia32_efer);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_verify_load_ia32_efer);
 }
 
 TEST_CASE("check_guest_verify_load_ia32_bndcfgs")
@@ -3550,7 +3550,7 @@ TEST_CASE("check_guest_verify_load_ia32_bndcfgs")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_verify_load_ia32_bndcfgs_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_verify_load_ia32_bndcfgs);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_verify_load_ia32_bndcfgs);
 }
 
 TEST_CASE("check_guest_tr_ti_bit_equals_0")
@@ -3558,7 +3558,7 @@ TEST_CASE("check_guest_tr_ti_bit_equals_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_tr_ti_bit_equals_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_tr_ti_bit_equals_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_tr_ti_bit_equals_0);
 }
 
 TEST_CASE("check_guest_ldtr_ti_bit_equals_0")
@@ -3566,7 +3566,7 @@ TEST_CASE("check_guest_ldtr_ti_bit_equals_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ldtr_ti_bit_equals_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ldtr_ti_bit_equals_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ldtr_ti_bit_equals_0);
 }
 
 TEST_CASE("check_guest_ss_and_cs_rpl_are_the_same")
@@ -3574,7 +3574,7 @@ TEST_CASE("check_guest_ss_and_cs_rpl_are_the_same")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ss_and_cs_rpl_are_the_same_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ss_and_cs_rpl_are_the_same);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ss_and_cs_rpl_are_the_same);
 }
 
 TEST_CASE("check_guest_cs_base_is_shifted")
@@ -3582,7 +3582,7 @@ TEST_CASE("check_guest_cs_base_is_shifted")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cs_base_is_shifted_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cs_base_is_shifted);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cs_base_is_shifted);
 }
 
 TEST_CASE("check_guest_ss_base_is_shifted")
@@ -3590,7 +3590,7 @@ TEST_CASE("check_guest_ss_base_is_shifted")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ss_base_is_shifted_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ss_base_is_shifted);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ss_base_is_shifted);
 }
 
 TEST_CASE("check_guest_ds_base_is_shifted")
@@ -3598,7 +3598,7 @@ TEST_CASE("check_guest_ds_base_is_shifted")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ds_base_is_shifted_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ds_base_is_shifted);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ds_base_is_shifted);
 }
 
 TEST_CASE("check_guest_es_base_is_shifted")
@@ -3606,7 +3606,7 @@ TEST_CASE("check_guest_es_base_is_shifted")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_es_base_is_shifted_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_es_base_is_shifted);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_es_base_is_shifted);
 }
 
 TEST_CASE("check_guest_fs_base_is_shifted")
@@ -3614,7 +3614,7 @@ TEST_CASE("check_guest_fs_base_is_shifted")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_fs_base_is_shifted_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_fs_base_is_shifted);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_fs_base_is_shifted);
 }
 
 TEST_CASE("check_guest_gs_base_is_shifted")
@@ -3622,7 +3622,7 @@ TEST_CASE("check_guest_gs_base_is_shifted")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_gs_base_is_shifted_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_gs_base_is_shifted);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_gs_base_is_shifted);
 }
 
 TEST_CASE("check_guest_tr_base_is_canonical")
@@ -3630,7 +3630,7 @@ TEST_CASE("check_guest_tr_base_is_canonical")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_tr_base_is_canonical_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_tr_base_is_canonical);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_tr_base_is_canonical);
 }
 
 TEST_CASE("check_guest_fs_base_is_canonical")
@@ -3638,7 +3638,7 @@ TEST_CASE("check_guest_fs_base_is_canonical")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_fs_base_is_canonical_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_fs_base_is_canonical);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_fs_base_is_canonical);
 }
 
 TEST_CASE("check_guest_gs_base_is_canonical")
@@ -3646,7 +3646,7 @@ TEST_CASE("check_guest_gs_base_is_canonical")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_gs_base_is_canonical_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_gs_base_is_canonical);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_gs_base_is_canonical);
 }
 
 TEST_CASE("check_guest_ldtr_base_is_canonical")
@@ -3654,7 +3654,7 @@ TEST_CASE("check_guest_ldtr_base_is_canonical")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ldtr_base_is_canonical_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ldtr_base_is_canonical);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ldtr_base_is_canonical);
 }
 
 TEST_CASE("check_guest_cs_base_upper_dword_0")
@@ -3662,7 +3662,7 @@ TEST_CASE("check_guest_cs_base_upper_dword_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cs_base_upper_dword_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cs_base_upper_dword_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cs_base_upper_dword_0);
 }
 
 TEST_CASE("check_guest_ss_base_upper_dword_0")
@@ -3670,7 +3670,7 @@ TEST_CASE("check_guest_ss_base_upper_dword_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ss_base_upper_dword_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ss_base_upper_dword_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ss_base_upper_dword_0);
 }
 
 TEST_CASE("check_guest_ds_base_upper_dword_0")
@@ -3678,7 +3678,7 @@ TEST_CASE("check_guest_ds_base_upper_dword_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ds_base_upper_dword_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ds_base_upper_dword_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ds_base_upper_dword_0);
 }
 
 TEST_CASE("check_guest_es_base_upper_dword_0")
@@ -3686,7 +3686,7 @@ TEST_CASE("check_guest_es_base_upper_dword_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_es_base_upper_dword_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_es_base_upper_dword_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_es_base_upper_dword_0);
 }
 
 TEST_CASE("check_guest_cs_limit")
@@ -3694,7 +3694,7 @@ TEST_CASE("check_guest_cs_limit")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cs_limit_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cs_limit);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cs_limit);
 }
 
 TEST_CASE("check_guest_ss_limit")
@@ -3702,7 +3702,7 @@ TEST_CASE("check_guest_ss_limit")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ss_limit_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ss_limit);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ss_limit);
 }
 
 TEST_CASE("check_guest_ds_limit")
@@ -3710,7 +3710,7 @@ TEST_CASE("check_guest_ds_limit")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ds_limit_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ds_limit);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ds_limit);
 }
 
 TEST_CASE("check_guest_es_limit")
@@ -3718,7 +3718,7 @@ TEST_CASE("check_guest_es_limit")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_es_limit_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_es_limit);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_es_limit);
 }
 
 TEST_CASE("check_guest_gs_limit")
@@ -3726,7 +3726,7 @@ TEST_CASE("check_guest_gs_limit")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_gs_limit_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_gs_limit);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_gs_limit);
 }
 
 TEST_CASE("check_guest_fs_limit")
@@ -3734,7 +3734,7 @@ TEST_CASE("check_guest_fs_limit")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_fs_limit_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_fs_limit);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_fs_limit);
 }
 
 TEST_CASE("check_guest_v8086_cs_access_rights")
@@ -3742,7 +3742,7 @@ TEST_CASE("check_guest_v8086_cs_access_rights")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_v8086_cs_access_rights_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_v8086_cs_access_rights);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_v8086_cs_access_rights);
 }
 
 TEST_CASE("check_guest_v8086_ss_access_rights")
@@ -3750,7 +3750,7 @@ TEST_CASE("check_guest_v8086_ss_access_rights")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_v8086_ss_access_rights_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_v8086_ss_access_rights);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_v8086_ss_access_rights);
 }
 
 TEST_CASE("check_guest_v8086_ds_access_rights")
@@ -3758,7 +3758,7 @@ TEST_CASE("check_guest_v8086_ds_access_rights")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_v8086_ds_access_rights_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_v8086_ds_access_rights);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_v8086_ds_access_rights);
 }
 
 TEST_CASE("check_guest_v8086_es_access_rights")
@@ -3766,7 +3766,7 @@ TEST_CASE("check_guest_v8086_es_access_rights")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_v8086_es_access_rights_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_v8086_es_access_rights);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_v8086_es_access_rights);
 }
 
 TEST_CASE("check_guest_v8086_fs_access_rights")
@@ -3774,7 +3774,7 @@ TEST_CASE("check_guest_v8086_fs_access_rights")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_v8086_fs_access_rights_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_v8086_fs_access_rights);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_v8086_fs_access_rights);
 }
 
 TEST_CASE("check_guest_v8086_gs_access_rights")
@@ -3782,7 +3782,7 @@ TEST_CASE("check_guest_v8086_gs_access_rights")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_v8086_gs_access_rights_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_v8086_gs_access_rights);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_v8086_gs_access_rights);
 }
 
 TEST_CASE("check_guest_cs_access_rights_type")
@@ -3790,7 +3790,7 @@ TEST_CASE("check_guest_cs_access_rights_type")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cs_access_rights_type_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cs_access_rights_type);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cs_access_rights_type);
 }
 
 TEST_CASE("check_guest_ss_access_rights_type")
@@ -3798,7 +3798,7 @@ TEST_CASE("check_guest_ss_access_rights_type")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ss_access_rights_type_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ss_access_rights_type);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ss_access_rights_type);
 }
 
 TEST_CASE("check_guest_ds_access_rights_type")
@@ -3806,7 +3806,7 @@ TEST_CASE("check_guest_ds_access_rights_type")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ds_access_rights_type_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ds_access_rights_type);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ds_access_rights_type);
 }
 
 TEST_CASE("check_guest_es_access_rights_type")
@@ -3814,7 +3814,7 @@ TEST_CASE("check_guest_es_access_rights_type")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_es_access_rights_type_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_es_access_rights_type);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_es_access_rights_type);
 }
 
 TEST_CASE("check_guest_fs_access_rights_type")
@@ -3822,7 +3822,7 @@ TEST_CASE("check_guest_fs_access_rights_type")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_fs_access_rights_type_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_fs_access_rights_type);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_fs_access_rights_type);
 }
 
 TEST_CASE("check_guest_gs_access_rights_type")
@@ -3830,7 +3830,7 @@ TEST_CASE("check_guest_gs_access_rights_type")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_gs_access_rights_type_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_gs_access_rights_type);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_gs_access_rights_type);
 }
 
 TEST_CASE("check_guest_cs_is_not_a_system_descriptor")
@@ -3838,7 +3838,7 @@ TEST_CASE("check_guest_cs_is_not_a_system_descriptor")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cs_is_not_a_system_descriptor_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cs_is_not_a_system_descriptor);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cs_is_not_a_system_descriptor);
 }
 
 TEST_CASE("check_guest_ss_is_not_a_system_descriptor")
@@ -3846,7 +3846,7 @@ TEST_CASE("check_guest_ss_is_not_a_system_descriptor")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ss_is_not_a_system_descriptor_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ss_is_not_a_system_descriptor);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ss_is_not_a_system_descriptor);
 }
 
 TEST_CASE("check_guest_ds_is_not_a_system_descriptor")
@@ -3854,7 +3854,7 @@ TEST_CASE("check_guest_ds_is_not_a_system_descriptor")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ds_is_not_a_system_descriptor_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ds_is_not_a_system_descriptor);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ds_is_not_a_system_descriptor);
 }
 
 TEST_CASE("check_guest_es_is_not_a_system_descriptor")
@@ -3862,7 +3862,7 @@ TEST_CASE("check_guest_es_is_not_a_system_descriptor")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_es_is_not_a_system_descriptor_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_es_is_not_a_system_descriptor);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_es_is_not_a_system_descriptor);
 }
 
 TEST_CASE("check_guest_fs_is_not_a_system_descriptor")
@@ -3870,7 +3870,7 @@ TEST_CASE("check_guest_fs_is_not_a_system_descriptor")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_fs_is_not_a_system_descriptor_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_fs_is_not_a_system_descriptor);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_fs_is_not_a_system_descriptor);
 }
 
 TEST_CASE("check_guest_gs_is_not_a_system_descriptor")
@@ -3878,7 +3878,7 @@ TEST_CASE("check_guest_gs_is_not_a_system_descriptor")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_gs_is_not_a_system_descriptor_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_gs_is_not_a_system_descriptor);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_gs_is_not_a_system_descriptor);
 }
 
 TEST_CASE("check_guest_cs_type_not_equal_3")
@@ -3886,7 +3886,7 @@ TEST_CASE("check_guest_cs_type_not_equal_3")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cs_type_not_equal_3_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cs_type_not_equal_3);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cs_type_not_equal_3);
 }
 
 TEST_CASE("check_guest_cs_dpl_adheres_to_ss_dpl")
@@ -3894,7 +3894,7 @@ TEST_CASE("check_guest_cs_dpl_adheres_to_ss_dpl")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cs_dpl_adheres_to_ss_dpl_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cs_dpl_adheres_to_ss_dpl);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cs_dpl_adheres_to_ss_dpl);
 }
 
 TEST_CASE("check_guest_ss_dpl_must_equal_rpl")
@@ -3902,7 +3902,7 @@ TEST_CASE("check_guest_ss_dpl_must_equal_rpl")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ss_dpl_must_equal_rpl_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ss_dpl_must_equal_rpl);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ss_dpl_must_equal_rpl);
 }
 
 TEST_CASE("check_guest_ss_dpl_must_equal_zero")
@@ -3910,7 +3910,7 @@ TEST_CASE("check_guest_ss_dpl_must_equal_zero")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ss_dpl_must_equal_zero_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ss_dpl_must_equal_zero);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ss_dpl_must_equal_zero);
 }
 
 TEST_CASE("check_guest_ds_dpl")
@@ -3918,7 +3918,7 @@ TEST_CASE("check_guest_ds_dpl")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ds_dpl_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ds_dpl);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ds_dpl);
 }
 
 TEST_CASE("check_guest_es_dpl")
@@ -3926,7 +3926,7 @@ TEST_CASE("check_guest_es_dpl")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_es_dpl_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_es_dpl);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_es_dpl);
 }
 
 TEST_CASE("check_guest_fs_dpl")
@@ -3934,7 +3934,7 @@ TEST_CASE("check_guest_fs_dpl")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_fs_dpl_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_fs_dpl);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_fs_dpl);
 }
 
 TEST_CASE("check_guest_gs_dpl")
@@ -3942,7 +3942,7 @@ TEST_CASE("check_guest_gs_dpl")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_gs_dpl_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_gs_dpl);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_gs_dpl);
 }
 
 TEST_CASE("check_guest_cs_must_be_present")
@@ -3950,7 +3950,7 @@ TEST_CASE("check_guest_cs_must_be_present")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cs_must_be_present_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cs_must_be_present);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cs_must_be_present);
 }
 
 TEST_CASE("check_guest_ss_must_be_present_if_usable")
@@ -3958,7 +3958,7 @@ TEST_CASE("check_guest_ss_must_be_present_if_usable")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ss_must_be_present_if_usable_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ss_must_be_present_if_usable);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ss_must_be_present_if_usable);
 }
 
 TEST_CASE("check_guest_ds_must_be_present_if_usable")
@@ -3966,7 +3966,7 @@ TEST_CASE("check_guest_ds_must_be_present_if_usable")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ds_must_be_present_if_usable_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ds_must_be_present_if_usable);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ds_must_be_present_if_usable);
 }
 
 TEST_CASE("check_guest_es_must_be_present_if_usable")
@@ -3974,7 +3974,7 @@ TEST_CASE("check_guest_es_must_be_present_if_usable")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_es_must_be_present_if_usable_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_es_must_be_present_if_usable);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_es_must_be_present_if_usable);
 }
 
 TEST_CASE("check_guest_fs_must_be_present_if_usable")
@@ -3982,7 +3982,7 @@ TEST_CASE("check_guest_fs_must_be_present_if_usable")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_fs_must_be_present_if_usable_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_fs_must_be_present_if_usable);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_fs_must_be_present_if_usable);
 }
 
 TEST_CASE("check_guest_gs_must_be_present_if_usable")
@@ -3990,7 +3990,7 @@ TEST_CASE("check_guest_gs_must_be_present_if_usable")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_gs_must_be_present_if_usable_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_gs_must_be_present_if_usable);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_gs_must_be_present_if_usable);
 }
 
 TEST_CASE("check_guest_cs_access_rights_reserved_must_be_0")
@@ -3998,7 +3998,7 @@ TEST_CASE("check_guest_cs_access_rights_reserved_must_be_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cs_access_rights_reserved_must_be_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cs_access_rights_reserved_must_be_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cs_access_rights_reserved_must_be_0);
 }
 
 TEST_CASE("check_guest_ss_access_rights_reserved_must_be_0")
@@ -4006,7 +4006,7 @@ TEST_CASE("check_guest_ss_access_rights_reserved_must_be_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ss_access_rights_reserved_must_be_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ss_access_rights_reserved_must_be_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ss_access_rights_reserved_must_be_0);
 }
 
 TEST_CASE("check_guest_ds_access_rights_reserved_must_be_0")
@@ -4014,7 +4014,7 @@ TEST_CASE("check_guest_ds_access_rights_reserved_must_be_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ds_access_rights_reserved_must_be_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ds_access_rights_reserved_must_be_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ds_access_rights_reserved_must_be_0);
 }
 
 TEST_CASE("check_guest_es_access_rights_reserved_must_be_0")
@@ -4022,7 +4022,7 @@ TEST_CASE("check_guest_es_access_rights_reserved_must_be_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_es_access_rights_reserved_must_be_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_es_access_rights_reserved_must_be_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_es_access_rights_reserved_must_be_0);
 }
 
 TEST_CASE("check_guest_fs_access_rights_reserved_must_be_0")
@@ -4030,7 +4030,7 @@ TEST_CASE("check_guest_fs_access_rights_reserved_must_be_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_fs_access_rights_reserved_must_be_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_fs_access_rights_reserved_must_be_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_fs_access_rights_reserved_must_be_0);
 }
 
 TEST_CASE("check_guest_gs_access_rights_reserved_must_be_0")
@@ -4038,7 +4038,7 @@ TEST_CASE("check_guest_gs_access_rights_reserved_must_be_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_gs_access_rights_reserved_must_be_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_gs_access_rights_reserved_must_be_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_gs_access_rights_reserved_must_be_0);
 }
 
 TEST_CASE("check_guest_cs_db_must_be_0_if_l_equals_1")
@@ -4046,7 +4046,7 @@ TEST_CASE("check_guest_cs_db_must_be_0_if_l_equals_1")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cs_db_must_be_0_if_l_equals_1_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cs_db_must_be_0_if_l_equals_1);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cs_db_must_be_0_if_l_equals_1);
 }
 
 TEST_CASE("check_guest_cs_granularity")
@@ -4054,7 +4054,7 @@ TEST_CASE("check_guest_cs_granularity")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cs_granularity_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cs_granularity);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cs_granularity);
 }
 
 TEST_CASE("check_guest_ss_granularity")
@@ -4062,7 +4062,7 @@ TEST_CASE("check_guest_ss_granularity")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ss_granularity_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ss_granularity);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ss_granularity);
 }
 
 TEST_CASE("check_guest_ds_granularity")
@@ -4070,7 +4070,7 @@ TEST_CASE("check_guest_ds_granularity")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ds_granularity_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ds_granularity);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ds_granularity);
 }
 
 TEST_CASE("check_guest_es_granularity")
@@ -4078,7 +4078,7 @@ TEST_CASE("check_guest_es_granularity")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_es_granularity_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_es_granularity);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_es_granularity);
 }
 
 TEST_CASE("check_guest_fs_granularity")
@@ -4086,7 +4086,7 @@ TEST_CASE("check_guest_fs_granularity")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_fs_granularity_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_fs_granularity);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_fs_granularity);
 }
 
 TEST_CASE("check_guest_gs_granularity")
@@ -4094,7 +4094,7 @@ TEST_CASE("check_guest_gs_granularity")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_gs_granularity_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_gs_granularity);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_gs_granularity);
 }
 
 TEST_CASE("check_guest_cs_access_rights_remaining_reserved_bit_0")
@@ -4102,7 +4102,7 @@ TEST_CASE("check_guest_cs_access_rights_remaining_reserved_bit_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_cs_access_rights_remaining_reserved_bit_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_cs_access_rights_remaining_reserved_bit_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_cs_access_rights_remaining_reserved_bit_0);
 }
 
 TEST_CASE("check_guest_ss_access_rights_remaining_reserved_bit_0")
@@ -4110,7 +4110,7 @@ TEST_CASE("check_guest_ss_access_rights_remaining_reserved_bit_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ss_access_rights_remaining_reserved_bit_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ss_access_rights_remaining_reserved_bit_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ss_access_rights_remaining_reserved_bit_0);
 }
 
 TEST_CASE("check_guest_ds_access_rights_remaining_reserved_bit_0")
@@ -4118,7 +4118,7 @@ TEST_CASE("check_guest_ds_access_rights_remaining_reserved_bit_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ds_access_rights_remaining_reserved_bit_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ds_access_rights_remaining_reserved_bit_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ds_access_rights_remaining_reserved_bit_0);
 }
 
 TEST_CASE("check_guest_es_access_rights_remaining_reserved_bit_0")
@@ -4126,7 +4126,7 @@ TEST_CASE("check_guest_es_access_rights_remaining_reserved_bit_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_es_access_rights_remaining_reserved_bit_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_es_access_rights_remaining_reserved_bit_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_es_access_rights_remaining_reserved_bit_0);
 }
 
 TEST_CASE("check_guest_fs_access_rights_remaining_reserved_bit_0")
@@ -4134,7 +4134,7 @@ TEST_CASE("check_guest_fs_access_rights_remaining_reserved_bit_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_fs_access_rights_remaining_reserved_bit_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_fs_access_rights_remaining_reserved_bit_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_fs_access_rights_remaining_reserved_bit_0);
 }
 
 TEST_CASE("check_guest_gs_access_rights_remaining_reserved_bit_0")
@@ -4142,7 +4142,7 @@ TEST_CASE("check_guest_gs_access_rights_remaining_reserved_bit_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_gs_access_rights_remaining_reserved_bit_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_gs_access_rights_remaining_reserved_bit_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_gs_access_rights_remaining_reserved_bit_0);
 }
 
 TEST_CASE("check_guest_tr_type_must_be_11")
@@ -4150,7 +4150,7 @@ TEST_CASE("check_guest_tr_type_must_be_11")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_tr_type_must_be_11_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_tr_type_must_be_11);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_tr_type_must_be_11);
 }
 
 TEST_CASE("check_guest_tr_must_be_a_system_descriptor")
@@ -4158,7 +4158,7 @@ TEST_CASE("check_guest_tr_must_be_a_system_descriptor")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_tr_must_be_a_system_descriptor_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_tr_must_be_a_system_descriptor);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_tr_must_be_a_system_descriptor);
 }
 
 TEST_CASE("check_guest_tr_must_be_present")
@@ -4166,7 +4166,7 @@ TEST_CASE("check_guest_tr_must_be_present")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_tr_must_be_present_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_tr_must_be_present);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_tr_must_be_present);
 }
 
 TEST_CASE("check_guest_tr_access_rights_reserved_must_be_0")
@@ -4174,7 +4174,7 @@ TEST_CASE("check_guest_tr_access_rights_reserved_must_be_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_tr_access_rights_reserved_must_be_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_tr_access_rights_reserved_must_be_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_tr_access_rights_reserved_must_be_0);
 }
 
 TEST_CASE("check_guest_tr_granularity")
@@ -4182,7 +4182,7 @@ TEST_CASE("check_guest_tr_granularity")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_tr_granularity_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_tr_granularity);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_tr_granularity);
 }
 
 TEST_CASE("check_guest_tr_must_be_usable")
@@ -4190,7 +4190,7 @@ TEST_CASE("check_guest_tr_must_be_usable")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_tr_must_be_usable_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_tr_must_be_usable);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_tr_must_be_usable);
 }
 
 TEST_CASE("check_guest_tr_access_rights_remaining_reserved_bit_0")
@@ -4198,7 +4198,7 @@ TEST_CASE("check_guest_tr_access_rights_remaining_reserved_bit_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_tr_access_rights_remaining_reserved_bit_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_tr_access_rights_remaining_reserved_bit_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_tr_access_rights_remaining_reserved_bit_0);
 }
 
 TEST_CASE("check_guest_ldtr_type_must_be_2")
@@ -4206,7 +4206,7 @@ TEST_CASE("check_guest_ldtr_type_must_be_2")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ldtr_type_must_be_2_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ldtr_type_must_be_2);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ldtr_type_must_be_2);
 }
 
 TEST_CASE("check_guest_ldtr_must_be_a_system_descriptor")
@@ -4214,7 +4214,7 @@ TEST_CASE("check_guest_ldtr_must_be_a_system_descriptor")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ldtr_must_be_a_system_descriptor_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ldtr_must_be_a_system_descriptor);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ldtr_must_be_a_system_descriptor);
 }
 
 TEST_CASE("check_guest_ldtr_must_be_present")
@@ -4222,7 +4222,7 @@ TEST_CASE("check_guest_ldtr_must_be_present")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ldtr_must_be_present_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ldtr_must_be_present);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ldtr_must_be_present);
 }
 
 TEST_CASE("check_guest_ldtr_access_rights_reserved_must_be_0")
@@ -4230,7 +4230,7 @@ TEST_CASE("check_guest_ldtr_access_rights_reserved_must_be_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ldtr_access_rights_reserved_must_be_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ldtr_access_rights_reserved_must_be_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ldtr_access_rights_reserved_must_be_0);
 }
 
 TEST_CASE("check_guest_ldtr_granularity")
@@ -4238,7 +4238,7 @@ TEST_CASE("check_guest_ldtr_granularity")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ldtr_granularity_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ldtr_granularity);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ldtr_granularity);
 }
 
 TEST_CASE("check_guest_ldtr_access_rights_remaining_reserved_bit_0")
@@ -4246,7 +4246,7 @@ TEST_CASE("check_guest_ldtr_access_rights_remaining_reserved_bit_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_ldtr_access_rights_remaining_reserved_bit_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_ldtr_access_rights_remaining_reserved_bit_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_ldtr_access_rights_remaining_reserved_bit_0);
 }
 
 TEST_CASE("check_guest_gdtr_base_must_be_canonical")
@@ -4254,7 +4254,7 @@ TEST_CASE("check_guest_gdtr_base_must_be_canonical")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_gdtr_base_must_be_canonical_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_gdtr_base_must_be_canonical);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_gdtr_base_must_be_canonical);
 }
 
 TEST_CASE("check_guest_idtr_base_must_be_canonical")
@@ -4262,7 +4262,7 @@ TEST_CASE("check_guest_idtr_base_must_be_canonical")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_idtr_base_must_be_canonical_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_idtr_base_must_be_canonical);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_idtr_base_must_be_canonical);
 }
 
 TEST_CASE("check_guest_gdtr_limit_reserved_bits")
@@ -4270,7 +4270,7 @@ TEST_CASE("check_guest_gdtr_limit_reserved_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_gdtr_limit_reserved_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_gdtr_limit_reserved_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_gdtr_limit_reserved_bits);
 }
 
 TEST_CASE("check_guest_idtr_limit_reserved_bits")
@@ -4278,7 +4278,7 @@ TEST_CASE("check_guest_idtr_limit_reserved_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_idtr_limit_reserved_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_idtr_limit_reserved_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_idtr_limit_reserved_bits);
 }
 
 TEST_CASE("check_guest_rip_upper_bits")
@@ -4286,7 +4286,7 @@ TEST_CASE("check_guest_rip_upper_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_rip_upper_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_rip_upper_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_rip_upper_bits);
 }
 
 TEST_CASE("check_guest_rip_valid_addr")
@@ -4294,7 +4294,7 @@ TEST_CASE("check_guest_rip_valid_addr")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_rip_valid_addr_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_rip_valid_addr);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_rip_valid_addr);
 }
 
 TEST_CASE("check_guest_rflags_reserved_bits")
@@ -4302,7 +4302,7 @@ TEST_CASE("check_guest_rflags_reserved_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_rflags_reserved_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_rflags_reserved_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_rflags_reserved_bits);
 }
 
 TEST_CASE("check_guest_rflags_vm_bit")
@@ -4310,7 +4310,7 @@ TEST_CASE("check_guest_rflags_vm_bit")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_rflags_vm_bit_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_rflags_vm_bit);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_rflags_vm_bit);
 }
 
 TEST_CASE("check_guest_rflag_interrupt_enable")
@@ -4318,7 +4318,7 @@ TEST_CASE("check_guest_rflag_interrupt_enable")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_rflag_interrupt_enable_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_rflag_interrupt_enable);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_rflag_interrupt_enable);
 }
 
 TEST_CASE("check_guest_valid_activity_state")
@@ -4326,7 +4326,7 @@ TEST_CASE("check_guest_valid_activity_state")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_valid_activity_state_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_valid_activity_state);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_valid_activity_state);
 }
 
 TEST_CASE("check_guest_activity_state_not_hlt_when_dpl_not_0")
@@ -4334,7 +4334,7 @@ TEST_CASE("check_guest_activity_state_not_hlt_when_dpl_not_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_activity_state_not_hlt_when_dpl_not_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_activity_state_not_hlt_when_dpl_not_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_activity_state_not_hlt_when_dpl_not_0);
 }
 
 TEST_CASE("check_guest_must_be_active_if_injecting_blocking_state")
@@ -4342,7 +4342,7 @@ TEST_CASE("check_guest_must_be_active_if_injecting_blocking_state")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_must_be_active_if_injecting_blocking_state_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_must_be_active_if_injecting_blocking_state);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_must_be_active_if_injecting_blocking_state);
 }
 
 TEST_CASE("check_guest_hlt_valid_interrupts")
@@ -4350,7 +4350,7 @@ TEST_CASE("check_guest_hlt_valid_interrupts")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_hlt_valid_interrupts_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_hlt_valid_interrupts);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_hlt_valid_interrupts);
 }
 
 TEST_CASE("check_guest_shutdown_valid_interrupts")
@@ -4358,7 +4358,7 @@ TEST_CASE("check_guest_shutdown_valid_interrupts")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_shutdown_valid_interrupts_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_shutdown_valid_interrupts);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_shutdown_valid_interrupts);
 }
 
 TEST_CASE("check_guest_sipi_valid_interrupts")
@@ -4366,7 +4366,7 @@ TEST_CASE("check_guest_sipi_valid_interrupts")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_sipi_valid_interrupts_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_sipi_valid_interrupts);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_sipi_valid_interrupts);
 }
 
 TEST_CASE("check_guest_valid_activity_state_and_smm")
@@ -4374,7 +4374,7 @@ TEST_CASE("check_guest_valid_activity_state_and_smm")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_valid_activity_state_and_smm_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_valid_activity_state_and_smm);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_valid_activity_state_and_smm);
 }
 
 TEST_CASE("check_guest_interruptibility_state_reserved")
@@ -4382,7 +4382,7 @@ TEST_CASE("check_guest_interruptibility_state_reserved")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_interruptibility_state_reserved_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_interruptibility_state_reserved);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_interruptibility_state_reserved);
 }
 
 TEST_CASE("check_guest_interruptibility_state_sti_mov_ss")
@@ -4390,7 +4390,7 @@ TEST_CASE("check_guest_interruptibility_state_sti_mov_ss")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_interruptibility_state_sti_mov_ss_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_interruptibility_state_sti_mov_ss);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_interruptibility_state_sti_mov_ss);
 }
 
 TEST_CASE("check_guest_interruptibility_state_sti")
@@ -4398,7 +4398,7 @@ TEST_CASE("check_guest_interruptibility_state_sti")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_interruptibility_state_sti_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_interruptibility_state_sti);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_interruptibility_state_sti);
 }
 
 TEST_CASE("check_guest_interruptibility_state_external_interrupt")
@@ -4406,7 +4406,7 @@ TEST_CASE("check_guest_interruptibility_state_external_interrupt")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_interruptibility_state_external_interrupt_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_interruptibility_state_external_interrupt);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_interruptibility_state_external_interrupt);
 }
 
 TEST_CASE("check_guest_interruptibility_state_nmi")
@@ -4414,7 +4414,7 @@ TEST_CASE("check_guest_interruptibility_state_nmi")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_interruptibility_state_nmi_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_interruptibility_state_nmi);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_interruptibility_state_nmi);
 }
 
 TEST_CASE("check_guest_interruptibility_not_in_smm")
@@ -4422,7 +4422,7 @@ TEST_CASE("check_guest_interruptibility_not_in_smm")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_interruptibility_not_in_smm_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_interruptibility_not_in_smm);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_interruptibility_not_in_smm);
 }
 
 TEST_CASE("check_guest_interruptibility_entry_to_smm")
@@ -4430,7 +4430,7 @@ TEST_CASE("check_guest_interruptibility_entry_to_smm")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_interruptibility_entry_to_smm_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_interruptibility_entry_to_smm);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_interruptibility_entry_to_smm);
 }
 
 TEST_CASE("check_guest_interruptibility_state_sti_and_nmi")
@@ -4438,7 +4438,7 @@ TEST_CASE("check_guest_interruptibility_state_sti_and_nmi")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_interruptibility_state_sti_and_nmi_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_interruptibility_state_sti_and_nmi);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_interruptibility_state_sti_and_nmi);
 }
 
 TEST_CASE("check_guest_interruptibility_state_virtual_nmi")
@@ -4446,7 +4446,7 @@ TEST_CASE("check_guest_interruptibility_state_virtual_nmi")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_interruptibility_state_virtual_nmi_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_interruptibility_state_virtual_nmi);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_interruptibility_state_virtual_nmi);
 }
 
 TEST_CASE("check_guest_interruptibility_state_enclave_interrupt")
@@ -4454,7 +4454,7 @@ TEST_CASE("check_guest_interruptibility_state_enclave_interrupt")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_interruptibility_state_enclave_interrupt_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_interruptibility_state_enclave_interrupt);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_interruptibility_state_enclave_interrupt);
 }
 
 TEST_CASE("check_guest_pending_debug_exceptions_reserved")
@@ -4462,7 +4462,7 @@ TEST_CASE("check_guest_pending_debug_exceptions_reserved")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_pending_debug_exceptions_reserved_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_pending_debug_exceptions_reserved);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_pending_debug_exceptions_reserved);
 }
 
 TEST_CASE("check_guest_pending_debug_exceptions_dbg_ctl")
@@ -4470,7 +4470,7 @@ TEST_CASE("check_guest_pending_debug_exceptions_dbg_ctl")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_pending_debug_exceptions_dbg_ctl_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_pending_debug_exceptions_dbg_ctl);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_pending_debug_exceptions_dbg_ctl);
 }
 
 TEST_CASE("check_guest_pending_debug_exceptions_rtm")
@@ -4478,7 +4478,7 @@ TEST_CASE("check_guest_pending_debug_exceptions_rtm")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_pending_debug_exceptions_rtm_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_pending_debug_exceptions_rtm);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_pending_debug_exceptions_rtm);
 }
 
 TEST_CASE("check_guest_vmcs_link_pointer_bits_11_0")
@@ -4486,7 +4486,7 @@ TEST_CASE("check_guest_vmcs_link_pointer_bits_11_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_vmcs_link_pointer_bits_11_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_vmcs_link_pointer_bits_11_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_vmcs_link_pointer_bits_11_0);
 }
 
 TEST_CASE("check_guest_vmcs_link_pointer_valid_addr")
@@ -4494,7 +4494,7 @@ TEST_CASE("check_guest_vmcs_link_pointer_valid_addr")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_vmcs_link_pointer_valid_addr_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_vmcs_link_pointer_valid_addr);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_vmcs_link_pointer_valid_addr);
 }
 
 TEST_CASE("check_guest_vmcs_link_pointer_first_word")
@@ -4502,7 +4502,7 @@ TEST_CASE("check_guest_vmcs_link_pointer_first_word")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_vmcs_link_pointer_first_word_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_vmcs_link_pointer_first_word);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_vmcs_link_pointer_first_word);
 }
 
 TEST_CASE("check_guest_valid_pdpte_with_ept_disabled")
@@ -4510,7 +4510,7 @@ TEST_CASE("check_guest_valid_pdpte_with_ept_disabled")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_valid_pdpte_with_ept_disabled_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_valid_pdpte_with_ept_disabled);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_valid_pdpte_with_ept_disabled);
 }
 
 TEST_CASE("check_guest_valid_pdpte_with_ept_enabled")
@@ -4518,7 +4518,7 @@ TEST_CASE("check_guest_valid_pdpte_with_ept_enabled")
     std::vector<struct control_flow_path> cfg;
     setup_check_guest_valid_pdpte_with_ept_enabled_paths(cfg);
 
-    test_vmcs_check(cfg, check::guest_valid_pdpte_with_ept_enabled);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_valid_pdpte_with_ept_enabled);
 }
 
 #endif

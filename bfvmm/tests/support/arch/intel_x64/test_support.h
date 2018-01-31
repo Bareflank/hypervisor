@@ -26,13 +26,14 @@
 #include <hve/arch/intel_x64/exit_handler/exit_handler_support.h>
 
 #include <hve/arch/intel_x64/vmcs/vmcs.h>
-#include <hve/arch/intel_x64/vmcs/vmcs_check.h>
 #include <hve/arch/intel_x64/vmcs/vmcs_launch.h>
 #include <hve/arch/intel_x64/vmcs/vmcs_resume.h>
 #include <hve/arch/intel_x64/vmcs/vmcs_promote.h>
 #include <hve/arch/intel_x64/vmcs/vmcs_state.h>
 #include <hve/arch/intel_x64/vmcs/vmcs_state_hvm.h>
 #include <hve/arch/intel_x64/vmcs/vmcs_state_vmm.h>
+
+#include <hve/arch/intel_x64/check/check.h>
 
 #include <hve/arch/x64/gdt.h>
 #include <hve/arch/x64/idt.h>

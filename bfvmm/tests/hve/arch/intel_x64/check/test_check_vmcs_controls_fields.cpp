@@ -1237,7 +1237,7 @@ TEST_CASE("check_control_vmx_controls_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_vmx_controls_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::vmx_controls_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::vmx_controls_all);
 }
 
 TEST_CASE("check_control_vm_execution_control_fields_all")
@@ -1245,7 +1245,7 @@ TEST_CASE("check_control_vm_execution_control_fields_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_vm_execution_control_fields_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_vm_execution_control_fields_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_vm_execution_control_fields_all);
 }
 
 TEST_CASE("check_control_vm_exit_control_fields_all")
@@ -1253,7 +1253,7 @@ TEST_CASE("check_control_vm_exit_control_fields_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_vm_exit_control_fields_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_vm_exit_control_fields_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_vm_exit_control_fields_all);
 }
 
 TEST_CASE("check_control_vm_entry_control_fields_all")
@@ -1261,7 +1261,7 @@ TEST_CASE("check_control_vm_entry_control_fields_all")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_vm_entry_control_fields_all_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_vm_entry_control_fields_all);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_vm_entry_control_fields_all);
 }
 
 TEST_CASE("check_control_pin_based_ctls_reserved_properly_set")
@@ -1269,7 +1269,7 @@ TEST_CASE("check_control_pin_based_ctls_reserved_properly_set")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_pin_based_ctls_reserved_properly_set_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_pin_based_ctls_reserved_properly_set);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_pin_based_ctls_reserved_properly_set);
 }
 
 TEST_CASE("check_control_proc_based_ctls_reserved_properly_set")
@@ -1277,7 +1277,7 @@ TEST_CASE("check_control_proc_based_ctls_reserved_properly_set")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_proc_based_ctls_reserved_properly_set_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_proc_based_ctls_reserved_properly_set);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_proc_based_ctls_reserved_properly_set);
 }
 
 TEST_CASE("check_control_proc_based_ctls2_reserved_properly_set")
@@ -1285,7 +1285,7 @@ TEST_CASE("check_control_proc_based_ctls2_reserved_properly_set")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_proc_based_ctls2_reserved_properly_set_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_proc_based_ctls2_reserved_properly_set);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_proc_based_ctls2_reserved_properly_set);
 }
 
 TEST_CASE("check_control_cr3_count_less_than_4")
@@ -1293,7 +1293,7 @@ TEST_CASE("check_control_cr3_count_less_than_4")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_cr3_count_less_than_4_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_cr3_count_less_then_4);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_cr3_count_less_then_4);
 }
 
 TEST_CASE("check_control_io_bitmap_address_bits")
@@ -1301,7 +1301,7 @@ TEST_CASE("check_control_io_bitmap_address_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_io_bitmap_address_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_io_bitmap_address_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_io_bitmap_address_bits);
 }
 
 TEST_CASE("check_control_msr_bitmap_address_bits")
@@ -1309,7 +1309,7 @@ TEST_CASE("check_control_msr_bitmap_address_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_msr_bitmap_address_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_msr_bitmap_address_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_msr_bitmap_address_bits);
 }
 
 TEST_CASE("check_control_tpr_shadow_and_virtual_apic")
@@ -1317,7 +1317,7 @@ TEST_CASE("check_control_tpr_shadow_and_virtual_apic")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_tpr_shadow_and_virtual_apic_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_tpr_shadow_and_virtual_apic);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_tpr_shadow_and_virtual_apic);
 }
 
 TEST_CASE("check_control_nmi_exiting_and_virtual_nmi")
@@ -1325,7 +1325,7 @@ TEST_CASE("check_control_nmi_exiting_and_virtual_nmi")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_nmi_exiting_and_virtual_nmi_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_nmi_exiting_and_virtual_nmi);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_nmi_exiting_and_virtual_nmi);
 }
 
 TEST_CASE("check_control_virtual_nmi_and_nmi_window")
@@ -1333,7 +1333,7 @@ TEST_CASE("check_control_virtual_nmi_and_nmi_window")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_virtual_nmi_and_nmi_window_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_virtual_nmi_and_nmi_window);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_virtual_nmi_and_nmi_window);
 }
 
 TEST_CASE("check_control_virtual_apic_address_bits")
@@ -1341,7 +1341,7 @@ TEST_CASE("check_control_virtual_apic_address_bits")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_virtual_apic_address_bits_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_virtual_apic_address_bits);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_virtual_apic_address_bits);
 }
 
 TEST_CASE("check_control_x2apic_mode_and_virtual_apic_access")
@@ -1349,7 +1349,7 @@ TEST_CASE("check_control_x2apic_mode_and_virtual_apic_access")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_x2apic_mode_and_virtual_apic_access_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_x2apic_mode_and_virtual_apic_access);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_x2apic_mode_and_virtual_apic_access);
 }
 
 TEST_CASE("check_control_virtual_interrupt_and_external_interrupt")
@@ -1357,7 +1357,7 @@ TEST_CASE("check_control_virtual_interrupt_and_external_interrupt")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_virtual_interrupt_and_external_interrupt_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_virtual_interrupt_and_external_interrupt);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_virtual_interrupt_and_external_interrupt);
 }
 
 TEST_CASE("check_control_process_posted_interrupt_checks")
@@ -1365,7 +1365,7 @@ TEST_CASE("check_control_process_posted_interrupt_checks")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_process_posted_interrupt_checks_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_process_posted_interrupt_checks);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_process_posted_interrupt_checks);
 }
 
 TEST_CASE("check_control_vpid_checks")
@@ -1373,7 +1373,7 @@ TEST_CASE("check_control_vpid_checks")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_vpid_checks_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_vpid_checks);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_vpid_checks);
 }
 
 TEST_CASE("check_control_enable_ept_checks")
@@ -1381,7 +1381,7 @@ TEST_CASE("check_control_enable_ept_checks")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_enable_ept_checks_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_enable_ept_checks);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_enable_ept_checks);
 }
 
 TEST_CASE("check_control_enable_pml_checks")
@@ -1389,7 +1389,7 @@ TEST_CASE("check_control_enable_pml_checks")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_enable_pml_checks_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_enable_pml_checks);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_enable_pml_checks);
 }
 
 TEST_CASE("check_control_unrestricted_guests")
@@ -1397,7 +1397,7 @@ TEST_CASE("check_control_unrestricted_guests")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_unrestricted_guests_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_unrestricted_guests);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_unrestricted_guests);
 }
 
 TEST_CASE("check_control_enable_vm_functions")
@@ -1405,7 +1405,7 @@ TEST_CASE("check_control_enable_vm_functions")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_enable_vm_functions_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_enable_vm_functions);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_enable_vm_functions);
 }
 
 TEST_CASE("check_control_enable_vmcs_shadowing")
@@ -1413,7 +1413,7 @@ TEST_CASE("check_control_enable_vmcs_shadowing")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_enable_vmcs_shadowing_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_enable_vmcs_shadowing);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_enable_vmcs_shadowing);
 }
 
 TEST_CASE("check_control_enable_ept_violation_checks")
@@ -1421,7 +1421,7 @@ TEST_CASE("check_control_enable_ept_violation_checks")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_enable_ept_violation_checks_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_enable_ept_violation_checks);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_enable_ept_violation_checks);
 }
 
 TEST_CASE("check_control_vm_exit_ctls_reserved_properly_set")
@@ -1429,7 +1429,7 @@ TEST_CASE("check_control_vm_exit_ctls_reserved_properly_set")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_vm_exit_ctls_reserved_properly_set_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_vm_exit_ctls_reserved_properly_set);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_vm_exit_ctls_reserved_properly_set);
 }
 
 TEST_CASE("check_control_activate_and_save_preemption_timer_must_be_0")
@@ -1437,7 +1437,7 @@ TEST_CASE("check_control_activate_and_save_preemption_timer_must_be_0")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_activate_and_save_preemption_timer_must_be_0_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_activate_and_save_preemption_timer_must_be_0);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_activate_and_save_preemption_timer_must_be_0);
 }
 
 TEST_CASE("check_control_exit_msr_store_address")
@@ -1445,7 +1445,7 @@ TEST_CASE("check_control_exit_msr_store_address")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_exit_msr_store_address_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_exit_msr_store_address);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_exit_msr_store_address);
 }
 
 TEST_CASE("check_control_exit_msr_load_address")
@@ -1453,7 +1453,7 @@ TEST_CASE("check_control_exit_msr_load_address")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_exit_msr_load_address_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_exit_msr_load_address);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_exit_msr_load_address);
 }
 
 TEST_CASE("check_control_vm_entry_ctls_reserved_properly_set")
@@ -1461,7 +1461,7 @@ TEST_CASE("check_control_vm_entry_ctls_reserved_properly_set")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_vm_entry_ctls_reserved_properly_set_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_vm_entry_ctls_reserved_properly_set);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_vm_entry_ctls_reserved_properly_set);
 }
 
 TEST_CASE("check_control_event_injection_type_vector_checks")
@@ -1469,7 +1469,7 @@ TEST_CASE("check_control_event_injection_type_vector_checks")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_event_injection_type_vector_checks_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_event_injection_type_vector_checks);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_event_injection_type_vector_checks);
 }
 
 TEST_CASE("check_control_event_injection_delivery_ec_checks")
@@ -1477,7 +1477,7 @@ TEST_CASE("check_control_event_injection_delivery_ec_checks")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_event_injection_delivery_ec_checks_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_event_injection_delivery_ec_checks);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_event_injection_delivery_ec_checks);
 }
 
 TEST_CASE("check_control_event_injection_reserved_bits_checks")
@@ -1485,7 +1485,7 @@ TEST_CASE("check_control_event_injection_reserved_bits_checks")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_event_injection_reserved_bits_checks_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_event_injection_reserved_bits_checks);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_event_injection_reserved_bits_checks);
 }
 
 TEST_CASE("check_control_event_injection_ec_checks")
@@ -1493,7 +1493,7 @@ TEST_CASE("check_control_event_injection_ec_checks")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_event_injection_ec_checks_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_event_injection_ec_checks);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_event_injection_ec_checks);
 }
 
 TEST_CASE("check_control_event_injection_instr_length_checks")
@@ -1501,7 +1501,7 @@ TEST_CASE("check_control_event_injection_instr_length_checks")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_event_injection_instr_length_checks_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_event_injection_instr_length_checks);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_event_injection_instr_length_checks);
 }
 
 TEST_CASE("check_control_entry_msr_load_address")
@@ -1509,7 +1509,7 @@ TEST_CASE("check_control_entry_msr_load_address")
     std::vector<struct control_flow_path> cfg;
     setup_check_control_entry_msr_load_address_paths(cfg);
 
-    test_vmcs_check(cfg, check::control_entry_msr_load_address);
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_entry_msr_load_address);
 }
 
 TEST_CASE("check_control_reserved_properly_set")
@@ -1524,7 +1524,7 @@ TEST_CASE("check_control_reserved_properly_set")
     auto ctls = vm_entry_controls::get();
     auto name = vm_entry_controls::name;
 
-    CHECK_NOTHROW(check::control_reserved_properly_set(msr_addr, ctls, name));
+    CHECK_NOTHROW(bfvmm::intel_x64::check::control_reserved_properly_set(msr_addr, ctls, name));
 }
 
 TEST_CASE("check_memory_type_reserved")
