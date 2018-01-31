@@ -26,8 +26,8 @@ TEST_CASE("test name goes here")
 // #include <bfgsl.h>
 
 // #include <test.h>
-// #include <memory_manager/pat_x64.h>
-// #include <memory_manager/mem_attr_x64.h>
+// #include <bfvmm/memory_manager/pat_x64.h>
+// #include <bfvmm/memory_manager/mem_attr_x64.h>
 
 // void
 // memory_manager_ut::test_pat_x64_mem_attr_to_pat_index()

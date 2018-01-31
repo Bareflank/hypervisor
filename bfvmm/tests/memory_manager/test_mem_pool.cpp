@@ -30,7 +30,7 @@ TEST_CASE("test name goes here")
 // #include <vector>
 
 // #include <test.h>
-// #include <memory_manager/mem_pool.h>
+// #include <bfvmm/memory_manager/mem_pool.h>
 
 // void
 // memory_manager_ut::test_mem_pool_free_zero()

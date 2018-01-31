@@ -19,7 +19,7 @@
 #ifndef PAT_X64_H
 #define PAT_X64_H
 
-#include <memory_manager/mem_attr_x64.h>
+#include <bfvmm/memory_manager/mem_attr_x64.h>
 
 /// @cond
 /// *INDENT-OFF*

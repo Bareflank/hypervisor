@@ -21,7 +21,7 @@
 #include <bfconstants.h>
 #include <bfthreadcontext.h>
 
-#include <memory_manager/memory_manager_x64.h>
+#include <bfvmm/memory_manager/memory_manager_x64.h>
 
 #include <hve/arch/intel_x64/vmcs/vmcs.h>
 #include <hve/arch/intel_x64/vmcs/vmcs_launch.h>

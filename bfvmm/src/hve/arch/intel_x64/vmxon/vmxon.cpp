@@ -20,7 +20,7 @@
 #include <bfdebug.h>
 
 #include <hve/arch/intel_x64/vmxon/vmxon.h>
-#include <memory_manager/memory_manager_x64.h>
+#include <bfvmm/memory_manager/memory_manager_x64.h>
 
 #include <intrinsics.h>
 

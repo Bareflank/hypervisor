@@ -29,8 +29,8 @@ TEST_CASE("test name goes here")
 // #include <vector>
 
 // #include <test.h>
-// #include <memory_manager/map_ptr_x64.h>
-// #include <memory_manager/memory_manager_x64.h>
+// #include <bfvmm/memory_manager/map_ptr_x64.h>
+// #include <bfvmm/memory_manager/memory_manager_x64.h>
 
 // #include <intrinsics/x64.h>
 // using namespace x64;

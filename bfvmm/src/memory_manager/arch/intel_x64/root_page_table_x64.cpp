@@ -19,8 +19,8 @@
 #include <bfdebug.h>
 #include <bfexception.h>
 
-#include <memory_manager/memory_manager_x64.h>
-#include <memory_manager/root_page_table_x64.h>
+#include <bfvmm/memory_manager/memory_manager_x64.h>
+#include <bfvmm/memory_manager/root_page_table_x64.h>
 
 using namespace x64;
 

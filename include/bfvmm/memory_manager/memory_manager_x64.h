@@ -26,7 +26,7 @@
 #include <bfconstants.h>
 
 #include <intrinsics.h>
-#include <memory_manager/mem_pool.h>
+#include <bfvmm/memory_manager/mem_pool.h>
 
 // -----------------------------------------------------------------------------
 // Exports

@@ -27,7 +27,7 @@ TEST_CASE("test name goes here")
 
 // #include <test.h>
 // #include <intrinsics/x64.h>
-// #include <memory_manager/mem_attr_x64.h>
+// #include <bfvmm/memory_manager/mem_attr_x64.h>
 
 // using namespace x64;
 

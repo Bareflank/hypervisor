@@ -26,8 +26,8 @@ TEST_CASE("test name goes here")
 // #include <bfgsl.h>
 
 // #include <test.h>
-// #include <memory_manager/page_table_x64.h>
-// #include <memory_manager/memory_manager_x64.h>
+// #include <bfvmm/memory_manager/page_table_x64.h>
+// #include <bfvmm/memory_manager/memory_manager_x64.h>
 
 // bool virt_to_phys_return_nullptr = false;
 // constexpr page_table_x64::integer_pointer virt = 0x0000100000000000UL;
