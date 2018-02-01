@@ -20,22 +20,69 @@
 # README
 # ------------------------------------------------------------------------------
 
+# To use this config, put this file in the same folder that contains the
+# hypervisor and build folder, (and extended apis if your using them), and
+# rename it to "config.cmake". For example:
+#
+# - working
+#   - build
+#   - hypervisor
+#   - extended_apis
+#   - config.cmake
+#
+# Change the options as needed, and then from the build folder, run the
+# following:
+#
+# > cd working/build
+# > cmake ../hypervisor
+# > make -j<# of cpus>
+#
+
 # *** WARNING ***
 #
 # Configuration variables can only be set prior to running "make". Once the
-# build has started, a clean build must be used after any configuration
-# variable has been set. Use "make clean-all".
+# build has started, a new build folder is needed before any configuration
+# changes can be made.
 
 # ------------------------------------------------------------------------------
-# Config
+# Options
+# ------------------------------------------------------------------------------
+
+# Developer Mode
+#
+# Turns on build options useful for developers. If you plan to submit a PR to
+# any of the Bareflank repos, this option will be needed as it enables
+# formatting, static / dynamic analysis, etc...
+#
+set(ENABLE_DEVELOPER_MODE ON)
+
+# Extended APIs
+#
+# This option enables the use of the extended APIs. It assumes the extended
+# APIs are located in the same directory as this configuration file.
+#
+set(ENABLE_EXTENDED_APIS OFF)
+
+# Tests only
+#
+# If you are only interested in compiling the tests, this option can speed up
+# your build times .
+set(ENABLE_TESTS_ONLY OFF)
+
+# ------------------------------------------------------------------------------
+# Config Variables (No Need To Modify)
 # ------------------------------------------------------------------------------
 
 # Build Type
 #
-# Defines the type of hypervisor that is build. Possible values are Release
+# Defines the type of hypervisor that is built. Possible values are Release
 # and Debug. Release mode turns on all optimizations and is the default
-#set(CMAKE_BUILD_TYPE Release)
-#set(CMAKE_BUILD_TYPE Debug)
+#
+if(ENABLE_DEVELOPER_MODE)
+    set(CMAKE_BUILD_TYPE Debug)
+else()
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
 # Shared vs Static Builds
 #
@@ -48,55 +95,80 @@
 # contact AIS, Inc at quinnr@ainfosec.com. Finally, both binary types can be
 # built simultaniously.
 #
-#set(BUILD_SHARED_LIBS ON)
-#set(BUILD_STATIC_LIBS ON)
+if(ENABLE_DEVELOPER_MODE)
+    set(BUILD_SHARED_LIBS ON)
+    set(BUILD_STATIC_LIBS OFF)
+else()
+    set(BUILD_SHARED_LIBS OFF)
+    set(BUILD_STATIC_LIBS ON)
+endif()
 
-# Verbosity
+# Cache
 #
-# To enable a more verbose build system for debugging build issues, you can
-# on the following.
+# THe build system maintains it's own cache of all external dependencies to
+# eliminate the need to download these dependencies multiple times. The default
+# location is in the build folder, but if you plan to do more than one build,
+# moving this cache outside of the build folder will speed up build times, and
+# prevent needless downloading.
 #
-# set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CACHE_DIR ${CMAKE_CURRENT_LIST_DIR}/cache)
 
-# External Directories
+# Enable Build Bits
 #
-# THe build system maintains three different directories that may be relocated
-# outside of the build folder. The most common directory to relocate is the
-# cache directory. If you create these folders up one directory from
-# CMAKE_SOURCE_DIR, the build system will automatically use these directories.
-# Additionally, you can specify them manually here.
+# There are several enable bits that can be used to enable / disable which
+# parts of the hypervisor are built.
 #
-#set(CACHE_DIR <path>)
-#set(DEPENDS_DIR <path>)
-#set(PREFIXES_DIR <path>)
+if(ENABLE_TESTS_ONLY)
+    set(ENABLE_BUILD_VMM OFF)
+    set(ENABLE_BUILD_USERSPACE OFF)
+else()
+    set(ENABLE_BUILD_VMM ON)
+    set(ENABLE_BUILD_USERSPACE ON)
+endif()
 
-# Enable Bits
-#
-# There are several enable bits that can be used to enable additional
-# functionality, or reduce which portions of the hypervisor are built.
-#
-#set(ENABLE_BUILD_VMM ON)
-#set(ENABLE_BUILD_USERSPACE ON)
-#set(ENABLE_BUILD_TEST ON)
-#set(ENABLE_COMPILER_WARNINGS ON)
-#set(ENABLE_ASAN ON)
-#set(ENABLE_USAN ON)
-#set(ENABLE_CODECOV ON)
-#set(ENABLE_TIDY ON)
-#set(ENABLE_FORMAT ON)
+if(ENABLE_DEVELOPER_MODE)
+    set(ENABLE_BUILD_TEST ON)
+else()
+    set(ENABLE_BUILD_TEST OFF)
+endif()
 
-# Hypervisor Only (Default)
+# Enable Tool Bits
 #
-# The following will only build the hypervisor and related tools
+# These enable bits turn on / off different tools used by developers and the
+# CI environments to ensure Bareflank meets all static / dynamic checks. The
+# only check that is not included are the undefined sanatizers.
 #
-#set(ENABLE_BUILD_VMM ON)
-#set(ENABLE_BUILD_USERSPACE ON)
-#set(ENABLE_BUILD_TEST OFF)
+if(ENABLE_DEVELOPER_MODE)
+    set(ENABLE_ASAN ON)
+    set(ENABLE_TIDY ON)
+    set(ENABLE_FORMAT ON)
+    set(ENABLE_CODECOV ON)
+else()
+    set(ENABLE_ASAN OFF)
+    set(ENABLE_TIDY OFF)
+    set(ENABLE_FORMAT OFF)
+    set(ENABLE_CODECOV OFF)
+endif()
 
-# Unit Test Only
+# Compiler Warnings
 #
-# The following will only build the unit tests
+# Enables compiler warnings. This option should always be on when developing.
+# Not that Release builds add "-Werror".
 #
-#set(ENABLE_BUILD_VMM OFF)
-#set(ENABLE_BUILD_USERSPACE OFF)
-#set(ENABLE_BUILD_TEST ON)
+if(ENABLE_DEVELOPER_MODE)
+    set(ENABLE_COMPILER_WARNINGS ON)
+else()
+    set(ENABLE_COMPILER_WARNINGS OFF)
+endif()
+
+# Extended APIs
+#
+# This turns on the extended APIs, and assumes the repo is located in the same
+# directory as this configuration file.
+#
+if(ENABLE_EXTENDED_APIS)
+    set_bfm_vmm(eapis_vmm)
+    list(APPEND EXTENSION
+        ${CMAKE_CURRENT_LIST_DIR}/extended_apis/CMakeLists.txt
+    )
+endif()
