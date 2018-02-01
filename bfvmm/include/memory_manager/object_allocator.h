@@ -42,7 +42,7 @@ constexpr const auto objtpool_size = 255U;
 /// Once the buddy allocator is complete, this code should alloc from the
 /// buddy allocator.
 ///
-#include <memory_manager/memory_manager_x64.h>
+#include "../memory_manager/memory_manager_x64.h"
 
 /// @struct __oa_page
 ///
