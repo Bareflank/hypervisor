@@ -58,11 +58,11 @@ std::map<uint32_t, uint32_t> g_ecx_cpuid;
 
 uintptr_t g_rip = 0;
 
-x64::dr7::value_type g_dr7 = 0;
 x64::rflags::value_type g_rflags = 0;
 intel_x64::cr0::value_type g_cr0 = 0;
 intel_x64::cr3::value_type g_cr3 = 0;
 intel_x64::cr4::value_type g_cr4 = 0;
+intel_x64::dr7::value_type g_dr7 = 0;
 
 uint16_t g_es;
 uint16_t g_cs;

@@ -19,7 +19,7 @@
 #include <catch/catch.hpp>
 #include <intrinsics.h>
 
-using namespace x64;
+using namespace intel_x64;
 
 dr7::value_type g_dr7 = 0;
 

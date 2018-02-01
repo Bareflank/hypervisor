@@ -88,7 +88,7 @@ public:
     { return m_cr3; }
     intel_x64::cr4::value_type cr4() const override
     { return m_cr4; }
-    x64::dr7::value_type dr7() const override
+    intel_x64::dr7::value_type dr7() const override
     { return m_dr7; }
 
     x64::rflags::value_type rflags() const override
@@ -274,7 +274,7 @@ protected:
     intel_x64::cr0::value_type m_cr0{0};
     intel_x64::cr3::value_type m_cr3{0};
     intel_x64::cr4::value_type m_cr4{0};
-    x64::dr7::value_type m_dr7{0};
+    intel_x64::dr7::value_type m_dr7{0};
 
     x64::rflags::value_type m_rflags{0};
 

@@ -122,7 +122,7 @@ public:
     { return 0; }
     virtual intel_x64::cr4::value_type cr4() const
     { return 0; }
-    virtual x64::dr7::value_type dr7() const
+    virtual intel_x64::dr7::value_type dr7() const
     { return 0; }
 
     virtual void set_cr0(intel_x64::cr0::value_type val)
@@ -131,7 +131,7 @@ public:
     { (void) val; }
     virtual void set_cr4(intel_x64::cr4::value_type val)
     { (void) val; }
-    virtual void set_dr7(x64::dr7::value_type val)
+    virtual void set_dr7(intel_x64::dr7::value_type val)
     { (void) val; }
 
     virtual x64::rflags::value_type rflags() const

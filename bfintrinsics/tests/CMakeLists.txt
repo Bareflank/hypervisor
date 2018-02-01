@@ -24,6 +24,7 @@ init_project()
 
 do_test(test_cpuid_intel_x64 SOURCES arch/intel_x64/test_cpuid.cpp)
 do_test(test_crs_intel_x64 SOURCES arch/intel_x64/test_crs.cpp)
+do_test(test_drs_intel_x64 SOURCES arch/intel_x64/test_drs.cpp)
 do_test(test_msrs_intel_x64 SOURCES arch/intel_x64/test_msrs.cpp)
 do_test(test_vmx_intel_x64 SOURCES arch/intel_x64/test_vmx.cpp)
 
@@ -47,7 +48,6 @@ do_test(test_natural_width_read_only_data_fields SOURCES arch/intel_x64/vmcs/tes
 
 do_test(test_cache SOURCES arch/x64/test_cache.cpp)
 do_test(test_cpuid SOURCES arch/x64/test_cpuid.cpp)
-do_test(test_debug SOURCES arch/x64/test_debug.cpp)
 do_test(test_gdt SOURCES arch/x64/test_gdt.cpp)
 do_test(test_idt SOURCES arch/x64/test_idt.cpp)
 do_test(test_msrs SOURCES arch/x64/test_msrs.cpp)
