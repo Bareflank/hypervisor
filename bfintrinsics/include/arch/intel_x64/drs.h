@@ -16,8 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef DEBUG_X64_H
-#define DEBUG_X64_H
+#ifndef DRS_INTEL_X64_H
+#define DRS_INTEL_X64_H
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -44,7 +44,7 @@ extern "C" void _write_dr7(uint64_t val) noexcept;
 
 // *INDENT-OFF*
 
-namespace x64
+namespace intel_x64
 {
 namespace dr7
 {
