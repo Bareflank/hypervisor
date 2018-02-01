@@ -68,6 +68,7 @@ public:
     using interrupt_descriptor_type = uint64_t;     ///< IDT descriptor type
     using offset_type = uint64_t;                   ///< IDT offset type
     using selector_type = uint64_t;                 ///< IDT selector type
+    using isr_type = void(*)(void);                 ///< ISR type
 
     /// Constructor
     ///
@@ -166,6 +167,18 @@ public:
     /// @param off the RIP address of the ISR.
     ///
     void set_offset(index_type index, pointer off)
+    { set_offset(index, reinterpret_cast<offset_type>(off)); }
+
+    /// Set Descriptor Offset
+    ///
+    /// @expects index < m_idt.size() + 1
+    /// @expects off is canonical
+    /// @ensures none
+    ///
+    /// @param index the index of the IDT descriptor
+    /// @param off the RIP address of the ISR.
+    ///
+    void set_offset(index_type index, isr_type off)
     { set_offset(index, reinterpret_cast<offset_type>(off)); }
 
     /// Get Descriptor Offset
@@ -275,6 +288,23 @@ public:
     ///
     void set(
         index_type index, pointer off, selector_type selector)
+    {
+        this->set_offset(index, off);
+        this->set_selector(index, selector);
+        this->set_present(index, true);
+    }
+
+    /// Set All Fields
+    ///
+    /// @expects index < m_idt.size()
+    /// @ensures none
+    ///
+    /// @param index the index of the IDT descriptor
+    /// @param off the RIP address of the ISR.
+    /// @param selector the descriptor
+    ///
+    void set(
+        index_type index, isr_type off, selector_type selector)
     {
         this->set_offset(index, off);
         this->set_selector(index, selector);

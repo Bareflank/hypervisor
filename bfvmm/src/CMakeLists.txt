@@ -34,4 +34,4 @@ add_subdirectory(entry)
 # Install
 # ------------------------------------------------------------------------------
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/../include DESTINATION include/bfvmm)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/../include/ DESTINATION include/bfvmm)
