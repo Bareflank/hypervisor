@@ -26,7 +26,6 @@ if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
     list(APPEND SOURCES
         arch/x64/cache.asm
         arch/x64/cpuid.asm
-        arch/x64/debug.asm
         arch/x64/gdt.asm
         arch/x64/idt.asm
         arch/x64/msrs.asm
@@ -37,6 +36,7 @@ if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
         arch/x64/srs.asm
         arch/x64/tlb.asm
         arch/intel_x64/crs.asm
+        arch/intel_x64/drs.asm
         arch/intel_x64/vmx.asm
     )
 elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
