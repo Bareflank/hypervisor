@@ -54,6 +54,9 @@
 
 /// @cond
 
+namespace bfvmm
+{
+
 namespace serial_ns16550a
 {
 
@@ -333,6 +336,8 @@ public:
 
     /// @endcond
 };
+
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

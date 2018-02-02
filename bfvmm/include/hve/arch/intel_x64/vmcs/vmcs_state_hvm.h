@@ -49,6 +49,11 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+namespace intel_x64
+{
+
 /// VMCS Host VM State
 ///
 /// Define's the Host VM's CPU state. The Host VM runs the Host OS that
@@ -56,128 +61,128 @@
 /// the state is defined by Bareflank. With the Host VM, the state is defined
 /// by the Host OS, so we have to get this information from the hardware.
 ///
-class EXPORT_HVE vmcs_intel_x64_host_vm_state : public vmcs_intel_x64_state
+class EXPORT_HVE vmcs_state_hvm : public vmcs_state
 {
 public:
 
     /// @cond
 
-    vmcs_intel_x64_host_vm_state();
-    ~vmcs_intel_x64_host_vm_state() override = default;
+    vmcs_state_hvm();
+    ~vmcs_state_hvm() override = default;
 
-    x64::segment_register::value_type es() const override
+    ::x64::segment_register::value_type es() const override
     { return m_es; }
-    x64::segment_register::value_type cs() const override
+    ::x64::segment_register::value_type cs() const override
     { return m_cs; }
-    x64::segment_register::value_type ss() const override
+    ::x64::segment_register::value_type ss() const override
     { return m_ss; }
-    x64::segment_register::value_type ds() const override
+    ::x64::segment_register::value_type ds() const override
     { return m_ds; }
-    x64::segment_register::value_type fs() const override
+    ::x64::segment_register::value_type fs() const override
     { return m_fs; }
-    x64::segment_register::value_type gs() const override
+    ::x64::segment_register::value_type gs() const override
     { return m_gs; }
-    x64::segment_register::value_type ldtr() const override
+    ::x64::segment_register::value_type ldtr() const override
     { return m_ldtr; }
-    x64::segment_register::value_type tr() const override
+    ::x64::segment_register::value_type tr() const override
     { return m_tr; }
 
-    intel_x64::cr0::value_type cr0() const override
+    ::intel_x64::cr0::value_type cr0() const override
     { return m_cr0; }
-    intel_x64::cr3::value_type cr3() const override
+    ::intel_x64::cr3::value_type cr3() const override
     { return m_cr3; }
-    intel_x64::cr4::value_type cr4() const override
+    ::intel_x64::cr4::value_type cr4() const override
     { return m_cr4; }
-    intel_x64::dr7::value_type dr7() const override
+    ::intel_x64::dr7::value_type dr7() const override
     { return m_dr7; }
 
-    x64::rflags::value_type rflags() const override
+    ::x64::rflags::value_type rflags() const override
     { return m_rflags; }
 
-    gdt_x64::integer_pointer gdt_base() const override
+    x64::gdt::integer_pointer gdt_base() const override
     { return m_gdt.base(); }
-    idt_x64::integer_pointer idt_base() const override
+    x64::idt::integer_pointer idt_base() const override
     { return m_idt.base(); }
 
-    gdt_x64::size_type gdt_limit() const override
+    x64::gdt::size_type gdt_limit() const override
     { return m_gdt.limit(); }
-    idt_x64::size_type idt_limit() const override
+    x64::idt::size_type idt_limit() const override
     { return m_idt.limit(); }
 
-    gdt_x64::limit_type es_limit() const override
+    x64::gdt::limit_type es_limit() const override
     { return m_es_index != 0 ? m_gdt.limit(m_es_index) : 0; }
-    gdt_x64::limit_type cs_limit() const override
+    x64::gdt::limit_type cs_limit() const override
     { return m_cs_index != 0 ? m_gdt.limit(m_cs_index) : 0; }
-    gdt_x64::limit_type ss_limit() const override
+    x64::gdt::limit_type ss_limit() const override
     { return m_ss_index != 0 ? m_gdt.limit(m_ss_index) : 0; }
-    gdt_x64::limit_type ds_limit() const override
+    x64::gdt::limit_type ds_limit() const override
     { return m_ds_index != 0 ? m_gdt.limit(m_ds_index) : 0; }
-    gdt_x64::limit_type fs_limit() const override
+    x64::gdt::limit_type fs_limit() const override
     { return m_fs_index != 0 ? m_gdt.limit(m_fs_index) : 0; }
-    gdt_x64::limit_type gs_limit() const override
+    x64::gdt::limit_type gs_limit() const override
     { return m_gs_index != 0 ? m_gdt.limit(m_gs_index) : 0; }
-    gdt_x64::limit_type ldtr_limit() const override
+    x64::gdt::limit_type ldtr_limit() const override
     { return m_ldtr_index != 0 ? m_gdt.limit(m_ldtr_index) : 0; }
-    gdt_x64::limit_type tr_limit() const override
+    x64::gdt::limit_type tr_limit() const override
     { return m_tr_index != 0 ? m_gdt.limit(m_tr_index) : 0; }
 
-    gdt_x64::access_rights_type es_access_rights() const override
-    { return m_es_index != 0 ? m_gdt.access_rights(m_es_index) : x64::access_rights::unusable; }
-    gdt_x64::access_rights_type cs_access_rights() const override
-    { return m_cs_index != 0 ? m_gdt.access_rights(m_cs_index) : x64::access_rights::unusable; }
-    gdt_x64::access_rights_type ss_access_rights() const override
-    { return m_ss_index != 0 ? m_gdt.access_rights(m_ss_index) : x64::access_rights::unusable; }
-    gdt_x64::access_rights_type ds_access_rights() const override
-    { return m_ds_index != 0 ? m_gdt.access_rights(m_ds_index) : x64::access_rights::unusable; }
-    gdt_x64::access_rights_type fs_access_rights() const override
-    { return m_fs_index != 0 ? m_gdt.access_rights(m_fs_index) : x64::access_rights::unusable; }
-    gdt_x64::access_rights_type gs_access_rights() const override
-    { return m_gs_index != 0 ? m_gdt.access_rights(m_gs_index) : x64::access_rights::unusable; }
-    gdt_x64::access_rights_type ldtr_access_rights() const override
-    { return m_ldtr_index != 0 ? m_gdt.access_rights(m_ldtr_index) : x64::access_rights::unusable; }
-    gdt_x64::access_rights_type tr_access_rights() const override
-    { return m_tr_index != 0 ? m_gdt.access_rights(m_tr_index) : x64::access_rights::unusable; }
+    x64::gdt::access_rights_type es_access_rights() const override
+    { return m_es_index != 0 ? m_gdt.access_rights(m_es_index) : ::x64::access_rights::unusable; }
+    x64::gdt::access_rights_type cs_access_rights() const override
+    { return m_cs_index != 0 ? m_gdt.access_rights(m_cs_index) : ::x64::access_rights::unusable; }
+    x64::gdt::access_rights_type ss_access_rights() const override
+    { return m_ss_index != 0 ? m_gdt.access_rights(m_ss_index) : ::x64::access_rights::unusable; }
+    x64::gdt::access_rights_type ds_access_rights() const override
+    { return m_ds_index != 0 ? m_gdt.access_rights(m_ds_index) : ::x64::access_rights::unusable; }
+    x64::gdt::access_rights_type fs_access_rights() const override
+    { return m_fs_index != 0 ? m_gdt.access_rights(m_fs_index) : ::x64::access_rights::unusable; }
+    x64::gdt::access_rights_type gs_access_rights() const override
+    { return m_gs_index != 0 ? m_gdt.access_rights(m_gs_index) : ::x64::access_rights::unusable; }
+    x64::gdt::access_rights_type ldtr_access_rights() const override
+    { return m_ldtr_index != 0 ? m_gdt.access_rights(m_ldtr_index) : ::x64::access_rights::unusable; }
+    x64::gdt::access_rights_type tr_access_rights() const override
+    { return m_tr_index != 0 ? m_gdt.access_rights(m_tr_index) : ::x64::access_rights::unusable; }
 
-    gdt_x64::base_type es_base() const override
+    x64::gdt::base_type es_base() const override
     { return m_es_index != 0 ? m_gdt.base(m_es_index) : 0; }
-    gdt_x64::base_type cs_base() const override
+    x64::gdt::base_type cs_base() const override
     { return m_cs_index != 0 ? m_gdt.base(m_cs_index) : 0; }
-    gdt_x64::base_type ss_base() const override
+    x64::gdt::base_type ss_base() const override
     { return m_ss_index != 0 ? m_gdt.base(m_ss_index) : 0; }
-    gdt_x64::base_type ds_base() const override
+    x64::gdt::base_type ds_base() const override
     { return m_ds_index != 0 ? m_gdt.base(m_ds_index) : 0; }
-    gdt_x64::base_type fs_base() const override
+    x64::gdt::base_type fs_base() const override
     { return m_fs_index != 0 ? m_gdt.base(m_fs_index) : 0; }
-    gdt_x64::base_type gs_base() const override
+    x64::gdt::base_type gs_base() const override
     { return m_gs_index != 0 ? m_gdt.base(m_gs_index) : 0; }
-    gdt_x64::base_type ldtr_base() const override
+    x64::gdt::base_type ldtr_base() const override
     { return m_ldtr_index != 0 ? m_gdt.base(m_ldtr_index) : 0; }
-    gdt_x64::base_type tr_base() const override
+    x64::gdt::base_type tr_base() const override
     { return m_tr_index != 0 ? m_gdt.base(m_tr_index) : 0; }
 
-    intel_x64::msrs::value_type ia32_debugctl_msr() const override
+    ::intel_x64::msrs::value_type ia32_debugctl_msr() const override
     { return m_ia32_debugctl_msr; }
-    intel_x64::msrs::value_type ia32_pat_msr() const override
+    ::intel_x64::msrs::value_type ia32_pat_msr() const override
     { return m_ia32_pat_msr; }
-    intel_x64::msrs::value_type ia32_efer_msr() const override
+    ::intel_x64::msrs::value_type ia32_efer_msr() const override
     { return m_ia32_efer_msr; }
-    intel_x64::msrs::value_type ia32_perf_global_ctrl_msr() const override
+    ::intel_x64::msrs::value_type ia32_perf_global_ctrl_msr() const override
     { return m_ia32_perf_global_ctrl_msr; }
-    intel_x64::msrs::value_type ia32_sysenter_cs_msr() const override
+    ::intel_x64::msrs::value_type ia32_sysenter_cs_msr() const override
     { return m_ia32_sysenter_cs_msr; }
-    intel_x64::msrs::value_type ia32_sysenter_esp_msr() const override
+    ::intel_x64::msrs::value_type ia32_sysenter_esp_msr() const override
     { return m_ia32_sysenter_esp_msr; }
-    intel_x64::msrs::value_type ia32_sysenter_eip_msr() const override
+    ::intel_x64::msrs::value_type ia32_sysenter_eip_msr() const override
     { return m_ia32_sysenter_eip_msr; }
-    intel_x64::msrs::value_type ia32_fs_base_msr() const override
+    ::intel_x64::msrs::value_type ia32_fs_base_msr() const override
     { return m_ia32_fs_base_msr; }
-    intel_x64::msrs::value_type ia32_gs_base_msr() const override
+    ::intel_x64::msrs::value_type ia32_gs_base_msr() const override
     { return m_ia32_gs_base_msr; }
 
     void dump(int level = 0, std::string *msg = nullptr) const override
     {
         bferror_lnbr(level, msg);
-        bferror_info(level, "vmcs_intel_x64_host_vm_state", msg);
+        bferror_info(level, "vmcs_state_hvm", msg);
         bferror_brk1(level, msg);
 
         bfdebug_info(level, "segment selectors", msg);
@@ -253,43 +258,43 @@ protected:
 
     /// @cond
 
-    x64::segment_register::value_type m_es{0};
-    x64::segment_register::value_type m_cs{0};
-    x64::segment_register::value_type m_ss{0};
-    x64::segment_register::value_type m_ds{0};
-    x64::segment_register::value_type m_fs{0};
-    x64::segment_register::value_type m_gs{0};
-    x64::segment_register::value_type m_ldtr{0};
-    x64::segment_register::value_type m_tr{0};
+    ::x64::segment_register::value_type m_es{0};
+    ::x64::segment_register::value_type m_cs{0};
+    ::x64::segment_register::value_type m_ss{0};
+    ::x64::segment_register::value_type m_ds{0};
+    ::x64::segment_register::value_type m_fs{0};
+    ::x64::segment_register::value_type m_gs{0};
+    ::x64::segment_register::value_type m_ldtr{0};
+    ::x64::segment_register::value_type m_tr{0};
 
-    x64::segment_register::value_type m_es_index{0};
-    x64::segment_register::value_type m_cs_index{0};
-    x64::segment_register::value_type m_ss_index{0};
-    x64::segment_register::value_type m_ds_index{0};
-    x64::segment_register::value_type m_fs_index{0};
-    x64::segment_register::value_type m_gs_index{0};
-    x64::segment_register::value_type m_ldtr_index{0};
-    x64::segment_register::value_type m_tr_index{0};
+    ::x64::segment_register::value_type m_es_index{0};
+    ::x64::segment_register::value_type m_cs_index{0};
+    ::x64::segment_register::value_type m_ss_index{0};
+    ::x64::segment_register::value_type m_ds_index{0};
+    ::x64::segment_register::value_type m_fs_index{0};
+    ::x64::segment_register::value_type m_gs_index{0};
+    ::x64::segment_register::value_type m_ldtr_index{0};
+    ::x64::segment_register::value_type m_tr_index{0};
 
-    intel_x64::cr0::value_type m_cr0{0};
-    intel_x64::cr3::value_type m_cr3{0};
-    intel_x64::cr4::value_type m_cr4{0};
-    intel_x64::dr7::value_type m_dr7{0};
+    ::intel_x64::cr0::value_type m_cr0{0};
+    ::intel_x64::cr3::value_type m_cr3{0};
+    ::intel_x64::cr4::value_type m_cr4{0};
+    ::intel_x64::dr7::value_type m_dr7{0};
 
-    x64::rflags::value_type m_rflags{0};
+    ::x64::rflags::value_type m_rflags{0};
 
-    gdt_x64 m_gdt;
-    idt_x64 m_idt;
+    x64::gdt m_gdt;
+    x64::idt m_idt;
 
-    intel_x64::msrs::value_type m_ia32_debugctl_msr{0};
-    intel_x64::msrs::value_type m_ia32_pat_msr{0};
-    intel_x64::msrs::value_type m_ia32_efer_msr{0};
-    intel_x64::msrs::value_type m_ia32_perf_global_ctrl_msr{0};
-    intel_x64::msrs::value_type m_ia32_sysenter_cs_msr{0};
-    intel_x64::msrs::value_type m_ia32_sysenter_esp_msr{0};
-    intel_x64::msrs::value_type m_ia32_sysenter_eip_msr{0};
-    intel_x64::msrs::value_type m_ia32_fs_base_msr{0};
-    intel_x64::msrs::value_type m_ia32_gs_base_msr{0};
+    ::intel_x64::msrs::value_type m_ia32_debugctl_msr{0};
+    ::intel_x64::msrs::value_type m_ia32_pat_msr{0};
+    ::intel_x64::msrs::value_type m_ia32_efer_msr{0};
+    ::intel_x64::msrs::value_type m_ia32_perf_global_ctrl_msr{0};
+    ::intel_x64::msrs::value_type m_ia32_sysenter_cs_msr{0};
+    ::intel_x64::msrs::value_type m_ia32_sysenter_esp_msr{0};
+    ::intel_x64::msrs::value_type m_ia32_sysenter_eip_msr{0};
+    ::intel_x64::msrs::value_type m_ia32_fs_base_msr{0};
+    ::intel_x64::msrs::value_type m_ia32_gs_base_msr{0};
 
     /// @endcond
 
@@ -297,14 +302,17 @@ public:
 
     /// @cond
 
-    vmcs_intel_x64_host_vm_state(vmcs_intel_x64_host_vm_state &&) noexcept = delete;
-    vmcs_intel_x64_host_vm_state &operator=(vmcs_intel_x64_host_vm_state &&) noexcept = delete;
+    vmcs_state_hvm(vmcs_state_hvm &&) noexcept = delete;
+    vmcs_state_hvm &operator=(vmcs_state_hvm &&) noexcept = delete;
 
-    vmcs_intel_x64_host_vm_state(const vmcs_intel_x64_host_vm_state &) = delete;
-    vmcs_intel_x64_host_vm_state &operator=(const vmcs_intel_x64_host_vm_state &) = delete;
+    vmcs_state_hvm(const vmcs_state_hvm &) = delete;
+    vmcs_state_hvm &operator=(const vmcs_state_hvm &) = delete;
 
     /// @endcond
 };
+
+}
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

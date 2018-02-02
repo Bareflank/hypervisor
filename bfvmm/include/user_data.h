@@ -19,6 +19,9 @@
 #ifndef USER_DATA_H
 #define USER_DATA_H
 
+namespace bfvmm
+{
+
 /// User Data
 ///
 /// This defines the base class used for passing around user data.
@@ -49,5 +52,7 @@ public:
 
     /// @endcond
 };
+
+}
 
 #endif

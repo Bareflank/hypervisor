@@ -102,7 +102,7 @@ extern "C" void
 _outsdrep(uint16_t port, uint64_t m32, uint32_t count) noexcept
 { (void) port; memcpy(static_cast<void *>(g_buf_32bit), reinterpret_cast<void *>(m32), static_cast<uint32_t>(count * 4)); }
 
-TEST_CASE("portio_x64_byte")
+TEST_CASE("portio_byte")
 {
     std::vector<uint8_t> buf1 = {0, 1, 2, 3};
     std::vector<uint8_t> buf2 = {42, 42, 42, 42};
@@ -134,7 +134,7 @@ TEST_CASE("portio_x64_byte")
     CHECK(buf3.at(3) == 3);
 }
 
-TEST_CASE("portio_x64_word")
+TEST_CASE("portio_word")
 {
     std::vector<uint16_t> buf1 = {0, 1, 2, 3};
     std::vector<uint16_t> buf2 = {42, 42, 42, 42};
@@ -166,7 +166,7 @@ TEST_CASE("portio_x64_word")
     CHECK(buf3.at(3) == 3);
 }
 
-TEST_CASE("portio_x64_doubleword")
+TEST_CASE("portio_doubleword")
 {
     std::vector<uint32_t> buf1 = {0, 1, 2, 3};
     std::vector<uint32_t> buf2 = {42, 42, 42, 42};

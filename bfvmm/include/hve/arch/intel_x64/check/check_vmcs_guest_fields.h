@@ -134,7 +134,7 @@ guest_verify_ia_32e_mode_disabled()
 inline void
 guest_cr3_for_unsupported_bits()
 {
-    if (!x64::is_physical_address_valid(::intel_x64::vmcs::guest_cr3::get())) {
+    if (!::x64::is_physical_address_valid(::intel_x64::vmcs::guest_cr3::get())) {
         throw std::logic_error("guest cr3 too large");
     }
 }
@@ -156,7 +156,7 @@ guest_load_debug_controls_verify_dr7()
 inline void
 guest_ia32_sysenter_esp_canonical_address()
 {
-    if (!x64::is_address_canonical(::intel_x64::vmcs::guest_ia32_sysenter_esp::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::guest_ia32_sysenter_esp::get())) {
         throw std::logic_error("guest sysenter esp must be canonical");
     }
 }
@@ -164,7 +164,7 @@ guest_ia32_sysenter_esp_canonical_address()
 inline void
 guest_ia32_sysenter_eip_canonical_address()
 {
-    if (!x64::is_address_canonical(::intel_x64::vmcs::guest_ia32_sysenter_eip::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::guest_ia32_sysenter_eip::get())) {
         throw std::logic_error("guest sysenter eip must be canonical");
     }
 }
@@ -273,7 +273,7 @@ guest_verify_load_ia32_bndcfgs()
 
     auto bound_addr = bndcfgs & 0xFFFFFFFFFFFFF000;
 
-    if (!x64::is_address_canonical(bound_addr)) {
+    if (!::x64::is_address_canonical(bound_addr)) {
         throw std::logic_error("bound address in ia32 bndcfgs msr must be "
                                "canonical if load ia32 bndcfgs entry is enabled");
     }
@@ -405,7 +405,7 @@ guest_gs_base_is_shifted()
 inline void
 guest_tr_base_is_canonical()
 {
-    if (!x64::is_address_canonical(::intel_x64::vmcs::guest_tr_base::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::guest_tr_base::get())) {
         throw std::logic_error("guest tr base non-canonical");
     }
 }
@@ -413,7 +413,7 @@ guest_tr_base_is_canonical()
 inline void
 guest_fs_base_is_canonical()
 {
-    if (!x64::is_address_canonical(::intel_x64::vmcs::guest_fs_base::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::guest_fs_base::get())) {
         throw std::logic_error("guest fs base non-canonical");
     }
 }
@@ -421,7 +421,7 @@ guest_fs_base_is_canonical()
 inline void
 guest_gs_base_is_canonical()
 {
-    if (!x64::is_address_canonical(::intel_x64::vmcs::guest_gs_base::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::guest_gs_base::get())) {
         throw std::logic_error("guest gs base non-canonical");
     }
 }
@@ -433,7 +433,7 @@ guest_ldtr_base_is_canonical()
         return;
     }
 
-    if (!x64::is_address_canonical(::intel_x64::vmcs::guest_ldtr_base::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::guest_ldtr_base::get())) {
         throw std::logic_error("guest ldtr base non-canonical");
     }
 }
@@ -1748,7 +1748,7 @@ guest_ldtr_access_rights_remaining_reserved_bit_0()
 inline void
 guest_gdtr_base_must_be_canonical()
 {
-    if (!x64::is_address_canonical(::intel_x64::vmcs::guest_gdtr_base::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::guest_gdtr_base::get())) {
         throw std::logic_error("gdtr base is non-canonical");
     }
 }
@@ -1756,7 +1756,7 @@ guest_gdtr_base_must_be_canonical()
 inline void
 guest_idtr_base_must_be_canonical()
 {
-    if (!x64::is_address_canonical(::intel_x64::vmcs::guest_idtr_base::get())) {
+    if (!::x64::is_address_canonical(::intel_x64::vmcs::guest_idtr_base::get())) {
         throw std::logic_error("idtr base is non-canonical");
     }
 }
@@ -1808,7 +1808,7 @@ guest_rip_valid_addr()
         return;
     }
 
-    if (!x64::is_linear_address_valid(::intel_x64::vmcs::guest_rip::get())) {
+    if (!::x64::is_linear_address_valid(::intel_x64::vmcs::guest_rip::get())) {
         throw std::logic_error("rip bits must be canonical");
     }
 }
@@ -2239,7 +2239,7 @@ guest_vmcs_link_pointer_valid_addr()
         return;
     }
 
-    if (!x64::is_physical_address_valid(vmcs_link_pointer)) {
+    if (!::x64::is_physical_address_valid(vmcs_link_pointer)) {
         throw std::logic_error("vmcs link pointer invalid physical address");
     }
 }

@@ -19,6 +19,9 @@
 #include <bfgsl.h>
 #include <debug/serial/serial_port_base.h>
 
+namespace bfvmm
+{
+
 void
 serial_port_base::write(const std::string &str) noexcept
 {
@@ -81,4 +84,6 @@ serial_port_base::offset_outd(serial_port_base::port_type offset, serial_port_ba
     auto ptr = reinterpret_cast<uint32_t volatile *>(port() + offset);
     *ptr = data;
 #endif
+}
+
 }

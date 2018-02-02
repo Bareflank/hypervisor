@@ -52,6 +52,9 @@
 // Constants
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+
 /// @cond
 
 // from ARM PrimeCell UART (PL011) Technical Reference Manual
@@ -395,6 +398,8 @@ public:
 
     /// @endcond
 };
+
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

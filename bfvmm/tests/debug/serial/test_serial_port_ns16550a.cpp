@@ -26,6 +26,8 @@
 #include <bfgsl.h>
 #include <debug/serial/serial_port_ns16550a.h>
 
+using namespace bfvmm;
+
 static std::map<serial_port_ns16550a::port_type, serial_port_ns16550a::value_type_8> g_ports;
 
 extern "C" uint8_t

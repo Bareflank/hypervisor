@@ -18,6 +18,9 @@
 
 #include <vcpu/vcpu.h>
 
+namespace bfvmm
+{
+
 vcpu::vcpu(vcpuid::type id) :
     m_id(id)
 {
@@ -60,4 +63,6 @@ vcpu::hlt(user_data *data)
     (void) data;
 
     m_is_running = false;
+}
+
 }

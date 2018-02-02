@@ -21,17 +21,17 @@
 
 TEST_CASE("vcpu: invalid_id")
 {
-    CHECK_THROWS(std::make_unique<vcpu>(vcpuid::reserved));
+    CHECK_THROWS(std::make_unique<bfvmm::vcpu>(vcpuid::reserved));
 }
 
 TEST_CASE("vcpu: valid")
 {
-    CHECK_NOTHROW(std::make_unique<vcpu>(0));
+    CHECK_NOTHROW(std::make_unique<bfvmm::vcpu>(0));
 }
 
 TEST_CASE("vcpu: init_null_attr")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_initialized());
     vc->init(nullptr);
@@ -40,8 +40,8 @@ TEST_CASE("vcpu: init_null_attr")
 
 TEST_CASE("vcpu: init_valid_attr")
 {
-    user_data data{};
-    auto &&vc = std::make_unique<vcpu>(0);
+    bfvmm::user_data data{};
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_initialized());
     vc->init(&data);
@@ -50,7 +50,7 @@ TEST_CASE("vcpu: init_valid_attr")
 
 TEST_CASE("vcpu: fini_null_attr")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->init();
 
@@ -61,8 +61,8 @@ TEST_CASE("vcpu: fini_null_attr")
 
 TEST_CASE("vcpu: fini_valid_attr")
 {
-    user_data data{};
-    auto &&vc = std::make_unique<vcpu>(0);
+    bfvmm::user_data data{};
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->init();
 
@@ -73,7 +73,7 @@ TEST_CASE("vcpu: fini_valid_attr")
 
 TEST_CASE("vcpu: fini_without_init_without_run")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
     CHECK_FALSE(vc->is_initialized());
@@ -84,7 +84,7 @@ TEST_CASE("vcpu: fini_without_init_without_run")
 
 TEST_CASE("vcpu: fini_with_init_without_run")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->init();
 
@@ -97,7 +97,7 @@ TEST_CASE("vcpu: fini_with_init_without_run")
 
 TEST_CASE("vcpu: fini_without_init_with_run")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->run();
 
@@ -110,7 +110,7 @@ TEST_CASE("vcpu: fini_without_init_with_run")
 
 TEST_CASE("vcpu: fini_with_init_with_run")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->init();
     vc->run();
@@ -124,7 +124,7 @@ TEST_CASE("vcpu: fini_with_init_with_run")
 
 TEST_CASE("vcpu: run_null_attr")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
     vc->run(nullptr);
@@ -133,8 +133,8 @@ TEST_CASE("vcpu: run_null_attr")
 
 TEST_CASE("vcpu: run_valid_attr")
 {
-    user_data data{};
-    auto &&vc = std::make_unique<vcpu>(0);
+    bfvmm::user_data data{};
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
     vc->run(&data);
@@ -143,7 +143,7 @@ TEST_CASE("vcpu: run_valid_attr")
 
 TEST_CASE("vcpu: run_without_init")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
     vc->run();
@@ -152,7 +152,7 @@ TEST_CASE("vcpu: run_without_init")
 
 TEST_CASE("vcpu: run_with_init")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->init();
 
@@ -163,7 +163,7 @@ TEST_CASE("vcpu: run_with_init")
 
 TEST_CASE("vcpu: hlt_null_attr")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
     vc->hlt(nullptr);
@@ -172,8 +172,8 @@ TEST_CASE("vcpu: hlt_null_attr")
 
 TEST_CASE("vcpu: hlt_valid_attr")
 {
-    user_data data{};
-    auto &&vc = std::make_unique<vcpu>(0);
+    bfvmm::user_data data{};
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
     vc->hlt(&data);
@@ -182,7 +182,7 @@ TEST_CASE("vcpu: hlt_valid_attr")
 
 TEST_CASE("vcpu: hlt_without_run")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
     vc->hlt();
@@ -191,7 +191,7 @@ TEST_CASE("vcpu: hlt_without_run")
 
 TEST_CASE("vcpu: hlt_with_run")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->run();
 
@@ -202,49 +202,49 @@ TEST_CASE("vcpu: hlt_with_run")
 
 TEST_CASE("vcpu: id")
 {
-    auto vc = std::make_unique<vcpu>(1);
+    auto vc = std::make_unique<bfvmm::vcpu>(1);
     CHECK(vc->id() == 1);
 }
 
 TEST_CASE("vcpu: is_bootstrap_vcpu")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
     CHECK(vc->is_bootstrap_vcpu());
 }
 
 TEST_CASE("vcpu: is_not_bootstrap_vcpu")
 {
-    auto vc = std::make_unique<vcpu>(1);
+    auto vc = std::make_unique<bfvmm::vcpu>(1);
     CHECK_FALSE(vc->is_bootstrap_vcpu());
 }
 
 TEST_CASE("vcpu: is_host_vm_vcpu")
 {
-    auto vc = std::make_unique<vcpu>(1);
+    auto vc = std::make_unique<bfvmm::vcpu>(1);
     CHECK(vc->is_host_vm_vcpu());
 }
 
 TEST_CASE("vcpu: is_not_host_vm_vcpu")
 {
-    auto vc = std::make_unique<vcpu>(0x0000000100000000);
+    auto vc = std::make_unique<bfvmm::vcpu>(0x0000000100000000);
     CHECK_FALSE(vc->is_host_vm_vcpu());
 }
 
 TEST_CASE("vcpu: is_guest_vm_vcpu")
 {
-    auto vc = std::make_unique<vcpu>(0x0000000100000000);
+    auto vc = std::make_unique<bfvmm::vcpu>(0x0000000100000000);
     CHECK(vc->is_guest_vm_vcpu());
 }
 
 TEST_CASE("vcpu: is_not_guest_vm_vcpu")
 {
-    auto vc = std::make_unique<vcpu>(1);
+    auto vc = std::make_unique<bfvmm::vcpu>(1);
     CHECK_FALSE(vc->is_guest_vm_vcpu());
 }
 
 TEST_CASE("vcpu: is_running_vm_vcpu")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->run();
     CHECK(vc->is_running());
@@ -252,13 +252,13 @@ TEST_CASE("vcpu: is_running_vm_vcpu")
 
 TEST_CASE("vcpu: is_not_running_vm_vcpu")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
     CHECK_FALSE(vc->is_running());
 }
 
 TEST_CASE("vcpu: is_initialized_vm_vcpu")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->init();
     CHECK(vc->is_initialized());
@@ -266,6 +266,6 @@ TEST_CASE("vcpu: is_initialized_vm_vcpu")
 
 TEST_CASE("vcpu: is_not_initialized_vm_vcpu")
 {
-    auto &&vc = std::make_unique<vcpu>(0);
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
     CHECK_FALSE(vc->is_initialized());
 }

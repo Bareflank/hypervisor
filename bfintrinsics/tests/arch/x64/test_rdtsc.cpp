@@ -32,13 +32,13 @@ extern "C" uint64_t
 _read_tscp() noexcept
 { return g_read_tscp; }
 
-TEST_CASE("_rdtsc_x64")
+TEST_CASE("_rdtsc")
 {
     g_read_tsc = 10U;
     CHECK(read_tsc::get() == 10U);
 }
 
-TEST_CASE("_rdtscp_x64")
+TEST_CASE("_rdtscp")
 {
     g_read_tscp = 10U;
     CHECK(read_tscp::get() == 10U);

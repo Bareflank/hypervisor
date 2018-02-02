@@ -32,27 +32,28 @@
 
 #include <intrinsics.h>
 
-using namespace x64;
-using namespace intel_x64;
-using namespace vmcs;
+namespace bfvmm
+{
+namespace intel_x64
+{
 
 void
 default_delegate(
-    vmcs_intel_x64::host_state_t host_state,
-    vmcs_intel_x64::guest_state_t guest_state)
+    vmcs::host_state_t host_state,
+    vmcs::guest_state_t guest_state)
 {
     bfignored(host_state);
     bfignored(guest_state);
 }
 
-vmcs_intel_x64::vmcs_intel_x64()
+vmcs::vmcs()
 {
     m_pre_launch_delegate = decltype(m_pre_launch_delegate)::create<default_delegate>();
     m_post_launch_delegate = decltype(m_post_launch_delegate)::create<default_delegate>();
 }
 
 void
-vmcs_intel_x64::launch(host_state_t host_state, guest_state_t guest_state)
+vmcs::launch(host_state_t host_state, guest_state_t guest_state)
 {
     this->create_vmcs_region();
 
@@ -93,11 +94,11 @@ vmcs_intel_x64::launch(host_state_t host_state, guest_state_t guest_state)
 
     auto ___ = gsl::on_failure([&] {
         bfdebug_transaction(0, [&](std::string * msg)
-        { vmcs::debug::dump(0, msg); });
+        { ::intel_x64::vmcs::debug::dump(0, msg); });
     });
 
     auto ___ = gsl::on_failure([&] {
-        bfvmm::intel_x64::check::all();
+        check::all();
     });
 
     if (guest_state->is_guest()) {
@@ -105,7 +106,7 @@ vmcs_intel_x64::launch(host_state_t host_state, guest_state_t guest_state)
         throw std::runtime_error("vmcs resume failed");
     }
     else {
-        vm::launch_demote();
+        ::intel_x64::vm::launch_demote();
     }
 
     // NOTE:
@@ -118,45 +119,45 @@ vmcs_intel_x64::launch(host_state_t host_state, guest_state_t guest_state)
 }
 
 void
-vmcs_intel_x64::promote(gsl::not_null<const void *> gdt)
+vmcs::promote(gsl::not_null<const void *> gdt)
 {
     vmcs_promote(m_state_save, gdt);
     throw std::runtime_error("vmcs promote failed");
 }
 
 void
-vmcs_intel_x64::resume()
+vmcs::resume()
 {
     vmcs_resume(m_state_save);
     throw std::runtime_error("vmcs resume failed");
 }
 
 void
-vmcs_intel_x64::load()
+vmcs::load()
 {
-    vm::load(&m_vmcs_region_phys);
+    ::intel_x64::vm::load(&m_vmcs_region_phys);
     bfdebug_nhex(1, "loaded vmcs region", m_vmcs_region_phys);
 }
 
 void
-vmcs_intel_x64::clear()
+vmcs::clear()
 {
-    vm::clear(&m_vmcs_region_phys);
+    ::intel_x64::vm::clear(&m_vmcs_region_phys);
     bfdebug_nhex(1, "cleared vmcs region", m_vmcs_region_phys);
 }
 
 void
-vmcs_intel_x64::set_pre_launch_delegate(
+vmcs::set_pre_launch_delegate(
     const pre_launch_delegate_t &d) noexcept
 { m_pre_launch_delegate = d; }
 
 void
-vmcs_intel_x64::set_post_launch_delegate(
+vmcs::set_post_launch_delegate(
     const post_launch_delegate_t &d) noexcept
 { m_post_launch_delegate = d; }
 
 void
-vmcs_intel_x64::create_vmcs_region()
+vmcs::create_vmcs_region()
 {
     auto ___ = gsl::on_failure([&]
     { this->release_vmcs_region(); });
@@ -165,7 +166,7 @@ vmcs_intel_x64::create_vmcs_region()
     m_vmcs_region_phys = g_mm->virtptr_to_physint(m_vmcs_region.get());
 
     gsl::span<uint32_t> id{m_vmcs_region.get(), 1024};
-    id[0] = gsl::narrow<uint32_t>(intel_x64::msrs::ia32_vmx_basic::revision_id::get());
+    id[0] = gsl::narrow<uint32_t>(::intel_x64::msrs::ia32_vmx_basic::revision_id::get());
 
     bfdebug_transaction(1, [&](std::string * msg) {
         bfdebug_pass(1, "create vmcs region", msg);
@@ -175,7 +176,7 @@ vmcs_intel_x64::create_vmcs_region()
 }
 
 void
-vmcs_intel_x64::release_vmcs_region() noexcept
+vmcs::release_vmcs_region() noexcept
 {
     bfdebug_transaction(1, [&](std::string * msg) {
         bfdebug_pass(1, "release vmcs region", msg);
@@ -188,7 +189,7 @@ vmcs_intel_x64::release_vmcs_region() noexcept
 }
 
 void
-vmcs_intel_x64::create_exit_handler_stack()
+vmcs::create_exit_handler_stack()
 {
     auto size = STACK_SIZE * 2;
     m_exit_handler_stack = std::make_unique<gsl::byte[]>(size);
@@ -201,7 +202,7 @@ vmcs_intel_x64::create_exit_handler_stack()
 }
 
 void
-vmcs_intel_x64::release_exit_handler_stack() noexcept
+vmcs::release_exit_handler_stack() noexcept
 {
     bfdebug_transaction(1, [&](std::string * msg) {
         bfdebug_pass(1, "release vmm stack", msg);
@@ -212,7 +213,7 @@ vmcs_intel_x64::release_exit_handler_stack() noexcept
 }
 
 void
-vmcs_intel_x64::write_16bit_control_state()
+vmcs::write_16bit_control_state()
 {
     // unused: VMCS_VIRTUAL_PROCESSOR_IDENTIFIER
     // unused: VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR
@@ -222,7 +223,7 @@ vmcs_intel_x64::write_16bit_control_state()
 }
 
 void
-vmcs_intel_x64::write_64bit_control_state()
+vmcs::write_64bit_control_state()
 {
     // unused: VMCS_ADDRESS_OF_IO_BITMAP_A
     // unused: VMCS_ADDRESS_OF_IO_BITMAP_B
@@ -251,31 +252,31 @@ vmcs_intel_x64::write_64bit_control_state()
 }
 
 void
-vmcs_intel_x64::write_32bit_control_state()
+vmcs::write_32bit_control_state()
 {
-    intel_x64::msrs::value_type lower;
-    intel_x64::msrs::value_type upper;
+    ::intel_x64::msrs::value_type lower;
+    ::intel_x64::msrs::value_type upper;
 
-    auto ia32_vmx_pinbased_ctls_msr = intel_x64::msrs::ia32_vmx_true_pinbased_ctls::get();
-    auto ia32_vmx_procbased_ctls_msr = intel_x64::msrs::ia32_vmx_true_procbased_ctls::get();
-    auto ia32_vmx_exit_ctls_msr = intel_x64::msrs::ia32_vmx_true_exit_ctls::get();
-    auto ia32_vmx_entry_ctls_msr = intel_x64::msrs::ia32_vmx_true_entry_ctls::get();
+    auto ia32_vmx_pinbased_ctls_msr = ::intel_x64::msrs::ia32_vmx_true_pinbased_ctls::get();
+    auto ia32_vmx_procbased_ctls_msr = ::intel_x64::msrs::ia32_vmx_true_procbased_ctls::get();
+    auto ia32_vmx_exit_ctls_msr = ::intel_x64::msrs::ia32_vmx_true_exit_ctls::get();
+    auto ia32_vmx_entry_ctls_msr = ::intel_x64::msrs::ia32_vmx_true_entry_ctls::get();
 
     lower = ((ia32_vmx_pinbased_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_pinbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-    pin_based_vm_execution_controls::set(lower & upper);
+    ::intel_x64::vmcs::pin_based_vm_execution_controls::set(lower & upper);
 
     lower = ((ia32_vmx_procbased_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_procbased_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-    primary_processor_based_vm_execution_controls::set(lower & upper);
+    ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::set(lower & upper);
 
     lower = ((ia32_vmx_exit_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_exit_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-    vm_exit_controls::set(lower & upper);
+    ::intel_x64::vmcs::vm_exit_controls::set(lower & upper);
 
     lower = ((ia32_vmx_entry_ctls_msr >> 0) & 0x00000000FFFFFFFF);
     upper = ((ia32_vmx_entry_ctls_msr >> 32) & 0x00000000FFFFFFFF);
-    vm_entry_controls::set(lower & upper);
+    ::intel_x64::vmcs::vm_entry_controls::set(lower & upper);
 
     // unused: VMCS_EXCEPTION_BITMAP
     // unused: VMCS_PAGE_FAULT_ERROR_CODE_MASK
@@ -302,7 +303,7 @@ vmcs_intel_x64::write_32bit_control_state()
 }
 
 void
-vmcs_intel_x64::write_natural_control_state()
+vmcs::write_natural_control_state()
 {
     // unused: VMCS_CR0_GUEST_HOST_MASK
     // unused: VMCS_CR4_GUEST_HOST_MASK
@@ -317,7 +318,7 @@ vmcs_intel_x64::write_natural_control_state()
 }
 
 void
-vmcs_intel_x64::write_16bit_host_state(gsl::not_null<vmcs_intel_x64_state *> state)
+vmcs::write_16bit_host_state(gsl::not_null<vmcs_state *> state)
 {
     auto es = state->es();
     auto cs = state->cs();
@@ -327,13 +328,13 @@ vmcs_intel_x64::write_16bit_host_state(gsl::not_null<vmcs_intel_x64_state *> sta
     auto gs = state->gs();
     auto tr = state->tr();
 
-    vmcs::host_es_selector::set(es);
-    vmcs::host_cs_selector::set(cs);
-    vmcs::host_ss_selector::set(ss);
-    vmcs::host_ds_selector::set(ds);
-    vmcs::host_fs_selector::set(fs);
-    vmcs::host_gs_selector::set(gs);
-    vmcs::host_tr_selector::set(tr);
+    ::intel_x64::vmcs::host_es_selector::set(es);
+    ::intel_x64::vmcs::host_cs_selector::set(cs);
+    ::intel_x64::vmcs::host_ss_selector::set(ss);
+    ::intel_x64::vmcs::host_ds_selector::set(ds);
+    ::intel_x64::vmcs::host_fs_selector::set(fs);
+    ::intel_x64::vmcs::host_gs_selector::set(gs);
+    ::intel_x64::vmcs::host_tr_selector::set(tr);
 
     bfdebug_transaction(1, [&](std::string * msg) {
         bfdebug_pass(1, "write 16bit host state", msg);
@@ -348,15 +349,15 @@ vmcs_intel_x64::write_16bit_host_state(gsl::not_null<vmcs_intel_x64_state *> sta
 }
 
 void
-vmcs_intel_x64::write_64bit_host_state(gsl::not_null<vmcs_intel_x64_state *> state)
+vmcs::write_64bit_host_state(gsl::not_null<vmcs_state *> state)
 {
     auto ia32_pat_msr = state->ia32_pat_msr();
     auto ia32_efer_msr = state->ia32_efer_msr();
     auto ia32_perf_global_ctrl_msr = state->ia32_perf_global_ctrl_msr();
 
-    vmcs::host_ia32_pat::set(ia32_pat_msr);
-    vmcs::host_ia32_efer::set(ia32_efer_msr);
-    vmcs::host_ia32_perf_global_ctrl::set_if_exists(ia32_perf_global_ctrl_msr);
+    ::intel_x64::vmcs::host_ia32_pat::set(ia32_pat_msr);
+    ::intel_x64::vmcs::host_ia32_efer::set(ia32_efer_msr);
+    ::intel_x64::vmcs::host_ia32_perf_global_ctrl::set_if_exists(ia32_perf_global_ctrl_msr);
 
     bfdebug_transaction(1, [&](std::string * msg) {
         bfdebug_pass(1, "write 64bit host state", msg);
@@ -367,11 +368,11 @@ vmcs_intel_x64::write_64bit_host_state(gsl::not_null<vmcs_intel_x64_state *> sta
 }
 
 void
-vmcs_intel_x64::write_32bit_host_state(gsl::not_null<vmcs_intel_x64_state *> state)
+vmcs::write_32bit_host_state(gsl::not_null<vmcs_state *> state)
 {
     auto ia32_sysenter_cs_msr = state->ia32_sysenter_cs_msr();
 
-    vmcs::host_ia32_sysenter_cs::set(ia32_sysenter_cs_msr);
+    ::intel_x64::vmcs::host_ia32_sysenter_cs::set(ia32_sysenter_cs_msr);
 
     bfdebug_transaction(1, [&](std::string * msg) {
         bfdebug_pass(1, "write 32bit host state", msg);
@@ -380,41 +381,41 @@ vmcs_intel_x64::write_32bit_host_state(gsl::not_null<vmcs_intel_x64_state *> sta
 }
 
 void
-vmcs_intel_x64::write_natural_host_state(gsl::not_null<vmcs_intel_x64_state *> state)
+vmcs::write_natural_host_state(gsl::not_null<vmcs_state *> state)
 {
     auto cr0 = state->cr0();
     auto cr3 = state->cr3();
     auto cr4 = state->cr4();
 
-    vmcs::host_cr0::set(cr0);
-    vmcs::host_cr3::set(cr3);
-    vmcs::host_cr4::set(cr4);
+    ::intel_x64::vmcs::host_cr0::set(cr0);
+    ::intel_x64::vmcs::host_cr3::set(cr3);
+    ::intel_x64::vmcs::host_cr4::set(cr4);
 
     auto fs_base = state->ia32_fs_base_msr();
     auto gs_base = reinterpret_cast<uintptr_t>(m_state_save);
     auto tr_base = state->tr_base();
 
-    vmcs::host_fs_base::set(fs_base);
-    vmcs::host_gs_base::set(gs_base);
-    vmcs::host_tr_base::set(tr_base);
+    ::intel_x64::vmcs::host_fs_base::set(fs_base);
+    ::intel_x64::vmcs::host_gs_base::set(gs_base);
+    ::intel_x64::vmcs::host_tr_base::set(tr_base);
 
     auto gdt_base = state->gdt_base();
     auto idt_base = state->idt_base();
 
-    vmcs::host_gdtr_base::set(gdt_base);
-    vmcs::host_idtr_base::set(idt_base);
+    ::intel_x64::vmcs::host_gdtr_base::set(gdt_base);
+    ::intel_x64::vmcs::host_idtr_base::set(idt_base);
 
     auto ia32_sysenter_esp_msr = state->ia32_sysenter_esp_msr();
     auto ia32_sysenter_eip_msr = state->ia32_sysenter_eip_msr();
 
-    vmcs::host_ia32_sysenter_esp::set(ia32_sysenter_esp_msr);
-    vmcs::host_ia32_sysenter_eip::set(ia32_sysenter_eip_msr);
+    ::intel_x64::vmcs::host_ia32_sysenter_esp::set(ia32_sysenter_esp_msr);
+    ::intel_x64::vmcs::host_ia32_sysenter_eip::set(ia32_sysenter_eip_msr);
 
     auto exit_handler_stack = setup_stack(m_exit_handler_stack.get());
     auto exit_handler_entry = reinterpret_cast<uintptr_t>(m_exit_handler_entry);
 
-    vmcs::host_rsp::set(exit_handler_stack);
-    vmcs::host_rip::set(exit_handler_entry);
+    ::intel_x64::vmcs::host_rsp::set(exit_handler_stack);
+    ::intel_x64::vmcs::host_rip::set(exit_handler_entry);
 
     bfdebug_transaction(1, [&](std::string * msg) {
         bfdebug_pass(1, "write natural width host state", msg);
@@ -434,7 +435,7 @@ vmcs_intel_x64::write_natural_host_state(gsl::not_null<vmcs_intel_x64_state *> s
 }
 
 void
-vmcs_intel_x64::write_16bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> state)
+vmcs::write_16bit_guest_state(gsl::not_null<vmcs_state *> state)
 {
     auto es = state->es();
     auto cs = state->cs();
@@ -445,14 +446,14 @@ vmcs_intel_x64::write_16bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> st
     auto ldtr = state->ldtr();
     auto tr = state->tr();
 
-    vmcs::guest_es_selector::set(es);
-    vmcs::guest_cs_selector::set(cs);
-    vmcs::guest_ss_selector::set(ss);
-    vmcs::guest_ds_selector::set(ds);
-    vmcs::guest_fs_selector::set(fs);
-    vmcs::guest_gs_selector::set(gs);
-    vmcs::guest_ldtr_selector::set(ldtr);
-    vmcs::guest_tr_selector::set(tr);
+    ::intel_x64::vmcs::guest_es_selector::set(es);
+    ::intel_x64::vmcs::guest_cs_selector::set(cs);
+    ::intel_x64::vmcs::guest_ss_selector::set(ss);
+    ::intel_x64::vmcs::guest_ds_selector::set(ds);
+    ::intel_x64::vmcs::guest_fs_selector::set(fs);
+    ::intel_x64::vmcs::guest_gs_selector::set(gs);
+    ::intel_x64::vmcs::guest_ldtr_selector::set(ldtr);
+    ::intel_x64::vmcs::guest_tr_selector::set(tr);
 
     // unused: VMCS_GUEST_INTERRUPT_STATUS
 
@@ -470,7 +471,7 @@ vmcs_intel_x64::write_16bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> st
 }
 
 void
-vmcs_intel_x64::write_64bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> state)
+vmcs::write_64bit_guest_state(gsl::not_null<vmcs_state *> state)
 {
     auto link_pointer = 0xFFFFFFFFFFFFFFFF;
     auto ia32_debugctl_msr = state->ia32_debugctl_msr();
@@ -478,11 +479,11 @@ vmcs_intel_x64::write_64bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> st
     auto ia32_efer_msr = state->ia32_efer_msr();
     auto ia32_perf_global_ctrl_msr = state->ia32_perf_global_ctrl_msr();
 
-    vmcs::vmcs_link_pointer::set(link_pointer);
-    vmcs::guest_ia32_debugctl::set(ia32_debugctl_msr);
-    vmcs::guest_ia32_pat::set(ia32_pat_msr);
-    vmcs::guest_ia32_efer::set(ia32_efer_msr);
-    vmcs::guest_ia32_perf_global_ctrl::set_if_exists(ia32_perf_global_ctrl_msr);
+    ::intel_x64::vmcs::vmcs_link_pointer::set(link_pointer);
+    ::intel_x64::vmcs::guest_ia32_debugctl::set(ia32_debugctl_msr);
+    ::intel_x64::vmcs::guest_ia32_pat::set(ia32_pat_msr);
+    ::intel_x64::vmcs::guest_ia32_efer::set(ia32_efer_msr);
+    ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::set_if_exists(ia32_perf_global_ctrl_msr);
 
     // unused: VMCS_GUEST_PDPTE0
     // unused: VMCS_GUEST_PDPTE1
@@ -500,7 +501,7 @@ vmcs_intel_x64::write_64bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> st
 }
 
 void
-vmcs_intel_x64::write_32bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> state)
+vmcs::write_32bit_guest_state(gsl::not_null<vmcs_state *> state)
 {
     auto es_limit = state->es_limit();
     auto cs_limit = state->cs_limit();
@@ -511,20 +512,20 @@ vmcs_intel_x64::write_32bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> st
     auto ldtr_limit = state->ldtr_limit();
     auto tr_limit = state->tr_limit();
 
-    vmcs::guest_es_limit::set(es_limit);
-    vmcs::guest_cs_limit::set(cs_limit);
-    vmcs::guest_ss_limit::set(ss_limit);
-    vmcs::guest_ds_limit::set(ds_limit);
-    vmcs::guest_fs_limit::set(fs_limit);
-    vmcs::guest_gs_limit::set(gs_limit);
-    vmcs::guest_ldtr_limit::set(ldtr_limit);
-    vmcs::guest_tr_limit::set(tr_limit);
+    ::intel_x64::vmcs::guest_es_limit::set(es_limit);
+    ::intel_x64::vmcs::guest_cs_limit::set(cs_limit);
+    ::intel_x64::vmcs::guest_ss_limit::set(ss_limit);
+    ::intel_x64::vmcs::guest_ds_limit::set(ds_limit);
+    ::intel_x64::vmcs::guest_fs_limit::set(fs_limit);
+    ::intel_x64::vmcs::guest_gs_limit::set(gs_limit);
+    ::intel_x64::vmcs::guest_ldtr_limit::set(ldtr_limit);
+    ::intel_x64::vmcs::guest_tr_limit::set(tr_limit);
 
     auto gdt_limit = state->gdt_limit();
     auto idt_limit = state->idt_limit();
 
-    vmcs::guest_gdtr_limit::set(gdt_limit);
-    vmcs::guest_idtr_limit::set(idt_limit);
+    ::intel_x64::vmcs::guest_gdtr_limit::set(gdt_limit);
+    ::intel_x64::vmcs::guest_idtr_limit::set(idt_limit);
 
     auto es_access_rights = state->es_access_rights();
     auto cs_access_rights = state->cs_access_rights();
@@ -535,18 +536,18 @@ vmcs_intel_x64::write_32bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> st
     auto ldtr_access_rights = state->ldtr_access_rights();
     auto tr_access_rights = state->tr_access_rights();
 
-    vmcs::guest_es_access_rights::set(es_access_rights);
-    vmcs::guest_cs_access_rights::set(cs_access_rights);
-    vmcs::guest_ss_access_rights::set(ss_access_rights);
-    vmcs::guest_ds_access_rights::set(ds_access_rights);
-    vmcs::guest_fs_access_rights::set(fs_access_rights);
-    vmcs::guest_gs_access_rights::set(gs_access_rights);
-    vmcs::guest_ldtr_access_rights::set(ldtr_access_rights);
-    vmcs::guest_tr_access_rights::set(tr_access_rights);
+    ::intel_x64::vmcs::guest_es_access_rights::set(es_access_rights);
+    ::intel_x64::vmcs::guest_cs_access_rights::set(cs_access_rights);
+    ::intel_x64::vmcs::guest_ss_access_rights::set(ss_access_rights);
+    ::intel_x64::vmcs::guest_ds_access_rights::set(ds_access_rights);
+    ::intel_x64::vmcs::guest_fs_access_rights::set(fs_access_rights);
+    ::intel_x64::vmcs::guest_gs_access_rights::set(gs_access_rights);
+    ::intel_x64::vmcs::guest_ldtr_access_rights::set(ldtr_access_rights);
+    ::intel_x64::vmcs::guest_tr_access_rights::set(tr_access_rights);
 
     auto ia32_sysenter_cs_msr = state->ia32_sysenter_cs_msr();
 
-    vmcs::guest_ia32_sysenter_cs::set(ia32_sysenter_cs_msr);
+    ::intel_x64::vmcs::guest_ia32_sysenter_cs::set(ia32_sysenter_cs_msr);
 
     // unused: VMCS_GUEST_INTERRUPTIBILITY_STATE
     // unused: VMCS_GUEST_ACTIVITY_STATE
@@ -578,15 +579,15 @@ vmcs_intel_x64::write_32bit_guest_state(gsl::not_null<vmcs_intel_x64_state *> st
 }
 
 void
-vmcs_intel_x64::write_natural_guest_state(gsl::not_null<vmcs_intel_x64_state *> state)
+vmcs::write_natural_guest_state(gsl::not_null<vmcs_state *> state)
 {
     auto cr0 = state->cr0();
     auto cr3 = state->cr3();
     auto cr4 = state->cr4();
 
-    vmcs::guest_cr0::set(cr0);
-    vmcs::guest_cr3::set(cr3);
-    vmcs::guest_cr4::set(cr4);
+    ::intel_x64::vmcs::guest_cr0::set(cr0);
+    ::intel_x64::vmcs::guest_cr3::set(cr3);
+    ::intel_x64::vmcs::guest_cr4::set(cr4);
 
     auto es_base = state->es_base();
     auto cs_base = state->cs_base();
@@ -597,32 +598,32 @@ vmcs_intel_x64::write_natural_guest_state(gsl::not_null<vmcs_intel_x64_state *> 
     auto ldtr_base = state->ldtr_base();
     auto tr_base = state->tr_base();
 
-    vmcs::guest_es_base::set(es_base);
-    vmcs::guest_cs_base::set(cs_base);
-    vmcs::guest_ss_base::set(ss_base);
-    vmcs::guest_ds_base::set(ds_base);
-    vmcs::guest_fs_base::set(fs_base);
-    vmcs::guest_gs_base::set(gs_base);
-    vmcs::guest_ldtr_base::set(ldtr_base);
-    vmcs::guest_tr_base::set(tr_base);
+    ::intel_x64::vmcs::guest_es_base::set(es_base);
+    ::intel_x64::vmcs::guest_cs_base::set(cs_base);
+    ::intel_x64::vmcs::guest_ss_base::set(ss_base);
+    ::intel_x64::vmcs::guest_ds_base::set(ds_base);
+    ::intel_x64::vmcs::guest_fs_base::set(fs_base);
+    ::intel_x64::vmcs::guest_gs_base::set(gs_base);
+    ::intel_x64::vmcs::guest_ldtr_base::set(ldtr_base);
+    ::intel_x64::vmcs::guest_tr_base::set(tr_base);
 
     auto gdt_base = state->gdt_base();
     auto idt_base = state->idt_base();
 
-    vmcs::guest_gdtr_base::set(gdt_base);
-    vmcs::guest_idtr_base::set(idt_base);
+    ::intel_x64::vmcs::guest_gdtr_base::set(gdt_base);
+    ::intel_x64::vmcs::guest_idtr_base::set(idt_base);
 
     auto dr7 = state->dr7();
     auto rflags = state->rflags();
 
-    vmcs::guest_dr7::set(dr7);
-    vmcs::guest_rflags::set(rflags);
+    ::intel_x64::vmcs::guest_dr7::set(dr7);
+    ::intel_x64::vmcs::guest_rflags::set(rflags);
 
     auto ia32_sysenter_esp_msr = state->ia32_sysenter_esp_msr();
     auto ia32_sysenter_eip_msr = state->ia32_sysenter_eip_msr();
 
-    vmcs::guest_ia32_sysenter_esp::set(ia32_sysenter_esp_msr);
-    vmcs::guest_ia32_sysenter_eip::set(ia32_sysenter_eip_msr);
+    ::intel_x64::vmcs::guest_ia32_sysenter_esp::set(ia32_sysenter_esp_msr);
+    ::intel_x64::vmcs::guest_ia32_sysenter_eip::set(ia32_sysenter_eip_msr);
 
     // unused: VMCS_GUEST_RSP, see m_intrinsics->vmlaunch()
     // unused: VMCS_GUEST_RIP, see m_intrinsics->vmlaunch()
@@ -651,106 +652,109 @@ vmcs_intel_x64::write_natural_guest_state(gsl::not_null<vmcs_intel_x64_state *> 
 }
 
 void
-vmcs_intel_x64::pin_based_vm_execution_controls()
+vmcs::pin_based_vm_execution_controls()
 {
-    // pin_based_vm_execution_controls::external_interrupt_exiting::enable_if_allowed();
-    // pin_based_vm_execution_controls::nmi_exiting::enable_if_allowed();
-    // pin_based_vm_execution_controls::virtual_nmis::enable_if_allowed();
-    // pin_based_vm_execution_controls::activate_vmx_preemption_timer::enable_if_allowed();
-    // pin_based_vm_execution_controls::process_posted_interrupts::enable_if_allowed();
+    // ::intel_x64::vmcs::pin_based_vm_execution_controls::external_interrupt_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::pin_based_vm_execution_controls::nmi_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::pin_based_vm_execution_controls::virtual_nmis::enable_if_allowed();
+    // ::intel_x64::vmcs::pin_based_vm_execution_controls::activate_vmx_preemption_timer::enable_if_allowed();
+    // ::intel_x64::vmcs::pin_based_vm_execution_controls::process_posted_interrupts::enable_if_allowed();
 
     bfdebug_transaction(1, [&](std::string * msg) {
-        pin_based_vm_execution_controls::dump(1, msg);
+        ::intel_x64::vmcs::pin_based_vm_execution_controls::dump(1, msg);
     });
 }
 
 void
-vmcs_intel_x64::primary_processor_based_vm_execution_controls()
+vmcs::primary_processor_based_vm_execution_controls()
 {
-    // primary_processor_based_vm_execution_controls::interrupt_window_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::use_tsc_offsetting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::hlt_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::invlpg_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::mwait_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::rdpmc_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::rdtsc_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::cr3_load_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::cr3_store_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::cr8_load_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::cr8_store_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::use_tpr_shadow::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::nmi_window_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::mov_dr_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::unconditional_io_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::use_io_bitmaps::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::monitor_trap_flag::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::use_msr_bitmaps::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::monitor_exiting::enable_if_allowed();
-    // primary_processor_based_vm_execution_controls::pause_exiting::enable_if_allowed();
-    primary_processor_based_vm_execution_controls::activate_secondary_controls::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::interrupt_window_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::use_tsc_offsetting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::hlt_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::invlpg_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::mwait_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::rdpmc_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::rdtsc_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::cr3_load_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::cr3_store_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::cr8_load_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::cr8_store_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::use_tpr_shadow::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::mov_dr_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::unconditional_io_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::use_io_bitmaps::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::monitor_trap_flag::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::use_msr_bitmaps::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::monitor_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::pause_exiting::enable_if_allowed();
+    ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::enable_if_allowed();
 
     bfdebug_transaction(1, [&](std::string * msg) {
-        primary_processor_based_vm_execution_controls::dump(1, msg);
+        ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::dump(1, msg);
     });
 }
 
 void
-vmcs_intel_x64::secondary_processor_based_vm_execution_controls()
+vmcs::secondary_processor_based_vm_execution_controls()
 {
-    // secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::enable_ept::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::descriptor_table_exiting::enable_if_allowed();
-    secondary_processor_based_vm_execution_controls::enable_rdtscp::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::enable_vpid::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::wbinvd_exiting::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::unrestricted_guest::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::apic_register_virtualization::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::pause_loop_exiting::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::rdrand_exiting::enable_if_allowed();
-    secondary_processor_based_vm_execution_controls::enable_invpcid::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::enable_vm_functions::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::vmcs_shadowing::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::rdseed_exiting::enable_if_allowed();
-    // secondary_processor_based_vm_execution_controls::ept_violation_ve::enable_if_allowed();
-    secondary_processor_based_vm_execution_controls::enable_xsaves_xrstors::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::virtualize_apic_accesses::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::enable_ept::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::descriptor_table_exiting::enable_if_allowed();
+    ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::enable_rdtscp::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::virtualize_x2apic_mode::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::enable_vpid::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::wbinvd_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::unrestricted_guest::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::apic_register_virtualization::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::virtual_interrupt_delivery::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::pause_loop_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::rdrand_exiting::enable_if_allowed();
+    ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::enable_invpcid::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::enable_vm_functions::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::vmcs_shadowing::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::rdseed_exiting::enable_if_allowed();
+    // ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::ept_violation_ve::enable_if_allowed();
+    ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::enable_xsaves_xrstors::enable_if_allowed();
 
     bfdebug_transaction(1, [&](std::string * msg) {
-        secondary_processor_based_vm_execution_controls::dump(1, msg);
+        ::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::dump(1, msg);
     });
 }
 
 void
-vmcs_intel_x64::vm_exit_controls()
+vmcs::vm_exit_controls()
 {
-    vm_exit_controls::save_debug_controls::enable_if_allowed();
-    vm_exit_controls::host_address_space_size::enable_if_allowed();
-    vm_exit_controls::load_ia32_perf_global_ctrl::enable_if_allowed();
-    // vm_exit_controls::acknowledge_interrupt_on_exit::enable_if_allowed();
-    vm_exit_controls::save_ia32_pat::enable_if_allowed();
-    vm_exit_controls::load_ia32_pat::enable_if_allowed();
-    vm_exit_controls::save_ia32_efer::enable_if_allowed();
-    vm_exit_controls::load_ia32_efer::enable_if_allowed();
-    // vm_exit_controls::save_vmx_preemption_timer_value::enable_if_allowed();
+    ::intel_x64::vmcs::vm_exit_controls::save_debug_controls::enable_if_allowed();
+    ::intel_x64::vmcs::vm_exit_controls::host_address_space_size::enable_if_allowed();
+    ::intel_x64::vmcs::vm_exit_controls::load_ia32_perf_global_ctrl::enable_if_allowed();
+    // ::intel_x64::vmcs::vm_exit_controls::acknowledge_interrupt_on_exit::enable_if_allowed();
+    ::intel_x64::vmcs::vm_exit_controls::save_ia32_pat::enable_if_allowed();
+    ::intel_x64::vmcs::vm_exit_controls::load_ia32_pat::enable_if_allowed();
+    ::intel_x64::vmcs::vm_exit_controls::save_ia32_efer::enable_if_allowed();
+    ::intel_x64::vmcs::vm_exit_controls::load_ia32_efer::enable_if_allowed();
+    // ::intel_x64::vmcs::vm_exit_controls::save_vmx_preemption_timer_value::enable_if_allowed();
 
     bfdebug_transaction(1, [&](std::string * msg) {
-        vm_exit_controls::dump(1, msg);
+        ::intel_x64::vmcs::vm_exit_controls::dump(1, msg);
     });
 }
 
 void
-vmcs_intel_x64::vm_entry_controls()
+vmcs::vm_entry_controls()
 {
-    vm_entry_controls::load_debug_controls::enable_if_allowed();
-    vm_entry_controls::ia_32e_mode_guest::enable_if_allowed();
-    // vm_entry_controls::entry_to_smm::enable_if_allowed();
-    // vm_entry_controls::deactivate_dual_monitor_treatment::enable_if_allowed();
-    vm_entry_controls::load_ia32_perf_global_ctrl::enable_if_allowed();
-    vm_entry_controls::load_ia32_pat::enable_if_allowed();
-    vm_entry_controls::load_ia32_efer::enable_if_allowed();
+    ::intel_x64::vmcs::vm_entry_controls::load_debug_controls::enable_if_allowed();
+    ::intel_x64::vmcs::vm_entry_controls::ia_32e_mode_guest::enable_if_allowed();
+    // ::intel_x64::vmcs::vm_entry_controls::entry_to_smm::enable_if_allowed();
+    // ::intel_x64::vmcs::vm_entry_controls::deactivate_dual_monitor_treatment::enable_if_allowed();
+    ::intel_x64::vmcs::vm_entry_controls::load_ia32_perf_global_ctrl::enable_if_allowed();
+    ::intel_x64::vmcs::vm_entry_controls::load_ia32_pat::enable_if_allowed();
+    ::intel_x64::vmcs::vm_entry_controls::load_ia32_efer::enable_if_allowed();
 
     bfdebug_transaction(1, [&](std::string * msg) {
-        vm_entry_controls::dump(1, msg);
+        ::intel_x64::vmcs::vm_entry_controls::dump(1, msg);
     });
+}
+
+}
 }

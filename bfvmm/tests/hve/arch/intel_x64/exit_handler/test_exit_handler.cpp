@@ -23,13 +23,13 @@
 auto
 setup_vmcs_unhandled(MockRepository &mocks, vmcs::value_type reason)
 {
-    auto vmcs = mocks.Mock<vmcs_intel_x64>();
+    auto vmcs = mocks.Mock<bfvmm::intel_x64::vmcs>();
 
-    mocks.NeverCall(vmcs, vmcs_intel_x64::launch);
-    mocks.NeverCall(vmcs, vmcs_intel_x64::promote);
-    mocks.NeverCall(vmcs, vmcs_intel_x64::load);
-    mocks.NeverCall(vmcs, vmcs_intel_x64::clear);
-    mocks.ExpectCall(vmcs, vmcs_intel_x64::resume);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::launch);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::promote);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::load);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::clear);
+    mocks.ExpectCall(vmcs, bfvmm::intel_x64::vmcs::resume);
 
     g_msrs[intel_x64::msrs::ia32_vmx_procbased_ctls2::addr] = 0xFFFFFFFF00000000UL;
     g_msrs[intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr] = 0xFFFFFFFF00000000UL;
@@ -44,15 +44,15 @@ setup_vmcs_unhandled(MockRepository &mocks, vmcs::value_type reason)
 auto
 setup_vmcs_handled(MockRepository &mocks, vmcs::value_type reason)
 {
-    auto vmcs = mocks.Mock<vmcs_intel_x64>();
+    auto vmcs = mocks.Mock<bfvmm::intel_x64::vmcs>();
 
-    mocks.OnCall(vmcs, vmcs_intel_x64::launch);
-    mocks.OnCall(vmcs, vmcs_intel_x64::promote);
-    mocks.OnCall(vmcs, vmcs_intel_x64::load);
-    mocks.OnCall(vmcs, vmcs_intel_x64::clear);
+    mocks.OnCall(vmcs, bfvmm::intel_x64::vmcs::launch);
+    mocks.OnCall(vmcs, bfvmm::intel_x64::vmcs::promote);
+    mocks.OnCall(vmcs, bfvmm::intel_x64::vmcs::load);
+    mocks.OnCall(vmcs, bfvmm::intel_x64::vmcs::clear);
 
     if (reason != exit_reason::basic_exit_reason::vmxoff) {
-        mocks.ExpectCall(vmcs, vmcs_intel_x64::resume);
+        mocks.ExpectCall(vmcs, bfvmm::intel_x64::vmcs::resume);
     }
 
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFFFFFFFFFFUL;
@@ -64,13 +64,13 @@ setup_vmcs_handled(MockRepository &mocks, vmcs::value_type reason)
 auto
 setup_vmcs_halt(MockRepository &mocks, vmcs::value_type reason)
 {
-    auto vmcs = mocks.Mock<vmcs_intel_x64>();
+    auto vmcs = mocks.Mock<bfvmm::intel_x64::vmcs>();
 
-    mocks.NeverCall(vmcs, vmcs_intel_x64::launch);
-    mocks.NeverCall(vmcs, vmcs_intel_x64::promote);
-    mocks.NeverCall(vmcs, vmcs_intel_x64::load);
-    mocks.NeverCall(vmcs, vmcs_intel_x64::clear);
-    mocks.NeverCall(vmcs, vmcs_intel_x64::resume);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::launch);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::promote);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::load);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::clear);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::resume);
 
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFFFFFFFFFFUL;
     g_vmcs_fields[vmcs::exit_reason::addr] = reason;
@@ -81,13 +81,13 @@ setup_vmcs_halt(MockRepository &mocks, vmcs::value_type reason)
 auto
 setup_vmcs_promote(MockRepository &mocks, vmcs::value_type reason)
 {
-    auto vmcs = mocks.Mock<vmcs_intel_x64>();
+    auto vmcs = mocks.Mock<bfvmm::intel_x64::vmcs>();
 
-    mocks.NeverCall(vmcs, vmcs_intel_x64::launch);
-    mocks.ExpectCall(vmcs, vmcs_intel_x64::promote);
-    mocks.NeverCall(vmcs, vmcs_intel_x64::load);
-    mocks.NeverCall(vmcs, vmcs_intel_x64::clear);
-    mocks.NeverCall(vmcs, vmcs_intel_x64::resume);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::launch);
+    mocks.ExpectCall(vmcs, bfvmm::intel_x64::vmcs::promote);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::load);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::clear);
+    mocks.NeverCall(vmcs, bfvmm::intel_x64::vmcs::resume);
 
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0xFFFFFFFFFFFFFFFFUL;
     g_vmcs_fields[vmcs::exit_reason::addr] = reason;
@@ -95,10 +95,10 @@ setup_vmcs_promote(MockRepository &mocks, vmcs::value_type reason)
     return vmcs;
 }
 
-exit_handler_intel_x64
-setup_ehlr(gsl::not_null<vmcs_intel_x64 *> vmcs)
+auto
+setup_ehlr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 {
-    auto ehlr = exit_handler_intel_x64{};
+    auto ehlr = bfvmm::intel_x64::exit_handler{};
     ehlr.set_vmcs(vmcs);
     ehlr.set_state_save(&g_state_save);
 
@@ -741,30 +741,6 @@ TEST_CASE("exit_handler: vm_exit_reason_vmcall_data_string_json_map_fails")
     ehlr.m_state_save->r09 = g_msg.size();                       // r06
     ehlr.m_state_save->r11 = 0x1234U;                            // r08
     ehlr.m_state_save->r12 = g_msg.size();                       // r09
-
-    CHECK_NOTHROW(ehlr.dispatch());
-    CHECK(ehlr.m_state_save->rip == g_rip);
-    CHECK(bfscast(int64_t, ehlr.m_state_save->rdx) == BF_VMCALL_FAILURE);
-}
-
-TEST_CASE("exit_handler: vm_exit_reason_vmcall_data_string_json_invalid")
-{
-    MockRepository mocks;
-    auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::vmcall);
-    auto ehlr = setup_ehlr(vmcs);
-    setup_mm(mocks);
-    setup_pt(mocks);
-
-    ehlr.m_state_save->rax = VMCALL_DATA;                        // r00
-    ehlr.m_state_save->rdx = VMCALL_MAGIC_NUMBER;                // r01
-    ehlr.m_state_save->rsi = VMCALL_DATA_STRING_JSON;            // r04
-    ehlr.m_state_save->r08 = 0x1234U;                            // r05
-    ehlr.m_state_save->r09 = g_msg.size();                       // r06
-    ehlr.m_state_save->r11 = 0x1234U;                            // r08
-    ehlr.m_state_save->r12 = g_msg.size();                       // r09
-
-    std::string msg = "hello world";
-    memcpy(static_cast<char *>(g_map), msg.data(), msg.size());
 
     CHECK_NOTHROW(ehlr.dispatch());
     CHECK(ehlr.m_state_save->rip == g_rip);

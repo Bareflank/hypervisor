@@ -25,6 +25,8 @@
 #include <string>
 #include <debug/serial/serial_port_base.h>
 
+using namespace bfvmm;
+
 static std::map<serial_port_base::port_type, serial_port_base::value_type_32> g_ports;
 
 extern "C" uint32_t

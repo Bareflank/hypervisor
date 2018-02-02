@@ -47,6 +47,9 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+
 /// Serial port base class
 ///
 /// This class provides an interface to the basic functions of a serial port,
@@ -173,5 +176,7 @@ protected:
     ///
     void offset_outd(port_type offset, value_type_32 data) const noexcept;
 };
+
+}
 
 #endif

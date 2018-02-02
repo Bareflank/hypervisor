@@ -29,12 +29,12 @@ extern "C" void
 _stop() noexcept
 { }
 
-TEST_CASE("pm_x64_halt")
+TEST_CASE("pm_halt")
 {
     CHECK_NOTHROW(pm::halt());
 }
 
-TEST_CASE("pm_x64_stop")
+TEST_CASE("pm_stop")
 {
     CHECK_NOTHROW(pm::stop());
 }
