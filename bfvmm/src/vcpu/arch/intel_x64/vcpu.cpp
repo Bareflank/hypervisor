@@ -21,15 +21,20 @@
 #include <vcpu/arch/intel_x64/vcpu.h>
 #include <hve/arch/intel_x64/exit_handler/exit_handler_support.h>
 
-vcpu_intel_x64::vcpu_intel_x64(
-    vcpuid::type id,
-    std::unique_ptr<vmxon_intel_x64> vmxon,
-    std::unique_ptr<vmcs_intel_x64> vmcs,
-    std::unique_ptr<exit_handler_intel_x64> exit_handler,
-    std::unique_ptr<vmcs_intel_x64_state> vmm_state,
-    std::unique_ptr<vmcs_intel_x64_state> guest_state) :
+namespace bfvmm
+{
+namespace intel_x64
+{
 
-    vcpu(id),
+vcpu::vcpu(
+    vcpuid::type id,
+    std::unique_ptr<vmxon> vmxon,
+    std::unique_ptr<vmcs> vmcs,
+    std::unique_ptr<exit_handler> exit_handler,
+    std::unique_ptr<vmcs_state> vmm_state,
+    std::unique_ptr<vmcs_state> guest_state) :
+
+    bfvmm::vcpu(id),
     m_vmxon(std::move(vmxon)),
     m_vmcs(std::move(vmcs)),
     m_exit_handler(std::move(exit_handler)),
@@ -38,33 +43,33 @@ vcpu_intel_x64::vcpu_intel_x64(
 { }
 
 void
-vcpu_intel_x64::init(user_data *data)
+vcpu::init(user_data *data)
 {
     auto ___ = gsl::on_failure([&]
     { this->fini(); });
 
     if (!m_state_save) {
-        m_state_save = std::make_unique<state_save_intel_x64>();
+        m_state_save = std::make_unique<state_save>();
     }
 
     if (!m_vmxon) {
-        m_vmxon = std::make_unique<vmxon_intel_x64>();
+        m_vmxon = std::make_unique<vmxon>();
     }
 
     if (!m_vmcs) {
-        m_vmcs = std::make_unique<vmcs_intel_x64>();
+        m_vmcs = std::make_unique<vmcs>();
     }
 
     if (!m_exit_handler) {
-        m_exit_handler = std::make_unique<exit_handler_intel_x64>();
+        m_exit_handler = std::make_unique<exit_handler>();
     }
 
     if (!m_vmm_state) {
-        m_vmm_state = std::make_unique<vmcs_intel_x64_vmm_state>();
+        m_vmm_state = std::make_unique<vmcs_state_vmm>();
     }
 
     if (!m_guest_state) {
-        m_guest_state = std::make_unique<vmcs_intel_x64_host_vm_state>();
+        m_guest_state = std::make_unique<vmcs_state_hvm>();
     }
 
     m_state_save->vcpuid = this->id();
@@ -83,18 +88,18 @@ vcpu_intel_x64::init(user_data *data)
         bfdebug_nhex(1, "init vcpu", id(), msg);
     });
 
-    vcpu::init(data);
+    bfvmm::vcpu::init(data);
 }
 
 void
-vcpu_intel_x64::fini(user_data *data)
+vcpu::fini(user_data *data)
 {
-    vcpu::fini(data);
+    bfvmm::vcpu::fini(data);
     bfdebug_nhex(1, "fini vcpu", id());
 }
 
 void
-vcpu_intel_x64::run(user_data *data)
+vcpu::run(user_data *data)
 {
     expects(this->is_initialized());
 
@@ -105,10 +110,10 @@ vcpu_intel_x64::run(user_data *data)
             m_vmcs_launched = false;
         });
 
-        vcpu::run(data);
+        bfvmm::vcpu::run(data);
 
         auto ___ = gsl::on_failure([&] {
-            vcpu::hlt(data);
+            bfvmm::vcpu::hlt(data);
         });
 
         if (this->is_host_vm_vcpu()) {
@@ -135,7 +140,7 @@ vcpu_intel_x64::run(user_data *data)
 }
 
 void
-vcpu_intel_x64::hlt(user_data *data)
+vcpu::hlt(user_data *data)
 {
     if (!this->is_initialized()) {
         return;
@@ -154,5 +159,8 @@ vcpu_intel_x64::hlt(user_data *data)
         bfdebug_nhex(1, "halting vcpu", id());
     }
 
-    vcpu::hlt(data);
+    bfvmm::vcpu::hlt(data);
+}
+
+}
 }

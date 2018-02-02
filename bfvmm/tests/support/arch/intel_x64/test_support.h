@@ -76,7 +76,7 @@ uint16_t g_tr;
 gdt_reg::reg_t g_gdtr{};
 idt_reg::reg_t g_idtr{};
 
-std::vector<gdt_x64::segment_descriptor_type> g_gdt = {
+std::vector<bfvmm::x64::gdt::segment_descriptor_type> g_gdt = {
     0x0,
     0xFF7FFFFFFFFFFFFF,
     0xFF7FFFFFFFFFFFFF,
@@ -87,7 +87,7 @@ std::vector<gdt_x64::segment_descriptor_type> g_gdt = {
     0x00000000FFFFFFFF,
 };
 
-std::vector<idt_x64::interrupt_descriptor_type> g_idt = {
+std::vector<bfvmm::x64::idt::interrupt_descriptor_type> g_idt = {
     0xFFFFFFFFFFFFFFFF,
     0xFFFFFFFFFFFFFFFF,
     0xFFFFFFFFFFFFFFFF,
@@ -97,7 +97,7 @@ std::vector<idt_x64::interrupt_descriptor_type> g_idt = {
 alignas(0x1000) static char g_map[100];
 
 auto g_msg = std::string(R"%({"msg":"hello world"})%");
-auto g_state_save = state_save_intel_x64 {};
+auto g_state_save = bfvmm::intel_x64::state_save {};
 
 bool g_virt_to_phys_fails = false;
 bool g_phys_to_virt_fails = false;
@@ -117,10 +117,10 @@ uint64_t g_pdpt_addr = 2U;
 uint64_t g_pdpt_mem[4] = {0U};
 
 std::map<uint64_t, void *> g_mock_mem {{
-    {g_virt_apic_addr, static_cast<void *>(&g_virt_apic_mem)},
-    {g_vmcs_link_addr, static_cast<void *>(&g_vmcs_link_mem)},
-    {g_pdpt_addr, static_cast<void *>(&g_pdpt_mem)}
-}};
+        {g_virt_apic_addr, static_cast<void *>(&g_virt_apic_mem)},
+        {g_vmcs_link_addr, static_cast<void *>(&g_vmcs_link_mem)},
+        {g_pdpt_addr, static_cast<void *>(&g_pdpt_mem)}
+    }};
 
 struct control_flow_path {
     std::function<void()> setup{};
@@ -363,15 +363,15 @@ physint_to_virtptr(uintptr_t ptr)
 }
 
 extern "C" void
-vmcs_launch(state_save_intel_x64 *state_save) noexcept
+vmcs_launch(bfvmm::intel_x64::state_save *state_save) noexcept
 { bfignored(state_save); }
 
 extern "C" void
-vmcs_promote(state_save_intel_x64 *state_save, const void *guest_gdt) noexcept
+vmcs_promote(bfvmm::intel_x64::state_save *state_save, const void *guest_gdt) noexcept
 { bfignored(state_save); bfignored(guest_gdt); }
 
 extern "C" void
-vmcs_resume(state_save_intel_x64 *state_save) noexcept
+vmcs_resume(bfvmm::intel_x64::state_save *state_save) noexcept
 { bfignored(state_save); }
 
 extern "C" void
@@ -415,7 +415,7 @@ setup_registers()
 void
 setup_gdt()
 {
-    auto limit = g_gdt.size() * sizeof(gdt_x64::segment_descriptor_type) - 1;
+    auto limit = g_gdt.size() * sizeof(bfvmm::x64::gdt::segment_descriptor_type) - 1;
 
     g_gdtr.base = reinterpret_cast<uint64_t>(&g_gdt.at(0));
     g_gdtr.limit = gsl::narrow_cast<uint16_t>(limit);
@@ -424,7 +424,7 @@ setup_gdt()
 void
 setup_idt()
 {
-    auto limit = g_idt.size() * sizeof(idt_x64::interrupt_descriptor_type) - 1;
+    auto limit = g_idt.size() * sizeof(bfvmm::x64::idt::interrupt_descriptor_type) - 1;
 
     g_idtr.base = reinterpret_cast<uint64_t>(&g_idt.at(0));
     g_idtr.limit = gsl::narrow_cast<uint16_t>(limit);
@@ -480,47 +480,47 @@ setup_pt(MockRepository &mocks)
 auto
 setup_vmcs_state(MockRepository &mocks)
 {
-    auto state = mocks.Mock<vmcs_intel_x64_state>();
+    auto state = mocks.Mock<bfvmm::intel_x64::vmcs_state>();
 
-    mocks.OnCall(state, vmcs_intel_x64_state::es).Return(0x10);
-    mocks.OnCall(state, vmcs_intel_x64_state::cs).Return(0x10);
-    mocks.OnCall(state, vmcs_intel_x64_state::ss).Return(0x10);
-    mocks.OnCall(state, vmcs_intel_x64_state::ds).Return(0x10);
-    mocks.OnCall(state, vmcs_intel_x64_state::fs).Return(0x10);
-    mocks.OnCall(state, vmcs_intel_x64_state::gs).Return(0x10);
-    mocks.OnCall(state, vmcs_intel_x64_state::ldtr).Return(0x10);
-    mocks.OnCall(state, vmcs_intel_x64_state::tr).Return(0x10);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::es).Return(0x10);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::cs).Return(0x10);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ss).Return(0x10);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ds).Return(0x10);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::fs).Return(0x10);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::gs).Return(0x10);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ldtr).Return(0x10);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::tr).Return(0x10);
 
-    mocks.OnCall(state, vmcs_intel_x64_state::gdt_limit).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::idt_limit).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::gdt_limit).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::idt_limit).Return(0);
 
-    mocks.OnCall(state, vmcs_intel_x64_state::es_limit).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::cs_limit).Return(0xFFFFFFFF);
-    mocks.OnCall(state, vmcs_intel_x64_state::ss_limit).Return(0xFFFFFFFF);
-    mocks.OnCall(state, vmcs_intel_x64_state::ds_limit).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::fs_limit).Return(0xFFFFFFFF);
-    mocks.OnCall(state, vmcs_intel_x64_state::gs_limit).Return(0xFFFFFFFF);
-    mocks.OnCall(state, vmcs_intel_x64_state::ldtr_limit).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::tr_limit).Return(sizeof(tss_x64));
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::es_limit).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::cs_limit).Return(0xFFFFFFFF);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ss_limit).Return(0xFFFFFFFF);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ds_limit).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::fs_limit).Return(0xFFFFFFFF);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::gs_limit).Return(0xFFFFFFFF);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ldtr_limit).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::tr_limit).Return(sizeof(tss));
 
-    mocks.OnCall(state, vmcs_intel_x64_state::es_access_rights).Return(access_rights::unusable);
-    mocks.OnCall(state, vmcs_intel_x64_state::cs_access_rights).Return(access_rights::ring0_cs_descriptor);
-    mocks.OnCall(state, vmcs_intel_x64_state::ss_access_rights).Return(access_rights::ring0_ss_descriptor);
-    mocks.OnCall(state, vmcs_intel_x64_state::ds_access_rights).Return(access_rights::unusable);
-    mocks.OnCall(state, vmcs_intel_x64_state::fs_access_rights).Return(access_rights::ring0_fs_descriptor);
-    mocks.OnCall(state, vmcs_intel_x64_state::gs_access_rights).Return(access_rights::ring0_gs_descriptor);
-    mocks.OnCall(state, vmcs_intel_x64_state::ldtr_access_rights).Return(access_rights::unusable);
-    mocks.OnCall(state, vmcs_intel_x64_state::tr_access_rights).Return(access_rights::ring0_tr_descriptor);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::es_access_rights).Return(access_rights::unusable);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::cs_access_rights).Return(access_rights::ring0_cs_descriptor);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ss_access_rights).Return(access_rights::ring0_ss_descriptor);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ds_access_rights).Return(access_rights::unusable);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::fs_access_rights).Return(access_rights::ring0_fs_descriptor);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::gs_access_rights).Return(access_rights::ring0_gs_descriptor);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ldtr_access_rights).Return(access_rights::unusable);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::tr_access_rights).Return(access_rights::ring0_tr_descriptor);
 
-    mocks.OnCall(state, vmcs_intel_x64_state::es_base).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::cs_base).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::ss_base).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::ds_base).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::ds_base).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::fs_base).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::gs_base).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::ldtr_base).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::tr_base).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::es_base).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::cs_base).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ss_base).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ds_base).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ds_base).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::fs_base).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::gs_base).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ldtr_base).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::tr_base).Return(0);
 
     auto cr0 = 0UL;
     cr0 |= cr0::paging::mask;
@@ -532,30 +532,30 @@ setup_vmcs_state(MockRepository &mocks)
     auto rflags = 0UL;
     rflags |= rflags::interrupt_enable_flag::mask;
 
-    mocks.OnCall(state, vmcs_intel_x64_state::cr0).Return(cr0);
-    mocks.OnCall(state, vmcs_intel_x64_state::cr3).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::cr4).Return(cr4);
-    mocks.OnCall(state, vmcs_intel_x64_state::dr7).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::rflags).Return(rflags);
-    mocks.OnCall(state, vmcs_intel_x64_state::gdt_base).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::idt_base).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::cr0).Return(cr0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::cr3).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::cr4).Return(cr4);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::dr7).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::rflags).Return(rflags);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::gdt_base).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::idt_base).Return(0);
 
     auto efer = 0UL;
     efer |= intel_x64::msrs::ia32_efer::lme::mask;
     efer |= intel_x64::msrs::ia32_efer::lma::mask;
 
-    mocks.OnCall(state, vmcs_intel_x64_state::ia32_debugctl_msr).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::ia32_pat_msr).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::ia32_efer_msr).Return(efer);
-    mocks.OnCall(state, vmcs_intel_x64_state::ia32_perf_global_ctrl_msr).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::ia32_sysenter_cs_msr).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::ia32_sysenter_esp_msr).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::ia32_sysenter_eip_msr).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::ia32_fs_base_msr).Return(0);
-    mocks.OnCall(state, vmcs_intel_x64_state::ia32_gs_base_msr).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ia32_debugctl_msr).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ia32_pat_msr).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ia32_efer_msr).Return(efer);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ia32_perf_global_ctrl_msr).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ia32_sysenter_cs_msr).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ia32_sysenter_esp_msr).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ia32_sysenter_eip_msr).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ia32_fs_base_msr).Return(0);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::ia32_gs_base_msr).Return(0);
 
-    mocks.OnCall(state, vmcs_intel_x64_state::is_guest).Return(false);
-    mocks.OnCall(state, vmcs_intel_x64_state::dump);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::is_guest).Return(false);
+    mocks.OnCall(state, bfvmm::intel_x64::vmcs_state::dump);
 
     return state;
 }

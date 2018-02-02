@@ -94,7 +94,7 @@ extern "C" void
 _write_tr(uint16_t val) noexcept
 { g_tr = val; }
 
-TEST_CASE("srs_x64_es")
+TEST_CASE("srs_es")
 {
     using namespace segment_register::es;
 
@@ -103,7 +103,7 @@ TEST_CASE("srs_x64_es")
     dump(0);
 }
 
-TEST_CASE("srs_x64_es_rpl")
+TEST_CASE("srs_es_rpl")
 {
     using namespace segment_register::es;
 
@@ -114,7 +114,7 @@ TEST_CASE("srs_x64_es_rpl")
     CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
-TEST_CASE("srs_x64_es_ti")
+TEST_CASE("srs_es_ti")
 {
     using namespace segment_register::es;
 
@@ -129,7 +129,7 @@ TEST_CASE("srs_x64_es_ti")
     CHECK(ti::is_disabled(0x0));
 }
 
-TEST_CASE("srs_x64_es_index")
+TEST_CASE("srs_es_index")
 {
     using namespace segment_register::es;
 
@@ -140,7 +140,7 @@ TEST_CASE("srs_x64_es_index")
     CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
-TEST_CASE("srs_x64_cs")
+TEST_CASE("srs_cs")
 {
     using namespace segment_register::cs;
 
@@ -149,7 +149,7 @@ TEST_CASE("srs_x64_cs")
     dump(0);
 }
 
-TEST_CASE("srs_x64_cs_rpl")
+TEST_CASE("srs_cs_rpl")
 {
     using namespace segment_register::cs;
 
@@ -160,7 +160,7 @@ TEST_CASE("srs_x64_cs_rpl")
     CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
-TEST_CASE("srs_x64_cs_ti")
+TEST_CASE("srs_cs_ti")
 {
     using namespace segment_register::cs;
 
@@ -175,7 +175,7 @@ TEST_CASE("srs_x64_cs_ti")
     CHECK(ti::is_disabled(0x0));
 }
 
-TEST_CASE("srs_x64_cs_index")
+TEST_CASE("srs_cs_index")
 {
     using namespace segment_register::cs;
 
@@ -186,7 +186,7 @@ TEST_CASE("srs_x64_cs_index")
     CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
-TEST_CASE("srs_x64_ss")
+TEST_CASE("srs_ss")
 {
     using namespace segment_register::ss;
 
@@ -195,7 +195,7 @@ TEST_CASE("srs_x64_ss")
     dump(0);
 }
 
-TEST_CASE("srs_x64_ss_rpl")
+TEST_CASE("srs_ss_rpl")
 {
     using namespace segment_register::ss;
 
@@ -206,7 +206,7 @@ TEST_CASE("srs_x64_ss_rpl")
     CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
-TEST_CASE("srs_x64_ss_ti")
+TEST_CASE("srs_ss_ti")
 {
     using namespace segment_register::ss;
 
@@ -221,7 +221,7 @@ TEST_CASE("srs_x64_ss_ti")
     CHECK(ti::is_disabled(0x0));
 }
 
-TEST_CASE("srs_x64_ss_index")
+TEST_CASE("srs_ss_index")
 {
     using namespace segment_register::ss;
 
@@ -232,7 +232,7 @@ TEST_CASE("srs_x64_ss_index")
     CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
-TEST_CASE("srs_x64_ds")
+TEST_CASE("srs_ds")
 {
     using namespace segment_register::ds;
 
@@ -241,7 +241,7 @@ TEST_CASE("srs_x64_ds")
     dump(0);
 }
 
-TEST_CASE("srs_x64_ds_rpl")
+TEST_CASE("srs_ds_rpl")
 {
     using namespace segment_register::ds;
 
@@ -252,7 +252,7 @@ TEST_CASE("srs_x64_ds_rpl")
     CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
-TEST_CASE("srs_x64_ds_ti")
+TEST_CASE("srs_ds_ti")
 {
     using namespace segment_register::ds;
 
@@ -267,7 +267,7 @@ TEST_CASE("srs_x64_ds_ti")
     CHECK(ti::is_disabled(0x0));
 }
 
-TEST_CASE("srs_x64_ds_index")
+TEST_CASE("srs_ds_index")
 {
     using namespace segment_register::ds;
 
@@ -278,7 +278,7 @@ TEST_CASE("srs_x64_ds_index")
     CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
-TEST_CASE("srs_x64_fs")
+TEST_CASE("srs_fs")
 {
     using namespace segment_register::fs;
 
@@ -287,7 +287,7 @@ TEST_CASE("srs_x64_fs")
     dump(0);
 }
 
-TEST_CASE("srs_x64_fs_rpl")
+TEST_CASE("srs_fs_rpl")
 {
     using namespace segment_register::fs;
 
@@ -298,7 +298,7 @@ TEST_CASE("srs_x64_fs_rpl")
     CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
-TEST_CASE("srs_x64_fs_ti")
+TEST_CASE("srs_fs_ti")
 {
     using namespace segment_register::fs;
 
@@ -313,7 +313,7 @@ TEST_CASE("srs_x64_fs_ti")
     CHECK(ti::is_disabled(0x0));
 }
 
-TEST_CASE("srs_x64_fs_index")
+TEST_CASE("srs_fs_index")
 {
     using namespace segment_register::fs;
 
@@ -324,7 +324,7 @@ TEST_CASE("srs_x64_fs_index")
     CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
-TEST_CASE("srs_x64_gs")
+TEST_CASE("srs_gs")
 {
     using namespace segment_register::gs;
 
@@ -333,7 +333,7 @@ TEST_CASE("srs_x64_gs")
     dump(0);
 }
 
-TEST_CASE("srs_x64_gs_rpl")
+TEST_CASE("srs_gs_rpl")
 {
     using namespace segment_register::gs;
 
@@ -344,7 +344,7 @@ TEST_CASE("srs_x64_gs_rpl")
     CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
-TEST_CASE("srs_x64_gs_ti")
+TEST_CASE("srs_gs_ti")
 {
     using namespace segment_register::gs;
 
@@ -359,7 +359,7 @@ TEST_CASE("srs_x64_gs_ti")
     CHECK(ti::is_disabled(0x0));
 }
 
-TEST_CASE("srs_x64_gs_index")
+TEST_CASE("srs_gs_index")
 {
     using namespace segment_register::gs;
 
@@ -370,7 +370,7 @@ TEST_CASE("srs_x64_gs_index")
     CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
-TEST_CASE("srs_x64_ldtr")
+TEST_CASE("srs_ldtr")
 {
     using namespace segment_register::ldtr;
 
@@ -379,7 +379,7 @@ TEST_CASE("srs_x64_ldtr")
     dump(0);
 }
 
-TEST_CASE("srs_x64_ldtr_rpl")
+TEST_CASE("srs_ldtr_rpl")
 {
     using namespace segment_register::ldtr;
 
@@ -390,7 +390,7 @@ TEST_CASE("srs_x64_ldtr_rpl")
     CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
-TEST_CASE("srs_x64_ldtr_ti")
+TEST_CASE("srs_ldtr_ti")
 {
     using namespace segment_register::ldtr;
 
@@ -405,7 +405,7 @@ TEST_CASE("srs_x64_ldtr_ti")
     CHECK(ti::is_disabled(0x0));
 }
 
-TEST_CASE("srs_x64_ldtr_index")
+TEST_CASE("srs_ldtr_index")
 {
     using namespace segment_register::ldtr;
 
@@ -416,7 +416,7 @@ TEST_CASE("srs_x64_ldtr_index")
     CHECK(index::get(index::mask) == (index::mask >> index::from));
 }
 
-TEST_CASE("srs_x64_tr")
+TEST_CASE("srs_tr")
 {
     using namespace segment_register::tr;
 
@@ -425,7 +425,7 @@ TEST_CASE("srs_x64_tr")
     dump(0);
 }
 
-TEST_CASE("srs_x64_tr_rpl")
+TEST_CASE("srs_tr_rpl")
 {
     using namespace segment_register::tr;
 
@@ -436,7 +436,7 @@ TEST_CASE("srs_x64_tr_rpl")
     CHECK(rpl::get(rpl::mask) == (rpl::mask >> rpl::from));
 }
 
-TEST_CASE("srs_x64_tr_ti")
+TEST_CASE("srs_tr_ti")
 {
     using namespace segment_register::tr;
 
@@ -451,7 +451,7 @@ TEST_CASE("srs_x64_tr_ti")
     CHECK(ti::is_disabled(0x0));
 }
 
-TEST_CASE("srs_x64_tr_index")
+TEST_CASE("srs_tr_index")
 {
     using namespace segment_register::tr;
 

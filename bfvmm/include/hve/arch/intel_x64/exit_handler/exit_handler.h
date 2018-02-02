@@ -54,6 +54,11 @@
 // Exit Handler
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+namespace intel_x64
+{
+
 /// Exit Handler
 ///
 /// This class is responsible for detecting why a guest exited (i.e. stopped
@@ -68,7 +73,7 @@
 /// can subclass this class, and overload the handlers that are needed. The
 /// basics are provided with this class to ease development.
 ///
-class EXPORT_HVE exit_handler_intel_x64
+class EXPORT_HVE exit_handler
 {
 public:
 
@@ -79,14 +84,14 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    exit_handler_intel_x64() = default;
+    exit_handler() = default;
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    virtual ~exit_handler_intel_x64() = default;
+    virtual ~exit_handler() = default;
 
     /// Dispatch
     ///
@@ -129,7 +134,7 @@ protected:
     virtual void advance_and_resume();
 
     virtual void handle_exit(
-        intel_x64::vmcs::value_type reason);
+        ::intel_x64::vmcs::value_type reason);
 
     void handle_cpuid();
     void handle_invd();
@@ -183,15 +188,13 @@ public:
 
     /// @cond
 
-    vmcs_intel_x64 *m_vmcs{nullptr};
-    state_save_intel_x64 *m_state_save{nullptr};
+    vmcs *m_vmcs{nullptr};
+    state_save *m_state_save{nullptr};
 
-    virtual void set_vmcs(
-        gsl::not_null<vmcs_intel_x64 *> vmcs)
+    virtual void set_vmcs(gsl::not_null<vmcs *> vmcs)
     { m_vmcs = vmcs; }
 
-    virtual void set_state_save(
-        gsl::not_null<state_save_intel_x64 *> state_save)
+    virtual void set_state_save(gsl::not_null<state_save *> state_save)
     { m_state_save = state_save; }
 
     /// @endcond
@@ -200,14 +203,17 @@ public:
 
     /// @cond
 
-    exit_handler_intel_x64(exit_handler_intel_x64 &&) noexcept = default;
-    exit_handler_intel_x64 &operator=(exit_handler_intel_x64 &&) noexcept = default;
+    exit_handler(exit_handler &&) noexcept = default;
+    exit_handler &operator=(exit_handler &&) noexcept = default;
 
-    exit_handler_intel_x64(const exit_handler_intel_x64 &) = delete;
-    exit_handler_intel_x64 &operator=(const exit_handler_intel_x64 &) = delete;
+    exit_handler(const exit_handler &) = delete;
+    exit_handler &operator=(const exit_handler &) = delete;
 
     /// @endcond
 };
+
+}
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

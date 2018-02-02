@@ -33,17 +33,17 @@ extern "C" void
 _clflush(void *addr) noexcept
 { (void) addr; }
 
-TEST_CASE("cache_x64_invd")
+TEST_CASE("cache_invd")
 {
     CHECK_NOTHROW(cache::invd());
 }
 
-TEST_CASE("cache_x64_wbinvd")
+TEST_CASE("cache_wbinvd")
 {
     CHECK_NOTHROW(cache::wbinvd());
 }
 
-TEST_CASE("cache_x64_clflush")
+TEST_CASE("cache_clflush")
 {
     CHECK_NOTHROW(cache::clflush(0x10));
 

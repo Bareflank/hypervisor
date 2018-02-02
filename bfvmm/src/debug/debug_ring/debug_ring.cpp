@@ -58,6 +58,9 @@ get_drr(uint64_t vcpuid, struct debug_ring_resources_t **drr) noexcept
 // Debug Ring Implementation
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+
 debug_ring::debug_ring(vcpuid::type vcpuid) noexcept
 {
     try {
@@ -151,4 +154,6 @@ debug_ring::write(const std::string &str) noexcept
         }
     }
     catch (...) { }
+}
+
 }

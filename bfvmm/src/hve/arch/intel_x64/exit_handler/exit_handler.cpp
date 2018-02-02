@@ -30,18 +30,20 @@
 #include <intrinsics.h>
 #include <memory_manager/memory_manager_x64.h>
 
-using namespace x64;
-using namespace intel_x64;
+namespace bfvmm
+{
+namespace intel_x64
+{
 
 #include <mutex>
 std::mutex g_unimplemented_handler_mutex;
 
 void
-exit_handler_intel_x64::dispatch()
-{ handle_exit(vmcs::exit_reason::basic_exit_reason::get()); }
+exit_handler::dispatch()
+{ handle_exit(::intel_x64::vmcs::exit_reason::basic_exit_reason::get()); }
 
 void
-exit_handler_intel_x64::halt() noexcept
+exit_handler::halt() noexcept
 {
     bferror_lnbr(0);
     bferror_info(0, "halting vcpu");
@@ -70,49 +72,49 @@ exit_handler_intel_x64::halt() noexcept
 }
 
 void
-exit_handler_intel_x64::stop() noexcept
-{ pm::stop(); }
+exit_handler::stop() noexcept
+{ ::x64::pm::stop(); }
 
 void
-exit_handler_intel_x64::resume()
+exit_handler::resume()
 { m_vmcs->resume(); }
 
 void
-exit_handler_intel_x64::promote(gsl::not_null<const void *> guest_gdt)
+exit_handler::promote(gsl::not_null<const void *> guest_gdt)
 { m_vmcs->promote(guest_gdt); }
 
 void
-exit_handler_intel_x64::advance_and_resume()
+exit_handler::advance_and_resume()
 {
     this->advance_rip();
     this->resume();
 }
 
 void
-exit_handler_intel_x64::handle_exit(vmcs::value_type reason)
+exit_handler::handle_exit(::intel_x64::vmcs::value_type reason)
 {
     switch (reason) {
-        case vmcs::exit_reason::basic_exit_reason::cpuid:
+        case ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid:
             handle_cpuid();
             break;
 
-        case vmcs::exit_reason::basic_exit_reason::invd:
+        case ::intel_x64::vmcs::exit_reason::basic_exit_reason::invd:
             handle_invd();
             break;
 
-        case vmcs::exit_reason::basic_exit_reason::vmcall:
+        case ::intel_x64::vmcs::exit_reason::basic_exit_reason::vmcall:
             handle_vmcall();
             break;
 
-        case vmcs::exit_reason::basic_exit_reason::vmxoff:
+        case ::intel_x64::vmcs::exit_reason::basic_exit_reason::vmxoff:
             handle_vmxoff();
             break;
 
-        case vmcs::exit_reason::basic_exit_reason::rdmsr:
+        case ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr:
             handle_rdmsr();
             break;
 
-        case vmcs::exit_reason::basic_exit_reason::wrmsr:
+        case ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr:
             handle_wrmsr();
             break;
 
@@ -125,12 +127,14 @@ exit_handler_intel_x64::handle_exit(vmcs::value_type reason)
 }
 
 void
-exit_handler_intel_x64::handle_cpuid()
+exit_handler::handle_cpuid()
 {
-    auto ret = x64::cpuid::get(gsl::narrow_cast<x64::cpuid::field_type>(m_state_save->rax),
-                               gsl::narrow_cast<x64::cpuid::field_type>(m_state_save->rbx),
-                               gsl::narrow_cast<x64::cpuid::field_type>(m_state_save->rcx),
-                               gsl::narrow_cast<x64::cpuid::field_type>(m_state_save->rdx));
+    auto ret = ::x64::cpuid::get(
+                   gsl::narrow_cast<::x64::cpuid::field_type>(m_state_save->rax),
+                   gsl::narrow_cast<::x64::cpuid::field_type>(m_state_save->rbx),
+                   gsl::narrow_cast<::x64::cpuid::field_type>(m_state_save->rcx),
+                   gsl::narrow_cast<::x64::cpuid::field_type>(m_state_save->rdx)
+               );
 
     m_state_save->rax = ret.rax;
     m_state_save->rbx = ret.rbx;
@@ -141,14 +145,14 @@ exit_handler_intel_x64::handle_cpuid()
 }
 
 void
-exit_handler_intel_x64::handle_invd()
+exit_handler::handle_invd()
 {
-    cache::wbinvd();
+    ::x64::cache::wbinvd();
     advance_rip();
 }
 
 void
-exit_handler_intel_x64::handle_vmcall()
+exit_handler::handle_vmcall()
 {
     auto &&regs = vmcall_registers_t{};
 
@@ -216,64 +220,64 @@ exit_handler_intel_x64::handle_vmcall()
 }
 
 void
-exit_handler_intel_x64::handle_vmxoff()
+exit_handler::handle_vmxoff()
 {
     auto gdt_map =
         bfn::make_unique_map_x64<char>(
-            vmcs::guest_gdtr_base::get(),
-            vmcs::guest_cr3::get(),
-            vmcs::guest_gdtr_limit::size(),
-            vmcs::guest_ia32_pat::get()
+            ::intel_x64::vmcs::guest_gdtr_base::get(),
+            ::intel_x64::vmcs::guest_cr3::get(),
+            ::intel_x64::vmcs::guest_gdtr_limit::size(),
+            ::intel_x64::vmcs::guest_ia32_pat::get()
         );
 
     this->promote(gdt_map.get());
 }
 
 void
-exit_handler_intel_x64::handle_rdmsr()
+exit_handler::handle_rdmsr()
 {
     auto val = 0ULL;
-    auto msr = gsl::narrow_cast<x64::msrs::field_type>(m_state_save->rcx);
+    auto msr = gsl::narrow_cast<::x64::msrs::field_type>(m_state_save->rcx);
 
     switch (msr) {
-        case intel_x64::msrs::ia32_debugctl::addr:
-            val = vmcs::guest_ia32_debugctl::get();
+        case ::intel_x64::msrs::ia32_debugctl::addr:
+            val = ::intel_x64::vmcs::guest_ia32_debugctl::get();
             break;
 
-        case x64::msrs::ia32_pat::addr:
-            val = vmcs::guest_ia32_pat::get();
+        case ::x64::msrs::ia32_pat::addr:
+            val = ::intel_x64::vmcs::guest_ia32_pat::get();
             break;
 
-        case intel_x64::msrs::ia32_efer::addr:
-            val = vmcs::guest_ia32_efer::get();
+        case ::intel_x64::msrs::ia32_efer::addr:
+            val = ::intel_x64::vmcs::guest_ia32_efer::get();
             break;
 
-        case intel_x64::msrs::ia32_perf_global_ctrl::addr:
-            val = vmcs::guest_ia32_perf_global_ctrl::get();
+        case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
+            val = ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::get();
             break;
 
-        case intel_x64::msrs::ia32_sysenter_cs::addr:
-            val = vmcs::guest_ia32_sysenter_cs::get();
+        case ::intel_x64::msrs::ia32_sysenter_cs::addr:
+            val = ::intel_x64::vmcs::guest_ia32_sysenter_cs::get();
             break;
 
-        case intel_x64::msrs::ia32_sysenter_esp::addr:
-            val = vmcs::guest_ia32_sysenter_esp::get();
+        case ::intel_x64::msrs::ia32_sysenter_esp::addr:
+            val = ::intel_x64::vmcs::guest_ia32_sysenter_esp::get();
             break;
 
-        case intel_x64::msrs::ia32_sysenter_eip::addr:
-            val = vmcs::guest_ia32_sysenter_eip::get();
+        case ::intel_x64::msrs::ia32_sysenter_eip::addr:
+            val = ::intel_x64::vmcs::guest_ia32_sysenter_eip::get();
             break;
 
-        case intel_x64::msrs::ia32_fs_base::addr:
-            val = vmcs::guest_fs_base::get();
+        case ::intel_x64::msrs::ia32_fs_base::addr:
+            val = ::intel_x64::vmcs::guest_fs_base::get();
             break;
 
-        case intel_x64::msrs::ia32_gs_base::addr:
-            val = vmcs::guest_gs_base::get();
+        case ::intel_x64::msrs::ia32_gs_base::addr:
+            val = ::intel_x64::vmcs::guest_gs_base::get();
             break;
 
         default:
-            val = intel_x64::msrs::get(msr);
+            val = ::intel_x64::msrs::get(msr);
             break;
 
         // QUIRK:
@@ -302,53 +306,53 @@ exit_handler_intel_x64::handle_rdmsr()
 }
 
 void
-exit_handler_intel_x64::handle_wrmsr()
+exit_handler::handle_wrmsr()
 {
     auto val = 0ULL;
-    auto msr = gsl::narrow_cast<x64::msrs::field_type>(m_state_save->rcx);
+    auto msr = gsl::narrow_cast<::x64::msrs::field_type>(m_state_save->rcx);
 
     val |= ((m_state_save->rax & 0x00000000FFFFFFFF) << 0x00);
     val |= ((m_state_save->rdx & 0x00000000FFFFFFFF) << 0x20);
 
     switch (msr) {
-        case intel_x64::msrs::ia32_debugctl::addr:
-            vmcs::guest_ia32_debugctl::set(val);
+        case ::intel_x64::msrs::ia32_debugctl::addr:
+            ::intel_x64::vmcs::guest_ia32_debugctl::set(val);
             break;
 
-        case x64::msrs::ia32_pat::addr:
-            vmcs::guest_ia32_pat::set(val);
+        case ::x64::msrs::ia32_pat::addr:
+            ::intel_x64::vmcs::guest_ia32_pat::set(val);
             break;
 
-        case intel_x64::msrs::ia32_efer::addr:
-            vmcs::guest_ia32_efer::set(val);
+        case ::intel_x64::msrs::ia32_efer::addr:
+            ::intel_x64::vmcs::guest_ia32_efer::set(val);
             break;
 
-        case intel_x64::msrs::ia32_perf_global_ctrl::addr:
-            vmcs::guest_ia32_perf_global_ctrl::set(val);
+        case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
+            ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::set(val);
             break;
 
-        case intel_x64::msrs::ia32_sysenter_cs::addr:
-            vmcs::guest_ia32_sysenter_cs::set(val);
+        case ::intel_x64::msrs::ia32_sysenter_cs::addr:
+            ::intel_x64::vmcs::guest_ia32_sysenter_cs::set(val);
             break;
 
-        case intel_x64::msrs::ia32_sysenter_esp::addr:
-            vmcs::guest_ia32_sysenter_esp::set(val);
+        case ::intel_x64::msrs::ia32_sysenter_esp::addr:
+            ::intel_x64::vmcs::guest_ia32_sysenter_esp::set(val);
             break;
 
-        case intel_x64::msrs::ia32_sysenter_eip::addr:
-            vmcs::guest_ia32_sysenter_eip::set(val);
+        case ::intel_x64::msrs::ia32_sysenter_eip::addr:
+            ::intel_x64::vmcs::guest_ia32_sysenter_eip::set(val);
             break;
 
-        case intel_x64::msrs::ia32_fs_base::addr:
-            vmcs::guest_fs_base::set(val);
+        case ::intel_x64::msrs::ia32_fs_base::addr:
+            ::intel_x64::vmcs::guest_fs_base::set(val);
             break;
 
-        case intel_x64::msrs::ia32_gs_base::addr:
-            vmcs::guest_gs_base::set(val);
+        case ::intel_x64::msrs::ia32_gs_base::addr:
+            ::intel_x64::vmcs::guest_gs_base::set(val);
             break;
 
         default:
-            intel_x64::msrs::set(msr, val);
+            ::intel_x64::msrs::set(msr, val);
             break;
     }
 
@@ -356,27 +360,27 @@ exit_handler_intel_x64::handle_wrmsr()
 }
 
 void
-exit_handler_intel_x64::advance_rip() noexcept
-{ m_state_save->rip += vmcs::vm_exit_instruction_length::get(); }
+exit_handler::advance_rip() noexcept
+{ m_state_save->rip += ::intel_x64::vmcs::vm_exit_instruction_length::get(); }
 
 void
-exit_handler_intel_x64::unimplemented_handler() noexcept
+exit_handler::unimplemented_handler() noexcept
 {
     std::lock_guard<std::mutex> guard(g_unimplemented_handler_mutex);
 
     bferror_lnbr(0);
     bferror_info(0, "unhandled exit reason");
     bferror_brk1(0);
-    bferror_subtext(0, "exit_reason", vmcs::exit_reason::basic_exit_reason::description());
+    bferror_subtext(0, "exit_reason", ::intel_x64::vmcs::exit_reason::basic_exit_reason::description());
 
-    if (vmcs::exit_reason::vm_entry_failure::is_enabled()) {
+    if (::intel_x64::vmcs::exit_reason::vm_entry_failure::is_enabled()) {
 
         guard_exceptions([&] {
-            bfvmm::intel_x64::check::all();
+            check::all();
         });
 
         guard_exceptions([&] {
-            vmcs::debug::dump();
+            ::intel_x64::vmcs::debug::dump();
         });
     }
 
@@ -384,7 +388,7 @@ exit_handler_intel_x64::unimplemented_handler() noexcept
 }
 
 void
-exit_handler_intel_x64::complete_vmcall(
+exit_handler::complete_vmcall(
     ret_type ret, vmcall_registers_t &regs) noexcept
 {
     switch (m_state_save->rax) {
@@ -412,7 +416,7 @@ exit_handler_intel_x64::complete_vmcall(
 }
 
 void
-exit_handler_intel_x64::handle_vmcall_versions(vmcall_registers_t &regs)
+exit_handler::handle_vmcall_versions(vmcall_registers_t &regs)
 {
     switch (regs.r02) {
         case VMCALL_VERSION_PROTOCOL:
@@ -439,7 +443,7 @@ exit_handler_intel_x64::handle_vmcall_versions(vmcall_registers_t &regs)
 }
 
 void
-exit_handler_intel_x64::handle_vmcall_registers(vmcall_registers_t &regs)
+exit_handler::handle_vmcall_registers(vmcall_registers_t &regs)
 {
     bfdebug_transaction(0, [&](std::string * msg) {
         bfdebug_info(0, "vmcall registers", msg);
@@ -458,7 +462,7 @@ exit_handler_intel_x64::handle_vmcall_registers(vmcall_registers_t &regs)
 }
 
 void
-exit_handler_intel_x64::handle_vmcall_data(vmcall_registers_t &regs)
+exit_handler::handle_vmcall_data(vmcall_registers_t &regs)
 {
     expects(regs.r05 != 0);
     expects(regs.r08 != 0);
@@ -468,8 +472,19 @@ exit_handler_intel_x64::handle_vmcall_data(vmcall_registers_t &regs)
     expects(regs.r06 <= VMCALL_IN_BUFFER_SIZE);
     expects(regs.r09 <= VMCALL_OUT_BUFFER_SIZE);
 
-    auto imap = bfn::make_unique_map_x64<char>(regs.r05, vmcs::guest_cr3::get(), regs.r06, vmcs::guest_ia32_pat::get());
-    auto omap = bfn::make_unique_map_x64<char>(regs.r08, vmcs::guest_cr3::get(), regs.r09, vmcs::guest_ia32_pat::get());
+    auto imap = bfn::make_unique_map_x64<char>(
+                    regs.r05,
+                    ::intel_x64::vmcs::guest_cr3::get(),
+                    regs.r06,
+                    ::intel_x64::vmcs::guest_ia32_pat::get()
+                );
+
+    auto omap = bfn::make_unique_map_x64<char>(
+                    regs.r08,
+                    ::intel_x64::vmcs::guest_cr3::get(),
+                    regs.r09,
+                    ::intel_x64::vmcs::guest_ia32_pat::get()
+                );
 
     switch (regs.r04) {
         case VMCALL_DATA_STRING_UNFORMATTED: {
@@ -499,7 +514,7 @@ exit_handler_intel_x64::handle_vmcall_data(vmcall_registers_t &regs)
 }
 
 void
-exit_handler_intel_x64::handle_vmcall_event(vmcall_registers_t &regs)
+exit_handler::handle_vmcall_event(vmcall_registers_t &regs)
 {
     bfdebug_transaction(0, [&](std::string * msg) {
         bfdebug_info(0, "vmcall event", msg);
@@ -508,21 +523,21 @@ exit_handler_intel_x64::handle_vmcall_event(vmcall_registers_t &regs)
 }
 
 void
-exit_handler_intel_x64::handle_vmcall_start(vmcall_registers_t &regs)
+exit_handler::handle_vmcall_start(vmcall_registers_t &regs)
 {
     (void) regs;
     bfdebug_info(0, "host os is" bfcolor_green " now " bfcolor_end "in a vm");
 }
 
 void
-exit_handler_intel_x64::handle_vmcall_stop(vmcall_registers_t &regs)
+exit_handler::handle_vmcall_stop(vmcall_registers_t &regs)
 {
     (void) regs;
     bfdebug_info(0, "host os is" bfcolor_red " not " bfcolor_end "in a vm");
 }
 
 void
-exit_handler_intel_x64::handle_vmcall_unittest(vmcall_registers_t &regs)
+exit_handler::handle_vmcall_unittest(vmcall_registers_t &regs)
 {
     bfdebug_transaction(0, [&](std::string * msg) {
         bfdebug_info(0, "vmcall unittest", msg);
@@ -531,7 +546,7 @@ exit_handler_intel_x64::handle_vmcall_unittest(vmcall_registers_t &regs)
 }
 
 void
-exit_handler_intel_x64::handle_vmcall_data_string_unformatted(
+exit_handler::handle_vmcall_data_string_unformatted(
     const std::string &istr, std::string &ostr)
 {
     std::cout << "received in vmm: " << istr << '\n';
@@ -539,7 +554,7 @@ exit_handler_intel_x64::handle_vmcall_data_string_unformatted(
 }
 
 void
-exit_handler_intel_x64::handle_vmcall_data_string_json(
+exit_handler::handle_vmcall_data_string_json(
     const json &ijson, json &ojson)
 {
     std::cout << "received in vmm: " << ijson << '\n';
@@ -547,7 +562,7 @@ exit_handler_intel_x64::handle_vmcall_data_string_json(
 }
 
 void
-exit_handler_intel_x64::handle_vmcall_data_binary_unformatted(
+exit_handler::handle_vmcall_data_binary_unformatted(
     const bfn::unique_map_ptr_x64<char> &imap,
     const bfn::unique_map_ptr_x64<char> &omap)
 {
@@ -555,7 +570,7 @@ exit_handler_intel_x64::handle_vmcall_data_binary_unformatted(
     memcpy(omap.get(), imap.get(), imap.size());
 }
 
-void exit_handler_intel_x64::reply_with_string(
+void exit_handler::reply_with_string(
     vmcall_registers_t &regs, const std::string &str,
     const bfn::unique_map_ptr_x64<char> &omap)
 {
@@ -568,7 +583,7 @@ void exit_handler_intel_x64::reply_with_string(
 }
 
 void
-exit_handler_intel_x64::reply_with_json(
+exit_handler::reply_with_json(
     vmcall_registers_t &regs, const json &str,
     const bfn::unique_map_ptr_x64<char> &omap)
 {
@@ -579,4 +594,7 @@ exit_handler_intel_x64::reply_with_json(
 
     regs.r07 = VMCALL_DATA_STRING_JSON;
     regs.r09 = len;
+}
+
+}
 }
