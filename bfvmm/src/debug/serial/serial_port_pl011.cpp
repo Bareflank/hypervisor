@@ -19,6 +19,9 @@
 #include <bfgsl.h>
 #include <debug/serial/serial_port_pl011.h>
 
+namespace bfvmm
+{
+
 using namespace serial_pl011;
 
 serial_port_pl011::serial_port_pl011(serial_port_pl011::port_type port) noexcept :
@@ -160,4 +163,6 @@ bool
 serial_port_pl011::get_status_full_transmitter() const noexcept
 {
     return (offset_ind(uartfr_reg) & uartfr_tx_full) != 0;
+}
+
 }

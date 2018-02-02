@@ -46,6 +46,11 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+namespace intel_x64
+{
+
 /// VMXON (Intel x86_64)
 ///
 /// This class is respobsible for turning Intel's VMX (also know as VT-x)
@@ -54,7 +59,7 @@
 ///
 /// This class is managed by vcpu_intel_x64
 ///
-class EXPORT_HVE vmxon_intel_x64
+class EXPORT_HVE vmxon
 {
 public:
 
@@ -63,14 +68,14 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    vmxon_intel_x64() = default;
+    vmxon() = default;
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    virtual ~vmxon_intel_x64() = default;
+    virtual ~vmxon() = default;
 
     /// Start VMXON
     ///
@@ -120,14 +125,17 @@ public:
 
     /// @cond
 
-    vmxon_intel_x64(vmxon_intel_x64 &&) noexcept = default;
-    vmxon_intel_x64 &operator=(vmxon_intel_x64 &&) noexcept = default;
+    vmxon(vmxon &&) noexcept = default;
+    vmxon &operator=(vmxon &&) noexcept = default;
 
-    vmxon_intel_x64(const vmxon_intel_x64 &) = delete;
-    vmxon_intel_x64 &operator=(const vmxon_intel_x64 &) = delete;
+    vmxon(const vmxon &) = delete;
+    vmxon &operator=(const vmxon &) = delete;
 
     /// @endcond
 };
+
+}
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

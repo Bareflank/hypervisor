@@ -19,6 +19,9 @@
 #include <bfgsl.h>
 #include <debug/serial/serial_port_ns16550a.h>
 
+namespace bfvmm
+{
+
 using namespace serial_ns16550a;
 
 serial_port_ns16550a::serial_port_ns16550a(serial_port_ns16550a::port_type port) noexcept :
@@ -223,4 +226,6 @@ bool
 serial_port_ns16550a::get_line_status_empty_transmitter() const noexcept
 {
     return (offset_inb(line_status_reg) & line_status_empty_transmitter) != 0;
+}
+
 }

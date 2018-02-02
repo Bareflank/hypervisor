@@ -50,6 +50,11 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+namespace intel_x64
+{
+
 /// Intel x86_64 VMCS
 ///
 /// The following provides the basic VMCS implementation as defined by the
@@ -67,13 +72,13 @@
 /// for more details. Pro tip: auto-complete works great with the VMCS
 /// namespace logic.
 ///
-class EXPORT_HVE vmcs_intel_x64
+class EXPORT_HVE vmcs
 {
 public:
 
     using gdt_t = gsl::not_null<const void *>;                                      ///< GDT pointer type
-    using host_state_t = gsl::not_null<vmcs_intel_x64_state *>;                     ///< Host state pointer type
-    using guest_state_t = gsl::not_null<vmcs_intel_x64_state *>;                    ///< Guest state pointer type
+    using host_state_t = gsl::not_null<vmcs_state *>;                               ///< Host state pointer type
+    using guest_state_t = gsl::not_null<vmcs_state *>;                              ///< Guest state pointer type
     using pre_launch_delegate_t = delegate<void(host_state_t, guest_state_t)>;      ///< Pre launch delegate type
     using post_launch_delegate_t = delegate<void(host_state_t, guest_state_t)>;     ///< Post launch delegate type
 
@@ -82,14 +87,14 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    vmcs_intel_x64();
+    vmcs();
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    virtual ~vmcs_intel_x64() = default;
+    virtual ~vmcs() = default;
 
     /// Launch
     ///
@@ -147,7 +152,7 @@ public:
     ///       has been mapped into the VMM read/write.  It is marked const
     ///       in order to prevent static analysis from complaining, but
     ///       the memory will be written by the processor in
-    ///       vmcs_intel_x64_promote.asm
+    ///       vmcs_promote.asm
     ///
     /// @expects gdt != nullptr
     /// @ensures none
@@ -211,9 +216,9 @@ public:
     /// @cond
 
     void *m_exit_handler_entry{nullptr};
-    state_save_intel_x64 *m_state_save{nullptr};
+    state_save *m_state_save{nullptr};
 
-    virtual void set_state_save(gsl::not_null<state_save_intel_x64 *> state_save)
+    virtual void set_state_save(gsl::not_null<state_save *> state_save)
     { m_state_save = state_save; }
 
     virtual void set_exit_handler_entry(void *entry)
@@ -268,14 +273,17 @@ public:
 
     /// @cond
 
-    vmcs_intel_x64(vmcs_intel_x64 &&) noexcept = default;
-    vmcs_intel_x64 &operator=(vmcs_intel_x64 &&) noexcept = default;
+    vmcs(vmcs &&) noexcept = default;
+    vmcs &operator=(vmcs &&) noexcept = default;
 
-    vmcs_intel_x64(const vmcs_intel_x64 &) = delete;
-    vmcs_intel_x64 &operator=(const vmcs_intel_x64 &) = delete;
+    vmcs(const vmcs &) = delete;
+    vmcs &operator=(const vmcs &) = delete;
 
     /// @endcond
 };
+
+}
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

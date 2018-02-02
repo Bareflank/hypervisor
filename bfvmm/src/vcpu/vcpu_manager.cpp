@@ -30,6 +30,9 @@ static std::mutex g_vcpu_manager_mutex;
 // Implementation
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+
 vcpu_manager *
 vcpu_manager::instance() noexcept
 {
@@ -103,4 +106,6 @@ vcpu_manager::get_vcpu(vcpuid::type vcpuid)
 {
     std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
     return m_vcpus[vcpuid];
+}
+
 }

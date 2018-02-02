@@ -34,19 +34,19 @@ private_add_md(struct memory_descriptor *md) noexcept
 {
     return guard_exceptions(MEMORY_MANAGER_FAILURE, [&] {
 
-        auto &&virt = static_cast<memory_manager_x64::integer_pointer>(md->virt);
-        auto &&phys = static_cast<memory_manager_x64::integer_pointer>(md->phys);
-        auto &&type = static_cast<memory_manager_x64::attr_type>(md->type);
+        auto virt = static_cast<memory_manager_x64::integer_pointer>(md->virt);
+        auto phys = static_cast<memory_manager_x64::integer_pointer>(md->phys);
+        auto type = static_cast<memory_manager_x64::attr_type>(md->type);
 
         g_mm->add_md(virt, phys, type);
     });
 }
 
-user_data *
+bfvmm::user_data *
 WEAK_SYM pre_create_vcpu(vcpuid::type id)
 { (void) id; return nullptr; }
 
-user_data *
+bfvmm::user_data *
 WEAK_SYM pre_run_vcpu(vcpuid::type id)
 { (void) id; return nullptr; }
 
@@ -66,11 +66,11 @@ private_init_vmm(uint64_t arg) noexcept
     });
 }
 
-user_data *
+bfvmm::user_data *
 WEAK_SYM pre_hlt_vcpu(vcpuid::type id)
 { (void) id; return nullptr; }
 
-user_data *
+bfvmm::user_data *
 WEAK_SYM pre_delete_vcpu(vcpuid::type id)
 { (void) id; return nullptr; }
 

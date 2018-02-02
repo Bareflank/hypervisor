@@ -50,6 +50,9 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+
 /// Virtual CPU
 ///
 /// The vCPU represents a "core" for a virtual machine. There are different
@@ -288,6 +291,8 @@ public:
 
     /// @endcond
 };
+
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

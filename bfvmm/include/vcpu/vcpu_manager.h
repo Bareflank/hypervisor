@@ -49,6 +49,9 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+
 /// vCPU Manager
 ///
 /// The vCPU manager is responsible for creating / destroying vCPUs, and
@@ -175,7 +178,9 @@ public:
 /// @expects none
 /// @ensures ret != nullptr
 ///
-#define g_vcm vcpu_manager::instance()
+#define g_vcm bfvmm::vcpu_manager::instance()
+
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

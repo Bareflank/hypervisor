@@ -26,6 +26,11 @@ project(hypervisor)
 include(scripts/cmake/config/default.cmake)
 include_external_config()
 
+# ------------------------------------------------------------------------------
+# BFM VMM
+# ------------------------------------------------------------------------------
+
+set_bfm_vmm(bfvmm DEFAULT)
 message(STATUS "Bareflank Manager VMM: ${BFM_VMM}")
 
 # ------------------------------------------------------------------------------

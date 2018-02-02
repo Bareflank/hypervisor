@@ -31,7 +31,7 @@ extern "C" void
 _write_rflags(uint64_t val) noexcept
 { g_rflags = val; }
 
-TEST_CASE("rflags_x64")
+TEST_CASE("rflags")
 {
     g_rflags = 0xFFFFFFFFU;
     CHECK(rflags::get() == 0xFFFFFFFFU);
@@ -42,7 +42,7 @@ TEST_CASE("rflags_x64")
     CHECK(rflags::get() == 0x0U);
 }
 
-TEST_CASE("rflags_x64_carry_flag")
+TEST_CASE("rflags_carry_flag")
 {
     using namespace rflags;
 
@@ -57,7 +57,7 @@ TEST_CASE("rflags_x64_carry_flag")
     CHECK(carry_flag::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_parity_flag")
+TEST_CASE("rflags_parity_flag")
 {
     using namespace rflags;
 
@@ -72,7 +72,7 @@ TEST_CASE("rflags_x64_parity_flag")
     CHECK(parity_flag::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_auxiliary_carry_flag")
+TEST_CASE("rflags_auxiliary_carry_flag")
 {
     using namespace rflags;
 
@@ -87,7 +87,7 @@ TEST_CASE("rflags_x64_auxiliary_carry_flag")
     CHECK(auxiliary_carry_flag::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_zero_flag")
+TEST_CASE("rflags_zero_flag")
 {
     using namespace rflags;
 
@@ -102,7 +102,7 @@ TEST_CASE("rflags_x64_zero_flag")
     CHECK(zero_flag::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_sign_flag")
+TEST_CASE("rflags_sign_flag")
 {
     using namespace rflags;
 
@@ -117,7 +117,7 @@ TEST_CASE("rflags_x64_sign_flag")
     CHECK(sign_flag::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_trap_flag")
+TEST_CASE("rflags_trap_flag")
 {
     using namespace rflags;
 
@@ -132,7 +132,7 @@ TEST_CASE("rflags_x64_trap_flag")
     CHECK(trap_flag::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_interrupt_enable_flag")
+TEST_CASE("rflags_interrupt_enable_flag")
 {
     using namespace rflags;
 
@@ -147,7 +147,7 @@ TEST_CASE("rflags_x64_interrupt_enable_flag")
     CHECK(interrupt_enable_flag::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_direction_flag")
+TEST_CASE("rflags_direction_flag")
 {
     using namespace rflags;
 
@@ -162,7 +162,7 @@ TEST_CASE("rflags_x64_direction_flag")
     CHECK(direction_flag::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_overflow_flag")
+TEST_CASE("rflags_overflow_flag")
 {
     using namespace rflags;
 
@@ -177,7 +177,7 @@ TEST_CASE("rflags_x64_overflow_flag")
     CHECK(overflow_flag::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_privilege_level")
+TEST_CASE("rflags_privilege_level")
 {
     using namespace rflags;
 
@@ -188,7 +188,7 @@ TEST_CASE("rflags_x64_privilege_level")
     CHECK(privilege_level::get(privilege_level::mask) == (privilege_level::mask >> privilege_level::from));
 }
 
-TEST_CASE("rflags_x64_nested_task")
+TEST_CASE("rflags_nested_task")
 {
     using namespace rflags;
 
@@ -203,7 +203,7 @@ TEST_CASE("rflags_x64_nested_task")
     CHECK(nested_task::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_resume_flag")
+TEST_CASE("rflags_resume_flag")
 {
     using namespace rflags;
 
@@ -218,7 +218,7 @@ TEST_CASE("rflags_x64_resume_flag")
     CHECK(resume_flag::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_virtual_8086_mode")
+TEST_CASE("rflags_virtual_8086_mode")
 {
     using namespace rflags;
 
@@ -233,7 +233,7 @@ TEST_CASE("rflags_x64_virtual_8086_mode")
     CHECK(virtual_8086_mode::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_alignment_check_access_control")
+TEST_CASE("rflags_alignment_check_access_control")
 {
     using namespace rflags;
 
@@ -248,7 +248,7 @@ TEST_CASE("rflags_x64_alignment_check_access_control")
     CHECK(alignment_check_access_control::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_virtual_interupt_flag")
+TEST_CASE("rflags_virtual_interupt_flag")
 {
     using namespace rflags;
 
@@ -263,7 +263,7 @@ TEST_CASE("rflags_x64_virtual_interupt_flag")
     CHECK(virtual_interupt_flag::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_virtual_interupt_pending")
+TEST_CASE("rflags_virtual_interupt_pending")
 {
     using namespace rflags;
 
@@ -278,7 +278,7 @@ TEST_CASE("rflags_x64_virtual_interupt_pending")
     CHECK(virtual_interupt_pending::is_disabled(0x0));
 }
 
-TEST_CASE("rflags_x64_id_flag")
+TEST_CASE("rflags_id_flag")
 {
     using namespace rflags;
 

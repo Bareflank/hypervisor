@@ -28,6 +28,6 @@
 /// and instruction, or it can be executed to schedule another guest
 ///
 extern "C" void vmcs_resume(
-    state_save_intel_x64 *state_save) noexcept;
+    bfvmm::intel_x64::state_save *state_save) noexcept;
 
 #endif

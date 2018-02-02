@@ -31,6 +31,6 @@
 /// @ensures none
 ///
 extern "C" EXPORT_HVE void exit_handler(
-    exit_handler_intel_x64 *exit_handler) noexcept;
+    bfvmm::intel_x64::exit_handler *exit_handler) noexcept;
 
 #endif

@@ -47,6 +47,9 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+
 /// vCPU Factory
 ///
 /// This class is used by the vcpu_manager to create vCPUs. Specifically,
@@ -106,6 +109,8 @@ public:
 
     /// @endcond
 };
+
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)
