@@ -758,9 +758,9 @@ TEST_CASE("exit_handler: vm_exit_reason_vmcall_data_string_json_invalid")
     ehlr.m_state_save->rax = VMCALL_DATA;                        // r00
     ehlr.m_state_save->rdx = VMCALL_MAGIC_NUMBER;                // r01
     ehlr.m_state_save->rsi = VMCALL_DATA_STRING_JSON;            // r04
-    ehlr.m_state_save->r08 = 0x1234U;                            // r05
+    ehlr.m_state_save->r08 = reinterpret_cast<uint64_t>(g_map);  // r05
     ehlr.m_state_save->r09 = g_msg.size();                       // r06
-    ehlr.m_state_save->r11 = 0x1234U;                            // r08
+    ehlr.m_state_save->r11 = reinterpret_cast<uint64_t>(g_map);  // r08
     ehlr.m_state_save->r12 = g_msg.size();                       // r09
 
     std::string msg = "hello world";
