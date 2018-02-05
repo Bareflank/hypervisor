@@ -117,10 +117,10 @@ uint64_t g_pdpt_addr = 2U;
 uint64_t g_pdpt_mem[4] = {0U};
 
 std::map<uint64_t, void *> g_mock_mem {{
-    {g_virt_apic_addr, static_cast<void *>(&g_virt_apic_mem)},
-    {g_vmcs_link_addr, static_cast<void *>(&g_vmcs_link_mem)},
-    {g_pdpt_addr, static_cast<void *>(&g_pdpt_mem)}
-}};
+        {g_virt_apic_addr, static_cast<void *>(&g_virt_apic_mem)},
+        {g_vmcs_link_addr, static_cast<void *>(&g_vmcs_link_mem)},
+        {g_pdpt_addr, static_cast<void *>(&g_pdpt_mem)}
+    }};
 
 struct control_flow_path {
     std::function<void()> setup{};

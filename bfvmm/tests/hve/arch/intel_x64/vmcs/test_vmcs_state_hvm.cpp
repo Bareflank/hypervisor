@@ -142,7 +142,7 @@ TEST_CASE("vmcs: host_vm_state_es_limit")
     SECTION("es_limit == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::es::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -153,7 +153,7 @@ TEST_CASE("vmcs: host_vm_state_es_limit")
     SECTION("es_limit == 0xFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::es::index::set(1U);
         vmcs_intel_x64_host_vm_state state{};
@@ -167,7 +167,7 @@ TEST_CASE("vmcs: host_vm_state_cs_limit")
     SECTION("cs_limit == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::cs::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -178,7 +178,7 @@ TEST_CASE("vmcs: host_vm_state_cs_limit")
     SECTION("cs_limit == 0xFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::cs::index::set(1U);
         vmcs_intel_x64_host_vm_state state{};
@@ -192,7 +192,7 @@ TEST_CASE("vmcs: host_vm_state_ss_limit")
     SECTION("ss_limit == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ss::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -203,7 +203,7 @@ TEST_CASE("vmcs: host_vm_state_ss_limit")
     SECTION("ss_limit == 0xFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ss::index::set(1U);
         vmcs_intel_x64_host_vm_state state{};
@@ -217,7 +217,7 @@ TEST_CASE("vmcs: host_vm_state_ds_limit")
     SECTION("ds_limit == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ds::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -228,7 +228,7 @@ TEST_CASE("vmcs: host_vm_state_ds_limit")
     SECTION("ds_limit == 0xFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ds::index::set(1U);
         vmcs_intel_x64_host_vm_state state{};
@@ -242,7 +242,7 @@ TEST_CASE("vmcs: host_vm_state_fs_limit")
     SECTION("fs_limit == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::fs::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -253,7 +253,7 @@ TEST_CASE("vmcs: host_vm_state_fs_limit")
     SECTION("fs_limit == 0xFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::fs::index::set(1U);
         vmcs_intel_x64_host_vm_state state{};
@@ -267,7 +267,7 @@ TEST_CASE("vmcs: host_vm_state_gs_limit")
     SECTION("gs_limit == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::gs::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -278,7 +278,7 @@ TEST_CASE("vmcs: host_vm_state_gs_limit")
     SECTION("gs_limit == 0xFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::gs::index::set(1U);
         vmcs_intel_x64_host_vm_state state{};
@@ -292,7 +292,7 @@ TEST_CASE("vmcs: host_vm_state_tr_limit")
     SECTION("tr_limit == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::tr::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -303,7 +303,7 @@ TEST_CASE("vmcs: host_vm_state_tr_limit")
     SECTION("tr_limit == 0xFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::tr::index::set(1U);
         vmcs_intel_x64_host_vm_state state{};
@@ -317,7 +317,7 @@ TEST_CASE("vmcs: host_vm_state_ldtr_limit")
     SECTION("ldtr_limit == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ldtr::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -328,7 +328,7 @@ TEST_CASE("vmcs: host_vm_state_ldtr_limit")
     SECTION("ldtr_limit == 0xFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ldtr::index::set(1U);
         vmcs_intel_x64_host_vm_state state{};
@@ -342,7 +342,7 @@ TEST_CASE("vmcs: host_vm_state_es_access_rights")
     SECTION("es_access_rights unusable") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::es::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -353,7 +353,7 @@ TEST_CASE("vmcs: host_vm_state_es_access_rights")
     SECTION("es_access_rights == 0x70") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::es::index::set(2U);
         vmcs_intel_x64_host_vm_state state{};
@@ -367,7 +367,7 @@ TEST_CASE("vmcs: host_vm_state_cs_access_rights")
     SECTION("cs_access_rights unusable") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::cs::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -378,7 +378,7 @@ TEST_CASE("vmcs: host_vm_state_cs_access_rights")
     SECTION("cs_access_rights == 0x70") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::cs::index::set(2U);
         vmcs_intel_x64_host_vm_state state{};
@@ -392,7 +392,7 @@ TEST_CASE("vmcs: host_vm_state_ss_access_rights")
     SECTION("ss_access_rights unusable") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ss::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -403,7 +403,7 @@ TEST_CASE("vmcs: host_vm_state_ss_access_rights")
     SECTION("ss_access_rights == 0x70") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ss::index::set(2U);
         vmcs_intel_x64_host_vm_state state{};
@@ -417,7 +417,7 @@ TEST_CASE("vmcs: host_vm_state_ds_access_rights")
     SECTION("ds_access_rights unusable") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ds::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -428,7 +428,7 @@ TEST_CASE("vmcs: host_vm_state_ds_access_rights")
     SECTION("ds_access_rights == 0x70") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ds::index::set(2U);
         vmcs_intel_x64_host_vm_state state{};
@@ -442,7 +442,7 @@ TEST_CASE("vmcs: host_vm_state_fs_access_rights")
     SECTION("fs_access_rights unusable") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::fs::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -453,7 +453,7 @@ TEST_CASE("vmcs: host_vm_state_fs_access_rights")
     SECTION("fs_access_rights == 0x70") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::fs::index::set(2U);
         vmcs_intel_x64_host_vm_state state{};
@@ -467,7 +467,7 @@ TEST_CASE("vmcs: host_vm_state_gs_access_rights")
     SECTION("gs_access_rights unusable") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::gs::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -478,7 +478,7 @@ TEST_CASE("vmcs: host_vm_state_gs_access_rights")
     SECTION("gs_access_rights == 0x70") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::gs::index::set(2U);
         vmcs_intel_x64_host_vm_state state{};
@@ -492,7 +492,7 @@ TEST_CASE("vmcs: host_vm_state_tr_access_rights")
     SECTION("tr_access_rights unusable") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::tr::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -503,7 +503,7 @@ TEST_CASE("vmcs: host_vm_state_tr_access_rights")
     SECTION("tr_access_rights == 0x70") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::tr::index::set(2U);
         vmcs_intel_x64_host_vm_state state{};
@@ -517,7 +517,7 @@ TEST_CASE("vmcs: host_vm_state_ldtr_access_rights")
     SECTION("ldtr_access_rights unusable") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ldtr::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -528,7 +528,7 @@ TEST_CASE("vmcs: host_vm_state_ldtr_access_rights")
     SECTION("ldtr_access_rights == 0x70") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ldtr::index::set(2U);
         vmcs_intel_x64_host_vm_state state{};
@@ -542,7 +542,7 @@ TEST_CASE("vmcs: host_vm_state_es_base")
     SECTION("es_base == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::es::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -553,7 +553,7 @@ TEST_CASE("vmcs: host_vm_state_es_base")
     SECTION("es_base == 0xFFFFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::es::index::set(3U);
         vmcs_intel_x64_host_vm_state state{};
@@ -567,7 +567,7 @@ TEST_CASE("vmcs: host_vm_state_cs_base")
     SECTION("cs_base == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::cs::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -578,7 +578,7 @@ TEST_CASE("vmcs: host_vm_state_cs_base")
     SECTION("cs_base == 0xFFFFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::cs::index::set(3U);
         vmcs_intel_x64_host_vm_state state{};
@@ -592,7 +592,7 @@ TEST_CASE("vmcs: host_vm_state_ss_base")
     SECTION("ss_base == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ss::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -603,7 +603,7 @@ TEST_CASE("vmcs: host_vm_state_ss_base")
     SECTION("ss_base == 0xFFFFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ss::index::set(3U);
         vmcs_intel_x64_host_vm_state state{};
@@ -617,7 +617,7 @@ TEST_CASE("vmcs: host_vm_state_ds_base")
     SECTION("ds_base == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ds::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -628,7 +628,7 @@ TEST_CASE("vmcs: host_vm_state_ds_base")
     SECTION("ds_base == 0xFFFFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ds::index::set(3U);
         vmcs_intel_x64_host_vm_state state{};
@@ -642,7 +642,7 @@ TEST_CASE("vmcs: host_vm_state_fs_base")
     SECTION("fs_base == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::fs::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -653,7 +653,7 @@ TEST_CASE("vmcs: host_vm_state_fs_base")
     SECTION("fs_base == 0xFFFFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::fs::index::set(3U);
         vmcs_intel_x64_host_vm_state state{};
@@ -667,7 +667,7 @@ TEST_CASE("vmcs: host_vm_state_gs_base")
     SECTION("gs_base == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::gs::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -678,7 +678,7 @@ TEST_CASE("vmcs: host_vm_state_gs_base")
     SECTION("gs_base == 0xFFFFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::gs::index::set(3U);
         vmcs_intel_x64_host_vm_state state{};
@@ -692,7 +692,7 @@ TEST_CASE("vmcs: host_vm_state_tr_base")
     SECTION("tr_base == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::tr::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -703,7 +703,7 @@ TEST_CASE("vmcs: host_vm_state_tr_base")
     SECTION("tr_base == 0xFFFFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::tr::index::set(3U);
         vmcs_intel_x64_host_vm_state state{};
@@ -717,7 +717,7 @@ TEST_CASE("vmcs: host_vm_state_ldtr_base")
     SECTION("ldtr_base == 0") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ldtr::index::set(0U);
         vmcs_intel_x64_host_vm_state state{};
@@ -728,7 +728,7 @@ TEST_CASE("vmcs: host_vm_state_ldtr_base")
     SECTION("ldtr_base == 0xFFFFFFFF") {
         MockRepository mocks;
         setup_gdt();
-    setup_idt();
+        setup_idt();
 
         segment_register::ldtr::index::set(3U);
         vmcs_intel_x64_host_vm_state state{};

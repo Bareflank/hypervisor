@@ -57,7 +57,7 @@ TEST_CASE("vmxon: start_execute_vmxon_failure")
     auto mm = setup_vmxon_tests(mocks);
 
     g_vmxon_fails = true;
-    auto ___ = gsl::finally([&]{
+    auto ___ = gsl::finally([&] {
         g_vmxon_fails = false;
     });
 

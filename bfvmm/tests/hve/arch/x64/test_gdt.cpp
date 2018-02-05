@@ -54,195 +54,195 @@ TEST_CASE("gdt_limit")
 
 TEST_CASE("gdt_set_base_zero_index")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.set_base(0, 0x10));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.set_base(0, 0x10));
 }
 
 TEST_CASE("gdt_set_base_invalid_index")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.set_base(1000, 0x10));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.set_base(1000, 0x10));
 }
 
 TEST_CASE("gdt_set_base_tss_at_end_of_gdt")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.set_base(7, 0x10));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.set_base(7, 0x10));
 }
 
 TEST_CASE("gdt_set_base_descriptor_success")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_NOTHROW(gdt.set_base(5, 0xBBBBBBBB12345678));
-   CHECK(gdt.m_gdt.at(5) == 0x12FFFF345678FFFF);
+    gdt_x64 gdt;
+    CHECK_NOTHROW(gdt.set_base(5, 0xBBBBBBBB12345678));
+    CHECK(gdt.m_gdt.at(5) == 0x12FFFF345678FFFF);
 }
 
 TEST_CASE("gdt_set_base_tss_success")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_NOTHROW(gdt.set_base(6, 0x1234567812345678));
-   CHECK(gdt.m_gdt.at(6) == 0x12FF8F345678FFFF);
-   CHECK(gdt.m_gdt.at(7) == 0x0000000012345678);
+    gdt_x64 gdt;
+    CHECK_NOTHROW(gdt.set_base(6, 0x1234567812345678));
+    CHECK(gdt.m_gdt.at(6) == 0x12FF8F345678FFFF);
+    CHECK(gdt.m_gdt.at(7) == 0x0000000012345678);
 }
 
 TEST_CASE("gdt_base_zero_index")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.base(0));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.base(0));
 }
 
 TEST_CASE("gdt_base_invalid_index")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.base(1000));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.base(1000));
 }
 
 TEST_CASE("gdt_base_tss_at_end_of_gdt")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.base(7));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.base(7));
 }
 
 TEST_CASE("gdt_base_descriptor_success")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   gdt.m_gdt.at(5) = 0x12FFFF345678FFFF;
-   CHECK(gdt.base(5) == 0x0000000012345678);
+    gdt_x64 gdt;
+    gdt.m_gdt.at(5) = 0x12FFFF345678FFFF;
+    CHECK(gdt.base(5) == 0x0000000012345678);
 }
 
 TEST_CASE("gdt_base_tss_success")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   gdt.m_gdt.at(6) = 0x12FF8F345678FFFF;
-   gdt.m_gdt.at(7) = 0x0000000012345678;
-   CHECK(gdt.base(6) == 0x1234567812345678);
+    gdt_x64 gdt;
+    gdt.m_gdt.at(6) = 0x12FF8F345678FFFF;
+    gdt.m_gdt.at(7) = 0x0000000012345678;
+    CHECK(gdt.base(6) == 0x1234567812345678);
 }
 
 TEST_CASE("gdt_set_limit_zero_index")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.set_limit(0, 0x10));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.set_limit(0, 0x10));
 }
 
 TEST_CASE("gdt_set_limit_invalid_index")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.set_limit(1000, 0x10));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.set_limit(1000, 0x10));
 }
 
 TEST_CASE("gdt_set_limit_descriptor_success")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_NOTHROW(gdt.set_limit(5, 0x12345678));
-   CHECK(gdt.m_gdt.at(5) == 0xFFF1FFFFFFFF2345);
+    gdt_x64 gdt;
+    CHECK_NOTHROW(gdt.set_limit(5, 0x12345678));
+    CHECK(gdt.m_gdt.at(5) == 0xFFF1FFFFFFFF2345);
 }
 
 TEST_CASE("gdt_limit_zero_index")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.limit(0));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.limit(0));
 }
 
 TEST_CASE("gdt_limit_invalid_index")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.limit(1000));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.limit(1000));
 }
 
 TEST_CASE("gdt_limit_descriptor_success")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   gdt.m_gdt.at(5) = 0xFFF4FFFFFFFF5678;
-   CHECK(gdt.limit(5) == 0x0000000045678FFF);
+    gdt_x64 gdt;
+    gdt.m_gdt.at(5) = 0xFFF4FFFFFFFF5678;
+    CHECK(gdt.limit(5) == 0x0000000045678FFF);
 }
 
 TEST_CASE("gdt_limit_descriptor_in_bytes_success")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   gdt.m_gdt.at(5) = 0xFF74FFFFFFFF5678;
-   CHECK(gdt.limit(5) == 0x0000000000045678);
+    gdt_x64 gdt;
+    gdt.m_gdt.at(5) = 0xFF74FFFFFFFF5678;
+    CHECK(gdt.limit(5) == 0x0000000000045678);
 }
 
 TEST_CASE("gdt_set_access_rights_zero_index")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.set_access_rights(0, 0x10));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.set_access_rights(0, 0x10));
 }
 
 TEST_CASE("gdt_set_access_rights_invalid_index")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.set_access_rights(1000, 0x10));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.set_access_rights(1000, 0x10));
 }
 
 TEST_CASE("gdt_set_access_rights_descriptor_success")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_NOTHROW(gdt.set_access_rights(5, 0x12345678));
-   CHECK(gdt.m_gdt.at(5) == 0xFF5F78FFFFFFFFFF);
+    gdt_x64 gdt;
+    CHECK_NOTHROW(gdt.set_access_rights(5, 0x12345678));
+    CHECK(gdt.m_gdt.at(5) == 0xFF5F78FFFFFFFFFF);
 }
 
 TEST_CASE("gdt_access_rights_zero_index")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.access_rights(0));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.access_rights(0));
 }
 
 TEST_CASE("gdt_access_rights_invalid_index")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   CHECK_THROWS(gdt.access_rights(1000));
+    gdt_x64 gdt;
+    CHECK_THROWS(gdt.access_rights(1000));
 }
 
 TEST_CASE("gdt_access_rights_descriptor_success")
 {
-   setup_gdt();
+    setup_gdt();
 
-   gdt_x64 gdt;
-   gdt.m_gdt.at(5) = 0xFF5F78FFFFFFFFFF;
-   CHECK(gdt.access_rights(5) == 0x0000000000005078);
+    gdt_x64 gdt;
+    gdt.m_gdt.at(5) = 0xFF5F78FFFFFFFFFF;
+    CHECK(gdt.access_rights(5) == 0x0000000000005078);
 }
