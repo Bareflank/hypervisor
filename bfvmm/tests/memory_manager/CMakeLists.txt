@@ -16,9 +16,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+if(NOT WIN32)
 do_test(test_object_allocator
     SOURCES test_object_allocator.cpp
     DEPENDS bfvmm_memory_manager
     DEFINES STATIC_MEMORY_MANAGER
     DEFINES STATIC_INTRINSICS
 )
+endif()
