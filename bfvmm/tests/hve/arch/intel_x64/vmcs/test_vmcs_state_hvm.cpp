@@ -26,7 +26,7 @@ TEST_CASE("vmcs: host_vm_state")
     setup_gdt();
     setup_idt();
 
-    CHECK_NOTHROW(vmcs_intel_x64_host_vm_state{});
+    CHECK_NOTHROW(bfvmm::intel_x64::vmcs_state_hvm{});
 }
 
 TEST_CASE("vmcs: host_vm_state_segment_registers")
@@ -44,7 +44,7 @@ TEST_CASE("vmcs: host_vm_state_segment_registers")
     segment_register::tr::set(1U);
     segment_register::ldtr::set(1U);
 
-    vmcs_intel_x64_host_vm_state state{};
+    bfvmm::intel_x64::vmcs_state_hvm state{};
 
     CHECK(state.es() == 1U);
     CHECK(state.cs() == 1U);
@@ -66,7 +66,7 @@ TEST_CASE("vmcs: host_vm_state_control_registers")
     intel_x64::cr3::set(2U);
     intel_x64::cr4::set(3U);
 
-    vmcs_intel_x64_host_vm_state state{};
+    bfvmm::intel_x64::vmcs_state_hvm state{};
 
     CHECK(state.cr0() == 1U);
     CHECK(state.cr3() == 2U);
@@ -80,7 +80,7 @@ TEST_CASE("vmcs: host_vm_state_debug_registers")
     setup_idt();
 
     dr7::set(42U);
-    vmcs_intel_x64_host_vm_state state{};
+    bfvmm::intel_x64::vmcs_state_hvm state{};
 
     CHECK(state.dr7() == 42U);
 }
@@ -92,7 +92,7 @@ TEST_CASE("vmcs: host_vm_state_rflags")
     setup_idt();
 
     rflags::set(42U);
-    vmcs_intel_x64_host_vm_state state{};
+    bfvmm::intel_x64::vmcs_state_hvm state{};
 
     CHECK(state.rflags() == 42U);
 }
@@ -103,8 +103,8 @@ TEST_CASE("vmcs: host_vm_state_gdt_base")
     setup_gdt();
     setup_idt();
 
-    vmcs_intel_x64_host_vm_state state{};
-    CHECK(state.gdt_base() == bfscast(gdt_x64::integer_pointer, g_gdtr.base));
+    bfvmm::intel_x64::vmcs_state_hvm state{};
+    CHECK(state.gdt_base() == bfscast(bfvmm::x64::gdt::integer_pointer, g_gdtr.base));
 }
 
 TEST_CASE("vmcs: host_vm_state_idt_base")
@@ -113,8 +113,8 @@ TEST_CASE("vmcs: host_vm_state_idt_base")
     setup_gdt();
     setup_idt();
 
-    vmcs_intel_x64_host_vm_state state{};
-    CHECK(state.idt_base() == bfscast(gdt_x64::integer_pointer, g_idtr.base));
+    bfvmm::intel_x64::vmcs_state_hvm state{};
+    CHECK(state.idt_base() == bfscast(bfvmm::x64::gdt::integer_pointer, g_idtr.base));
 }
 
 TEST_CASE("vmcs: host_vm_state_gdt_limit")
@@ -123,7 +123,7 @@ TEST_CASE("vmcs: host_vm_state_gdt_limit")
     setup_gdt();
     setup_idt();
 
-    vmcs_intel_x64_host_vm_state state{};
+    bfvmm::intel_x64::vmcs_state_hvm state{};
     CHECK(state.gdt_limit() == g_gdtr.limit);
 }
 
@@ -133,7 +133,7 @@ TEST_CASE("vmcs: host_vm_state_idt_limit")
     setup_gdt();
     setup_idt();
 
-    vmcs_intel_x64_host_vm_state state{};
+    bfvmm::intel_x64::vmcs_state_hvm state{};
     CHECK(state.idt_limit() == g_idtr.limit);
 }
 
@@ -145,7 +145,7 @@ TEST_CASE("vmcs: host_vm_state_es_limit")
         setup_idt();
 
         segment_register::es::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.es_limit() == 0U);
     }
@@ -156,7 +156,7 @@ TEST_CASE("vmcs: host_vm_state_es_limit")
         setup_idt();
 
         segment_register::es::index::set(1U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.es_limit() == 0xFFFFF);
     }
@@ -170,7 +170,7 @@ TEST_CASE("vmcs: host_vm_state_cs_limit")
         setup_idt();
 
         segment_register::cs::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.cs_limit() == 0U);
     }
@@ -181,7 +181,7 @@ TEST_CASE("vmcs: host_vm_state_cs_limit")
         setup_idt();
 
         segment_register::cs::index::set(1U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.cs_limit() == 0xFFFFF);
     }
@@ -195,7 +195,7 @@ TEST_CASE("vmcs: host_vm_state_ss_limit")
         setup_idt();
 
         segment_register::ss::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ss_limit() == 0U);
     }
@@ -206,7 +206,7 @@ TEST_CASE("vmcs: host_vm_state_ss_limit")
         setup_idt();
 
         segment_register::ss::index::set(1U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ss_limit() == 0xFFFFF);
     }
@@ -220,7 +220,7 @@ TEST_CASE("vmcs: host_vm_state_ds_limit")
         setup_idt();
 
         segment_register::ds::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ds_limit() == 0U);
     }
@@ -231,7 +231,7 @@ TEST_CASE("vmcs: host_vm_state_ds_limit")
         setup_idt();
 
         segment_register::ds::index::set(1U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ds_limit() == 0xFFFFF);
     }
@@ -245,7 +245,7 @@ TEST_CASE("vmcs: host_vm_state_fs_limit")
         setup_idt();
 
         segment_register::fs::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.fs_limit() == 0U);
     }
@@ -256,7 +256,7 @@ TEST_CASE("vmcs: host_vm_state_fs_limit")
         setup_idt();
 
         segment_register::fs::index::set(1U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.fs_limit() == 0xFFFFF);
     }
@@ -270,7 +270,7 @@ TEST_CASE("vmcs: host_vm_state_gs_limit")
         setup_idt();
 
         segment_register::gs::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.gs_limit() == 0U);
     }
@@ -281,7 +281,7 @@ TEST_CASE("vmcs: host_vm_state_gs_limit")
         setup_idt();
 
         segment_register::gs::index::set(1U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.gs_limit() == 0xFFFFF);
     }
@@ -295,7 +295,7 @@ TEST_CASE("vmcs: host_vm_state_tr_limit")
         setup_idt();
 
         segment_register::tr::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.tr_limit() == 0U);
     }
@@ -306,7 +306,7 @@ TEST_CASE("vmcs: host_vm_state_tr_limit")
         setup_idt();
 
         segment_register::tr::index::set(1U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.tr_limit() == 0xFFFFF);
     }
@@ -320,7 +320,7 @@ TEST_CASE("vmcs: host_vm_state_ldtr_limit")
         setup_idt();
 
         segment_register::ldtr::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ldtr_limit() == 0U);
     }
@@ -331,7 +331,7 @@ TEST_CASE("vmcs: host_vm_state_ldtr_limit")
         setup_idt();
 
         segment_register::ldtr::index::set(1U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ldtr_limit() == 0xFFFFF);
     }
@@ -345,7 +345,7 @@ TEST_CASE("vmcs: host_vm_state_es_access_rights")
         setup_idt();
 
         segment_register::es::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.es_access_rights() == x64::access_rights::unusable);
     }
@@ -356,7 +356,7 @@ TEST_CASE("vmcs: host_vm_state_es_access_rights")
         setup_idt();
 
         segment_register::es::index::set(2U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.es_access_rights() == 0x70FF);
     }
@@ -370,7 +370,7 @@ TEST_CASE("vmcs: host_vm_state_cs_access_rights")
         setup_idt();
 
         segment_register::cs::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.cs_access_rights() == x64::access_rights::unusable);
     }
@@ -381,7 +381,7 @@ TEST_CASE("vmcs: host_vm_state_cs_access_rights")
         setup_idt();
 
         segment_register::cs::index::set(2U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.cs_access_rights() == 0x70FF);
     }
@@ -395,7 +395,7 @@ TEST_CASE("vmcs: host_vm_state_ss_access_rights")
         setup_idt();
 
         segment_register::ss::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ss_access_rights() == x64::access_rights::unusable);
     }
@@ -406,7 +406,7 @@ TEST_CASE("vmcs: host_vm_state_ss_access_rights")
         setup_idt();
 
         segment_register::ss::index::set(2U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ss_access_rights() == 0x70FF);
     }
@@ -420,7 +420,7 @@ TEST_CASE("vmcs: host_vm_state_ds_access_rights")
         setup_idt();
 
         segment_register::ds::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ds_access_rights() == x64::access_rights::unusable);
     }
@@ -431,7 +431,7 @@ TEST_CASE("vmcs: host_vm_state_ds_access_rights")
         setup_idt();
 
         segment_register::ds::index::set(2U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ds_access_rights() == 0x70FF);
     }
@@ -445,7 +445,7 @@ TEST_CASE("vmcs: host_vm_state_fs_access_rights")
         setup_idt();
 
         segment_register::fs::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.fs_access_rights() == x64::access_rights::unusable);
     }
@@ -456,7 +456,7 @@ TEST_CASE("vmcs: host_vm_state_fs_access_rights")
         setup_idt();
 
         segment_register::fs::index::set(2U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.fs_access_rights() == 0x70FF);
     }
@@ -470,7 +470,7 @@ TEST_CASE("vmcs: host_vm_state_gs_access_rights")
         setup_idt();
 
         segment_register::gs::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.gs_access_rights() == x64::access_rights::unusable);
     }
@@ -481,7 +481,7 @@ TEST_CASE("vmcs: host_vm_state_gs_access_rights")
         setup_idt();
 
         segment_register::gs::index::set(2U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.gs_access_rights() == 0x70FF);
     }
@@ -495,7 +495,7 @@ TEST_CASE("vmcs: host_vm_state_tr_access_rights")
         setup_idt();
 
         segment_register::tr::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.tr_access_rights() == x64::access_rights::unusable);
     }
@@ -506,7 +506,7 @@ TEST_CASE("vmcs: host_vm_state_tr_access_rights")
         setup_idt();
 
         segment_register::tr::index::set(2U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.tr_access_rights() == 0x70FF);
     }
@@ -520,7 +520,7 @@ TEST_CASE("vmcs: host_vm_state_ldtr_access_rights")
         setup_idt();
 
         segment_register::ldtr::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ldtr_access_rights() == x64::access_rights::unusable);
     }
@@ -531,7 +531,7 @@ TEST_CASE("vmcs: host_vm_state_ldtr_access_rights")
         setup_idt();
 
         segment_register::ldtr::index::set(2U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ldtr_access_rights() == 0x70FF);
     }
@@ -545,7 +545,7 @@ TEST_CASE("vmcs: host_vm_state_es_base")
         setup_idt();
 
         segment_register::es::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.es_base() == 0U);
     }
@@ -556,7 +556,7 @@ TEST_CASE("vmcs: host_vm_state_es_base")
         setup_idt();
 
         segment_register::es::index::set(3U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.es_base() == 0xFFFFFFFF);
     }
@@ -570,7 +570,7 @@ TEST_CASE("vmcs: host_vm_state_cs_base")
         setup_idt();
 
         segment_register::cs::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.cs_base() == 0U);
     }
@@ -581,7 +581,7 @@ TEST_CASE("vmcs: host_vm_state_cs_base")
         setup_idt();
 
         segment_register::cs::index::set(3U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.cs_base() == 0xFFFFFFFF);
     }
@@ -595,7 +595,7 @@ TEST_CASE("vmcs: host_vm_state_ss_base")
         setup_idt();
 
         segment_register::ss::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ss_base() == 0U);
     }
@@ -606,7 +606,7 @@ TEST_CASE("vmcs: host_vm_state_ss_base")
         setup_idt();
 
         segment_register::ss::index::set(3U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ss_base() == 0xFFFFFFFF);
     }
@@ -620,7 +620,7 @@ TEST_CASE("vmcs: host_vm_state_ds_base")
         setup_idt();
 
         segment_register::ds::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ds_base() == 0U);
     }
@@ -631,7 +631,7 @@ TEST_CASE("vmcs: host_vm_state_ds_base")
         setup_idt();
 
         segment_register::ds::index::set(3U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ds_base() == 0xFFFFFFFF);
     }
@@ -645,7 +645,7 @@ TEST_CASE("vmcs: host_vm_state_fs_base")
         setup_idt();
 
         segment_register::fs::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.fs_base() == 0U);
     }
@@ -656,7 +656,7 @@ TEST_CASE("vmcs: host_vm_state_fs_base")
         setup_idt();
 
         segment_register::fs::index::set(3U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.fs_base() == 0xFFFFFFFF);
     }
@@ -670,7 +670,7 @@ TEST_CASE("vmcs: host_vm_state_gs_base")
         setup_idt();
 
         segment_register::gs::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.gs_base() == 0U);
     }
@@ -681,7 +681,7 @@ TEST_CASE("vmcs: host_vm_state_gs_base")
         setup_idt();
 
         segment_register::gs::index::set(3U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.gs_base() == 0xFFFFFFFF);
     }
@@ -695,7 +695,7 @@ TEST_CASE("vmcs: host_vm_state_tr_base")
         setup_idt();
 
         segment_register::tr::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.tr_base() == 0U);
     }
@@ -706,7 +706,7 @@ TEST_CASE("vmcs: host_vm_state_tr_base")
         setup_idt();
 
         segment_register::tr::index::set(3U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.tr_base() == 0xFFFFFFFF);
     }
@@ -720,7 +720,7 @@ TEST_CASE("vmcs: host_vm_state_ldtr_base")
         setup_idt();
 
         segment_register::ldtr::index::set(0U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ldtr_base() == 0U);
     }
@@ -731,7 +731,7 @@ TEST_CASE("vmcs: host_vm_state_ldtr_base")
         setup_idt();
 
         segment_register::ldtr::index::set(3U);
-        vmcs_intel_x64_host_vm_state state{};
+        bfvmm::intel_x64::vmcs_state_hvm state{};
 
         CHECK(state.ldtr_base() == 0xFFFFFFFF);
     }
@@ -753,7 +753,7 @@ TEST_CASE("vmcs: host_vm_state_ia32_msrs_no_perf")
     intel_x64::msrs::ia32_fs_base::set(42U);
     intel_x64::msrs::ia32_gs_base::set(42U);
 
-    vmcs_intel_x64_host_vm_state state{};
+    bfvmm::intel_x64::vmcs_state_hvm state{};
 
     CHECK(state.ia32_debugctl_msr() == 42U);
     CHECK(state.ia32_pat_msr() == 42U);
@@ -783,7 +783,7 @@ TEST_CASE("vmcs: host_vm_state_ia32_msrs_perf")
     intel_x64::msrs::ia32_gs_base::set(42U);
     g_eax_cpuid[intel_x64::cpuid::arch_perf_monitoring::addr] = 2;
 
-    vmcs_intel_x64_host_vm_state state{};
+    bfvmm::intel_x64::vmcs_state_hvm state{};
 
     CHECK(state.ia32_debugctl_msr() == 42U);
     CHECK(state.ia32_pat_msr() == 42U);
@@ -802,7 +802,7 @@ TEST_CASE("vmcs: host_vm_state_dump")
     setup_gdt();
     setup_idt();
 
-    vmcs_intel_x64_host_vm_state state{};
+    bfvmm::intel_x64::vmcs_state_hvm state{};
     CHECK_NOTHROW(state.dump());
 }
 

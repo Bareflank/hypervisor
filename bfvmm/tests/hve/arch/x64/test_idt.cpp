@@ -21,36 +21,36 @@
 TEST_CASE("idt_constructor_no_size")
 {
     setup_idt();
-    idt_x64 idt;
+    bfvmm::x64::idt idt;
 }
 
 TEST_CASE("idt_constructor_zero_size")
 {
     setup_idt();
-    CHECK_NOTHROW(idt_x64{0});
+    CHECK_NOTHROW(bfvmm::x64::idt{0});
 }
 
 TEST_CASE("idt_constructor_size")
 {
     setup_idt();
 
-    idt_x64 idt{4};
+    bfvmm::x64::idt idt{4};
     CHECK(idt.base() != 0);
-    CHECK(idt.limit() == (4 * sizeof(idt_x64::interrupt_descriptor_type)) - 1);
+    CHECK(idt.limit() == (4 * sizeof(bfvmm::x64::idt::interrupt_descriptor_type)) - 1);
 }
 
 TEST_CASE("idt_base")
 {
     setup_idt();
 
-    idt_x64 idt;
-    CHECK(idt.base() == reinterpret_cast<idt_x64::integer_pointer>(g_idt.data()));
+    bfvmm::x64::idt idt;
+    CHECK(idt.base() == reinterpret_cast<bfvmm::x64::idt::integer_pointer>(g_idt.data()));
 }
 
 TEST_CASE("idt_limit")
 {
     setup_idt();
 
-    idt_x64 idt;
-    CHECK(idt.limit() == (4 * sizeof(idt_x64::interrupt_descriptor_type)) - 1);
+    bfvmm::x64::idt idt;
+    CHECK(idt.limit() == (4 * sizeof(bfvmm::x64::idt::interrupt_descriptor_type)) - 1);
 }

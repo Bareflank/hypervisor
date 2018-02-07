@@ -22,6 +22,8 @@
 #include <bfnewdelete.h>
 #include <debug/debug_ring/debug_ring.h>
 
+using namespace bfvmm;
+
 debug_ring_resources_t *drr;
 
 char rb[DEBUG_RING_SIZE];

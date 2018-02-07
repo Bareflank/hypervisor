@@ -30,6 +30,6 @@
 /// @note this function does not return
 ///
 extern "C" void vmcs_promote(
-    state_save_intel_x64 *state_save, const void *guest_gdt) noexcept;
+    bfvmm::intel_x64::state_save *state_save, const void *guest_gdt) noexcept;
 
 #endif

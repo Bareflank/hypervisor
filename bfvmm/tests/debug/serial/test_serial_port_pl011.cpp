@@ -26,6 +26,8 @@
 #include <bfgsl.h>
 #include <debug/serial/serial_port_pl011.h>
 
+using namespace bfvmm;
+
 static std::map<serial_port_pl011::port_type, serial_port_pl011::value_type_32> g_ports;
 
 extern "C" uint8_t

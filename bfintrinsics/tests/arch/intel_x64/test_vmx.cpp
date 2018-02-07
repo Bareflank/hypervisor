@@ -93,13 +93,13 @@ extern "C" bool
 _invvpid(uint64_t type, void *ptr) noexcept
 { (void) type; (void) ptr; return !g_invvpid_fails; }
 
-TEST_CASE("vmx_intel_x64_vmxon_nullptr")
+TEST_CASE("vmx_vmxon_nullptr")
 {
     void *invalid_ptr = nullptr;
     CHECK_THROWS(vmx::on(invalid_ptr));
 }
 
-TEST_CASE("vmx_intel_x64_vmxon_failure")
+TEST_CASE("vmx_vmxon_failure")
 {
     auto ___ = gsl::finally([&]
     { g_vmxon_fails = false; });
@@ -108,12 +108,12 @@ TEST_CASE("vmx_intel_x64_vmxon_failure")
     CHECK_THROWS(vmx::on(&g_region));
 }
 
-TEST_CASE("vmx_intel_x64_vmxon_success")
+TEST_CASE("vmx_vmxon_success")
 {
     CHECK_NOTHROW(vmx::on(&g_region));
 }
 
-TEST_CASE("vmx_intel_x64_vmxoff_failure")
+TEST_CASE("vmx_vmxoff_failure")
 {
     auto ___ = gsl::finally([&]
     { g_vmxoff_fails = false; });
@@ -122,18 +122,18 @@ TEST_CASE("vmx_intel_x64_vmxoff_failure")
     CHECK_THROWS(vmx::off());
 }
 
-TEST_CASE("vmx_intel_x64_vmxoff_success")
+TEST_CASE("vmx_vmxoff_success")
 {
     CHECK_NOTHROW(vmx::off());
 }
 
-TEST_CASE("vmx_intel_x64_vmclear_nullptr")
+TEST_CASE("vmx_vmclear_nullptr")
 {
     void *invalid_ptr = nullptr;
     CHECK_THROWS(vm::clear(invalid_ptr));
 }
 
-TEST_CASE("vmx_intel_x64_vmclear_failure")
+TEST_CASE("vmx_vmclear_failure")
 {
     auto ___ = gsl::finally([&]
     { g_vmclear_fails = false; });
@@ -142,18 +142,18 @@ TEST_CASE("vmx_intel_x64_vmclear_failure")
     CHECK_THROWS(vm::clear(&g_region));
 }
 
-TEST_CASE("vmx_intel_x64_vmclear_success")
+TEST_CASE("vmx_vmclear_success")
 {
     CHECK_NOTHROW(vm::clear(&g_region));
 }
 
-TEST_CASE("vmx_intel_x64_vmload_nullptr")
+TEST_CASE("vmx_vmload_nullptr")
 {
     void *invalid_ptr = nullptr;
     CHECK_THROWS(vm::load(invalid_ptr));
 }
 
-TEST_CASE("vmx_intel_x64_vmload_failure")
+TEST_CASE("vmx_vmload_failure")
 {
     auto ___ = gsl::finally([&]
     { g_vmload_fails = false; });
@@ -162,18 +162,18 @@ TEST_CASE("vmx_intel_x64_vmload_failure")
     CHECK_THROWS(vm::load(&g_region));
 }
 
-TEST_CASE("vmx_intel_x64_vmload_success")
+TEST_CASE("vmx_vmload_success")
 {
     CHECK_NOTHROW(vm::load(&g_region));
 }
 
-TEST_CASE("vmx_intel_x64_vmreset_nullptr")
+TEST_CASE("vmx_vmreset_nullptr")
 {
     void *invalid_ptr = nullptr;
     CHECK_THROWS(vm::reset(invalid_ptr));
 }
 
-TEST_CASE("vmx_intel_x64_vmreset_failure")
+TEST_CASE("vmx_vmreset_failure")
 {
     auto ___ = gsl::finally([&]
     { g_vmreset_fails = false; });
@@ -182,12 +182,12 @@ TEST_CASE("vmx_intel_x64_vmreset_failure")
     CHECK_THROWS(vm::reset(&g_region));
 }
 
-TEST_CASE("vmx_intel_x64_vmreset_success")
+TEST_CASE("vmx_vmreset_success")
 {
     CHECK_NOTHROW(vm::reset(&g_region));
 }
 
-TEST_CASE("vmx_intel_x64_vmread_failure")
+TEST_CASE("vmx_vmread_failure")
 {
     auto ___ = gsl::finally([&]
     { g_vmread_fails = false; });
@@ -196,7 +196,7 @@ TEST_CASE("vmx_intel_x64_vmread_failure")
     CHECK_THROWS(vm::read(10U));
 }
 
-TEST_CASE("vmx_intel_x64_vmwrite_failure")
+TEST_CASE("vmx_vmwrite_failure")
 {
     auto ___ = gsl::finally([&]
     { g_vmwrite_fails = false; });
@@ -205,7 +205,7 @@ TEST_CASE("vmx_intel_x64_vmwrite_failure")
     CHECK_THROWS(vm::write(10U, 10U));
 }
 
-TEST_CASE("vmx_intel_x64_vmread_vmwrite_succcess")
+TEST_CASE("vmx_vmread_vmwrite_succcess")
 {
     auto val = 10ULL;
 
@@ -214,12 +214,12 @@ TEST_CASE("vmx_intel_x64_vmread_vmwrite_succcess")
     CHECK(val == 10UL);
 }
 
-TEST_CASE("vmx_intel_x64_vmlaunch_demote_success")
+TEST_CASE("vmx_vmlaunch_demote_success")
 {
     CHECK_NOTHROW(vm::launch_demote());
 }
 
-TEST_CASE("vmx_intel_x64_vmlaunch_demote_failure")
+TEST_CASE("vmx_vmlaunch_demote_failure")
 {
     auto ___ = gsl::finally([&]
     { g_vmlaunch_fails = false; });
@@ -228,7 +228,7 @@ TEST_CASE("vmx_intel_x64_vmlaunch_demote_failure")
     CHECK_THROWS(vm::launch_demote());
 }
 
-TEST_CASE("vmx_intel_x64_invept")
+TEST_CASE("vmx_invept")
 {
     CHECK_NOTHROW(vmx::invept_single_context(0));
     CHECK_NOTHROW(vmx::invept_global());
@@ -241,7 +241,7 @@ TEST_CASE("vmx_intel_x64_invept")
     CHECK_THROWS(vmx::invept_global());
 }
 
-TEST_CASE("vmx_intel_x64_invvpid")
+TEST_CASE("vmx_invvpid")
 {
     CHECK_NOTHROW(vmx::invvpid_individual_address(0, 0));
     CHECK_NOTHROW(vmx::invvpid_single_context(0));

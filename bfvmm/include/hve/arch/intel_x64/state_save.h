@@ -21,10 +21,15 @@
 
 #include <cstdint>
 
+namespace bfvmm
+{
+namespace intel_x64
+{
+
 /// @cond
 #pragma pack(push, 1)
 
-struct state_save_intel_x64 {
+struct state_save {
     uint64_t rax;                   // 0x000
     uint64_t rbx;                   // 0x008
     uint64_t rcx;                   // 0x010
@@ -74,5 +79,8 @@ struct state_save_intel_x64 {
 
 #pragma pack(pop)
 /// @endcond
+
+}
+}
 
 #endif

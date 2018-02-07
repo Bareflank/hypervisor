@@ -51,6 +51,9 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+
 /// Debug Ring
 ///
 /// The debug ring is a simple debug facility that allows the vmm to write
@@ -109,6 +112,8 @@ public:
 
     /// @endcond
 };
+
+}
 
 /// Get Debug Ring Resource
 ///

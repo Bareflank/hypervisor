@@ -41,11 +41,14 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace x64
+{
+
 #pragma pack(push, 1)
 
 /* @cond */
 
-struct EXPORT_INTRINSICS tss_x64 {
+struct EXPORT_INTRINSICS tss {
     uint32_t reserved1{0};
     uint64_t rsp0{0};
     uint64_t rsp1{0};
@@ -68,5 +71,7 @@ struct EXPORT_INTRINSICS tss_x64 {
 /* @endcond */
 
 #pragma pack(pop)
+
+}
 
 #endif

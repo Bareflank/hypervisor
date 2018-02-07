@@ -22,9 +22,14 @@
 #include <vcpu/vcpu_factory.h>
 #include <vcpu/arch/intel_x64/vcpu.h>
 
+namespace bfvmm
+{
+
 WEAK_SYM std::unique_ptr<vcpu>
 vcpu_factory::make_vcpu(vcpuid::type vcpuid, user_data *data)
 {
     bfignored(data);
-    return std::make_unique<vcpu_intel_x64>(vcpuid);
+    return std::make_unique<intel_x64::vcpu>(vcpuid);
+}
+
 }

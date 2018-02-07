@@ -28,7 +28,7 @@ TEST_CASE("vmcs: vmm_state")
     g_ecx_cpuid[intel_x64::cpuid::feature_information::addr] = 0xFFFFFFFF;
     g_ebx_cpuid[intel_x64::cpuid::extended_feature_flags::addr] = 0xFFFFFFFF;
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
 }
 
 TEST_CASE("vmcs: state_segment_registers")
@@ -36,7 +36,7 @@ TEST_CASE("vmcs: state_segment_registers")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
 
     CHECK(state.cs() == 1U << 3);
     CHECK(state.ss() == 2U << 3);
@@ -50,7 +50,7 @@ TEST_CASE("vmcs: state_control_registers")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
 
     CHECK(state.cr0() != 0U);
     CHECK(state.cr3() != 0U);
@@ -62,7 +62,7 @@ TEST_CASE("vmcs: state_debug_registers")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
     CHECK(state.dr7() == 0U);
 }
 
@@ -71,7 +71,7 @@ TEST_CASE("vmcs: state_rflags")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
     CHECK(state.rflags() == 0U);
 }
 
@@ -80,7 +80,7 @@ TEST_CASE("vmcs: state_gdt_base")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
     CHECK(state.gdt_base() != 0U);
 }
 
@@ -89,7 +89,7 @@ TEST_CASE("vmcs: state_idt_base")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
     CHECK(state.idt_base() != 0U);
 }
 
@@ -98,7 +98,7 @@ TEST_CASE("vmcs: state_gdt_limit")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
 
     CHECK(state.gdt_limit() == 4095U);
 }
@@ -108,7 +108,7 @@ TEST_CASE("vmcs: state_idt_limit")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
     CHECK(state.idt_limit() == 2047U);
 }
 
@@ -117,7 +117,7 @@ TEST_CASE("vmcs: state_segment_registers_limit")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
 
     CHECK(state.cs_limit() == 0xFFFFFFFF);
     CHECK(state.ss_limit() == 0xFFFFFFFF);
@@ -131,7 +131,7 @@ TEST_CASE("vmcs: state_segment_registers_access_rights")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
 
     CHECK(state.cs_access_rights() == access_rights::ring0_cs_descriptor);
     CHECK(state.ss_access_rights() == access_rights::ring0_ss_descriptor);
@@ -145,7 +145,7 @@ TEST_CASE("vmcs: state_segment_register_base")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
 
     CHECK(state.cs_base() == 0U);
     CHECK(state.ss_base() == 0U);
@@ -159,7 +159,7 @@ TEST_CASE("vmcs: state_msrs")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
 
     CHECK(state.ia32_pat_msr() != 0U);
     CHECK(state.ia32_efer_msr() != 0U);
@@ -170,7 +170,7 @@ TEST_CASE("vmcs: state_dump")
     MockRepository mocks;
     setup_mm(mocks);
 
-    vmcs_intel_x64_vmm_state state{};
+    bfvmm::intel_x64::vmcs_state_vmm state{};
     CHECK_NOTHROW(state.dump());
 }
 

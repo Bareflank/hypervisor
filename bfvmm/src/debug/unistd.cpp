@@ -32,7 +32,7 @@ unlock_write(void)
 static auto
 g_debug_ring() noexcept
 {
-    static debug_ring dr{vcpuid::invalid};
+    static bfvmm::debug_ring dr{vcpuid::invalid};
     return &dr;
 }
 
@@ -43,7 +43,7 @@ write_str(const std::string &str)
         std::lock_guard<std::mutex> guard(g_write_mutex);
 
         g_debug_ring()->write(str);
-        serial_port_ns16550a::instance()->write(str);
+        bfvmm::serial_port_ns16550a::instance()->write(str);
 
         return str.length();
     }

@@ -20,12 +20,12 @@
 
 TEST_CASE("vmcs: state")
 {
-    CHECK_NOTHROW(vmcs_intel_x64_state{});
+    CHECK_NOTHROW(bfvmm::intel_x64::vmcs_state{});
 }
 
 TEST_CASE("vmcs: state_segment_registers")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
 
     CHECK(state.es() == 0U);
     CHECK(state.cs() == 0U);
@@ -47,7 +47,7 @@ TEST_CASE("vmcs: state_segment_registers")
 
 TEST_CASE("vmcs: state_control_registers")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
 
     CHECK(state.cr0() == 0U);
     CHECK(state.cr3() == 0U);
@@ -59,7 +59,7 @@ TEST_CASE("vmcs: state_control_registers")
 
 TEST_CASE("vmcs: state_debug_registers")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
 
     CHECK(state.dr7() == 0U);
     CHECK_NOTHROW(state.set_dr7(42U));
@@ -67,7 +67,7 @@ TEST_CASE("vmcs: state_debug_registers")
 
 TEST_CASE("vmcs: state_rflags")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
 
     CHECK(state.rflags() == 0U);
     CHECK_NOTHROW(state.set_rflags(42U));
@@ -75,7 +75,7 @@ TEST_CASE("vmcs: state_rflags")
 
 TEST_CASE("vmcs: state_gdt_base")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
 
     CHECK(state.gdt_base() == 0U);
     CHECK_NOTHROW(state.set_gdt_base(42U));
@@ -83,7 +83,7 @@ TEST_CASE("vmcs: state_gdt_base")
 
 TEST_CASE("vmcs: state_idt_base")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
 
     CHECK(state.idt_base() == 0U);
     CHECK_NOTHROW(state.set_idt_base(42U));
@@ -91,7 +91,7 @@ TEST_CASE("vmcs: state_idt_base")
 
 TEST_CASE("vmcs: state_gdt_limit")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
 
     CHECK(state.gdt_limit() == 0U);
     CHECK_NOTHROW(state.set_gdt_limit(42U));
@@ -99,7 +99,7 @@ TEST_CASE("vmcs: state_gdt_limit")
 
 TEST_CASE("vmcs: state_idt_limit")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
 
     CHECK(state.idt_limit() == 0U);
     CHECK_NOTHROW(state.set_idt_limit(42U));
@@ -107,7 +107,7 @@ TEST_CASE("vmcs: state_idt_limit")
 
 TEST_CASE("vmcs: state_segment_registers_limit")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
 
     CHECK(state.es_limit() == 0U);
     CHECK(state.cs_limit() == 0U);
@@ -130,7 +130,7 @@ TEST_CASE("vmcs: state_segment_registers_limit")
 
 TEST_CASE("vmcs: state_segment_registers_access_rights")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
 
     CHECK(state.es_access_rights() == access_rights::unusable);
     CHECK(state.cs_access_rights() == access_rights::unusable);
@@ -152,7 +152,7 @@ TEST_CASE("vmcs: state_segment_registers_access_rights")
 
 TEST_CASE("vmcs: state_segment_register_base")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
 
     CHECK(state.es_base() == 0U);
     CHECK(state.cs_base() == 0U);
@@ -174,7 +174,7 @@ TEST_CASE("vmcs: state_segment_register_base")
 
 TEST_CASE("vmcs: state_msrs")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
 
     CHECK(state.ia32_debugctl_msr() == 0U);
     CHECK(state.ia32_pat_msr() == 0U);
@@ -198,12 +198,12 @@ TEST_CASE("vmcs: state_msrs")
 
 TEST_CASE("vmcs: state_is_guest")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
     CHECK_FALSE(state.is_guest());
 }
 
 TEST_CASE("vmcs: state_dump")
 {
-    vmcs_intel_x64_state state{};
+    bfvmm::intel_x64::vmcs_state state{};
     CHECK_NOTHROW(state.dump());
 }

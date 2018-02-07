@@ -19,7 +19,7 @@
 #include <catch/catch.hpp>
 #include <intrinsics.h>
 
-using namespace x64;
+using namespace intel_x64;
 
 dr7::value_type g_dr7 = 0;
 
@@ -31,7 +31,7 @@ extern "C" void
 _write_dr7(uint64_t val) noexcept
 { g_dr7 = val; }
 
-TEST_CASE("debug_x64_dr7")
+TEST_CASE("debug_dr7")
 {
     dr7::set(100U);
     CHECK(dr7::get() == 100UL);

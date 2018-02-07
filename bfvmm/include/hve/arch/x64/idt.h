@@ -54,10 +54,15 @@
 // Interrupt Descriptor Table
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+namespace x64
+{
+
 /// Interrupt Descriptor Table
 ///
 ///
-class EXPORT_INTRINSICS idt_x64
+class EXPORT_INTRINSICS idt
 {
 public:
 
@@ -77,11 +82,11 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    idt_x64() noexcept
+    idt() noexcept
     {
         guard_exceptions([&] {
-            m_idt_reg.base = x64::idt_reg::base::get();
-            m_idt_reg.limit = x64::idt_reg::limit::get();
+            m_idt_reg.base = ::x64::idt_reg::base::get();
+            m_idt_reg.limit = ::x64::idt_reg::limit::get();
 
             std::copy_n(reinterpret_cast<uint64_t *>(m_idt_reg.base), (m_idt_reg.limit + 1) >> 3, std::back_inserter(m_idt));
         });
@@ -97,7 +102,7 @@ public:
     ///
     /// @param size number of entries in the IDT
     ///
-    idt_x64(size_type size) noexcept :
+    idt(size_type size) noexcept :
         m_idt(size * 2U)
     {
         guard_exceptions([&] {
@@ -111,7 +116,7 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    ~idt_x64() = default;
+    ~idt() = default;
 
     /// IDT Base Address
     ///
@@ -144,7 +149,7 @@ public:
     ///
     void set_offset(index_type index, offset_type off)
     {
-        expects(x64::is_address_canonical(off));
+        expects(::x64::is_address_canonical(off));
 
         auto sd1 = m_idt.at((index * 2U) + 0U) & 0x0000FFFFFFFF0000ULL;
         auto sd2 = m_idt.at((index * 2U) + 1U) & 0xFFFFFFFF00000000ULL;
@@ -315,7 +320,7 @@ private:
 
     /// @cond
 
-    x64::idt_reg::reg_t m_idt_reg;
+    ::x64::idt_reg::reg_t m_idt_reg;
     std::vector<interrupt_descriptor_type> m_idt;
 
     /// @endcond
@@ -324,14 +329,17 @@ public:
 
     /// @cond
 
-    idt_x64(idt_x64 &&) noexcept = delete;
-    idt_x64 &operator=(idt_x64 &&) noexcept = delete;
+    idt(idt &&) noexcept = delete;
+    idt &operator=(idt &&) noexcept = delete;
 
-    idt_x64(const idt_x64 &) = delete;
-    idt_x64 &operator=(const idt_x64 &) = delete;
+    idt(const idt &) = delete;
+    idt &operator=(const idt &) = delete;
 
     /// @endcond
 };
+
+}
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

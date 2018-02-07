@@ -67,7 +67,7 @@ extern "C" void
 _write_cr8(uint64_t val) noexcept
 { g_cr8 = val; }
 
-TEST_CASE("cr0_intel_x64")
+TEST_CASE("cr0")
 {
     using namespace cr0;
 
@@ -76,7 +76,7 @@ TEST_CASE("cr0_intel_x64")
     dump(0);
 }
 
-TEST_CASE("cr0_intel_x64_protection_enable")
+TEST_CASE("cr0_protection_enable")
 {
     using namespace cr0;
 
@@ -91,7 +91,7 @@ TEST_CASE("cr0_intel_x64_protection_enable")
     CHECK(protection_enable::is_disabled(0x0));
 }
 
-TEST_CASE("cr0_intel_x64_monitor_coprocessor")
+TEST_CASE("cr0_monitor_coprocessor")
 {
     using namespace cr0;
 
@@ -106,7 +106,7 @@ TEST_CASE("cr0_intel_x64_monitor_coprocessor")
     CHECK(monitor_coprocessor::is_disabled(0x0));
 }
 
-TEST_CASE("cr0_intel_x64_emulation")
+TEST_CASE("cr0_emulation")
 {
     using namespace cr0;
 
@@ -121,7 +121,7 @@ TEST_CASE("cr0_intel_x64_emulation")
     CHECK(emulation::is_disabled(0x0));
 }
 
-TEST_CASE("cr0_intel_x64_task_switched")
+TEST_CASE("cr0_task_switched")
 {
     using namespace cr0;
 
@@ -136,7 +136,7 @@ TEST_CASE("cr0_intel_x64_task_switched")
     CHECK(task_switched::is_disabled(0x0));
 }
 
-TEST_CASE("cr0_intel_x64_extension_type")
+TEST_CASE("cr0_extension_type")
 {
     using namespace cr0;
 
@@ -151,7 +151,7 @@ TEST_CASE("cr0_intel_x64_extension_type")
     CHECK(extension_type::is_disabled(0x0));
 }
 
-TEST_CASE("cr0_intel_x64_numeric_error")
+TEST_CASE("cr0_numeric_error")
 {
     using namespace cr0;
 
@@ -166,7 +166,7 @@ TEST_CASE("cr0_intel_x64_numeric_error")
     CHECK(numeric_error::is_disabled(0x0));
 }
 
-TEST_CASE("cr0_intel_x64_write_protect")
+TEST_CASE("cr0_write_protect")
 {
     using namespace cr0;
 
@@ -181,7 +181,7 @@ TEST_CASE("cr0_intel_x64_write_protect")
     CHECK(write_protect::is_disabled(0x0));
 }
 
-TEST_CASE("cr0_intel_x64_alignment_mask")
+TEST_CASE("cr0_alignment_mask")
 {
     using namespace cr0;
 
@@ -196,7 +196,7 @@ TEST_CASE("cr0_intel_x64_alignment_mask")
     CHECK(alignment_mask::is_disabled(0x0));
 }
 
-TEST_CASE("cr0_intel_x64_not_write_through")
+TEST_CASE("cr0_not_write_through")
 {
     using namespace cr0;
 
@@ -211,7 +211,7 @@ TEST_CASE("cr0_intel_x64_not_write_through")
     CHECK(not_write_through::is_disabled(0x0));
 }
 
-TEST_CASE("cr0_intel_x64_cache_disable")
+TEST_CASE("cr0_cache_disable")
 {
     using namespace cr0;
 
@@ -226,7 +226,7 @@ TEST_CASE("cr0_intel_x64_cache_disable")
     CHECK(cache_disable::is_disabled(0x0));
 }
 
-TEST_CASE("cr0_intel_x64_paging")
+TEST_CASE("cr0_paging")
 {
     using namespace cr0;
 
@@ -241,7 +241,7 @@ TEST_CASE("cr0_intel_x64_paging")
     CHECK(paging::is_disabled(0x0));
 }
 
-TEST_CASE("cr2_intel_x64")
+TEST_CASE("cr2")
 {
     using namespace cr2;
 
@@ -250,7 +250,7 @@ TEST_CASE("cr2_intel_x64")
     dump(0);
 }
 
-TEST_CASE("cr3_intel_x64")
+TEST_CASE("cr3")
 {
     using namespace cr3;
 
@@ -259,7 +259,7 @@ TEST_CASE("cr3_intel_x64")
     dump(0);
 }
 
-TEST_CASE("cr4_intel_x64")
+TEST_CASE("cr4")
 {
     using namespace cr4;
 
@@ -268,7 +268,7 @@ TEST_CASE("cr4_intel_x64")
     dump(0);
 }
 
-TEST_CASE("cr4_intel_x64_v8086_mode_extensions")
+TEST_CASE("cr4_v8086_mode_extensions")
 {
     using namespace cr4;
 
@@ -283,7 +283,7 @@ TEST_CASE("cr4_intel_x64_v8086_mode_extensions")
     CHECK(v8086_mode_extensions::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_protected_mode_virtual_interrupts")
+TEST_CASE("cr4_protected_mode_virtual_interrupts")
 {
     using namespace cr4;
 
@@ -298,7 +298,7 @@ TEST_CASE("cr4_intel_x64_protected_mode_virtual_interrupts")
     CHECK(protected_mode_virtual_interrupts::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_time_stamp_disable")
+TEST_CASE("cr4_time_stamp_disable")
 {
     using namespace cr4;
 
@@ -313,7 +313,7 @@ TEST_CASE("cr4_intel_x64_time_stamp_disable")
     CHECK(time_stamp_disable::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_debugging_extensions")
+TEST_CASE("cr4_debugging_extensions")
 {
     using namespace cr4;
 
@@ -328,7 +328,7 @@ TEST_CASE("cr4_intel_x64_debugging_extensions")
     CHECK(debugging_extensions::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_page_size_extensions")
+TEST_CASE("cr4_page_size_extensions")
 {
     using namespace cr4;
 
@@ -343,7 +343,7 @@ TEST_CASE("cr4_intel_x64_page_size_extensions")
     CHECK(page_size_extensions::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_physical_address_extensions")
+TEST_CASE("cr4_physical_address_extensions")
 {
     using namespace cr4;
 
@@ -358,7 +358,7 @@ TEST_CASE("cr4_intel_x64_physical_address_extensions")
     CHECK(physical_address_extensions::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_machine_check_enable")
+TEST_CASE("cr4_machine_check_enable")
 {
     using namespace cr4;
 
@@ -373,7 +373,7 @@ TEST_CASE("cr4_intel_x64_machine_check_enable")
     CHECK(machine_check_enable::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_page_global_enable")
+TEST_CASE("cr4_page_global_enable")
 {
     using namespace cr4;
 
@@ -388,7 +388,7 @@ TEST_CASE("cr4_intel_x64_page_global_enable")
     CHECK(page_global_enable::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_performance_monitor_counter_enable")
+TEST_CASE("cr4_performance_monitor_counter_enable")
 {
     using namespace cr4;
 
@@ -403,7 +403,7 @@ TEST_CASE("cr4_intel_x64_performance_monitor_counter_enable")
     CHECK(performance_monitor_counter_enable::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_osfxsr")
+TEST_CASE("cr4_osfxsr")
 {
     using namespace cr4;
 
@@ -418,7 +418,7 @@ TEST_CASE("cr4_intel_x64_osfxsr")
     CHECK(osfxsr::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_osxmmexcpt")
+TEST_CASE("cr4_osxmmexcpt")
 {
     using namespace cr4;
 
@@ -433,7 +433,7 @@ TEST_CASE("cr4_intel_x64_osxmmexcpt")
     CHECK(osxmmexcpt::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_vmx_enable_bit")
+TEST_CASE("cr4_vmx_enable_bit")
 {
     using namespace cr4;
 
@@ -448,7 +448,7 @@ TEST_CASE("cr4_intel_x64_vmx_enable_bit")
     CHECK(vmx_enable_bit::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_smx_enable_bit")
+TEST_CASE("cr4_smx_enable_bit")
 {
     using namespace cr4;
 
@@ -463,7 +463,7 @@ TEST_CASE("cr4_intel_x64_smx_enable_bit")
     CHECK(smx_enable_bit::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_fsgsbase_enable_bit")
+TEST_CASE("cr4_fsgsbase_enable_bit")
 {
     using namespace cr4;
 
@@ -478,7 +478,7 @@ TEST_CASE("cr4_intel_x64_fsgsbase_enable_bit")
     CHECK(fsgsbase_enable_bit::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_pcid_enable_bit")
+TEST_CASE("cr4_pcid_enable_bit")
 {
     using namespace cr4;
 
@@ -493,7 +493,7 @@ TEST_CASE("cr4_intel_x64_pcid_enable_bit")
     CHECK(pcid_enable_bit::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_osxsave")
+TEST_CASE("cr4_osxsave")
 {
     using namespace cr4;
 
@@ -508,7 +508,7 @@ TEST_CASE("cr4_intel_x64_osxsave")
     CHECK(osxsave::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_smep_enable_bit")
+TEST_CASE("cr4_smep_enable_bit")
 {
     using namespace cr4;
 
@@ -523,7 +523,7 @@ TEST_CASE("cr4_intel_x64_smep_enable_bit")
     CHECK(smep_enable_bit::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_smap_enable_bit")
+TEST_CASE("cr4_smap_enable_bit")
 {
     using namespace cr4;
 
@@ -538,7 +538,7 @@ TEST_CASE("cr4_intel_x64_smap_enable_bit")
     CHECK(smap_enable_bit::is_disabled(0x0));
 }
 
-TEST_CASE("cr4_intel_x64_protection_key_enable_bit")
+TEST_CASE("cr4_protection_key_enable_bit")
 {
     using namespace cr4;
 
@@ -553,7 +553,7 @@ TEST_CASE("cr4_intel_x64_protection_key_enable_bit")
     CHECK(protection_key_enable_bit::is_disabled(0x0));
 }
 
-TEST_CASE("cr8_intel_x64")
+TEST_CASE("cr8")
 {
     using namespace cr8;
 

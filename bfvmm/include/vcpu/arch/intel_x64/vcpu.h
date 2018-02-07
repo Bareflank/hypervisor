@@ -51,6 +51,11 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+namespace intel_x64
+{
+
 /// Virtual CPU (Intel x86_64)
 ///
 /// The Virtual CPU represents a "CPU" to the hypervisor that is specific to
@@ -58,14 +63,14 @@
 ///
 /// This Intel specific vCPU class provides all of the functionality of the
 /// base vCPU, but also adds classes specific to Intel's VT-x including the
-/// vmxon_intel_x64, vmcs_intel_x64, exit_handler_intel_x64 and
-/// intrinsics_intel_x64 classes.
+/// vmxon, vmcs, exit_handler and
+/// intrinsics classes.
 ///
 /// Note that these should not be created directly, but instead should be
 /// created by the vcpu_manager, which uses the vcpu_factory to actually
 /// create a vcpu.
 ///
-class EXPORT_VCPU vcpu_intel_x64 : public vcpu
+class EXPORT_VCPU vcpu : public bfvmm::vcpu
 {
 public:
 
@@ -92,17 +97,17 @@ public:
     /// @param guest_state the guest state the vcpu should use. If you
     ///     provide nullptr, a default guest state will be created.
     ///
-    vcpu_intel_x64(
+    vcpu(
         vcpuid::type id,
-        std::unique_ptr<vmxon_intel_x64> vmxon = nullptr,
-        std::unique_ptr<vmcs_intel_x64> vmcs = nullptr,
-        std::unique_ptr<exit_handler_intel_x64> exit_handler = nullptr,
-        std::unique_ptr<vmcs_intel_x64_state> vmm_state = nullptr,
-        std::unique_ptr<vmcs_intel_x64_state> guest_state = nullptr);
+        std::unique_ptr<vmxon> vmxon = nullptr,
+        std::unique_ptr<vmcs> vmcs = nullptr,
+        std::unique_ptr<exit_handler> exit_handler = nullptr,
+        std::unique_ptr<vmcs_state> vmm_state = nullptr,
+        std::unique_ptr<vmcs_state> guest_state = nullptr);
 
     /// Destructor
     ///
-    ~vcpu_intel_x64() override = default;
+    ~vcpu() override = default;
 
     /// Init vCPU
     ///
@@ -152,12 +157,12 @@ protected:
 
     /// @cond
 
-    std::unique_ptr<vmxon_intel_x64> m_vmxon;
-    std::unique_ptr<vmcs_intel_x64> m_vmcs;
-    std::unique_ptr<exit_handler_intel_x64> m_exit_handler;
-    std::unique_ptr<state_save_intel_x64> m_state_save;
-    std::unique_ptr<vmcs_intel_x64_state> m_vmm_state;
-    std::unique_ptr<vmcs_intel_x64_state> m_guest_state;
+    std::unique_ptr<vmxon> m_vmxon;
+    std::unique_ptr<vmcs> m_vmcs;
+    std::unique_ptr<exit_handler> m_exit_handler;
+    std::unique_ptr<state_save> m_state_save;
+    std::unique_ptr<vmcs_state> m_vmm_state;
+    std::unique_ptr<vmcs_state> m_guest_state;
 
     /// @endcond
 
@@ -165,14 +170,17 @@ public:
 
     /// @cond
 
-    vcpu_intel_x64(vcpu_intel_x64 &&) noexcept = default;
-    vcpu_intel_x64 &operator=(vcpu_intel_x64 &&) noexcept = default;
+    vcpu(vcpu &&) noexcept = default;
+    vcpu &operator=(vcpu &&) noexcept = default;
 
-    vcpu_intel_x64(const vcpu_intel_x64 &) = delete;
-    vcpu_intel_x64 &operator=(const vcpu_intel_x64 &) = delete;
+    vcpu(const vcpu &) = delete;
+    vcpu &operator=(const vcpu &) = delete;
 
     /// @endcond
 };
+
+}
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

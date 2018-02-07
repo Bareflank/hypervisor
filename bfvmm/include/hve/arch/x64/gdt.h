@@ -54,6 +54,11 @@
 // Global Descriptor Table
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+namespace x64
+{
+
 /// Global Descriptor Table
 ///
 /// This class provides an abstraction around the global descriptor table
@@ -105,7 +110,7 @@
 /// The solution is to mark the host OS's TSS descriptor as not busy
 /// manually before loading it.
 ///
-class EXPORT_HVE gdt_x64
+class EXPORT_HVE gdt
 {
 public:
 
@@ -131,11 +136,11 @@ public:
     ///     GDT using an alternate constructor, and set the hardware to use
     ///     that GDT instead.
     ///
-    gdt_x64() noexcept
+    gdt() noexcept
     {
         guard_exceptions([&] {
-            m_gdt_reg.base = x64::gdt_reg::base::get();
-            m_gdt_reg.limit = x64::gdt_reg::limit::get();
+            m_gdt_reg.base = ::x64::gdt_reg::base::get();
+            m_gdt_reg.limit = ::x64::gdt_reg::limit::get();
 
             std::copy_n(reinterpret_cast<uint64_t *>(m_gdt_reg.base), (m_gdt_reg.limit + 1) >> 3, std::back_inserter(m_gdt));
         });
@@ -151,7 +156,7 @@ public:
     ///
     /// @param size number of entries in the GDT
     ///
-    gdt_x64(size_type size) noexcept :
+    gdt(size_type size) noexcept :
         m_gdt(size)
     {
         guard_exceptions([&] {
@@ -165,7 +170,7 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    ~gdt_x64() noexcept = default;
+    ~gdt() noexcept = default;
 
     /// GDT Base Address
     ///
@@ -465,7 +470,7 @@ private:
 
     /// @cond
 
-    x64::gdt_reg::reg_t m_gdt_reg;
+    ::x64::gdt_reg::reg_t m_gdt_reg;
     std::vector<segment_descriptor_type> m_gdt;
 
     /// @endcond
@@ -474,14 +479,17 @@ public:
 
     /// @cond
 
-    gdt_x64(gdt_x64 &&) noexcept = delete;
-    gdt_x64 &operator=(gdt_x64 &&) noexcept = delete;
+    gdt(gdt &&) noexcept = delete;
+    gdt &operator=(gdt &&) noexcept = delete;
 
-    gdt_x64(const gdt_x64 &) = delete;
-    gdt_x64 &operator=(const gdt_x64 &) = delete;
+    gdt(const gdt &) = delete;
+    gdt &operator=(const gdt &) = delete;
 
     /// @endcond
 };
+
+}
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

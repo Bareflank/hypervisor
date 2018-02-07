@@ -24,7 +24,6 @@
 #ifdef BF_X64
 #include <arch/x64/cache.h>
 #include <arch/x64/cpuid.h>
-#include <arch/x64/debug.h>
 #include <arch/x64/gdt.h>
 #include <arch/x64/idt.h>
 #include <arch/x64/misc.h>
@@ -41,6 +40,7 @@
 #ifdef BF_INTEL_X64
 #include <arch/intel_x64/cpuid.h>
 #include <arch/intel_x64/crs.h>
+#include <arch/intel_x64/drs.h>
 #include <arch/intel_x64/msrs.h>
 #include <arch/intel_x64/vmx.h>
 #include <arch/intel_x64/vmcs/16bit_control_fields.h>

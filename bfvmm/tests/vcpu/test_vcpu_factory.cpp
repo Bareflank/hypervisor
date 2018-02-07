@@ -21,6 +21,9 @@
 #include <catch/catch.hpp>
 #include <vcpu/vcpu_factory.h>
 
+namespace bfvmm
+{
+
 WEAK_SYM std::unique_ptr<vcpu>
 vcpu_factory::make_vcpu(vcpuid::type vcpuid, user_data *data)
 {
@@ -28,8 +31,10 @@ vcpu_factory::make_vcpu(vcpuid::type vcpuid, user_data *data)
     return std::make_unique<vcpu>(vcpuid);
 }
 
+}
+
 TEST_CASE("vcpu_factory: make_vcpu")
 {
-    vcpu_factory factory;
+    bfvmm::vcpu_factory factory;
     CHECK(factory.make_vcpu(0, nullptr) != nullptr);
 }

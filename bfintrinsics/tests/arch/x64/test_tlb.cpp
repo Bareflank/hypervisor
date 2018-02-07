@@ -25,7 +25,7 @@ extern "C" void
 _invlpg(const void *virt) noexcept
 { (void) virt; }
 
-TEST_CASE("tlb_x64_invlpg")
+TEST_CASE("tlb_invlpg")
 {
     int test = 8;
     CHECK_NOTHROW(tlb::invlpg(&test));
