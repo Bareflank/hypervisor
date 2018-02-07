@@ -1500,6 +1500,34 @@ namespace exit_qualification
             { dump_vmcs_subbool(level, msg); }
         }
 
+        namespace translation_violation
+        {
+            constexpr const auto mask = 0x0000000000000100ULL;
+            constexpr const auto from = 8ULL;
+            constexpr const auto name = "translation_violation";
+
+            inline auto is_enabled()
+            { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
+
+            inline auto is_enabled(value_type field)
+            { return is_bit_set(field, from); }
+
+            inline auto is_enabled_if_exists(bool verbose = false)
+            { return is_bit_set(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+            inline auto is_disabled()
+            { return is_bit_cleared(get_vmcs_field(addr, name, exists()), from); }
+
+            inline auto is_disabled(value_type field)
+            { return is_bit_cleared(field, from); }
+
+            inline auto is_disabled_if_exists(bool verbose = false)
+            { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
+
+            inline void dump(int level, std::string *msg = nullptr)
+            { dump_vmcs_subbool(level, msg); }
+        }
+
         namespace nmi_unblocking_due_to_iret
         {
             constexpr const auto mask = 0x0000000000001000ULL;
@@ -1528,6 +1556,54 @@ namespace exit_qualification
             { dump_vmcs_subbool(level, msg); }
         }
 
+        namespace attr
+        {
+            // dr = data read
+            // dw = data write
+            // rw, ro... the usual read-write, read-only, etc
+            // v = valid guest linear address
+            // t = violation due to translated access
+            // w = violation due to page-walk access
+
+            // data reads
+            constexpr const auto dr_rwe_vt = 0x1B9ULL;
+            constexpr const auto dr_rwe_vw = 0x0B9ULL;
+
+            constexpr const auto dr_rw_vt = 0x199ULL;
+            constexpr const auto dr_rw_vw = 0x099ULL;
+
+            constexpr const auto dr_re_vt = 0x1A9ULL;
+            constexpr const auto dr_re_vw = 0x0A9ULL;
+
+            constexpr const auto dr_ro_vt = 0x189ULL;
+            constexpr const auto dr_ro_vw = 0x089ULL;
+
+            constexpr const auto dr_wo_vt = 0x191ULL;
+            constexpr const auto dr_wo_vw = 0x091ULL;
+
+            constexpr const auto dr_eo_vt = 0x1A1ULL;
+            constexpr const auto dr_eo_vw = 0x0A1ULL;
+
+            // data writes
+            constexpr const auto dw_rwe_vt = 0x1BAULL;
+            constexpr const auto dw_rwe_vw = 0x0BAULL;
+
+            constexpr const auto dw_rw_vt = 0x19AULL;
+            constexpr const auto dw_rw_vw = 0x09AULL;
+
+            constexpr const auto dw_re_vt = 0x1AAULL;
+            constexpr const auto dw_re_vw = 0x0AAULL;
+
+            constexpr const auto dw_ro_vt = 0x18AULL;
+            constexpr const auto dw_ro_vw = 0x08AULL;
+
+            constexpr const auto dw_wo_vt = 0x192ULL;
+            constexpr const auto dw_wo_vw = 0x092ULL;
+
+            constexpr const auto dw_eo_vt = 0x1A2ULL;
+            constexpr const auto dw_eo_vw = 0x0A2ULL;
+        }
+
         inline void dump(int level, std::string *msg = nullptr)
         {
             dump_vmcs_nhex(level, msg);
@@ -1539,6 +1615,7 @@ namespace exit_qualification
             executable::dump(level, msg);
             reserved::dump(level, msg);
             valid_guest_linear_address::dump(level, msg);
+            translation_violation::dump(level, msg);
             nmi_unblocking_due_to_iret::dump(level, msg);
         }
     }

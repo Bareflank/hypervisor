@@ -38,6 +38,10 @@
 #endif
 
 #ifdef BF_INTEL_X64
+#include <arch/intel_x64/acpi.h>
+#include <arch/intel_x64/apic/lapic.h>
+#include <arch/intel_x64/apic/x2apic.h>
+#include <arch/intel_x64/apic/xapic.h>
 #include <arch/intel_x64/cpuid.h>
 #include <arch/intel_x64/crs.h>
 #include <arch/intel_x64/drs.h>
