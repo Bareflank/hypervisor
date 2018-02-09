@@ -22,6 +22,11 @@ project(bfintrinsics_test C CXX)
 include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project()
 
+do_test(test_lapic SOURCES arch/intel_x64/apic/test_lapic.cpp)
+do_test(test_x2apic SOURCES arch/intel_x64/apic/test_x2apic.cpp)
+do_test(test_xapic SOURCES arch/intel_x64/apic/test_xapic.cpp)
+
+do_test(test_acpi_intel_x64 SOURCES arch/intel_x64/test_acpi.cpp)
 do_test(test_cpuid_intel_x64 SOURCES arch/intel_x64/test_cpuid.cpp)
 do_test(test_crs_intel_x64 SOURCES arch/intel_x64/test_crs.cpp)
 do_test(test_drs_intel_x64 SOURCES arch/intel_x64/test_drs.cpp)

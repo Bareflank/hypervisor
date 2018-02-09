@@ -747,6 +747,30 @@ TEST_CASE("exit_handler: vm_exit_reason_vmcall_data_string_json_map_fails")
     CHECK(bfscast(int64_t, ehlr.m_state_save->rdx) == BF_VMCALL_FAILURE);
 }
 
+TEST_CASE("exit_handler: vm_exit_reason_vmcall_data_string_json_invalid")
+{
+    MockRepository mocks;
+    auto vmcs = setup_vmcs_handled(mocks, exit_reason::basic_exit_reason::vmcall);
+    auto ehlr = setup_ehlr(vmcs);
+    setup_mm(mocks);
+    setup_pt(mocks);
+
+    ehlr.m_state_save->rax = VMCALL_DATA;                        // r00
+    ehlr.m_state_save->rdx = VMCALL_MAGIC_NUMBER;                // r01
+    ehlr.m_state_save->rsi = VMCALL_DATA_STRING_JSON;            // r04
+    ehlr.m_state_save->r08 = reinterpret_cast<uint64_t>(g_map);  // r05
+    ehlr.m_state_save->r09 = g_msg.size();                       // r06
+    ehlr.m_state_save->r11 = reinterpret_cast<uint64_t>(g_map);  // r08
+    ehlr.m_state_save->r12 = g_msg.size();                       // r09
+
+    std::string msg = "hello world";
+    memcpy(static_cast<char *>(g_map), msg.data(), msg.size());
+
+    CHECK_NOTHROW(ehlr.dispatch());
+    CHECK(ehlr.m_state_save->rip == g_rip);
+    CHECK(bfscast(int64_t, ehlr.m_state_save->rdx) == BF_VMCALL_FAILURE);
+}
+
 TEST_CASE("exit_handler: vm_exit_reason_vmcall_data_string_json_success")
 {
     MockRepository mocks;
