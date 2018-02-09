@@ -74,6 +74,132 @@ TEST_CASE("intrinsics: cpuid_feature_information")
     dump(0);
 }
 
+TEST_CASE("intrinsics: cpuid_feature_information_eax")
+{
+    using namespace cpuid::feature_information;
+
+    g_eax_cpuid[addr] = 0xFFFFFFFF;
+    CHECK(eax::get() == 0xFFFFFFFF);
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_eax_stepping_id")
+{
+    using namespace cpuid::feature_information;
+
+    g_eax_cpuid[addr] = 0xFFFFFFFFULL;
+    CHECK(eax::stepping_id::get() ==
+            (eax::stepping_id::mask >> eax::stepping_id::from));
+    CHECK(eax::stepping_id::get(eax::stepping_id::mask) ==
+            (eax::stepping_id::mask >> eax::stepping_id::from));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_eax_model")
+{
+    using namespace cpuid::feature_information;
+
+    g_eax_cpuid[addr] = 0xFFFFFFFFULL;
+    CHECK(eax::model::get() ==
+            (eax::model::mask >> eax::model::from));
+    CHECK(eax::model::get(eax::model::mask) ==
+            (eax::model::mask >> eax::model::from));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_eax_family_id")
+{
+    using namespace cpuid::feature_information;
+
+    g_eax_cpuid[addr] = 0xFFFFFFFFULL;
+    CHECK(eax::family_id::get() ==
+            (eax::family_id::mask >> eax::family_id::from));
+    CHECK(eax::family_id::get(eax::family_id::mask) ==
+            (eax::family_id::mask >> eax::family_id::from));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_eax_processor_type")
+{
+    using namespace cpuid::feature_information;
+
+    g_eax_cpuid[addr] = 0xFFFFFFFFULL;
+    CHECK(eax::processor_type::get() ==
+            (eax::processor_type::mask >> eax::processor_type::from));
+    CHECK(eax::processor_type::get(eax::processor_type::mask) ==
+            (eax::processor_type::mask >> eax::processor_type::from));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_eax_extended_model_id")
+{
+    using namespace cpuid::feature_information;
+
+    g_eax_cpuid[addr] = 0xFFFFFFFFULL;
+    CHECK(eax::extended_model_id::get() ==
+            (eax::extended_model_id::mask >> eax::extended_model_id::from));
+    CHECK(eax::extended_model_id::get(eax::extended_model_id::mask) ==
+            (eax::extended_model_id::mask >> eax::extended_model_id::from));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_eax_extended_family_id")
+{
+    using namespace cpuid::feature_information;
+
+    g_eax_cpuid[addr] = 0xFFFFFFFFULL;
+    CHECK(eax::extended_family_id::get() ==
+            (eax::extended_family_id::mask >> eax::extended_family_id::from));
+    CHECK(eax::extended_family_id::get(eax::extended_family_id::mask) ==
+            (eax::extended_family_id::mask >> eax::extended_family_id::from));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_ebx")
+{
+    using namespace cpuid::feature_information;
+
+    g_ebx_cpuid[addr] = 0xFFFFFFFF;
+    CHECK(ebx::get() == 0xFFFFFFFF);
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_ebx_brand_index")
+{
+    using namespace cpuid::feature_information;
+
+    g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
+    CHECK(ebx::brand_index::get() ==
+            (ebx::brand_index::mask >> ebx::brand_index::from));
+    CHECK(ebx::brand_index::get(ebx::brand_index::mask) ==
+            (ebx::brand_index::mask >> ebx::brand_index::from));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_ebx_clflush_line_size")
+{
+    using namespace cpuid::feature_information;
+
+    g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
+    CHECK(ebx::clflush_line_size::get() ==
+            (ebx::clflush_line_size::mask >> ebx::clflush_line_size::from));
+    CHECK(ebx::clflush_line_size::get(ebx::clflush_line_size::mask) ==
+            (ebx::clflush_line_size::mask >> ebx::clflush_line_size::from));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_ebx_max_addressable_ids")
+{
+    using namespace cpuid::feature_information;
+
+    g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
+    CHECK(ebx::max_addressable_ids::get() ==
+            (ebx::max_addressable_ids::mask >> ebx::max_addressable_ids::from));
+    CHECK(ebx::max_addressable_ids::get(ebx::max_addressable_ids::mask) ==
+            (ebx::max_addressable_ids::mask >> ebx::max_addressable_ids::from));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_ebx_initial_apic_id")
+{
+    using namespace cpuid::feature_information;
+
+    g_ebx_cpuid[addr] = 0xFFFFFFFFULL;
+    CHECK(ebx::initial_apic_id::get() ==
+            (ebx::initial_apic_id::mask >> ebx::initial_apic_id::from));
+    CHECK(ebx::initial_apic_id::get(ebx::initial_apic_id::mask) ==
+            (ebx::initial_apic_id::mask >> ebx::initial_apic_id::from));
+}
+
 TEST_CASE("intrinsics: cpuid_feature_information_ecx")
 {
     using namespace cpuid::feature_information;
@@ -530,6 +656,449 @@ TEST_CASE("intrinsics: cpuid_feature_information_ecx_rdrand")
     CHECK(ecx::rdrand::is_enabled(ecx::rdrand::mask));
     g_ecx_cpuid[addr] = 0x0;
     CHECK(ecx::rdrand::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = 0xFFFFFFFF;
+    CHECK(edx::get() == 0xFFFFFFFF);
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_fpu")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::fpu::mask;
+    CHECK(edx::fpu::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::fpu::is_disabled());
+
+    g_edx_cpuid[addr] = edx::fpu::mask;
+    CHECK(edx::fpu::is_enabled(edx::fpu::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::fpu::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_vme")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::vme::mask;
+    CHECK(edx::vme::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::vme::is_disabled());
+
+    g_edx_cpuid[addr] = edx::vme::mask;
+    CHECK(edx::vme::is_enabled(edx::vme::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::vme::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_de")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::de::mask;
+    CHECK(edx::de::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::de::is_disabled());
+
+    g_edx_cpuid[addr] = edx::de::mask;
+    CHECK(edx::de::is_enabled(edx::de::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::de::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_pse")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::pse::mask;
+    CHECK(edx::pse::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::pse::is_disabled());
+
+    g_edx_cpuid[addr] = edx::pse::mask;
+    CHECK(edx::pse::is_enabled(edx::pse::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::pse::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_tsc")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::tsc::mask;
+    CHECK(edx::tsc::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::tsc::is_disabled());
+
+    g_edx_cpuid[addr] = edx::tsc::mask;
+    CHECK(edx::tsc::is_enabled(edx::tsc::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::tsc::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_msr")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::msr::mask;
+    CHECK(edx::msr::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::msr::is_disabled());
+
+    g_edx_cpuid[addr] = edx::msr::mask;
+    CHECK(edx::msr::is_enabled(edx::msr::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::msr::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_pae")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::pae::mask;
+    CHECK(edx::pae::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::pae::is_disabled());
+
+    g_edx_cpuid[addr] = edx::pae::mask;
+    CHECK(edx::pae::is_enabled(edx::pae::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::pae::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_mce")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::mce::mask;
+    CHECK(edx::mce::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::mce::is_disabled());
+
+    g_edx_cpuid[addr] = edx::mce::mask;
+    CHECK(edx::mce::is_enabled(edx::mce::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::mce::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_cx8")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::cx8::mask;
+    CHECK(edx::cx8::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::cx8::is_disabled());
+
+    g_edx_cpuid[addr] = edx::cx8::mask;
+    CHECK(edx::cx8::is_enabled(edx::cx8::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::cx8::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_apic")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::apic::mask;
+    CHECK(edx::apic::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::apic::is_disabled());
+
+    g_edx_cpuid[addr] = edx::apic::mask;
+    CHECK(edx::apic::is_enabled(edx::apic::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::apic::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_sep")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::sep::mask;
+    CHECK(edx::sep::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::sep::is_disabled());
+
+    g_edx_cpuid[addr] = edx::sep::mask;
+    CHECK(edx::sep::is_enabled(edx::sep::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::sep::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_mtrr")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::mtrr::mask;
+    CHECK(edx::mtrr::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::mtrr::is_disabled());
+
+    g_edx_cpuid[addr] = edx::mtrr::mask;
+    CHECK(edx::mtrr::is_enabled(edx::mtrr::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::mtrr::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_pge")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::pge::mask;
+    CHECK(edx::pge::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::pge::is_disabled());
+
+    g_edx_cpuid[addr] = edx::pge::mask;
+    CHECK(edx::pge::is_enabled(edx::pge::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::pge::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_mca")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::mca::mask;
+    CHECK(edx::mca::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::mca::is_disabled());
+
+    g_edx_cpuid[addr] = edx::mca::mask;
+    CHECK(edx::mca::is_enabled(edx::mca::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::mca::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_cmov")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::cmov::mask;
+    CHECK(edx::cmov::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::cmov::is_disabled());
+
+    g_edx_cpuid[addr] = edx::cmov::mask;
+    CHECK(edx::cmov::is_enabled(edx::cmov::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::cmov::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_pat")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::pat::mask;
+    CHECK(edx::pat::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::pat::is_disabled());
+
+    g_edx_cpuid[addr] = edx::pat::mask;
+    CHECK(edx::pat::is_enabled(edx::pat::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::pat::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_pse_36")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::pse_36::mask;
+    CHECK(edx::pse_36::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::pse_36::is_disabled());
+
+    g_edx_cpuid[addr] = edx::pse_36::mask;
+    CHECK(edx::pse_36::is_enabled(edx::pse_36::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::pse_36::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_psn")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::psn::mask;
+    CHECK(edx::psn::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::psn::is_disabled());
+
+    g_edx_cpuid[addr] = edx::psn::mask;
+    CHECK(edx::psn::is_enabled(edx::psn::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::psn::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_clfsh")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::clfsh::mask;
+    CHECK(edx::clfsh::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::clfsh::is_disabled());
+
+    g_edx_cpuid[addr] = edx::clfsh::mask;
+    CHECK(edx::clfsh::is_enabled(edx::clfsh::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::clfsh::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_ds")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::ds::mask;
+    CHECK(edx::ds::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::ds::is_disabled());
+
+    g_edx_cpuid[addr] = edx::ds::mask;
+    CHECK(edx::ds::is_enabled(edx::ds::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::ds::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_acpi")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::acpi::mask;
+    CHECK(edx::acpi::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::acpi::is_disabled());
+
+    g_edx_cpuid[addr] = edx::acpi::mask;
+    CHECK(edx::acpi::is_enabled(edx::acpi::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::acpi::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_mmx")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::mmx::mask;
+    CHECK(edx::mmx::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::mmx::is_disabled());
+
+    g_edx_cpuid[addr] = edx::mmx::mask;
+    CHECK(edx::mmx::is_enabled(edx::mmx::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::mmx::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_fxsr")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::fxsr::mask;
+    CHECK(edx::fxsr::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::fxsr::is_disabled());
+
+    g_edx_cpuid[addr] = edx::fxsr::mask;
+    CHECK(edx::fxsr::is_enabled(edx::fxsr::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::fxsr::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_sse")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::sse::mask;
+    CHECK(edx::sse::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::sse::is_disabled());
+
+    g_edx_cpuid[addr] = edx::sse::mask;
+    CHECK(edx::sse::is_enabled(edx::sse::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::sse::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_sse2")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::sse2::mask;
+    CHECK(edx::sse2::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::sse2::is_disabled());
+
+    g_edx_cpuid[addr] = edx::sse2::mask;
+    CHECK(edx::sse2::is_enabled(edx::sse2::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::sse2::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_ss")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::ss::mask;
+    CHECK(edx::ss::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::ss::is_disabled());
+
+    g_edx_cpuid[addr] = edx::ss::mask;
+    CHECK(edx::ss::is_enabled(edx::ss::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::ss::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_htt")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::htt::mask;
+    CHECK(edx::htt::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::htt::is_disabled());
+
+    g_edx_cpuid[addr] = edx::htt::mask;
+    CHECK(edx::htt::is_enabled(edx::htt::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::htt::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_tm")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::tm::mask;
+    CHECK(edx::tm::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::tm::is_disabled());
+
+    g_edx_cpuid[addr] = edx::tm::mask;
+    CHECK(edx::tm::is_enabled(edx::tm::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::tm::is_disabled(0x0));
+}
+
+TEST_CASE("intrinsics: cpuid_feature_information_edx_pbe")
+{
+    using namespace cpuid::feature_information;
+
+    g_edx_cpuid[addr] = edx::pbe::mask;
+    CHECK(edx::pbe::is_enabled());
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::pbe::is_disabled());
+
+    g_edx_cpuid[addr] = edx::pbe::mask;
+    CHECK(edx::pbe::is_enabled(edx::pbe::mask));
+    g_edx_cpuid[addr] = 0x0;
+    CHECK(edx::pbe::is_disabled(0x0));
 }
 
 TEST_CASE("intrinsics: cpuid_extended_feature_flags")
