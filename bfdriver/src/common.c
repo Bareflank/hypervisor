@@ -403,7 +403,6 @@ common_start_vmm(void)
     int64_t cpuid = 0;
     int64_t ignore_ret = 0;
     int64_t caller_affinity = 0;
-    struct vmcall_registers_t regs;
 
     switch (common_vmm_status()) {
         case VMM_CORRUPT:
@@ -418,9 +417,6 @@ common_start_vmm(void)
 
     for (cpuid = 0, g_num_cpus_started = 0; cpuid < platform_num_cpus(); cpuid++) {
 
-        regs.r00 = VMCALL_START;
-        regs.r01 = VMCALL_MAGIC_NUMBER;
-
         ret = caller_affinity = platform_set_affinity(cpuid);
         if (caller_affinity < 0) {
             goto failure;
@@ -432,11 +428,6 @@ common_start_vmm(void)
         }
 
         g_num_cpus_started++;
-
-        _vmcall(&regs);
-        if (regs.r01 != 0) {
-            return ENTRY_ERROR_VMM_START_FAILED;
-        }
 
         platform_start();
         platform_restore_affinity(caller_affinity);
@@ -460,7 +451,6 @@ common_stop_vmm(void)
     int64_t ret = 0;
     int64_t cpuid = 0;
     int64_t caller_affinity = 0;
-    struct vmcall_registers_t regs;
 
     switch (common_vmm_status()) {
         case VMM_CORRUPT:
@@ -475,17 +465,8 @@ common_stop_vmm(void)
 
     for (cpuid = g_num_cpus_started - 1; cpuid >= 0 ; cpuid--) {
 
-        regs.r00 = VMCALL_STOP;
-        regs.r01 = VMCALL_MAGIC_NUMBER;
-
         ret = caller_affinity = platform_set_affinity(cpuid);
         if (caller_affinity < 0) {
-            goto corrupted;
-        }
-
-        _vmcall(&regs);
-        if (regs.r01 != 0) {
-            ret = ENTRY_ERROR_VMM_STOP_FAILED;
             goto corrupted;
         }
 

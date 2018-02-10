@@ -42,7 +42,7 @@ install:
   #
   # Nasm
   #
-  - ps: Start-FileDownload "http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/win64/nasm-2.13.01-installer-x64.exe" -FileName "nasm-installer-x64.exe"
+  - ps: Start-FileDownload "http://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win64/nasm-2.13.03-installer-x64.exe" -FileName "nasm-installer-x64.exe"
   - nasm-installer-x64.exe /S
 
   #

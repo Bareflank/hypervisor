@@ -792,6 +792,13 @@ add_config(
 # ------------------------------------------------------------------------------
 
 add_config(
+    CONFIG_NAME DEFAULT_VMM
+    CONFIG_TYPE STRING
+    DEFAULT_VAL bfvmm
+    DESCRIPTION "Default vmm"
+)
+
+add_config(
     CONFIG_NAME BFM_VMM_BIN_PATH
     CONFIG_TYPE PATH
     DEFAULT_VAL ${VMM_PREFIX_PATH}/bin

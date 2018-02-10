@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 
-#include <support/arch/intel_x64/test_support.h>
+#include "test_support.h"
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
@@ -3050,7 +3050,6 @@ setup_check_guest_interruptibility_state_enclave_interrupt_paths(
 
     g_path.setup = [&] {
         guest_interruptibility_state::blocking_by_mov_ss::disable();
-        g_cpuid_regs.ebx = 0U;
     };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
@@ -3132,7 +3131,6 @@ setup_check_guest_pending_debug_exceptions_rtm_paths(std::vector<struct control_
 
     g_path.setup = [&] {
         guest_pending_debug_exceptions::enabled_breakpoint::enable();
-        g_cpuid_regs.ebx = 0U;
     };
     g_path.throws_exception = true;
     cfg.push_back(g_path);

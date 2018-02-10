@@ -33,8 +33,7 @@ enum class command_line_parser_command {
     stop = 5,
     quick = 6,
     dump = 7,
-    status = 8,
-    vmcall = 9
+    status = 8
 };
 
 #ifdef _MSC_VER
@@ -58,11 +57,9 @@ class command_line_parser
 {
 public:
 
-    using registers_type = ioctl::registers_type;           ///< VMCall registers type
     using arg_type = std::string;                           ///< Arg type
     using arg_list_type = std::vector<arg_type>;            ///< Arg list type
     using filename_type = file::filename_type;              ///< Filename type
-    using cpuid_type = uint64_t;                            ///< CPUID type
     using vcpuid_type = ioctl::vcpuid_type;                 ///< VCPUID type
     using command_type = command_line_parser_command;       ///< Command type
 
@@ -117,15 +114,6 @@ public:
     ///
     virtual const filename_type &modules() const noexcept;
 
-    /// CPU ID
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @return returns the cpuid provided by the user
-    ///
-    virtual cpuid_type cpuid() const noexcept;
-
     /// vCPU ID
     ///
     /// @expects none
@@ -134,37 +122,6 @@ public:
     /// @return returns the vcpuid provided by the user
     ///
     virtual vcpuid_type vcpuid() const noexcept;
-
-    /// VMCall Registers
-    ///
-    /// When a VMCall command is provided, this struct is filled in which
-    /// is then sent to the driver to be delivered to the hypervisor for
-    /// processing.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @return returns the vmcall registers provided by the user
-    ///
-    virtual const registers_type &registers() const noexcept;
-
-    /// Input File
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @return input filename for "data" vmcall
-    ///
-    virtual const filename_type &ifile() const noexcept;
-
-    /// Output File
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @return output filename for "data" vmcall
-    ///
-    virtual const filename_type &ofile() const noexcept;
 
 private:
 
@@ -177,30 +134,12 @@ private:
     void parse_quick(arg_list_type &args);
     void parse_dump(arg_list_type &args);
     void parse_status(arg_list_type &args);
-    void parse_vmcall(arg_list_type &args);
-
-    void parse_vmcall_version(arg_list_type &args);
-    void parse_vmcall_registers(arg_list_type &args);
-    void parse_vmcall_string(arg_list_type &args);
-    void parse_vmcall_data(arg_list_type &args);
-    void parse_vmcall_event(arg_list_type &args);
-    void parse_vmcall_unittest(arg_list_type &args);
-
-    void parse_vmcall_string_unformatted(arg_list_type &args);
-    void parse_vmcall_string_json(arg_list_type &args);
-
-    void parse_vmcall_data_unformatted(arg_list_type &args);
 
 private:
 
     command_type m_cmd{};
     filename_type m_modules{};
-    cpuid_type m_cpuid{};
     vcpuid_type m_vcpuid{};
-    registers_type m_registers{};
-    filename_type m_ifile{};
-    filename_type m_ofile{};
-    arg_type m_string_data{};
 };
 
 #ifdef _MSC_VER

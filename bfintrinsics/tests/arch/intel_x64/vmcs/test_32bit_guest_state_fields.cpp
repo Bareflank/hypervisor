@@ -166,6 +166,7 @@ TEST_CASE("vmcs_guest_gdtr_limit")
 
     set_if_exists(200UL);
     CHECK(get_if_exists() == 200UL);
+    CHECK(size() == get() + 1UL);
 
     dump(0);
 }
@@ -180,6 +181,7 @@ TEST_CASE("vmcs_guest_idtr_limit")
 
     set_if_exists(200UL);
     CHECK(get_if_exists() == 200UL);
+    CHECK(size() == get() + 1UL);
 
     dump(0);
 }

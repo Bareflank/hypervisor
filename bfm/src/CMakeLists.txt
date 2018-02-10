@@ -46,14 +46,6 @@ else()
     message(FATAL_ERROR "Unsupported OS: ${BUILD_TARGET_OS}")
 endif()
 
-if(BUILD_TARGET_ARCH STREQUAL "x86_64")
-    list(APPEND SOURCES
-        arch/intel_x64/bfvmcall.asm
-    )
-else()
-    message(FATAL_ERROR "Unsupported architecture: ${BUILD_TARGET_ARCH}")
-endif()
-
 list(APPEND SOURCES
     command_line_parser.cpp
     ioctl_driver.cpp

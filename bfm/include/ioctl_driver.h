@@ -46,7 +46,6 @@ class ioctl_driver
 public:
 
     using status_type = ioctl::status_type;                         ///< Status type
-    using registers_type = command_line_parser::registers_type;     ///< VMCall registers type
     using filename_type = std::string;                              ///< Filename type
     using list_type = std::vector<std::string>;                     ///< List type
 
@@ -94,16 +93,6 @@ private:
     void quick_vmm();
     void dump_vmm();
     void vmm_status();
-    void vmcall();
-
-    void vmcall_send_regs(registers_type &regs);
-    void vmcall_versions(registers_type &regs);
-    void vmcall_registers(registers_type &regs);
-    void vmcall_data(registers_type &regs);
-    void vmcall_data_string(registers_type &regs);
-    void vmcall_data_binary(registers_type &regs);
-    void vmcall_event(registers_type &regs);
-    void vmcall_unittest(registers_type &regs);
 
     status_type get_status() const;
 

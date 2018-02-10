@@ -16,18 +16,42 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VMCS_INTEL_X64_RESUME_H
-#define VMCS_INTEL_X64_RESUME_H
-
-#include "../state_save.h"
-
-/// Resume VMCS
 ///
-/// Performs a VMRESUME, executing the guest described by this VMCS. This
-/// function can be executed by the exit handler when it is done emulating
-/// and instruction, or it can be executed to schedule another guest
+/// @file bfobject.h
 ///
-extern "C" void vmcs_resume(
-    bfvmm::intel_x64::state_save *state_save) noexcept;
+
+#ifndef BFOBJECT_H
+#define BFOBJECT_H
+
+/// User Data
+///
+/// This defines the base class used for passing around subclasses.
+/// This is mainly used so that dynamic_cast can be used if desired
+/// for casting and deletion.
+///
+class bfobject
+{
+public:
+
+    /// Default Constructor
+    ///
+    bfobject() = default;
+
+    /// Default Destructor
+    ///
+    virtual ~bfobject() = default;
+
+public:
+
+    /// @cond
+
+    bfobject(bfobject &&) noexcept = delete;
+    bfobject &operator=(bfobject &&) noexcept = delete;
+
+    bfobject(const bfobject &) = delete;
+    bfobject &operator=(const bfobject &) = delete;
+
+    /// @endcond
+};
 
 #endif

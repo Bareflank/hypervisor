@@ -20,167 +20,95 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
-TEST_CASE("vmcs: launch_success")
+auto
+setup_vmcs(MockRepository &mocks)
 {
-    MockRepository mocks;
-    auto mm = setup_mm(mocks);
-    auto host_state = setup_vmcs_state(mocks);
-    auto guest_state = setup_vmcs_state(mocks);
-
     setup_msrs();
+    setup_mm(mocks);
+    setup_pt(mocks);
 
-    bfvmm::intel_x64::vmcs vmcs{};
-    CHECK_NOTHROW(vmcs.launch(host_state, guest_state));
+    return bfvmm::intel_x64::vmcs{0x0};
 }
 
-TEST_CASE("vmcs: launch_vmlaunch_failure")
+TEST_CASE("vmcs: construct / destruct")
 {
     MockRepository mocks;
-    auto mm = setup_mm(mocks);
-    auto host_state = setup_vmcs_state(mocks);
-    auto guest_state = setup_vmcs_state(mocks);
+    auto vmcs = setup_vmcs(mocks);
 
-    setup_msrs();
-
-    mocks.OnCall(guest_state, bfvmm::intel_x64::vmcs_state::is_guest).Return(true);
-    mocks.OnCallFunc(vmcs_launch);
-
-    bfvmm::intel_x64::vmcs vmcs{};
-    CHECK_THROWS(vmcs.launch(host_state, guest_state));
+    CHECK_NOTHROW(bfvmm::intel_x64::vmcs{0});
 }
 
-TEST_CASE("vmcs: launch_vmlaunch_demote_failure")
+TEST_CASE("vmcs: launch demote success")
 {
     MockRepository mocks;
-    auto mm = setup_mm(mocks);
-    auto host_state = setup_vmcs_state(mocks);
-    auto guest_state = setup_vmcs_state(mocks);
+    auto vmcs = setup_vmcs(mocks);
 
-    setup_msrs();
+    CHECK_NOTHROW(vmcs.launch());
+}
 
-    mocks.OnCallFunc(debug::dump);
+TEST_CASE("vmcs: launch demote failure")
+{
+    MockRepository mocks;
+    auto vmcs = setup_vmcs(mocks);
+
     mocks.OnCallFunc(bfvmm::intel_x64::check::all);
-    mocks.OnCall(guest_state, bfvmm::intel_x64::vmcs_state::is_guest).Return(false);
+    mocks.OnCallFunc(::intel_x64::vmcs::debug::dump);
 
     g_vmlaunch_fails = true;
     auto ___ = gsl::finally([&] {
         g_vmlaunch_fails = false;
     });
 
-    bfvmm::intel_x64::vmcs vmcs{};
-    CHECK_THROWS(vmcs.launch(host_state, guest_state));
+    CHECK_THROWS(vmcs.launch());
 }
 
-TEST_CASE("vmcs: launch_create_vmcs_region_failure")
+TEST_CASE("vmcs: launch failure")
 {
     MockRepository mocks;
-    auto mm = setup_mm(mocks);
-    auto host_state = setup_vmcs_state(mocks);
-    auto guest_state = setup_vmcs_state(mocks);
+    setup_vmcs(mocks);
 
-    setup_msrs();
+    mocks.OnCallFunc(bfvmm::intel_x64::check::all);
+    mocks.OnCallFunc(::intel_x64::vmcs::debug::dump);
 
-    g_virt_to_phys_fails = true;
-    auto ___ = gsl::finally([&] {
-        g_virt_to_phys_fails = false;
-    });
-
-    bfvmm::intel_x64::vmcs vmcs{};
-    CHECK_THROWS(vmcs.launch(host_state, guest_state));
+    bfvmm::intel_x64::vmcs vmcs{0xF0000000};
+    CHECK_THROWS(vmcs.launch());
 }
 
-TEST_CASE("vmcs: launch_create_exit_handler_stack_failure")
+TEST_CASE("vmcs: load failure")
 {
     MockRepository mocks;
-    auto mm = setup_mm(mocks);
-    auto host_state = setup_vmcs_state(mocks);
-    auto guest_state = setup_vmcs_state(mocks);
-
-    setup_msrs();
-
-    g_new_throws_bad_alloc = STACK_SIZE * 2;
-    auto ___ = gsl::finally([&] {
-        g_new_throws_bad_alloc = 0;
-    });
-
-    bfvmm::intel_x64::vmcs vmcs{};
-    CHECK_THROWS(vmcs.launch(host_state, guest_state));
-}
-
-TEST_CASE("vmcs: launch_clear_failure")
-{
-    MockRepository mocks;
-    auto mm = setup_mm(mocks);
-
-    setup_msrs();
-
-    g_vmclear_fails = true;
-    auto ___ = gsl::finally([&] {
-        g_vmclear_fails = false;
-    });
-
-    bfvmm::intel_x64::vmcs vmcs{};
-    CHECK_THROWS(vmcs.clear());
-}
-
-TEST_CASE("vmcs: launch_load_failure")
-{
-    MockRepository mocks;
-    auto mm = setup_mm(mocks);
-
-    setup_msrs();
+    auto vmcs = setup_vmcs(mocks);
 
     g_vmload_fails = true;
     auto ___ = gsl::finally([&] {
         g_vmload_fails = false;
     });
 
-    bfvmm::intel_x64::vmcs vmcs{};
     CHECK_THROWS(vmcs.load());
 }
 
-TEST_CASE("vmcs: promote_failure")
+TEST_CASE("vmcs: promote failure")
 {
     MockRepository mocks;
-    auto mm = setup_mm(mocks);
+    auto vmcs = setup_vmcs(mocks);
 
-    mocks.OnCallFunc(vmcs_promote);
-
-    bfvmm::intel_x64::vmcs vmcs{};
-    CHECK_THROWS(vmcs.promote(reinterpret_cast<char *>(0x1000UL)));
+    CHECK_THROWS(vmcs.promote());
 }
 
-TEST_CASE("vmcs: resume_failure")
+TEST_CASE("vmcs: resume failure")
 {
     MockRepository mocks;
-    auto mm = setup_mm(mocks);
+    auto vmcs = setup_vmcs(mocks);
 
-    mocks.OnCallFunc(vmcs_resume);
-
-    bfvmm::intel_x64::vmcs vmcs{};
     CHECK_THROWS(vmcs.resume());
 }
 
-TEST_CASE("vmcs: clear")
+TEST_CASE("vmcs: save state")
 {
-    bfvmm::intel_x64::vmcs vmcs{};
-    CHECK_NOTHROW(vmcs.clear());
-}
+    MockRepository mocks;
+    auto vmcs = setup_vmcs(mocks);
 
-TEST_CASE("vmcs: set_pre_launch_delegate")
-{
-    bfvmm::intel_x64::vmcs::pre_launch_delegate_t d;
-
-    bfvmm::intel_x64::vmcs vmcs{};
-    CHECK_NOTHROW(vmcs.set_pre_launch_delegate(d));
-}
-
-TEST_CASE("vmcs: set_post_launch_delegate")
-{
-    bfvmm::intel_x64::vmcs::post_launch_delegate_t d;
-
-    bfvmm::intel_x64::vmcs vmcs{};
-    CHECK_NOTHROW(vmcs.set_post_launch_delegate(d));
+    CHECK(vmcs.save_state() != nullptr);
 }
 
 #endif

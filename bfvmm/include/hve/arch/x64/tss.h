@@ -27,20 +27,22 @@
 
 #include <bfexports.h>
 
-#ifndef STATIC_INTRINSICS
-#ifdef SHARED_INTRINSICS
-#define EXPORT_INTRINSICS EXPORT_SYM
+#ifndef STATIC_HVE
+#ifdef SHARED_HVE
+#define EXPORT_HVE EXPORT_SYM
 #else
-#define EXPORT_INTRINSICS IMPORT_SYM
+#define EXPORT_HVE IMPORT_SYM
 #endif
 #else
-#define EXPORT_INTRINSICS
+#define EXPORT_HVE
 #endif
 
 // -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
 namespace x64
 {
 
@@ -48,7 +50,7 @@ namespace x64
 
 /* @cond */
 
-struct EXPORT_INTRINSICS tss {
+struct EXPORT_HVE tss {
     uint32_t reserved1{0};
     uint64_t rsp0{0};
     uint64_t rsp1{0};
@@ -72,6 +74,7 @@ struct EXPORT_INTRINSICS tss {
 
 #pragma pack(pop)
 
+}
 }
 
 #endif

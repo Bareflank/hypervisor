@@ -108,6 +108,48 @@ public:
     constexpr static delegate create(T &obj) noexcept
     { return delegate(std::addressof(obj), member_stub<T, FUNC>); }
 
+    /// Create (Member Function Pointer Class Pointer)
+    ///
+    /// Example usage:
+    /// @code
+    /// test_class t;
+    /// auto d = delegate<int(int)>::create<test_class, &test_class::foo>(&t);
+    /// std::cout << "d: " << d(1) << '\n';
+    /// @endcode
+    ///
+    /// @param obj a pointer to the class who's member function will
+    ///     be executed.
+    /// @return resulting delegate
+    ///
+    template <
+        typename T,
+        RET(T::*FUNC)(PARAMS...),
+        typename = std::enable_if<std::is_class<T>::value>
+        >
+    constexpr static delegate create(T *obj) noexcept
+    { return delegate(obj, member_stub<T, FUNC>); }
+
+    /// Create (Member Function Unique Pointer)
+    ///
+    /// Example usage:
+    /// @code
+    /// auto t = make_unique<test_class>();
+    /// auto d = delegate<int(int)>::create<test_class, &test_class::foo>(t);
+    /// std::cout << "d: " << d(1) << '\n';
+    /// @endcode
+    ///
+    /// @param obj a pointer to the class who's member function will
+    ///     be executed.
+    /// @return resulting delegate
+    ///
+    template <
+        typename T,
+        RET(T::*FUNC)(PARAMS...),
+        typename = std::enable_if<std::is_class<T>::value>
+        >
+    constexpr static delegate create(const std::unique_ptr<T> &obj) noexcept
+    { return delegate(obj.get(), member_stub<T, FUNC>); }
+
     /// Create (Const Member Function Pointer)
     ///
     /// Example usage:

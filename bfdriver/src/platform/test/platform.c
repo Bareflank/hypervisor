@@ -23,7 +23,6 @@
 
 #include <bfplatform.h>
 #include <bfconstants.h>
-#include <bfvmcallinterface.h>
 
 #ifdef WIN64
 #include <windows.h>
@@ -117,7 +116,3 @@ platform_get_current_cpu_num(void)
 void
 platform_restore_preemption(void)
 { }
-
-void
-_vmcall(struct vmcall_registers_t *regs)
-{ regs->r01 = 0; }

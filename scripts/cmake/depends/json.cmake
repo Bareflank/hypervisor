@@ -16,19 +16,13 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if(ENABLE_BUILD_VMM OR ENABLE_BUILD_USERSPACE OR ENABLE_BUILD_TEST)
+if(ENABLE_BUILD_USERSPACE OR ENABLE_BUILD_TEST)
     message(STATUS "Including dependency: json")
 
     download_dependency(
         json
         URL         ${JSON_URL}
         URL_MD5     ${JSON_URL_MD5}
-    )
-endif()
-
-if(ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST)
-    add_dependency(
-        json vmm
     )
 endif()
 

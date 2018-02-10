@@ -41,7 +41,4 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
     <ClCompile Include="platform.c" />
     <ClCompile Include="queue.c" />
   </ItemGroup>
-  <ItemGroup>
-    <MASM Include="vmcall.asm" />
-  </ItemGroup>
 </Project>

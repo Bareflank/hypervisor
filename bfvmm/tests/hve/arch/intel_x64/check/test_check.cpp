@@ -14,24 +14,20 @@
 //
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef EXIT_HANDLER_INTEL_X64_SUPPORT_H
-#define EXIT_HANDLER_INTEL_X64_SUPPORT_H
+#include "test_support.h"
 
-#include "exit_handler.h"
+#ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
-/// Exit Handler Entry
-///
-/// This is the starting point of the VMM. It is written in pure assembly
-/// in order to ensure the state of the guest is handled properly. This
-/// code saves / restores the guest's CPU state, and then hands control off
-/// to the "C" portion of the code to continue execution, and begin the
-/// process of handling the VM exit.
-///
-/// @expects none
-/// @ensures none
-///
-extern "C" EXPORT_HVE void exit_handler_entry(void) noexcept;
+TEST_CASE("check")
+{
+    MockRepository mocks;
+
+    mocks.OnCallFunc(bfvmm::intel_x64::check::vmx_controls_all);
+    mocks.OnCallFunc(bfvmm::intel_x64::check::host_state_all);
+    mocks.OnCallFunc(bfvmm::intel_x64::check::guest_state_all);
+
+    CHECK_NOTHROW(bfvmm::intel_x64::check::all());
+}
 
 #endif

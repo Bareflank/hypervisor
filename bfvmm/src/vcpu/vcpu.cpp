@@ -16,13 +16,16 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <bfdebug.h>
+#include <bfconstants.h>
+
 #include <vcpu/vcpu.h>
 
 namespace bfvmm
 {
 
 vcpu::vcpu(vcpuid::type id) :
-    m_id(id)
+    m_id{id}
 {
     if ((id & vcpuid::reserved) != 0) {
         throw std::invalid_argument("invalid vcpuid");
@@ -30,39 +33,55 @@ vcpu::vcpu(vcpuid::type id) :
 }
 
 void
-vcpu::init(user_data *data)
+vcpu::run(bfobject *data)
 {
-    (void) data;
+    for (const auto &d : m_run_delegates) {
+        d(data);
+    }
+
+    m_is_running = true;
+
+    if (this->is_host_vm_vcpu()) {
+        bfdebug_info(0, "host os is" bfcolor_green " now " bfcolor_end "in a vm");
+    }
+}
+
+void
+vcpu::hlt(bfobject *data)
+{
+    for (const auto &d : m_hlt_delegates) {
+        d(data);
+    }
+
+    m_is_running = false;
+
+    if (this->is_host_vm_vcpu()) {
+        bfdebug_info(0, "host os is" bfcolor_red " not " bfcolor_end "in a vm");
+    }
+}
+
+void
+vcpu::init(bfobject *data)
+{
+    for (const auto &d : m_init_delegates) {
+        d(data);
+    }
 
     m_is_initialized = true;
 }
 
 void
-vcpu::fini(user_data *data)
+vcpu::fini(bfobject *data)
 {
-    (void) data;
-
     if (m_is_running) {
         this->hlt();
     }
 
+    for (const auto &d : m_fini_delegates) {
+        d(data);
+    }
+
     m_is_initialized = false;
-}
-
-void
-vcpu::run(user_data *data)
-{
-    (void) data;
-
-    m_is_running = true;
-}
-
-void
-vcpu::hlt(user_data *data)
-{
-    (void) data;
-
-    m_is_running = false;
 }
 
 }

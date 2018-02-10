@@ -24,10 +24,8 @@
 
 #include <bftypes.h>
 #include <bfvcpuid.h>
-#include <bfaffinity.h>
 #include <bfelf_loader.h>
 #include <bfdriverinterface.h>
-#include <bfvmcallinterface.h>
 
 #include <ioctl.h>
 #include <ioctl_driver.h>
@@ -74,12 +72,6 @@ void
 ioctl::call_ioctl_vmm_status(gsl::not_null<status_pointer> status)
 {
     bfignored(status);
-}
-
-extern "C" void
-_vmcall(vmcall_registers_t *regs)
-{
-    bfignored(regs);
 }
 
 TEST_CASE("support")
