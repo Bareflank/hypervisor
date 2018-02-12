@@ -17,6 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <bfgsl.h>
+#include <bfarch.h>
+#include <bfsupport.h>
 #include <debug/serial/serial_port_pl011.h>
 
 namespace bfvmm
@@ -24,9 +26,29 @@ namespace bfvmm
 
 using namespace serial_pl011;
 
+serial_port_pl011::serial_port_pl011() noexcept
+{
+#ifdef BF_AARCH64
+    auto platform_info = get_platform_info();
+    auto port = platform_info
+        ? reinterpret_cast<port_type>(platform_info->serial_address)
+        : DEFAULT_COM_PORT;
+    init(port);
+#else
+    init(DEFAULT_COM_PORT);
+#endif
+}
+
 serial_port_pl011::serial_port_pl011(serial_port_pl011::port_type port) noexcept :
     m_port(port)
 {
+    init(port);
+}
+
+void serial_port_pl011::init(serial_port_pl011::port_type port) noexcept
+{
+    m_port = port;
+
     auto bits = offset_ind(uartlcr_h_reg);
 
     bits |= uartlcr_h_fifo_enable;
