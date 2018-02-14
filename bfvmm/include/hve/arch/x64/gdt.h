@@ -479,8 +479,8 @@ public:
 
     /// @cond
 
-    gdt(gdt &&) noexcept = delete;
-    gdt &operator=(gdt &&) noexcept = delete;
+    gdt(gdt &&) noexcept = default;
+    gdt &operator=(gdt &&) noexcept = default;
 
     gdt(const gdt &) = delete;
     gdt &operator=(const gdt &) = delete;

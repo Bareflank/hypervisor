@@ -27,13 +27,16 @@
 # - working
 #   - build
 #   - hypervisor
-#   - extended_apis
+#   - extended_apis                     # optional
+#   - hypervisor_example_vpid           # optional
+#   - hypervisor_example_rdtsc          # optional
+#   - hypervisor_example_cpuidcount     # optional
+#   - hypervisor_example_msr_bitmap     # optional
 #   - config.cmake
 #
 # Change the options as needed, and then from the build folder, run the
 # following:
 #
-# > cd working/build
 # > cmake ../hypervisor
 # > make -j<# of cpus>
 #
@@ -54,7 +57,14 @@
 # any of the Bareflank repos, this option will be needed as it enables
 # formatting, static / dynamic analysis, etc...
 #
-set(ENABLE_DEVELOPER_MODE ON)
+set(ENABLE_DEVELOPER_MODE OFF)
+
+# Tests only
+#
+# If you are only interested in compiling the tests, this option can speed up
+# your build times .
+#
+set(ENABLE_TESTS_ONLY OFF)
 
 # Extended APIs
 #
@@ -63,11 +73,14 @@ set(ENABLE_DEVELOPER_MODE ON)
 #
 set(ENABLE_EXTENDED_APIS OFF)
 
-# Tests only
+# Examples
 #
-# If you are only interested in compiling the tests, this option can speed up
-# your build times .
-set(ENABLE_TESTS_ONLY OFF)
+# These options enable the examples
+#
+set(ENABLE_HYPERVISOR_EXAMPLE_VPID OFF)
+set(ENABLE_HYPERVISOR_EXAMPLE_RDTSC OFF)
+set(ENABLE_HYPERVISOR_EXAMPLE_CPUIDCOUNT OFF)
+set(ENABLE_HYPERVISOR_EXAMPLE_MSR_BITMAP OFF)
 
 # ------------------------------------------------------------------------------
 # Config Variables (No Need To Modify)
@@ -113,10 +126,10 @@ endif()
 #
 set(CACHE_DIR ${CMAKE_CURRENT_LIST_DIR}/cache)
 
-# Enable Build Bits
+# Enable Bits
 #
-# There are several enable bits that can be used to enable / disable which
-# parts of the hypervisor are built.
+# There are several enable bits that can be used to enable additional
+# functionality, or reduce which portions of the hypervisor are built.
 #
 if(ENABLE_TESTS_ONLY)
     set(ENABLE_BUILD_VMM OFF)
@@ -132,12 +145,6 @@ else()
     set(ENABLE_BUILD_TEST OFF)
 endif()
 
-# Enable Tool Bits
-#
-# These enable bits turn on / off different tools used by developers and the
-# CI environments to ensure Bareflank meets all static / dynamic checks. The
-# only check that is not included are the undefined sanatizers.
-#
 if(ENABLE_DEVELOPER_MODE)
     set(ENABLE_ASAN ON)
     set(ENABLE_TIDY ON)
@@ -161,14 +168,45 @@ else()
     set(ENABLE_COMPILER_WARNINGS OFF)
 endif()
 
+# ------------------------------------------------------------------------------
 # Extended APIs
-#
-# This turns on the extended APIs, and assumes the repo is located in the same
-# directory as this configuration file.
-#
+# ------------------------------------------------------------------------------
+
 if(ENABLE_EXTENDED_APIS)
     set_bfm_vmm(eapis_vmm)
     list(APPEND EXTENSION
         ${CMAKE_CURRENT_LIST_DIR}/extended_apis/CMakeLists.txt
+    )
+endif()
+
+# ------------------------------------------------------------------------------
+# Examples
+# ------------------------------------------------------------------------------
+
+if(ENABLE_HYPERVISOR_EXAMPLE_VPID)
+    set_bfm_vmm(example_vmm)
+    list(APPEND EXTENSION
+        ${CMAKE_CURRENT_LIST_DIR}/hypervisor_example_vpid
+    )
+endif()
+
+if(ENABLE_HYPERVISOR_EXAMPLE_RDTSC)
+    set_bfm_vmm(example_vmm)
+    list(APPEND EXTENSION
+        ${CMAKE_CURRENT_LIST_DIR}/hypervisor_example_rdtsc
+    )
+endif()
+
+if(ENABLE_HYPERVISOR_EXAMPLE_CPUIDCOUNT)
+    set_bfm_vmm(example_vmm)
+    list(APPEND EXTENSION
+        ${CMAKE_CURRENT_LIST_DIR}/hypervisor_example_cpuidcount
+    )
+endif()
+
+if(ENABLE_HYPERVISOR_EXAMPLE_MSR_BITMAP)
+    set_bfm_vmm(example_vmm)
+    list(APPEND EXTENSION
+        ${CMAKE_CURRENT_LIST_DIR}/hypervisor_example_msr_bitmap
     )
 endif()

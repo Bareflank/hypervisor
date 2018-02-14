@@ -17,20 +17,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 list(APPEND SOURCES
-    arch/intel_x64/exit_handler/exit_handler.cpp
-    arch/intel_x64/exit_handler/exit_handler_entry.cpp
-    arch/intel_x64/vmcs/vmcs_state_hvm.cpp
-    arch/intel_x64/vmcs/vmcs_state_vmm.cpp
+    arch/intel_x64/vmx/vmx.cpp
     arch/intel_x64/vmcs/vmcs.cpp
-    arch/intel_x64/vmxon/vmxon.cpp
+    arch/intel_x64/exit_handler/exit_handler.cpp
 )
 
 if(NOT WIN32 AND NOT ENABLE_MOCKING)
     list(APPEND SOURCES
-        arch/intel_x64/exit_handler/exit_handler_support.asm
         arch/intel_x64/vmcs/vmcs_launch.asm
         arch/intel_x64/vmcs/vmcs_promote.asm
         arch/intel_x64/vmcs/vmcs_resume.asm
+        arch/intel_x64/exit_handler/exit_handler_entry.asm
     )
 endif()
 

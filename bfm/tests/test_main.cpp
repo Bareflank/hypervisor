@@ -80,14 +80,6 @@ TEST_CASE("protected_main help")
     CHECK_NOTHROW(protected_main({"-h"}));
 }
 
-TEST_CASE("protected_main affinity fail")
-{
-    MockRepository mocks;
-    mocks.OnCallFunc(bfm_process).Return(0);
-
-    CHECK_THROWS(protected_main({"stop", "--cpuid", "31"}));
-}
-
 TEST_CASE("protected_main success")
 {
     MockRepository mocks;

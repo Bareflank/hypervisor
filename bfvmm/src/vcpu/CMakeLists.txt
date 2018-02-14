@@ -22,10 +22,6 @@ list(APPEND SOURCES
 )
 
 if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    list(APPEND SOURCES
-        arch/intel_x64/vcpu.cpp
-    )
-
     if(NOT ENABLE_MOCKING)
         list(APPEND SOURCES
             arch/intel_x64/vcpu_factory.cpp

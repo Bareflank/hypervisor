@@ -18,91 +18,94 @@
 
 #include <bfgsl.h>
 #include <bfdebug.h>
+#include <bfexception.h>
 
-#include <hve/arch/intel_x64/vmxon/vmxon.h>
+#include <hve/arch/intel_x64/vmx/vmx.h>
 #include <memory_manager/memory_manager_x64.h>
 
 #include <intrinsics.h>
+
+// -----------------------------------------------------------------------------
+// Implementation
+// -----------------------------------------------------------------------------
 
 namespace bfvmm
 {
 namespace intel_x64
 {
 
-void
-vmxon::start()
+vmx::vmx() :
+    m_vmx_region{std::make_unique<uint32_t[]>(1024)},
+    m_vmx_region_phys{g_mm->virtptr_to_physint(m_vmx_region.get())}
 {
+    this->setup_vmx_region();
+
     this->check_cpuid_vmx_supported();
     this->check_vmx_capabilities_msr();
-    this->check_ia32_vmx_cr0_fixed_msr();
-    this->check_ia32_feature_control_msr();
-    this->check_v8086_disabled();
-
-    this->create_vmxon_region();
-
-    auto ___ = gsl::on_failure([&] {
-        this->release_vmxon_region();
-    });
 
     this->enable_vmx();
 
-    auto ___ = gsl::on_failure([&] {
+    this->check_ia32_vmx_cr0_fixed_msr();
+    this->check_ia32_vmx_cr4_fixed_msr();
+    this->check_ia32_feature_control_msr();
+    this->check_v8086_disabled();
+
+    this->execute_vmxon();
+
+    bfdebug_pass(1, "vmx: complete");
+}
+
+vmx::~vmx()
+{
+    guard_exceptions([&]() {
+        this->execute_vmxoff();
         this->disable_vmx();
     });
 
-    this->check_ia32_vmx_cr4_fixed_msr();
-    this->execute_vmxon();
+    bfdebug_pass(1, "~vmx: complete");
 }
 
 void
-vmxon::stop()
-{
-    this->execute_vmxoff();
-    this->disable_vmx();
-    this->release_vmxon_region();
-}
-
-void
-vmxon::check_cpuid_vmx_supported()
+vmx::check_cpuid_vmx_supported()
 {
     if (::intel_x64::cpuid::feature_information::ecx::vmx::is_disabled()) {
-        throw std::logic_error("VMX extensions not supported");
+        throw std::runtime_error("VMX extensions not supported");
     }
 
     bfdebug_pass(1, "check vmx supported");
 }
 
 void
-vmxon::check_vmx_capabilities_msr()
+vmx::check_vmx_capabilities_msr()
 {
     if (::intel_x64::msrs::ia32_vmx_basic::physical_address_width::is_enabled()) {
-        throw std::logic_error("invalid physical address width");
+        throw std::runtime_error("invalid physical address width");
     }
 
     bfdebug_pass(1, "check vmx capabilities physical address width");
 
     if (::intel_x64::msrs::ia32_vmx_basic::memory_type::get() != x64::memory_type::write_back) {
-        throw std::logic_error("invalid memory type");
+        throw std::runtime_error("invalid memory type");
     }
 
     bfdebug_pass(1, "check vmx capabilities memory type");
 
     if (::intel_x64::msrs::ia32_vmx_basic::true_based_controls::is_disabled()) {
-        throw std::logic_error("invalid vmx true based controls");
+        throw std::runtime_error("invalid vmx true based controls");
     }
 
     bfdebug_pass(1, "check vmx capabilities true based controls supported");
 }
 
 void
-vmxon::check_ia32_vmx_cr0_fixed_msr()
+vmx::check_ia32_vmx_cr0_fixed_msr()
 {
     auto cr0 = ::intel_x64::cr0::get();
     auto ia32_vmx_cr0_fixed0 = ::intel_x64::msrs::ia32_vmx_cr0_fixed0::get();
     auto ia32_vmx_cr0_fixed1 = ::intel_x64::msrs::ia32_vmx_cr0_fixed1::get();
 
     if (0 != ((~cr0 & ia32_vmx_cr0_fixed0) | (cr0 & ~ia32_vmx_cr0_fixed1))) {
-        throw std::logic_error("invalid cr0");
+        throw std::runtime_error("invalid cr0");
     }
 
     bfdebug_transaction(1, [&](std::string * msg) {
@@ -114,14 +117,14 @@ vmxon::check_ia32_vmx_cr0_fixed_msr()
 }
 
 void
-vmxon::check_ia32_vmx_cr4_fixed_msr()
+vmx::check_ia32_vmx_cr4_fixed_msr()
 {
     auto cr4 = ::intel_x64::cr4::get();
     auto ia32_vmx_cr4_fixed0 = ::intel_x64::msrs::ia32_vmx_cr4_fixed0::get();
     auto ia32_vmx_cr4_fixed1 = ::intel_x64::msrs::ia32_vmx_cr4_fixed1::get();
 
     if (0 != ((~cr4 & ia32_vmx_cr4_fixed0) | (cr4 & ~ia32_vmx_cr4_fixed1))) {
-        throw std::logic_error("invalid cr4");
+        throw std::runtime_error("invalid cr4");
     }
 
     bfdebug_transaction(1, [&](std::string * msg) {
@@ -133,7 +136,7 @@ vmxon::check_ia32_vmx_cr4_fixed_msr()
 }
 
 void
-vmxon::check_ia32_feature_control_msr()
+vmx::check_ia32_feature_control_msr()
 {
     if (::intel_x64::msrs::ia32_feature_control::lock_bit::is_enabled()) {
         bfdebug_pass(1, "check vmx feature controls lock bit");
@@ -150,94 +153,59 @@ vmxon::check_ia32_feature_control_msr()
 }
 
 void
-vmxon::check_v8086_disabled()
+vmx::check_v8086_disabled()
 {
     if (::x64::rflags::virtual_8086_mode::is_enabled()) {
-        throw std::logic_error("v8086 mode is not supported");
+        throw std::runtime_error("v8086 mode is not supported");
     }
 
     bfdebug_pass(1, "check v8086 disabled");
 }
 
 void
-vmxon::create_vmxon_region()
+vmx::setup_vmx_region()
 {
-    auto ___ = gsl::on_failure([&]
-    { this->release_vmxon_region(); });
-
-    m_vmxon_region = std::make_unique<uint32_t[]>(1024);
-    m_vmxon_region_phys = g_mm->virtptr_to_physint(m_vmxon_region.get());
-
-    gsl::span<uint32_t> id{m_vmxon_region.get(), 1024};
+    gsl::span<uint32_t> id{m_vmx_region.get(), 1024};
     id[0] = gsl::narrow<uint32_t>(::intel_x64::msrs::ia32_vmx_basic::revision_id::get());
 
     bfdebug_transaction(1, [&](std::string * msg) {
-        bfdebug_pass(1, "create vmxon region", msg);
-        bfdebug_subnhex(1, "virt address", m_vmxon_region.get(), msg);
-        bfdebug_subnhex(1, "phys address", m_vmxon_region_phys, msg);
+        bfdebug_pass(1, "vmx region", msg);
+        bfdebug_subnhex(1, "virt address", m_vmx_region.get(), msg);
+        bfdebug_subnhex(1, "phys address", m_vmx_region_phys, msg);
     });
 }
 
 void
-vmxon::release_vmxon_region() noexcept
-{
-    bfdebug_transaction(1, [&](std::string * msg) {
-        bfdebug_pass(1, "release vmxon region", msg);
-        bfdebug_subnhex(1, "virt address", m_vmxon_region.get(), msg);
-        bfdebug_subnhex(1, "phys address", m_vmxon_region_phys, msg);
-    });
-
-    m_vmxon_region.reset();
-    m_vmxon_region_phys = 0;
-}
-
-void
-vmxon::enable_vmx()
+vmx::enable_vmx()
 {
     ::intel_x64::cr4::vmx_enable_bit::enable();
 
     if (::intel_x64::cr4::vmx_enable_bit::is_disabled()) {
-        throw std::logic_error("failed to enable vmx");
+        throw std::runtime_error("failed to enable vmx");
     }
 
     bfdebug_pass(1, "vmx enabled");
 }
 
 void
-vmxon::disable_vmx() noexcept
+vmx::disable_vmx()
 {
     ::intel_x64::cr4::vmx_enable_bit::disable();
     bfdebug_test(1, "disable vmx", ::intel_x64::cr4::vmx_enable_bit::is_disabled());
 }
 
 void
-vmxon::execute_vmxon()
+vmx::execute_vmxon()
 {
-    auto ___ = gsl::on_success([&]
-    { m_vmxon_enabled = true; });
-
-    if (m_vmxon_enabled) {
-        throw std::logic_error("vmxon has already been executed");
-    }
-
-    ::intel_x64::vmx::on(&m_vmxon_region_phys);
-    bfdebug_pass(1, "vmxon successfully executed");
+    ::intel_x64::vmx::on(&m_vmx_region_phys);
+    bfdebug_pass(1, "execute_vmxon: vmxon successfully executed");
 }
 
 void
-vmxon::execute_vmxoff()
+vmx::execute_vmxoff()
 {
-    auto ___ = gsl::on_success([&] {
-        m_vmxon_enabled = false;
-    });
-
-    if (!m_vmxon_enabled) {
-        bfalert_info(0, "execute_vmxoff: vmx operation already disabled");
-        return;
-    }
-
     ::intel_x64::vmx::off();
-    bfdebug_pass(1, "vmxoff successfully executed");
+    bfdebug_pass(1, "execute_vmxoff: vmxoff successfully executed");
 }
 
 }

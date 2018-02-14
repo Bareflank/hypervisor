@@ -161,7 +161,7 @@ namespace vm
 
         if (!_vmread(field, &value))
         {
-            bferror_info(0, "vm::read failed:");
+            bferror_info(0, "vm::read failed");
             bferror_subtext(0, "field", name);
 
             throw std::runtime_error("vm::read failed");
@@ -174,7 +174,7 @@ namespace vm
     {
         if (!_vmwrite(field, value))
         {
-            bferror_info(0, "vm::write failed:");
+            bferror_info(0, "vm::write failed");
             bferror_subtext(0, "field", name);
             bferror_subnhex(0, "value", value);
 

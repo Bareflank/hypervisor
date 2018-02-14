@@ -22,7 +22,6 @@ ifneq ($(KERNELRELEASE),)
 	obj-m := $(TARGET_MODULE).o
 
 	$(TARGET_MODULE)-objs += entry.o
-	$(TARGET_MODULE)-objs += vmcall.o
 	$(TARGET_MODULE)-objs += platform.o
 	$(TARGET_MODULE)-objs += ../../common.o
 
@@ -51,7 +50,3 @@ unload:
 	-rmmod ./$(TARGET_MODULE).ko
 
 endif
-
-$(KBUILD_EXTMOD)/vmcall.o: vmcall.asm
-	@echo "cmd_${KBUILD_EXTMOD}/vmcall.o := nasm -f elf64 -o vmcall.asm" > $(KBUILD_EXTMOD)/.vmcall.o.cmd
-	@nasm -f elf64 -o $@ $^

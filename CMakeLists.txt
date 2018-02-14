@@ -30,7 +30,7 @@ include_external_config()
 # BFM VMM
 # ------------------------------------------------------------------------------
 
-set_bfm_vmm(bfvmm DEFAULT)
+set_bfm_vmm(${DEFAULT_VMM} DEFAULT)
 message(STATUS "Bareflank Manager VMM: ${BFM_VMM}")
 
 # ------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ if(ENABLE_BUILD_VMM)
 
     add_subproject(
         bfvmm vmm
-        DEPENDS bfunwind bfruntime gsl json
+        DEPENDS bfunwind bfruntime gsl
     )
 
     add_subproject(
@@ -126,7 +126,7 @@ if(ENABLE_BUILD_TEST AND NOT WIN32)
     add_subproject(
         bfdummy vmm
         TOOLCHAIN ${VMM_TEST_TOOLCHAIN_PATH}
-        DEPENDS bfunwind bfruntime gsl json
+        DEPENDS bfunwind bfruntime gsl
     )
 
     add_subproject(
@@ -204,3 +204,9 @@ validate_build()
 
 print_banner()
 print_usage()
+
+# ------------------------------------------------------------------------------
+# Helpers
+# ------------------------------------------------------------------------------
+
+git_dir_script()

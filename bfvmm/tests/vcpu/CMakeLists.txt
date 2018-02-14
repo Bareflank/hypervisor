@@ -40,8 +40,3 @@ do_test(test_vcpu_factory
     SOURCES test_vcpu_factory.cpp
     ${ARGN}
 )
-
-do_test(test_vcpu_intel_x64
-    SOURCES arch/intel_x64/test_vcpu.cpp
-    ${ARGN}
-)

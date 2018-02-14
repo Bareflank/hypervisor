@@ -92,9 +92,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
     <ClInclude Include="driver.h" />
     <ClInclude Include="queue.h" />
   </ItemGroup>
-  <ItemGroup>
-    <MASM Include="vmcall.asm" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -27,7 +27,6 @@
 
 #include <bfgsl.h>
 #include <bffile.h>
-#include <bfaffinity.h>
 
 #ifndef MAIN
 #define MAIN ut_main
@@ -85,33 +84,16 @@ bfm_help()
     std::cout << R"(  or:  bfm [OPTION]... stop...)" << std::endl;
     std::cout << R"(  or:  bfm [OPTION]... dump...)" << std::endl;
     std::cout << R"(  or:  bfm [OPTION]... status...)" << std::endl;
-    std::cout << R"(  or:  bfm [OPTION]... vmcall versions index...)" << std::endl;
-    std::cout << R"(  or:  bfm [OPTION]... vmcall registers r2 r3...r15)" << std::endl;
-    std::cout << R"(  or:  bfm [OPTION]... vmcall string type ""...)" << std::endl;
-    std::cout << R"(  or:  bfm [OPTION]... vmcall data type ifile ofile...)" << std::endl;
-    std::cout << R"(  or:  bfm [OPTION]... vmcall unittest index...)" << std::endl;
-    std::cout << R"(  or:  bfm [OPTION]... vmcall event index...)" << std::endl;
     std::cout << R"(Controls or queries the bareflank hypervisor)" << std::endl;
     std::cout << std::endl;
     std::cout << R"(       -h, --help      show this help menu)" << std::endl;
-    std::cout << R"(           --cpuid     indicate the requested cpuid)" << std::endl;
     std::cout << R"(           --vcpuid    indicate the requested vcpuid)" << std::endl;
-    std::cout << std::endl;
-    std::cout << R"(  vmcall string types:)" << std::endl;
-    std::cout << R"(       unformatted     unformatted string)" << std::endl;
-    std::cout << R"(       json            json formatted string)" << std::endl;
-    std::cout << std::endl;
-    std::cout << R"(  vmcall binary types:)" << std::endl;
-    std::cout << R"(       unformatted     unformatted binary data)" << std::endl;
-    std::cout << std::endl;
-    std::cout << R"(  vmcall notes:)" << std::endl;
-    std::cout << R"(       - registers are represented in hex)" << std::endl;
-    std::cout << R"(       - data / string uuids equal 0)" << std::endl;
 }
 
 int
 bfm_process(
-    gsl::not_null<file *> f, gsl::not_null<ioctl *> ctl,
+    gsl::not_null<file *> f,
+    gsl::not_null<ioctl *> ctl,
     gsl::not_null<command_line_parser *> clp)
 {
     auto driver = std::make_unique<ioctl_driver>(f, ctl, clp);
@@ -148,13 +130,6 @@ protected_main(const command_line_parser::arg_list_type &args)
     // aligned. For now, this should work on most system
 
     bfm_flush();
-
-    // -------------------------------------------------------------------------
-    // CPU Affinity
-
-    if (set_affinity(clp->cpuid()) != 0) {
-        throw std::runtime_error("failed to set cpu affinity");
-    }
 
     // -------------------------------------------------------------------------
     // File

@@ -19,11 +19,10 @@
 #ifndef VMCS_INTEL_X64_H
 #define VMCS_INTEL_X64_H
 
-#include <bfdelegate.h>
+#include <bfvcpuid.h>
 
-#include <intrinsics.h>
-#include "../state_save.h"
-#include "vmcs_state.h"
+#include "../save_state.h"
+#include "../check/check.h"
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -76,18 +75,14 @@ class EXPORT_HVE vmcs
 {
 public:
 
-    using gdt_t = gsl::not_null<const void *>;                                      ///< GDT pointer type
-    using host_state_t = gsl::not_null<vmcs_state *>;                               ///< Host state pointer type
-    using guest_state_t = gsl::not_null<vmcs_state *>;                              ///< Guest state pointer type
-    using pre_launch_delegate_t = delegate<void(host_state_t, guest_state_t)>;      ///< Pre launch delegate type
-    using post_launch_delegate_t = delegate<void(host_state_t, guest_state_t)>;     ///< Post launch delegate type
-
     /// Default Constructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    vmcs();
+    /// @param vcpuid the vcpuid for this VMCS
+    ///
+    vmcs(vcpuid::type vcpuid);
 
     /// Destructor
     ///
@@ -103,14 +98,10 @@ public:
     /// the VMCS and its state, starting the VM over again. For this reason
     /// it should only be called once, unless you intend to clear the VM.
     ///
-    /// @expects host_state != nullptr
-    /// @expects guest_state != nullptr
+    /// @expects none
     /// @ensures none
     ///
-    /// @param host_state the host state for the VMCS
-    /// @param guest_state the guest state for the VMCS
-    ///
-    VIRTUAL void launch(host_state_t host_state, guest_state_t guest_state);
+    VIRTUAL void launch();
 
     /// Resume
     ///
@@ -148,18 +139,10 @@ public:
     ///       when "-O3" was enabled. The order of each instruction is very
     ///       important
     ///
-    /// @note gdt is the virtual address of the guest's GDT that
-    ///       has been mapped into the VMM read/write.  It is marked const
-    ///       in order to prevent static analysis from complaining, but
-    ///       the memory will be written by the processor in
-    ///       vmcs_promote.asm
-    ///
-    /// @expects gdt != nullptr
+    /// @expects none
     /// @ensures none
     ///
-    /// @param gdt a pointer to the guest's gdt
-    ///
-    VIRTUAL void promote(gdt_t gdt);
+    VIRTUAL void promote();
 
     /// Load
     ///
@@ -179,95 +162,32 @@ public:
     ///
     VIRTUAL void load();
 
-    /// Set Pre Launch Delegate
+    /// Save State
     ///
-    /// Sets the pre launch delegate. This delegate function will be called
-    /// right before the launch occurs, and can be used by extensions to
-    /// make mods to the VMCS prior to launch
+    /// Returns the VMCS's save state. This is state that is above and beyond
+    /// what the VMCS stores, includng the CPU's registers, vcpuid and
+    /// exit handler pointer.
     ///
-    /// @param d the delegate function to use. Ownership is taken.
+    /// @expects none
+    /// @ensures none
     ///
-    void set_pre_launch_delegate(const pre_launch_delegate_t &d) noexcept;
+    /// @return returns the VMCS's save state.
+    ///
+    VIRTUAL save_state_t *save_state() const
+    { return m_save_state.get(); }
 
-    /// Set Post Launch Delegate
-    ///
-    /// Sets the post launch delegate. This delegate function will be called
-    /// right after the launch occurs, and can be used by extensions to
-    /// make mods to the VMCS after the launch.
-    ///
-    /// @note This is only called on demotions.
-    ///
-    /// @param d the delegate function to use. Ownership is taken.
-    ///
-    void set_post_launch_delegate(const post_launch_delegate_t &d) noexcept;
-
-#ifndef ENABLE_BUILD_TEST
 protected:
-#endif
 
     /// @cond
 
-    VIRTUAL void clear();
-
-    /// @endcond
-
-public:
-
-    /// @cond
-
-    void *m_exit_handler_entry{nullptr};
-    state_save *m_state_save{nullptr};
-
-    virtual void set_state_save(gsl::not_null<state_save *> state_save)
-    { m_state_save = state_save; }
-
-    virtual void set_exit_handler_entry(void *entry)
-    { m_exit_handler_entry = entry; }
+    std::unique_ptr<save_state_t> m_save_state;
 
     /// @endcond
 
 private:
 
-    void create_vmcs_region();
-    void release_vmcs_region() noexcept;
-
-    void create_exit_handler_stack();
-    void release_exit_handler_stack() noexcept;
-
-    void write_16bit_control_state();
-    void write_64bit_control_state();
-    void write_32bit_control_state();
-    void write_natural_control_state();
-
-    void write_16bit_host_state(host_state_t state);
-    void write_64bit_host_state(host_state_t state);
-    void write_32bit_host_state(host_state_t state);
-    void write_natural_host_state(host_state_t state);
-
-    void write_16bit_guest_state(guest_state_t state);
-    void write_64bit_guest_state(guest_state_t state);
-    void write_32bit_guest_state(guest_state_t state);
-    void write_natural_guest_state(guest_state_t state);
-
-    void pin_based_vm_execution_controls();
-    void primary_processor_based_vm_execution_controls();
-    void secondary_processor_based_vm_execution_controls();
-    void vm_exit_controls();
-    void vm_entry_controls();
-
-
-private:
-
-    /// @cond
-
-    uintptr_t m_vmcs_region_phys{0};
     std::unique_ptr<uint32_t[]> m_vmcs_region;
-    std::unique_ptr<gsl::byte[]> m_exit_handler_stack;
-
-    pre_launch_delegate_t m_pre_launch_delegate;
-    post_launch_delegate_t m_post_launch_delegate;
-
-    /// @endcond
+    uintptr_t m_vmcs_region_phys;
 
 public:
 

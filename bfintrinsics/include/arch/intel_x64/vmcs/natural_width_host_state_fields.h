@@ -2000,6 +2000,9 @@ namespace host_rip
     inline void set(value_type val)
     { set_vmcs_field(val, addr, name, exists()); }
 
+    inline void set(void (*val)())
+    { set_vmcs_field(reinterpret_cast<value_type>(val), addr, name, exists()); }
+
     inline void set_if_exists(value_type val, bool verbose = false)
     { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
 

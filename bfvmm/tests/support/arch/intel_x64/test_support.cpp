@@ -66,7 +66,6 @@ TEST_CASE("support")
     CHECK_NOTHROW(_cpuid_subebx(0, 0));
     CHECK_NOTHROW(_cpuid_ecx(0));
 
-    CHECK_NOTHROW(_vmclear(nullptr));
     CHECK_NOTHROW(_vmptrld(nullptr));
     CHECK_NOTHROW(_vmlaunch_demote());
     CHECK_NOTHROW(_vmxon(nullptr));

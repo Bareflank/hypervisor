@@ -16,9 +16,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <bftypes.h>
-#include <bfexports.h>
-
 #include <vcpu/vcpu_factory.h>
 #include <vcpu/arch/intel_x64/vcpu.h>
 
@@ -26,9 +23,9 @@ namespace bfvmm
 {
 
 WEAK_SYM std::unique_ptr<vcpu>
-vcpu_factory::make_vcpu(vcpuid::type vcpuid, user_data *data)
+vcpu_factory::make_vcpu(vcpuid::type vcpuid, bfobject *obj)
 {
-    bfignored(data);
+    bfignored(obj);
     return std::make_unique<intel_x64::vcpu>(vcpuid);
 }
 

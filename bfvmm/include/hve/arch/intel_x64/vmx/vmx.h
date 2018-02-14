@@ -59,7 +59,7 @@ namespace intel_x64
 ///
 /// This class is managed by vcpu_intel_x64
 ///
-class EXPORT_HVE vmxon
+class EXPORT_HVE vmx
 {
 public:
 
@@ -68,34 +68,14 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    vmxon() = default;
+    vmx();
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    virtual ~vmxon() = default;
-
-    /// Start VMXON
-    ///
-    /// Starts the VMXON. In the process of starting the VMXON, several
-    /// compatibility tests will be run to ensure that the VMXON can in fact
-    /// be used. If an error occurs, an exception will be thrown
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    virtual void start();
-
-    /// Stop VMXON
-    ///
-    /// Stops the VMXON.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    virtual void stop();
+    ~vmx();
 
 private:
 
@@ -106,30 +86,28 @@ private:
     void check_ia32_feature_control_msr();
     void check_v8086_disabled();
 
-    void create_vmxon_region();
-    void release_vmxon_region() noexcept;
+    void setup_vmx_region();
 
     void enable_vmx();
-    void disable_vmx() noexcept;
+    void disable_vmx();
 
     void execute_vmxon();
     void execute_vmxoff();
 
 private:
 
-    bool m_vmxon_enabled{false};
-    uintptr_t m_vmxon_region_phys{0};
-    std::unique_ptr<uint32_t[]> m_vmxon_region;
+    std::unique_ptr<uint32_t[]> m_vmx_region;
+    uintptr_t m_vmx_region_phys;
 
 public:
 
     /// @cond
 
-    vmxon(vmxon &&) noexcept = default;
-    vmxon &operator=(vmxon &&) noexcept = default;
+    vmx(vmx &&) noexcept = default;
+    vmx &operator=(vmx &&) noexcept = default;
 
-    vmxon(const vmxon &) = delete;
-    vmxon &operator=(const vmxon &) = delete;
+    vmx(const vmx &) = delete;
+    vmx &operator=(const vmx &) = delete;
 
     /// @endcond
 };

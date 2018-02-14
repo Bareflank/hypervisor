@@ -16,174 +16,108 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef VCPU_INTEL_X64_H
-#define VCPU_INTEL_X64_H
+#include "../../vcpu_factory.h"
 
-#include "../../vcpu.h"
-#include "../../../hve/arch/intel_x64/vmxon/vmxon.h"
+#include "../../../hve/arch/intel_x64/vmx/vmx.h"
 #include "../../../hve/arch/intel_x64/vmcs/vmcs.h"
-#include "../../../hve/arch/intel_x64/vmcs/vmcs_state_vmm.h"
-#include "../../../hve/arch/intel_x64/vmcs/vmcs_state_hvm.h"
 #include "../../../hve/arch/intel_x64/exit_handler/exit_handler.h"
-
-// -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_VCPU
-#ifdef SHARED_VCPU
-#define EXPORT_VCPU EXPORT_SYM
-#else
-#define EXPORT_VCPU IMPORT_SYM
-#endif
-#else
-#define EXPORT_VCPU
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
-// Definitions
-// -----------------------------------------------------------------------------
 
 namespace bfvmm
 {
 namespace intel_x64
 {
 
-/// Virtual CPU (Intel x86_64)
+/// Intel vCPU
 ///
-/// The Virtual CPU represents a "CPU" to the hypervisor that is specific to
-/// Intel x86_64.
+/// This class provides the base implementation for an Intel based vCPU. For
+/// more information on how a vCPU works, please @see bfvmm::vcpu
 ///
-/// This Intel specific vCPU class provides all of the functionality of the
-/// base vCPU, but also adds classes specific to Intel's VT-x including the
-/// vmxon, vmcs, exit_handler and
-/// intrinsics classes.
-///
-/// Note that these should not be created directly, but instead should be
-/// created by the vcpu_manager, which uses the vcpu_factory to actually
-/// create a vcpu.
-///
-class EXPORT_VCPU vcpu : public bfvmm::vcpu
+class vcpu : public bfvmm::vcpu
 {
 public:
 
-    /// Constructor
-    ///
-    /// Creates a vCPU with the provided resources. This constructor
-    /// provides a means to override and repalce the internal resources of the
-    /// vCPU. Note that if one of the resources is set to NULL, a default
-    /// will be constructed in its place, providing a means to select which
-    /// internal components to override.
+    /// Default Constructor
     ///
     /// @expects none
     /// @ensures none
     ///
     /// @param id the id of the vcpu
-    /// @param vmxon the vmxon the vcpu should use. If you
-    ///     provide nullptr, a default vmxon will be created.
-    /// @param vmcs the vmcs the vcpu should use. If you
-    ///     provide nullptr, a default vmcs will be created.
-    /// @param exit_handler the exit handler the vcpu should use. If you
-    ///     provide nullptr, a default exit handler will be created.
-    /// @param vmm_state the vmm state the vcpu should use. If you
-    ///     provide nullptr, a default vmm state will be created.
-    /// @param guest_state the guest state the vcpu should use. If you
-    ///     provide nullptr, a default guest state will be created.
     ///
-    vcpu(
-        vcpuid::type id,
-        std::unique_ptr<vmxon> vmxon = nullptr,
-        std::unique_ptr<vmcs> vmcs = nullptr,
-        std::unique_ptr<exit_handler> exit_handler = nullptr,
-        std::unique_ptr<vmcs_state> vmm_state = nullptr,
-        std::unique_ptr<vmcs_state> guest_state = nullptr);
+    vcpu(vcpuid::type id) :
+        bfvmm::vcpu{id}
+    {
+        if (this->is_host_vm_vcpu()) {
+            m_vmx = std::make_unique<intel_x64::vmx>();
+        }
+
+        m_vmcs = std::make_unique<bfvmm::intel_x64::vmcs>(id);
+        m_exit_handler = std::make_unique<bfvmm::intel_x64::exit_handler>(m_vmcs.get());
+
+        this->add_run_delegate(
+            run_delegate_t::create<intel_x64::vcpu, &intel_x64::vcpu::run_delegate>(this)
+        );
+    }
 
     /// Destructor
     ///
-    ~vcpu() override = default;
+    /// @expects none
+    /// @ensures none
+    ///
+    ~vcpu() override
+    {
+        if (this->is_host_vm_vcpu()) {
+            m_vmx.reset();
+        }
 
-    /// Init vCPU
+        m_vmcs.reset();
+        m_exit_handler.reset();
+    }
+
+    /// Run Delegate
+    ///
+    /// Provides the base implementation for starting the vCPU. This delegate
+    /// does not "resume" a vCPU as the base implementation does not support
+    /// guest VMs.
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param data user data that can be passed around as needed
-    ///     by extensions of Bareflank
+    /// @param obj ignored
     ///
-    void init(user_data *data = nullptr) override;
+    void run_delegate(bfobject *obj)
+    {
+        bfignored(obj);
 
-    /// Fini vCPU
+        m_vmcs->load();
+        m_vmcs->launch();
+    }
+
+    /// Get VMCS
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param data user data that can be passed around as needed
-    ///     by extensions of Bareflank
+    /// @return Returns a pointer to the vCPU's VMCS
     ///
-    void fini(user_data *data = nullptr) override;
+    auto vmcs() const noexcept
+    { return m_vmcs.get(); }
 
-    /// Run vCPU
-    ///
-    /// @expects this->is_initialized() == true
-    /// @ensures none
-    ///
-    /// @param data user data that can be passed around as needed
-    ///     by extensions of Bareflank
-    ///
-    void run(user_data *data = nullptr) override;
-
-    /// Halt vCPU
+    /// Get Exit Handler
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param data user data that can be passed around as needed
-    ///     by extensions of Bareflank
+    /// @return Returns a pointer to the vCPU's exit handler
     ///
-    void hlt(user_data *data = nullptr) override;
+    auto exit_handler() const noexcept
+    { return m_exit_handler.get(); }
 
 private:
 
-    bool m_vmcs_launched{false};
-
-protected:
-
-    /// @cond
-
-    std::unique_ptr<vmxon> m_vmxon;
-    std::unique_ptr<vmcs> m_vmcs;
-    std::unique_ptr<exit_handler> m_exit_handler;
-    std::unique_ptr<state_save> m_state_save;
-    std::unique_ptr<vmcs_state> m_vmm_state;
-    std::unique_ptr<vmcs_state> m_guest_state;
-
-    /// @endcond
-
-public:
-
-    /// @cond
-
-    vcpu(vcpu &&) noexcept = default;
-    vcpu &operator=(vcpu &&) noexcept = default;
-
-    vcpu(const vcpu &) = delete;
-    vcpu &operator=(const vcpu &) = delete;
-
-    /// @endcond
+    std::unique_ptr<bfvmm::intel_x64::vmx> m_vmx;
+    std::unique_ptr<bfvmm::intel_x64::vmcs> m_vmcs;
+    std::unique_ptr<bfvmm::intel_x64::exit_handler> m_exit_handler;
 };
 
 }
 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
-#endif
