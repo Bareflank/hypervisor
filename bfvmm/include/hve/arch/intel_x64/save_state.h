@@ -29,7 +29,7 @@ namespace intel_x64
 /// @cond
 #pragma pack(push, 1)
 
-struct state_save {
+struct save_state_t {
     uint64_t rax;                   // 0x000
     uint64_t rbx;                   // 0x008
     uint64_t rcx;                   // 0x010
@@ -48,9 +48,9 @@ struct state_save {
     uint64_t rip;                   // 0x078
     uint64_t rsp;                   // 0x080
 
-    uint64_t vcpuid;                // 0x088
-    uint64_t vmxon_ptr;             // 0x090
-    uint64_t vmcs_ptr;              // 0x098
+    uint64_t reserved1;             // 0x088
+    uint64_t reserved2;             // 0x090
+    uint64_t vcpuid;                // 0x098
     uint64_t exit_handler_ptr;      // 0x0A0
 
     uint64_t user1;                 // 0x0A8

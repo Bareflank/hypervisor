@@ -91,11 +91,11 @@ public:
     /// @ensures none
     ///
     /// @param vcpuid the vcpuid for the vcpu to create
-    /// @param data user data passed to the vcpu
+    /// @param obj object passed to the vcpu
     /// @return returns a pointer to a newly created vCPU.
     ///
     virtual std::unique_ptr<vcpu> make_vcpu(
-        vcpuid::type vcpuid, user_data *data = nullptr);
+        vcpuid::type vcpuid, bfobject *obj = nullptr);
 
 public:
 

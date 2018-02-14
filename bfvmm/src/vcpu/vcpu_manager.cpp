@@ -41,20 +41,20 @@ vcpu_manager::instance() noexcept
 }
 
 void
-vcpu_manager::create_vcpu(vcpuid::type vcpuid, user_data *data)
+vcpu_manager::create_vcpu(vcpuid::type vcpuid, bfobject *obj)
 {
     auto ___ = gsl::on_failure([&] {
         std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
         m_vcpus.erase(vcpuid);
     });
 
-    if (auto &&vcpu = add_vcpu(vcpuid, data)) {
-        vcpu->init(data);
+    if (auto &&vcpu = add_vcpu(vcpuid, obj)) {
+        vcpu->init(obj);
     }
 }
 
 void
-vcpu_manager::delete_vcpu(vcpuid::type vcpuid, user_data *data)
+vcpu_manager::delete_vcpu(vcpuid::type vcpuid, bfobject *obj)
 {
     auto ___ = gsl::finally([&] {
         std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
@@ -62,23 +62,23 @@ vcpu_manager::delete_vcpu(vcpuid::type vcpuid, user_data *data)
     });
 
     if (auto &&vcpu = get_vcpu(vcpuid)) {
-        vcpu->fini(data);
+        vcpu->fini(obj);
     }
 }
 
 void
-vcpu_manager::run_vcpu(vcpuid::type vcpuid, user_data *data)
+vcpu_manager::run_vcpu(vcpuid::type vcpuid, bfobject *obj)
 {
     if (auto &&vcpu = get_vcpu(vcpuid)) {
-        vcpu->run(data);
+        vcpu->run(obj);
     }
 }
 
 void
-vcpu_manager::hlt_vcpu(vcpuid::type vcpuid, user_data *data)
+vcpu_manager::hlt_vcpu(vcpuid::type vcpuid, bfobject *obj)
 {
     if (auto &&vcpu = get_vcpu(vcpuid)) {
-        vcpu->hlt(data);
+        vcpu->hlt(obj);
     }
 }
 
@@ -87,13 +87,13 @@ vcpu_manager::vcpu_manager() noexcept :
 { }
 
 std::unique_ptr<vcpu> &
-vcpu_manager::add_vcpu(vcpuid::type vcpuid, user_data *data)
+vcpu_manager::add_vcpu(vcpuid::type vcpuid, bfobject *obj)
 {
     if (auto &&vcpu = get_vcpu(vcpuid)) {
         return vcpu;
     }
 
-    if (auto &&vcpu = m_vcpu_factory->make_vcpu(vcpuid, data)) {
+    if (auto &&vcpu = m_vcpu_factory->make_vcpu(vcpuid, obj)) {
         std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
         return m_vcpus[vcpuid] = std::move(vcpu);
     }

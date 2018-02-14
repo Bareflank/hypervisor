@@ -19,15 +19,18 @@
 #ifndef EXIT_HANDLER_INTEL_X64_H
 #define EXIT_HANDLER_INTEL_X64_H
 
+#include <bfdelegate.h>
+
+#include <list>
+#include <array>
 #include <memory>
 
 #include <intrinsics.h>
 
-#include <bfjson.h>
-#include <bfvmcallinterface.h>
-
 #include "../vmcs/vmcs.h"
-#include "../../../../memory_manager/map_ptr_x64.h"
+#include "../../x64/gdt.h"
+#include "../../x64/idt.h"
+#include "../../x64/tss.h"
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -49,6 +52,19 @@
 #pragma warning(push)
 #pragma warning(disable : 4251)
 #endif
+
+// -----------------------------------------------------------------------------
+// Dispatch Type
+// -----------------------------------------------------------------------------
+
+using dispatch_delegate_t = delegate<bool(gsl::not_null<bfvmm::intel_x64::vmcs *>)>;
+
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+void halt(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs) noexcept;
+bool advance(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs) noexcept;
 
 // -----------------------------------------------------------------------------
 // Exit Handler
@@ -77,14 +93,16 @@ class EXPORT_HVE exit_handler
 {
 public:
 
-    using ret_type = int64_t;   ///< VMCall return type
-
     /// Default Constructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    exit_handler() = default;
+    /// @param vmcs The VMCS associated with this exit handler
+    ///
+    exit_handler(
+        gsl::not_null<vmcs *> vmcs
+    );
 
     /// Destructor
     ///
@@ -93,111 +111,72 @@ public:
     ///
     virtual ~exit_handler() = default;
 
+    /// Add Dispatch Delegate
+    ///
+    /// Adds a handler to the dispatch function. When a VM exit occurs, the
+    /// dispatch handler will call the delegate registered by this function as
+    /// as needed. Note that the handlers are called in the reverse order they
+    /// are registered (i.e. FIFO).
+    ///
+    /// @note If the delegate has serviced the VM exit, it should return true,
+    ///     otherwise it should return false, and the next delegate registered
+    ///     for this VM exit will execute, or an unimplemented exit reason
+    ///     error will trigger
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param reason The exit reason for the handler being registered
+    /// @param d The delegate being registered
+    ///
+    void add_dispatch_delegate(
+        ::intel_x64::vmcs::value_type reason,
+        dispatch_delegate_t &&d
+    );
+
     /// Dispatch
     ///
-    /// Called when a VM exit needs to be handled. This function will decode
-    /// the exit reason, and dispatch the correct handler.
+    /// Handles a VM exit. This function should only be called by the exit
+    /// handler entry function, which gets called when a VM exit occurs, and
+    /// then calls this function to dispatch the VM exit to the proper
+    /// handler.
     ///
     /// @expects none
     /// @ensures none
     ///
-    virtual void dispatch();
+    /// @param exit_handler The exit handler to dispatch the VM exit to
+    ///
+    static void dispatch(
+        bfvmm::intel_x64::exit_handler *exit_handler) noexcept;
 
-    /// Halt
-    ///
-    /// Called when the exit handler needs to halt the CPU. This would mainly
-    /// be due to an error.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    virtual void halt() noexcept;
+private:
 
-    /// Stop
-    ///
-    /// The only difference between halt and stop is halt first prints some
-    /// debug information and then halts. Stop simply halts the vCPU. Note
-    /// that users can override the stop program to continue execution if it
-    /// is possible (for example, running a different vcpu).
-    ///
-    virtual void stop() noexcept;
+    void write_host_state();
+    void write_guest_state();
+    void write_control_state();
 
-#ifndef ENABLE_BUILD_TEST
 protected:
-#endif
 
     /// @cond
 
-    virtual void promote(gsl::not_null<const void *> guest_gdt);
-
-    virtual void resume();
-    virtual void advance_and_resume();
-
-    virtual void handle_exit(
-        ::intel_x64::vmcs::value_type reason);
-
-    void handle_cpuid();
-    void handle_invd();
-    void handle_vmcall();
-    void handle_vmxoff();
-    void handle_rdmsr();
-    void handle_wrmsr();
-
-    void advance_rip() noexcept;
-    void unimplemented_handler() noexcept;
-
-    virtual void complete_vmcall(
-        ret_type ret, vmcall_registers_t &regs) noexcept;
-
-    virtual void handle_vmcall_versions(
-        vmcall_registers_t &regs);
-    virtual void handle_vmcall_registers(
-        vmcall_registers_t &regs);
-    virtual void handle_vmcall_data(
-        vmcall_registers_t &regs);
-    virtual void handle_vmcall_event(
-        vmcall_registers_t &regs);
-    virtual void handle_vmcall_start(
-        vmcall_registers_t &regs);
-    virtual void handle_vmcall_stop(
-        vmcall_registers_t &regs);
-    virtual void handle_vmcall_unittest(
-        vmcall_registers_t &regs);
-
-    virtual void handle_vmcall_data_string_unformatted(
-        const std::string &istr, std::string &ostr);
-
-    virtual void handle_vmcall_data_string_json(
-        const json &ijson, json &ojson);
-
-    virtual void handle_vmcall_data_binary_unformatted(
-        const bfn::unique_map_ptr_x64<char> &imap,
-        const bfn::unique_map_ptr_x64<char> &omap);
-
-    void reply_with_string(
-        vmcall_registers_t &regs, const std::string &str,
-        const bfn::unique_map_ptr_x64<char> &omap);
-
-    void reply_with_json(
-        vmcall_registers_t &regs, const json &str,
-        const bfn::unique_map_ptr_x64<char> &omap);
+    x64::tss m_host_tss{};
+    x64::gdt m_host_gdt{512};
+    x64::idt m_host_idt{256};
 
     /// @endcond
 
-public:
+private:
 
-    /// @cond
+    vmcs *m_vmcs;
+    std::unique_ptr<gsl::byte[]> m_stack;
 
-    vmcs *m_vmcs{nullptr};
-    state_save *m_state_save{nullptr};
+    static ::intel_x64::cr0::value_type s_cr0;
+    static ::intel_x64::cr3::value_type s_cr3;
+    static ::intel_x64::cr4::value_type s_cr4;
+    static ::intel_x64::msrs::value_type s_ia32_pat_msr;
+    static ::intel_x64::msrs::value_type s_ia32_efer_msr;
 
-    virtual void set_vmcs(gsl::not_null<vmcs *> vmcs)
-    { m_vmcs = vmcs; }
-
-    virtual void set_state_save(gsl::not_null<state_save *> state_save)
-    { m_state_save = state_save; }
-
-    /// @endcond
+    std::array<std::list<dispatch_delegate_t>, 128> m_handlers;
 
 public:
 

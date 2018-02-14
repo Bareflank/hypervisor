@@ -16,8 +16,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <bftypes.h>
-
 #include <catch/catch.hpp>
 #include <hippomocks.h>
 
@@ -28,40 +26,35 @@
 bool make_vcpu_throws = false;
 bfvmm::vcpu *g_vcpu = nullptr;
 
-class vcpu_factory_ut : public bfvmm::vcpu_factory
+auto
+setup_vcpu(MockRepository &mocks)
 {
-public:
-    std::unique_ptr<bfvmm::vcpu>
-    make_vcpu(vcpuid::type id, bfvmm::user_data *data) override
-    {
-        (void) id;
-        (void) data;
+    auto vcpu = mocks.Mock<bfvmm::vcpu>();
+    mocks.OnCallDestructor(vcpu);
 
-        if (make_vcpu_throws) {
-            throw std::runtime_error("make_vcpu error");
-        }
+    mocks.OnCall(vcpu, bfvmm::vcpu::init);
+    mocks.OnCall(vcpu, bfvmm::vcpu::fini);
+    mocks.OnCall(vcpu, bfvmm::vcpu::run);
+    mocks.OnCall(vcpu, bfvmm::vcpu::hlt);
+    mocks.OnCall(vcpu, bfvmm::vcpu::is_running).Return(false);
 
-        return std::unique_ptr<bfvmm::vcpu>(g_vcpu);
-    }
-};
-
-template<typename T> auto
-mock_no_delete(MockRepository &mocks)
-{
-    auto &&ptr = mocks.Mock<T>();
-    mocks.OnCallDestructor(ptr);
-
-    return ptr;
+    return vcpu;
 }
 
 namespace bfvmm
 {
 
 WEAK_SYM std::unique_ptr<vcpu>
-vcpu_factory::make_vcpu(vcpuid::type vcpuid, user_data *data)
+vcpu_factory::make_vcpu(vcpuid::type vcpuid, bfobject *data)
 {
+    bfignored(vcpuid);
     bfignored(data);
-    return std::make_unique<vcpu>(vcpuid);
+
+    if (make_vcpu_throws) {
+        throw std::runtime_error("make_vcpu error");
+    }
+
+    return std::unique_ptr<bfvmm::vcpu>(g_vcpu);
 }
 
 }
@@ -75,225 +68,190 @@ TEST_CASE("vcpu_manager: support")
 TEST_CASE("vcpu_manager: create_valid")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
 
     CHECK_NOTHROW(g_vcm->create_vcpu(0));
     g_vcm->delete_vcpu(0);
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: create_valid_twice_overwrites")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
 
     CHECK_NOTHROW(g_vcm->create_vcpu(0));
     CHECK_NOTHROW(g_vcm->create_vcpu(0));
     g_vcm->delete_vcpu(0);
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: create_make_vcpu_returns_null")
 {
     CHECK_THROWS(g_vcm->create_vcpu(0));
+    g_vcm->delete_vcpu(0);
 }
 
 TEST_CASE("vcpu_manager: create_make_vcpu_throws")
 {
+    MockRepository mocks;
+    g_vcpu = setup_vcpu(mocks);
+
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
+
     make_vcpu_throws = true;
+    auto ___ = gsl::finally([&] {
+        make_vcpu_throws = false;
+    });
+
     CHECK_THROWS(g_vcm->create_vcpu(0));
-    make_vcpu_throws = false;
+    g_vcm->delete_vcpu(0);
 }
 
 TEST_CASE("vcpu_manager: create_init_throws")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
+
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
 
     mocks.OnCall(g_vcpu, bfvmm::vcpu::init).Throw(std::runtime_error("error"));
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
 
     CHECK_THROWS(g_vcm->create_vcpu(0));
     g_vcm->delete_vcpu(0);
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: delete_valid")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
 
     g_vcm->create_vcpu(0);
     CHECK_NOTHROW(g_vcm->delete_vcpu(0));
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: delete_valid_twice")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
 
     g_vcm->create_vcpu(0);
     CHECK_NOTHROW(g_vcm->delete_vcpu(0));
     CHECK_NOTHROW(g_vcm->delete_vcpu(0));
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: delete_no_create")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
 
     CHECK_NOTHROW(g_vcm->delete_vcpu(0));
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: delete_fini_throws")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
+
     mocks.OnCall(g_vcpu, bfvmm::vcpu::fini).Throw(std::runtime_error("error"));
 
     g_vcm->create_vcpu(0);
     CHECK_THROWS(g_vcm->delete_vcpu(0));
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: run_valid")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::run);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::hlt);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::is_running).Return(false);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
 
     g_vcm->create_vcpu(0);
     CHECK_NOTHROW(g_vcm->run_vcpu(0));
     g_vcm->delete_vcpu(0);
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: run_valid_twice")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::run);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::hlt);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::is_running).Return(false);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
 
     g_vcm->create_vcpu(0);
     CHECK_NOTHROW(g_vcm->run_vcpu(0));
     CHECK_NOTHROW(g_vcm->run_vcpu(0));
     g_vcm->delete_vcpu(0);
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: run_run_throws")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
+
     mocks.OnCall(g_vcpu, bfvmm::vcpu::run).Throw(std::runtime_error("error"));
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::hlt);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::is_running).Return(false);
 
     g_vcm->create_vcpu(0);
     CHECK_THROWS(g_vcm->run_vcpu(0));
     g_vcm->delete_vcpu(0);
-
-    g_vcpu = nullptr;
-}
-
-TEST_CASE("vcpu_manager: run_hlt_throws")
-{
-    MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
-
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::run).Throw(std::runtime_error("error"));
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::hlt).Throw(std::logic_error("error"));
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::is_running).Return(false);
-
-    g_vcm->create_vcpu(0);
-    CHECK_THROWS(g_vcm->run_vcpu(0));
-    g_vcm->delete_vcpu(0);
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: run_no_create")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::run);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::hlt);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::is_running).Return(false);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
 
     CHECK_NOTHROW(g_vcm->run_vcpu(0));
-
-    g_vcpu = nullptr;
+    g_vcm->delete_vcpu(0);
 }
 
 TEST_CASE("vcpu_manager: hlt_valid")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::run);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::hlt);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
+
     mocks.OnCall(g_vcpu, bfvmm::vcpu::is_running).Return(false);
 
     g_vcm->create_vcpu(0);
@@ -303,20 +261,17 @@ TEST_CASE("vcpu_manager: hlt_valid")
 
     CHECK_NOTHROW(g_vcm->hlt_vcpu(0));
     g_vcm->delete_vcpu(0);
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: hlt_valid_twice")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::run);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::hlt);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
+
     mocks.OnCall(g_vcpu, bfvmm::vcpu::is_running).Return(false);
 
     g_vcm->create_vcpu(0);
@@ -327,19 +282,17 @@ TEST_CASE("vcpu_manager: hlt_valid_twice")
     CHECK_NOTHROW(g_vcm->hlt_vcpu(0));
     CHECK_NOTHROW(g_vcm->hlt_vcpu(0));
     g_vcm->delete_vcpu(0);
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: hlt_hlt_throws")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::run);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
+
     mocks.OnCall(g_vcpu, bfvmm::vcpu::hlt).Throw(std::runtime_error("error"));
     mocks.OnCall(g_vcpu, bfvmm::vcpu::is_running).Return(false);
 
@@ -350,23 +303,19 @@ TEST_CASE("vcpu_manager: hlt_hlt_throws")
 
     CHECK_THROWS(g_vcm->hlt_vcpu(0));
     g_vcm->delete_vcpu(0);
-
-    g_vcpu = nullptr;
 }
 
 TEST_CASE("vcpu_manager: hlt_no_create")
 {
     MockRepository mocks;
-    g_vcpu = mock_no_delete<bfvmm::vcpu>(mocks);
-    g_vcm->set_factory(std::make_unique<vcpu_factory_ut>());
+    g_vcpu = setup_vcpu(mocks);
 
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::init);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::fini);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::run);
-    mocks.OnCall(g_vcpu, bfvmm::vcpu::hlt);
+    auto ___ = gsl::finally([&] {
+        g_vcpu = nullptr;
+    });
+
     mocks.OnCall(g_vcpu, bfvmm::vcpu::is_running).Return(true);
 
     CHECK_NOTHROW(g_vcm->hlt_vcpu(0));
-
-    g_vcpu = nullptr;
+    g_vcm->delete_vcpu(0);
 }

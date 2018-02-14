@@ -35,14 +35,14 @@
 
 #include <bfexports.h>
 
-#ifndef STATIC_INTRINSICS
-#ifdef SHARED_INTRINSICS
-#define EXPORT_INTRINSICS EXPORT_SYM
+#ifndef STATIC_HVE
+#ifdef SHARED_HVE
+#define EXPORT_HVE EXPORT_SYM
 #else
-#define EXPORT_INTRINSICS IMPORT_SYM
+#define EXPORT_HVE IMPORT_SYM
 #endif
 #else
-#define EXPORT_INTRINSICS
+#define EXPORT_HVE
 #endif
 
 #ifdef _MSC_VER
@@ -62,7 +62,7 @@ namespace x64
 /// Interrupt Descriptor Table
 ///
 ///
-class EXPORT_INTRINSICS idt
+class EXPORT_HVE idt
 {
 public:
 
@@ -329,8 +329,8 @@ public:
 
     /// @cond
 
-    idt(idt &&) noexcept = delete;
-    idt &operator=(idt &&) noexcept = delete;
+    idt(idt &&) noexcept = default;
+    idt &operator=(idt &&) noexcept = default;
 
     idt(const idt &) = delete;
     idt &operator=(const idt &) = delete;

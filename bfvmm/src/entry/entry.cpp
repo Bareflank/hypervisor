@@ -19,11 +19,10 @@
 #include <bfgsl.h>
 #include <bfdebug.h>
 #include <bfvcpuid.h>
+#include <bfobject.h>
 #include <bfexports.h>
 #include <bfsupport.h>
 #include <bfexception.h>
-
-#include <user_data.h>
 
 #include <vcpu/vcpu_manager.h>
 #include <debug/debug_ring/debug_ring.h>
@@ -42,11 +41,11 @@ private_add_md(struct memory_descriptor *md) noexcept
     });
 }
 
-bfvmm::user_data *
+bfobject *
 WEAK_SYM pre_create_vcpu(vcpuid::type id)
 { (void) id; return nullptr; }
 
-bfvmm::user_data *
+bfobject *
 WEAK_SYM pre_run_vcpu(vcpuid::type id)
 { (void) id; return nullptr; }
 
@@ -66,11 +65,11 @@ private_init_vmm(uint64_t arg) noexcept
     });
 }
 
-bfvmm::user_data *
+bfobject *
 WEAK_SYM pre_hlt_vcpu(vcpuid::type id)
 { (void) id; return nullptr; }
 
-bfvmm::user_data *
+bfobject *
 WEAK_SYM pre_delete_vcpu(vcpuid::type id)
 { (void) id; return nullptr; }
 

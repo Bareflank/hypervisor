@@ -86,6 +86,20 @@ TEST_CASE("test class")
     CHECK(d(1) == result);
 }
 
+TEST_CASE("test class ptr")
+{
+    auto t = std::make_unique<test_class>();
+    auto d = delegate<int(int)>::create<test_class, &test_class::foo>(t.get());
+    CHECK(d(1) == result);
+}
+
+TEST_CASE("test unique class ptr")
+{
+    auto t = std::make_unique<test_class>();
+    auto d = delegate<int(int)>::create<test_class, &test_class::foo>(t);
+    CHECK(d(1) == result);
+}
+
 TEST_CASE("test const class")
 {
     test_const_class t;

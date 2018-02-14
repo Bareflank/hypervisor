@@ -49,28 +49,13 @@ do_test(test_check_vmcs_host_fields
     ${ARGN}
 )
 
+do_test(test_check
+    SOURCES arch/intel_x64/check/test_check.cpp
+    ${ARGN}
+)
+
 do_test(test_exit_handler
     SOURCES arch/intel_x64/exit_handler/test_exit_handler.cpp
-    ${ARGN}
-)
-
-do_test(test_exit_handler_entry
-    SOURCES arch/intel_x64/exit_handler/test_exit_handler_entry.cpp
-    ${ARGN}
-)
-
-do_test(test_vmcs_state_hvm
-    SOURCES arch/intel_x64/vmcs/test_vmcs_state_hvm.cpp
-    ${ARGN}
-)
-
-do_test(test_vmcs_state_vmm
-    SOURCES arch/intel_x64/vmcs/test_vmcs_state_vmm.cpp
-    ${ARGN}
-)
-
-do_test(test_vmcs_state
-    SOURCES arch/intel_x64/vmcs/test_vmcs_state.cpp
     ${ARGN}
 )
 
@@ -79,7 +64,7 @@ do_test(test_vmcs
     ${ARGN}
 )
 
-do_test(test_vmxon
-    SOURCES arch/intel_x64/vmxon/test_vmxon.cpp
+do_test(test_vmx
+    SOURCES arch/intel_x64/vmx/test_vmx.cpp
     ${ARGN}
 )

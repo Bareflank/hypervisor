@@ -110,20 +110,4 @@ TEST_CASE("common_start_vmm: set affinity fails")
     CHECK(common_fini() == BF_SUCCESS);
 }
 
-TEST_CASE("common_start_vmm: vmcall fails")
-{
-    binaries_info info{&g_file, g_filenames_success, false};
-
-    for (const auto &binary : info.binaries()) {
-        REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
-    }
-
-    MockRepository mocks;
-    mocks.OnCallFunc(_vmcall);
-
-    CHECK(common_load_vmm() == BF_SUCCESS);
-    CHECK(common_start_vmm() == ENTRY_ERROR_VMM_START_FAILED);
-    CHECK(common_fini() == BF_SUCCESS);
-}
-
 #endif

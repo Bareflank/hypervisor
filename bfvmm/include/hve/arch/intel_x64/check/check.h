@@ -43,7 +43,9 @@ all()
 {
     vmx_controls_all();
     host_state_all();
-    guest_state_all();}
+    guest_state_all();
+}
+
 }
 }
 }

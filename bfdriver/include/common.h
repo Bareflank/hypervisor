@@ -23,7 +23,6 @@
 #include <bftypes.h>
 #include <bferrorcodes.h>
 #include <bfelf_loader.h>
-#include <bfvmcallinterface.h>
 #include <bfdebugringinterface.h>
 
 #ifdef __cplusplus

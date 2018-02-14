@@ -19,11 +19,15 @@
 #ifndef VCPU_H
 #define VCPU_H
 
+#include <list>
 #include <string>
 #include <memory>
 
+#include <bfgsl.h>
+#include <bftypes.h>
 #include <bfvcpuid.h>
-#include "../user_data.h"
+#include <bfobject.h>
+#include <bfdelegate.h>
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -55,11 +59,9 @@ namespace bfvmm
 
 /// Virtual CPU
 ///
-/// The vCPU represents a "core" for a virtual machine. There are different
-/// types of virtual machines (the host VM and guest VM being good examples)
-/// but in either case, a set of vCPUs must be provided.
+/// The vCPU represents a "core" for a machine.
 ///
-/// For the host VM (also called the hardware domain), 1 vCPU must exist
+/// For the host VM (the VM that starts the hypervisor), 1 vCPU must exist
 /// for each physical core. These vCPUs are special. Their IDs are their
 /// physical core nums as assigned by the host OS. This is because the "guest"
 /// part of the ID is 0. The resources these vCPUs are given should match
@@ -77,15 +79,11 @@ namespace bfvmm
 ///
 /// For a guest VM, there can be any number of vCPUs. The first half of the
 /// ID is the guest ID, and the second half of the ID is a unique identifier.
-/// The goal with Bareflank is to allow any number of virtual cores, regardless
+/// The goal with Bareflank is to allow any number of cores, regardless
 /// of the physical core configuration. To support this, vCPUs
 /// can be scheduled on any core, and the ID does not correlate with
 /// a physical core. It's up to the vCPU implementation to figure out how to
-/// schedule a core on the proper vCPU. In the case of Intel, this means that
-/// the VMCS class and the exit handler will have to store their own physical
-/// core ID that is different from the vCPU ID. If the exit handler has to
-/// schedule a VMCS and it detects the VMCS used to be on a different core,
-/// it will have to perform a transition.
+/// schedule a core on the proper vCPU.
 ///
 /// This generic vCPU class not only provides the base class that architecture
 /// specific vCPUs will be created from, but it also provides some of the base
@@ -110,6 +108,11 @@ class EXPORT_VCPU vcpu
 {
 public:
 
+    using run_delegate_t = delegate<void(bfobject *)>;      ///< Run delegate type
+    using hlt_delegate_t = delegate<void(bfobject *)>;      ///< Halt delegate type
+    using init_delegate_t = delegate<void(bfobject *)>;     ///< Init delegate type
+    using fini_delegate_t = delegate<void(bfobject *)>;     ///< Fini delegate type
+
     /// Constructor
     ///
     /// Creates a vCPU with the provided id. This constructor
@@ -132,40 +135,6 @@ public:
     ///
     virtual ~vcpu() = default;
 
-    /// Init vCPU
-    ///
-    /// Initializes the vCPU. This function should only be run once. To
-    /// re-execute this function, fini should be used first. Both init
-    /// and fini are used in place of the constructor / destructor for some
-    /// logic that certainly could generate an exception.
-    ///
-    /// @note: subclasses must call this function if it's overridden
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param data user data that can be passed around as needed
-    ///     by extensions of Bareflank
-    ///
-    virtual void init(user_data *data = nullptr);
-
-    /// Fini vCPU
-    ///
-    /// Finalizes the vCPU. This function should only be run once. To
-    /// re-execute this function, init should be used first. Both init
-    /// and fini are used in place of the constructor / destructor for some
-    /// logic that certainly could generate an exception.
-    ///
-    /// @note: subclasses must call this function if it's overridden
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param data user data that can be passed around as needed
-    ///     by extensions of Bareflank
-    ///
-    virtual void fini(user_data *data = nullptr);
-
     /// Run
     ///
     /// Executes the vCPU. The vCPU can be in two different states prior to
@@ -176,15 +145,13 @@ public:
     /// VM to schedule a different vCPU. When this happens, it will likely
     /// call this function.
     ///
-    /// @note: subclasses must call this function if it's overridden
-    ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param data user data that can be passed around as needed
+    /// @param obj object that can be passed around as needed
     ///     by extensions of Bareflank
     ///
-    virtual void run(user_data *data = nullptr);
+    VIRTUAL void run(bfobject *obj = nullptr);
 
     /// Halt
     ///
@@ -202,15 +169,43 @@ public:
     /// host-only case. On tear down, the VMM needs to promote the host OS
     /// back to root operation prior to disabling the hypervisor completely.
     ///
-    /// @note: subclasses must call this function if it's overridden
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param obj object that can be passed around as needed
+    ///     by extensions of Bareflank
+    ///
+    VIRTUAL void hlt(bfobject *obj = nullptr);
+
+    /// Init vCPU
+    ///
+    /// Initializes the vCPU. This function should only be run once. To
+    /// re-execute this function, fini should be used first. Both init
+    /// and fini are used in place of the constructor / destructor for some
+    /// logic that certainly could generate an exception.
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param data user data that can be passed around as needed
+    /// @param obj object that can be passed around as needed
     ///     by extensions of Bareflank
     ///
-    virtual void hlt(user_data *data = nullptr);
+    VIRTUAL void init(bfobject *obj = nullptr);
+
+    /// Fini vCPU
+    ///
+    /// Finalizes the vCPU. This function should only be run once. To
+    /// re-execute this function, init should be used first. Both init
+    /// and fini are used in place of the constructor / destructor for some
+    /// logic that certainly could generate an exception.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param obj object that can be passed around as needed
+    ///     by extensions of Bareflank
+    ///
+    VIRTUAL void fini(bfobject *obj = nullptr);
 
     /// vCPU Id
     ///
@@ -219,7 +214,7 @@ public:
     ///
     /// @return the vCPU's id
     ///
-    virtual vcpuid::type id() const
+    VIRTUAL vcpuid::type id() const
     { return m_id; }
 
     /// Is Running
@@ -229,7 +224,7 @@ public:
     ///
     /// @return true if the vCPU is running, false otherwise.
     ///
-    virtual bool is_running()
+    VIRTUAL bool is_running()
     { return m_is_running; }
 
     /// Is Initialized
@@ -239,7 +234,7 @@ public:
     ///
     /// @return true if the vCPU is initialized, false otherwise.
     ///
-    virtual bool is_initialized()
+    VIRTUAL bool is_initialized()
     { return m_is_initialized; }
 
     /// Is Bootstrap vCPU
@@ -249,8 +244,8 @@ public:
     ///
     /// @return true if this vCPU is the bootstrap vCPU, false otherwise
     ///
-    virtual bool is_bootstrap_vcpu()
-    { return m_id == 0; }
+    VIRTUAL bool is_bootstrap_vcpu()
+    { return vcpuid::is_bootstrap_vcpu(m_id); }
 
     /// Is Host VM vCPU
     ///
@@ -259,18 +254,64 @@ public:
     ///
     /// @return true if this vCPU belongs to the host VM, false otherwise
     ///
-    virtual bool is_host_vm_vcpu()
-    { return (m_id & (vcpuid::guest_mask & ~vcpuid::reserved)) == 0; }
+    VIRTUAL bool is_host_vm_vcpu()
+    { return vcpuid::is_hvm_vcpu(m_id); }
 
-    /// Is Guest VM vCPU
+    /// Add Run Delegate
+    ///
+    /// Adds a run delegate to the VCPU. The delegates are added to a queue and
+    /// executed in FILO order. All delegates are executed unless an exception
+    /// is thrown that is not handled.
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @return true if this vCPU belongs to a guest VM, false otherwise
+    /// @param d the delegate to add to the vcpu
     ///
-    virtual bool is_guest_vm_vcpu()
-    { return (m_id & (vcpuid::guest_mask & ~vcpuid::reserved)) != 0; }
+    VIRTUAL void add_run_delegate(run_delegate_t &&d) noexcept
+    { m_run_delegates.push_back(std::move(d)); }
+
+    /// Add Halt Delegate
+    ///
+    /// Adds a halt delegate to the VCPU. The delegates are added to a queue and
+    /// executed in FILO order. All delegates are executed unless an exception
+    /// is thrown that is not handled.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param d the delegate to add to the vcpu
+    ///
+    VIRTUAL void add_hlt_delegate(hlt_delegate_t &&d) noexcept
+    { m_hlt_delegates.push_back(std::move(d)); }
+
+    /// Add Init Delegate
+    ///
+    /// Adds a init delegate to the VCPU. The delegates are added to a queue and
+    /// executed in FILO order. All delegates are executed unless an exception
+    /// is thrown that is not handled.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param d the delegate to add to the vcpu
+    ///
+    VIRTUAL void add_init_delegate(init_delegate_t &&d) noexcept
+    { m_init_delegates.push_back(std::move(d)); }
+
+    /// Add Fini Delegate
+    ///
+    /// Adds a fini delegate to the VCPU. The delegates are added to a queue and
+    /// executed in FILO order. All delegates are executed unless an exception
+    /// is thrown that is not handled.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param d the delegate to add to the vcpu
+    ///
+    VIRTUAL void add_fini_delegate(fini_delegate_t &&d) noexcept
+    { m_fini_delegates.push_back(std::move(d)); }
 
 private:
 
@@ -278,6 +319,11 @@ private:
 
     bool m_is_running{false};
     bool m_is_initialized{false};
+
+    std::list<run_delegate_t> m_run_delegates;
+    std::list<hlt_delegate_t> m_hlt_delegates;
+    std::list<init_delegate_t> m_init_delegates;
+    std::list<fini_delegate_t> m_fini_delegates;
 
 public:
 

@@ -40,7 +40,6 @@ public:
     using drr_pointer = ioctl::drr_pointer;
     using vcpuid_type = ioctl::vcpuid_type;
     using status_pointer = ioctl::status_pointer;
-    using registers_pointer = ioctl::registers_pointer;
     using handle_type = int;
 
     ioctl_private();

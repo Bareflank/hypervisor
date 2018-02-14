@@ -34,6 +34,29 @@ namespace vcpuid
 
     constexpr const auto guest_mask = 0xFFFFFFFFFFFF0000UL;
     constexpr const auto guest_from = 16;
+
+    /// Is Bootstrap vCPU
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param id the id to check
+    /// @return true if this vCPU is the bootstrap vCPU, false otherwise
+    ///
+    constexpr inline bool is_bootstrap_vcpu(type id)
+    { return id == 0; }
+
+    /// Is Host VM vCPU
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param id the id to check
+    /// @return true if this vCPU belongs to the host VM, false otherwise
+    ///
+    constexpr inline bool is_hvm_vcpu(type id)
+    { return (id & (vcpuid::guest_mask & ~vcpuid::reserved)) == 0; }
+
 }
 
 // *INDENT-ON*

@@ -23,7 +23,6 @@
 
 #include <bfgsl.h>
 #include <bffile.h>
-#include <bfvmcallinterface.h>
 #include <bfdebugringinterface.h>
 
 #ifdef _MSC_VER
@@ -68,8 +67,6 @@ public:
     using vcpuid_type = uint64_t;                   ///< VCPUID type
     using status_type = int64_t;                    ///< Status type
     using status_pointer = status_type *;           ///< Status pointer type
-    using registers_type = vmcall_registers_t;      ///< VMCall registers type
-    using registers_pointer = registers_type *;     ///< VMCall registers pointer type
 
     /// Default Constructor
     ///

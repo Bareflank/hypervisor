@@ -34,7 +34,6 @@
 #include <arch/x64/rflags.h>
 #include <arch/x64/srs.h>
 #include <arch/x64/tlb.h>
-#include <arch/x64/tss.h>
 #endif
 
 #ifdef BF_INTEL_X64

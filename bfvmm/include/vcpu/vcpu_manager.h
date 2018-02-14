@@ -88,22 +88,22 @@ public:
     /// @ensures none
     ///
     /// @param vcpuid the vcpu to initialize
-    /// @param data user data that can be passed around as needed
+    /// @param obj object that can be passed around as needed
     ///     by extensions of Bareflank
     ///
     virtual void create_vcpu(
-        vcpuid::type vcpuid, user_data *data = nullptr);
+        vcpuid::type vcpuid, bfobject *obj = nullptr);
 
     /// Delete vCPU
     ///
     /// Deletes the vCPU.
     ///
     /// @param vcpuid the vcpu to stop
-    /// @param data user data that can be passed around as needed
+    /// @param obj object that can be passed around as needed
     ///     by extensions of Bareflank
     ///
     virtual void delete_vcpu(
-        vcpuid::type vcpuid, user_data *data = nullptr);
+        vcpuid::type vcpuid, bfobject *obj = nullptr);
 
     /// Run vCPU
     ///
@@ -113,11 +113,11 @@ public:
     /// @ensures none
     ///
     /// @param vcpuid the vcpu to execute
-    /// @param data user data that can be passed around as needed
+    /// @param obj object that can be passed around as needed
     ///     by extensions of Bareflank
     ///
     virtual void run_vcpu(
-        vcpuid::type vcpuid, user_data *data = nullptr);
+        vcpuid::type vcpuid, bfobject *obj = nullptr);
 
     /// Halt vCPU
     ///
@@ -127,11 +127,11 @@ public:
     /// @ensures none
     ///
     /// @param vcpuid the vcpu to halt
-    /// @param data user data that can be passed around as needed
+    /// @param obj object that can be passed around as needed
     ///     by extensions of Bareflank
     ///
     virtual void hlt_vcpu(
-        vcpuid::type vcpuid, user_data *data = nullptr);
+        vcpuid::type vcpuid, bfobject *obj = nullptr);
 
     /// Set Factory
     ///
@@ -148,7 +148,7 @@ public:
 private:
 
     vcpu_manager() noexcept;
-    std::unique_ptr<vcpu> &add_vcpu(vcpuid::type vcpuid, user_data *data);
+    std::unique_ptr<vcpu> &add_vcpu(vcpuid::type vcpuid, bfobject *obj);
     std::unique_ptr<vcpu> &get_vcpu(vcpuid::type vcpuid);
 
 private:

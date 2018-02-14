@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 
-#include <support/arch/intel_x64/test_support.h>
+#include "test_support.h"
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
@@ -593,7 +593,7 @@ setup_check_host_address_space_disabled_paths(std::vector<struct control_flow_pa
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
-    g_path.setup = [&] { host_rip::set(0U); };
+    g_path.setup = [&] { host_rip::set(static_cast<uint64_t>(0)); };
     g_path.throws_exception = false;
     cfg.push_back(g_path);
 }
@@ -623,7 +623,7 @@ setup_check_host_address_space_enabled_paths(std::vector<struct control_flow_pat
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
-    g_path.setup = [&] { host_rip::set(0U); };
+    g_path.setup = [&] { host_rip::set(static_cast<uint64_t>(0)); };
     g_path.throws_exception = false;
     cfg.push_back(g_path);
 }

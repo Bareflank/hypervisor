@@ -16,6 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <bftypes.h>
+
 #include <catch/catch.hpp>
 #include <vcpu/vcpu.h>
 
@@ -40,7 +42,7 @@ TEST_CASE("vcpu: init_null_attr")
 
 TEST_CASE("vcpu: init_valid_attr")
 {
-    bfvmm::user_data data{};
+    bfobject data{};
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_initialized());
@@ -61,7 +63,7 @@ TEST_CASE("vcpu: fini_null_attr")
 
 TEST_CASE("vcpu: fini_valid_attr")
 {
-    bfvmm::user_data data{};
+    bfobject data{};
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->init();
@@ -133,7 +135,7 @@ TEST_CASE("vcpu: run_null_attr")
 
 TEST_CASE("vcpu: run_valid_attr")
 {
-    bfvmm::user_data data{};
+    bfobject data{};
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
@@ -172,7 +174,7 @@ TEST_CASE("vcpu: hlt_null_attr")
 
 TEST_CASE("vcpu: hlt_valid_attr")
 {
-    bfvmm::user_data data{};
+    bfobject data{};
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
@@ -230,18 +232,6 @@ TEST_CASE("vcpu: is_not_host_vm_vcpu")
     CHECK_FALSE(vc->is_host_vm_vcpu());
 }
 
-TEST_CASE("vcpu: is_guest_vm_vcpu")
-{
-    auto vc = std::make_unique<bfvmm::vcpu>(0x0000000100000000);
-    CHECK(vc->is_guest_vm_vcpu());
-}
-
-TEST_CASE("vcpu: is_not_guest_vm_vcpu")
-{
-    auto vc = std::make_unique<bfvmm::vcpu>(1);
-    CHECK_FALSE(vc->is_guest_vm_vcpu());
-}
-
 TEST_CASE("vcpu: is_running_vm_vcpu")
 {
     auto vc = std::make_unique<bfvmm::vcpu>(0);
@@ -268,4 +258,36 @@ TEST_CASE("vcpu: is_not_initialized_vm_vcpu")
 {
     auto vc = std::make_unique<bfvmm::vcpu>(0);
     CHECK_FALSE(vc->is_initialized());
+}
+
+void
+test_delegate(bfobject *data)
+{ bfignored(data); }
+
+TEST_CASE("vcpu: run_delegate")
+{
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
+    CHECK_NOTHROW(vc->add_run_delegate(bfvmm::vcpu::run_delegate_t::create<test_delegate>()));
+    CHECK_NOTHROW(vc->run());
+}
+
+TEST_CASE("vcpu: hlt_delegate")
+{
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
+    CHECK_NOTHROW(vc->add_hlt_delegate(bfvmm::vcpu::hlt_delegate_t::create<test_delegate>()));
+    CHECK_NOTHROW(vc->hlt());
+}
+
+TEST_CASE("vcpu: init_delegate")
+{
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
+    CHECK_NOTHROW(vc->add_init_delegate(bfvmm::vcpu::init_delegate_t::create<test_delegate>()));
+    CHECK_NOTHROW(vc->init());
+}
+
+TEST_CASE("vcpu: fini_delegate")
+{
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
+    CHECK_NOTHROW(vc->add_fini_delegate(bfvmm::vcpu::fini_delegate_t::create<test_delegate>()));
+    CHECK_NOTHROW(vc->fini());
 }
