@@ -327,32 +327,52 @@ function(download_dependency NAME)
         set(TMP ${CACHE_DIR}/${NAME}_tmp)
         set(TAR ${CACHE_DIR}/${NAME}${EXT})
 
-        if(EXISTS "${TAR}")
-            file(MD5 ${TAR} MD5)
-            if(NOT ${MD5} STREQUAL "${ARG_URL_MD5}")
-                message(STATUS "    md5 mismatch: ${ARG_URL_MD5} ${MD5}")
-                file(REMOVE_RECURSE ${SRC})
-                file(REMOVE_RECURSE ${TMP})
+        # TODO
+        #
+        # If a dependency needs to be downloaded, currently, we remove the
+        # source directory which forces a recompile. We need to verify that
+        # when this happens, all of the targets that rely on this dependency
+        # are also recompiled / relinked.
+        #
+
+        foreach(ATTEMPT RANGE 1 5 1)
+            if(EXISTS "${TAR}")
+                message(STATUS "    checking hash: ${ARG_URL_MD5}")
+                file(MD5 ${TAR} MD5)
+                if(NOT "${MD5}" STREQUAL "${ARG_URL_MD5}")
+                    message(STATUS "    ${Red}md5 mismatch: expecting ${ARG_URL_MD5}, got ${MD5}${ColorReset}")
+                    file(REMOVE_RECURSE ${SRC})
+                    file(REMOVE_RECURSE ${TMP})
+                    file(REMOVE_RECURSE ${TAR})
+                    file(REMOVE_RECURSE ${DEPENDS_DIR})
+                    message(STATUS "    checking hash: ${Yellow}complete, redownload required${ColorReset}")
+                else()
+                    message(STATUS "    checking hash: ${Green}complete${ColorReset}")
+                    break()
+                endif()
+            endif()
+
+            if(ATTEMPT GREATER 1)
+                message(STATUS "    attempt: ${ATTEMPT}")
+            endif()
+
+            message(STATUS "    download file: ${ARG_URL} -> ${TAR}")
+            file(DOWNLOAD ${ARG_URL} ${TAR} STATUS DOWNLOAD_STATUS)
+            if(NOT DOWNLOAD_STATUS MATCHES "0;")
+                message(STATUS "    ${Red}failed to download ${ARG_URL}${ColorReset}")
                 file(REMOVE_RECURSE ${TAR})
-                file(REMOVE_RECURSE ${DEPENDS_DIR})
+                continue()
             endif()
-        endif()
+            message(STATUS "    download file: ${Green}complete${ColorReset}")
+        endforeach()
 
-        if(NOT EXISTS "${TAR}")
-            message(STATUS "    downloading: ${ARG_URL} -> ${TAR}")
-            file(DOWNLOAD ${ARG_URL} ${TAR})
-            if(NOT EXISTS ${TAR})
-                message(FATAL_ERROR "Failed to download: ${ARG_URL}")
-            endif()
-            message(STATUS "    downloading: complete")
-
-            message(STATUS "    verifying md5: ${ARG_URL_MD5}")
+        if(EXISTS ${TAR})
             file(MD5 ${TAR} MD5)
-            if(NOT ${MD5} STREQUAL "${ARG_URL_MD5}")
-                message(FATAL_ERROR "Invalid MD5 hash: expecting: ${ARG_URL_MD5}, got: ${MD5}")
-            else()
-                message(STATUS "    verifying md5: complete")
+            if(NOT "${MD5}" STREQUAL "${ARG_URL_MD5}")
+                message(FATAL_ERROR "Failed to download ${ARG_URL} with md5 hash of ${ARG_URL_MD5}")
             endif()
+        else()
+            message(FATAL_ERROR "Failed to download ${ARG_URL} with md5 hash of ${ARG_URL_MD5}")
         endif()
 
         if(NOT EXISTS "${SRC}")
@@ -360,7 +380,6 @@ function(download_dependency NAME)
             file(REMOVE_RECURSE ${SRC})
             file(MAKE_DIRECTORY ${TMP})
 
-            message(STATUS "    extracting: ${TAR}")
             execute_process(
                 COMMAND ${CMAKE_COMMAND} -E tar xfz ${TAR}
                 WORKING_DIRECTORY ${TMP}
@@ -462,6 +481,15 @@ function(add_dependency NAME PREFIX)
         TARGET clean-depends
         COMMAND ${CMAKE_COMMAND} -E remove_directory ${DEPENDS_DIR}/${NAME}
     )
+
+    # TODO
+    #
+    # As a post install step, we need to touch a file that states that the
+    # dependency has been compiled. If this is the case, we would then only
+    # run the install step, skipping the compile step. This should allow us
+    # to move the depends directory outside of the build tree and safely use
+    # it for future compilations.
+    #
 
     ExternalProject_Add(
         ${NAME}_${PREFIX}

@@ -17,12 +17,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 if(ENABLE_TIDY)
-    message(STATUS "Including dependency: clang-tidy")
-
     if(NOT CLANG_TIDY_BIN)
         find_program(CLANG_TIDY_BIN clang-tidy-4.0)
 
         if(NOT CLANG_TIDY_BIN)
+            message(STATUS "Including dependency: clang-tidy")
             message(STATUS "*** FATAL ERROR: Clang Tidy 4.0 was not found. To Fix:")
             message(STATUS "  - install clang-tidy-4.0 or")
             message(STATUS "  - ln -s /usr/bin/clang-tidy /usr/bin/clang-tidy-4.0")
