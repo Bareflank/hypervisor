@@ -175,7 +175,7 @@ endif()
 if(ENABLE_EXTENDED_APIS)
     set_bfm_vmm(eapis_vmm)
     list(APPEND EXTENSION
-        ${CMAKE_CURRENT_LIST_DIR}/extended_apis/CMakeLists.txt
+        ${CMAKE_CURRENT_LIST_DIR}/extended_apis
     )
 endif()
 

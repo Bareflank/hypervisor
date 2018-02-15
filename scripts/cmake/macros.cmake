@@ -886,7 +886,7 @@ function(add_subproject NAME PREFIX)
 endfunction(add_subproject)
 
 # ------------------------------------------------------------------------------
-# vmm_extension
+# Extensions
 # ------------------------------------------------------------------------------
 
 function(vmm_extension NAME)
@@ -899,6 +899,19 @@ function(vmm_extension NAME)
         ${ARGN}
     )
 endfunction(vmm_extension)
+
+function(userspace_extension NAME)
+    add_subproject(
+        ${NAME} userspace
+    )
+endfunction(userspace_extension)
+
+function(test_extension NAME)
+    add_subproject(
+        ${NAME} test
+        ${ARGN}
+    )
+endfunction(test_extension)
 
 # ------------------------------------------------------------------------------
 # init_project
@@ -1049,6 +1062,10 @@ function(add_shared_library NAME)
     set(multiVal SOURCES DEFINES DEPENDS)
     cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
 
+    if(NOT ARG_SOURCES)
+        return()
+    endif()
+
     if(BUILD_SHARED_LIBS OR ARG_ALWAYS)
         if(NOT ARG_SOURCES)
             message(FATAL_ERROR "SOURCES must be defined when creating a library")
@@ -1081,6 +1098,10 @@ function(add_static_library NAME)
     set(options ALWAYS)
     set(multiVal SOURCES DEFINES)
     cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
+
+    if(NOT ARG_SOURCES)
+        return()
+    endif()
 
     if(BUILD_STATIC_LIBS OR ARG_ALWAYS)
         if(NOT ARG_SOURCES)
