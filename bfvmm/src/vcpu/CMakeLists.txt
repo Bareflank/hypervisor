@@ -21,18 +21,6 @@ list(APPEND SOURCES
     vcpu_manager.cpp
 )
 
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    if(NOT ENABLE_MOCKING)
-        list(APPEND SOURCES
-            arch/intel_x64/vcpu_factory.cpp
-        )
-    endif()
-elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
-    message(WARNING "Unimplemented")
-else()
-    message(FATAL_ERROR "Unsupported archiecture")
-endif()
-
 add_shared_library(
     bfvmm_vcpu
     SOURCES ${SOURCES}
