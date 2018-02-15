@@ -18,6 +18,9 @@
 
 if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
     list(APPEND SOURCES
+        arch/intel_x64/check/check_vmcs_control_fields.cpp
+        arch/intel_x64/check/check_vmcs_guest_fields.cpp
+        arch/intel_x64/check/check_vmcs_host_fields.cpp
         arch/intel_x64/vmx/vmx.cpp
         arch/intel_x64/vmcs/vmcs.cpp
         arch/intel_x64/exit_handler/exit_handler.cpp

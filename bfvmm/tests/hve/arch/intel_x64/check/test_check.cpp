@@ -19,15 +19,12 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
-TEST_CASE("check")
+TEST_CASE("check all")
 {
-    MockRepository mocks;
+    std::vector<struct control_flow_path> cfg;
+    setup_check_all_paths(cfg);
 
-    mocks.OnCallFunc(bfvmm::intel_x64::check::vmx_controls_all);
-    mocks.OnCallFunc(bfvmm::intel_x64::check::host_state_all);
-    mocks.OnCallFunc(bfvmm::intel_x64::check::guest_state_all);
-
-    CHECK_NOTHROW(bfvmm::intel_x64::check::all());
+    test_vmcs_check(cfg, bfvmm::intel_x64::check::all);
 }
 
 #endif
