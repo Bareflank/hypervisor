@@ -16,19 +16,25 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-list(APPEND SOURCES
-    arch/intel_x64/vmx/vmx.cpp
-    arch/intel_x64/vmcs/vmcs.cpp
-    arch/intel_x64/exit_handler/exit_handler.cpp
-)
-
-if(NOT WIN32 AND NOT ENABLE_MOCKING)
+if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
     list(APPEND SOURCES
-        arch/intel_x64/vmcs/vmcs_launch.asm
-        arch/intel_x64/vmcs/vmcs_promote.asm
-        arch/intel_x64/vmcs/vmcs_resume.asm
-        arch/intel_x64/exit_handler/exit_handler_entry.asm
+        arch/intel_x64/vmx/vmx.cpp
+        arch/intel_x64/vmcs/vmcs.cpp
+        arch/intel_x64/exit_handler/exit_handler.cpp
     )
+
+    if(NOT WIN32 AND NOT ENABLE_MOCKING)
+        list(APPEND SOURCES
+            arch/intel_x64/vmcs/vmcs_launch.asm
+            arch/intel_x64/vmcs/vmcs_promote.asm
+            arch/intel_x64/vmcs/vmcs_resume.asm
+            arch/intel_x64/exit_handler/exit_handler_entry.asm
+        )
+    endif()
+elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
+    message(WARNING "Unimplemented")
+else()
+    message(FATAL_ERROR "Unsupported archiecture")
 endif()
 
 add_shared_library(
