@@ -30,9 +30,9 @@
 #include <intrinsics.h>
 #include <bfnewdelete.h>
 
-#include <memory_manager/map_ptr_x64.h>
-#include <memory_manager/memory_manager_x64.h>
-#include <memory_manager/root_page_table_x64.h>
+#include <memory_manager/arch/x64/map_ptr.h>
+#include <memory_manager/arch/x64/root_page_table.h>
+#include <memory_manager/memory_manager.h>
 
 bfvmm::intel_x64::save_state_t g_save_state{};
 
@@ -397,16 +397,16 @@ setup_idt()
 auto
 setup_mm(MockRepository &mocks)
 {
-    auto mm = mocks.Mock<memory_manager_x64>();
-    mocks.OnCallFunc(memory_manager_x64::instance).Return(mm);
+    auto mm = mocks.Mock<bfvmm::memory_manager>();
+    mocks.OnCallFunc(bfvmm::memory_manager::instance).Return(mm);
 
-    mocks.OnCall(mm, memory_manager_x64::alloc_map).Return(static_cast<char *>(g_map));
-    mocks.OnCall(mm, memory_manager_x64::free_map);
-    mocks.OnCall(mm, memory_manager_x64::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, memory_manager_x64::physint_to_virtptr).Do(physint_to_virtptr);
+    mocks.OnCall(mm, bfvmm::memory_manager::alloc_map).Return(static_cast<char *>(g_map));
+    mocks.OnCall(mm, bfvmm::memory_manager::free_map);
+    mocks.OnCall(mm, bfvmm::memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
+    mocks.OnCall(mm, bfvmm::memory_manager::physint_to_virtptr).Do(physint_to_virtptr);
 
-    mocks.OnCallFunc(bfn::map_with_cr3);
-    mocks.OnCallFunc(bfn::virt_to_phys_with_cr3).Return(0x42);
+    mocks.OnCallFunc(bfvmm::x64::map_with_cr3);
+    mocks.OnCallFunc(bfvmm::x64::virt_to_phys_with_cr3).Return(0x42);
 
     return mm;
 }
@@ -414,12 +414,12 @@ setup_mm(MockRepository &mocks)
 auto
 setup_pt(MockRepository &mocks)
 {
-    auto pt = mocks.Mock<root_page_table_x64>();
-    mocks.OnCallFunc(root_pt).Return(pt);
+    auto pt = mocks.Mock<bfvmm::x64::root_page_table>();
+    mocks.OnCallFunc(bfvmm::x64::root_pt).Return(pt);
 
-    mocks.OnCall(pt, root_page_table_x64::map_4k);
-    mocks.OnCall(pt, root_page_table_x64::unmap);
-    mocks.OnCall(pt, root_page_table_x64::cr3).Return(0x000000ABCDEF0000);
+    mocks.OnCall(pt, bfvmm::x64::root_page_table::map_4k);
+    mocks.OnCall(pt, bfvmm::x64::root_page_table::unmap);
+    mocks.OnCall(pt, bfvmm::x64::root_page_table::cr3).Return(0x000000ABCDEF0000);
 
     return pt;
 }

@@ -20,6 +20,7 @@
 #define PAGE_TABLE_ENTRY_X64_H
 
 #include <bfgsl.h>
+#include <intrinsics.h>
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -43,65 +44,20 @@
 #endif
 
 // -----------------------------------------------------------------------------
-// Constants
-// -----------------------------------------------------------------------------
-
-/// @cond
-/// *INDENT-OFF*
-
-namespace x64
-{
-namespace page_table
-{
-    constexpr const auto num_entries = 512UL;
-    constexpr const auto num_bytes = num_entries * sizeof(uintptr_t);
-
-    template<class T, class F> auto index(const T virt, const F from)
-    { return gsl::narrow_cast<std::ptrdiff_t>((virt & ((0x1FFULL) << from)) >> from); }
-
-    namespace pml4
-    {
-        constexpr const auto from = 39U;
-        constexpr const auto size = 9U;
-        constexpr const auto size_bytes = 0x8000000000UL;
-    }
-
-    namespace pdpt
-    {
-        constexpr const auto from = 30U;
-        constexpr const auto size = 9U;
-        constexpr const auto size_bytes = 0x40000000UL;
-    }
-
-    namespace pd
-    {
-        constexpr const auto from = 21U;
-        constexpr const auto size = 9U;
-        constexpr const auto size_bytes = 0x200000UL;
-    }
-
-    namespace pt
-    {
-        constexpr const auto from = 12U;
-        constexpr const auto size = 9U;
-        constexpr const auto size_bytes = 0x1000UL;
-    }
-}
-}
-
-// *INDENT-ON*
-/// @endcond
-
-// -----------------------------------------------------------------------------
 // Definition
 // -----------------------------------------------------------------------------
+
+namespace bfvmm
+{
+namespace x64
+{
 
 /// Page Table Entry
 ///
 /// Defines an entry in a page table and provides helper functions for setting
 /// each field in the entry
 ///
-class EXPORT_MEMORY_MANAGER page_table_entry_x64
+class EXPORT_MEMORY_MANAGER page_table_entry
 {
 public:
 
@@ -116,14 +72,14 @@ public:
     ///
     /// @param pte the pte that this page table entry encapsulates.
     ///
-    page_table_entry_x64(gsl::not_null<pointer> pte) noexcept;
+    page_table_entry(gsl::not_null<pointer> pte) noexcept;
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    ~page_table_entry_x64() = default;
+    ~page_table_entry() = default;
 
     /// Present
     ///
@@ -416,14 +372,17 @@ public:
 
     /// @cond
 
-    page_table_entry_x64(page_table_entry_x64 &&) noexcept = default;
-    page_table_entry_x64 &operator=(page_table_entry_x64 &&) noexcept = default;
+    page_table_entry(page_table_entry &&) noexcept = default;
+    page_table_entry &operator=(page_table_entry &&) noexcept = default;
 
-    page_table_entry_x64(const page_table_entry_x64 &) = delete;
-    page_table_entry_x64 &operator=(const page_table_entry_x64 &) = delete;
+    page_table_entry(const page_table_entry &) = delete;
+    page_table_entry &operator=(const page_table_entry &) = delete;
 
     /// @endcond
 };
+
+}
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

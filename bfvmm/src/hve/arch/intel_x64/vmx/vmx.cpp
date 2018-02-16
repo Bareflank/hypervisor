@@ -21,9 +21,9 @@
 #include <bfexception.h>
 
 #include <hve/arch/intel_x64/vmx/vmx.h>
-#include <memory_manager/memory_manager_x64.h>
 
 #include <intrinsics.h>
+#include <memory_manager/memory_manager.h>
 
 // -----------------------------------------------------------------------------
 // Implementation

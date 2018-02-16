@@ -25,7 +25,7 @@
 #include <vector>
 #include <memory>
 
-#include "page_table_entry_x64.h"
+#include "page_table_entry.h"
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -52,11 +52,16 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+namespace x64
+{
+
 /// Page Table
 ///
 /// Defines page table
 ///
-class EXPORT_MEMORY_MANAGER page_table_x64
+class EXPORT_MEMORY_MANAGER page_table
 {
 public:
 
@@ -76,14 +81,14 @@ public:
     ///
     /// @param pte the parent page table entry that points to this table
     ///
-    page_table_x64(gsl::not_null<pointer> pte);
+    page_table(gsl::not_null<pointer> pte);
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    ~page_table_x64() = default;
+    ~page_table() = default;
 
     /// Add Page (1g Granularity)
     ///
@@ -100,8 +105,8 @@ public:
     /// @return the resulting pte. Note that this pte is blank, and its
     ///     properties (like present) should be set by the caller
     ///
-    page_table_entry_x64 add_page_1g(integer_pointer addr)
-    { return add_page(addr, x64::page_table::pml4::from, x64::page_table::pdpt::from); }
+    page_table_entry add_page_1g(integer_pointer addr)
+    { return add_page(addr, ::x64::page_table::pml4::from, ::x64::page_table::pdpt::from); }
 
     /// Add Page (2m Granularity)
     ///
@@ -118,8 +123,8 @@ public:
     /// @return the resulting pte. Note that this pte is blank, and its
     ///     properties (like present) should be set by the caller
     ///
-    page_table_entry_x64 add_page_2m(integer_pointer addr)
-    { return add_page(addr, x64::page_table::pml4::from, x64::page_table::pd::from); }
+    page_table_entry add_page_2m(integer_pointer addr)
+    { return add_page(addr, ::x64::page_table::pml4::from, ::x64::page_table::pd::from); }
 
     /// Add Page (4k Granularity)
     ///
@@ -136,8 +141,8 @@ public:
     /// @return the resulting pte. Note that this pte is blank, and its
     ///     properties (like present) should be set by the caller
     ///
-    page_table_entry_x64 add_page_4k(integer_pointer addr)
-    { return add_page(addr, x64::page_table::pml4::from, x64::page_table::pt::from); }
+    page_table_entry add_page_4k(integer_pointer addr)
+    { return add_page(addr, ::x64::page_table::pml4::from, ::x64::page_table::pt::from); }
 
     /// Remove Page
     ///
@@ -153,7 +158,7 @@ public:
     /// @param addr the virtual address of the page to remove
     ///
     void remove_page(integer_pointer addr)
-    { remove_page(addr, x64::page_table::pml4::from); }
+    { remove_page(addr, ::x64::page_table::pml4::from); }
 
     /// Virt to Page Table Entry
     ///
@@ -166,8 +171,8 @@ public:
     /// @param addr the virtual address of the pte to locate
     /// @return the PTE for the provided virtual address
     ///
-    page_table_entry_x64 virt_to_pte(integer_pointer addr) const
-    { return virt_to_pte(addr, x64::page_table::pml4::from); }
+    page_table_entry virt_to_pte(integer_pointer addr) const
+    { return virt_to_pte(addr, ::x64::page_table::pml4::from); }
 
     /// Page Table to Memory Descriptor List
     ///
@@ -186,9 +191,9 @@ public:
 
 private:
 
-    page_table_entry_x64 add_page(integer_pointer addr, integer_pointer bits, integer_pointer end);
+    page_table_entry add_page(integer_pointer addr, integer_pointer bits, integer_pointer end);
     void remove_page(integer_pointer addr, integer_pointer bits);
-    page_table_entry_x64 virt_to_pte(integer_pointer addr, integer_pointer bits) const;
+    page_table_entry virt_to_pte(integer_pointer addr, integer_pointer bits) const;
     memory_descriptor_list pt_to_mdl(memory_descriptor_list &mdl) const;
 
     bool empty() const noexcept;
@@ -200,20 +205,23 @@ private:
     friend class memory_manager_ut;
 
     std::unique_ptr<integer_pointer[]> m_pt;
-    std::vector<std::unique_ptr<page_table_x64>> m_pts;
+    std::vector<std::unique_ptr<page_table>> m_pts;
 
 public:
 
     /// @cond
 
-    page_table_x64(page_table_x64 &&) noexcept = default;
-    page_table_x64 &operator=(page_table_x64 &&) noexcept = default;
+    page_table(page_table &&) noexcept = default;
+    page_table &operator=(page_table &&) noexcept = default;
 
-    page_table_x64(const page_table_x64 &) = delete;
-    page_table_x64 &operator=(const page_table_x64 &) = delete;
+    page_table(const page_table &) = delete;
+    page_table &operator=(const page_table &) = delete;
 
     /// @endcond
 };
+
+}
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

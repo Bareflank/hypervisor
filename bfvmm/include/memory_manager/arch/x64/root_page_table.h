@@ -25,10 +25,7 @@
 #include <mutex>
 #include <vector>
 
-#include "pat_x64.h"
-#include "mem_attr_x64.h"
-#include "page_table_x64.h"
-
+#include "page_table.h"
 #include <intrinsics.h>
 
 // -----------------------------------------------------------------------------
@@ -56,6 +53,11 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+namespace x64
+{
+
 /// Root Page Tables
 ///
 /// The VMM has to have a set of page tables for itself to map in memory
@@ -66,16 +68,16 @@
 /// This needs to be done manually. In general, this class should not be used
 /// directly, but instead mapping should be done via a unique_map_ptr_x64.
 ///
-class EXPORT_MEMORY_MANAGER root_page_table_x64
+class EXPORT_MEMORY_MANAGER root_page_table
 {
 public:
 
     using pointer = void *;                                                 ///< Pointer type
     using integer_pointer = uintptr_t;                                      ///< Integer pointer type
     using cr3_type = uint64_t;                                              ///< CR3 value type
-    using attr_type = x64::memory_attr::attr_type;                          ///< Attribute type
+    using attr_type = ::x64::memory_attr::attr_type;                        ///< Attribute type
     using size_type = size_t;                                               ///< Size type
-    using memory_descriptor_list = page_table_x64::memory_descriptor_list;  ///< Memory descriptor list type
+    using memory_descriptor_list = page_table::memory_descriptor_list;      ///< Memory descriptor list type
 
     /// Default Constructor
     ///
@@ -84,14 +86,14 @@ public:
     ///
     /// @param is_vmm true if this is the root page table for the VMM
     ///
-    root_page_table_x64(bool is_vmm = false);
+    root_page_table(bool is_vmm = false);
 
     /// Default Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    virtual ~root_page_table_x64() = default;
+    virtual ~root_page_table() = default;
 
     /// CR3
     ///
@@ -117,7 +119,7 @@ public:
     ///
     virtual void map_1g(
         integer_pointer virt, integer_pointer phys, attr_type attr)
-    { this->map_page(virt, phys, attr, x64::page_table::pdpt::size_bytes); }
+    { this->map_page(virt, phys, attr, ::x64::page_table::pdpt::size_bytes); }
 
     /// Map (2 Megabytes)
     ///
@@ -133,7 +135,7 @@ public:
     ///
     virtual void map_2m(
         integer_pointer virt, integer_pointer phys, attr_type attr)
-    { this->map_page(virt, phys, attr, x64::page_table::pd::size_bytes); }
+    { this->map_page(virt, phys, attr, ::x64::page_table::pd::size_bytes); }
 
     /// Map (1 Kilobytes)
     ///
@@ -149,7 +151,7 @@ public:
     ///
     virtual void map_4k(
         integer_pointer virt, integer_pointer phys, attr_type attr)
-    { this->map_page(virt, phys, attr, x64::page_table::pt::size_bytes); }
+    { this->map_page(virt, phys, attr, ::x64::page_table::pt::size_bytes); }
 
     /// Unmap
     ///
@@ -261,7 +263,7 @@ public:
     /// @param virt the virtual address to lookup
     /// @return the resulting PTE
     ///
-    page_table_entry_x64 virt_to_pte(
+    page_table_entry virt_to_pte(
         integer_pointer virt) const;
 
     /// Page Table to Memory Descriptor List
@@ -280,7 +282,7 @@ public:
 
 private:
 
-    page_table_entry_x64 add_page(integer_pointer virt, size_type size);
+    page_table_entry add_page(integer_pointer virt, size_type size);
 
     void map_page(integer_pointer virt, integer_pointer phys, attr_type attr, size_type size);
     void unmap_page(integer_pointer virt) noexcept;
@@ -290,7 +292,7 @@ private:
     bool m_is_vmm{false};
 
     integer_pointer m_cr3{0};
-    std::unique_ptr<page_table_x64> m_pt;
+    std::unique_ptr<page_table> m_pt;
 
     mutable std::mutex m_mutex;
 
@@ -298,11 +300,11 @@ public:
 
     /// @cond
 
-    root_page_table_x64(root_page_table_x64 &&) noexcept = delete;
-    root_page_table_x64 &operator=(root_page_table_x64 &&) noexcept = delete;
+    root_page_table(root_page_table &&) noexcept = delete;
+    root_page_table &operator=(root_page_table &&) noexcept = delete;
 
-    root_page_table_x64(const root_page_table_x64 &) = delete;
-    root_page_table_x64 &operator=(const root_page_table_x64 &) = delete;
+    root_page_table(const root_page_table &) = delete;
+    root_page_table &operator=(const root_page_table &) = delete;
 
     /// @endcond
 };
@@ -314,7 +316,10 @@ public:
 /// @expects
 /// @ensures ret != nullptr
 ///
-EXPORT_MEMORY_MANAGER root_page_table_x64 *root_pt() noexcept;
+EXPORT_MEMORY_MANAGER root_page_table *root_pt() noexcept;
+
+}
+}
 
 /// Root Page Table Macro
 ///
@@ -324,7 +329,7 @@ EXPORT_MEMORY_MANAGER root_page_table_x64 *root_pt() noexcept;
 /// @expects
 /// @ensures ret != nullptr
 ///
-#define g_pt root_pt()
+#define g_pt bfvmm::x64::root_pt()
 
 #ifdef _MSC_VER
 #pragma warning(pop)
