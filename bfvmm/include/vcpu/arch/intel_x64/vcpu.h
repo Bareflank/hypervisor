@@ -16,6 +16,9 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#ifndef VCPU_INTEL_X64_H
+#define VCPU_INTEL_X64_H
+
 #include "../../vcpu_factory.h"
 
 #include "../../../hve/arch/intel_x64/vmx/vmx.h"
@@ -121,3 +124,5 @@ private:
 
 }
 }
+
+#endif
