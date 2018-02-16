@@ -19,24 +19,6 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
-void
-test_vmcs_check(std::vector<struct control_flow_path> cfg, void(*func)())
-{
-    for (auto p : cfg) {
-        MockRepository mocks;
-        setup_mm(mocks);
-
-        p.setup();
-
-        if (p.throws_exception) {
-            CHECK_THROWS(func());
-        }
-        else {
-            CHECK_NOTHROW(func());
-        }
-    }
-}
-
 static void
 make_usable(uint32_t access_rights)
 { g_vmcs_fields[access_rights] &= ~x64::access_rights::unusable; }
@@ -3380,62 +3362,6 @@ setup_check_guest_valid_pdpte_with_ept_enabled_paths(std::vector<struct control_
     g_path.setup = [&] { guest_pdpte3::reserved::set(0U); };
     g_path.throws_exception = false;
     cfg.push_back(g_path);
-}
-
-TEST_CASE("check_guest_state_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_guest_state_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_state_all);
-}
-
-TEST_CASE("check_guest_control_registers_debug_registers_and_msrs_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_guest_control_registers_debug_registers_and_msrs_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_control_registers_debug_registers_and_msrs_all);
-}
-
-TEST_CASE("check_guest_segment_registers_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_guest_segment_registers_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_segment_registers_all);
-}
-
-TEST_CASE("check_guest_descriptor_table_registers_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_guest_descriptor_table_registers_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_descriptor_table_registers_all);
-}
-
-TEST_CASE("check_guest_rip_and_rflags_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_guest_rip_and_rflags_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_rip_and_rflags_all);
-}
-
-TEST_CASE("check_guest_non_register_state_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_guest_non_register_state_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_non_register_state_all);
-}
-
-TEST_CASE("check_guest_pdptes_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_guest_pdptes_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::guest_pdptes_all);
 }
 
 TEST_CASE("check_guest_cr0_for_unsupported_bits")

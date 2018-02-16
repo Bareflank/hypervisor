@@ -81,6 +81,24 @@ inline void
 vmfunc_ctl_allow1(uint64_t mask)
 { g_msrs[intel_x64::msrs::ia32_vmx_vmfunc::addr] |= mask; }
 
+void
+test_vmcs_check(std::vector<struct control_flow_path> cfg, void(*func)())
+{
+    for (auto p : cfg) {
+        MockRepository mocks;
+        setup_mm(mocks);
+
+        p.setup();
+
+        if (p.throws_exception) {
+            CHECK_THROWS(func());
+        }
+        else {
+            CHECK_NOTHROW(func());
+        }
+    }
+}
+
 inline void
 setup_check_control_vm_execution_control_fields_all_paths(std::vector<struct control_flow_path>
         &cfg)

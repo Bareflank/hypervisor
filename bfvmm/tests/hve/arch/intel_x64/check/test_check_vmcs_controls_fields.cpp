@@ -19,24 +19,6 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
-void
-test_vmcs_check(std::vector<struct control_flow_path> cfg, void(*func)())
-{
-    for (auto p : cfg) {
-        MockRepository mocks;
-        setup_mm(mocks);
-
-        p.setup();
-
-        if (p.throws_exception) {
-            CHECK_THROWS(func());
-        }
-        else {
-            CHECK_NOTHROW(func());
-        }
-    }
-}
-
 static void
 setup_check_control_pin_based_ctls_reserved_properly_set_paths(std::vector<struct control_flow_path>
         &cfg)
@@ -1230,38 +1212,6 @@ setup_check_control_entry_msr_load_address_paths(std::vector<struct control_flow
     };
     g_path.throws_exception = false;
     cfg.push_back(g_path);
-}
-
-TEST_CASE("check_control_vmx_controls_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_control_vmx_controls_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::vmx_controls_all);
-}
-
-TEST_CASE("check_control_vm_execution_control_fields_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_control_vm_execution_control_fields_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_vm_execution_control_fields_all);
-}
-
-TEST_CASE("check_control_vm_exit_control_fields_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_control_vm_exit_control_fields_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_vm_exit_control_fields_all);
-}
-
-TEST_CASE("check_control_vm_entry_control_fields_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_control_vm_entry_control_fields_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::control_vm_entry_control_fields_all);
 }
 
 TEST_CASE("check_control_pin_based_ctls_reserved_properly_set")

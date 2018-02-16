@@ -19,21 +19,6 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
-void
-test_vmcs_check(std::vector<struct control_flow_path> cfg, void(*func)())
-{
-    for (auto p : cfg) {
-        p.setup();
-
-        if (p.throws_exception) {
-            CHECK_THROWS(func());
-        }
-        else {
-            CHECK_NOTHROW(func());
-        }
-    }
-}
-
 static void
 setup_check_host_cr0_for_unsupported_bits_paths(std::vector<struct control_flow_path> &cfg)
 {
@@ -72,11 +57,17 @@ setup_check_host_cr4_for_unsupported_bits_paths(std::vector<struct control_flow_
 static void
 setup_check_host_cr3_for_unsupported_bits_paths(std::vector<struct control_flow_path> &cfg)
 {
-    g_path.setup = [&] { host_cr3::set(0xff00000000000000UL); };
+    g_path.setup = [&] {
+        g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+        host_cr3::set(0xff00000000000000UL);
+    };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
-    g_path.setup = [&] { host_cr3::set(0x1000UL); };
+    g_path.setup = [&] {
+        g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
+        host_cr3::set(0x1000UL);
+    };
     g_path.throws_exception = false;
     cfg.push_back(g_path);
 }
@@ -626,38 +617,6 @@ setup_check_host_address_space_enabled_paths(std::vector<struct control_flow_pat
     g_path.setup = [&] { host_rip::set(static_cast<uint64_t>(0)); };
     g_path.throws_exception = false;
     cfg.push_back(g_path);
-}
-
-TEST_CASE("check_host_state_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_host_state_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_state_all);
-}
-
-TEST_CASE("check_host_control_registers_and_msrs_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_host_control_registers_and_msrs_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_control_registers_and_msrs_all);
-}
-
-TEST_CASE("check_host_segment_and_descriptor_table_registers_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_host_segment_and_descriptor_table_registers_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_segment_and_descriptor_table_registers_all);
-}
-
-TEST_CASE("check_host_address_space_size_all")
-{
-    std::vector<struct control_flow_path> cfg;
-    setup_check_host_address_space_size_all_paths(cfg);
-
-    test_vmcs_check(cfg, bfvmm::intel_x64::check::host_address_space_size_all);
 }
 
 TEST_CASE("check_host_cr0_for_unsupported_bits")
