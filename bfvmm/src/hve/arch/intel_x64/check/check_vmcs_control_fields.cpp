@@ -22,7 +22,7 @@
 #include <type_traits>
 
 #include <intrinsics.h>
-#include "../../../../memory_manager/memory_manager_x64.h"
+#include <memory_manager/memory_manager_x64.h>
 
 /// Intel x86_64 VMCS Check Controls
 ///
@@ -37,7 +37,7 @@ namespace intel_x64
 namespace check
 {
 
-inline auto
+void
 control_reserved_properly_set(
     ::x64::msrs::field_type addr, ::x64::msrs::value_type ctls, const char *name)
 {
@@ -76,7 +76,7 @@ control_reserved_properly_set(
     }
 }
 
-inline void
+void
 control_pin_based_ctls_reserved_properly_set()
 {
     auto addr = ::intel_x64::msrs::ia32_vmx_true_pinbased_ctls::addr;
@@ -86,7 +86,7 @@ control_pin_based_ctls_reserved_properly_set()
     control_reserved_properly_set(addr, ctls, name);
 }
 
-inline void
+void
 control_proc_based_ctls_reserved_properly_set()
 {
     auto addr = ::intel_x64::msrs::ia32_vmx_true_procbased_ctls::addr;
@@ -96,7 +96,7 @@ control_proc_based_ctls_reserved_properly_set()
     control_reserved_properly_set(addr, ctls, name);
 }
 
-inline void
+void
 control_proc_based_ctls2_reserved_properly_set()
 {
     if (!::intel_x64::vmcs::secondary_processor_based_vm_execution_controls::exists()) {
@@ -110,7 +110,7 @@ control_proc_based_ctls2_reserved_properly_set()
     control_reserved_properly_set(addr, ctls, name);
 }
 
-inline void
+void
 control_cr3_count_less_then_4()
 {
     if (::intel_x64::vmcs::cr3_target_count::get() > 4) {
@@ -118,7 +118,7 @@ control_cr3_count_less_then_4()
     }
 }
 
-inline void
+void
 control_io_bitmap_address_bits()
 {
     if (::intel_x64::vmcs::primary_processor_based_vm_execution_controls::use_io_bitmaps::is_disabled()) {
@@ -145,7 +145,7 @@ control_io_bitmap_address_bits()
     }
 }
 
-inline void
+void
 control_msr_bitmap_address_bits()
 {
     if (::intel_x64::vmcs::primary_processor_based_vm_execution_controls::use_msr_bitmap::is_disabled()) {
@@ -163,7 +163,7 @@ control_msr_bitmap_address_bits()
     }
 }
 
-inline void
+void
 control_tpr_shadow_and_virtual_apic()
 {
     using namespace ::intel_x64::vmcs::primary_processor_based_vm_execution_controls;
@@ -236,7 +236,7 @@ control_tpr_shadow_and_virtual_apic()
     }
 }
 
-inline void
+void
 control_nmi_exiting_and_virtual_nmi()
 {
     if (::intel_x64::vmcs::pin_based_vm_execution_controls::nmi_exiting::is_enabled()) {
@@ -248,7 +248,7 @@ control_nmi_exiting_and_virtual_nmi()
     }
 }
 
-inline void
+void
 control_virtual_nmi_and_nmi_window()
 {
     if (::intel_x64::vmcs::pin_based_vm_execution_controls::virtual_nmis::is_enabled()) {
@@ -260,7 +260,7 @@ control_virtual_nmi_and_nmi_window()
     }
 }
 
-inline void
+void
 control_virtual_apic_address_bits()
 {
     if (::intel_x64::vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled()) {
@@ -286,7 +286,7 @@ control_virtual_apic_address_bits()
     }
 }
 
-inline void
+void
 control_x2apic_mode_and_virtual_apic_access()
 {
     if (::intel_x64::vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled()) {
@@ -302,7 +302,7 @@ control_x2apic_mode_and_virtual_apic_access()
     }
 }
 
-inline void
+void
 control_virtual_interrupt_and_external_interrupt()
 {
     if (::intel_x64::vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled()) {
@@ -319,7 +319,7 @@ control_virtual_interrupt_and_external_interrupt()
     }
 }
 
-inline void
+void
 control_process_posted_interrupt_checks()
 {
     if (::intel_x64::vmcs::pin_based_vm_execution_controls::process_posted_interrupts::is_disabled()) {
@@ -360,7 +360,7 @@ control_process_posted_interrupt_checks()
     }
 }
 
-inline void
+void
 control_vpid_checks()
 {
     if (::intel_x64::vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled()) {
@@ -376,7 +376,7 @@ control_vpid_checks()
     }
 }
 
-inline void
+void
 control_enable_ept_checks()
 {
     using namespace ::intel_x64::msrs::ia32_vmx_ept_vpid_cap;
@@ -417,7 +417,7 @@ control_enable_ept_checks()
     }
 }
 
-inline void
+void
 control_enable_pml_checks()
 {
     if (::intel_x64::vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled()) {
@@ -443,7 +443,7 @@ control_enable_pml_checks()
     }
 }
 
-inline void
+void
 control_unrestricted_guests()
 {
     if (::intel_x64::vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled()) {
@@ -459,7 +459,7 @@ control_unrestricted_guests()
     }
 }
 
-inline void
+void
 control_enable_vm_functions()
 {
     if (::intel_x64::vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled()) {
@@ -497,7 +497,7 @@ control_enable_vm_functions()
     }
 }
 
-inline void
+void
 control_enable_vmcs_shadowing()
 {
     if (::intel_x64::vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled()) {
@@ -528,7 +528,7 @@ control_enable_vmcs_shadowing()
     }
 }
 
-inline void
+void
 control_enable_ept_violation_checks()
 {
     if (::intel_x64::vmcs::primary_processor_based_vm_execution_controls::activate_secondary_controls::is_disabled()) {
@@ -551,7 +551,7 @@ control_enable_ept_violation_checks()
     }
 }
 
-inline void
+void
 control_vm_exit_ctls_reserved_properly_set()
 {
     auto addr = ::intel_x64::msrs::ia32_vmx_true_exit_ctls::addr;
@@ -561,7 +561,7 @@ control_vm_exit_ctls_reserved_properly_set()
     control_reserved_properly_set(addr, ctls, name);
 }
 
-inline void
+void
 control_activate_and_save_preemption_timer_must_be_0()
 {
     if (::intel_x64::vmcs::pin_based_vm_execution_controls::activate_vmx_preemption_timer::is_enabled()) {
@@ -574,7 +574,7 @@ control_activate_and_save_preemption_timer_must_be_0()
     }
 }
 
-inline void
+void
 control_exit_msr_store_address()
 {
     auto msr_store_count = ::intel_x64::vmcs::vm_exit_msr_store_count::get();
@@ -600,7 +600,7 @@ control_exit_msr_store_address()
     }
 }
 
-inline void
+void
 control_exit_msr_load_address()
 {
     auto msr_load_count = ::intel_x64::vmcs::vm_exit_msr_load_count::get();
@@ -626,7 +626,7 @@ control_exit_msr_load_address()
     }
 }
 
-inline void
+void
 control_vm_entry_ctls_reserved_properly_set()
 {
     auto addr = ::intel_x64::msrs::ia32_vmx_true_entry_ctls::addr;
@@ -636,7 +636,7 @@ control_vm_entry_ctls_reserved_properly_set()
     control_reserved_properly_set(addr, ctls, name);
 }
 
-inline void
+void
 control_event_injection_type_vector_checks()
 {
     using namespace ::intel_x64::vmcs::vm_entry_interruption_information;
@@ -674,7 +674,7 @@ control_event_injection_type_vector_checks()
     }
 }
 
-inline void
+void
 control_event_injection_delivery_ec_checks()
 {
     using namespace ::intel_x64::vmcs::vm_entry_interruption_information;
@@ -722,7 +722,7 @@ control_event_injection_delivery_ec_checks()
     }
 }
 
-inline void
+void
 control_event_injection_reserved_bits_checks()
 {
     if (::intel_x64::vmcs::vm_entry_interruption_information::valid_bit::is_disabled()) {
@@ -734,7 +734,7 @@ control_event_injection_reserved_bits_checks()
     }
 }
 
-inline void
+void
 control_event_injection_ec_checks()
 {
     if (::intel_x64::vmcs::vm_entry_interruption_information::valid_bit::is_disabled()) {
@@ -751,7 +751,7 @@ control_event_injection_ec_checks()
     }
 }
 
-inline void
+void
 control_event_injection_instr_length_checks()
 {
     using namespace ::intel_x64::vmcs::vm_entry_interruption_information;
@@ -783,7 +783,7 @@ control_event_injection_instr_length_checks()
     }
 }
 
-inline void
+void
 control_entry_msr_load_address()
 {
     auto msr_load_count = ::intel_x64::vmcs::vm_entry_msr_load_count::get();
@@ -807,60 +807,6 @@ control_entry_msr_load_address()
     if (!::x64::is_physical_address_valid(msr_load_addr_end)) {
         throw std::logic_error("end of entry msr load area too large");
     }
-}
-
-inline void
-control_vm_exit_control_fields_all()
-{
-    control_vm_exit_ctls_reserved_properly_set();
-    control_activate_and_save_preemption_timer_must_be_0();
-    control_exit_msr_store_address();
-    control_exit_msr_load_address();
-}
-
-inline void
-control_vm_entry_control_fields_all()
-{
-    control_vm_entry_ctls_reserved_properly_set();
-    control_event_injection_type_vector_checks();
-    control_event_injection_delivery_ec_checks();
-    control_event_injection_reserved_bits_checks();
-    control_event_injection_ec_checks();
-    control_event_injection_instr_length_checks();
-    control_entry_msr_load_address();
-}
-
-inline void
-control_vm_execution_control_fields_all()
-{
-    control_pin_based_ctls_reserved_properly_set();
-    control_proc_based_ctls_reserved_properly_set();
-    control_proc_based_ctls2_reserved_properly_set();
-    control_cr3_count_less_then_4();
-    control_io_bitmap_address_bits();
-    control_msr_bitmap_address_bits();
-    control_tpr_shadow_and_virtual_apic();
-    control_nmi_exiting_and_virtual_nmi();
-    control_virtual_nmi_and_nmi_window();
-    control_virtual_apic_address_bits();
-    control_x2apic_mode_and_virtual_apic_access();
-    control_virtual_interrupt_and_external_interrupt();
-    control_process_posted_interrupt_checks();
-    control_vpid_checks();
-    control_enable_ept_checks();
-    control_enable_pml_checks();
-    control_unrestricted_guests();
-    control_enable_vm_functions();
-    control_enable_vmcs_shadowing();
-    control_enable_ept_violation_checks();
-}
-
-inline void
-vmx_controls_all()
-{
-    control_vm_execution_control_fields_all();
-    control_vm_exit_control_fields_all();
-    control_vm_entry_control_fields_all();
 }
 
 }
