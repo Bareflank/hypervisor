@@ -19,6 +19,7 @@
 #ifndef VMCS_INTEL_X64_H
 #define VMCS_INTEL_X64_H
 
+#include <bftypes.h>
 #include <bfvcpuid.h>
 
 #include "../save_state.h"
