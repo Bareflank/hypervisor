@@ -16,8 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef MEMORY_MANAGER_X64_H
-#define MEMORY_MANAGER_X64_H
+#ifndef MEMORY_MANAGER_H
+#define MEMORY_MANAGER_H
 
 #include <map>
 #include <vector>
@@ -25,7 +25,6 @@
 #include <bfmemory.h>
 #include <bfconstants.h>
 
-#include <intrinsics.h>
 #include "mem_pool.h"
 
 // -----------------------------------------------------------------------------
@@ -52,6 +51,9 @@
 // -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
+
+namespace bfvmm
+{
 
 /// The memory manager has a couple specific functions:
 /// - alloc / free memory
@@ -91,7 +93,7 @@
 ///     class to inherit that provides shared APIs for both ARM and Intel. For
 ///     now the memory manager is Intel specific
 ///
-class EXPORT_MEMORY_MANAGER memory_manager_x64
+class EXPORT_MEMORY_MANAGER memory_manager
 {
 public:
 
@@ -106,7 +108,7 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    virtual ~memory_manager_x64() = default;
+    virtual ~memory_manager() = default;
 
     /// Get Singleton Instance
     ///
@@ -115,9 +117,9 @@ public:
     /// @expects none
     /// @ensures ret != nullptr
     ///
-    /// @return a singleton instance of memory_manager_x64
+    /// @return a singleton instance of memory_manager
     ///
-    static memory_manager_x64 *instance() noexcept;
+    static memory_manager *instance() noexcept;
 
     /// Allocate Memory
     ///
@@ -389,7 +391,7 @@ public:
 
 private:
 
-    memory_manager_x64() noexcept;
+    memory_manager() noexcept;
 
     integer_pointer lower(integer_pointer ptr) const noexcept;
     integer_pointer upper(integer_pointer ptr) const noexcept;
@@ -400,22 +402,24 @@ private:
     std::map<integer_pointer, integer_pointer> m_phys_to_virt_map;
     std::map<integer_pointer, attr_type> m_virt_to_attr_map;
 
-    mem_pool<MAX_HEAP_POOL, x64::cache_line_shift> g_heap_pool;
-    mem_pool<MAX_PAGE_POOL, x64::page_shift> g_page_pool;
-    mem_pool<MAX_MEM_MAP_POOL, x64::page_shift> g_mem_map_pool;
+    mem_pool<MAX_HEAP_POOL, 6ULL> g_heap_pool;
+    mem_pool<MAX_PAGE_POOL, 12ULL> g_page_pool;
+    mem_pool<MAX_MEM_MAP_POOL, 12ULL> g_mem_map_pool;
 
 public:
 
     /// @cond
 
-    memory_manager_x64(memory_manager_x64 &&) noexcept = delete;
-    memory_manager_x64 &operator=(memory_manager_x64 &&) noexcept = delete;
+    memory_manager(memory_manager &&) noexcept = delete;
+    memory_manager &operator=(memory_manager &&) noexcept = delete;
 
-    memory_manager_x64(const memory_manager_x64 &) = delete;
-    memory_manager_x64 &operator=(const memory_manager_x64 &) = delete;
+    memory_manager(const memory_manager &) = delete;
+    memory_manager &operator=(const memory_manager &) = delete;
 
     /// @endcond
 };
+
+}
 
 /// Memory Manager Macro
 ///
@@ -425,7 +429,7 @@ public:
 /// @expects
 /// @ensures g_mm != nullptr
 ///
-#define g_mm memory_manager_x64::instance()
+#define g_mm bfvmm::memory_manager::instance()
 
 #ifdef _MSC_VER
 #pragma warning(pop)

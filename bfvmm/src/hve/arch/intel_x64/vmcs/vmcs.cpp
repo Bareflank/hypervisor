@@ -21,8 +21,8 @@
 #include <bfconstants.h>
 #include <bfthreadcontext.h>
 
-#include <memory_manager/map_ptr_x64.h>
-#include <memory_manager/memory_manager_x64.h>
+#include <memory_manager/memory_manager.h>
+#include <memory_manager/arch/x64/map_ptr.h>
 
 #include <hve/arch/intel_x64/vmcs/vmcs.h>
 
@@ -92,7 +92,7 @@ void
 vmcs::promote()
 {
     auto gdt =
-        bfn::make_unique_map_x64<char>(
+        bfvmm::x64::make_unique_map<char>(
             ::intel_x64::vmcs::guest_gdtr_base::get(),
             ::intel_x64::vmcs::guest_cr3::get(),
             ::intel_x64::vmcs::guest_gdtr_limit::size(),

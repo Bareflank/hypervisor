@@ -26,16 +26,16 @@
 
 #include <vcpu/vcpu_manager.h>
 #include <debug/debug_ring/debug_ring.h>
-#include <memory_manager/memory_manager_x64.h>
+#include <memory_manager/memory_manager.h>
 
 extern "C" int64_t
 private_add_md(struct memory_descriptor *md) noexcept
 {
     return guard_exceptions(MEMORY_MANAGER_FAILURE, [&] {
 
-        auto virt = static_cast<memory_manager_x64::integer_pointer>(md->virt);
-        auto phys = static_cast<memory_manager_x64::integer_pointer>(md->phys);
-        auto type = static_cast<memory_manager_x64::attr_type>(md->type);
+        auto virt = static_cast<bfvmm::memory_manager::integer_pointer>(md->virt);
+        auto phys = static_cast<bfvmm::memory_manager::integer_pointer>(md->phys);
+        auto type = static_cast<bfvmm::memory_manager::attr_type>(md->type);
 
         g_mm->add_md(virt, phys, type);
     });

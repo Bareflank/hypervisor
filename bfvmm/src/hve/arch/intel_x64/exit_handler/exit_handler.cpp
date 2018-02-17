@@ -26,8 +26,8 @@
 #include <hve/arch/intel_x64/check/check.h>
 #include <hve/arch/intel_x64/exit_handler/exit_handler.h>
 
-#include <memory_manager/memory_manager_x64.h>
-#include <memory_manager/root_page_table_x64.h>
+#include <memory_manager/memory_manager.h>
+#include <memory_manager/arch/x64/root_page_table.h>
 
 // -----------------------------------------------------------------------------
 // C Prototypes

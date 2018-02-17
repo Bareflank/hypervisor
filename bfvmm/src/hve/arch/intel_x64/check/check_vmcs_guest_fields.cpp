@@ -22,7 +22,7 @@
 #include <type_traits>
 
 #include <intrinsics.h>
-#include <memory_manager/memory_manager_x64.h>
+#include <memory_manager/memory_manager.h>
 
 /// Intel x86_64 VMCS Check Guest
 ///

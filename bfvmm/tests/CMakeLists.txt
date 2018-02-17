@@ -31,6 +31,5 @@ add_subdirectory(../src/vcpu ${CMAKE_CURRENT_BINARY_DIR}/src/vcpu)
 
 add_subdirectory(debug)
 add_subdirectory(hve)
-add_subdirectory(memory_manager)
 add_subdirectory(vcpu)
 add_subdirectory(support)
