@@ -16,13 +16,16 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+list(APPEND SOURCES
+    memory_manager.cpp
+)
+
 if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
     list(APPEND SOURCES
-        arch/intel_x64/map_ptr_x64.cpp
-        arch/intel_x64/memory_manager_x64.cpp
-        arch/intel_x64/page_table_entry_x64.cpp
-        arch/intel_x64/page_table_x64.cpp
-        arch/intel_x64/root_page_table_x64.cpp
+        arch/x64/map_ptr.cpp
+        arch/x64/page_table_entry.cpp
+        arch/x64/page_table.cpp
+        arch/x64/root_page_table.cpp
     )
 elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
     message(WARNING "Unimplemented")

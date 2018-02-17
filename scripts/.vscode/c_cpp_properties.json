@@ -3,12 +3,13 @@
         {
             "name": "Mac",
             "includePath": [
-                "/usr/local/include",
-                "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-                "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0/include",
-                "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
-                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/include",
                 "${workspaceRoot}",
+                "${workspaceRoot}/build/prefixes/x86_64-vmm-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-vmm-elf/include/c++/v1/",
+                "${workspaceRoot}/build/prefixes/x86_64-userspace-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-userspace-elf/include/c++/v1/",
+                "${workspaceRoot}/build/prefixes/x86_64-test-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-test-elf/include/c++/v1/",
                 "${workspaceRoot}/bfdriver/include",
                 "${workspaceRoot}/bfdummy/include",
                 "${workspaceRoot}/bfelf_loader/include",
@@ -17,32 +18,32 @@
                 "${workspaceRoot}/bfsdk/include",
                 "${workspaceRoot}/bfunwind/include",
                 "${workspaceRoot}/bfvmm/include"
-
             ],
-            "defines": [],
+            "defines": [
+                "VMM",
+                "NATIVE",
+                "ENABLE_BUILD_TEST",
+                "_HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT"
+            ],
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [
-                    "/usr/local/include",
-                    "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-                    "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0/include",
-                    "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
-                    "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/include",
                     "${workspaceRoot}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
-            },
-            "macFrameworkPath": [
-                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks"
-            ]
+            }
         },
         {
             "name": "Linux",
             "includePath": [
-                "/usr/include",
-                "/usr/local/include",
                 "${workspaceRoot}",
+                "${workspaceRoot}/build/prefixes/x86_64-vmm-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-vmm-elf/include/c++/v1/",
+                "${workspaceRoot}/build/prefixes/x86_64-userspace-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-userspace-elf/include/c++/v1/",
+                "${workspaceRoot}/build/prefixes/x86_64-test-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-test-elf/include/c++/v1/",
                 "${workspaceRoot}/bfdriver/include",
                 "${workspaceRoot}/bfdummy/include",
                 "${workspaceRoot}/bfelf_loader/include",
@@ -52,12 +53,15 @@
                 "${workspaceRoot}/bfunwind/include",
                 "${workspaceRoot}/bfvmm/include"
             ],
-            "defines": [],
+            "defines": [
+                "VMM",
+                "NATIVE",
+                "ENABLE_BUILD_TEST",
+                "_HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT"
+            ],
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [
-                    "/usr/include",
-                    "/usr/local/include",
                     "${workspaceRoot}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
@@ -67,8 +71,13 @@
         {
             "name": "Win32",
             "includePath": [
-                "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include",
                 "${workspaceRoot}",
+                "${workspaceRoot}/build/prefixes/x86_64-vmm-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-vmm-elf/include/c++/v1/",
+                "${workspaceRoot}/build/prefixes/x86_64-userspace-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-userspace-elf/include/c++/v1/",
+                "${workspaceRoot}/build/prefixes/x86_64-test-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-test-elf/include/c++/v1/",
                 "${workspaceRoot}/bfdriver/include",
                 "${workspaceRoot}/bfdummy/include",
                 "${workspaceRoot}/bfelf_loader/include",
@@ -81,12 +90,15 @@
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "VMM",
+                "NATIVE",
+                "ENABLE_BUILD_TEST",
+                "_HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT"
             ],
             "intelliSenseMode": "msvc-x64",
             "browse": {
                 "path": [
-                    "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/*",
                     "${workspaceRoot}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,

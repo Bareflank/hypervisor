@@ -19,10 +19,7 @@
 #ifndef VMCS_INTEL_X64_CHECK_CONTROLS_H
 #define VMCS_INTEL_X64_CHECK_CONTROLS_H
 
-#include <type_traits>
-
 #include <intrinsics.h>
-#include "../../../../memory_manager/memory_manager_x64.h"
 
 /// Intel x86_64 VMCS Check Controls
 ///

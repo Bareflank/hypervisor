@@ -41,6 +41,71 @@ namespace memory_type
     constexpr const auto uncacheable_minus = 0x00000007ULL;
 }
 
+namespace memory_attr
+{
+    using attr_type = uint64_t;
+
+    constexpr const auto invalid = 0x00000000UL;
+
+    constexpr const auto rw = 0x00000100UL;
+    constexpr const auto re = 0x00000200UL;
+    constexpr const auto pt = 0x00000300UL;
+
+    constexpr const auto rw_uc = 0x00000100UL;
+    constexpr const auto rw_wc = 0x00000101UL;
+    constexpr const auto rw_wt = 0x00000104UL;
+    constexpr const auto rw_wp = 0x00000105UL;
+    constexpr const auto rw_wb = 0x00000106UL;
+    constexpr const auto rw_uc_m = 0x00000107UL;
+
+    constexpr const auto re_uc = 0x00000200UL;
+    constexpr const auto re_wc = 0x00000201UL;
+    constexpr const auto re_wt = 0x00000204UL;
+    constexpr const auto re_wp = 0x00000205UL;
+    constexpr const auto re_wb = 0x00000206UL;
+    constexpr const auto re_uc_m = 0x00000207UL;
+
+    constexpr const auto pt_uc = 0x00000300UL;
+    constexpr const auto pt_wc = 0x00000301UL;
+    constexpr const auto pt_wt = 0x00000304UL;
+    constexpr const auto pt_wp = 0x00000305UL;
+    constexpr const auto pt_wb = 0x00000306UL;
+    constexpr const auto pt_uc_m = 0x00000307UL;
+
+    template<
+        typename P,
+        typename T,
+        typename = std::enable_if<std::is_integral<P>::value>,
+        typename = std::enable_if<std::is_integral<T>::value>
+        >
+    auto mem_type_to_attr(P perm, T type)
+    {
+        switch(perm)
+        {
+            case rw: break;
+            case re: break;
+
+            default:
+                throw std::runtime_error("mem_type_to_attr failed: invalid permissions");
+        }
+
+        switch(type)
+        {
+            case memory_type::uncacheable: break;
+            case memory_type::write_combining: break;
+            case memory_type::write_through: break;
+            case memory_type::write_protected: break;
+            case memory_type::write_back: break;
+            case memory_type::uncacheable_minus: break;
+
+            default:
+                throw std::runtime_error("mem_type_to_attr failed: invalid memory type");
+        }
+
+        return perm | type;
+    }
+}
+
 namespace access_rights
 {
     namespace type
@@ -84,6 +149,35 @@ namespace access_rights
     constexpr const auto unusable = 0x00010000U;
 }
 
+namespace pat
+{
+    constexpr const auto pat_value = 0x0706050406040100UL;
+
+    constexpr const auto uncacheable_index = 0x00000000UL;
+    constexpr const auto write_combining_index = 0x00000001UL;
+    constexpr const auto write_through_index = 0x00000002UL;
+    constexpr const auto write_protected_index = 0x00000005UL;
+    constexpr const auto write_back_index = 0x00000003UL;
+    constexpr const auto uncacheable_minus_index = 0x00000007UL;
+
+    template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    auto mem_attr_to_pat_index(T attr)
+    {
+        switch (attr & 0xF)
+        {
+            case memory_type::uncacheable: return uncacheable_index;
+            case memory_type::write_combining: return write_combining_index;
+            case memory_type::write_through: return write_through_index;
+            case memory_type::write_protected: return write_protected_index;
+            case memory_type::write_back: return write_back_index;
+            case memory_type::uncacheable_minus: return uncacheable_minus_index;
+
+            default:
+                throw std::runtime_error("mem_attr_to_pat_index failed: invalid attr");
+        };
+    }
+}
+
 namespace interrupt
 {
     constexpr const auto divide_error = 0U;
@@ -118,6 +212,43 @@ namespace interrupt
 // We should also provide a "general" page table type that only has fields that
 // are shared
 //
+
+namespace page_table
+{
+    constexpr const auto num_entries = 512UL;
+    constexpr const auto num_bytes = num_entries * sizeof(uintptr_t);
+
+    template<class T, class F> auto index(const T virt, const F from)
+    { return gsl::narrow_cast<std::ptrdiff_t>((virt & ((0x1FFULL) << from)) >> from); }
+
+    namespace pml4
+    {
+        constexpr const auto from = 39U;
+        constexpr const auto size = 9U;
+        constexpr const auto size_bytes = 0x8000000000UL;
+    }
+
+    namespace pdpt
+    {
+        constexpr const auto from = 30U;
+        constexpr const auto size = 9U;
+        constexpr const auto size_bytes = 0x40000000UL;
+    }
+
+    namespace pd
+    {
+        constexpr const auto from = 21U;
+        constexpr const auto size = 9U;
+        constexpr const auto size_bytes = 0x200000UL;
+    }
+
+    namespace pt
+    {
+        constexpr const auto from = 12U;
+        constexpr const auto size = 9U;
+        constexpr const auto size_bytes = 0x1000UL;
+    }
+}
 
 namespace pdpte
 {
