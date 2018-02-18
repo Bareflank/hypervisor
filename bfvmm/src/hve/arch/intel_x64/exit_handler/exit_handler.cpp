@@ -98,7 +98,7 @@ emulate_rdmsr(::x64::msrs::field_type msr)
             return ::intel_x64::vmcs::guest_ia32_efer::get();
 
         case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
-            return ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::get();
+            return ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::get_if_exists();
 
         case ::intel_x64::msrs::ia32_sysenter_cs::addr:
             return ::intel_x64::vmcs::guest_ia32_sysenter_cs::get();
@@ -154,7 +154,7 @@ emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val)
             return;
 
         case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
-            ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::set(val);
+            ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::set_if_exists(val);
             return;
 
         case ::intel_x64::msrs::ia32_sysenter_cs::addr:
@@ -424,7 +424,7 @@ exit_handler::write_guest_state()
     guest_ia32_efer::set(::intel_x64::msrs::ia32_efer::get());
 
     if (::intel_x64::cpuid::arch_perf_monitoring::eax::version_id::get() >= 2) {
-        guest_ia32_perf_global_ctrl::set(::intel_x64::msrs::ia32_perf_global_ctrl::get());
+        guest_ia32_perf_global_ctrl::set_if_exists(::intel_x64::msrs::ia32_perf_global_ctrl::get());
     }
 
     guest_gdtr_limit::set(guest_gdt.limit());
@@ -521,7 +521,7 @@ exit_handler::write_control_state()
 
     vm_exit_controls::save_debug_controls::enable();
     vm_exit_controls::host_address_space_size::enable();
-    vm_exit_controls::load_ia32_perf_global_ctrl::enable();
+    vm_exit_controls::load_ia32_perf_global_ctrl::enable_if_allowed();
     vm_exit_controls::save_ia32_pat::enable();
     vm_exit_controls::load_ia32_pat::enable();
     vm_exit_controls::save_ia32_efer::enable();
@@ -529,7 +529,7 @@ exit_handler::write_control_state()
 
     vm_entry_controls::load_debug_controls::enable();
     vm_entry_controls::ia_32e_mode_guest::enable();
-    vm_entry_controls::load_ia32_perf_global_ctrl::enable();
+    vm_entry_controls::load_ia32_perf_global_ctrl::enable_if_allowed();
     vm_entry_controls::load_ia32_pat::enable();
     vm_entry_controls::load_ia32_efer::enable();
 }
