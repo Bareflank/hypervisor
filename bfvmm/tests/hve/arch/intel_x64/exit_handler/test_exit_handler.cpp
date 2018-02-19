@@ -20,6 +20,8 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
+extern bool g_guest_perf_glbl_ctrl_field_exists;
+
 static bool
 handle_test(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 { bfignored(vmcs); return true; }
@@ -209,7 +211,7 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_efer")
     CHECK(g_save_state.rdx == 0x4);
 }
 
-TEST_CASE("exit_handler: vm_exit_reason_rdmsr_perf")
+TEST_CASE("exit_handler: vm_exit_reason_rdmsr_perf_exists")
 {
     MockRepository mocks;
     auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
@@ -225,6 +227,24 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_perf")
     CHECK(g_save_state.rax == 0x3);
     CHECK(g_save_state.rdx == 0x4);
 }
+
+TEST_CASE("exit_handler: vm_exit_reason_rdmsr_perf_doesnt_exist")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
+
+    g_msrs[::intel_x64::msrs::ia32_perf_global_ctrl::addr] = 0x0000000400000003;
+    g_save_state.rcx = intel_x64::msrs::ia32_perf_global_ctrl::addr;
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0;
+    g_guest_perf_glbl_ctrl_field_exists = false;
+
+    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+
+    CHECK(g_save_state.rax == 0x3);
+    CHECK(g_save_state.rdx == 0x4);
+}
+
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_cs")
 {
@@ -380,7 +400,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_efer")
     CHECK(g_vmcs_fields[::intel_x64::vmcs::guest_ia32_efer::addr] == 0x0000000400000003);
 }
 
-TEST_CASE("exit_handler: vm_exit_reason_wrmsr_perf")
+TEST_CASE("exit_handler: vm_exit_reason_wrmsr_perf_exists")
 {
     MockRepository mocks;
     auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr);
@@ -395,6 +415,23 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_perf")
     CHECK_NOTHROW(ehlr.dispatch(&ehlr));
 
     CHECK(g_vmcs_fields[::intel_x64::vmcs::guest_ia32_perf_global_ctrl::addr] == 0x0000000400000003);
+}
+
+TEST_CASE("exit_handler: vm_exit_reason_wrmsr_perf_doesnt_exist")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
+
+    g_save_state.rcx = intel_x64::msrs::ia32_perf_global_ctrl::addr;
+    g_save_state.rax = 0x3;
+    g_save_state.rdx = 0x4;
+    g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] = 0;
+    g_guest_perf_glbl_ctrl_field_exists = false;
+
+    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+
+    CHECK(g_msrs[::intel_x64::msrs::ia32_perf_global_ctrl::addr] == 0x0000000400000003);
 }
 
 TEST_CASE("exit_handler: vm_exit_reason_wrmsr_cs")

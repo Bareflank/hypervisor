@@ -78,7 +78,7 @@ public:
     /// @return true if valid, false otherwise
     ///
     constexpr bool is_valid() const noexcept
-    { return m_stub != nullptr; }
+    { return m_stub != nullptr && m_obj != nullptr; }
 
     /// Is Valid
     ///

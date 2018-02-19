@@ -70,6 +70,14 @@ TEST_CASE("segfault cases")
     // d1(1);
 }
 
+TEST_CASE("create from nullptr")
+{
+    delegate<int(int)> d0 = delegate<int(int)>::create<nullptr>();
+
+    CHECK(!d0);
+    CHECK(!d0.is_valid());
+}
+
 TEST_CASE("is valid")
 {
     delegate<int(int)> d0;

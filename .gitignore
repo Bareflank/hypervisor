@@ -32,6 +32,7 @@ bfdriver/src/.common.o.cmd
 bfdriver/src/platform/linux/.bareflank.ko.cmd
 bfdriver/src/platform/linux/.bareflank.mod.o.cmd
 bfdriver/src/platform/linux/.bareflank.o.cmd
+bfdriver/src/platform/linux/.cache.mk
 bfdriver/src/platform/linux/.entry.o.cmd
 bfdriver/src/platform/linux/.platform.o.cmd
 bfdriver/src/platform/linux/.tmp_versions/

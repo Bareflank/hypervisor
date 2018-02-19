@@ -29,6 +29,8 @@
 #include <memory_manager/memory_manager.h>
 #include <memory_manager/arch/x64/root_page_table.h>
 
+bool g_guest_perf_glbl_ctrl_field_exists;
+
 // -----------------------------------------------------------------------------
 // C Prototypes
 // -----------------------------------------------------------------------------
@@ -141,7 +143,11 @@ handle_rdmsr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
             break;
 
         case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
-            val = ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::get();
+            if (g_guest_perf_glbl_ctrl_field_exists) {
+                val = ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::get();
+            } else {
+                val = ::intel_x64::msrs::ia32_perf_global_ctrl::get();
+            }
             break;
 
         case ::intel_x64::msrs::ia32_sysenter_cs::addr:
@@ -216,7 +222,11 @@ handle_wrmsr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
             break;
 
         case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
-            ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::set(val);
+            if (g_guest_perf_glbl_ctrl_field_exists) {
+                ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::set(val);
+            } else {
+                ::intel_x64::msrs::ia32_perf_global_ctrl::set(val);
+            }
             break;
 
         case ::intel_x64::msrs::ia32_sysenter_cs::addr:
@@ -316,6 +326,8 @@ exit_handler::exit_handler(
             s_cr4 |= ::intel_x64::cr4::smap_enable_bit::mask;
         }
     }
+
+    g_guest_perf_glbl_ctrl_field_exists = ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::exists();
 
     this->write_host_state();
     this->write_control_state();
@@ -422,7 +434,7 @@ exit_handler::write_guest_state()
     guest_ia32_efer::set(::intel_x64::msrs::ia32_efer::get());
 
     if (::intel_x64::cpuid::arch_perf_monitoring::eax::version_id::get() >= 2) {
-        guest_ia32_perf_global_ctrl::set(::intel_x64::msrs::ia32_perf_global_ctrl::get());
+        guest_ia32_perf_global_ctrl::set_if_exists(::intel_x64::msrs::ia32_perf_global_ctrl::get());
     }
 
     guest_gdtr_limit::set(guest_gdt.limit());
@@ -519,7 +531,7 @@ exit_handler::write_control_state()
 
     vm_exit_controls::save_debug_controls::enable();
     vm_exit_controls::host_address_space_size::enable();
-    vm_exit_controls::load_ia32_perf_global_ctrl::enable();
+    vm_exit_controls::load_ia32_perf_global_ctrl::enable_if_allowed();
     vm_exit_controls::save_ia32_pat::enable();
     vm_exit_controls::load_ia32_pat::enable();
     vm_exit_controls::save_ia32_efer::enable();
@@ -527,7 +539,7 @@ exit_handler::write_control_state()
 
     vm_entry_controls::load_debug_controls::enable();
     vm_entry_controls::ia_32e_mode_guest::enable();
-    vm_entry_controls::load_ia32_perf_global_ctrl::enable();
+    vm_entry_controls::load_ia32_perf_global_ctrl::enable_if_allowed();
     vm_entry_controls::load_ia32_pat::enable();
     vm_entry_controls::load_ia32_efer::enable();
 }
