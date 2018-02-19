@@ -140,18 +140,19 @@ supported platforms and their dependencies:
 
 #### Arch Linux:
 ```
-sudo pacman -S git linux-headers nasm clang clang-tools-extra cmake base-devel
+sudo pacman -S linux-headers nasm cmake base-devel
 git clone https://aur.archlinux.org/package-query.git
 git clone https://aur.archlinux.org/yaourt.git
 pushd package-query
-makepkg --install --sync-deps --needed
+makepkg --install --syncdeps --needed
 popd
 pushd yaourt
-makepkg --install --sync-deps --needed
+makepkg --install --syncdeps --needed
 popd
 sudo yaourt -S downgrade
 sudo downgrade clang clang-tools-extra llvm-libs  # select 4.0.*
 sudo ln -s /usr/share/clang/run-clang-tidy.py /usr/bin/run-clang-tidy-4.0.py
+sudo ln -s /usr/bin/clang-tidy /usr/bin/clang-tidy-4.0
 ```
 
 #### Ubuntu 17.04 (or Higher):
