@@ -1171,6 +1171,7 @@ function(add_vmm_executable NAME)
             ${CMAKE_INSTALL_PREFIX}/lib/libbfpthread_shared.so
             ${CMAKE_INSTALL_PREFIX}/lib/libbfunwind_shared.so
             ${CMAKE_INSTALL_PREFIX}/lib/libc.so
+            ${CMAKE_INSTALL_PREFIX}/lib/libm.so
             --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
             ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall_shared.so
         )
@@ -1205,6 +1206,7 @@ function(add_vmm_executable NAME)
             ${CMAKE_INSTALL_PREFIX}/lib/libbfpthread_static.a
             ${CMAKE_INSTALL_PREFIX}/lib/libbfunwind_static.a
             ${CMAKE_INSTALL_PREFIX}/lib/libc.a
+            ${CMAKE_INSTALL_PREFIX}/lib/libm.a
             --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
             ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall_static.a
         )

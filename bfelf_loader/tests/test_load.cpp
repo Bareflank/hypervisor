@@ -151,10 +151,10 @@ TEST_CASE("bfelf_load: success")
     void *entry = nullptr;
     crt_info_t info = {};
     bfelf_loader_t loader = {};
-    bfelf_binary_t binaries[9] = {};
+    bfelf_binary_t binaries[10] = {};
 
     std::list<bfn::buffer> files;
-    for (auto i = 0ULL; i < 9; i++) {
+    for (auto i = 0ULL; i < 10; i++) {
         auto file = g_file.read_binary(g_filenames.at(i));
 
         gsl::at(binaries, i).file = file.data();
@@ -163,6 +163,6 @@ TEST_CASE("bfelf_load: success")
         files.emplace_back(std::move(file));
     }
 
-    auto ret = bfelf_load(reinterpret_cast<bfelf_binary_t *>(binaries), 9, &entry, &info, &loader);
+    auto ret = bfelf_load(reinterpret_cast<bfelf_binary_t *>(binaries), 10, &entry, &info, &loader);
     CHECK(ret == BF_SUCCESS);
 }
