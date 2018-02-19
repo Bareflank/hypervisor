@@ -397,6 +397,32 @@ __stack_chk_fail(void) noexcept
     abort();
 }
 
+extern "C" EXPORT_SYM float
+__mulsc3(float a, float b, float c, float d)
+{
+    bfignored(a);
+    bfignored(b);
+    bfignored(c);
+    bfignored(d);
+
+    UNHANDLED();
+
+    return 0;
+}
+
+extern "C" EXPORT_SYM double
+__muldc3(double a, double b, double c, double d)
+{
+    bfignored(a);
+    bfignored(b);
+    bfignored(c);
+    bfignored(d);
+
+    UNHANDLED();
+
+    return 0;
+}
+
 EXPORT_SYM int __g_eh_frame_list_num = 0;
 EXPORT_SYM eh_frame_t __g_eh_frame_list[MAX_NUM_MODULES] = {};
 EXPORT_SYM int __g_dwarf_sections_num = 0;
