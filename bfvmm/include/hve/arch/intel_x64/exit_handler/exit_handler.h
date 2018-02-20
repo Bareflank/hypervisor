@@ -54,10 +54,11 @@
 #endif
 
 // -----------------------------------------------------------------------------
-// Dispatch Type
+// Handler Types
 // -----------------------------------------------------------------------------
 
-using dispatch_delegate_t = delegate<bool(gsl::not_null<bfvmm::intel_x64::vmcs *>)>;
+using handler_t = bool(gsl::not_null<bfvmm::intel_x64::vmcs *>);
+using handler_delegate_t = delegate<handler_t>;
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -78,7 +79,7 @@ namespace intel_x64
 /// Exit Handler
 ///
 /// This class is responsible for detecting why a guest exited (i.e. stopped
-/// its execution), and dispatches the appropriated handler to emulate the
+/// its execution), and handleres the appropriated handler to emulate the
 /// instruction that could not execute. Note that this class could be executed
 /// a lot, so performance is key here.
 ///
@@ -111,10 +112,10 @@ public:
     ///
     virtual ~exit_handler() = default;
 
-    /// Add Dispatch Delegate
+    /// Add Handler Delegate
     ///
-    /// Adds a handler to the dispatch function. When a VM exit occurs, the
-    /// dispatch handler will call the delegate registered by this function as
+    /// Adds a handler to the handler function. When a VM exit occurs, the
+    /// handler handler will call the delegate registered by this function as
     /// as needed. Note that the handlers are called in the reverse order they
     /// are registered (i.e. FIFO).
     ///
@@ -129,24 +130,24 @@ public:
     /// @param reason The exit reason for the handler being registered
     /// @param d The delegate being registered
     ///
-    void add_dispatch_delegate(
+    void add_handler(
         ::intel_x64::vmcs::value_type reason,
-        dispatch_delegate_t &&d
+        handler_delegate_t &&d
     );
 
-    /// Dispatch
+    /// Handle
     ///
     /// Handles a VM exit. This function should only be called by the exit
     /// handler entry function, which gets called when a VM exit occurs, and
-    /// then calls this function to dispatch the VM exit to the proper
+    /// then calls this function to handler the VM exit to the proper
     /// handler.
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param exit_handler The exit handler to dispatch the VM exit to
+    /// @param exit_handler The exit handler to handler the VM exit to
     ///
-    static void dispatch(
+    static void handle(
         bfvmm::intel_x64::exit_handler *exit_handler) noexcept;
 
 private:
@@ -176,7 +177,7 @@ private:
     static ::intel_x64::msrs::value_type s_ia32_pat_msr;
     static ::intel_x64::msrs::value_type s_ia32_efer_msr;
 
-    std::array<std::list<dispatch_delegate_t>, 128> m_handlers;
+    std::array<std::list<handler_delegate_t>, 128> m_handlers;
 
 public:
 

@@ -75,25 +75,25 @@ TEST_CASE("exit_handler: construct / destruct")
     CHECK_NOTHROW(bfvmm::intel_x64::exit_handler{vmcs});
 }
 
-TEST_CASE("exit_handler: add_dispatch_delegate")
+TEST_CASE("exit_handler: add_handler")
 {
     MockRepository mocks;
     auto &&vmcs = setup_vmcs(mocks, 0x0);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
 
     CHECK_NOTHROW(
-        ehlr.add_dispatch_delegate(0, dispatch_delegate_t::create<handle_test>())
+        ehlr.add_handler(0, handler_delegate_t::create<handle_test>())
     );
 }
 
-TEST_CASE("exit_handler: add_dispatch_delegate invalid reason")
+TEST_CASE("exit_handler: add_handler invalid reason")
 {
     MockRepository mocks;
     auto &&vmcs = setup_vmcs(mocks, 0x0);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
 
     CHECK_THROWS(
-        ehlr.add_dispatch_delegate(1000, dispatch_delegate_t::create<handle_test>())
+        ehlr.add_handler(1000, handler_delegate_t::create<handle_test>())
     );
 }
 
@@ -103,7 +103,7 @@ TEST_CASE("exit_handler: unhandled exit reason")
     auto &&vmcs = setup_vmcs(mocks, 0x0);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 }
 
 TEST_CASE("exit_handler: unhandled exit reason, invalid guest state")
@@ -112,7 +112,7 @@ TEST_CASE("exit_handler: unhandled exit reason, invalid guest state")
     auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::vm_entry_failure::mask);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 }
 
 TEST_CASE("exit_handler: unhandled exit reason, invalid reason")
@@ -121,7 +121,7 @@ TEST_CASE("exit_handler: unhandled exit reason, invalid reason")
     auto &&vmcs = setup_vmcs(mocks, 0x0000BEEF);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 }
 
 TEST_CASE("exit_handler: handle_cpuid")
@@ -132,7 +132,7 @@ TEST_CASE("exit_handler: handle_cpuid")
 
     g_save_state.rip = 0;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
     CHECK(g_save_state.rip != 0);
 }
 
@@ -144,7 +144,7 @@ TEST_CASE("exit_handler: handle_invd")
 
     g_save_state.rip = 0;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
     CHECK(g_save_state.rip != 0);
 }
 
@@ -156,7 +156,7 @@ TEST_CASE("exit_handler: handle_vmxoff")
 
     g_save_state.rip = 0;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
     CHECK(g_save_state.rip == 0);
 }
 
@@ -169,7 +169,7 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_debug_ctl")
     g_vmcs_fields[::intel_x64::vmcs::guest_ia32_debugctl::addr] = 0x0000000200000001;
     g_save_state.rcx = intel_x64::msrs::ia32_debugctl::addr;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_save_state.rax == 0x1);
     CHECK(g_save_state.rdx == 0x2);
@@ -186,7 +186,7 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_pat")
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] =
         intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask << 32;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_save_state.rax == 0x2);
     CHECK(g_save_state.rdx == 0x3);
@@ -203,7 +203,7 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_efer")
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] =
         intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask << 32;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_save_state.rax == 0x3);
     CHECK(g_save_state.rdx == 0x4);
@@ -220,7 +220,7 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_perf")
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] =
         intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::mask << 32;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_save_state.rax == 0x3);
     CHECK(g_save_state.rdx == 0x4);
@@ -235,7 +235,7 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_cs")
     g_vmcs_fields[::intel_x64::vmcs::guest_ia32_sysenter_cs::addr] = 0x0000000500000004;
     g_save_state.rcx = intel_x64::msrs::ia32_sysenter_cs::addr;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_save_state.rax == 0x4);
     CHECK(g_save_state.rdx == 0x5);
@@ -250,7 +250,7 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_esp")
     g_vmcs_fields[::intel_x64::vmcs::guest_ia32_sysenter_esp::addr] = 0x0000000600000005;
     g_save_state.rcx = intel_x64::msrs::ia32_sysenter_esp::addr;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_save_state.rax == 0x5);
     CHECK(g_save_state.rdx == 0x6);
@@ -265,7 +265,7 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_eip")
     g_vmcs_fields[::intel_x64::vmcs::guest_ia32_sysenter_eip::addr] = 0x0000000700000006;
     g_save_state.rcx = intel_x64::msrs::ia32_sysenter_eip::addr;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_save_state.rax == 0x6);
     CHECK(g_save_state.rdx == 0x7);
@@ -280,7 +280,7 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_fs_base")
     g_vmcs_fields[::intel_x64::vmcs::guest_fs_base::addr] = 0x0000000800000007;
     g_save_state.rcx = intel_x64::msrs::ia32_fs_base::addr;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_save_state.rax == 0x7);
     CHECK(g_save_state.rdx == 0x8);
@@ -295,7 +295,7 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_gs_base")
     g_vmcs_fields[::intel_x64::vmcs::guest_gs_base::addr] = 0x0000000900000008;
     g_save_state.rcx = intel_x64::msrs::ia32_gs_base::addr;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_save_state.rax == 0x8);
     CHECK(g_save_state.rdx == 0x9);
@@ -310,7 +310,7 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_default")
     g_msrs[0x10] = 0x0000000A00000009;
     g_save_state.rcx = 0x10;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_save_state.rax == 0x9);
     CHECK(g_save_state.rdx == 0xA);
@@ -325,7 +325,7 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_ignore")
     g_msrs[0x31] = 0x0;
     g_save_state.rcx = 0x31;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_save_state.rax == 0);
     CHECK(g_save_state.rdx == 0);
@@ -341,7 +341,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_debug_ctrl")
     g_save_state.rax = 0x1;
     g_save_state.rdx = 0x2;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_vmcs_fields[::intel_x64::vmcs::guest_ia32_debugctl::addr] == 0x0000000200000001);
 }
@@ -358,7 +358,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_pat")
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] =
         intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_pat::mask << 32;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_vmcs_fields[::intel_x64::vmcs::guest_ia32_pat::addr] == 0x0000000300000002);
 }
@@ -375,7 +375,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_efer")
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] =
         intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_efer::mask << 32;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_vmcs_fields[::intel_x64::vmcs::guest_ia32_efer::addr] == 0x0000000400000003);
 }
@@ -392,7 +392,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_perf")
     g_msrs[intel_x64::msrs::ia32_vmx_true_entry_ctls::addr] =
         intel_x64::msrs::ia32_vmx_true_entry_ctls::load_ia32_perf_global_ctrl::mask << 32;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_vmcs_fields[::intel_x64::vmcs::guest_ia32_perf_global_ctrl::addr] == 0x0000000400000003);
 }
@@ -407,7 +407,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_cs")
     g_save_state.rax = 0x4;
     g_save_state.rdx = 0x5;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_vmcs_fields[::intel_x64::vmcs::guest_ia32_sysenter_cs::addr] == 0x0000000500000004);
 }
@@ -422,7 +422,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_esp")
     g_save_state.rax = 0x5;
     g_save_state.rdx = 0x6;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_vmcs_fields[::intel_x64::vmcs::guest_ia32_sysenter_esp::addr] == 0x0000000600000005);
 }
@@ -437,7 +437,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_eip")
     g_save_state.rax = 0x6;
     g_save_state.rdx = 0x7;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_vmcs_fields[::intel_x64::vmcs::guest_ia32_sysenter_eip::addr] == 0x0000000700000006);
 }
@@ -452,7 +452,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_fs_base")
     g_save_state.rax = 0x7;
     g_save_state.rdx = 0x8;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_vmcs_fields[::intel_x64::vmcs::guest_fs_base::addr] == 0x0000000800000007);
 }
@@ -467,7 +467,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_gs_base")
     g_save_state.rax = 0x8;
     g_save_state.rdx = 0x9;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
 
     CHECK(g_vmcs_fields[::intel_x64::vmcs::guest_gs_base::addr] == 0x0000000900000008);
 }
@@ -482,7 +482,7 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_default")
     g_save_state.rax = 0x9;
     g_save_state.rdx = 0xA;
 
-    CHECK_NOTHROW(ehlr.dispatch(&ehlr));
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
     CHECK(g_msrs[0x10] == 0x0000000A00000009);
 }
 
