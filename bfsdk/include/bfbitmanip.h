@@ -23,6 +23,8 @@
 #ifndef BFBITMANIP_H
 #define BFBITMANIP_H
 
+#include <bfgsl.h>
+
 #include <bitset>
 #include <type_traits>
 
@@ -49,6 +51,30 @@ set_bit(T t, B b) noexcept
     return t | (0x1ULL << b);
 }
 
+/// Set Bit
+///
+/// Sets a bit given the bit position and an integer.
+///
+/// @expects
+/// @ensures
+///
+/// @param view view whose bit is to be set
+/// @param b bit position
+/// @return t with bit set at position b
+///
+template <
+    typename T,
+    typename B,
+    typename = std::enable_if<std::is_pointer<T>::value>,
+    typename = std::enable_if<std::is_integral<B>::value>
+    >
+auto
+set_bit(gsl::span<T> &view, B b)
+{
+    auto byte_view = gsl::as_writeable_bytes(view);
+    byte_view.at(b >> 3) |= gsl::narrow_cast<gsl::byte>((1 << (b & 7)));
+}
+
 /// Clear Bit
 ///
 /// Clears a bit given the bit position and an integer.
@@ -72,6 +98,30 @@ clear_bit(T t, B b) noexcept
     return t & ~(0x1ULL << b);
 }
 
+/// Clear Bit
+///
+/// Clears a bit given the bit position and an integer.
+///
+/// @expects
+/// @ensures
+///
+/// @param view view whose bit is to be cleared
+/// @param b bit position
+/// @return t with bit cleared at position b
+///
+template <
+    typename T,
+    typename B,
+    typename = std::enable_if<std::is_pointer<T>::value>,
+    typename = std::enable_if<std::is_integral<B>::value>
+    >
+auto
+clear_bit(gsl::span<T> &view, B b)
+{
+    auto byte_view = gsl::as_writeable_bytes(view);
+    byte_view.at(b >> 3) &= gsl::narrow_cast<gsl::byte>(~(1 << (b & 7)));
+}
+
 /// Get Bit
 ///
 /// @expects
@@ -93,6 +143,28 @@ get_bit(T t, B b) noexcept
     return (t & (0x1ULL << b)) >> b;
 }
 
+/// Get Bit
+///
+/// @expects
+/// @ensures
+///
+/// @param view view whose bit is to be gotten
+/// @param b bit position
+/// @return value of bit b for integer t
+///
+template <
+    typename T,
+    typename B,
+    typename = std::enable_if<std::is_pointer<T>::value>,
+    typename = std::enable_if<std::is_integral<B>::value>
+    >
+auto
+get_bit(const gsl::span<T> &view, B b)
+{
+    auto byte_view = gsl::as_writeable_bytes(view);
+    return byte_view.at(b >> 3) & gsl::narrow_cast<gsl::byte>((1 << (b & 7)));
+}
+
 /// Is Bit Set
 ///
 /// @expects
@@ -111,7 +183,7 @@ template <
 auto
 is_bit_set(T t, B b) noexcept
 {
-    return get_bit(t, b) != 0;
+    return static_cast<uint64_t>(get_bit(t, b)) != static_cast<uint64_t>(0);
 }
 
 /// Is Bit Cleared
@@ -132,7 +204,7 @@ template <
 auto
 is_bit_cleared(T t, B b) noexcept
 {
-    return get_bit(t, b) == 0;
+    return static_cast<uint64_t>(get_bit(t, b)) == static_cast<uint64_t>(0);
 }
 
 /// Number of Bits Set

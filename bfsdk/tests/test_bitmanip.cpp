@@ -76,3 +76,45 @@ TEST_CASE("set bits")
     CHECK(set_bits(0x88888888U, 0x00111100U, 0x00111100U) == 0x88999988U);
     CHECK(set_bits(0xF0F0F0F0U, 0x00111100U, 0x00111100U) == 0xF0F1F1F0U);
 }
+
+TEST_CASE("bitmanip_eapis: set bit from span")
+{
+    auto buf = std::make_unique<unsigned[]>(10);
+    auto buf_view = gsl::make_span(buf, 10);
+
+    memset(buf.get(), 0, 10 * sizeof(unsigned));
+    set_bit(buf_view, 0);
+    CHECK(buf_view[0] == 0x1);
+
+    memset(buf.get(), 0, 10 * sizeof(unsigned));
+    set_bit(buf_view, 8);
+    CHECK(buf_view[0] == 0x100);
+
+    memset(buf.get(), 0, 10 * sizeof(unsigned));
+    set_bit(buf_view, 48);
+    CHECK(buf_view[1] == 0x10000);
+
+    memset(buf.get(), 0, 10 * sizeof(unsigned));
+    CHECK_THROWS(set_bit(buf_view, 1000000));
+}
+
+TEST_CASE("bitmanip_eapis: clear bit from span")
+{
+    auto buf = std::make_unique<unsigned[]>(10);
+    auto buf_view = gsl::make_span(buf, 10);
+
+    memset(buf.get(), 0xFF, 10 * sizeof(unsigned));
+    clear_bit(buf_view, 0);
+    CHECK(buf_view[0] == 0xFFFFFFFE);
+
+    memset(buf.get(), 0xFF, 10 * sizeof(unsigned));
+    clear_bit(buf_view, 8);
+    CHECK(buf_view[0] == 0xFFFFFEFF);
+
+    memset(buf.get(), 0xFF, 10 * sizeof(unsigned));
+    clear_bit(buf_view, 48);
+    CHECK(buf_view[1] == 0xFFFEFFFF);
+
+    memset(buf.get(), 0xFF, 10 * sizeof(unsigned));
+    CHECK_THROWS(clear_bit(buf_view, 1000000));
+}

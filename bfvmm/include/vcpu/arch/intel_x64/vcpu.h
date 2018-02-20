@@ -66,15 +66,7 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    ~vcpu() override
-    {
-        if (this->is_host_vm_vcpu()) {
-            m_vmx.reset();
-        }
-
-        m_vmcs.reset();
-        m_exit_handler.reset();
-    }
+    ~vcpu() = default;
 
     /// Run Delegate
     ///
@@ -117,9 +109,9 @@ public:
 
 private:
 
-    std::unique_ptr<bfvmm::intel_x64::vmx> m_vmx;
-    std::unique_ptr<bfvmm::intel_x64::vmcs> m_vmcs;
     std::unique_ptr<bfvmm::intel_x64::exit_handler> m_exit_handler;
+    std::unique_ptr<bfvmm::intel_x64::vmcs> m_vmcs;
+    std::unique_ptr<bfvmm::intel_x64::vmx> m_vmx;
 };
 
 }

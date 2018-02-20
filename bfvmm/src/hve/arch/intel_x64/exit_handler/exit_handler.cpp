@@ -324,36 +324,36 @@ exit_handler::exit_handler(
         this->write_guest_state();
     }
 
-    add_dispatch_delegate(
+    add_handler(
         exit_reason::basic_exit_reason::cpuid,
-        dispatch_delegate_t::create<handle_cpuid>()
+        handler_delegate_t::create<handle_cpuid>()
     );
 
-    add_dispatch_delegate(
+    add_handler(
         exit_reason::basic_exit_reason::invd,
-        dispatch_delegate_t::create<handle_invd>()
+        handler_delegate_t::create<handle_invd>()
     );
 
-    add_dispatch_delegate(
+    add_handler(
         exit_reason::basic_exit_reason::vmxoff,
-        dispatch_delegate_t::create<handle_vmxoff>()
+        handler_delegate_t::create<handle_vmxoff>()
     );
 
-    add_dispatch_delegate(
+    add_handler(
         exit_reason::basic_exit_reason::rdmsr,
-        dispatch_delegate_t::create<handle_rdmsr>()
+        handler_delegate_t::create<handle_rdmsr>()
     );
 
-    add_dispatch_delegate(
+    add_handler(
         exit_reason::basic_exit_reason::wrmsr,
-        dispatch_delegate_t::create<handle_wrmsr>()
+        handler_delegate_t::create<handle_wrmsr>()
     );
 }
 
 void
-exit_handler::add_dispatch_delegate(
+exit_handler::add_handler(
     ::intel_x64::vmcs::value_type reason,
-    dispatch_delegate_t &&d)
+    handler_delegate_t &&d)
 { m_handlers.at(reason).push_front(std::move(d)); }
 
 void
@@ -533,19 +533,21 @@ exit_handler::write_control_state()
 }
 
 void
-exit_handler::dispatch(
+exit_handler::handle(
     bfvmm::intel_x64::exit_handler *exit_handler) noexcept
 {
-    auto reason = ::intel_x64::vmcs::exit_reason::basic_exit_reason::get();
-
     guard_exceptions([&]() {
-        for (const auto &d : exit_handler->m_handlers.at(reason)) {
+        const auto &handlers = exit_handler->m_handlers.at(
+            ::intel_x64::vmcs::exit_reason::basic_exit_reason::get()
+        );
+
+        for (const auto &d : handlers) {
             if (d(exit_handler->m_vmcs)) {
                 exit_handler->m_vmcs->resume();
             }
         }
 
-        bfdebug_transaction(1, [&](std::string * msg) {
+        bfdebug_transaction(0, [&](std::string * msg) {
             bferror_lnbr(0, msg);
             bferror_info(0, "unhandled exit reason", msg);
             bferror_brk1(0, msg);
