@@ -67,6 +67,9 @@ using handler_delegate_t = delegate<handler_t>;
 void halt(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs) noexcept;
 bool advance(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs) noexcept;
 
+::x64::msrs::value_type emulate_rdmsr(::x64::msrs::field_type msr);
+void emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val);
+
 // -----------------------------------------------------------------------------
 // Exit Handler
 // -----------------------------------------------------------------------------
