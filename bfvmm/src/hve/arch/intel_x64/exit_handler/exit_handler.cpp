@@ -84,6 +84,105 @@ advance(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs) noexcept
     return true;
 }
 
+::x64::msrs::value_type
+emulate_rdmsr(::x64::msrs::field_type msr)
+{
+    switch (msr) {
+        case ::intel_x64::msrs::ia32_debugctl::addr:
+            return ::intel_x64::vmcs::guest_ia32_debugctl::get();
+
+        case ::x64::msrs::ia32_pat::addr:
+            return ::intel_x64::vmcs::guest_ia32_pat::get();
+
+        case ::intel_x64::msrs::ia32_efer::addr:
+            return ::intel_x64::vmcs::guest_ia32_efer::get();
+
+        case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
+            return ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::get();
+
+        case ::intel_x64::msrs::ia32_sysenter_cs::addr:
+            return ::intel_x64::vmcs::guest_ia32_sysenter_cs::get();
+
+        case ::intel_x64::msrs::ia32_sysenter_esp::addr:
+            return ::intel_x64::vmcs::guest_ia32_sysenter_esp::get();
+
+        case ::intel_x64::msrs::ia32_sysenter_eip::addr:
+            return ::intel_x64::vmcs::guest_ia32_sysenter_eip::get();
+
+        case ::intel_x64::msrs::ia32_fs_base::addr:
+            return ::intel_x64::vmcs::guest_fs_base::get();
+
+        case ::intel_x64::msrs::ia32_gs_base::addr:
+            return ::intel_x64::vmcs::guest_gs_base::get();
+
+        default:
+            return ::intel_x64::msrs::get(msr);
+
+        // QUIRK:
+        //
+        // The following is specifically for CPU-Z. For whatever reason, it is
+        // reading the following undefined MSRs, which causes the system to
+        // freeze since attempting to read these MSRs in the exit handler
+        // will cause a GPF which is not being caught. The result is, the core
+        // that runs RDMSR on these freezes, the other cores receive an
+        // INIT signal to reset, and the system dies.
+        //
+
+        case 0x31:
+        case 0x39:
+        case 0x1ae:
+        case 0x1af:
+        case 0x602:
+            return 0;
+    }
+}
+
+void
+emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val)
+{
+    switch (msr) {
+        case ::intel_x64::msrs::ia32_debugctl::addr:
+            ::intel_x64::vmcs::guest_ia32_debugctl::set(val);
+            return;
+
+        case ::x64::msrs::ia32_pat::addr:
+            ::intel_x64::vmcs::guest_ia32_pat::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_efer::addr:
+            ::intel_x64::vmcs::guest_ia32_efer::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
+            ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_sysenter_cs::addr:
+            ::intel_x64::vmcs::guest_ia32_sysenter_cs::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_sysenter_esp::addr:
+            ::intel_x64::vmcs::guest_ia32_sysenter_esp::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_sysenter_eip::addr:
+            ::intel_x64::vmcs::guest_ia32_sysenter_eip::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_fs_base::addr:
+            ::intel_x64::vmcs::guest_fs_base::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_gs_base::addr:
+            ::intel_x64::vmcs::guest_gs_base::set(val);
+            return;
+
+        default:
+            ::intel_x64::msrs::set(msr, val);
+            return;
+    }
+}
+
 // -----------------------------------------------------------------------------
 // Handlers
 // -----------------------------------------------------------------------------
@@ -124,68 +223,9 @@ handle_vmxoff(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 static bool
 handle_rdmsr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 {
-    auto val = 0ULL;
-    auto msr = gsl::narrow_cast<::x64::msrs::field_type>(vmcs->save_state()->rcx);
-
-    switch (msr) {
-        case ::intel_x64::msrs::ia32_debugctl::addr:
-            val = ::intel_x64::vmcs::guest_ia32_debugctl::get();
-            break;
-
-        case ::x64::msrs::ia32_pat::addr:
-            val = ::intel_x64::vmcs::guest_ia32_pat::get();
-            break;
-
-        case ::intel_x64::msrs::ia32_efer::addr:
-            val = ::intel_x64::vmcs::guest_ia32_efer::get();
-            break;
-
-        case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
-            val = ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::get();
-            break;
-
-        case ::intel_x64::msrs::ia32_sysenter_cs::addr:
-            val = ::intel_x64::vmcs::guest_ia32_sysenter_cs::get();
-            break;
-
-        case ::intel_x64::msrs::ia32_sysenter_esp::addr:
-            val = ::intel_x64::vmcs::guest_ia32_sysenter_esp::get();
-            break;
-
-        case ::intel_x64::msrs::ia32_sysenter_eip::addr:
-            val = ::intel_x64::vmcs::guest_ia32_sysenter_eip::get();
-            break;
-
-        case ::intel_x64::msrs::ia32_fs_base::addr:
-            val = ::intel_x64::vmcs::guest_fs_base::get();
-            break;
-
-        case ::intel_x64::msrs::ia32_gs_base::addr:
-            val = ::intel_x64::vmcs::guest_gs_base::get();
-            break;
-
-        default:
-            val = ::intel_x64::msrs::get(msr);
-            break;
-
-        // QUIRK:
-        //
-        // The following is specifically for CPU-Z. For whatever reason, it is
-        // reading the following undefined MSRs, which causes the system to
-        // freeze since attempting to read these MSRs in the exit handler
-        // will cause a GP which is not being caught. The result is, the core
-        // that runs RDMSR on these freezes, the other cores receive an
-        // INIT signal to reset, and the system dies.
-        //
-
-        case 0x31:
-        case 0x39:
-        case 0x1ae:
-        case 0x1af:
-        case 0x602:
-            val = 0;
-            break;
-    }
+    auto val = emulate_rdmsr(
+        gsl::narrow_cast<::x64::msrs::field_type>(vmcs->save_state()->rcx)
+    );
 
     vmcs->save_state()->rax = ((val >> 0x00) & 0x00000000FFFFFFFF);
     vmcs->save_state()->rdx = ((val >> 0x20) & 0x00000000FFFFFFFF);
@@ -197,52 +237,14 @@ static bool
 handle_wrmsr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 {
     auto val = 0ULL;
-    auto msr = gsl::narrow_cast<::x64::msrs::field_type>(vmcs->save_state()->rcx);
 
     val |= ((vmcs->save_state()->rax & 0x00000000FFFFFFFF) << 0x00);
     val |= ((vmcs->save_state()->rdx & 0x00000000FFFFFFFF) << 0x20);
 
-    switch (msr) {
-        case ::intel_x64::msrs::ia32_debugctl::addr:
-            ::intel_x64::vmcs::guest_ia32_debugctl::set(val);
-            break;
-
-        case ::x64::msrs::ia32_pat::addr:
-            ::intel_x64::vmcs::guest_ia32_pat::set(val);
-            break;
-
-        case ::intel_x64::msrs::ia32_efer::addr:
-            ::intel_x64::vmcs::guest_ia32_efer::set(val);
-            break;
-
-        case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
-            ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::set(val);
-            break;
-
-        case ::intel_x64::msrs::ia32_sysenter_cs::addr:
-            ::intel_x64::vmcs::guest_ia32_sysenter_cs::set(val);
-            break;
-
-        case ::intel_x64::msrs::ia32_sysenter_esp::addr:
-            ::intel_x64::vmcs::guest_ia32_sysenter_esp::set(val);
-            break;
-
-        case ::intel_x64::msrs::ia32_sysenter_eip::addr:
-            ::intel_x64::vmcs::guest_ia32_sysenter_eip::set(val);
-            break;
-
-        case ::intel_x64::msrs::ia32_fs_base::addr:
-            ::intel_x64::vmcs::guest_fs_base::set(val);
-            break;
-
-        case ::intel_x64::msrs::ia32_gs_base::addr:
-            ::intel_x64::vmcs::guest_gs_base::set(val);
-            break;
-
-        default:
-            ::intel_x64::msrs::set(msr, val);
-            break;
-    }
+    emulate_wrmsr(
+        gsl::narrow_cast<::x64::msrs::field_type>(vmcs->save_state()->rcx),
+        val
+    );
 
     return advance(vmcs);
 }
