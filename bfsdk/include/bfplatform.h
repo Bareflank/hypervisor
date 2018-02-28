@@ -25,6 +25,7 @@
 #define BFPLATFORM_H
 
 #include <bftypes.h>
+#include <bfsupport.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -187,6 +188,32 @@ int64_t platform_get_current_cpu_num(void);
  * @ensures none
  */
 void platform_restore_preemption(void);
+
+/**
+ * Get platform-specific information for the VMM
+ *
+ * Populate a struct with platform-specific information that is to be passed
+ * from bfdriver to bfvmm at initialization.
+ *
+ * @expects none
+ * @ensures none
+ *
+ * @param info platform-specific info struct to be populated
+ *
+ * @return BF_SUCCESS or an error code on failure
+ */
+int64_t platform_populate_info(struct platform_info_t *info);
+
+/**
+ * Unload platform-specific information after the VMM is unloaded.
+ *
+ * @expects info is either filled with zero bytes or previously populated
+ *          by platform_populate_info()
+ * @ensures none
+ *
+ * @param info platform-specific info struct to be unloaded
+ */
+void platform_unload_info(struct platform_info_t *info);
 
 #ifdef __cplusplus
 }

@@ -21,6 +21,7 @@
 
 #include <debug/debug_ring/debug_ring.h>
 #include <debug/serial/serial_port_ns16550a.h>
+#include <debug/serial/serial_port_pl011.h>
 
 #include <mutex>
 std::mutex g_write_mutex;
@@ -43,7 +44,7 @@ write_str(const std::string &str)
         std::lock_guard<std::mutex> guard(g_write_mutex);
 
         g_debug_ring()->write(str);
-        bfvmm::serial_port_ns16550a::instance()->write(str);
+        bfvmm::DEFAULT_COM_DRIVER::instance()->write(str);
 
         return str.length();
     }
