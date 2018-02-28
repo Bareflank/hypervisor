@@ -30,6 +30,8 @@
 #include <sys/mman.h>
 #endif
 
+int platform_info_should_fail = 0;
+
 #define PAGE_ROUND_UP(x) ( (((uintptr_t)(x)) + MAX_PAGE_SIZE-1)  & (~(MAX_PAGE_SIZE-1)) )
 
 void *
@@ -116,3 +118,19 @@ platform_get_current_cpu_num(void)
 void
 platform_restore_preemption(void)
 { }
+
+int64_t
+platform_populate_info(struct platform_info_t *info)
+{
+    if (info) {
+        platform_memset(info, 0, sizeof(struct platform_info_t));
+    }
+
+    return platform_info_should_fail ? BF_ERROR_UNKNOWN : BF_SUCCESS;
+}
+
+void
+platform_unload_info(struct platform_info_t *info)
+{
+    (void) info;
+}

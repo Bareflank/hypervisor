@@ -59,6 +59,12 @@ TEST_CASE("serial: constructor_null_intrinsics")
     CHECK_NOTHROW(std::make_unique<serial_port_ns16550a>());
 }
 
+TEST_CASE("serial: constructor with specific port")
+{
+    serial_port_ns16550a ser(0x1234);
+    CHECK(ser.port() == 0x1234);
+}
+
 TEST_CASE("serial: success")
 {
     CHECK(serial_port_ns16550a::instance()->port() == DEFAULT_COM_PORT);

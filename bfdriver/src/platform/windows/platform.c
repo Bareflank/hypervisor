@@ -160,3 +160,19 @@ void
 platform_restore_preemption(void)
 {
 }
+
+int64_t
+platform_populate_info(struct platform_info_t *info)
+{
+    if (info) {
+        platform_memset(info, 0, sizeof(struct platform_info_t));
+    }
+
+    return BF_SUCCESS;
+}
+
+void
+platform_unload_info(struct platform_info_t *info)
+{
+    (void) info;
+}

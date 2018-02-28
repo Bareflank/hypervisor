@@ -229,14 +229,20 @@ public:
 
 public:
 
-    /// Default Constructor
+    /// Default constructor - uses the default port
     ///
+    /// @expects none
+    /// @ensures none
+    ///
+    serial_port_pl011() noexcept;
+
+    /// Specific constructor - accepts a target port address
     /// @expects none
     /// @ensures none
     ///
     /// @param port the serial port to connect to
     ///
-    serial_port_pl011(port_type port = DEFAULT_COM_PORT) noexcept;
+    serial_port_pl011(port_type port) noexcept;
 
     /// Destructor
     ///
@@ -382,7 +388,7 @@ private:
 
     bool get_status_full_transmitter() const noexcept;
 
-private:
+    void init(port_type port) noexcept;
 
     port_type m_port;
 
