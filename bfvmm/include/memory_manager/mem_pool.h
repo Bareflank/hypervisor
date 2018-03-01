@@ -1,9 +1,6 @@
 //
 // Bareflank Hypervisor
-//
 // Copyright (C) 2015 Assured Information Security, Inc.
-// Author: Rian Quinn        <quinnr@ainfosec.com>
-// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -22,12 +19,11 @@
 #ifndef MEM_POOL_H
 #define MEM_POOL_H
 
-#include <gsl/gsl>
-
 #include <mutex>
 #include <array>
 
-#include <constants.h>
+#include <bfgsl.h>
+#include <bfconstants.h>
 
 // -----------------------------------------------------------------------------
 // Testing Switch
@@ -52,9 +48,7 @@ constexpr const auto mem_pool_free_index = 0xFFFFFFFFFFFFFFFFUL;
 // Definition
 // -----------------------------------------------------------------------------
 
-///
 /// *INDENT-OFF*
-///
 
 /// Memory Pool
 ///
@@ -81,14 +75,14 @@ template<size_t total_size, size_t block_shift>
 class mem_pool
 {
     static_assert(total_size > 0, "total size must be larger than 0");
-    static_assert(total_size % (1 << block_shift) == 0, "total size must be a multiple of block size");
+    static_assert(total_size % (1ULL << block_shift) == 0, "total size must be a multiple of block size");
     static_assert((MAX_PAGE_SHIFT >= block_shift) &&(block_shift > 0), "block shift must be larger than 0");
 
 public:
 
-    using size_type = size_t;
-    using shift_type = size_t;
-    using integer_pointer = uintptr_t;
+    using size_type = size_t;               ///< Size type
+    using shift_type = size_t;              ///< Shift type
+    using integer_pointer = uintptr_t;      ///< Integer pointer type
 
     /// Constructor
     ///
@@ -99,15 +93,20 @@ public:
     ///
     /// @param addr the starting address of the memory pool
     mem_pool(integer_pointer addr) noexcept_testing :
+        m_next(0),
         m_addr(addr),
         m_size(total_size >> block_shift)
     {
-        if (addr == 0)
+        if (addr == 0) {
             static_construction_error();
+        }
 
-        integer_pointer end;
-        if (__builtin_uaddl_overflow(m_addr, total_size, &end))
-            static_construction_error();
+        // TODO: Convert to MSVC
+        //
+        // integer_pointer end;
+        // if (__builtin_uaddl_overflow(m_addr, total_size, &end)) {
+        //     static_construction_error();
+        // }
 
         clear();
     }
@@ -168,13 +167,15 @@ public:
     void
     free(integer_pointer addr) noexcept
     {
-        if (addr < m_addr)
+        if (addr < m_addr) {
             return;
+        }
 
         integer_pointer start = (addr - m_addr) >> block_shift;
 
-        if (start >= m_allocated.size())
+        if (start >= m_allocated.size()) {
             return;
+        }
 
         {
             std::lock_guard<std::mutex> lock(m_mutex);
@@ -191,6 +192,7 @@ public:
     /// @ensures none
     ///
     /// @param addr to lookup
+    /// @return true if the mempool contains addr, false otherwise
     ///
     bool
     contains(integer_pointer addr) const noexcept
@@ -206,19 +208,22 @@ public:
     /// @ensures none
     ///
     /// @param addr to lookup
+    /// @return the size of the addr
     ///
     size_type
     size(integer_pointer addr) const noexcept
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
-        if (!contains(addr))
+        if (!contains(addr)) {
             return 0;
+        }
 
         auto size = gsl::at(m_allocated, (addr - m_addr) >> block_shift);
 
-        if (size == mem_pool_free_index)
+        if (size == mem_pool_free_index) {
             return 0;
+        }
 
         return size << block_shift;
     }
@@ -237,7 +242,7 @@ public:
         std::lock_guard<std::mutex> lock(m_mutex);
 
         m_next = 0;
-        __builtin_memset(m_allocated.data(), 0xFF, sizeof(m_allocated));
+        memset(m_allocated.data(), 0xFF, sizeof(m_allocated));
     }
 
 private:
@@ -260,8 +265,9 @@ private:
 
             if (gsl::at(m_allocated, index) == mem_pool_free_index)
             {
-                if (count == 0)
+                if (count == 0) {
                     start = index;
+                }
 
                 count++;
                 index++;
@@ -276,11 +282,13 @@ private:
                 check += blocks;
             }
 
-            if (count >= total)
+            if (count >= total) {
                 return start;
+            }
 
-            if (check >= (total_size >> block_shift))
+            if (check >= (total_size >> block_shift)) {
                 return mem_pool_used_index;
+            }
         }
     }
 
@@ -289,31 +297,35 @@ private:
     {
         integer_pointer total = size >> block_shift;
 
-        if ((size & ((1 << block_shift) - 1)) != 0)
+        if ((size & ((1 << block_shift) - 1)) != 0) {
             total++;
+        }
 
         return total;
     }
 
 private:
 
-    integer_pointer m_next;
-    integer_pointer m_addr;
-    integer_pointer m_size;
+    integer_pointer m_next{0};
+    integer_pointer m_addr{0};
+    integer_pointer m_size{0};
 
     mutable std::mutex m_mutex;
-    std::array < integer_pointer, (total_size >> block_shift) > m_allocated;
+    std::array<integer_pointer, (total_size >> block_shift)> m_allocated;
 
 public:
 
-    mem_pool(const mem_pool &) = delete;
-    mem_pool &operator=(const mem_pool &) = delete;
+    /// @cond
+
     mem_pool(mem_pool &&) noexcept = delete;
     mem_pool &operator=(mem_pool &&) noexcept = delete;
+
+    mem_pool(const mem_pool &) = delete;
+    mem_pool &operator=(const mem_pool &) = delete;
+
+    /// @endcond
 };
 
-///
 /// *INDENT-ON*
-///
 
 #endif

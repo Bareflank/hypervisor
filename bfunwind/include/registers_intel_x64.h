@@ -1,9 +1,6 @@
 //
 // Bareflank Unwind Library
-//
 // Copyright (C) 2015 Assured Information Security, Inc.
-// Author: Rian Quinn        <quinnr@ainfosec.com>
-// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -34,8 +31,9 @@
 // Load / Store Registers
 // -----------------------------------------------------------------------------
 
-struct registers_intel_x64_t
-{
+#pragma pack(push, 1)
+
+struct registers_intel_x64_t {
     uint64_t rax;
     uint64_t rdx;
     uint64_t rcx;
@@ -54,6 +52,8 @@ struct registers_intel_x64_t
     uint64_t r15;
     uint64_t rip;
 };
+
+#pragma pack(pop)
 
 /// __store_registers_intel_x64
 ///
@@ -115,16 +115,18 @@ public:
 
     uint64_t get(uint64_t index) const override
     {
-        if (index >= max_num_registers())
+        if (index >= max_num_registers()) {
             ABORT("register index out of bounds");
+        }
 
         return reinterpret_cast<const uint64_t *>(&m_registers)[index];
     }
 
     register_state &set(uint64_t index, uint64_t value) override
     {
-        if (index >= max_num_registers())
+        if (index >= max_num_registers()) {
             ABORT("register index out of bounds");
+        }
 
         reinterpret_cast<uint64_t *>(&m_tmp_registers)[index] = value;
 
@@ -148,11 +150,11 @@ public:
 
     const char *name(uint64_t index) const override
     {
-        if (index >= max_num_registers())
+        if (index >= max_num_registers()) {
             ABORT("register index out of bounds");
+        }
 
-        switch (index)
-        {
+        switch (index) {
             case 0x00: return "rax";
             case 0x01: return "rdx";
             case 0x02: return "rcx";

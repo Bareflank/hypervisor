@@ -1,9 +1,6 @@
 //
 // Bareflank Unwind Library
-//
 // Copyright (C) 2015 Assured Information Security, Inc.
-// Author: Rian Quinn        <quinnr@ainfosec.com>
-// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -25,12 +22,13 @@
 #include <registers.h>
 #include <ia64_cxx_abi.h>
 
+#include <bfexports.h>
+
 // -----------------------------------------------------------------------------
 // Context
 // -----------------------------------------------------------------------------
 
-struct _Unwind_Context
-{
+struct _Unwind_Context {
     fd_entry fde;
     register_state *state;
     _Unwind_Exception *exception_object;
@@ -49,10 +47,8 @@ struct _Unwind_Context
 static _Unwind_Reason_Code
 private_personality(_Unwind_Action action, _Unwind_Context *context)
 {
-    if (auto pl = context->fde.cie().personality_function())
-    {
-        if (auto pr = *(reinterpret_cast<__personality_routine *>(pl)))
-        {
+    if (auto pl = context->fde.cie().personality_function()) {
+        if (auto pr = *(reinterpret_cast<__personality_routine *>(pl))) {
             return pr(1, action,
                       context->exception_object->exception_class,
                       context->exception_object, context);
@@ -69,8 +65,9 @@ private_personality(_Unwind_Action action, _Unwind_Context *context)
 static _Unwind_Reason_Code
 find_and_store_fde(_Unwind_Context *context)
 {
-    if (!(context->fde = eh_frame::find_fde(context->state)))
+    if (!(context->fde = eh_frame::find_fde(context->state))) {
         return _URC_END_OF_STACK;
+    }
 
     return _URC_CONTINUE_UNWIND;
 }
@@ -81,19 +78,19 @@ private_phase1(_Unwind_Context *context)
     auto result = _URC_CONTINUE_UNWIND;
 
     result = find_and_store_fde(context);
-    if (result != _URC_CONTINUE_UNWIND)
+    if (result != _URC_CONTINUE_UNWIND) {
         return result;
+    }
 
     dwarf4::unwind(context->fde, context->state);
 
-    while (true)
-    {
+    while (true) {
         result = find_and_store_fde(context);
-        if (result != _URC_CONTINUE_UNWIND)
+        if (result != _URC_CONTINUE_UNWIND) {
             return result;
+        }
 
-        switch (private_personality(_UA_SEARCH_PHASE, context))
-        {
+        switch (private_personality(_UA_SEARCH_PHASE, context)) {
             case _URC_HANDLER_FOUND:
                 context->exception_object->private_1 = context->fde.pc_begin();
                 return _URC_NO_REASON;
@@ -115,24 +112,25 @@ private_phase2(_Unwind_Context *context)
     auto result = _URC_CONTINUE_UNWIND;
 
     result = find_and_store_fde(context);
-    if (result != _URC_CONTINUE_UNWIND)
+    if (result != _URC_CONTINUE_UNWIND) {
         return result;
+    }
 
     dwarf4::unwind(context->fde, context->state);
 
-    while (true)
-    {
+    while (true) {
         auto action = _UA_CLEANUP_PHASE;
 
         result = find_and_store_fde(context);
-        if (result != _URC_CONTINUE_UNWIND)
+        if (result != _URC_CONTINUE_UNWIND) {
             return result;
+        }
 
-        if (context->exception_object->private_1 == context->fde.pc_begin())
+        if (context->exception_object->private_1 == context->fde.pc_begin()) {
             action |= _UA_HANDLER_FRAME;
+        }
 
-        switch (private_personality(action, context))
-        {
+        switch (private_personality(action, context)) {
             case _URC_INSTALL_CONTEXT:
                 context->state->resume(); __builtin_unreachable();
 
@@ -147,7 +145,7 @@ private_phase2(_Unwind_Context *context)
     }
 }
 
-extern "C" _Unwind_Reason_Code
+extern "C" EXPORT_SYM _Unwind_Reason_Code
 _Unwind_RaiseException(_Unwind_Exception *exception_object)
 {
     auto ret = _URC_END_OF_STACK;
@@ -162,20 +160,22 @@ _Unwind_RaiseException(_Unwind_Exception *exception_object)
     auto context = _Unwind_Context(&state, exception_object);
 
     ret = private_phase1(&context);
-    if (ret != _URC_NO_REASON)
+    if (ret != _URC_NO_REASON) {
         return ret;
+    }
 
     state = register_state_intel_x64(registers);
     context = _Unwind_Context(&state, exception_object);
 
     ret = private_phase2(&context);
-    if (ret != _URC_NO_REASON)
+    if (ret != _URC_NO_REASON) {
         return ret;
+    }
 
     return _URC_FATAL_PHASE2_ERROR;
 }
 
-extern "C" void
+extern "C" EXPORT_SYM void
 _Unwind_Resume(_Unwind_Exception *exception_object)
 {
     auto registers = registers_intel_x64_t();
@@ -187,57 +187,58 @@ _Unwind_Resume(_Unwind_Exception *exception_object)
     private_phase2(&context);
 }
 
-extern "C" void
+extern "C" EXPORT_SYM void
 _Unwind_DeleteException(_Unwind_Exception *exception_object)
 {
-    if (exception_object->exception_cleanup != nullptr)
-        (*exception_object->exception_cleanup)(_URC_FOREIGN_EXCEPTION_CAUGHT,
-                                               exception_object);
+    if (exception_object->exception_cleanup != nullptr) {
+        (*exception_object->exception_cleanup)(_URC_FOREIGN_EXCEPTION_CAUGHT, exception_object);
+    }
 }
 
-extern "C" uintptr_t
+extern "C" EXPORT_SYM uintptr_t
 _Unwind_GetGR(_Unwind_Context *context, int index)
 {
     return context->state->get(static_cast<uint64_t>(index));
 }
 
-extern "C" void
+extern "C" EXPORT_SYM void
 _Unwind_SetGR(_Unwind_Context *context, int index, uintptr_t value)
 {
     context->state->set(static_cast<uint64_t>(index), value);
     context->state->commit();
 }
 
-extern "C" uintptr_t
+extern "C" EXPORT_SYM uintptr_t
 _Unwind_GetIP(_Unwind_Context *context)
 {
     return context->state->get_ip();
 }
 
-extern "C" void
+extern "C" EXPORT_SYM void
 _Unwind_SetIP(_Unwind_Context *context, uintptr_t value)
 {
     context->state->set_ip(value);
     context->state->commit();
 }
 
-extern "C" uintptr_t
+extern "C" EXPORT_SYM uintptr_t
 _Unwind_GetLanguageSpecificData(_Unwind_Context *context)
 {
     return context->fde.lsda();
 }
 
-extern "C" uintptr_t
+extern "C" EXPORT_SYM uintptr_t
 _Unwind_GetRegionStart(_Unwind_Context *context)
 {
     return context->fde.pc_begin();
 }
 
-extern "C" uintptr_t
+extern "C" EXPORT_SYM uintptr_t
 _Unwind_GetIPInfo(_Unwind_Context *context, int *ip_before_insn)
 {
-    if (ip_before_insn == nullptr)
+    if (ip_before_insn == nullptr) {
         ABORT("ip_before_insn == 0");
+    }
 
     *ip_before_insn = 0;
     return _Unwind_GetIP(context);

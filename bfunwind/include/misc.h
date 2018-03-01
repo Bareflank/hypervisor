@@ -1,9 +1,6 @@
 //
 // Bareflank Unwind Library
-//
 // Copyright (C) 2015 Assured Information Security, Inc.
-// Author: Rian Quinn        <quinnr@ainfosec.com>
-// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -33,11 +30,13 @@ add_offset(uint64_t value, int64_t offset)
 {
     auto abs_offset = bfabs(offset);
 
-    if (offset >= 0)
+    if (offset >= 0) {
         return value + abs_offset;
+    }
 
-    if (value >= abs_offset)
+    if (value >= abs_offset) {
         return value - abs_offset;
+    }
 
     ABORT("attempted add an offset that would result in overflow");
     return 0;
