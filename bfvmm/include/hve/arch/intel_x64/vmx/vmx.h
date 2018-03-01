@@ -90,6 +90,7 @@ private:
 
     void enable_vmx();
     void disable_vmx();
+    void reset_vmx();
 
     void execute_vmxon();
     void execute_vmxoff();

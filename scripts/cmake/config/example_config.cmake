@@ -82,6 +82,13 @@ set(ENABLE_HYPERVISOR_EXAMPLE_RDTSC OFF)
 set(ENABLE_HYPERVISOR_EXAMPLE_CPUIDCOUNT OFF)
 set(ENABLE_HYPERVISOR_EXAMPLE_MSR_BITMAP OFF)
 
+# Override VMM
+#
+# If the override VMM is set, this VMM will be used instead of the default VMM
+# based on the current configuration.
+#
+# set(OVERRIDE_VMM XXX)
+
 # ------------------------------------------------------------------------------
 # Config Variables (No Need To Modify)
 # ------------------------------------------------------------------------------
@@ -209,4 +216,12 @@ if(ENABLE_HYPERVISOR_EXAMPLE_MSR_BITMAP)
     list(APPEND EXTENSION
         ${CMAKE_CURRENT_LIST_DIR}/hypervisor_example_msr_bitmap
     )
+endif()
+
+# ------------------------------------------------------------------------------
+# Override VMM
+# ------------------------------------------------------------------------------
+
+if(OVERRIDE_VMM)
+    set_bfm_vmm(${OVERRIDE_VMM})
 endif()

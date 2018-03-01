@@ -51,6 +51,19 @@ TEST_CASE("vmx: start_execute_vmxon_failure")
     CHECK_THROWS(bfvmm::intel_x64::vmx{});
 }
 
+TEST_CASE("vmx: reset")
+{
+    MockRepository mocks;
+    auto mm = setup_vmx_tests(mocks);
+
+    ::intel_x64::cr4::vmx_enable_bit::enable();
+    auto ___ = gsl::finally([&] {
+        ::intel_x64::cr4::vmx_enable_bit::disable();
+    });
+
+    CHECK_NOTHROW(bfvmm::intel_x64::vmx{});
+}
+
 TEST_CASE("vmx: start_check_ia32_vmx_cr4_fixed0_msr_failure")
 {
     MockRepository mocks;

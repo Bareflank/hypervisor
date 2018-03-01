@@ -38,6 +38,7 @@ vmx::vmx() :
     m_vmx_region{std::make_unique<uint32_t[]>(1024)},
     m_vmx_region_phys{g_mm->virtptr_to_physint(m_vmx_region.get())}
 {
+    this->reset_vmx();
     this->setup_vmx_region();
 
     this->check_cpuid_vmx_supported();
@@ -192,6 +193,17 @@ vmx::disable_vmx()
 {
     ::intel_x64::cr4::vmx_enable_bit::disable();
     bfdebug_test(1, "disable vmx", ::intel_x64::cr4::vmx_enable_bit::is_disabled());
+}
+
+void
+vmx::reset_vmx()
+{
+    if (::intel_x64::cr4::vmx_enable_bit::is_enabled()) {
+        bfalert_info(0, "VMX was not properly disabled. Attempting to reset VMX.");
+
+        execute_vmxoff();
+        disable_vmx();
+    }
 }
 
 void
