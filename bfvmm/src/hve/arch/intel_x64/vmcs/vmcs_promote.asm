@@ -78,6 +78,7 @@ extern _write_idt
 extern _write_cr0
 extern _write_cr3
 extern _write_cr4
+extern _write_cr8
 extern _write_dr7
 
 extern _cpuid_eax
@@ -96,6 +97,7 @@ section .text
 ;
 vmcs_promote:
 
+    cli
     mov r15, rdi
     mov r14, rsi
 
@@ -103,7 +105,7 @@ vmcs_promote:
     ; Clear TSS Busy
     ;
     ; rsi contains the virtual address of the guest's GDT mapped r/w
-    ; in the VMM's address space (see exit_handler_intel_x64::handle_vmxoff)
+    ; in the VMM's address space (see handle_vmxoff)
     ;
 
     mov rdi, rsi
@@ -201,6 +203,9 @@ vmcs_promote:
 
     pop rdi
     call _write_cr3 wrt ..plt
+
+    mov rdi, 0x0
+    call _write_cr8 wrt ..plt
 
     mov rsi, VMCS_GUEST_DR7
     vmread rdi, rsi

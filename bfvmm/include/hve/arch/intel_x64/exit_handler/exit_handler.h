@@ -153,6 +153,36 @@ public:
     static void handle(
         bfvmm::intel_x64::exit_handler *exit_handler) noexcept;
 
+    /// Get Host TSS
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return Returns a pointer to the host_tss
+    ///
+    auto host_tss() noexcept
+    { return &m_host_tss; }
+
+    /// Get Host IDT
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return Returns a pointer to the host_idt
+    ///
+    auto host_idt() noexcept
+    { return &m_host_idt; }
+
+    /// Get Host GDT
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return Returns a pointer to the host_gdt
+    ///
+    auto host_gdt() noexcept
+    { return &m_host_gdt; }
+
 private:
 
     void write_host_state();
