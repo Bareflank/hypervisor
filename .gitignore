@@ -45,6 +45,7 @@ bfdriver/src/platform/linux/entry.o
 bfdriver/src/platform/linux/modules.order
 bfdriver/src/platform/linux/platform.o
 bfdriver/src/platform/linux/vmcall.o
+bfdriver/src/platform/linux/.cache.mk
 bfdriver/src/common.o
 
 bfdriver/src/platform/windows/.vs/
