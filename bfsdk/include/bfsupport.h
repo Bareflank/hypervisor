@@ -219,7 +219,7 @@ typedef int64_t (*_start_t)(char *stack, const struct crt_info_t *);
  * @return pointer to populated platform_info_t
  */
 EXPORT_SYM struct platform_info_t *
-get_platform_info();
+get_platform_info(void);
 
 #ifdef __cplusplus
 }
