@@ -1,6 +1,9 @@
 //
 // Bareflank Hypervisor
+//
 // Copyright (C) 2015 Assured Information Security, Inc.
+// Author: Rian Quinn        <quinnr@ainfosec.com>
+// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -22,35 +25,9 @@
 #include <map>
 #include <memory>
 
-#include "vcpu_factory.h"
-
-// -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_VCPU
-#ifdef SHARED_VCPU
-#define EXPORT_VCPU EXPORT_SYM
-#else
-#define EXPORT_VCPU IMPORT_SYM
-#endif
-#else
-#define EXPORT_VCPU
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
-// Definitions
-// -----------------------------------------------------------------------------
-
-namespace bfvmm
-{
+#include <vcpuid.h>
+#include <user_data.h>
+#include <vcpu/vcpu_factory.h>
 
 /// vCPU Manager
 ///
@@ -59,7 +36,7 @@ namespace bfvmm
 /// need to work with a vCPU, but all you have is a vcpuid, this is the class
 /// to use.
 ///
-class EXPORT_VCPU vcpu_manager
+class vcpu_manager
 {
 public:
 
@@ -75,7 +52,7 @@ public:
     /// @expects none
     /// @ensures ret != nullptr
     ///
-    /// @return a singleton instance of vcpu_manager
+    /// Get an instance to the singleton class.
     ///
     static vcpu_manager *instance() noexcept;
 
@@ -88,22 +65,20 @@ public:
     /// @ensures none
     ///
     /// @param vcpuid the vcpu to initialize
-    /// @param obj object that can be passed around as needed
+    /// @param data user data that can be passed around as needed
     ///     by extensions of Bareflank
     ///
-    virtual void create_vcpu(
-        vcpuid::type vcpuid, bfobject *obj = nullptr);
+    virtual void create_vcpu(vcpuid::type vcpuid, user_data *data = nullptr);
 
     /// Delete vCPU
     ///
     /// Deletes the vCPU.
     ///
     /// @param vcpuid the vcpu to stop
-    /// @param obj object that can be passed around as needed
+    /// @param data user data that can be passed around as needed
     ///     by extensions of Bareflank
     ///
-    virtual void delete_vcpu(
-        vcpuid::type vcpuid, bfobject *obj = nullptr);
+    virtual void delete_vcpu(vcpuid::type vcpuid, user_data *data = nullptr);
 
     /// Run vCPU
     ///
@@ -113,11 +88,10 @@ public:
     /// @ensures none
     ///
     /// @param vcpuid the vcpu to execute
-    /// @param obj object that can be passed around as needed
+    /// @param data user data that can be passed around as needed
     ///     by extensions of Bareflank
     ///
-    virtual void run_vcpu(
-        vcpuid::type vcpuid, bfobject *obj = nullptr);
+    virtual void run_vcpu(vcpuid::type vcpuid, user_data *data = nullptr);
 
     /// Halt vCPU
     ///
@@ -127,46 +101,46 @@ public:
     /// @ensures none
     ///
     /// @param vcpuid the vcpu to halt
-    /// @param obj object that can be passed around as needed
+    /// @param data user data that can be passed around as needed
     ///     by extensions of Bareflank
     ///
-    virtual void hlt_vcpu(
-        vcpuid::type vcpuid, bfobject *obj = nullptr);
+    virtual void hlt_vcpu(vcpuid::type vcpuid, user_data *data = nullptr);
 
-    /// Set Factory
+    /// Write to Log
     ///
-    /// Should only be used by unit tests
+    /// Write's a string the vCPU's debug ring.
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param factory the new factory to use
+    /// @param vcpuid the vCPU to write to
+    /// @param str the string to write
     ///
-    void set_factory(std::unique_ptr<vcpu_factory> factory)
-    { m_vcpu_factory = std::move(factory); }
+    virtual void write(vcpuid::type vcpuid, const std::string &str) noexcept;
 
 private:
 
     vcpu_manager() noexcept;
-    std::unique_ptr<vcpu> &add_vcpu(vcpuid::type vcpuid, bfobject *obj);
+    std::unique_ptr<vcpu> &add_vcpu(vcpuid::type vcpuid, user_data *data);
     std::unique_ptr<vcpu> &get_vcpu(vcpuid::type vcpuid);
 
 private:
 
-    std::unique_ptr<vcpu_factory> m_vcpu_factory;
+    friend class vcpu_ut;
+
     std::map<vcpuid::type, std::unique_ptr<vcpu>> m_vcpus;
+
+private:
+
+    std::unique_ptr<vcpu_factory> m_vcpu_factory;
+
+    void set_factory(std::unique_ptr<vcpu_factory> factory)
+    { m_vcpu_factory = std::move(factory); }
 
 public:
 
-    /// @cond
-
-    vcpu_manager(vcpu_manager &&) noexcept = delete;
-    vcpu_manager &operator=(vcpu_manager &&) noexcept = delete;
-
     vcpu_manager(const vcpu_manager &) = delete;
     vcpu_manager &operator=(const vcpu_manager &) = delete;
-
-    /// @endcond
 };
 
 /// vCPU Manager Macro
@@ -178,12 +152,6 @@ public:
 /// @expects none
 /// @ensures ret != nullptr
 ///
-#define g_vcm bfvmm::vcpu_manager::instance()
-
-}
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+#define g_vcm vcpu_manager::instance()
 
 #endif

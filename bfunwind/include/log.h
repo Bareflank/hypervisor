@@ -1,6 +1,9 @@
 //
 // Bareflank Unwind Library
+//
 // Copyright (C) 2015 Assured Information Security, Inc.
+// Author: Rian Quinn        <quinnr@ainfosec.com>
+// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -19,8 +22,13 @@
 #ifndef LOG_H
 #define LOG_H
 
-#ifndef DISABLE_LOGGING
+#ifdef CROSS_COMPILED
+extern "C" int printf(const char *format, ...);
+#else
 #include <stdio.h>
+#endif
+
+#ifndef DISABLE_LOGGING
 #define log(...) printf(__VA_ARGS__);
 #else
 #define log(...)

@@ -1,6 +1,9 @@
 //
 // Bareflank Unwind Library
+//
 // Copyright (C) 2015 Assured Information Security, Inc.
+// Author: Rian Quinn        <quinnr@ainfosec.com>
+// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -81,7 +84,8 @@ struct _Unwind_Exception;
 /// callback functions what to do, so view it as nothing more than a global
 /// enum, were each value has it's own meaning.
 ///
-typedef enum {
+typedef enum
+{
     _URC_NO_REASON = 0,
     _URC_FOREIGN_EXCEPTION_CAUGHT = 1,
     _URC_FATAL_PHASE2_ERROR = 2,
@@ -152,7 +156,8 @@ typedef void (*_Unwind_Exception_Cleanup_Fn)(
 ///     Used by level I as a state save area. This should not be touched by
 ///     level II at all.
 ///
-struct _Unwind_Exception {
+struct _Unwind_Exception
+{
     uint64_t exception_class;
     _Unwind_Exception_Cleanup_Fn exception_cleanup;
     uint64_t private_1;
@@ -253,16 +258,15 @@ _Unwind_GetRegionStart(_Unwind_Context *context);
 //
 
 typedef int _Unwind_Action;
-constexpr const _Unwind_Action _UA_SEARCH_PHASE = 1;
-constexpr const _Unwind_Action _UA_CLEANUP_PHASE = 2;
-constexpr const _Unwind_Action _UA_HANDLER_FRAME = 4;
-constexpr const _Unwind_Action _UA_FORCE_UNWIND = 8;
+static const _Unwind_Action _UA_SEARCH_PHASE = 1;
+static const _Unwind_Action _UA_CLEANUP_PHASE = 2;
+static const _Unwind_Action _UA_HANDLER_FRAME = 4;
+static const _Unwind_Action _UA_FORCE_UNWIND = 8;
 
-typedef _Unwind_Reason_Code(
-    *__personality_routine)(int version,
-                            _Unwind_Action actions, uint64_t exceptionClass,
-                            _Unwind_Exception *exceptionObject,
-                            _Unwind_Context *context);
+typedef _Unwind_Reason_Code(*__personality_routine)(int version,
+        _Unwind_Action actions, uint64_t exceptionClass,
+        _Unwind_Exception *exceptionObject,
+        _Unwind_Context *context);
 
 // -----------------------------------------------------------------------------
 // GNU Extensions

@@ -1,6 +1,9 @@
 //
 // Bareflank Hypervisor
+//
 // Copyright (C) 2015 Assured Information Security, Inc.
+// Author: Rian Quinn        <quinnr@ainfosec.com>
+// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -21,18 +24,9 @@
 
 #include <memory>
 
-#include <bfgsl.h>
-#include <bffile.h>
-#include <bfdebugringinterface.h>
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
-// Definitions
-// -----------------------------------------------------------------------------
+#include <file.h>
+#include <vmcall_interface.h>
+#include <debug_ring_interface.h>
 
 /// IOCTL Private Base
 ///
@@ -41,13 +35,7 @@
 class ioctl_private_base
 {
 public:
-
-    /// Default Constructor
-    ///
     ioctl_private_base() = default;
-
-    /// Default Destructor
-    ///
     virtual ~ioctl_private_base() = default;
 };
 
@@ -61,12 +49,15 @@ class ioctl
 {
 public:
 
-    using binary_data = file::binary_data;          ///< Binary data type
-    using drr_type = debug_ring_resources_t;        ///< Debug ring resources type
-    using drr_pointer = drr_type *;                 ///< Debug ring resources pointer type
-    using vcpuid_type = uint64_t;                   ///< VCPUID type
-    using status_type = int64_t;                    ///< Status type
-    using status_pointer = status_type *;           ///< Status pointer type
+    using binary_data = file::binary_data;
+    using drr_type = debug_ring_resources_t;
+    using drr_pointer = drr_type *;
+    using cpuid_type = uint64_t;
+    using vcpuid_type = uint64_t;
+    using status_type = int64_t;
+    using status_pointer = status_type *;
+    using registers_type = struct vmcall_registers_t;
+    using registers_pointer = registers_type *;
 
     /// Default Constructor
     ///
@@ -161,13 +152,21 @@ public:
     ///
     virtual void call_ioctl_vmm_status(gsl::not_null<status_pointer> status);
 
+    /// VMCall
+    ///
+    /// Performs a VMCall
+    ///
+    /// @expects status != nullptr
+    /// @ensures none
+    ///
+    /// @param regs register values to send to the hypervisor
+    /// @param cpuid indicates which vcpu to vmcall
+    ///
+    virtual void call_ioctl_vmcall(gsl::not_null<registers_pointer> regs, cpuid_type cpuid);
+
 private:
 
     std::unique_ptr<ioctl_private_base> m_d;
 };
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif
