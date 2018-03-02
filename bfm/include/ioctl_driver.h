@@ -1,9 +1,6 @@
 //
 // Bareflank Hypervisor
-//
 // Copyright (C) 2015 Assured Information Security, Inc.
-// Author: Rian Quinn        <quinnr@ainfosec.com>
-// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -22,9 +19,17 @@
 #ifndef IOCTL_DRIVER_H
 #define IOCTL_DRIVER_H
 
-#include <command_line_parser.h>
-#include <file.h>
 #include <ioctl.h>
+#include <command_line_parser.h>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
+
+// -----------------------------------------------------------------------------
+// Definitions
+// -----------------------------------------------------------------------------
 
 /// IOCTL Driver
 ///
@@ -40,8 +45,9 @@ class ioctl_driver
 {
 public:
 
-    using status_type = ioctl::status_type;
-    using registers_type = command_line_parser::registers_type;
+    using status_type = ioctl::status_type;                         ///< Status type
+    using filename_type = std::string;                              ///< Filename type
+    using list_type = std::vector<std::string>;                     ///< List type
 
     /// Default Constructor
     ///
@@ -76,26 +82,23 @@ public:
     ///
     void process();
 
+#ifndef ENABLE_BUILD_TEST
 private:
+#endif
 
     void load_vmm();
     void unload_vmm();
     void start_vmm();
     void stop_vmm();
+    void quick_vmm();
     void dump_vmm();
     void vmm_status();
-    void vmcall();
-
-    void vmcall_send_regs(registers_type &regs);
-    void vmcall_versions(registers_type &regs);
-    void vmcall_registers(registers_type &regs);
-    void vmcall_data(registers_type &regs);
-    void vmcall_data_string(registers_type &regs);
-    void vmcall_data_binary(registers_type &regs);
-    void vmcall_event(registers_type &regs);
-    void vmcall_unittest(registers_type &regs);
 
     status_type get_status() const;
+
+    list_type library_path();
+    filename_type vmm_filename();
+    list_type vmm_module_list(const filename_type &filename);
 
 private:
 
@@ -103,5 +106,9 @@ private:
     gsl::not_null<ioctl *> m_ioctl;
     gsl::not_null<command_line_parser *> m_clp;
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif

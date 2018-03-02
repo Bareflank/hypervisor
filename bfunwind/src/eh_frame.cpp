@@ -1,9 +1,6 @@
 //
 // Bareflank Unwind Library
-//
 // Copyright (C) 2015 Assured Information Security, Inc.
-// Author: Rian Quinn        <quinnr@ainfosec.com>
-// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -34,16 +31,16 @@ decode_pointer(char **addr, uint64_t encoding)
 {
     uint64_t result = 0;
 
-    if (encoding == DW_EH_PE_omit)
+    if (encoding == DW_EH_PE_omit) {
         return 0;
+    }
 
     // The following are defined in the DWARF Exception Header Encodings
     // section 10.5.1. For some reason, GCC adds a 0x80 to the upper 4 bits
     // that are not documented in the LSB. Thefore, only 3 of the upper 4 bits
     // are actually used.
 
-    switch (encoding & 0x70)
-    {
+    switch (encoding & 0x70) {
         case DW_EH_PE_absptr:
             break;
 
@@ -71,8 +68,7 @@ decode_pointer(char **addr, uint64_t encoding)
             ABORT("unknown upper pointer encoding bits");
     }
 
-    switch (encoding & 0x0F)
-    {
+    switch (encoding & 0x0F) {
         case DW_EH_PE_absptr:
             result += *reinterpret_cast<uintptr_t *>(*addr);
             *addr += sizeof(void *);
@@ -149,13 +145,16 @@ common_entry::common_entry(const eh_frame_t &eh_frame) :
 
 common_entry &common_entry::operator++()
 {
-    if (m_entry_start == nullptr)
+    if (m_entry_start == nullptr) {
         return *this;
+    }
 
-    if (m_entry_end + 4 < reinterpret_cast<char *>(m_eh_frame.addr) + m_eh_frame.size)
+    if (m_entry_end + 4 < reinterpret_cast<char *>(m_eh_frame.addr) + m_eh_frame.size) {
         parse(m_entry_end);
-    else
+    }
+    else {
         parse(nullptr);
+    }
 
     return *this;
 }
@@ -165,31 +164,33 @@ common_entry::non_virtual_parse(char *addr)
 {
     auto len = 0ULL;
 
-    if ((m_entry_start = addr) == nullptr)
+    if ((m_entry_start = addr) == nullptr) {
         goto failure;
+    }
 
-    if (m_entry_start < m_eh_frame.addr)
+    if (m_entry_start < m_eh_frame.addr) {
         goto failure;
+    }
 
-    if (*reinterpret_cast<uint32_t *>(m_entry_start) != 0xFFFFFFFF)
-    {
+    if (*reinterpret_cast<uint32_t *>(m_entry_start) != 0xFFFFFFFF) {
         len = *reinterpret_cast<uint32_t *>(m_entry_start + 0);
         m_payload_start = m_entry_start + 4;
     }
-    else
-    {
+    else {
         len = *reinterpret_cast<uint64_t *>(m_entry_start + 4);
         m_payload_start = m_entry_start + 12;
     }
 
-    if (len == 0)
+    if (len == 0) {
         goto failure;
+    }
 
     m_payload_end = m_payload_start + len;
     m_entry_end = m_payload_end;
 
-    if (m_entry_end > reinterpret_cast<char *>(m_eh_frame.addr) + m_eh_frame.size)
+    if (m_entry_end > reinterpret_cast<char *>(m_eh_frame.addr) + m_eh_frame.size) {
         goto failure;
+    }
 
     m_is_cie = (*reinterpret_cast<uint32_t *>(m_payload_start) == 0);
     return;
@@ -263,11 +264,13 @@ ci_entry::non_virtual_parse(char *addr)
 {
     common_entry::non_virtual_parse(addr);
 
-    if (!*this)
+    if (!*this) {
         return;
+    }
 
-    if (!is_cie())
+    if (!is_cie()) {
         return;
+    }
 
     auto p = payload_start();
 
@@ -276,20 +279,18 @@ ci_entry::non_virtual_parse(char *addr)
 
     m_augmentation_string = p;
 
-    while (*p++ != 0);
+    while (*p++ != 0)
+    { }
 
     m_code_alignment = dwarf4::decode_uleb128(&p);
     m_data_alignment = dwarf4::decode_sleb128(&p);
     m_return_address_reg = dwarf4::decode_uleb128(&p);
 
-    if (m_augmentation_string[0] == 'z')
-    {
+    if (m_augmentation_string[0] == 'z') {
         auto len = dwarf4::decode_uleb128(&p);
 
-        for (auto i = 1U; m_augmentation_string[i] != 0 && i <= len; i++)
-        {
-            switch (m_augmentation_string[i])
-            {
+        for (auto i = 1U; i <= len && m_augmentation_string[i] != 0; i++) {
+            switch (m_augmentation_string[i]) {
                 case 'L':
                     m_lsda_encoding = *reinterpret_cast<uint8_t *>(p++);
                     break;
@@ -358,11 +359,13 @@ fd_entry::non_virtual_parse(char *addr)
 {
     common_entry::non_virtual_parse(addr);
 
-    if (!*this)
+    if (!*this) {
         return;
+    }
 
-    if (!is_fde())
+    if (!is_fde()) {
         return;
+    }
 
     auto p = payload_start();
     auto p_cie = reinterpret_cast<char *>(reinterpret_cast<uint64_t>(p) - *reinterpret_cast<uint32_t *>(p));
@@ -373,14 +376,11 @@ fd_entry::non_virtual_parse(char *addr)
     m_pc_begin = decode_pointer(&p, m_cie.pointer_encoding());
     m_pc_range = decode_pointer(&p, m_cie.pointer_encoding() & 0xF);
 
-    if (m_cie.augmentation_string(0) == 'z')
-    {
+    if (m_cie.augmentation_string(0) == 'z') {
         auto len = dwarf4::decode_uleb128(&p);
 
-        for (auto i = 1U; m_cie.augmentation_string(i) != 0 && i <= len; i++)
-        {
-            switch (m_cie.augmentation_string(i))
-            {
+        for (auto i = 1U; m_cie.augmentation_string(i) != 0 && i <= len; i++) {
+            switch (m_cie.augmentation_string(i)) {
                 case 'L':
                     m_lsda = decode_pointer(&p, m_cie.lsda_encoding());
                     break;
@@ -409,15 +409,15 @@ eh_frame::find_fde(register_state *state)
 {
     auto eh_frame_list = get_eh_frame_list();
 
-    for (auto m = 0U; m < MAX_NUM_MODULES; m++)
-    {
-        for (auto fde = fd_entry(eh_frame_list[m]); fde; ++fde)
-        {
-            if (fde.is_cie())
+    for (auto m = 0U; m < MAX_NUM_MODULES; m++) {
+        for (auto fde = fd_entry(eh_frame_list[m]); fde; ++fde) {
+            if (fde.is_cie()) {
                 continue;
+            }
 
-            if (fde.is_in_range(state->get_ip()))
+            if (fde.is_in_range(state->get_ip())) {
                 return fde;
+            }
         }
     }
 

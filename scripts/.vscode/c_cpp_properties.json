@@ -1,0 +1,110 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceRoot}",
+                "${workspaceRoot}/build/prefixes/x86_64-vmm-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-vmm-elf/include/c++/v1/",
+                "${workspaceRoot}/build/prefixes/x86_64-userspace-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-userspace-elf/include/c++/v1/",
+                "${workspaceRoot}/build/prefixes/x86_64-test-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-test-elf/include/c++/v1/",
+                "${workspaceRoot}/bfdriver/include",
+                "${workspaceRoot}/bfdummy/include",
+                "${workspaceRoot}/bfelf_loader/include",
+                "${workspaceRoot}/bfintrinsics/include",
+                "${workspaceRoot}/bfm/include",
+                "${workspaceRoot}/bfsdk/include",
+                "${workspaceRoot}/bfunwind/include",
+                "${workspaceRoot}/bfvmm/include"
+            ],
+            "defines": [
+                "VMM",
+                "NATIVE",
+                "ENABLE_BUILD_TEST",
+                "_HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT"
+            ],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceRoot}",
+                "${workspaceRoot}/build/prefixes/x86_64-vmm-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-vmm-elf/include/c++/v1/",
+                "${workspaceRoot}/build/prefixes/x86_64-userspace-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-userspace-elf/include/c++/v1/",
+                "${workspaceRoot}/build/prefixes/x86_64-test-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-test-elf/include/c++/v1/",
+                "${workspaceRoot}/bfdriver/include",
+                "${workspaceRoot}/bfdummy/include",
+                "${workspaceRoot}/bfelf_loader/include",
+                "${workspaceRoot}/bfintrinsics/include",
+                "${workspaceRoot}/bfm/include",
+                "${workspaceRoot}/bfsdk/include",
+                "${workspaceRoot}/bfunwind/include",
+                "${workspaceRoot}/bfvmm/include"
+            ],
+            "defines": [
+                "VMM",
+                "NATIVE",
+                "ENABLE_BUILD_TEST",
+                "_HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT"
+            ],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceRoot}",
+                "${workspaceRoot}/build/prefixes/x86_64-vmm-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-vmm-elf/include/c++/v1/",
+                "${workspaceRoot}/build/prefixes/x86_64-userspace-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-userspace-elf/include/c++/v1/",
+                "${workspaceRoot}/build/prefixes/x86_64-test-elf/include",
+                "${workspaceRoot}/build/prefixes/x86_64-test-elf/include/c++/v1/",
+                "${workspaceRoot}/bfdriver/include",
+                "${workspaceRoot}/bfdummy/include",
+                "${workspaceRoot}/bfelf_loader/include",
+                "${workspaceRoot}/bfintrinsics/include",
+                "${workspaceRoot}/bfm/include",
+                "${workspaceRoot}/bfsdk/include",
+                "${workspaceRoot}/bfunwind/include",
+                "${workspaceRoot}/bfvmm/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "VMM",
+                "NATIVE",
+                "ENABLE_BUILD_TEST",
+                "_HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "browse": {
+                "path": [
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 3
+}
