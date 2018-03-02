@@ -1,4 +1,4 @@
-![Bareflank](https://raw.githubusercontent.com/Bareflank/hypervisor/master/doc/images/bareflank_logo.jpg)
+![Bareflank](https://github.com/Bareflank/hypervisor/blob/gh-pages/bareflank_logo.jpg?raw=true)
 <br>
 <br>
 <br>
