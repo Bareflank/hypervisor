@@ -7,7 +7,6 @@
 [![Build Status](https://ci.appveyor.com/api/projects/status/r82c37nc634tnsv9/branch/master?svg=true)](https://ci.appveyor.com/project/rianquinn/hypervisor-13oyg/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/Bareflank/hypervisor/badge.svg?branch=master)](https://coveralls.io/github/Bareflank/hypervisor?branch=master)
 [![Codacy Status](https://api.codacy.com/project/badge/Grade/28ec616803cb4800a4b727b70a3b112f)](https://www.codacy.com/app/rianquinn/hypervisor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Bareflank/hypervisor&amp;utm_campaign=Badge_Grade)
-[![Coverity Scan Status](https://scan.coverity.com/projects/9857/badge.svg)](https://scan.coverity.com/projects/bareflank-hypervisor)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/325/badge)](https://bestpractices.coreinfrastructure.org/projects/325)
 [![Join the chat at https://gitter.im/Bareflank-hypervisor/Lobby](https://badges.gitter.im/Bareflank-hypervisor/Lobby.svg)](https://gitter.im/Bareflank-hypervisor/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -50,7 +49,6 @@ that the provided code works as expected. These tests are validated using
 test styling via
 [Astyle](http://astyle.sourceforge.net), and static / dynamic analysis
 via
-[Coverity Scan](https://scan.coverity.com/projects/bareflank-hypervisor),
 [Clang Tidy](http://clang.llvm.org/extra/clang-tidy/),
 [Codacy](https://www.codacy.com),
 and
@@ -65,8 +63,7 @@ including support for the
 Currently we have support for the following 64bit host operating systems on
 Intel _Sandy Bridge_ and above hardware:
 - Arch Linux
-- Debian 9.x+
-- Ubuntu 17.04+
+- Ubuntu 17.10+
 - Windows 10
 - Windows 8.1
 - Windows 7
@@ -154,22 +151,15 @@ sudo ln -s /usr/share/clang/run-clang-tidy.py /usr/bin/run-clang-tidy-4.0.py
 sudo ln -s /usr/bin/clang-tidy /usr/bin/clang-tidy-4.0
 ```
 
-#### Ubuntu 17.04 (or Higher):
+#### Ubuntu 17.10 (or Higher):
 ```
 sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cmake
 ```
 
 #### Windows (Cygwin):
-Visual Studio 2017 doesn't support building drivers, but the WDK 10 doesn't
-compile drivers without Visual Studio 2017 installed, so you must install
-both Visual Studio 2017 and 2015 to get a complete environment. Also note that
-these packages must be installed in the following order:
-- [Visual Studio 2015](https://go.microsoft.com/fwlink/?LinkId=615448&clcid=0x409)
-  - Check "Visual C++"
-- [Visual Studio 2017](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15#)
+- [Visual Studio 2017 / WDK 10](https://docs.microsoft.com/en-us/windows-hardware/drivers/)
   - Check "Desktop development with C++"
   - Check "C++ CLI / Support"
-- [Visual Studio WDK 10](https://go.microsoft.com/fwlink/p/?LinkId=845980)
 - [Cygwin](https://www.cygwin.com/setup-x86_64.exe)
 
 To install Cygwin, simply install using all default settings, and then copy
@@ -177,7 +167,7 @@ setup-x86\_64.exe to C:\\cygwin64\\bin. From there, open a Cygwin terminal and
 run the following:
 
 ```
-setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext,bash-completion
+setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext
 ```
 
 After installing the the above packages you must enable test signing mode.
@@ -256,6 +246,11 @@ netsh advfirewall firewall add rule name='SSH Port' dir=in action=allow protocol
 
 ## Extended APIs / Hyperkernel
 
+*** **WARNING** *** <br>
+The master branch is our development branch and should be considered unstable. 
+It is possible these additional projects might not compile with master. If you 
+need a stable branch that works with these repos, please use a tagged release. 
+
 Since Bareflank only provides the bare minimum implementation, we have created
 two other repositories that extend Bareflank to provide additional
 capabilities that you might find useful. The Extended APIs repo provides
@@ -271,6 +266,11 @@ https://github.com/Bareflank/extended_apis
 https://github.com/Bareflank/hyperkernel
 
 ## Example Extensions
+
+*** **WARNING** *** <br>
+The master branch is our development branch and should be considered unstable. 
+It is possible these additional projects might not compile with master. If you 
+need a stable branch that works with these repos, please use a tagged release. 
 
 To provide examples of how you might extend Bareflank to provide your own custom
 functionality, we have provided a couple of examples:
