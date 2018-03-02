@@ -1,6 +1,9 @@
 //
 // Bareflank Hypervisor
+//
 // Copyright (C) 2015 Assured Information Security, Inc.
+// Author: Rian Quinn        <quinnr@ainfosec.com>
+// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -20,35 +23,10 @@
 #define VCPU_FACTORY_H
 
 #include <memory>
-#include "vcpu.h"
 
-// -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_VCPU
-#ifdef SHARED_VCPU
-#define EXPORT_VCPU EXPORT_SYM
-#else
-#define EXPORT_VCPU IMPORT_SYM
-#endif
-#else
-#define EXPORT_VCPU
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
-// Definitions
-// -----------------------------------------------------------------------------
-
-namespace bfvmm
-{
+#include <vcpuid.h>
+#include <user_data.h>
+#include <vcpu/vcpu.h>
 
 /// vCPU Factory
 ///
@@ -67,7 +45,7 @@ namespace bfvmm
 /// <br>
 /// <a href="https://github.com/Bareflank/hypervisor_example_cpuidcount">Bareflank Hypervisor CPUID Example</a>
 ///
-class EXPORT_VCPU vcpu_factory
+class vcpu_factory
 {
 public:
 
@@ -91,29 +69,10 @@ public:
     /// @ensures none
     ///
     /// @param vcpuid the vcpuid for the vcpu to create
-    /// @param obj object passed to the vcpu
+    /// @param data user data passed to the vcpu
     /// @return returns a pointer to a newly created vCPU.
     ///
-    virtual std::unique_ptr<vcpu> make_vcpu(
-        vcpuid::type vcpuid, bfobject *obj = nullptr);
-
-public:
-
-    /// @cond
-
-    vcpu_factory(vcpu_factory &&) noexcept = default;
-    vcpu_factory &operator=(vcpu_factory &&) noexcept = default;
-
-    vcpu_factory(const vcpu_factory &) = delete;
-    vcpu_factory &operator=(const vcpu_factory &) = delete;
-
-    /// @endcond
+    virtual std::unique_ptr<vcpu> make_vcpu(vcpuid::type vcpuid, user_data *data = nullptr);
 };
-
-}
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

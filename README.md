@@ -2,31 +2,33 @@
 <br>
 <br>
 <br>
-[![GitHub Version](https://badge.fury.io/gh/bareflank%2Fhypervisor.svg)](https://badge.fury.io/gh/bareflank%2Fhypervisor)
+[![GitHub version](https://badge.fury.io/gh/bareflank%2Fhypervisor.svg)](https://badge.fury.io/gh/bareflank%2Fhypervisor)
 [![Build Status](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)](https://travis-ci.org/Bareflank/hypervisor)
-[![Build Status](https://ci.appveyor.com/api/projects/status/r82c37nc634tnsv9/branch/master?svg=true)](https://ci.appveyor.com/project/rianquinn/hypervisor-13oyg/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/r82c37nc634tnsv9/branch/master?svg=true)](https://ci.appveyor.com/project/rianquinn/hypervisor-13oyg/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/Bareflank/hypervisor/badge.svg?branch=master)](https://coveralls.io/github/Bareflank/hypervisor?branch=master)
-[![Codacy Status](https://api.codacy.com/project/badge/Grade/28ec616803cb4800a4b727b70a3b112f)](https://www.codacy.com/app/rianquinn/hypervisor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Bareflank/hypervisor&amp;utm_campaign=Badge_Grade)
-[![Coverity Scan Status](https://scan.coverity.com/projects/9857/badge.svg)](https://scan.coverity.com/projects/bareflank-hypervisor)
+<a href="https://scan.coverity.com/projects/bareflank-hypervisor">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/9857/badge.svg"/>
+</a>
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/325/badge)](https://bestpractices.coreinfrastructure.org/projects/325)
 [![Join the chat at https://gitter.im/Bareflank-hypervisor/Lobby](https://badges.gitter.im/Bareflank-hypervisor/Lobby.svg)](https://gitter.im/Bareflank-hypervisor/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Description
 
-The Bareflank Hypervisor is an open source, lightweight hypervisor, led by
-Assured Information Security, Inc., that provides the scaffolding needed to
+The Bareflank Hypervisor is an open source, lightweight hypervisor, lead by
+Assured Information Security, Inc. that provides the scaffolding needed to
 rapidly prototype new hypervisors. To ease development, Bareflank
 is written in C++, and includes support for exceptions and the C++ Standard
 Template Library (STL) via libc++. With the C++ STL, users can leverage
 shared pointers, complex data structures (e.g. hash tables, maps, lists,
 etc…), and several other modern C++ features. Existing open source
-hypervisors that are written in C are difficult to modify, and require a
+hypervisors that are written in C are difficult to modify, and spend a
 considerable amount of time re-writing similar functionality instead of
 focusing on what matters most: hypervisor technologies. Furthermore, users
 can leverage inheritance to extend every part of the hypervisor to provide
 additional functionality above and beyond what is already provided.
 
-To this end, Bareflank's primary goal is to remain simple and
+To this end, Bareflank's primary goal is to remain simple, and
 minimalistic, providing only the scaffolding needed
 to construct more complete/complicated hypervisors including:
 - Bare Metal Hypervisors (also known as type 1, like [Xen](http://www.xenproject.org))
@@ -49,33 +51,28 @@ that the provided code works as expected. These tests are validated using
 [Travis CI](https://travis-ci.org/Bareflank/hypervisor) has been setup to
 test styling via
 [Astyle](http://astyle.sourceforge.net), and static / dynamic analysis
-via
-[Coverity Scan](https://scan.coverity.com/projects/bareflank-hypervisor),
-[Clang Tidy](http://clang.llvm.org/extra/clang-tidy/),
-[Codacy](https://www.codacy.com),
-and
-[Google's Sanitizers](https://github.com/google/sanitizers). In addition, we adhere
+via [Coverity](https://scan.coverity.com/projects/bareflank-hypervisor),
+[Clang Tidy](http://clang.llvm.org/extra/clang-tidy/), and [Google's
+Sanitizers](https://github.com/google/sanitizers). In addition, we adhere
 to the
 [CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/325),
 and the
 [C++ Core Guidelines](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md)
-including support for the
-[Guideline Support Library](https://github.com/Microsoft/GSL).
+including support for the [Guideline Support Library](https://github.com/Microsoft/GSL).
 
-Currently we have support for the following 64bit host operating systems on
-Intel _Sandy Bridge_ and above hardware:
-- Arch Linux
-- Debian 9.x+
-- Ubuntu 17.04+
+Currently we have support for the following 64bit host operating systems on Intel _SandyBridge_ and above hardware:
+- Ubuntu 16.10
+- Debian Stretch
+- Fedora 25, 24
+- OpenSUSE Leap 42.2
 - Windows 10
 - Windows 8.1
-- Windows 7
 
 In the future, we would also like to support:
 - macOS
 - BSD
-- UEFI (currently under development)
-- ARM64 (currently under development)
+- UEFI
+- ARM (64bit)
 
 ## Motivation
 
@@ -83,7 +80,7 @@ Most people think that hypervisors are meant to virtualize servers and
 provide a means to run Windows on a Mac, but there is a whole field
 of research where hypervisors are used without guest virtual
 machines. Since a hypervisor is capable of controlling the host OS
-running underneath it (so called "ring -1"), hypervisors have been
+running underneath it, (so called "ring -1"), hypervisors have been
 used for introspection, reverse engineering, anti-virus, containerization,
 diversity, and even architectural research like the
 [MoRE](https://github.com/ainfosec/MoRE) hypervisor. All of these use
@@ -132,83 +129,67 @@ Bareflank Hypervisor
 [![CppCon 2017](https://i.imgur.com/bLnrVon.png)](https://www.youtube.com/watch?v=KdJhQuycD78)
 [![CppCon 2016](https://i.imgur.com/MLoOLmM.png)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
 
-## Dependencies
+## Compilation Instructions
 
-Although Bareflank can be made to run on most systems, the following are the
-supported platforms and their dependencies:
+NOTE: Our master branch is our working, experimental branch and might be
+unstable. If you would like to use Bareflank, we recommend using a tagged
+release which has been more thoroughly tested. Of course if you happen to
+find a bug, please let us know
+[here](https://github.com/Bareflank/hypervisor/issues). These instructions
+might vary from release to release, so if something doesn't work, please
+refer to the instructions provided in the tagged version.
 
-#### Arch Linux:
-```
-sudo pacman -S linux-headers nasm cmake base-devel
-git clone https://aur.archlinux.org/package-query.git
-git clone https://aur.archlinux.org/yaourt.git
-pushd package-query
-makepkg --install --syncdeps --needed
-popd
-pushd yaourt
-makepkg --install --syncdeps --needed
-popd
-sudo yaourt -S downgrade
-sudo downgrade clang clang-tools-extra llvm-libs  # select 4.0.*
-sudo ln -s /usr/share/clang/run-clang-tidy.py /usr/bin/run-clang-tidy-4.0.py
-sudo ln -s /usr/bin/clang-tidy /usr/bin/clang-tidy-4.0
-```
-
-#### Ubuntu 17.04 (or Higher):
-```
-sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cmake
-```
-
-#### Windows (Cygwin):
-Visual Studio 2017 doesn't support building drivers, but the WDK 10 doesn't
-compile drivers without Visual Studio 2017 installed, so you must install
-both Visual Studio 2017 and 2015 to get a complete environment. Also note that
-these packages must be installed in the following order:
-- [Visual Studio 2015](https://go.microsoft.com/fwlink/?LinkId=615448&clcid=0x409)
-  - Check "Visual C++"
-- [Visual Studio 2017](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15#)
-  - Check "Desktop development with C++"
-  - Check "C++ CLI / Support"
-- [Visual Studio WDK 10](https://go.microsoft.com/fwlink/p/?LinkId=845980)
-- [Cygwin](https://www.cygwin.com/setup-x86_64.exe)
-
-To install Cygwin, simply install using all default settings, and then copy
-setup-x86\_64.exe to C:\\cygwin64\\bin. From there, open a Cygwin terminal and
-run the following:
+Before you can compile, the build environment must be present. If you are on
+a supported Windows platform, you must first install cygwin, and run a cygwin
+terminal with admin rights. You must also copy the setup-x86_64.exe to
+"c:\cygwin64\bin". If you are on a supported Linux platform, all you need
+is a terminal. Once your setup, you should be able to run the following:
 
 ```
-setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext,bash-completion
+cd ~/
+git clone https://github.com/bareflank/hypervisor.git
+cd ~/hypervisor
+git checkout -b v1.1.0
+
+./tools/scripts/setup_<platform>.sh
 ```
 
-After installing the the above packages you must enable test signing mode.
-This can be done from a command prompt with admin privileges:
+If you are on Windows, there is one additional step that must be taken
+to turn on test signing. This step can be skipped if you plan to sign
+the driver with your own signing key.
+
 ```
 bcdedit.exe /set testsigning ON
 <reboot>
 ```
-## Compilation Instructions
 
-To compile with default settings for your host environment, run the following commands:
-
-```
-git clone -b dev https://github.com/bareflank/hypervisor.git
-mkdir build; cd build
-cmake ../hypervisor
-make -j<# cores + 1>
-```
-
-For more detailed build instuctions and configurations, see the
-[detailed build instructions](scripts/docs/build_instructions.md).
-For instructions on building and creating Bareflank extensions, see the
-[extension build instructions](scripts/docs/extension_instructions.md)
-
-## Usage Instructions
-
-To use the hypervisor, run the following commands:
+If your Linux distro has SELinux turned on, and you wish to run the
+unit tests, you must first put SELinux in permissive mode. Once you are
+done testing, it is probably wise to turn SELinux back on.
 
 ```
-make driver_quick
-make quick
+sudo setenforce 0
+```
+
+If you are not on a supported platform, you are more than welcome to modify
+an existing setup_\<platform\>.sh script to suite your needs. Its likely
+the hypervisor will work assuming you can get it to compile. Once the system
+is set up, run the following commands:
+
+```
+make
+make test
+```
+
+To run the hypervisor, you need to first compile, and load one of the driver
+entry points. Bareflank uses the driver entry point to gain kernel level
+access to the system to load the hypervisor. On Windows and Linux, this
+is as simple as:
+
+```
+make driver_load
+make load
+make start
 ```
 
 to get status information, use the following:
@@ -216,43 +197,20 @@ to get status information, use the following:
 ```
 make status
 make dump
+ARGS="versions 1" make vmcall
 ```
 
 to reverse this:
 
 ```
+make stop
 make unload
 make driver_unload
 ```
-to clean up:
 
-```
-make distclean
-```
+For more detailed instructions please read the following (based on which OS you are using):
 
-## Serial Instructions
-
-On Windows, serial output might not work. If this is the case, disbale the
-default Serial device using the following:
-```
-reg add "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\Serial" /f /v "start" /t REG_DWORD /d "4"
-```
-
-## Cygwin SSH Instructions
-
-You might find it useful to setup SSH if you are using Cygwin. The instructions
-for setting up SSH on Cygwin are as follows:
-
-```
-setup-x86_64.exe -q -P getent,cygrunsrv,openssl,openssh
-
-ssh-host-config -y
-<password>
-<password>
-
-net start sshd
-netsh advfirewall firewall add rule name='SSH Port' dir=in action=allow protocol=TCP localport=22
-```
+[Driver Entry Documentation](https://github.com/Bareflank/hypervisor/tree/master/bfdrivers/src/arch)
 
 ## Extended APIs / Hyperkernel
 
@@ -286,11 +244,6 @@ https://github.com/Bareflank/hypervisor_example_msr_bitmap
 
 **Extended APIs EPT Hook:**<br>
 https://github.com/Bareflank/extended_apis_example_hook
-
-## License
-
-The Bareflank Hypervisor is licensed under the GNU Lesser General Public License
-v2.1 (LGPL).
 
 ## Related
 
