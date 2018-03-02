@@ -1,9 +1,6 @@
 //
 // Bareflank Unwind Library
-//
 // Copyright (C) 2015 Assured Information Security, Inc.
-// Author: Rian Quinn        <quinnr@ainfosec.com>
-// Author: Brendan Kerrigan  <kerriganb@ainfosec.com>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -140,8 +137,7 @@
 // Call Frame Information (section 6.4.1)
 // -----------------------------------------------------------------------------
 
-enum register_rules
-{
+enum register_rules {
     rule_undefined       = 0,
     rule_same_value      = 1,
     rule_offsetn         = 2,
