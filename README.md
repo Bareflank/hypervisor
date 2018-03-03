@@ -181,7 +181,7 @@ bcdedit.exe /set testsigning ON
 To compile with default settings for your host environment, run the following commands:
 
 ```
-git clone -b dev https://github.com/bareflank/hypervisor.git
+git clone https://github.com/bareflank/hypervisor.git
 mkdir build; cd build
 cmake ../hypervisor
 make -j<# cores + 1>
@@ -247,9 +247,9 @@ netsh advfirewall firewall add rule name='SSH Port' dir=in action=allow protocol
 ## Extended APIs / Hyperkernel
 
 *** **WARNING** *** <br>
-The master branch is our development branch and should be considered unstable. 
-It is possible these additional projects might not compile with master. If you 
-need a stable branch that works with these repos, please use a tagged release. 
+The master branch is our development branch and should be considered unstable.
+It is possible these additional projects might not compile with master. If you
+need a stable branch that works with these repos, please use a tagged release.
 
 Since Bareflank only provides the bare minimum implementation, we have created
 two other repositories that extend Bareflank to provide additional
@@ -268,9 +268,9 @@ https://github.com/Bareflank/hyperkernel
 ## Example Extensions
 
 *** **WARNING** *** <br>
-The master branch is our development branch and should be considered unstable. 
-It is possible these additional projects might not compile with master. If you 
-need a stable branch that works with these repos, please use a tagged release. 
+The master branch is our development branch and should be considered unstable.
+It is possible these additional projects might not compile with master. If you
+need a stable branch that works with these repos, please use a tagged release.
 
 To provide examples of how you might extend Bareflank to provide your own custom
 functionality, we have provided a couple of examples:

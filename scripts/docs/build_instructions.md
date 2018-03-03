@@ -26,7 +26,7 @@ cd ~/bareflank
 ...then clone the Bareflank hypervisor repository, and create a build directory:
 
 ```
-git clone -b dev https://github.com/bareflank/hypervisor.git
+git clone https://github.com/bareflank/hypervisor.git
 mkdir build
 cd build
 ```
@@ -80,12 +80,12 @@ cmake ../hypervisor -DBUILD_TYPE=Release -DBUILD_TARGET_ARCH=x86_64
 
 If you would like to specify many build configuration options at once, you
 should use a Bareflank build configuration file. By default, Bareflank
-creates a file named *bfconfig.cmake* in your build directory, and uses any
+creates a file named *config.cmake* in your build directory, and uses any
 options specified there (using CMake syntax) to configure your build.
-An example bfconfig.cmake file might look like the following:
+An example config.cmake file might look like the following:
 
 ```
-# ~/bareflank/build/bfconfig.cmake (comments start with '#')
+# ~/bareflank/build/config.cmake (comments start with '#')
 
 set(BUILD_TYPE Release)
 set(BUILD_TARGET_ARCH x86_64)
@@ -99,7 +99,7 @@ You can also specify a relative path to a Bareflank configuration file
 explicity:
 
 ```
-cmake ../hypervisor -DBFCONFIG=/path/to/bfconfig.cmake
+cmake ../hypervisor -DCONFIG=/path/to/config.cmake
 ```
 
 To view and configure *all* of the provided build configuration options at once,
