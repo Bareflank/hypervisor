@@ -224,8 +224,8 @@ static bool
 handle_rdmsr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 {
     auto val = emulate_rdmsr(
-        gsl::narrow_cast<::x64::msrs::field_type>(vmcs->save_state()->rcx)
-    );
+                   gsl::narrow_cast<::x64::msrs::field_type>(vmcs->save_state()->rcx)
+               );
 
     vmcs->save_state()->rax = ((val >> 0x00) & 0x00000000FFFFFFFF);
     vmcs->save_state()->rdx = ((val >> 0x20) & 0x00000000FFFFFFFF);
@@ -539,9 +539,11 @@ exit_handler::handle(
     bfvmm::intel_x64::exit_handler *exit_handler) noexcept
 {
     guard_exceptions([&]() {
-        const auto &handlers = exit_handler->m_handlers.at(
-            ::intel_x64::vmcs::exit_reason::basic_exit_reason::get()
-        );
+
+        const auto &handlers =
+            exit_handler->m_handlers.at(
+                ::intel_x64::vmcs::exit_reason::basic_exit_reason::get()
+            );
 
         for (const auto &d : handlers) {
             if (d(exit_handler->m_vmcs)) {
