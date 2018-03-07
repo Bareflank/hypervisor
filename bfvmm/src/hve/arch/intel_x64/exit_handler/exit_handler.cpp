@@ -190,6 +190,16 @@ emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val)
 static bool
 handle_cpuid(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 {
+    if (vmcs->save_state()->rax == 0xBF01) {
+        bfdebug_info(0, "host os is" bfcolor_green " now " bfcolor_end "in a vm");
+        return advance(vmcs);
+    }
+
+    if (vmcs->save_state()->rax == 0xBF00) {
+        bfdebug_info(0, "host os is" bfcolor_red " not " bfcolor_end "in a vm");
+        return advance(vmcs);
+    }
+
     auto ret =
         ::x64::cpuid::get(
             gsl::narrow_cast<::x64::cpuid::field_type>(vmcs->save_state()->rax),
