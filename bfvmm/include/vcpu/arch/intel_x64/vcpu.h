@@ -59,6 +59,10 @@ public:
         this->add_run_delegate(
             run_delegate_t::create<intel_x64::vcpu, &intel_x64::vcpu::run_delegate>(this)
         );
+
+        this->add_hlt_delegate(
+            hlt_delegate_t::create<intel_x64::vcpu, &intel_x64::vcpu::hlt_delegate>(this)
+        );
     }
 
     /// Destructor
@@ -85,6 +89,23 @@ public:
 
         m_vmcs->load();
         m_vmcs->launch();
+
+        ::x64::cpuid::get(0xBF01, 0, 0, 0);
+    }
+
+    /// Halt Delegate
+    ///
+    /// Provides the base implementation for stopping the vCPU.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param obj ignored
+    ///
+    void hlt_delegate(bfobject *obj)
+    {
+        bfignored(obj);
+        ::x64::cpuid::get(0xBF00, 0, 0, 0);
     }
 
     /// Get VMCS

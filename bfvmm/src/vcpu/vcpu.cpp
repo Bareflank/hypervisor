@@ -40,10 +40,6 @@ vcpu::run(bfobject *data)
     }
 
     m_is_running = true;
-
-    if (this->is_host_vm_vcpu()) {
-        bfdebug_info(0, "host os is" bfcolor_green " now " bfcolor_end "in a vm");
-    }
 }
 
 void
@@ -54,10 +50,6 @@ vcpu::hlt(bfobject *data)
     }
 
     m_is_running = false;
-
-    if (this->is_host_vm_vcpu()) {
-        bfdebug_info(0, "host os is" bfcolor_red " not " bfcolor_end "in a vm");
-    }
 }
 
 void

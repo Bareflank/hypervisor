@@ -136,6 +136,32 @@ TEST_CASE("exit_handler: handle_cpuid")
     CHECK(g_save_state.rip != 0);
 }
 
+TEST_CASE("exit_handler: handle_cpuid start")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
+
+    g_save_state.rax = 0xBF01;
+    g_save_state.rip = 0;
+
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
+    CHECK(g_save_state.rip != 0);
+}
+
+TEST_CASE("exit_handler: handle_cpuid stop")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
+
+    g_save_state.rax = 0xBF00;
+    g_save_state.rip = 0;
+
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
+    CHECK(g_save_state.rip != 0);
+}
+
 TEST_CASE("exit_handler: handle_invd")
 {
     MockRepository mocks;

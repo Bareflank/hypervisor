@@ -36,7 +36,34 @@
 /// @endcond
 
 #ifndef NEED_GSL_LITE
+
 #include <gsl/gsl>
+
+namespace gsl
+{
+
+/// Memset
+///
+/// Same as std::memset, but for spans
+///
+/// @param dst The span to memset
+/// @param val The value to set the span to
+/// @return Returns dst
+///
+template<class DstElementType, std::ptrdiff_t DstExtent, class T>
+auto memset(span<DstElementType, DstExtent> dst, T val)
+{
+    expects(dst.size() > 0);
+
+    return std::memset(
+        dst.data(),
+        static_cast<int>(val),
+        static_cast<std::size_t>(dst.size())
+    );
+}
+
+}
+
 #else
 
 #ifdef NEED_STD_LITE
