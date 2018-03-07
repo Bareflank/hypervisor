@@ -692,7 +692,7 @@ add_config(
 add_config(
     CONFIG_NAME BINUTILS_URL
     CONFIG_TYPE STRING
-    DEFAULT_VAL "http://ftp.gnu.org/gnu/binutils/binutils-2.28.tar.gz"
+    DEFAULT_VAL "https://ftp.gnu.org/gnu/binutils/binutils-2.28.tar.gz"
     DESCRIPTION "Binutils URL"
 )
 
