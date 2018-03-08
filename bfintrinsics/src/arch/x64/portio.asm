@@ -71,6 +71,7 @@ _insbrep:
     mov rcx, rdx
     mov rdx, rdi
     mov rdi, rsi
+    cld
     rep insb
     xor rax, rax
     ret
@@ -80,6 +81,7 @@ _inswrep:
     mov rcx, rdx
     mov rdx, rdi
     mov rdi, rsi
+    cld
     rep insw
     xor rax, rax
     ret
@@ -89,6 +91,7 @@ _insdrep:
     mov rcx, rdx
     mov rdx, rdi
     mov rdi, rsi
+    cld
     rep insd
     xor rax, rax
     ret
@@ -117,53 +120,56 @@ _outd:
     xor rax, rax
     ret
 
-global _outbs:function
-_outbs:
+global _outsb:function
+_outsb:
     mov rdx, rdi
     mov rdi, rsi
     outsb
     xor rax, rax
     ret
 
-global _outws:function
-_outws:
+global _outsw:function
+_outsw:
     mov rdx, rdi
     mov rdi, rsi
     outsw
     xor rax, rax
     ret
 
-global _outds:function
-_outds:
+global _outsd:function
+_outsd:
     mov rdx, rdi
     mov rdi, rsi
     outsd
     xor rax, rax
     ret
 
-global _outbsrep:function
-_outbsrep:
+global _outsbrep:function
+_outsbrep:
     mov rcx, rdx
     mov rdx, rdi
     mov rdi, rsi
+    cld
     outsb
     xor rax, rax
     ret
 
-global _outwsrep:function
-_outwsrep:
+global _outswrep:function
+_outswrep:
     mov rcx, rdx
     mov rdx, rdi
     mov rdi, rsi
+    cld
     outsw
     xor rax, rax
     ret
 
-global _outdsrep:function
-_outdsrep:
+global _outsdrep:function
+_outsdrep:
     mov rcx, rdx
     mov rdx, rdi
     mov rdi, rsi
+    cld
     outsd
     xor rax, rax
     ret
