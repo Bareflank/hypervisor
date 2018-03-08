@@ -19,11 +19,31 @@
 #ifndef VCPU_INTEL_X64_H
 #define VCPU_INTEL_X64_H
 
-#include "../../vcpu_factory.h"
+#include "../exit_handler/exit_handler.h"
+#include "../vmx/vmx.h"
+#include "../vmcs/vmcs.h"
+#include "../../../../vcpu/vcpu.h"
 
-#include "../../../hve/arch/intel_x64/vmx/vmx.h"
-#include "../../../hve/arch/intel_x64/vmcs/vmcs.h"
-#include "../../../hve/arch/intel_x64/exit_handler/exit_handler.h"
+// -----------------------------------------------------------------------------
+// Exports
+// -----------------------------------------------------------------------------
+
+#include <bfexports.h>
+
+#ifndef STATIC_HVE
+#ifdef SHARED_HVE
+#define EXPORT_HVE EXPORT_SYM
+#else
+#define EXPORT_HVE IMPORT_SYM
+#endif
+#else
+#define EXPORT_HVE
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
 
 namespace bfvmm
 {
@@ -35,8 +55,9 @@ namespace intel_x64
 /// This class provides the base implementation for an Intel based vCPU. For
 /// more information on how a vCPU works, please @see bfvmm::vcpu
 ///
-class vcpu : public bfvmm::vcpu
+class EXPORT_HVE vcpu : public bfvmm::vcpu
 {
+
 public:
 
     /// Default Constructor
@@ -115,7 +136,7 @@ public:
     ///
     /// @return Returns a pointer to the vCPU's VMCS
     ///
-    auto vmcs() const noexcept
+    bfvmm::intel_x64::vmcs *vmcs()
     { return m_vmcs.get(); }
 
     /// Get Exit Handler
@@ -125,7 +146,7 @@ public:
     ///
     /// @return Returns a pointer to the vCPU's exit handler
     ///
-    auto exit_handler() const noexcept
+    bfvmm::intel_x64::exit_handler *exit_handler()
     { return m_exit_handler.get(); }
 
 private:
@@ -137,5 +158,9 @@ private:
 
 }
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif
