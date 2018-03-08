@@ -128,6 +128,19 @@ if(NOT WIN32 AND ENABLE_BUILD_VMM AND ENABLE_BUILD_USERSPACE)
     )
 
     add_custom_target(
+        cycle
+        COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm load ${BFM_VMM_BIN_PATH}/${BFM_VMM}
+        COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm start
+        COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm stop
+        COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm unload
+        USES_TERMINAL
+    )
+    add_custom_target_info(
+        TARGET cycle
+        COMMENT "Load, start, stop, unload the VMM"
+    )
+
+    add_custom_target(
         load
         COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm load ${BFM_VMM_BIN_PATH}/${BFM_VMM}
         USES_TERMINAL
