@@ -75,10 +75,15 @@ TEST_CASE("bfelf_loader_add: too many files")
 
         int64_t ret = 0;
 
-        ret = bfelf_file_init(buf.get(), size, &gsl::at(efs, i));
+        ret = bfelf_file_init(buf.get(), size, &gsl::at(efs, static_cast<std::ptrdiff_t>(i)));
         REQUIRE(ret == BFELF_SUCCESS);
 
-        ret = bfelf_loader_add(&loader, &gsl::at(efs, i), static_cast<char *>(dummy), static_cast<char *>(dummy));
+        ret = bfelf_loader_add(
+            &loader,
+            &gsl::at(efs, static_cast<std::ptrdiff_t>(i)),
+            static_cast<char *>(dummy),
+            static_cast<char *>(dummy)
+        );
 
         if (i < MAX_NUM_MODULES) {
             CHECK(ret == BF_SUCCESS);

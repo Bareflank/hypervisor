@@ -29,26 +29,8 @@ section .text
 ; Note: If the constants.h file changes, or the thread_context structure
 ;       changes, this code might also have to change as well.
 
-global thread_context_cpuid:function
-thread_context_cpuid:
-
-    mov rdx, 0x8000
-    sub rdx, 0x1
-
-    mov rax, rsp
-    mov rcx, rdx
-    not rcx
-    and rax, rcx
-
-    add rax, rdx
-
-    sub rax, 32
-
-    mov rax, [rax]
-    ret
-
-global thread_context_tlsptr:function
-thread_context_tlsptr:
+global _thread_context_tlsptr:function
+_thread_context_tlsptr:
 
     mov rdx, 0x8000
     sub rdx, 0x1
@@ -61,6 +43,24 @@ thread_context_tlsptr:
     add rax, rdx
 
     sub rax, 24
+
+    mov rax, [rax]
+    ret
+
+global _thread_context_cpuid:function
+_thread_context_cpuid:
+
+    mov rdx, 0x8000
+    sub rdx, 0x1
+
+    mov rax, rsp
+    mov rcx, rdx
+    not rcx
+    and rax, rcx
+
+    add rax, rdx
+
+    sub rax, 32
 
     mov rax, [rax]
     ret

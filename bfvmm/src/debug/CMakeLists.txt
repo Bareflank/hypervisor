@@ -22,9 +22,7 @@
 
 list(APPEND SOURCES
     debug_ring/debug_ring.cpp
-    serial/serial_port_ns16550a.cpp
-    serial/serial_port_pl011.cpp
-    serial/serial_port_base.cpp
+    serial/serial_ns16550a.cpp
 )
 
 if(NOT ENABLE_MOCKING)

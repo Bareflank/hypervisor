@@ -16,16 +16,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef SERIAL_PORT_NS16550A_H
-#define SERIAL_PORT_NS16550A_H
-
-#include <string>
-#include <memory>
-
-#include <bfconstants.h>
+#ifndef SERIAL_NS16550A_H
+#define SERIAL_NS16550A_H
 
 #include <intrinsics.h>
-#include "serial_port_base.h"
+#include <bfconstants.h>
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -49,66 +44,15 @@
 #endif
 
 // -----------------------------------------------------------------------------
-// Constants
+// Definition
 // -----------------------------------------------------------------------------
-
-/// @cond
 
 namespace bfvmm
 {
 
-namespace serial_ns16550a
-{
-
-constexpr const serial_port_base::value_type_8 dlab = 1U << 7;
-
-constexpr const serial_port_base::port_type baud_rate_lo_reg = 0U;
-constexpr const serial_port_base::port_type baud_rate_hi_reg = 1U;
-constexpr const serial_port_base::port_type interrupt_en_reg = 1U;
-constexpr const serial_port_base::port_type fifo_control_reg = 2U;
-constexpr const serial_port_base::port_type line_control_reg = 3U;
-constexpr const serial_port_base::port_type line_status_reg = 5U;
-
-constexpr const serial_port_base::value_type_8 fifo_control_enable_fifos = 1U << 0;
-constexpr const serial_port_base::value_type_8 fifo_control_clear_recieve_fifo = 1U << 1;
-constexpr const serial_port_base::value_type_8 fifo_control_clear_transmit_fifo = 1U << 2;
-constexpr const serial_port_base::value_type_8 fifo_control_dma_mode_select = 1U << 3;
-
-constexpr const serial_port_base::value_type_8 line_status_data_ready = 1U << 0;
-constexpr const serial_port_base::value_type_8 line_status_overrun_error = 1U << 1;
-constexpr const serial_port_base::value_type_8 line_status_parity_error = 1U << 2;
-constexpr const serial_port_base::value_type_8 line_status_framing_error = 1U << 3;
-constexpr const serial_port_base::value_type_8 line_status_break_interrupt = 1U << 4;
-constexpr const serial_port_base::value_type_8 line_status_empty_transmitter = 1U << 5;
-constexpr const serial_port_base::value_type_8 line_status_empty_data = 1U << 6;
-constexpr const serial_port_base::value_type_8 line_status_recieved_fifo_error = 1U << 7;
-
-constexpr const serial_port_base::value_type_8 line_control_data_mask = 0x03;
-constexpr const serial_port_base::value_type_8 line_control_stop_mask = 0x04;
-constexpr const serial_port_base::value_type_8 line_control_parity_mask = 0x38;
-
-}
-
-/// @endcond
-
-// -----------------------------------------------------------------------------
-// Definitions
-// -----------------------------------------------------------------------------
-
 /// Serial Port (NatSemi 16550A and compatible)
 ///
-/// This class implements the serial device for Intel specific archiectures.
-/// All of the serial devices start off with the same default settings (minus
-/// the port). There are no checks on the port # (in case a custom port number
-/// is needed), and there are no checks to ensure that only one port is used
-/// at a time. If custom port settings are required, once the serial port is
-/// created, the custom settings can be setup by using the set_xxx functions.
-/// The user should ensure that the settings worked by checking the result.
-///
-/// Also note, that by default, a FIFO is used / required, and interrupts are
-/// disabled.
-///
-class EXPORT_DEBUG serial_port_ns16550a : public serial_port_base
+class EXPORT_DEBUG serial_ns16550a
 {
 public:
 
@@ -159,28 +103,19 @@ public:
 
 public:
 
-    /// Default constructor - uses the default port
+    /// Default constructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    serial_port_ns16550a() noexcept;
-
-    /// Specific constructor - accepts a target port address
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param port the serial port to connect to
-    ///
-    serial_port_ns16550a(port_type port) noexcept;
+    serial_ns16550a() noexcept;
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    ~serial_port_ns16550a() = default;
+    ~serial_ns16550a() = default;
 
     /// Get Instance
     ///
@@ -189,9 +124,9 @@ public:
     /// @expects none
     /// @ensures ret != nullptr
     ///
-    /// @return a singleton instance of serial_port_ns16550a
+    /// @return a singleton instance of serial_ns16550a
     ///
-    static serial_port_ns16550a *instance() noexcept;
+    static serial_ns16550a *instance() noexcept;
 
     /// Set Baud Rate
     ///
@@ -283,30 +218,6 @@ public:
     ///
     parity_bits_t parity_bits() const noexcept;
 
-    /// Port
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @return the serial device's port
-    ///
-    virtual port_type port() const noexcept override
-    { return m_port; }
-
-    /// Set Port
-    ///
-    /// Change the peripheral port/base address at runtime.
-    ///
-    /// @param port serial peripheral port or base address
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    virtual void set_port(port_type port) noexcept override
-    {
-        m_port = port;
-    }
-
     /// Write Character
     ///
     /// Writes a character to the serial device.
@@ -316,30 +227,22 @@ public:
     ///
     /// @param c character to write
     ///
-    virtual void write(char c) noexcept override;
-
-    using serial_port_base::write;
+    void write(char c) const noexcept;
 
 private:
 
     void enable_dlab() const noexcept;
     void disable_dlab() const noexcept;
 
-    bool get_line_status_empty_transmitter() const noexcept;
-
-    void init(port_type port) noexcept;
-
-    port_type m_port;
-
 public:
 
     /// @cond
 
-    serial_port_ns16550a(serial_port_ns16550a &&) noexcept = default;
-    serial_port_ns16550a &operator=(serial_port_ns16550a &&) noexcept = default;
+    serial_ns16550a(serial_ns16550a &&) noexcept = default;
+    serial_ns16550a &operator=(serial_ns16550a &&) noexcept = default;
 
-    serial_port_ns16550a(const serial_port_ns16550a &) = delete;
-    serial_port_ns16550a &operator=(const serial_port_ns16550a &) = delete;
+    serial_ns16550a(const serial_ns16550a &) = delete;
+    serial_ns16550a &operator=(const serial_ns16550a &) = delete;
 
     /// @endcond
 };

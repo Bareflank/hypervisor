@@ -33,10 +33,10 @@ void
 init_wb(uint64_t num, char val = 'A')
 {
     for (auto i = 0U; i < num; i++) {
-        gsl::at(wb, i) = val;
+        gsl::at(wb, static_cast<std::ptrdiff_t>(i)) = val;
     }
 
-    gsl::at(wb, num) = 0;
+    gsl::at(wb, static_cast<std::ptrdiff_t>(num)) = 0;
 }
 
 TEST_CASE("get_drr: get_drr_invalid_drr")

@@ -34,6 +34,7 @@ if(NOT WIN32)
         -fpic
         -fstack-protector-strong
         -fvisibility=hidden
+        -Wno-deprecated-declarations
     )
 
     list(APPEND BFFLAGS_USERSPACE_C

@@ -25,11 +25,20 @@ endif()
 set(CMAKE_SYSTEM_NAME Linux)
 
 if(NOT WIN32)
-    find_program(CLANG_BIN_40 clang-4.0)
-    find_program(CLANG_BIN_39 clang-3.9)
-    find_program(CLANG_BIN_38 clang-3.8)
+    if(NOT DEFINED ENV{CLANG_BIN})
+        find_program(CLANG_BIN_50 clang-5.0)
+        find_program(CLANG_BIN_40 clang-4.0)
+        find_program(CLANG_BIN_39 clang-3.9)
+        find_program(CLANG_BIN_38 clang-3.8)
+        find_program(CLANG_BIN clang)
+    else()
+        set(CLANG_BIN $ENV{CLANG_BIN})
+    endif()
 
-    if(CLANG_BIN_40)
+    if(CLANG_BIN_50)
+        set(CMAKE_C_COMPILER ${CLANG_BIN_50})
+        set(CMAKE_CXX_COMPILER ${CLANG_BIN_50})
+    elseif(CLANG_BIN_40)
         set(CMAKE_C_COMPILER ${CLANG_BIN_40})
         set(CMAKE_CXX_COMPILER ${CLANG_BIN_40})
     elseif(CLANG_BIN_39)
@@ -38,35 +47,56 @@ if(NOT WIN32)
     elseif(CLANG_BIN_38)
         set(CMAKE_C_COMPILER ${CLANG_BIN_38})
         set(CMAKE_CXX_COMPILER ${CLANG_BIN_38})
+    elseif(CLANG_BIN)
+        set(CMAKE_C_COMPILER ${CLANG_BIN})
+        set(CMAKE_CXX_COMPILER ${CLANG_BIN})
     else()
-        message(FATAL_ERROR "Unable to find clang 3.8, 3.9 or 4.0")
+        message(FATAL_ERROR "Unable to find clang")
     endif()
 endif()
 
-set(LD_FLAGS
-    "--sysroot=${CMAKE_INSTALL_PREFIX} -L${CMAKE_INSTALL_PREFIX}/lib -z max-page-size=4096 -z common-page-size=4096 -z relro -z now -nostdlib"
+string(CONCAT LD_FLAGS
+    "--sysroot=${CMAKE_INSTALL_PREFIX} "
+    "-L${CMAKE_INSTALL_PREFIX}/lib "
+    "-z max-page-size=4096 "
+    "-z common-page-size=4096 "
+    "-z relro "
+    "-z now "
+    "-nostdlib "
 )
 
-set(CMAKE_C_LINK_EXECUTABLE
-	"${CMAKE_INSTALL_PREFIX}/bin/ld ${LD_FLAGS} -pie <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
-)
+if(EXISTS "${CMAKE_INSTALL_PREFIX}/lib/libbfdso_static.a")
+    string(CONCAT LD_FLAGS
+        "--whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfdso_static.a --no-whole-archive "
+    )
+endif()
 
-set(CMAKE_CXX_LINK_EXECUTABLE
-	"${CMAKE_INSTALL_PREFIX}/bin/ld ${LD_FLAGS} -pie <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
-)
+if(DEFINED ENV{LD_BIN})
+    set(LD_BIN $ENV{LD_BIN})
+else()
+    set(LD_BIN ${CMAKE_INSTALL_PREFIX}/bin/ld)
+endif()
 
 set(CMAKE_C_ARCHIVE_CREATE
-    "${CMAKE_INSTALL_PREFIX}/bin/ar qc <TARGET> <OBJECTS>"
+    "ar qc <TARGET> <OBJECTS>"
 )
 
 set(CMAKE_CXX_ARCHIVE_CREATE
-    "${CMAKE_INSTALL_PREFIX}/bin/ar qc <TARGET> <OBJECTS>"
+    "ar qc <TARGET> <OBJECTS>"
+)
+
+set(CMAKE_C_LINK_EXECUTABLE
+    "${LD_BIN} ${LD_FLAGS} -pie <OBJECTS> -o <TARGET> <LINK_LIBRARIES> "
+)
+
+set(CMAKE_CXX_LINK_EXECUTABLE
+    "${LD_BIN} ${LD_FLAGS} -pie <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
 )
 
 set(CMAKE_C_CREATE_SHARED_LIBRARY
-    "${CMAKE_INSTALL_PREFIX}/bin/ld ${LD_FLAGS} -shared -o <TARGET> <OBJECTS>"
+    "${LD_BIN} ${LD_FLAGS} -shared <OBJECTS> -o <TARGET>"
 )
 
 set(CMAKE_CXX_CREATE_SHARED_LIBRARY
-    "${CMAKE_INSTALL_PREFIX}/bin/ld ${LD_FLAGS} -shared -o <TARGET> <OBJECTS>"
+    "${LD_BIN} ${LD_FLAGS} -shared <OBJECTS> -o <TARGET>"
 )

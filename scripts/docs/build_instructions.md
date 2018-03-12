@@ -38,7 +38,7 @@ Your Bareflank workspace should look like this:
    | - hypervisor
 ```
 
-Bareflank uses CMake (version 3.6+) to build VMM components, dependencies, and
+Bareflank uses CMake (VERSION 3.7+) to build VMM components, dependencies, and
 Bareflank extension projects. In general, CMake requires that you create a
 separate build directory for each build you would like to perform.
 Build directories can be located anywhere, but we suggest keeping them

@@ -134,11 +134,11 @@ debug_ring::write(const std::string &str) noexcept
                 space++;
                 m_drr->spos++;
 
-                if (gsl::at(m_drr->buf, cpos) == '\0' && space >= len) {
+                if (gsl::at(m_drr->buf, static_cast<std::ptrdiff_t>(cpos)) == '\0' && space >= len) {
                     break;
                 }
 
-                gsl::at(m_drr->buf, cpos++) = '\0';
+                gsl::at(m_drr->buf, static_cast<std::ptrdiff_t>(cpos++)) = '\0';
             }
         }
 
@@ -147,7 +147,7 @@ debug_ring::write(const std::string &str) noexcept
                 epos = 0;
             }
 
-            gsl::at(m_drr->buf, epos) = str[i];
+            gsl::at(m_drr->buf, static_cast<std::ptrdiff_t>(epos)) = str[i];
 
             epos++;
             m_drr->epos++;

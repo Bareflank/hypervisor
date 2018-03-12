@@ -202,6 +202,25 @@ if(NOT WIN32 AND ENABLE_BUILD_VMM AND ENABLE_BUILD_USERSPACE)
 endif()
 
 # ------------------------------------------------------------------------------
+# Unix
+# ------------------------------------------------------------------------------
+
+if(UNIX AND ENABLE_BUILD_VMM AND ENABLE_BUILD_USERSPACE)
+    add_custom_target(
+        oppss
+        COMMAND sync
+        COMMAND ${SOURCE_UTIL_DIR}/driver_load.sh ${SOURCE_BFDRIVER_DIR}
+        COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm load ${BFM_VMM_BIN_PATH}/${BFM_VMM}
+        COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm start
+        USES_TERMINAL
+    )
+    add_custom_target_info(
+        TARGET oppss
+        COMMENT "driver_load, load, start"
+    )
+endif()
+
+# ------------------------------------------------------------------------------
 # Build / Clean
 # ------------------------------------------------------------------------------
 
@@ -215,6 +234,7 @@ add_custom_target(
 add_custom_target(
     clean-all
     COMMAND ${CMAKE_COMMAND} --build . --target clean
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${DEPENDS_DIR}
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${PREFIXES_DIR}
     USES_TERMINAL
 )

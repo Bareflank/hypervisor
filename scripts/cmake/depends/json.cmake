@@ -26,14 +26,20 @@ if(ENABLE_BUILD_USERSPACE OR ENABLE_BUILD_TEST)
     )
 endif()
 
+list(APPEND JSON_CONFIGURE_FLAGS
+    -DJSON_BuildTests=OFF
+)
+
 if(ENABLE_BUILD_USERSPACE)
     add_dependency(
         json userspace
+        CMAKE_ARGS  ${JSON_CONFIGURE_FLAGS}
     )
 endif()
 
 if(ENABLE_BUILD_TEST)
     add_dependency(
         json test
+        CMAKE_ARGS  ${JSON_CONFIGURE_FLAGS}
     )
 endif()

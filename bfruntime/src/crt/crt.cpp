@@ -68,10 +68,6 @@ extern eh_frame_t __g_eh_frame_list[MAX_NUM_MODULES];
 extern int __g_dwarf_sections_num;
 extern dwarf_sections_t __g_dwarf_sections[MAX_NUM_MODULES];
 
-#ifndef ENABLE_BUILD_TEST
-EXPORT_SYM void *__dso_handle = nullptr;
-#endif
-
 extern "C" void
 __bareflank_init(const section_info_t *info)
 {
@@ -176,6 +172,4 @@ _start_c(const crt_info_t *info) noexcept
 
 extern "C" EXPORT_SYM struct platform_info_t *
 get_platform_info(void)
-{
-    return &g_platform_info;
-}
+{ return &g_platform_info; }

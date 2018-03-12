@@ -57,7 +57,7 @@
 # any of the Bareflank repos, this option will be needed as it enables
 # formatting, static / dynamic analysis, etc...
 #
-set(ENABLE_DEVELOPER_MODE OFF)
+set(ENABLE_DEVELOPER_MODE ON)
 
 # Tests only
 #
@@ -87,7 +87,14 @@ set(ENABLE_HYPERVISOR_EXAMPLE_MSR_BITMAP OFF)
 # If the override VMM is set, this VMM will be used instead of the default VMM
 # based on the current configuration.
 #
-# set(OVERRIDE_VMM XXX)
+# set(OVERRIDE_VMM eapis_integration_intel_x64_io_instruction_trap_in_out)
+
+# Override Compiler Warnings
+#
+# Tells the configuration that you want -Werror enabled regardless of the
+# setting of developer mode
+#
+# set(OVERRIDE_COMPILER_WARNINGS ON)
 
 # ------------------------------------------------------------------------------
 # Config Variables (No Need To Modify)
@@ -153,12 +160,10 @@ else()
 endif()
 
 if(ENABLE_DEVELOPER_MODE)
-    set(ENABLE_ASAN ON)
     set(ENABLE_TIDY ON)
     set(ENABLE_FORMAT ON)
     set(ENABLE_CODECOV ON)
 else()
-    set(ENABLE_ASAN OFF)
     set(ENABLE_TIDY OFF)
     set(ENABLE_FORMAT OFF)
     set(ENABLE_CODECOV OFF)
@@ -169,10 +174,10 @@ endif()
 # Enables compiler warnings. This option should always be on when developing.
 # Not that Release builds add "-Werror".
 #
-if(ENABLE_DEVELOPER_MODE)
-    set(ENABLE_COMPILER_WARNINGS ON)
-else()
+if(ENABLE_DEVELOPER_MODE AND NOT OVERRIDE_COMPILER_WARNINGS)
     set(ENABLE_COMPILER_WARNINGS OFF)
+else()
+    set(ENABLE_COMPILER_WARNINGS ON)
 endif()
 
 # ------------------------------------------------------------------------------

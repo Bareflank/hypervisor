@@ -437,6 +437,23 @@ add_config(
 )
 
 # ------------------------------------------------------------------------------
+# Binutils
+# ------------------------------------------------------------------------------
+
+if(NOT DEFINED ENV{LD_BIN})
+    set(ENABLE_BUILD_BINUTILS_DEFAULT ON)
+else()
+    set(ENABLE_BUILD_BINUTILS_DEFAULT OFF)
+endif()
+
+add_config(
+    CONFIG_NAME ENABLE_BUILD_BINUTILS
+    CONFIG_TYPE BOOL
+    DEFAULT_VAL ${ENABLE_BUILD_BINUTILS_DEFAULT}
+    DESCRIPTION "Build VMM components"
+)
+
+# ------------------------------------------------------------------------------
 # Developer Features
 # ------------------------------------------------------------------------------
 
@@ -553,29 +570,11 @@ add_config(
 # Toolchains
 # ------------------------------------------------------------------------------
 
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL "CYGWIN")
-    set(DEFAULT_VMM_TEST_TOOLCHAIN_PATH
-        "${SOURCE_TOOLCHAIN_DIR}/clang_${BUILD_TARGET_ARCH}_vmm.cmake"
-    )
-else()
-    set(DEFAULT_VMM_TEST_TOOLCHAIN_PATH
-        "${SOURCE_TOOLCHAIN_DIR}/clang_${BUILD_TARGET_ARCH}_vmm_test.cmake"
-    )
-endif()
-
 add_config(
     CONFIG_NAME VMM_TOOLCHAIN_PATH
     CONFIG_TYPE FILEPATH
     DEFAULT_VAL ${SOURCE_TOOLCHAIN_DIR}/clang_${BUILD_TARGET_ARCH}_vmm.cmake
     DESCRIPTION "Path to the default cmake toolchain file for building vmm components"
-    ADVANCED
-)
-
-add_config(
-    CONFIG_NAME VMM_TEST_TOOLCHAIN_PATH
-    CONFIG_TYPE FILEPATH
-    DEFAULT_VAL ${DEFAULT_VMM_TEST_TOOLCHAIN_PATH}
-    DESCRIPTION "Path to the default cmake toolchain file for building vmm components for testing"
     ADVANCED
 )
 
@@ -647,144 +646,104 @@ add_config(
 # Links
 # ------------------------------------------------------------------------------
 
-add_config(
-    CONFIG_NAME GSL_URL
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "https://github.com/Bareflank/gsl/archive/v1.2.zip"
-    DESCRIPTION "GSL URL"
+set(GSL_URL "https://github.com/Bareflank/gsl/archive/v2.0.zip"
+    CACHE INTERNAL FORCE
+    "GSL URL"
 )
 
-add_config(
-    CONFIG_NAME GSL_URL_MD5
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "629de6bd0ee501223919cf395fb6ffed"
-    DESCRIPTION "GSL URL MD5 hash"
+set(GSL_URL_MD5 "0cc95192658d10e43162ef7b2892e37a"
+    CACHE INTERNAL FORCE
+    "GSL URL MD5 hash"
 )
 
-add_config(
-    CONFIG_NAME JSON_URL
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "https://github.com/Bareflank/json/archive/v1.2.zip"
-    DESCRIPTION "JSON URL"
+set(JSON_URL "https://github.com/nlohmann/json/archive/v3.1.2.zip"
+    CACHE INTERNAL FORCE
+    "JSON URL"
 )
 
-add_config(
-    CONFIG_NAME JSON_URL_MD5
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "7d61cb7accecdbc0fa32d89a52a32153"
-    DESCRIPTION "JSON URL MD5 hash"
+set(JSON_URL_MD5 "a5690d84678f50860550633363a44a89"
+    CACHE INTERNAL FORCE
+    "JSON URL MD5 hash"
 )
 
-add_config(
-    CONFIG_NAME ASTYLE_URL
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "https://github.com/Bareflank/astyle/archive/v1.2.zip"
-    DESCRIPTION "Astyle URL"
+set(ASTYLE_URL "https://github.com/Bareflank/astyle/archive/v2.0.zip"
+    CACHE INTERNAL FORCE
+    "Astyle URL"
 )
 
-add_config(
-    CONFIG_NAME ASTYLE_URL_MD5
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "339d6ce8d4f34a3737e1c44b95c3b4dd"
-    DESCRIPTION "Astyle URL MD5 hash"
+set(ASTYLE_URL_MD5 "4315484ed9b4fbe4dfd534c5db5499a0"
+    CACHE INTERNAL FORCE
+    "Astyle URL MD5 hash"
 )
 
-add_config(
-    CONFIG_NAME BINUTILS_URL
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "https://ftp.gnu.org/gnu/binutils/binutils-2.28.tar.gz"
-    DESCRIPTION "Binutils URL"
+set(BINUTILS_URL "http://ftp.gnu.org/gnu/binutils/binutils-2.30.tar.gz"
+    CACHE INTERNAL FORCE
+    "Binutils URL"
 )
 
-add_config(
-    CONFIG_NAME BINUTILS_URL_MD5
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "d5d270fd0b698ed59ca5ade8e1b5059c"
-    DESCRIPTION "Binutils URL MD5 hash"
+set(BINUTILS_URL_MD5 "a332503c7f72ad02f4ef624fac34c4af"
+    CACHE INTERNAL FORCE
+    "Binutils URL MD5 hash"
 )
 
-add_config(
-    CONFIG_NAME NEWLIB_URL
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "https://github.com/Bareflank/newlib/archive/v1.2.zip"
-    DESCRIPTION "Newlib URL"
+set(NEWLIB_URL "https://github.com/Bareflank/newlib/archive/v2.0.zip"
+    CACHE INTERNAL FORCE
+    "Newlib URL"
 )
 
-add_config(
-    CONFIG_NAME NEWLIB_URL_MD5
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "6a634f488170ab2204db899407cc2d6d"
-    DESCRIPTION "Newlib URL MD5 hash"
+set(NEWLIB_URL_MD5 "91588a1a925c953453b2f04acecbcb88"
+    CACHE INTERNAL FORCE
+    "Newlib URL MD5 hash"
 )
 
-add_config(
-    CONFIG_NAME LLVM_URL
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "https://github.com/Bareflank/llvm/archive/v1.2.zip"
-    DESCRIPTION "LLVM URL"
+set(LLVM_URL "https://github.com/Bareflank/llvm/archive/v2.0.zip"
+    CACHE INTERNAL FORCE
+    "LLVM URL"
 )
 
-add_config(
-    CONFIG_NAME LLVM_URL_MD5
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "561bfc6a4cefbf287a2e9ca6815c7ee0"
-    DESCRIPTION "LLVM URL MD5 hash"
+set(LLVM_URL_MD5 "7a088762b40665815e47e49dc97ac59f"
+    CACHE INTERNAL FORCE
+    "LLVM URL MD5 hash"
 )
 
-add_config(
-    CONFIG_NAME LIBCXX_URL
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "https://github.com/Bareflank/libcxx/archive/v1.2.zip"
-    DESCRIPTION "Libc++ URL"
+set(LIBCXX_URL "https://github.com/Bareflank/libcxx/archive/v2.0.zip"
+    CACHE INTERNAL FORCE
+    "Libc++ URL"
 )
 
-add_config(
-    CONFIG_NAME LIBCXX_URL_MD5
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "562ea68e9f483ab7ca62b21fdbf0ee89"
-    DESCRIPTION "Libc++ URL MD5 hash"
+set(LIBCXX_URL_MD5 "564e6377485bf8527cab085075a626e1"
+    CACHE INTERNAL FORCE
+    "Libc++ URL MD5 hash"
 )
 
-add_config(
-    CONFIG_NAME LIBCXXABI_URL
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "https://github.com/Bareflank/libcxxabi/archive/v1.2.zip"
-    DESCRIPTION "Libc++abi URL"
+set(LIBCXXABI_URL "https://github.com/Bareflank/libcxxabi/archive/v2.0.zip"
+    CACHE INTERNAL FORCE
+    "Libc++abi URL"
 )
 
-add_config(
-    CONFIG_NAME LIBCXXABI_URL_MD5
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "a118c53b17110f23dcb567f2b8c73d9a"
-    DESCRIPTION "Libc++abi URL MD5 hash"
+set(LIBCXXABI_URL_MD5 "65dcfe9e14b0076958477953754f9141"
+    CACHE INTERNAL FORCE
+    "Libc++abi URL MD5 hash"
 )
 
-add_config(
-    CONFIG_NAME CATCH_URL
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "https://github.com/Bareflank/catch/archive/v1.2.zip"
-    DESCRIPTION "Catch URL"
+set(CATCH_URL "https://github.com/catchorg/Catch2/archive/v2.2.1.zip"
+    CACHE INTERNAL FORCE
+    "Catch URL"
 )
 
-add_config(
-    CONFIG_NAME CATCH_URL_MD5
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "ed2f6eec62fc8e825e622deedf50f6b4"
-    DESCRIPTION "Catch URL MD5 hash"
+set(CATCH_URL_MD5 "d1324482a68cdce904a75ae83c74ec73"
+    CACHE INTERNAL FORCE
+    "Catch URL MD5 hash"
 )
 
-add_config(
-    CONFIG_NAME HIPPOMOCKS_URL
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "https://github.com/Bareflank/hippomocks/archive/v1.2.zip"
-    DESCRIPTION "Hippomocks URL"
+set(HIPPOMOCKS_URL "https://github.com/Bareflank/hippomocks/archive/v1.2.zip"
+    CACHE INTERNAL FORCE
+    "Hippomocks URL"
 )
 
-add_config(
-    CONFIG_NAME HIPPOMOCKS_URL_MD5
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "6a0928dfee03fbf4c12c36219c696bae"
-    DESCRIPTION "Hippomocks URL MD5 hash"
+set(HIPPOMOCKS_URL_MD5 "6a0928dfee03fbf4c12c36219c696bae"
+    CACHE INTERNAL FORCE
+    "Hippomocks URL MD5 hash"
 )
 
 # ------------------------------------------------------------------------------

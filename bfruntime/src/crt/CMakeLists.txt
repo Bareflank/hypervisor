@@ -16,6 +16,15 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+cmake_minimum_required(VERSION 3.6)
+project(bfcrt C CXX)
+
+include(${SOURCE_CMAKE_DIR}/project.cmake)
+init_project(
+    TIDY_EXCLUSIONS -cert-err34-c,-misc-misplaced-widening-cast
+    CXX_FLAGS -Wno-main
+)
+
 list(APPEND SOURCES
     crt.cpp
 )
@@ -35,6 +44,5 @@ endif()
 add_static_library(
     bfcrt
     SOURCES ${SOURCES}
-    DEFINES STATIC_CRT
     ALWAYS
 )

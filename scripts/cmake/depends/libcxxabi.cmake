@@ -46,5 +46,6 @@ if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
         CMAKE_ARGS  ${LIBCXXABI_CONFIGURE_FLAGS}
         DEPENDS     llvm_${VMM_PREFIX}
         DEPENDS     newlib_${VMM_PREFIX}
+        DEPENDS     bfdso_${VMM_PREFIX}
     )
 endif()

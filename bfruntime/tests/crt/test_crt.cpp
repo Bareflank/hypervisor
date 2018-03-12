@@ -56,6 +56,12 @@ TEST_CASE("bfmain and mock_main")
 {
     CHECK(bfmain(0, 0, 0, 0) == -1);
     CHECK(mock_main(0, nullptr) == -1);
+
+    try {
+        mock_abort();
+    }
+    catch(...)
+    { }
 }
 
 TEST_CASE("__bareflank_init: init")

@@ -24,34 +24,11 @@
 #include <pthread.h>
 
 #include <bfgsl.h>
+#include <bfdebug.h>
 #include <bfexports.h>
 #include <bfthreadcontext.h>
 
 #define MAX_THREAD_SPECIFIC_DATA 512
-
-#define UNHANDLED() \
-    { \
-        const char *str_text = "\033[1;33mWARNING\033[0m: unsupported pthread function called = "; \
-        const char *str_func = __PRETTY_FUNCTION__; \
-        const char *str_endl = "\n"; \
-        write(0, str_text, strlen(str_text)); \
-        write(0, str_func, strlen(str_func)); \
-        write(0, str_endl, strlen(str_endl)); \
-    }
-
-#define ARG_UNSUPPORTED(a) \
-    { \
-        const char *str_text = "\033[1;33mWARNING\033[0m: " a " not supported for function called = "; \
-        const char *str_func = __PRETTY_FUNCTION__; \
-        const char *str_endl = "\n"; \
-        write(0, str_text, strlen(str_text)); \
-        write(0, str_func, strlen(str_func)); \
-        write(0, str_endl, strlen(str_endl)); \
-    }
-
-#ifndef LOOKUP_TLS_DATA
-void *threadSpecificData[MAX_THREAD_SPECIFIC_DATA] = {0};
-#endif
 
 extern "C" EXPORT_SYM int
 pthread_cond_broadcast(pthread_cond_t *cond)
@@ -60,8 +37,7 @@ pthread_cond_broadcast(pthread_cond_t *cond)
         return -EINVAL;
     }
 
-    __sync_lock_release(cond);
-
+    *cond = PTHREAD_COND_INITIALIZER;
     return 0;
 }
 
@@ -83,7 +59,7 @@ pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
         return -EINVAL;
     }
 
-    *cond = 0;
+    *cond = PTHREAD_COND_INITIALIZER;
     return 0;
 }
 
@@ -108,11 +84,10 @@ pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
         return -EINVAL;
     }
 
-    *cond = 1;
-
     pthread_mutex_unlock(mutex);
-    while (__sync_lock_test_and_set(cond, 1)) { while (*cond) {} };
-    pthread_mutex_lock(mutex);
+    while (!__sync_bool_compare_and_swap(cond, PTHREAD_COND_INITIALIZER, 0)) {
+        pthread_mutex_lock(mutex);
+    }
 
     return 0;
 }
@@ -138,11 +113,7 @@ pthread_getspecific(pthread_key_t key)
         return nullptr;
     }
 
-#ifdef LOOKUP_TLS_DATA
-    auto threadSpecificData = reinterpret_cast<void **>(thread_context_tlsptr());
-#endif
-
-    return threadSpecificData[key];
+    return thread_context_tlsptr()[key];
 }
 
 extern "C" EXPORT_SYM int
@@ -157,15 +128,23 @@ pthread_key_create(pthread_key_t *key, void (*destructor)(void *))
 {
     static int64_t g_keys = 0;
 
-    if (destructor != nullptr) {
-        ARG_UNSUPPORTED("destructor");
-    }
+    // TODO:
+    //
+    // Libcxx is providing a destructor now (as of 6.0), so we should
+    // implement this feature. For now, ignoring this works, but it might
+    // lead to a buggy teardown in the future.
+    //
+
+    // if (destructor != nullptr) {
+    //     ARG_UNSUPPORTED("destructor");
+    // }
+    bfignored(destructor);
 
     if (key == nullptr) {
         return -EINVAL;
     }
 
-    *key = __sync_fetch_and_add(&g_keys, 1);
+    *key = gsl::narrow_cast<pthread_key_t>(__sync_fetch_and_add(&g_keys, 1));
 
     return 0;
 }
@@ -195,7 +174,7 @@ pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
         return -EINVAL;
     }
 
-    *mutex = 0;
+    *mutex = PTHREAD_MUTEX_INITIALIZER;
     return 0;
 }
 
@@ -206,7 +185,8 @@ pthread_mutex_lock(pthread_mutex_t *mutex)
         return -EINVAL;
     }
 
-    while (__sync_lock_test_and_set(mutex, 1)) { while (*mutex) {} };
+    while (!__sync_bool_compare_and_swap(mutex, PTHREAD_MUTEX_INITIALIZER, 0))
+    { };
 
     return 0;
 }
@@ -225,8 +205,7 @@ pthread_mutex_unlock(pthread_mutex_t *mutex)
         return -EINVAL;
     }
 
-    __sync_lock_release(mutex);
-
+    *mutex = PTHREAD_MUTEX_INITIALIZER;
     return 0;
 }
 
@@ -254,11 +233,11 @@ pthread_mutexattr_settype(pthread_mutexattr_t *, int)
 extern "C" EXPORT_SYM int
 pthread_once(pthread_once_t *once, void (*init)(void))
 {
-    if (once == nullptr || init == nullptr) {
+    if (once == nullptr || init == nullptr || once->is_initialized == 0) {
         return -EINVAL;
     }
 
-    if (__sync_fetch_and_add(once, 1) == 0) {
+    if (__sync_bool_compare_and_swap(&once->init_executed, 0, 1)) {
         (*init)();
     }
 
@@ -279,10 +258,17 @@ pthread_setspecific(pthread_key_t key, const void *data)
         return -EINVAL;
     }
 
-#ifdef LOOKUP_TLS_DATA
-    auto threadSpecificData = reinterpret_cast<void **>(thread_context_tlsptr());
-#endif
-
-    threadSpecificData[key] = const_cast<void *>(data);
+    thread_context_tlsptr()[key] = const_cast<void *>(data);
     return 0;
 }
+
+extern "C" void **_thread_context_tlsptr(void);
+extern "C" uint64_t _thread_context_cpuid(void);
+
+extern "C" EXPORT_SYM void **
+WEAK_SYM thread_context_tlsptr(void)
+{ return _thread_context_tlsptr(); }
+
+extern "C" EXPORT_SYM uint64_t
+WEAK_SYM thread_context_cpuid(void)
+{ return _thread_context_cpuid(); }

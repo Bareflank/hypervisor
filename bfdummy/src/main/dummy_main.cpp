@@ -78,10 +78,14 @@ main(int argc, char *argv[])
         throw std::runtime_error("test exceptions");
     }
     catch (std::exception &)
-    { }
+    {
+        auto view = gsl::make_span(argv, argc);
 
-    return g_derived1.foo(gsl::narrow_cast<int>(atoi(gsl::at(argv, static_cast<size_t>(argc), 0)))) +
-           g_derived2.foo(gsl::narrow_cast<int>(atoi(gsl::at(argv, static_cast<size_t>(argc), 1))));
+        return g_derived1.foo(gsl::narrow_cast<int>(atoi(view[0]))) +
+               g_derived2.foo(gsl::narrow_cast<int>(atoi(view[1])));
+    }
+
+    return 0;
 }
 
 extern "C" int64_t
@@ -122,7 +126,7 @@ bfmain(uintptr_t request, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 // -----------------------------------------------------------------------------
 
 int g_cursor = 0;
-char g_memory[0x10000] = {};
+char g_memory[0x100000] = {};
 
 extern "C" EXPORT_SYM int
 write(int file, const void *buffer, size_t count)
@@ -134,12 +138,21 @@ write(int file, const void *buffer, size_t count)
     return 0;
 }
 
+extern "C" EXPORT_SYM uint64_t
+unsafe_write_cstr(const char *cstr, size_t len)
+{
+    bfignored(cstr);
+    bfignored(len);
+
+    return 0;
+}
+
 extern "C" EXPORT_SYM void *
 _malloc_r(struct _reent *ent, size_t size)
 {
     bfignored(ent);
 
-    auto *addr = &gsl::at(g_memory, g_cursor);
+    auto addr = &gsl::at(g_memory, g_cursor);
     g_cursor += size;
 
     return addr;
@@ -172,4 +185,17 @@ _realloc_r(struct _reent *ent, void *ptr, size_t size)
     bfignored(size);
 
     return nullptr;
+}
+
+extern "C" EXPORT_SYM void **
+thread_context_tlsptr(void)
+{
+    static char s_tls[0x1000] = {};
+    return reinterpret_cast<void **>(s_tls);
+}
+
+extern "C" EXPORT_SYM uint64_t
+thread_context_cpuid(void)
+{
+    return 0;
 }

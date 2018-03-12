@@ -16,7 +16,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-os: Visual Studio 2015
+os: Visual Studio 2017
 platform: x64
 
 #
@@ -27,7 +27,7 @@ environment:
     CYG_ROOT: C:\cygwin_bareflank
     CYG_BASH: C:\cygwin_bareflank\bin\bash
     CYG_MIRROR: http://mirrors.kernel.org/sourceware/cygwin/
-    CYG_PACKAGES: git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext
+    CYG_PACKAGES: make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext
     BFPATH: '%PATH%'
     PATH: '%PATH%;C:\Program Files\NASM'
 
@@ -61,17 +61,16 @@ build_script:
   #
   - mkdir build_msbuild
   - cd build_msbuild
-  - cmake -G "Visual Studio 14 2015 Win64" -DENABLE_BUILD_VMM=OFF -DENABLE_BUILD_USERSPACE=OFF -DENABLE_BUILD_TEST=ON ..
+  - cmake -G "Visual Studio 15 2017 Win64" -DENABLE_BUILD_VMM=OFF -DENABLE_BUILD_USERSPACE=OFF -DENABLE_BUILD_TEST=ON ..
   - msbuild /m:3 hypervisor.sln
   - cmake --build . --target test
 
   #
   # Cygwin (Shared Libraries)
   #
-  # - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; mkdir build_cygwin"'
-  # - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; cmake -DENABLE_BUILD_TEST=ON .."'
-  # - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make -j3"'
-  # - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make unittest"'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; mkdir build_cygwin"'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; cmake .."'
+  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make -j3"'
 
 #
 # No AppVeyor Tests

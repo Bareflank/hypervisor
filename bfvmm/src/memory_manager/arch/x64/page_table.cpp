@@ -52,7 +52,7 @@ page_table::add_page(integer_pointer addr, integer_pointer bits, integer_pointer
 
         auto iter = bfn::find(m_pts, index);
         if (!(*iter)) {
-            auto view = gsl::make_span(m_pt, ::x64::page_table::num_entries);
+            auto view = gsl::make_span(m_pt.get(), ::x64::page_table::num_entries);
             (*iter) = std::make_unique<page_table>(&view.at(index));
         }
 
@@ -64,7 +64,7 @@ page_table::add_page(integer_pointer addr, integer_pointer bits, integer_pointer
         m_pts.shrink_to_fit();
     }
 
-    auto view = gsl::make_span(m_pt, ::x64::page_table::num_entries);
+    auto view = gsl::make_span(m_pt.get(), ::x64::page_table::num_entries);
     return page_table_entry(&view.at(index));
 }
 
@@ -80,13 +80,13 @@ page_table::remove_page(integer_pointer addr, integer_pointer bits)
             if (pt->empty()) {
                 (*iter) = nullptr;
 
-                auto view = gsl::make_span(m_pt, ::x64::page_table::num_entries);
+                auto view = gsl::make_span(m_pt.get(), ::x64::page_table::num_entries);
                 view.at(index) = 0;
             }
         }
     }
     else {
-        auto view = gsl::make_span(m_pt, ::x64::page_table::num_entries);
+        auto view = gsl::make_span(m_pt.get(), ::x64::page_table::num_entries);
         view.at(index) = 0;
 
         return;
@@ -107,7 +107,7 @@ page_table::virt_to_pte(integer_pointer addr, integer_pointer bits) const
         throw std::runtime_error("unable to locate pte. invalid address");
     }
 
-    auto view = gsl::make_span(m_pt, ::x64::page_table::num_entries);
+    auto view = gsl::make_span(m_pt.get(), ::x64::page_table::num_entries);
     return page_table_entry(&view.at(index));
 }
 
@@ -132,7 +132,7 @@ page_table::empty() const noexcept
 {
     auto size = 0ULL;
 
-    for (auto entry : gsl::make_span(m_pt, ::x64::page_table::num_entries)) {
+    for (auto entry : gsl::make_span(m_pt.get(), ::x64::page_table::num_entries)) {
         if (entry != 0) {
             size++;
         }
@@ -146,7 +146,7 @@ page_table::global_size() const noexcept
 {
     auto size = 0ULL;
 
-    for (auto entry : gsl::make_span(m_pt, ::x64::page_table::num_entries)) {
+    for (auto entry : gsl::make_span(m_pt.get(), ::x64::page_table::num_entries)) {
         size += entry != 0 ? 1U : 0U;
     }
 

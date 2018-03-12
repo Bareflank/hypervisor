@@ -96,10 +96,14 @@ public:
     ///
     buffer(std::initializer_list<data_type> list) :
         m_size(list.size()),
-        m_data(std::make_unique<data_type[]>(m_size))
+        m_data(std::make_unique<data_type[]>(list.size()))
     {
-        gsl::span<const data_type> list_span(list);
-        gsl::copy(list_span, span());
+        auto _i = 0LL;
+        auto _span = span();
+
+        for (const auto &elem : list) {
+            _span[_i++] = elem;
+        }
     }
 
     /// Default Destructor
@@ -201,7 +205,7 @@ public:
     ///
     gsl::span<data_type>
     span() const
-    { return gsl::make_span(m_data, gsl::narrow_cast<std::ptrdiff_t>(m_size)); }
+    { return gsl::make_span(m_data.get(), gsl::narrow_cast<std::ptrdiff_t>(m_size)); }
 
     /// Resize
     ///
