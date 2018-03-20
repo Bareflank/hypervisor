@@ -45,7 +45,7 @@ template <
     typename = std::enable_if<std::is_integral<T>::value>,
     typename = std::enable_if<std::is_integral<B>::value>
     >
-auto
+constexpr auto
 set_bit(T t, B b) noexcept
 {
     return t | (0x1ULL << b);
@@ -68,7 +68,7 @@ template <
     typename = std::enable_if<std::is_pointer<T>::value>,
     typename = std::enable_if<std::is_integral<B>::value>
     >
-auto
+constexpr auto
 set_bit(gsl::span<T> &view, B b)
 {
     auto byte_view = gsl::as_writeable_bytes(view);
@@ -92,7 +92,7 @@ template <
     typename = std::enable_if<std::is_integral<T>::value>,
     typename = std::enable_if<std::is_integral<B>::value>
     >
-auto
+constexpr auto
 clear_bit(T t, B b) noexcept
 {
     return t & ~(0x1ULL << b);
@@ -115,7 +115,7 @@ template <
     typename = std::enable_if<std::is_pointer<T>::value>,
     typename = std::enable_if<std::is_integral<B>::value>
     >
-auto
+constexpr auto
 clear_bit(gsl::span<T> &view, B b)
 {
     auto byte_view = gsl::as_writeable_bytes(view);
@@ -137,7 +137,7 @@ template <
     typename = std::enable_if<std::is_integral<T>::value>,
     typename = std::enable_if<std::is_integral<B>::value>
     >
-auto
+constexpr auto
 get_bit(T t, B b) noexcept
 {
     return (t & (0x1ULL << b)) >> b;
@@ -158,7 +158,7 @@ template <
     typename = std::enable_if<std::is_pointer<T>::value>,
     typename = std::enable_if<std::is_integral<B>::value>
     >
-auto
+constexpr auto
 get_bit(const gsl::span<T> &view, B b)
 {
     auto byte_view = gsl::as_writeable_bytes(view);
@@ -180,7 +180,7 @@ template <
     typename = std::enable_if<std::is_integral<T>::value>,
     typename = std::enable_if<std::is_integral<B>::value>
     >
-auto
+constexpr auto
 is_bit_set(T t, B b) noexcept
 {
     return static_cast<uint64_t>(get_bit(t, b)) != static_cast<uint64_t>(0);
@@ -201,7 +201,7 @@ template <
     typename = std::enable_if<std::is_integral<T>::value>,
     typename = std::enable_if<std::is_integral<B>::value>
     >
-auto
+constexpr auto
 is_bit_cleared(T t, B b) noexcept
 {
     return static_cast<uint64_t>(get_bit(t, b)) == static_cast<uint64_t>(0);
@@ -241,7 +241,7 @@ template <
     typename = std::enable_if<std::is_integral<T>::value>,
     typename = std::enable_if<std::is_integral<M>::value>
     >
-auto
+constexpr auto
 get_bits(T t, M m) noexcept
 {
     return t & m;
@@ -265,7 +265,7 @@ template <
     typename = std::enable_if<std::is_integral<M>::value>,
     typename = std::enable_if<std::is_integral<V>::value>
     >
-auto
+constexpr auto
 set_bits(T t, M m, V v) noexcept
 {
     return (t & ~m) | (v & m);
