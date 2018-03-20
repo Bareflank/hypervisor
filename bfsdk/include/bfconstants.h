@@ -273,14 +273,14 @@
  *
  * On aarch64, the value is the serial peripheral's physical base address.
  *
- * Note: See bfvmm/serial/serial_port_ns16550a.h
+ * Note: See bfvmm/serial/serial_ns16550a.h
  */
 #ifndef DEFAULT_COM_PORT
 #if defined(BF_AARCH64)
 #   define DEFAULT_COM_PORT 0x09000000
 #else
 #   define DEFAULT_COM_PORT 0x3F8U
-#   define DEFAULT_COM_DRIVER serial_port_ns16550a
+#   define DEFAULT_COM_DRIVER serial_ns16550a
 #endif
 #endif
 
@@ -288,16 +288,16 @@
  * Serial Port Driver
  *
  * Possible values include:
- *     - serial_port_ns16550a
- *     - serial_port_pl011
+ *     - serial_ns16550a
+ *     - serial_pl011
  *
- * On x64, this should always be serial_port_ns16550a.
+ * On x64, this should always be serial_ns16550a.
  */
 #ifndef DEFAULT_COM_DRIVER
 #if defined(BF_AARCH64)
-#   define DEFAULT_COM_DRIVER serial_port_pl011
+#   define DEFAULT_COM_DRIVER serial_pl011
 #else
-#   define DEFAULT_COM_DRIVER serial_port_ns16550a
+#   define DEFAULT_COM_DRIVER serial_ns16550a
 #endif
 #endif
 
@@ -314,7 +314,7 @@
 /*
  * Default Serial Baud Rate
  *
- * Note: See bfvmm/serial/serial_port_ns16550a.h
+ * Note: See bfvmm/serial/serial_ns16550a.h
  */
 #ifndef DEFAULT_BAUD_RATE
 #define DEFAULT_BAUD_RATE baud_rate_115200
@@ -323,7 +323,7 @@
 /*
  * Default serial baud rate divisor, integer part (for PL011)
  *
- * Note: See bfvmm/serial/serial_port_pl011.h
+ * Note: See bfvmm/serial/serial_pl011.h
  */
 #ifndef DEFAULT_BAUD_RATE_INT
 #define DEFAULT_BAUD_RATE_INT 0x4
@@ -332,7 +332,7 @@
 /*
  * Default serial baud rate divisor, fractional part (for PL011)
  *
- * Note: See bfvmm/serial/serial_port_pl011.h
+ * Note: See bfvmm/serial/serial_pl011.h
  */
 #ifndef DEFAULT_BAUD_RATE_FRAC
 #define DEFAULT_BAUD_RATE_FRAC 0x0
@@ -341,7 +341,7 @@
 /*
  * Default Serial Data Bits
  *
- * Note: See bfvmm/serial/serial_port_ns16550a.h
+ * Note: See bfvmm/serial/serial_ns16550a.h
  */
 #ifndef DEFAULT_DATA_BITS
 #define DEFAULT_DATA_BITS char_length_8
@@ -350,7 +350,7 @@
 /*
  * Default Serial Stop Bits
  *
- * Note: See bfvmm/serial/serial_port_ns16550a.h
+ * Note: See bfvmm/serial/serial_ns16550a.h
  */
 #ifndef DEFAULT_STOP_BITS
 #define DEFAULT_STOP_BITS stop_bits_1
@@ -359,7 +359,7 @@
 /*
  * Default Serial Parity Bits
  *
- * Note: See bfvmm/serial/serial_port_ns16550a.h
+ * Note: See bfvmm/serial/serial_ns16550a.h
  */
 #ifndef DEFAULT_PARITY_BITS
 #define DEFAULT_PARITY_BITS parity_none

@@ -16,21 +16,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
+cmake_minimum_required(VERSION 3.6)
+project(bfdso C CXX)
 
-macro(do_test str)
-    add_executable(test_${str} test_${str}.cpp)
-    target_compile_definitions(test_${str} PRIVATE STATIC_SERIAL)
-    target_compile_definitions(test_${str} PRIVATE STATIC_INTRINSICS)
-    target_link_libraries(test_${str} bfvmm_serial_static)
-    target_link_libraries(test_${str} bfvmm_intrinsics_static)
-    target_link_libraries(test_${str} test_catch)
-    add_test(test_${str} test_${str})
-    install(TARGETS test_${str} DESTINATION ${BUILD_SYSROOT_TEST}/bin/bfvmm)
-endmacro(do_test)
+include(${SOURCE_CMAKE_DIR}/project.cmake)
+init_project()
 
-do_test(serial_port_ns16550a)
-do_test(serial_port_pl011)
-do_test(serial_port_base)
+add_static_library(
+    bfdso
+    SOURCES dso.cpp
+    ALWAYS
+)

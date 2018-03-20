@@ -26,20 +26,27 @@ if(ENABLE_BUILD_VMM OR ENABLE_BUILD_USERSPACE OR ENABLE_BUILD_TEST)
     )
 endif()
 
+list(APPEND GSL_CONFIGURE_FLAGS
+    -DGSL_TEST=OFF
+)
+
 if(ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST)
     add_dependency(
         gsl vmm
+        CMAKE_ARGS  ${GSL_CONFIGURE_FLAGS}
     )
 endif()
 
 if(ENABLE_BUILD_USERSPACE)
     add_dependency(
         gsl userspace
+        CMAKE_ARGS  ${GSL_CONFIGURE_FLAGS}
     )
 endif()
 
 if(ENABLE_BUILD_TEST)
     add_dependency(
         gsl test
+        CMAKE_ARGS  ${GSL_CONFIGURE_FLAGS}
     )
 endif()

@@ -25,7 +25,12 @@ if(ENABLE_BUILD_TEST)
         URL_MD5     ${CATCH_URL_MD5}
     )
 
+    list(APPEND CATCH_CONFIGURE_FLAGS
+        -DBUILD_TESTING=OFF
+    )
+
     add_dependency(
         catch test
+        CMAKE_ARGS  ${CATCH_CONFIGURE_FLAGS}
     )
 endif()

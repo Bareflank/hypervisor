@@ -214,7 +214,7 @@ void
 platform_unload_info(struct platform_info_t *info)
 {
     if (info->serial_address) {
-        iounmap((void*) info->serial_address);
+        iounmap((void *) info->serial_address);
         info->serial_address = 0;
     }
 }

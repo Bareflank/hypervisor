@@ -87,13 +87,15 @@ TEST_CASE("bfelf_load: init fail")
     for (auto i = 0ULL; i < 9; i++) {
         auto file = g_file.read_binary(g_filenames.at(i));
 
-        gsl::at(binaries, i).file = file.data();
-        gsl::at(binaries, i).file_size = file.size();
+        gsl::at(binaries, static_cast<std::ptrdiff_t>(i)).file = file.data();
+        gsl::at(binaries, static_cast<std::ptrdiff_t>(i)).file_size = file.size();
 
         files.emplace_back(std::move(file));
     }
 
-    gsl::at(const_cast<char *>(gsl::at(binaries, 0).file), 16, 0) = 0;
+    auto view = gsl::make_span(const_cast<char *>(gsl::at(binaries, 0).file), 16);
+    view[0] = 0;
+
 
     auto ret = bfelf_load(reinterpret_cast<bfelf_binary_t *>(binaries), 9, &entry, &info, &loader);
     CHECK(ret == BFELF_ERROR_INVALID_SIGNATURE);
@@ -110,8 +112,8 @@ TEST_CASE("bfelf_load: out of memory fail")
     for (auto i = 0ULL; i < 9; i++) {
         auto file = g_file.read_binary(g_filenames.at(i));
 
-        gsl::at(binaries, i).file = file.data();
-        gsl::at(binaries, i).file_size = file.size();
+        gsl::at(binaries, static_cast<std::ptrdiff_t>(i)).file = file.data();
+        gsl::at(binaries, static_cast<std::ptrdiff_t>(i)).file_size = file.size();
 
         files.emplace_back(std::move(file));
     }
@@ -136,8 +138,8 @@ TEST_CASE("bfelf_load: relocate fail")
     for (auto i = 0ULL; i < 9; i++) {
         auto file = g_file.read_binary(g_filenames.at(i));
 
-        gsl::at(binaries, i).file = file.data();
-        gsl::at(binaries, i).file_size = file.size();
+        gsl::at(binaries, static_cast<std::ptrdiff_t>(i)).file = file.data();
+        gsl::at(binaries, static_cast<std::ptrdiff_t>(i)).file_size = file.size();
 
         files.emplace_back(std::move(file));
     }
@@ -157,8 +159,8 @@ TEST_CASE("bfelf_load: success")
     for (auto i = 0ULL; i < 10; i++) {
         auto file = g_file.read_binary(g_filenames.at(i));
 
-        gsl::at(binaries, i).file = file.data();
-        gsl::at(binaries, i).file_size = file.size();
+        gsl::at(binaries, static_cast<std::ptrdiff_t>(i)).file = file.data();
+        gsl::at(binaries, static_cast<std::ptrdiff_t>(i)).file_size = file.size();
 
         files.emplace_back(std::move(file));
     }

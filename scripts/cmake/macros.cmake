@@ -191,8 +191,8 @@ function(generate_flags PREFIX)
     set(multiVal C_FLAGS CXX_FLAGS)
     cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
 
-    list(APPEND _C_FLAGS ${ARG_C_FLAGS})
-    list(APPEND _CXX_FLAGS ${ARG_CXX_FLAGS})
+    list(APPEND _C_FLAGS ${ARG_C_FLAGS} ${GLOBAL_C_FLAGS})
+    list(APPEND _CXX_FLAGS ${ARG_CXX_FLAGS} ${GLOBAL_CXX_FLAGS})
 
     if(PREFIX STREQUAL "vmm")
         list(APPEND _C_FLAGS ${BFFLAGS_VMM} ${BFFLAGS_VMM_C} ${C_FLAGS_VMM})
@@ -341,10 +341,10 @@ function(download_dependency NAME)
                 file(MD5 ${TAR} MD5)
                 if(NOT "${MD5}" STREQUAL "${ARG_URL_MD5}")
                     message(STATUS "    ${Red}md5 mismatch: expecting ${ARG_URL_MD5}, got ${MD5}${ColorReset}")
+                    set_property(GLOBAL PROPERTY "FORCE_REBUILD" "ON")
                     file(REMOVE_RECURSE ${SRC})
                     file(REMOVE_RECURSE ${TMP})
                     file(REMOVE_RECURSE ${TAR})
-                    file(REMOVE_RECURSE ${DEPENDS_DIR})
                     message(STATUS "    checking hash: ${Yellow}complete, redownload required${ColorReset}")
                 else()
                     message(STATUS "    checking hash: ${Green}complete${ColorReset}")
@@ -992,7 +992,7 @@ macro(init_project)
     string(REPLACE ";" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-    include_directories(
+    include_directories(SYSTEM
         ${ARG_INCLUDES}
         ${SOURCE_BFSDK_DIR}/include
         ${SOURCE_BFELF_LOADER_DIR}/include
@@ -1172,8 +1172,8 @@ function(add_vmm_executable NAME)
             ${CMAKE_INSTALL_PREFIX}/lib/libbfunwind_shared.so
             ${CMAKE_INSTALL_PREFIX}/lib/libc.so
             ${CMAKE_INSTALL_PREFIX}/lib/libm.so
-            --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
             ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall_shared.so
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
         )
 
         target_link_libraries(${NAME}_shared ${LIBRARIES})
@@ -1207,8 +1207,8 @@ function(add_vmm_executable NAME)
             ${CMAKE_INSTALL_PREFIX}/lib/libbfunwind_static.a
             ${CMAKE_INSTALL_PREFIX}/lib/libc.a
             ${CMAKE_INSTALL_PREFIX}/lib/libm.a
-            --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
             ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall_static.a
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
         )
 
         target_link_libraries(${NAME}_static ${LIBRARIES})

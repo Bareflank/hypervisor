@@ -40,7 +40,7 @@ message(STATUS "Bareflank Manager VMM: ${BFM_VMM}")
 include(scripts/cmake/targets.cmake)
 
 # ------------------------------------------------------------------------------
-# Dependencies
+# General Dependencies
 # ------------------------------------------------------------------------------
 
 include_dependency(gsl)
@@ -50,11 +50,6 @@ include_dependency(clang_tidy)
 include_dependency(catch)
 include_dependency(hippomocks)
 include_dependency(python)
-include_dependency(binutils)
-include_dependency(newlib)
-include_dependency(llvm)
-include_dependency(libcxxabi)
-include_dependency(libcxx)
 
 # ------------------------------------------------------------------------------
 # No Build Components
@@ -81,32 +76,73 @@ endif()
 # VMM Components
 # ------------------------------------------------------------------------------
 
+include_dependency(binutils)
+
+if(NOT WIN32)
+    if(NOT ENABLE_BUILD_BINUTILS)
+        add_subproject(
+            bfdso vmm
+            SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
+        )
+    else()
+        add_subproject(
+            bfdso vmm
+            SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
+            DEPENDS binutils
+        )
+    endif()
+endif()
+
+include_dependency(newlib)
+include_dependency(llvm)
+include_dependency(libcxxabi)
+include_dependency(libcxx)
+
 if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
     add_subproject(
-        bfunwind vmm
+        bfcrt vmm
+        DEPENDS gsl
         DEPENDS libcxx
+        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/crt
     )
 
     add_subproject(
-        bfruntime vmm
-        DEPENDS libcxx gsl
+        bfpthread vmm
+        DEPENDS gsl
+        DEPENDS libcxx
+        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/pthread
+    )
+
+    add_subproject(
+        bfsyscall vmm
+        DEPENDS gsl
+        DEPENDS libcxx
+        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/syscall
+    )
+
+    add_subproject(
+        bfunwind vmm
+        DEPENDS bfcrt
+        DEPENDS bfpthread
+        DEPENDS bfsyscall
     )
 endif()
 
 if(ENABLE_BUILD_VMM)
     add_subproject(
         bfintrinsics vmm
-        DEPENDS binutils
+        DEPENDS bfunwind
     )
 
     add_subproject(
         bfvmm vmm
-        DEPENDS bfunwind bfruntime gsl
+        DEPENDS bfunwind
     )
 
     add_subproject(
         bfvmm_main vmm
-        DEPENDS bfvmm bfintrinsics
+        DEPENDS bfvmm
+        DEPENDS bfintrinsics
         SOURCE_DIR ${SOURCE_BFVMM_DIR}/src/main
     )
 endif()
@@ -118,20 +154,21 @@ endif()
 if(ENABLE_BUILD_TEST)
     add_subproject(
         bfsdk test
-        DEPENDS gsl json catch hippomocks
+        DEPENDS gsl
+        DEPENDS json
+        DEPENDS catch
+        DEPENDS hippomocks
     )
 endif()
 
 if(ENABLE_BUILD_TEST AND NOT WIN32)
     add_subproject(
         bfdummy vmm
-        TOOLCHAIN ${VMM_TEST_TOOLCHAIN_PATH}
-        DEPENDS bfunwind bfruntime gsl
+        DEPENDS bfunwind
     )
 
     add_subproject(
         bfdummy_main vmm
-        TOOLCHAIN ${VMM_TEST_TOOLCHAIN_PATH}
         SOURCE_DIR ${SOURCE_BFDUMMY_DIR}/src/main
         DEPENDS bfdummy
     )
@@ -181,7 +218,8 @@ endif()
 if(ENABLE_BUILD_USERSPACE)
     add_subproject(
         bfm userspace
-        DEPENDS json gsl
+        DEPENDS gsl
+        DEPENDS json
     )
 endif()
 
@@ -190,6 +228,24 @@ endif()
 # ------------------------------------------------------------------------------
 
 include_external_extensions()
+
+# ------------------------------------------------------------------------------
+# Force Rebuild
+# ------------------------------------------------------------------------------
+
+get_property(FORCE_REBUILD GLOBAL PROPERTY "FORCE_REBUILD")
+
+if(FORCE_REBUILD STREQUAL "ON")
+    set_property(GLOBAL PROPERTY "FORCE_REBUILD" "OFF")
+    file(REMOVE_RECURSE ${DEPENDS_DIR})
+    file(REMOVE_RECURSE ${PREFIXES_DIR})
+    message(FATAL_ERROR "${Yellow}dependencies updated, rebuild is required. Rerun cmake${ColorReset}")
+endif()
+
+# TODO:
+#
+# Detect if the flags have changed, delete the depends and prefixes, and then
+# tell the user that cmake needs to be run again as a rebuild is required.
 
 # ------------------------------------------------------------------------------
 # Validate Build

@@ -27,6 +27,8 @@
 #pragma GCC system_header
 #endif
 
+#include <string.h>
+
 /// @cond
 
 #define concat1(a,b) a ## b
@@ -42,6 +44,93 @@
 namespace gsl
 {
 
+/// @cond
+
+#define expects(cond) Expects(cond)
+#define ensures(cond) Ensures(cond)
+
+template <class F>
+class final_act_success
+{
+public:
+    explicit final_act_success(F f) noexcept : f_(std::move(f)), invoke_(true) {}
+
+    final_act_success(final_act_success &&other) noexcept : f_(std::move(other.f_)), invoke_(other.invoke_)
+    {
+        other.invoke_ = false;
+    }
+
+    final_act_success(const final_act_success &) = delete;
+    final_act_success &operator=(const final_act_success &) = delete;
+
+    ~final_act_success() noexcept
+    {
+        if (std::uncaught_exception()) {
+            return;
+        }
+
+        if (invoke_) { f_(); }
+    }
+
+private:
+    F f_;
+    bool invoke_;
+};
+
+template <class F>
+class final_act_failure
+{
+public:
+    explicit final_act_failure(F f) noexcept : f_(std::move(f)), invoke_(true) {}
+
+    final_act_failure(final_act_failure &&other) noexcept : f_(std::move(other.f_)), invoke_(other.invoke_)
+    {
+        other.invoke_ = false;
+    }
+
+    final_act_failure(const final_act_failure &) = delete;
+    final_act_failure &operator=(const final_act_failure &) = delete;
+
+    ~final_act_failure() noexcept
+    {
+        if (!std::uncaught_exception()) {
+            return;
+        }
+
+        if (invoke_) { f_(); }
+    }
+
+private:
+    F f_;
+    bool invoke_;
+};
+
+template <class F>
+inline final_act_success<F> on_success(const F &f) noexcept
+{
+    return final_act_success<F>(f);
+}
+
+template <class F>
+inline final_act_success<F> on_success(F &&f) noexcept
+{
+    return final_act_success<F>(std::forward<F>(f));
+}
+
+template <class F>
+inline final_act_failure<F> on_failure(const F &f) noexcept
+{
+    return final_act_failure<F>(f);
+}
+
+template <class F>
+inline final_act_failure<F> on_failure(F &&f) noexcept
+{
+    return final_act_failure<F>(std::forward<F>(f));
+}
+
+/// @endcond
+
 /// Memset
 ///
 /// Same as std::memset, but for spans
@@ -56,10 +145,10 @@ auto memset(span<DstElementType, DstExtent> dst, T val)
     expects(dst.size() > 0);
 
     return std::memset(
-        dst.data(),
-        static_cast<int>(val),
-        static_cast<std::size_t>(dst.size())
-    );
+               dst.data(),
+               static_cast<int>(val),
+               static_cast<std::size_t>(dst.size())
+           );
 }
 
 }

@@ -103,7 +103,7 @@ private_call_vmm(uintptr_t request, uintptr_t arg1, uintptr_t arg2, uintptr_t ar
     cpuid = platform_get_current_cpu_num();
 
     tc->cpuid = (uint64_t)cpuid;
-    tc->tlsptr = (uint64_t)g_tls + (THREAD_LOCAL_STORAGE_SIZE * (uint64_t)cpuid);
+    tc->tlsptr = (void **)((uint64_t)g_tls + (THREAD_LOCAL_STORAGE_SIZE * (uint64_t)cpuid));
 
     ret = _start_func((void *)(g_stack_top - sizeof(struct thread_context_t) - 1), &g_info);
 

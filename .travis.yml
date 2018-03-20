@@ -52,7 +52,7 @@ before_script:
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
       mkdir -p external/cmake
       pushd external/cmake
-      wget https://cmake.org/files/v3.6/cmake-3.6.0-Linux-x86_64.sh
+      wget https://cmake.org/files/v3.7/cmake-3.7.0-Linux-x86_64.sh
       chmod +x cmake-*-Linux-x86_64.sh
       ./cmake-*-Linux-x86_64.sh --exclude-subdir --skip-license
       export PATH="${PWD}/bin:$PATH"
@@ -188,6 +188,7 @@ matrix:
     env:
       - TEST="Codecov"
     script:
+      - export LD_BIN=ld.gold
       - cmake -DCONFIG=travis_codecov ..
       - make -j3
       - make test
@@ -213,7 +214,7 @@ matrix:
     script:
       - cmake -DCONFIG=travis_asan ..
       - make -j3
-      - make test
+      - ASAN_OPTIONS=alloc_dealloc_mismatch=0 make test
 
   #
   # Google Undefined Sanitizer
@@ -253,6 +254,7 @@ matrix:
     env:
       - TEST="Clang 3.8 (Static Libraries)"
     script:
+      - export CLANG_BIN=clang-3.8
       - cmake -DCONFIG=travis_static ..
       - make -j3
 
@@ -273,6 +275,7 @@ matrix:
     env:
       - TEST="Clang 3.9 (Static Libraries)"
     script:
+      - export CLANG_BIN=clang-3.9
       - cmake -DCONFIG=travis_static ..
       - make -j3
 
@@ -293,6 +296,28 @@ matrix:
     env:
       - TEST="Clang 4.0 (Static Libraries)"
     script:
+      - export CLANG_BIN=clang-4.0
+      - cmake -DCONFIG=travis_static ..
+      - make -j3
+
+  #
+  # Clang 5.0 (Static Libraries)
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-5.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-5.0
+          - nasm
+    env:
+      - TEST="Clang 5.0 (Static Libraries)"
+    script:
+      - export CLANG_BIN=clang-5.0
       - cmake -DCONFIG=travis_static ..
       - make -j3
 
@@ -313,6 +338,7 @@ matrix:
     env:
       - TEST="Clang 3.8 (Shared Libraries)"
     script:
+      - export CLANG_BIN=clang-3.8
       - cmake -DCONFIG=travis_shared ..
       - make -j3
 
@@ -333,6 +359,7 @@ matrix:
     env:
       - TEST="Clang 3.9 (Shared Libraries)"
     script:
+      - export CLANG_BIN=clang-3.9
       - cmake -DCONFIG=travis_shared ..
       - make -j3
 
@@ -353,5 +380,69 @@ matrix:
     env:
       - TEST="Clang 4.0 (Shared Libraries)"
     script:
+      - export CLANG_BIN=clang-4.0
+      - cmake -DCONFIG=travis_shared ..
+      - make -j3
+
+  #
+  # Clang 5.0 (Shared Libraries)
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-5.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-5.0
+          - nasm
+    env:
+      - TEST="Clang 5.0 (Shared Libraries)"
+    script:
+      - export CLANG_BIN=clang-5.0
+      - cmake -DCONFIG=travis_shared ..
+      - make -j3
+
+  #
+  # ld.gold
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-5.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-5.0
+          - nasm
+    env:
+      - TEST="ld.gold"
+    script:
+      - export LD_BIN=ld.gold
+      - cmake -DCONFIG=travis_shared ..
+      - make -j3
+
+  #
+  # ld.lld
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-5.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-5.0
+          - nasm
+    env:
+      - TEST="ld.lld"
+    script:
+      - export LD_BIN=ld.lld
       - cmake -DCONFIG=travis_shared ..
       - make -j3

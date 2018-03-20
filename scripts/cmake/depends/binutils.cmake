@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
+if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32 AND ENABLE_BUILD_BINUTILS)
     message(STATUS "Including dependency: binutils")
 
     download_dependency(
@@ -46,4 +45,6 @@ if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
         COMMAND ${CMAKE_COMMAND} -E remove_directory ${PREFIXES_DIR}/bin
         COMMAND ${CMAKE_COMMAND} -E remove_directory ${PREFIXES_DIR}/share
     )
+else()
+    add_custom_target(binutils_${VMM_PREFIX})
 endif()

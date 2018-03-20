@@ -36,6 +36,7 @@ if(NOT WIN32)
         -fpic
         -fno-stack-protector
         -fvisibility=hidden
+        -Wno-deprecated-declarations
     )
 
     list(APPEND BFFLAGS_TEST_C

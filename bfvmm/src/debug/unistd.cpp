@@ -20,8 +20,7 @@
 #include <bfexports.h>
 
 #include <debug/debug_ring/debug_ring.h>
-#include <debug/serial/serial_port_ns16550a.h>
-#include <debug/serial/serial_port_pl011.h>
+#include <debug/serial/serial_ns16550a.h>
 
 #include <mutex>
 std::mutex g_write_mutex;
@@ -44,13 +43,33 @@ write_str(const std::string &str)
         std::lock_guard<std::mutex> guard(g_write_mutex);
 
         g_debug_ring()->write(str);
-        bfvmm::DEFAULT_COM_DRIVER::instance()->write(str);
 
-        return str.length();
+        for (const auto &c : str) {
+            bfvmm::DEFAULT_COM_DRIVER::instance()->write(c);
+        }
     }
     catch (...) {
         return 0;
     }
+
+    return str.length();
+}
+
+extern "C" EXPORT_SYM uint64_t
+unsafe_write_cstr(const char *cstr, size_t len)
+{
+    try {
+        auto str = gsl::make_span(cstr, gsl::narrow_cast<std::ptrdiff_t>(len));
+
+        for (const auto &c : str) {
+            bfvmm::DEFAULT_COM_DRIVER::instance()->write(c);
+        }
+    }
+    catch (...) {
+        return 0;
+    }
+
+    return len;
 }
 
 extern "C" EXPORT_SYM int

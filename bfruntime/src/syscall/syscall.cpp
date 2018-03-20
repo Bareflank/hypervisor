@@ -29,20 +29,11 @@
 #include <sys/times.h>
 
 #include <bfgsl.h>
+#include <bfdebug.h>
 #include <bfexports.h>
 #include <bfconstants.h>
 #include <bfehframelist.h>
 #include <bfdwarf.h>
-
-#define UNHANDLED() \
-    { \
-        const char *str_text = "\033[1;33mWARNING\033[0m: unsupported libc function called = "; \
-        const char *str_func = __PRETTY_FUNCTION__; \
-        const char *str_endl = "\n"; \
-        write(1, str_text, strlen(str_text)); \
-        write(1, str_func, strlen(str_func)); \
-        write(1, str_endl, strlen(str_endl)); \
-    }
 
 extern "C" EXPORT_SYM clock_t
 times(struct tms *buf)
@@ -387,16 +378,6 @@ extern "C" EXPORT_SYM int
 sched_yield(void)
 { return 0; }
 
-EXPORT_SYM uintptr_t __stack_chk_guard = 0x595e9fbd94fda766;
-
-extern "C" EXPORT_SYM void
-__stack_chk_fail(void) noexcept
-{
-    auto msg = "__stack_chk_fail: buffer overflow detected!!!\n";
-    write(1, msg, strlen(msg));
-    abort();
-}
-
 extern "C" EXPORT_SYM float
 __mulsc3(float a, float b, float c, float d)
 {
@@ -412,6 +393,19 @@ __mulsc3(float a, float b, float c, float d)
 
 extern "C" EXPORT_SYM double
 __muldc3(double a, double b, double c, double d)
+{
+    bfignored(a);
+    bfignored(b);
+    bfignored(c);
+    bfignored(d);
+
+    UNHANDLED();
+
+    return 0;
+}
+
+extern "C" EXPORT_SYM long double
+__mulxc3(long double a, long double b, long double c, long double d)
 {
     bfignored(a);
     bfignored(b);

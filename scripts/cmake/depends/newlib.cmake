@@ -28,27 +28,33 @@ if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
     set(CC_FOR_TARGET clang)
     set(CXX_FOR_TARGET clang)
 
-    set(AR_FOR_TARGET ${VMM_PREFIX_PATH}/bin/ar)
-    set(AS_FOR_TARGET ${VMM_PREFIX_PATH}/bin/as)
-    set(LD_FOR_TARGET ${VMM_PREFIX_PATH}/bin/ld)
-    set(NM_FOR_TARGET ${VMM_PREFIX_PATH}/bin/nm)
-    set(OBJCOPY_FOR_TARGET ${VMM_PREFIX_PATH}/bin/objcopy)
-    set(OBJDUMP_FOR_TARGET ${VMM_PREFIX_PATH}/bin/objdump)
-    set(RANLIB_FOR_TARGET ${VMM_PREFIX_PATH}/bin/ranlib)
-    set(READELF_FOR_TARGET ${VMM_PREFIX_PATH}/bin/readelf)
-    set(STRIP_FOR_TARGET ${VMM_PREFIX_PATH}/bin/strip)
+    set(AR_FOR_TARGET ar)
+    set(AS_FOR_TARGET as)
+    set(NM_FOR_TARGET nm)
+    set(OBJCOPY_FOR_TARGET objcopy)
+    set(OBJDUMP_FOR_TARGET objdump)
+    set(RANLIB_FOR_TARGET ranlib)
+    set(READELF_FOR_TARGET readelf)
+    set(STRIP_FOR_TARGET strip)
+
+    if(DEFINED ENV{LD_BIN})
+        set(LD_FOR_TARGET $ENV{LD_BIN})
+    else()
+        set(LD_FOR_TARGET ${VMM_PREFIX_PATH}/bin/ld)
+    endif()
 
     generate_flags(
         vmm
         NOWARNINGS
     )
 
-    list(APPEND LD_FLAGS
-        --sysroot=${VMM_PREFIX_PATH}
-        -z max-page-size=4096
-        -z common-page-size=4096
-        -z relro
-        -z now
+    string(CONCAT LD_FLAGS
+        "--sysroot=${CMAKE_INSTALL_PREFIX} "
+        "-z max-page-size=4096 "
+        "-z common-page-size=4096 "
+        "-z relro "
+        "-z now "
+        "-nostdlib "
     )
 
     if(CMAKE_BUILD_TYPE STREQUAL "Release")

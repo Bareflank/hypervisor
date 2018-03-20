@@ -23,23 +23,16 @@ do_test(test_debug_ring
     DEFINES STATIC_INTRINSICS
 )
 
-do_test(test_serial_port_base
-    SOURCES serial/test_serial_port_base.cpp
+do_test(test_serial_ns16550a
+    SOURCES serial/test_serial_ns16550a.cpp
     DEPENDS bfvmm_debug
     DEFINES STATIC_DEBUG
     DEFINES STATIC_INTRINSICS
 )
 
-do_test(test_serial_port_ns16550a
-    SOURCES serial/test_serial_port_ns16550a.cpp
-    DEPENDS bfvmm_debug
-    DEFINES STATIC_DEBUG
-    DEFINES STATIC_INTRINSICS
-)
-
-do_test(test_serial_port_pl011
-    SOURCES serial/test_serial_port_pl011.cpp
-    DEPENDS bfvmm_debug
-    DEFINES STATIC_DEBUG
-    DEFINES STATIC_INTRINSICS
-)
+# do_test(test_serial_port_pl011
+#     SOURCES serial/test_serial_port_pl011.cpp
+#     DEPENDS bfvmm_debug
+#     DEFINES STATIC_DEBUG
+#     DEFINES STATIC_INTRINSICS
+# )

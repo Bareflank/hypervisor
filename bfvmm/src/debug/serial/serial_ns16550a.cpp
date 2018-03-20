@@ -16,46 +16,47 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <bfgsl.h>
-#include <bfarch.h>
-#include <bfsupport.h>
-#include <debug/serial/serial_port_ns16550a.h>
+#include <debug/serial/serial_ns16550a.h>
 
 namespace bfvmm
 {
 
-using namespace serial_ns16550a;
+constexpr const uint8_t dlab = 1U << 7;
 
-serial_port_ns16550a::serial_port_ns16550a() noexcept
+constexpr const uint16_t baud_rate_lo_reg = 0U;
+constexpr const uint16_t baud_rate_hi_reg = 1U;
+constexpr const uint16_t interrupt_en_reg = 1U;
+constexpr const uint16_t fifo_control_reg = 2U;
+constexpr const uint16_t line_control_reg = 3U;
+constexpr const uint16_t line_status_reg = 5U;
+
+constexpr const uint8_t fifo_control_enable_fifos = 1U << 0;
+constexpr const uint8_t fifo_control_clear_recieve_fifo = 1U << 1;
+constexpr const uint8_t fifo_control_clear_transmit_fifo = 1U << 2;
+
+constexpr const uint8_t line_status_empty_transmitter = 1U << 5;
+
+constexpr const uint8_t line_control_data_mask = 0x03;
+constexpr const uint8_t line_control_stop_mask = 0x04;
+constexpr const uint8_t line_control_parity_mask = 0x38;
+
+#define IN(addr)                                                                \
+    x64::portio::inb(static_cast<uint16_t>(addr + DEFAULT_COM_PORT))
+
+#define OUT(addr, data)                                                         \
+    x64::portio::outb(static_cast<uint16_t>(addr + DEFAULT_COM_PORT), static_cast<uint8_t>(data))
+
+serial_ns16550a::serial_ns16550a() noexcept
 {
-#ifdef BF_AARCH64
-    auto platform_info = get_platform_info();
-    auto port = reinterpret_cast<port_type>(platform_info->serial_address);
-    init(port);
-#else
-    init(DEFAULT_COM_PORT);
-#endif
-}
-
-serial_port_ns16550a::serial_port_ns16550a(serial_port_ns16550a::port_type port) noexcept
-{
-    init(port);
-}
-
-void serial_port_ns16550a::init(serial_port_ns16550a::port_type port) noexcept
-{
-    m_port = port;
-
-    value_type_8 bits = 0;
-
     this->disable_dlab();
 
+    auto bits = 0U;
     bits |= fifo_control_enable_fifos;
     bits |= fifo_control_clear_recieve_fifo;
     bits |= fifo_control_clear_transmit_fifo;
 
-    offset_outb(interrupt_en_reg, gsl::narrow_cast<value_type_8>(0x00));
-    offset_outb(fifo_control_reg, gsl::narrow_cast<value_type_8>(bits));
+    OUT(interrupt_en_reg, 0x00);
+    OUT(fifo_control_reg, bits);
 
     this->set_baud_rate(DEFAULT_BAUD_RATE);
     this->set_data_bits(DEFAULT_DATA_BITS);
@@ -63,34 +64,34 @@ void serial_port_ns16550a::init(serial_port_ns16550a::port_type port) noexcept
     this->set_parity_bits(DEFAULT_PARITY_BITS);
 }
 
-serial_port_ns16550a *
-serial_port_ns16550a::instance() noexcept
+serial_ns16550a *
+serial_ns16550a::instance() noexcept
 {
-    static serial_port_ns16550a serial{};
+    static serial_ns16550a serial{};
     return &serial;
 }
 
 void
-serial_port_ns16550a::set_baud_rate(baud_rate_t rate) noexcept
+serial_ns16550a::set_baud_rate(baud_rate_t rate) noexcept
 {
     auto lsb = (rate & 0x000000FF) >> 0;
     auto msb = (rate & 0x0000FF00) >> 8;
 
     this->enable_dlab();
 
-    offset_outb(baud_rate_lo_reg, gsl::narrow_cast<value_type_8>(lsb));
-    offset_outb(baud_rate_hi_reg, gsl::narrow_cast<value_type_8>(msb));
+    OUT(baud_rate_lo_reg, lsb);
+    OUT(baud_rate_hi_reg, msb);
 
     this->disable_dlab();
 }
 
-serial_port_ns16550a::baud_rate_t
-serial_port_ns16550a::baud_rate() const noexcept
+serial_ns16550a::baud_rate_t
+serial_ns16550a::baud_rate() const noexcept
 {
     this->enable_dlab();
 
-    auto lsb = offset_inb(baud_rate_lo_reg);
-    auto msb = offset_inb(baud_rate_hi_reg);
+    auto lsb = IN(baud_rate_lo_reg);
+    auto msb = IN(baud_rate_hi_reg);
 
     this->disable_dlab();
 
@@ -135,20 +136,20 @@ serial_port_ns16550a::baud_rate() const noexcept
 }
 
 void
-serial_port_ns16550a::set_data_bits(data_bits_t bits) noexcept
+serial_ns16550a::set_data_bits(data_bits_t bits) noexcept
 {
-    auto reg = offset_inb(line_control_reg);
+    auto reg = IN(line_control_reg);
 
-    reg = reg & gsl::narrow_cast<decltype(reg)>(~line_control_data_mask);
-    reg = reg | gsl::narrow_cast<decltype(reg)>(bits & line_control_data_mask);
+    reg = reg & static_cast<decltype(reg)>(~line_control_data_mask);
+    reg = reg | static_cast<decltype(reg)>(bits & line_control_data_mask);
 
-    offset_outb(line_control_reg, reg);
+    OUT(line_control_reg, reg);
 }
 
-serial_port_ns16550a::data_bits_t
-serial_port_ns16550a::data_bits() const noexcept
+serial_ns16550a::data_bits_t
+serial_ns16550a::data_bits() const noexcept
 {
-    auto reg = offset_inb(line_control_reg);
+    auto reg = IN(line_control_reg);
 
     switch (reg & line_control_data_mask) {
         case char_length_5:
@@ -163,20 +164,20 @@ serial_port_ns16550a::data_bits() const noexcept
 }
 
 void
-serial_port_ns16550a::set_stop_bits(stop_bits_t bits) noexcept
+serial_ns16550a::set_stop_bits(stop_bits_t bits) noexcept
 {
-    auto reg = offset_inb(line_control_reg);
+    auto reg = IN(line_control_reg);
 
-    reg = reg & gsl::narrow_cast<decltype(reg)>(~line_control_stop_mask);
-    reg = reg | gsl::narrow_cast<decltype(reg)>(bits & line_control_stop_mask);
+    reg = reg & static_cast<decltype(reg)>(~line_control_stop_mask);
+    reg = reg | static_cast<decltype(reg)>(bits & line_control_stop_mask);
 
-    offset_outb(line_control_reg, reg);
+    OUT(line_control_reg, reg);
 }
 
-serial_port_ns16550a::stop_bits_t
-serial_port_ns16550a::stop_bits() const noexcept
+serial_ns16550a::stop_bits_t
+serial_ns16550a::stop_bits() const noexcept
 {
-    auto reg = offset_inb(line_control_reg);
+    auto reg = IN(line_control_reg);
 
     switch (reg & line_control_stop_mask) {
         case stop_bits_1:
@@ -187,20 +188,20 @@ serial_port_ns16550a::stop_bits() const noexcept
 }
 
 void
-serial_port_ns16550a::set_parity_bits(parity_bits_t bits) noexcept
+serial_ns16550a::set_parity_bits(parity_bits_t bits) noexcept
 {
-    auto reg = offset_inb(line_control_reg);
+    auto reg = IN(line_control_reg);
 
-    reg = reg & gsl::narrow_cast<decltype(reg)>(~line_control_parity_mask);
-    reg = reg | gsl::narrow_cast<decltype(reg)>(bits & line_control_parity_mask);
+    reg = reg & static_cast<decltype(reg)>(~line_control_parity_mask);
+    reg = reg | static_cast<decltype(reg)>(bits & line_control_parity_mask);
 
-    offset_outb(line_control_reg, reg);
+    OUT(line_control_reg, reg);
 }
 
-serial_port_ns16550a::parity_bits_t
-serial_port_ns16550a::parity_bits() const noexcept
+serial_ns16550a::parity_bits_t
+serial_ns16550a::parity_bits() const noexcept
 {
-    auto reg = offset_inb(line_control_reg);
+    auto reg = IN(line_control_reg);
 
     switch (reg & line_control_parity_mask) {
         case parity_odd:
@@ -216,35 +217,32 @@ serial_port_ns16550a::parity_bits() const noexcept
     }
 }
 
+int is_transmit_empty()
+{ return _inb(DEFAULT_COM_PORT + line_status_reg) & line_status_empty_transmitter; }
+
 void
-serial_port_ns16550a::write(char c) noexcept
+serial_ns16550a::write(char c) const noexcept
 {
-    while (!get_line_status_empty_transmitter())
+    while (is_transmit_empty() == 0)
     { }
 
-    offset_outb(0, gsl::narrow_cast<value_type_8>(c));
+    OUT(0, c);
 }
 
 void
-serial_port_ns16550a::enable_dlab() const noexcept
+serial_ns16550a::enable_dlab() const noexcept
 {
-    auto reg = offset_inb(line_control_reg);
-    reg = reg | gsl::narrow_cast<decltype(reg)>(dlab);
-    offset_outb(line_control_reg, reg);
+    auto reg = IN(line_control_reg);
+    reg = reg | static_cast<decltype(reg)>(dlab);
+    OUT(line_control_reg, reg);
 }
 
 void
-serial_port_ns16550a::disable_dlab() const noexcept
+serial_ns16550a::disable_dlab() const noexcept
 {
-    auto reg = offset_inb(line_control_reg);
-    reg = reg & gsl::narrow_cast<decltype(reg)>(~(dlab));
-    offset_outb(line_control_reg, reg);
-}
-
-bool
-serial_port_ns16550a::get_line_status_empty_transmitter() const noexcept
-{
-    return (offset_inb(line_status_reg) & line_status_empty_transmitter) != 0;
+    auto reg = IN(line_control_reg);
+    reg = reg & static_cast<decltype(reg)>(~(dlab));
+    OUT(line_control_reg, reg);
 }
 
 }
