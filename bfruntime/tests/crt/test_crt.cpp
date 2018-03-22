@@ -60,7 +60,7 @@ TEST_CASE("bfmain and mock_main")
     try {
         mock_abort();
     }
-    catch(...)
+    catch (...)
     { }
 }
 
