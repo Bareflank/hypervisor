@@ -44,3 +44,9 @@ add_static_library(
     DEFINES STATIC_DEBUG
     DEFINES STATIC_INTRINSICS
 )
+
+# ------------------------------------------------------------------------------
+# Install
+# ------------------------------------------------------------------------------
+
+install(DIRECTORY ../../include/debug/ DESTINATION include/bfvmm/debug)

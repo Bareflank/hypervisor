@@ -55,3 +55,9 @@ add_static_library(
     DEFINES STATIC_MEMORY_MANAGER
     DEFINES STATIC_INTRINSICS
 )
+
+# ------------------------------------------------------------------------------
+# Install
+# ------------------------------------------------------------------------------
+
+install(DIRECTORY ../../include/hve/ DESTINATION include/bfvmm/hve)
