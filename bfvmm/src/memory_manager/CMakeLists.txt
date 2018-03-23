@@ -46,3 +46,9 @@ add_static_library(
     DEFINES STATIC_MEMORY_MANAGER
     DEFINES STATIC_INTRINSICS
 )
+
+# ------------------------------------------------------------------------------
+# Install
+# ------------------------------------------------------------------------------
+
+install(DIRECTORY ../../include/memory_manager/ DESTINATION include/bfvmm/memory_manager)
