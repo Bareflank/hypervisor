@@ -41,7 +41,13 @@ constexpr const auto page_size = 0x1000ULL;
 /// \cond
 
 alignas(page_size) uint8_t g_heap_pool_owner[MAX_HEAP_POOL] = {};
-alignas(page_size) uint8_t g_page_pool_owner[MAX_PAGE_POOL] = {};
+
+constexpr auto g_page_pool_k = 15ULL;
+alignas(page_size) uint8_t g_page_pool_buffer[buddy_allocator::buffer_size(g_page_pool_k)] = {};
+alignas(page_size) uint8_t g_page_pool_node_tree[buddy_allocator::node_tree_size(g_page_pool_k)] = {};
+
+constexpr auto g_mem_map_pool_k = 15ULL;
+alignas(page_size) uint8_t g_mem_map_pool_node_tree[buddy_allocator::node_tree_size(g_mem_map_pool_k)] = {};
 
 /// \endcond
 
@@ -74,13 +80,13 @@ memory_manager::alloc(size_type size) noexcept
 
     try {
         if (lower(size) == 0) {
-            return reinterpret_cast<pointer>(g_page_pool.alloc(size));
+            return static_cast<pointer>(g_page_pool.allocate(size));
         }
 
         return reinterpret_cast<pointer>(g_heap_pool.alloc(size));
     }
     catch (...)
-    { }
+    { WARNING("memory_manager::alloc: std::bad_alloc thrown"); }
 
     return nullptr;
 }
@@ -93,7 +99,7 @@ memory_manager::alloc_map(size_type size) noexcept
     }
 
     try {
-        return reinterpret_cast<pointer>(g_mem_map_pool.alloc(size));
+        return reinterpret_cast<pointer>(g_mem_map_pool.allocate(size));
     }
     catch (...)
     { }
@@ -111,7 +117,7 @@ memory_manager::free(pointer ptr) noexcept
     }
 
     if (g_page_pool.contains(uintptr)) {
-        return g_page_pool.free(uintptr);
+        return g_page_pool.deallocate(ptr);
     }
 }
 
@@ -121,7 +127,7 @@ memory_manager::free_map(pointer ptr) noexcept
     auto uintptr = reinterpret_cast<integer_pointer>(ptr);
 
     if (g_mem_map_pool.contains(uintptr)) {
-        return g_mem_map_pool.free(uintptr);
+        return g_mem_map_pool.deallocate(ptr);
     }
 }
 
@@ -135,7 +141,7 @@ memory_manager::size(pointer ptr) const noexcept
     }
 
     if (g_page_pool.contains(uintptr)) {
-        return g_page_pool.size(uintptr);
+        return g_page_pool.size(ptr);
     }
 
     return 0;
@@ -147,7 +153,7 @@ memory_manager::size_map(pointer ptr) const noexcept
     auto uintptr = reinterpret_cast<integer_pointer>(ptr);
 
     if (g_mem_map_pool.contains(uintptr)) {
-        return g_mem_map_pool.size(uintptr);
+        return g_mem_map_pool.size(ptr);
     }
 
     return 0;
@@ -278,8 +284,8 @@ memory_manager::descriptors() const
 
 memory_manager::memory_manager() noexcept :
     g_heap_pool(reinterpret_cast<uintptr_t>(g_heap_pool_owner)),
-    g_page_pool(reinterpret_cast<uintptr_t>(g_page_pool_owner)),
-    g_mem_map_pool(MEM_MAP_POOL_START)
+    g_page_pool(g_page_pool_buffer, g_page_pool_k, g_page_pool_node_tree),
+    g_mem_map_pool(MEM_MAP_POOL_START, g_mem_map_pool_k, g_mem_map_pool_node_tree)
 { }
 
 memory_manager::integer_pointer

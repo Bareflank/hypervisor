@@ -93,7 +93,7 @@ vcpu_manager::add_vcpu(vcpuid::type vcpuid, bfobject *obj)
         return vcpu;
     }
 
-    if (auto &&vcpu = m_vcpu_factory->make_vcpu(vcpuid, obj)) {
+    if (auto vcpu = m_vcpu_factory->make_vcpu(vcpuid, obj)) {
         std::lock_guard<std::mutex> guard(g_vcpu_manager_mutex);
         return m_vcpus[vcpuid] = std::move(vcpu);
     }

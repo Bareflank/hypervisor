@@ -324,6 +324,10 @@ physint_to_virtptr(uintptr_t ptr)
     return static_cast<void *>(g_mock_mem[g_test_addr]);
 }
 
+extern "C" uint64_t
+unsafe_write_cstr(const char *cstr, size_t len)
+{ bfignored(cstr); bfignored(len); return 0; }
+
 extern "C" void vmcs_launch(
     bfvmm::intel_x64::save_state_t *save_state) noexcept
 { bfignored(save_state); }

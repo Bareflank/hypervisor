@@ -16,21 +16,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-cmake_minimum_required(VERSION 3.6)
-project(bfvmm_test C CXX)
-
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project(
-    INCLUDES ${CMAKE_CURRENT_LIST_DIR}/../include
+do_test(test_buddy_allocator
+    SOURCES test_buddy_allocator.cpp
+    DEFINES STATIC_MEMORY_MANAGER
 )
-
-add_subdirectory(../src/debug ${CMAKE_CURRENT_BINARY_DIR}/src/debug)
-add_subdirectory(../src/hve ${CMAKE_CURRENT_BINARY_DIR}/src/hve)
-add_subdirectory(../src/memory_manager ${CMAKE_CURRENT_BINARY_DIR}/src/memory_manager)
-add_subdirectory(../src/vcpu ${CMAKE_CURRENT_BINARY_DIR}/src/vcpu)
-
-add_subdirectory(debug)
-add_subdirectory(hve)
-add_subdirectory(memory_manager)
-add_subdirectory(vcpu)
-add_subdirectory(support)

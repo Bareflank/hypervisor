@@ -140,7 +140,7 @@ matrix:
     script:
       - cmake -DCONFIG=travis_format ..
       - make astyle_x86_64-userspace-elf
-      - make format
+      - make format-all
       - |
         if [[ -n $(git diff) ]]; then
           echo "You must run make format before submitting a pull request"

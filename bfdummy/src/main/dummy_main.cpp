@@ -77,8 +77,7 @@ main(int argc, char *argv[])
     try {
         throw std::runtime_error("test exceptions");
     }
-    catch (std::exception &)
-    {
+    catch (std::exception &) {
         auto view = gsl::make_span(argv, argc);
 
         return g_derived1.foo(gsl::narrow_cast<int>(atoi(view[0]))) +

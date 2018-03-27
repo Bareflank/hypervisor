@@ -26,6 +26,7 @@
 #include <bfconstants.h>
 
 #include "mem_pool.h"
+#include "buddy_allocator.h"
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -403,8 +404,9 @@ private:
     std::map<integer_pointer, attr_type> m_virt_to_attr_map;
 
     mem_pool<MAX_HEAP_POOL, 6ULL> g_heap_pool;
-    mem_pool<MAX_PAGE_POOL, 12ULL> g_page_pool;
-    mem_pool<MAX_MEM_MAP_POOL, 12ULL> g_mem_map_pool;
+
+    buddy_allocator g_page_pool;
+    buddy_allocator g_mem_map_pool;
 
 public:
 

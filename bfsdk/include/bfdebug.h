@@ -104,7 +104,17 @@ unsafe_write_cstr(const char *cstr, size_t len);
 #define CALLED() \
     { \
         const char *str_text = "\033[1;32mDEBUG\033[0m: function called = "; \
-        const char *str_func = __PRETTY_FUNCTION__; \
+        const char *str_func = __BFFUNC__; \
+        const char *str_endl = "\n"; \
+        unsafe_write_cstr(str_text, strlen(str_text)); \
+        unsafe_write_cstr(str_func, strlen(str_func)); \
+        unsafe_write_cstr(str_endl, strlen(str_endl)); \
+    }
+
+#define WARNING(a) \
+    { \
+        const char *str_text = "\033[1;33mWARNING\033[0m: " a " = "; \
+        const char *str_func = __BFFUNC__; \
         const char *str_endl = "\n"; \
         unsafe_write_cstr(str_text, strlen(str_text)); \
         unsafe_write_cstr(str_func, strlen(str_func)); \
@@ -114,7 +124,7 @@ unsafe_write_cstr(const char *cstr, size_t len);
 #define UNHANDLED() \
     { \
         const char *str_text = "\033[1;33mWARNING\033[0m: unsupported function called = "; \
-        const char *str_func = __PRETTY_FUNCTION__; \
+        const char *str_func = __BFFUNC__; \
         const char *str_endl = "\n"; \
         unsafe_write_cstr(str_text, strlen(str_text)); \
         unsafe_write_cstr(str_func, strlen(str_func)); \
@@ -124,7 +134,7 @@ unsafe_write_cstr(const char *cstr, size_t len);
 #define ARG_UNSUPPORTED(a) \
     { \
         const char *str_text = "\033[1;33mWARNING\033[0m: " a " not supported for function called = "; \
-        const char *str_func = __PRETTY_FUNCTION__; \
+        const char *str_func = __BFFUNC__; \
         const char *str_endl = "\n"; \
         unsafe_write_cstr(str_text, strlen(str_text)); \
         unsafe_write_cstr(str_func, strlen(str_func)); \
