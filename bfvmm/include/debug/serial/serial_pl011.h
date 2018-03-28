@@ -19,13 +19,11 @@
 #ifndef SERIAL_PORT_PL011_H
 #define SERIAL_PORT_PL011_H
 
-#include <string>
 #include <memory>
 
 #include <bfconstants.h>
 
 #include <intrinsics.h>
-#include "serial_port_base.h"
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -49,145 +47,11 @@
 #endif
 
 // -----------------------------------------------------------------------------
-// Constants
+// Definition
 // -----------------------------------------------------------------------------
 
 namespace bfvmm
 {
-
-/// @cond
-
-// from ARM PrimeCell UART (PL011) Technical Reference Manual
-// http://infocenter.arm.com/help/topic/com.arm.doc.ddi0183f/DDI0183.pdf
-
-namespace serial_pl011
-{
-constexpr const serial_port_base::port_type uartdr_reg = 0x000u;
-constexpr const serial_port_base::port_type uartrsr_reg = 0x004u;
-constexpr const serial_port_base::port_type uartecr_reg = 0x004u;
-constexpr const serial_port_base::port_type uartfr_reg = 0x018u;
-constexpr const serial_port_base::port_type uartilpr_reg = 0x020u;
-constexpr const serial_port_base::port_type uartibrd_reg = 0x024u;
-constexpr const serial_port_base::port_type uartfbrd_reg = 0x028u;
-constexpr const serial_port_base::port_type uartlcr_h_reg = 0x02Cu;
-constexpr const serial_port_base::port_type uartcr_reg = 0x030u;
-constexpr const serial_port_base::port_type uartifls_reg = 0x034u;
-constexpr const serial_port_base::port_type uartimsc_reg = 0x038u;
-constexpr const serial_port_base::port_type uartris_reg = 0x03Cu;
-constexpr const serial_port_base::port_type uartmis_reg = 0x040u;
-constexpr const serial_port_base::port_type uarticr_reg = 0x044u;
-constexpr const serial_port_base::port_type uartdmacr_reg = 0x048u;
-constexpr const serial_port_base::port_type uartperiphid0_reg = 0xFE0u;
-constexpr const serial_port_base::port_type uartperiphid1_reg = 0xFE4u;
-constexpr const serial_port_base::port_type uartperiphid2_reg = 0xFE8u;
-constexpr const serial_port_base::port_type uartperiphid3_reg = 0xFECu;
-constexpr const serial_port_base::port_type uartpcellid0_reg = 0xFF0u;
-constexpr const serial_port_base::port_type uartpcellid1_reg = 0xFF4u;
-constexpr const serial_port_base::port_type uartpcellid2_reg = 0xFF8u;
-constexpr const serial_port_base::port_type uartpcellid3_reg = 0xFFCu;
-
-// Data register (UARTDR)
-constexpr const serial_port_base::value_type_32 uartdr_overrun_error = 1U << 11;
-constexpr const serial_port_base::value_type_32 uartdr_break_error = 1U << 10;
-constexpr const serial_port_base::value_type_32 uartdr_parity_error = 1U << 9;
-constexpr const serial_port_base::value_type_32 uartdr_framing_error = 1U << 8;
-constexpr const serial_port_base::value_type_32 uartdr_data_mask = 0xFFu;
-
-// Receive status register (UARTRSR)
-// Error clear register (UARTECR)
-constexpr const serial_port_base::value_type_32 uartrsr_overrun_error = 1U << 3;
-constexpr const serial_port_base::value_type_32 uartrsr_break_error = 1U << 2;
-constexpr const serial_port_base::value_type_32 uartrsr_parity_error = 1U << 1;
-constexpr const serial_port_base::value_type_32 uartrsr_framing_error = 1U << 0;
-
-// Flag register (UARTFR)
-constexpr const serial_port_base::value_type_32 uartfr_ring_indicator = 1U << 8;
-constexpr const serial_port_base::value_type_32 uartfr_tx_empty = 1U << 7;
-constexpr const serial_port_base::value_type_32 uartfr_rx_full = 1U << 6;
-constexpr const serial_port_base::value_type_32 uartfr_tx_full = 1U << 5;
-constexpr const serial_port_base::value_type_32 uartfr_rx_empty = 1U << 4;
-constexpr const serial_port_base::value_type_32 uartfr_busy = 1U << 3;
-constexpr const serial_port_base::value_type_32 uartfr_dcd = 1U << 2;
-constexpr const serial_port_base::value_type_32 uartfr_dsr = 1U << 1;
-constexpr const serial_port_base::value_type_32 uartfr_cts = 1U << 0;
-
-// Line control register (UARTLCR_H)
-constexpr const serial_port_base::value_type_32 uartlcr_h_wlen_mask = 3U << 5;
-constexpr const serial_port_base::value_type_32 uartlcr_h_wlen_8bit = 3U << 5;
-constexpr const serial_port_base::value_type_32 uartlcr_h_wlen_7bit = 2U << 5;
-constexpr const serial_port_base::value_type_32 uartlcr_h_wlen_6bit = 1U << 5;
-constexpr const serial_port_base::value_type_32 uartlcr_h_wlen_5bit = 0U << 5;
-constexpr const serial_port_base::value_type_32 uartlcr_h_fifo_enable = 1U << 4;
-constexpr const serial_port_base::value_type_32 uartlcr_h_stop_mask = 1U << 3;
-constexpr const serial_port_base::value_type_32 uartlcr_h_stop_1bit = 0U << 3;
-constexpr const serial_port_base::value_type_32 uartlcr_h_stop_2bit = 1U << 3;
-constexpr const serial_port_base::value_type_32 uartlcr_h_sps = 1U << 7;
-constexpr const serial_port_base::value_type_32 uartlcr_h_eps = 1U << 2;
-constexpr const serial_port_base::value_type_32 uartlcr_h_pen = 1U << 1;
-constexpr const serial_port_base::value_type_32 uartlcr_h_parity_mask = uartlcr_h_sps | uartlcr_h_eps | uartlcr_h_pen;
-constexpr const serial_port_base::value_type_32 uartlcr_h_parity_even = uartlcr_h_eps | uartlcr_h_pen;
-constexpr const serial_port_base::value_type_32 uartlcr_h_parity_odd = uartlcr_h_pen;
-constexpr const serial_port_base::value_type_32 uartlcr_h_parity_none = 0;
-constexpr const serial_port_base::value_type_32 uartlcr_h_parity_one = uartlcr_h_pen | uartlcr_h_sps;
-constexpr const serial_port_base::value_type_32 uartlcr_h_parity_zero = uartlcr_h_pen | uartlcr_h_sps | uartlcr_h_eps;
-constexpr const serial_port_base::value_type_32 uartlcr_h_send_break = 1U << 0;
-
-// Control register (UARTCR)
-constexpr const serial_port_base::value_type_32 uartcr_ctse_n = 1U << 15;
-constexpr const serial_port_base::value_type_32 uartcr_rtse_n = 1U << 14;
-constexpr const serial_port_base::value_type_32 uartcr_out2 = 1U << 13;
-constexpr const serial_port_base::value_type_32 uartcr_out1 = 1U << 12;
-constexpr const serial_port_base::value_type_32 uartcr_rts = 1U << 11;
-constexpr const serial_port_base::value_type_32 uartcr_dtr = 1U << 10;
-constexpr const serial_port_base::value_type_32 uartcr_rx_en = 1U << 9;
-constexpr const serial_port_base::value_type_32 uartcr_tx_en = 1U << 8;
-constexpr const serial_port_base::value_type_32 uartcr_loopback_en = 1U << 7;
-constexpr const serial_port_base::value_type_32 uartcr_sirlp = 1U << 2;
-constexpr const serial_port_base::value_type_32 uartcr_siren = 1U << 1;
-constexpr const serial_port_base::value_type_32 uartcr_uart_en = 1U << 0;
-
-// Interrupt FIFO level select register (UARTIFLS)
-constexpr const serial_port_base::value_type_32 uartifls_rxiflsel_mask = 7U << 3;
-constexpr const serial_port_base::value_type_32 uartifls_rxiflsel_1_8 = 0U << 3;
-constexpr const serial_port_base::value_type_32 uartifls_rxiflsel_1_4 = 1U << 3;
-constexpr const serial_port_base::value_type_32 uartifls_rxiflsel_1_2 = 2U << 3;
-constexpr const serial_port_base::value_type_32 uartifls_rxiflsel_3_4 = 3U << 3;
-constexpr const serial_port_base::value_type_32 uartifls_rxiflsel_7_8 = 4U << 3;
-constexpr const serial_port_base::value_type_32 uartifls_txiflsel_mask = 7U << 0;
-constexpr const serial_port_base::value_type_32 uartifls_txiflsel_1_8 = 0U << 0;
-constexpr const serial_port_base::value_type_32 uartifls_txiflsel_1_4 = 1U << 0;
-constexpr const serial_port_base::value_type_32 uartifls_txiflsel_1_2 = 2U << 0;
-constexpr const serial_port_base::value_type_32 uartifls_txiflsel_3_4 = 3U << 0;
-constexpr const serial_port_base::value_type_32 uartifls_txiflsel_7_8 = 4U << 0;
-
-// Interrupt mask set/clear register (UARTIMSC)
-// Raw interrupt status register (UARTRIS)
-// Masked interrupt status register (UARTMIS)
-// Interrupt clear register (UARTICR)
-constexpr const serial_port_base::value_type_32 uartinterrupt_oe = 1U << 10;
-constexpr const serial_port_base::value_type_32 uartinterrupt_be = 1U << 9;
-constexpr const serial_port_base::value_type_32 uartinterrupt_pe = 1U << 8;
-constexpr const serial_port_base::value_type_32 uartinterrupt_fe = 1U << 7;
-constexpr const serial_port_base::value_type_32 uartinterrupt_rt = 1U << 6;
-constexpr const serial_port_base::value_type_32 uartinterrupt_tx = 1U << 5;
-constexpr const serial_port_base::value_type_32 uartinterrupt_rx = 1U << 4;
-constexpr const serial_port_base::value_type_32 uartinterrupt_dsrm = 1U << 3;
-constexpr const serial_port_base::value_type_32 uartinterrupt_dcdm = 1U << 2;
-constexpr const serial_port_base::value_type_32 uartinterrupt_ctsm = 1U << 1;
-constexpr const serial_port_base::value_type_32 uartinterrupt_rim = 1U << 0;
-
-// DMA control register (UARTDMACR)
-constexpr const serial_port_base::value_type_32 uartdmacr_dmaonerr = 1U << 2;
-constexpr const serial_port_base::value_type_32 uartdmacr_txdma_en = 1U << 1;
-constexpr const serial_port_base::value_type_32 uartdmacr_rxdma_en = 1U << 0;
-
-}
-
-/// @endcond
-
-// -----------------------------------------------------------------------------
-// Definitions
-// -----------------------------------------------------------------------------
 
 /// Serial Port (ARM PrimeCell PL011)
 ///
@@ -197,70 +61,192 @@ constexpr const serial_port_base::value_type_32 uartdmacr_rxdma_en = 1U << 0;
 /// Note that by default, a FIFO is used / required, and interrupts are
 /// disabled.
 ///
-class EXPORT_DEBUG serial_port_pl011 : public serial_port_base
+class EXPORT_DEBUG serial_pl011
 {
-public:
-
 public:
 
     /// @cond
 
-    enum data_bits_t : value_type_32 {
-        char_length_5 = serial_pl011::uartlcr_h_wlen_5bit,
-        char_length_6 = serial_pl011::uartlcr_h_wlen_6bit,
-        char_length_7 = serial_pl011::uartlcr_h_wlen_7bit,
-        char_length_8 = serial_pl011::uartlcr_h_wlen_8bit,
-    };
+    // from ARM PrimeCell UART (PL011) Technical Reference Manual
+    // http://infocenter.arm.com/help/topic/com.arm.doc.ddi0183f/DDI0183.pdf
 
-    enum stop_bits_t : value_type_32 {
-        stop_bits_1 = serial_pl011::uartlcr_h_stop_1bit,
-        stop_bits_2 = serial_pl011::uartlcr_h_stop_2bit,
-    };
+    static constexpr ptrdiff_t uartdr_reg = 0x000u;
+    static constexpr ptrdiff_t uartrsr_reg = 0x004u;
+    static constexpr ptrdiff_t uartecr_reg = 0x004u;
+    static constexpr ptrdiff_t uartfr_reg = 0x018u;
+    static constexpr ptrdiff_t uartilpr_reg = 0x020u;
+    static constexpr ptrdiff_t uartibrd_reg = 0x024u;
+    static constexpr ptrdiff_t uartfbrd_reg = 0x028u;
+    static constexpr ptrdiff_t uartlcr_h_reg = 0x02Cu;
+    static constexpr ptrdiff_t uartcr_reg = 0x030u;
+    static constexpr ptrdiff_t uartifls_reg = 0x034u;
+    static constexpr ptrdiff_t uartimsc_reg = 0x038u;
+    static constexpr ptrdiff_t uartris_reg = 0x03Cu;
+    static constexpr ptrdiff_t uartmis_reg = 0x040u;
+    static constexpr ptrdiff_t uarticr_reg = 0x044u;
+    static constexpr ptrdiff_t uartdmacr_reg = 0x048u;
+    static constexpr ptrdiff_t uartperiphid0_reg = 0xFE0u;
+    static constexpr ptrdiff_t uartperiphid1_reg = 0xFE4u;
+    static constexpr ptrdiff_t uartperiphid2_reg = 0xFE8u;
+    static constexpr ptrdiff_t uartperiphid3_reg = 0xFECu;
+    static constexpr ptrdiff_t uartpcellid0_reg = 0xFF0u;
+    static constexpr ptrdiff_t uartpcellid1_reg = 0xFF4u;
+    static constexpr ptrdiff_t uartpcellid2_reg = 0xFF8u;
+    static constexpr ptrdiff_t uartpcellid3_reg = 0xFFCu;
 
-    enum parity_bits_t : value_type_32 {
-        parity_none = serial_pl011::uartlcr_h_parity_none,
-        parity_odd = serial_pl011::uartlcr_h_parity_odd,
-        parity_even = serial_pl011::uartlcr_h_parity_even,
-        parity_mark = serial_pl011::uartlcr_h_parity_one,
-        parity_space = serial_pl011::uartlcr_h_parity_zero,
-    };
+    // Data register (UARTDR)
+    static constexpr uint32_t uartdr_overrun_error = 1U << 11;
+    static constexpr uint32_t uartdr_break_error = 1U << 10;
+    static constexpr uint32_t uartdr_parity_error = 1U << 9;
+    static constexpr uint32_t uartdr_framing_error = 1U << 8;
+    static constexpr uint32_t uartdr_data_mask = 0xFFu;
+
+    // Receive status register (UARTRSR)
+    // Error clear register (UARTECR)
+    static constexpr uint32_t uartrsr_overrun_error = 1U << 3;
+    static constexpr uint32_t uartrsr_break_error = 1U << 2;
+    static constexpr uint32_t uartrsr_parity_error = 1U << 1;
+    static constexpr uint32_t uartrsr_framing_error = 1U << 0;
+
+    // Flag register (UARTFR)
+    static constexpr uint32_t uartfr_ring_indicator = 1U << 8;
+    static constexpr uint32_t uartfr_tx_empty = 1U << 7;
+    static constexpr uint32_t uartfr_rx_full = 1U << 6;
+    static constexpr uint32_t uartfr_tx_full = 1U << 5;
+    static constexpr uint32_t uartfr_rx_empty = 1U << 4;
+    static constexpr uint32_t uartfr_busy = 1U << 3;
+    static constexpr uint32_t uartfr_dcd = 1U << 2;
+    static constexpr uint32_t uartfr_dsr = 1U << 1;
+    static constexpr uint32_t uartfr_cts = 1U << 0;
+
+    // Line control register (UARTLCR_H)
+    static constexpr uint32_t uartlcr_h_wlen_mask = 3U << 5;
+    static constexpr uint32_t uartlcr_h_wlen_8bit = 3U << 5;
+    static constexpr uint32_t uartlcr_h_wlen_7bit = 2U << 5;
+    static constexpr uint32_t uartlcr_h_wlen_6bit = 1U << 5;
+    static constexpr uint32_t uartlcr_h_wlen_5bit = 0U << 5;
+    static constexpr uint32_t uartlcr_h_fifo_enable = 1U << 4;
+    static constexpr uint32_t uartlcr_h_stop_mask = 1U << 3;
+    static constexpr uint32_t uartlcr_h_stop_1bit = 0U << 3;
+    static constexpr uint32_t uartlcr_h_stop_2bit = 1U << 3;
+    static constexpr uint32_t uartlcr_h_sps = 1U << 7;
+    static constexpr uint32_t uartlcr_h_eps = 1U << 2;
+    static constexpr uint32_t uartlcr_h_pen = 1U << 1;
+    static constexpr uint32_t uartlcr_h_parity_mask = uartlcr_h_sps | uartlcr_h_eps | uartlcr_h_pen;
+    static constexpr uint32_t uartlcr_h_parity_even = uartlcr_h_eps | uartlcr_h_pen;
+    static constexpr uint32_t uartlcr_h_parity_odd = uartlcr_h_pen;
+    static constexpr uint32_t uartlcr_h_parity_none = 0;
+    static constexpr uint32_t uartlcr_h_parity_one = uartlcr_h_pen | uartlcr_h_sps;
+    static constexpr uint32_t uartlcr_h_parity_zero = uartlcr_h_pen | uartlcr_h_sps | uartlcr_h_eps;
+    static constexpr uint32_t uartlcr_h_send_break = 1U << 0;
+
+    // Control register (UARTCR)
+    static constexpr uint32_t uartcr_ctse_n = 1U << 15;
+    static constexpr uint32_t uartcr_rtse_n = 1U << 14;
+    static constexpr uint32_t uartcr_out2 = 1U << 13;
+    static constexpr uint32_t uartcr_out1 = 1U << 12;
+    static constexpr uint32_t uartcr_rts = 1U << 11;
+    static constexpr uint32_t uartcr_dtr = 1U << 10;
+    static constexpr uint32_t uartcr_rx_en = 1U << 9;
+    static constexpr uint32_t uartcr_tx_en = 1U << 8;
+    static constexpr uint32_t uartcr_loopback_en = 1U << 7;
+    static constexpr uint32_t uartcr_sirlp = 1U << 2;
+    static constexpr uint32_t uartcr_siren = 1U << 1;
+    static constexpr uint32_t uartcr_uart_en = 1U << 0;
+
+    // Interrupt FIFO level select register (UARTIFLS)
+    static constexpr uint32_t uartifls_rxiflsel_mask = 7U << 3;
+    static constexpr uint32_t uartifls_rxiflsel_1_8 = 0U << 3;
+    static constexpr uint32_t uartifls_rxiflsel_1_4 = 1U << 3;
+    static constexpr uint32_t uartifls_rxiflsel_1_2 = 2U << 3;
+    static constexpr uint32_t uartifls_rxiflsel_3_4 = 3U << 3;
+    static constexpr uint32_t uartifls_rxiflsel_7_8 = 4U << 3;
+    static constexpr uint32_t uartifls_txiflsel_mask = 7U << 0;
+    static constexpr uint32_t uartifls_txiflsel_1_8 = 0U << 0;
+    static constexpr uint32_t uartifls_txiflsel_1_4 = 1U << 0;
+    static constexpr uint32_t uartifls_txiflsel_1_2 = 2U << 0;
+    static constexpr uint32_t uartifls_txiflsel_3_4 = 3U << 0;
+    static constexpr uint32_t uartifls_txiflsel_7_8 = 4U << 0;
+
+    // Interrupt mask set/clear register (UARTIMSC)
+    // Raw interrupt status register (UARTRIS)
+    // Masked interrupt status register (UARTMIS)
+    // Interrupt clear register (UARTICR)
+    static constexpr uint32_t uartinterrupt_oe = 1U << 10;
+    static constexpr uint32_t uartinterrupt_be = 1U << 9;
+    static constexpr uint32_t uartinterrupt_pe = 1U << 8;
+    static constexpr uint32_t uartinterrupt_fe = 1U << 7;
+    static constexpr uint32_t uartinterrupt_rt = 1U << 6;
+    static constexpr uint32_t uartinterrupt_tx = 1U << 5;
+    static constexpr uint32_t uartinterrupt_rx = 1U << 4;
+    static constexpr uint32_t uartinterrupt_dsrm = 1U << 3;
+    static constexpr uint32_t uartinterrupt_dcdm = 1U << 2;
+    static constexpr uint32_t uartinterrupt_ctsm = 1U << 1;
+    static constexpr uint32_t uartinterrupt_rim = 1U << 0;
+
+    // DMA control register (UARTDMACR)
+    static constexpr uint32_t uartdmacr_dmaonerr = 1U << 2;
+    static constexpr uint32_t uartdmacr_txdma_en = 1U << 1;
+    static constexpr uint32_t uartdmacr_rxdma_en = 1U << 0;
 
     /// @endcond
 
-public:
+    /// @cond
 
-    /// Default constructor - uses the default port
+    enum data_bits_t : uint32_t {
+        char_length_5 = uartlcr_h_wlen_5bit,
+        char_length_6 = uartlcr_h_wlen_6bit,
+        char_length_7 = uartlcr_h_wlen_7bit,
+        char_length_8 = uartlcr_h_wlen_8bit,
+    };
+
+    enum stop_bits_t : uint32_t {
+        stop_bits_1 = uartlcr_h_stop_1bit,
+        stop_bits_2 = uartlcr_h_stop_2bit,
+    };
+
+    enum parity_bits_t : uint32_t {
+        parity_none = uartlcr_h_parity_none,
+        parity_odd = uartlcr_h_parity_odd,
+        parity_even = uartlcr_h_parity_even,
+        parity_mark = uartlcr_h_parity_one,
+        parity_space = uartlcr_h_parity_zero,
+    };
+
+    /// Constructor - accepts a target port address
     ///
     /// @expects none
     /// @ensures none
     ///
-    serial_port_pl011() noexcept;
-
-    /// Specific constructor - accepts a target port address
-    /// @expects none
-    /// @ensures none
+    /// @param port the MMIO base address (platform-dependent)
     ///
-    /// @param port the serial port to connect to
-    ///
-    serial_port_pl011(port_type port) noexcept;
+    serial_pl011(uintptr_t port = DEFAULT_COM_PORT) noexcept;
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    ~serial_port_pl011() = default;
+    ~serial_pl011() = default;
 
+#ifdef BF_AARCH64
     /// Get Instance
     ///
     /// Get an instance to the class.
     ///
+    /// Because aarch64 is currently the only architecture that supports
+    /// initializing a serial_pl011 with default constructor arguments, this
+    /// method is only available on that architecture. Other architectures
+    /// require this class to be instantiated with a specific virtual base
+    /// address.
+    ///
     /// @expects none
     /// @ensures ret != nullptr
     ///
-    /// @return a singleton instance of serial_port_pl011
+    /// @return a singleton instance of serial_pl011
     ///
-    static serial_port_pl011 *instance() noexcept;
+    static serial_pl011 *instance() noexcept;
+#endif
 
     /// Set Baud Rate Divisor
     ///
@@ -356,7 +342,7 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    virtual void set_port(port_type port) noexcept override
+    virtual void set_port(uintptr_t port) noexcept
     {
         m_port = port;
     }
@@ -368,7 +354,7 @@ public:
     ///
     /// @return the serial device's port
     ///
-    virtual port_type port() const noexcept override
+    virtual uintptr_t port() const noexcept
     { return m_port; }
 
     /// Write Character
@@ -380,27 +366,27 @@ public:
     ///
     /// @param c character to write
     ///
-    virtual void write(char c) noexcept override;
-
-    using serial_port_base::write;
+    virtual void write(char c) noexcept;
 
 private:
 
     bool get_status_full_transmitter() const noexcept;
 
-    void init(port_type port) noexcept;
+    uint32_t read_32(ptrdiff_t offset) const noexcept;
 
-    port_type m_port;
+    void write_32(ptrdiff_t offset, uint32_t data) const noexcept;
+
+    uintptr_t m_port;
 
 public:
 
     /// @cond
 
-    serial_port_pl011(serial_port_pl011 &&) noexcept = default;
-    serial_port_pl011 &operator=(serial_port_pl011 &&) noexcept = default;
+    serial_pl011(serial_pl011 &&) noexcept = default;
+    serial_pl011 &operator=(serial_pl011 &&) noexcept = default;
 
-    serial_port_pl011(const serial_port_pl011 &) = delete;
-    serial_port_pl011 &operator=(const serial_port_pl011 &) = delete;
+    serial_pl011(const serial_pl011 &) = delete;
+    serial_pl011 &operator=(const serial_pl011 &) = delete;
 
     /// @endcond
 };
