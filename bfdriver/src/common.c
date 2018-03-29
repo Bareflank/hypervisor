@@ -150,10 +150,10 @@ private_add_md_to_memory_manager(struct bfelf_binary_t *module)
 
         exec_s = (uint64_t)module->exec + instr->mem_offset;
         exec_e = (uint64_t)module->exec + instr->mem_offset + instr->memsz;
-        exec_s &= ~(MAX_PAGE_SIZE - 1);
-        exec_e &= ~(MAX_PAGE_SIZE - 1);
+        exec_s &= ~(BAREFLANK_PAGE_SIZE - 1);
+        exec_e &= ~(BAREFLANK_PAGE_SIZE - 1);
 
-        for (; exec_s <= exec_e; exec_s += MAX_PAGE_SIZE) {
+        for (; exec_s <= exec_e; exec_s += BAREFLANK_PAGE_SIZE) {
             if ((instr->perm & bfpf_x) != 0) {
                 ret = private_add_raw_md_to_memory_manager(exec_s, MEMORY_TYPE_R | MEMORY_TYPE_E);
             }
@@ -175,7 +175,7 @@ private_add_tss_mdl(void)
 {
     uint64_t i = 0;
 
-    for (i = 0; i < g_tls_size; i += MAX_PAGE_SIZE) {
+    for (i = 0; i < g_tls_size; i += BAREFLANK_PAGE_SIZE) {
         int64_t ret = private_add_raw_md_to_memory_manager((uint64_t)g_tls + i, MEMORY_TYPE_R | MEMORY_TYPE_W);
         if (ret != BF_SUCCESS) {
             return ret;

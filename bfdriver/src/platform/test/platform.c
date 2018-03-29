@@ -32,7 +32,7 @@
 
 int platform_info_should_fail = 0;
 
-#define PAGE_ROUND_UP(x) ( (((uintptr_t)(x)) + MAX_PAGE_SIZE-1)  & (~(MAX_PAGE_SIZE-1)) )
+#define PAGE_ROUND_UP(x) ( (((uintptr_t)(x)) + BAREFLANK_PAGE_SIZE-1)  & (~(BAREFLANK_PAGE_SIZE-1)) )
 
 void *
 platform_alloc_rw(uint64_t len)
@@ -50,7 +50,7 @@ platform_alloc_rwe(uint64_t len)
 #endif
 
     len = PAGE_ROUND_UP(len);
-    addr = aligned_alloc(MAX_PAGE_SIZE, len);
+    addr = aligned_alloc(BAREFLANK_PAGE_SIZE, len);
 
 #ifdef WIN64
     VirtualProtect(addr, len, PAGE_EXECUTE_READWRITE, &oldProtect);

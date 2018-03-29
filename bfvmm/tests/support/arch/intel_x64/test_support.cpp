@@ -20,6 +20,8 @@
 
 TEST_CASE("support")
 {
+    unsafe_write_cstr("", 0);
+
     CHECK_NOTHROW(_read_msr(0));
     CHECK_NOTHROW(_write_msr(0, 0));
 

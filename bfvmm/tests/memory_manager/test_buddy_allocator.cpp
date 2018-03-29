@@ -26,9 +26,15 @@ unsafe_write_cstr(const char *cstr, size_t len)
 auto k = 3ULL;
 auto node_tree_size = buddy_allocator::node_tree_size(k);
 
+TEST_CASE("buddy_allocator: quiet")
+{
+    unsafe_write_cstr("", 0);
+}
+
 TEST_CASE("buddy_allocator: next_power_2")
 {
     CHECK(next_power_2(0x1000) == 0x1000);
+    CHECK(next_power_2(0x1010) == 0x2000);
     CHECK(next_power_2(0x2000) == 0x2000);
     CHECK(next_power_2(0x3000) == 0x4000);
     CHECK(next_power_2(0x4000) == 0x4000);

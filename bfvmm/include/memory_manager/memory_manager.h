@@ -19,14 +19,14 @@
 #ifndef MEMORY_MANAGER_H
 #define MEMORY_MANAGER_H
 
-#include <map>
 #include <vector>
+#include <unordered_map>
 
 #include <bfmemory.h>
 #include <bfconstants.h>
 
-#include "mem_pool.h"
 #include "buddy_allocator.h"
+#include "object_allocator.h"
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -124,21 +124,31 @@ public:
 
     /// Allocate Memory
     ///
-    /// Allocates memory. If the requested size is a multiple of MAX_PAGE_SIZE
-    /// the page pool is used to allocate the memory which likely has more
-    /// memory, and the resulting addresses are page aligned. All other
-    /// requests come from the heap.
+    /// Allocates memory from the SLAB allocator. If the requested memory
+    /// is a page or larger, the memory is allocated using the page pool or
+    /// huge pool.
     ///
     /// @expects none
     /// @ensures none
     ///
     /// @param size the number of bytes to allocate
-    /// @return a pointer to the starting address of the memory allocated. The
-    ///     pointer is page aligned if size is a multiple of MAX_PAGE_SIZE.
+    /// @return a poinmter to the newly allocated memory.
     ///     Returns 0 otherwise, or on error
     ///
     virtual pointer alloc(
         size_type size) noexcept;
+
+    /// Allocate Page
+    ///
+    /// Allocates memory from the page pool.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return a poinmter to the newly allocated memory.
+    ///     Returns 0 otherwise, or on error
+    ///
+    virtual pointer alloc_page() noexcept;
 
     /// Allocate Map
     ///
@@ -159,29 +169,38 @@ public:
     /// Free Memory
     ///
     /// Deallocates a block of memory previously allocated by a call to
-    /// alloc or alloc_map, making it available again for further allocations.
-    /// If ptr does not point to memory that was previously allocated, the call
-    /// is ignored. If ptr == nullptr, the call is also ignored.
+    /// alloc
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param ptr a pointer to memory previously allocated using alloc.
+    /// @param ptr a pointer to previously allocated memory.
     ///
     virtual void free(
+        pointer ptr) noexcept;
+
+    /// Free Page
+    ///
+    /// Deallocates a block of memory previously allocated by a call to
+    /// alloc_page
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param ptr a pointer to previously allocated memory.
+    ///
+    virtual void free_page(
         pointer ptr) noexcept;
 
     /// Free Map
     ///
     /// Deallocates a block of memory previously allocated by a call to
-    /// alloc_map, making it available again for further allocations.
-    /// If ptr does not point to memory that was previously allocated, the call
-    /// is ignored. If ptr == nullptr, the call is also ignored.
+    /// alloc_map
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param ptr a pointer to memory previously allocated using alloc_map.
+    /// @param ptr a pointer to previously allocated memory.
     ///
     virtual void free_map(
         pointer ptr) noexcept;
@@ -199,6 +218,21 @@ public:
     /// @return the size of the pointer
     ///
     virtual size_type size(
+        pointer ptr) const noexcept;
+
+    /// Size Page
+    ///
+    /// Returns the size of previously allocated memory. If the provided
+    /// pointer does not point to memory that has been allocated or is
+    /// outside the bounds of the memory pool, this function returns 0.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param ptr a pointer to memory previously allocated using alloc.
+    /// @return the size of the pointer
+    ///
+    virtual size_type size_page(
         pointer ptr) const noexcept;
 
     /// Size of Map
@@ -394,19 +428,25 @@ private:
 
     memory_manager() noexcept;
 
-    integer_pointer lower(integer_pointer ptr) const noexcept;
-    integer_pointer upper(integer_pointer ptr) const noexcept;
-
 private:
 
-    std::map<integer_pointer, integer_pointer> m_virt_to_phys_map;
-    std::map<integer_pointer, integer_pointer> m_phys_to_virt_map;
-    std::map<integer_pointer, attr_type> m_virt_to_attr_map;
-
-    mem_pool<MAX_HEAP_POOL, 6ULL> g_heap_pool;
+    std::unordered_map<integer_pointer, integer_pointer> m_virt_to_phys_map;
+    std::unordered_map<integer_pointer, integer_pointer> m_phys_to_virt_map;
+    std::unordered_map<integer_pointer, attr_type> m_virt_to_attr_map;
 
     buddy_allocator g_page_pool;
+    buddy_allocator g_huge_pool;
     buddy_allocator g_mem_map_pool;
+
+    basic_object_allocator slab010;
+    basic_object_allocator slab020;
+    basic_object_allocator slab030;
+    basic_object_allocator slab040;
+    basic_object_allocator slab080;
+    basic_object_allocator slab100;
+    basic_object_allocator slab200;
+    basic_object_allocator slab400;
+    basic_object_allocator slab800;
 
 public:
 
