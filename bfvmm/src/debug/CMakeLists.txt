@@ -23,7 +23,20 @@
 list(APPEND SOURCES
     debug_ring/debug_ring.cpp
     serial/serial_ns16550a.cpp
+    serial/serial_pl011.cpp
 )
+
+if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
+    list(APPEND SOURCES
+        arch/x64/serial_ns16550a.cpp
+    )
+endif()
+
+if(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
+    list(APPEND SOURCES
+        arch/aarch64/serial_ns16550a.cpp
+    )
+endif()
 
 if(NOT ENABLE_MOCKING)
     list(APPEND SOURCES

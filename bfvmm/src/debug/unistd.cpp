@@ -21,6 +21,7 @@
 
 #include <debug/debug_ring/debug_ring.h>
 #include <debug/serial/serial_ns16550a.h>
+#include <debug/serial/serial_pl011.h>
 
 #include <mutex>
 std::mutex g_write_mutex;
