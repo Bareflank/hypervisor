@@ -1,6 +1,6 @@
 #
 # Bareflank Hypervisor
-# Copyright (C) 2015 Assured Information Security, Inc.
+# Copyright (C) 2018 Assured Information Security, Inc.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -22,9 +22,9 @@ Vagrant.configure(2) do |config|
         vb.cpus = 2
     end
 
-    config.vm.define "ubuntu17_04", primary: true do |ubuntu17_04|
-        ubuntu17_04.vm.box = "ubuntu/zesty64"
-        ubuntu17_04.vm.provision "shell",
-            path: "scripts/vagrant/provision_ubuntu17_04.sh"
+    config.vm.define "ubuntu17_10", primary: true do |ubuntu17_10|
+        ubuntu17_10.vm.box = "ubuntu/artful64"
+        ubuntu17_10.vm.provision "shell",
+            path: "scripts/vagrant/provision_ubuntu17_10.sh"
     end
 end

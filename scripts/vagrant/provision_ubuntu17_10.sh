@@ -1,7 +1,7 @@
 #!/bin/bash -e
 #
 # Bareflank Hypervisor
-# Copyright (C) 2015 Assured Information Security, Inc.
+# Copyright (C) 2018 Assured Information Security, Inc.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-VAGRANT_BUILD_DIR="/vagrant/build_ubuntu17_04"
+VAGRANT_BUILD_DIR="/vagrant/build_ubuntu17_10"
 VAGRANT_HOME_DIR="/home/ubuntu"
 
 sudo apt-get update
