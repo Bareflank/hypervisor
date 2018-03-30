@@ -1,6 +1,6 @@
 #
 # Bareflank Hypervisor
-# Copyright (C) 2015 Assured Information Security, Inc.
+# Copyright (C) 2018 Assured Information Security, Inc.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -68,3 +68,5 @@ do_test(test_vmx
     SOURCES arch/intel_x64/vmx/test_vmx.cpp
     ${ARGN}
 )
+
+install(DIRECTORY ../../include/support/ DESTINATION include/bfvmm/support)

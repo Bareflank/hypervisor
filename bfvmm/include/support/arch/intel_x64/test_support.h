@@ -19,20 +19,20 @@
 #include <catch/catch.hpp>
 #include <hippomocks.h>
 
-#include <hve/arch/intel_x64/vmx/vmx.h>
-#include <hve/arch/intel_x64/vmcs/vmcs.h>
-#include <hve/arch/intel_x64/check/check.h>
-#include <hve/arch/intel_x64/exit_handler/exit_handler.h>
+#include "../../../hve/arch/intel_x64/vmx/vmx.h"
+#include "../../../hve/arch/intel_x64/vmcs/vmcs.h"
+#include "../../../hve/arch/intel_x64/check/check.h"
+#include "../../../hve/arch/intel_x64/exit_handler/exit_handler.h"
 
-#include <hve/arch/x64/gdt.h>
-#include <hve/arch/x64/idt.h>
+#include "../../../hve/arch/x64/gdt.h"
+#include "../../../hve/arch/x64/idt.h"
 
 #include <intrinsics.h>
 #include <bfnewdelete.h>
 
-#include <memory_manager/arch/x64/map_ptr.h>
-#include <memory_manager/arch/x64/root_page_table.h>
-#include <memory_manager/memory_manager.h>
+#include "../../../memory_manager/arch/x64/map_ptr.h"
+#include "../../../memory_manager/arch/x64/root_page_table.h"
+#include "../../../memory_manager/memory_manager.h"
 
 bfvmm::intel_x64::save_state_t g_save_state{};
 
@@ -41,11 +41,15 @@ std::map<uint64_t, uint64_t> g_vmcs_fields;
 std::map<uint32_t, uint32_t> g_eax_cpuid;
 std::map<uint32_t, uint32_t> g_ebx_cpuid;
 std::map<uint32_t, uint32_t> g_ecx_cpuid;
+std::map<uint32_t, uint32_t> g_edx_cpuid;
+std::map<x64::portio::port_addr_type, x64::portio::port_32bit_type> g_ports;
 
 x64::rflags::value_type g_rflags = 0;
 intel_x64::cr0::value_type g_cr0 = 0;
+intel_x64::cr2::value_type g_cr2 = 0;
 intel_x64::cr3::value_type g_cr3 = 0;
 intel_x64::cr4::value_type g_cr4 = 0;
+intel_x64::cr8::value_type g_cr8 = 0;
 intel_x64::dr7::value_type g_dr7 = 0;
 
 uint16_t g_es;
@@ -116,6 +120,10 @@ _read_cr0(void) noexcept
 { return g_cr0; }
 
 extern "C" uint64_t
+_read_cr2(void) noexcept
+{ return g_cr2; }
+
+extern "C" uint64_t
 _read_cr3(void) noexcept
 { return g_cr3; }
 
@@ -123,9 +131,17 @@ extern "C" uint64_t
 _read_cr4(void) noexcept
 { return g_cr4; }
 
+extern "C" uint64_t
+_read_cr8(void) noexcept
+{ return g_cr8; }
+
 extern "C" void
 _write_cr0(uint64_t val) noexcept
 { g_cr0 = val; }
+
+extern "C" void
+_write_cr2(uint64_t val) noexcept
+{ g_cr2 = val; }
 
 extern "C" void
 _write_cr3(uint64_t val) noexcept
@@ -140,6 +156,10 @@ _write_cr4(uint64_t val) noexcept
 
     g_cr4 = val;
 }
+
+extern "C" void
+_write_cr8(uint64_t val) noexcept
+{ g_cr8 = val; }
 
 extern "C" uint64_t
 _read_dr7() noexcept
@@ -229,8 +249,36 @@ extern "C" void
 _read_idt(void *idt_reg) noexcept
 { *static_cast<::x64::idt_reg::reg_t *>(idt_reg) = g_idtr; }
 
+extern "C" uint8_t
+_inb(uint16_t port) noexcept
+{ return gsl::narrow_cast<x64::portio::port_8bit_type>(g_ports[port]); }
+
+extern "C" uint16_t
+_inw(uint16_t port) noexcept
+{ return gsl::narrow_cast<x64::portio::port_16bit_type>(g_ports[port]); }
+
+extern "C" uint32_t
+_ind(uint16_t port) noexcept
+{ return gsl::narrow_cast<x64::portio::port_32bit_type>(g_ports[port]); }
+
+extern "C" void
+_outb(uint16_t port, uint8_t val) noexcept
+{ g_ports[port] = val; }
+
+extern "C" void
+_outw(uint16_t port, uint16_t val) noexcept
+{ g_ports[port] = val; }
+
+extern "C" void
+_outd(uint16_t port, uint32_t val) noexcept
+{ g_ports[port] = val; }
+
 extern "C" void
 _stop() noexcept
+{ }
+
+extern "C" void
+_halt() noexcept
 { }
 
 extern "C" void
@@ -261,6 +309,10 @@ _cpuid_subebx(uint32_t val, uint32_t sub) noexcept
 extern "C" uint32_t
 _cpuid_ecx(uint32_t val) noexcept
 { return g_ecx_cpuid[val]; }
+
+extern "C" uint32_t
+_cpuid_edx(uint32_t val) noexcept
+{ return g_edx_cpuid[val]; }
 
 extern "C" bool
 _vmread(uint64_t field, uint64_t *value) noexcept
