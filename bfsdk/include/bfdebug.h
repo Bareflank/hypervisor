@@ -101,6 +101,31 @@ unsafe_write_cstr(const char *cstr, size_t len);
 /* Low Level Debugging                                                        */
 /* ---------------------------------------------------------------------------*/
 
+inline char *
+bfitoa(size_t value, char *str, size_t base)
+{
+    const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+    int i = 0, j = 0;
+    size_t remainder;
+
+    do {
+        remainder = value % base;
+        str[i++] = digits[remainder];
+        value = value / base;
+    }
+    while (value != 0);
+
+    str[i] = '\0';
+
+    for (j = 0, i--; j < i; j++, i--) {
+        char c = str[j];
+        str[j] = str[i];
+        str[i] = c;
+    }
+
+    return str;
+}
+
 #define CALLED() \
     { \
         const char *str_text = "\033[1;32mDEBUG\033[0m: function called = "; \
@@ -138,6 +163,53 @@ unsafe_write_cstr(const char *cstr, size_t len);
         const char *str_endl = "\n"; \
         unsafe_write_cstr(str_text, strlen(str_text)); \
         unsafe_write_cstr(str_func, strlen(str_func)); \
+        unsafe_write_cstr(str_endl, strlen(str_endl)); \
+    }
+
+
+#define DEBUG_STR(a,b) \
+    { \
+        const char *str_text = "\033[1;32mDEBUG\033[0m: " a " = "; \
+        const char *str_endl = "\n"; \
+        unsafe_write_cstr(str_text, strlen(str_text)); \
+        unsafe_write_cstr(b, strlen(b)); \
+        unsafe_write_cstr(str_endl, strlen(str_endl)); \
+    }
+
+#define DEBUG_DEC(a,b) \
+    { \
+        char numstr[64]; \
+        bfitoa(b, numstr, 10); \
+        const char *str_text = "\033[1;32mDEBUG\033[0m: " a " = "; \
+        const char *str_endl = "\n"; \
+        unsafe_write_cstr(str_text, strlen(str_text)); \
+        unsafe_write_cstr(numstr, strlen(numstr)); \
+        unsafe_write_cstr(str_endl, strlen(str_endl)); \
+    }
+
+#define DEBUG_HEX(a,b) \
+    { \
+        char numstr[64]; \
+        bfitoa(b, numstr, 16); \
+        const char *str_text = "\033[1;32mDEBUG\033[0m: " a " = "; \
+        const char *str_endl = "\n"; \
+        unsafe_write_cstr(str_text, strlen(str_text)); \
+        unsafe_write_cstr(numstr, strlen(numstr)); \
+        unsafe_write_cstr(str_endl, strlen(str_endl)); \
+    }
+
+#define DEBUG_LINE() \
+    { \
+        char numstr[64]; \
+        bfitoa(__LINE__, numstr, 10); \
+        const char *str_text = "\033[1;32mDEBUG\033[0m: "; \
+        const char *str_func = __BFFUNC__; \
+        const char *str_next = " = "; \
+        const char *str_endl = "\n"; \
+        unsafe_write_cstr(str_text, strlen(str_text)); \
+        unsafe_write_cstr(str_func, strlen(str_func)); \
+        unsafe_write_cstr(str_next, strlen(str_next)); \
+        unsafe_write_cstr(numstr, strlen(numstr)); \
         unsafe_write_cstr(str_endl, strlen(str_endl)); \
     }
 

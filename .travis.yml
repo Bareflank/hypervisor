@@ -214,7 +214,7 @@ matrix:
     script:
       - cmake -DCONFIG=travis_asan ..
       - make -j3
-      - ASAN_OPTIONS=alloc_dealloc_mismatch=0 make test
+      - make test
 
   #
   # Google Undefined Sanitizer
@@ -322,6 +322,27 @@ matrix:
       - make -j3
 
   #
+  # Clang 6.0 (Static Libraries)
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-6.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-6.0
+          - nasm
+    env:
+      - TEST="Clang 6.0 (Static Libraries)"
+    script:
+      - export CLANG_BIN=clang-6.0
+      - cmake -DCONFIG=travis_static ..
+      - make -j3
+
+  #
   # Clang 3.8 (Shared Libraries)
   #
   - os: linux
@@ -406,6 +427,27 @@ matrix:
       - make -j3
 
   #
+  # Clang 6.0 (Shared Libraries)
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-6.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-6.0
+          - nasm
+    env:
+      - TEST="Clang 6.0 (Shared Libraries)"
+    script:
+      - export CLANG_BIN=clang-6.0
+      - cmake -DCONFIG=travis_shared ..
+      - make -j3
+
+  #
   # ld.gold
   #
   - os: linux
@@ -413,11 +455,11 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-5.0
+          - llvm-toolchain-trusty-4.0
         packages:
           - gcc-6
           - g++-6
-          - clang-5.0
+          - clang-4.0
           - nasm
     env:
       - TEST="ld.gold"
@@ -434,11 +476,11 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-5.0
+          - llvm-toolchain-trusty-4.0
         packages:
           - gcc-6
           - g++-6
-          - clang-5.0
+          - clang-4.0
           - nasm
     env:
       - TEST="ld.lld"

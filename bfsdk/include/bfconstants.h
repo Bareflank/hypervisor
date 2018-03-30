@@ -24,73 +24,6 @@
 #include <bftypes.h>
 
 /*
- * Hypervisor Version
- *
- * Uses http://semver.org
- */
-#define BAREFLANK_VERSION_MAJOR 1ULL
-#define BAREFLANK_VERSION_MINOR 2ULL
-#define BAREFLANK_VERSION_PATCH 0ULL
-
-/*
- * User Version
- *
- * Uses http://semver.org
- */
-#ifndef USER_VERSION_MAJOR
-#define USER_VERSION_MAJOR 0ULL
-#endif
-
-#ifndef USER_VERSION_MINOR
-#define USER_VERSION_MINOR 0ULL
-#endif
-
-#ifndef USER_VERSION_PATCH
-#define USER_VERSION_PATCH 0ULL
-#endif
-
-/*
- * Cache Line Shift
- *
- * The memory manager at the moment keeps track of blocks using a cache line
- * for performance reasons. If the cache line size is different, this value
- * might need to be tweaked. Note that this defines the shift that will be
- * used by MAX_CACHE_LINE_SIZE
- *
- * Note: defined in bits
- */
-#ifndef MAX_CACHE_LINE_SHIFT
-#define MAX_CACHE_LINE_SHIFT (6ULL)
-#endif
-
-/*
- * Cache Line Size
- *
- * The memory manager at the moment keeps track of blocks using a cache line
- * for performance reasons. If the cache line size is different, this value
- * might need to be tweaked.
- *
- * Note: defined in bytes
- */
-#ifndef MAX_CACHE_LINE_SIZE
-#define MAX_CACHE_LINE_SIZE (1 << MAX_CACHE_LINE_SHIFT)
-#endif
-
-/*
- * Max Page Shift
- *
- * Defines the maximum page size that is supported by the VMM (not the max
- * size supported by hardware, which is likely different). For now, this is
- * set to a value that is likely supported by most hardware. All pages must
- * be translated to this value, as the VMM only supports one page size.
- *
- * Note: defined in bits
- */
-#ifndef MAX_PAGE_SHIFT
-#define MAX_PAGE_SHIFT (12ULL)
-#endif
-
-/*
  * Max Page Size
  *
  * Defines the maximum page size that is supported by the VMM (not the max
@@ -100,46 +33,8 @@
  *
  * Note: defined in bytes
  */
-#ifndef MAX_PAGE_SIZE
-#define MAX_PAGE_SIZE (1ULL << MAX_PAGE_SHIFT)
-#endif
-
-/*
- * Max Heap Pool
- *
- * This defines the internal memory that the hypervisor allocates to use
- * during setup by new/delete. Note that things like the debug_ring and
- * anything that uses a std::container uses this heap so it does need to
- * have some size to it. Pages do not come from this pool.
- *
- * Note: defined in bytes (defaults to 8MB)
- */
-#ifndef MAX_HEAP_POOL
-#define MAX_HEAP_POOL (256ULL * MAX_PAGE_SIZE * sizeof(uintptr_t))
-#endif
-
-/*
- * Max Page Pool
- *
- * This defines the internal memory that the hypervisor allocates to use
- * for allocating pages.
- *
- * Note: defined in bytes (defaults to 32MB)
- */
-#ifndef MAX_PAGE_POOL
-#define MAX_PAGE_POOL (32 * 256ULL * MAX_PAGE_SIZE)
-#endif
-
-/*
- * Max Memory Map Pool
- *
- * This defines the virtual memory that the hypervisor will use for mapping
- * memory
- *
- * Note: defined in bytes (defaults to 8MB)
- */
-#ifndef MAX_MEM_MAP_POOL
-#define MAX_MEM_MAP_POOL (256ULL * MAX_PAGE_SIZE * sizeof(uintptr_t))
+#ifndef BAREFLANK_PAGE_SIZE
+#define BAREFLANK_PAGE_SIZE (0x1000ULL)
 #endif
 
 /*
@@ -166,21 +61,6 @@
 #endif
 
 /*
- * Debug Ring Shift
- *
- * Defines the size of the debug ring. Note that each vCPU gets one of these,
- * and thus the total amount of memory that is used can add up quickly. That
- * being said, make these as large as you can afford. Also note that these
- * will be allocated using the mem pool, so make sure that it is large enough
- * to hold the debug rings for each vCPU and then some.
- *
- * Note: defined in shifted bits
- */
-#ifndef DEBUG_RING_SHIFT
-#define DEBUG_RING_SHIFT (15)
-#endif
-
-/*
  * Debug Ring Size
  *
  * Defines the size of the debug ring. Note that each vCPU gets one of these,
@@ -191,7 +71,7 @@
  *
  * Note: defined in bytes
  */
-#define DEBUG_RING_SIZE (1 << DEBUG_RING_SHIFT)
+#define DEBUG_RING_SIZE (1 << 15ULL)
 
 /*
  * Stack Size
@@ -210,7 +90,7 @@
  *       value in that file as well.
  */
 #ifndef STACK_SIZE
-#define STACK_SIZE (1ULL << 15)
+#define STACK_SIZE (1ULL << 15ULL)
 #endif
 
 /*
@@ -227,37 +107,6 @@
  */
 #ifndef THREAD_LOCAL_STORAGE_SIZE
 #define THREAD_LOCAL_STORAGE_SIZE (0x1000ULL)
-#endif
-
-/*
- * Stack Reserved
- *
- * The bottom of the stack is reserved for storing useful information
- * (similar to the Linux kernel). The following defines how much of the
- * stack is reserved.
- *
- * Note: Defined in bytes
- */
-#ifndef STACK_RESERVED
-#define STACK_RESERVED (0x20)
-#endif
-
-/*
- * VMCall In Buffer Size (MAX)
- *
- * Note: Defined in bytes
- */
-#ifndef VMCALL_IN_BUFFER_SIZE
-#define VMCALL_IN_BUFFER_SIZE (32 * MAX_PAGE_SIZE)
-#endif
-
-/*
- * VMCall Out Buffer Size (MAX)
- *
- * Note: Defined in bytes
- */
-#ifndef VMCALL_OUT_BUFFER_SIZE
-#define VMCALL_OUT_BUFFER_SIZE (32 * MAX_PAGE_SIZE)
 #endif
 
 /*

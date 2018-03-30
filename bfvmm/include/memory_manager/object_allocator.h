@@ -21,6 +21,14 @@
 
 #include <bfgsl.h>
 #include <bfexception.h>
+#include <bfconstants.h>
+
+// -----------------------------------------------------------------------------
+// Prototypes
+// -----------------------------------------------------------------------------
+
+extern "C" void *malloc_page();
+extern "C" void free_page(void *ptr);
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -33,17 +41,6 @@ constexpr const auto objtpool_size = 255U;
 // Helpers
 // -----------------------------------------------------------------------------
 
-#ifndef OBJECT_ALLOCATOR_PAGE_SIZE
-#define OBJECT_ALLOCATOR_PAGE_SIZE 0x1000
-#endif
-
-/// TODO:
-///
-/// Once the buddy allocator is complete, this code should alloc from the
-/// buddy allocator.
-///
-#include "../memory_manager/memory_manager.h"
-
 /// @struct __oa_page
 ///
 /// Object Allocator Page
@@ -55,7 +52,7 @@ constexpr const auto objtpool_size = 255U;
 ///     the size of the page
 ///
 struct __oa_page {
-    gsl::byte data[OBJECT_ALLOCATOR_PAGE_SIZE];
+    gsl::byte data[BAREFLANK_PAGE_SIZE];
 };
 
 /// Object Allocator Alloc
@@ -68,10 +65,10 @@ struct __oa_page {
 template<typename S>
 S *__oa_alloc()
 {
-    static_assert(OBJECT_ALLOCATOR_PAGE_SIZE == sizeof(S), "allocation is not a page");
+    static_assert(BAREFLANK_PAGE_SIZE == sizeof(S), "allocation is not a page");
     void *addr;
 
-    if (GSL_LIKELY(addr = g_mm->alloc(OBJECT_ALLOCATOR_PAGE_SIZE))) {
+    if (GSL_LIKELY(addr = malloc_page())) {
         return static_cast<S *>(std::memset(addr, 0, sizeof(S)));
     }
 
@@ -86,8 +83,8 @@ S *__oa_alloc()
 template<typename S>
 void __oa_free(S *ptr)
 {
-    static_assert(OBJECT_ALLOCATOR_PAGE_SIZE == sizeof(S), "deallocation is not a page");
-    g_mm->free(ptr);
+    static_assert(BAREFLANK_PAGE_SIZE == sizeof(S), "deallocation is not a page");
+    free_page(ptr);
 }
 
 // -----------------------------------------------------------------------------
@@ -310,6 +307,46 @@ public:
         objt->addr = p;
     }
 
+    /// Contains
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param p to lookup
+    /// @return true if the buddy allocator contains p, false otherwise
+    ///
+    inline bool contains(pointer p) const noexcept
+    {
+        auto next = m_page_stack_top;
+
+        while (next != nullptr) {
+
+            for (auto i = 0ULL; i < next->index; i++) {
+                auto s = next->pool[i].addr;
+                auto e = next->pool[i].addr + BAREFLANK_PAGE_SIZE;
+
+                if (p >= s && p < e) {
+                    return true;
+                }
+            }
+
+            next = next->next;
+        }
+
+        return false;
+    }
+
+    /// Size
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param ptr a pointer to a previously allocated object
+    /// @return the size of ptr
+    ///
+    inline size_type size(pointer ptr) const
+    { bfignored(ptr); return m_size; }
+
     /// Get Page Stack Size
     ///
     /// @expects none
@@ -455,7 +492,7 @@ private:
         }
 
         auto page = &gsl::at(m_page_stack_top->pool, m_page_stack_top->index);
-        page->addr = static_cast<gsl::byte *>(g_mm->alloc(OBJECT_ALLOCATOR_PAGE_SIZE));
+        page->addr = static_cast<gsl::byte *>(malloc_page());
         page->index = 0;
 
         ++m_pages_consumed;
@@ -534,11 +571,12 @@ private:
     {
         auto page = get_next_page();
 
-        for (auto i = 0ULL; i + m_size <= OBJECT_ALLOCATOR_PAGE_SIZE; i += m_size) {
+        for (auto i = 0ULL; i + m_size <= BAREFLANK_PAGE_SIZE; i += m_size) {
             auto object = get_next_object();
             free_stack_push(object);
 
-            object->addr = &gsl::at(page->addr, OBJECT_ALLOCATOR_PAGE_SIZE, i);
+            auto view = gsl::make_span(page->addr, BAREFLANK_PAGE_SIZE);
+            object->addr = &view[i];
         }
     }
 
@@ -552,7 +590,7 @@ private:
                 if (m_page_stack_top->index != 0) {
                     for (auto i = 0ULL; i < m_page_stack_top->index; ++i) {
                         auto page = &gsl::at(m_page_stack_top->pool, i);
-                        g_mm->free(page->addr);
+                        free_page(page->addr);
                     }
                 }
 
@@ -623,7 +661,7 @@ public:
 template<typename T, std::size_t max_pages = 0>
 class object_allocator
 {
-    static_assert(OBJECT_ALLOCATOR_PAGE_SIZE >= sizeof(T), "T is too large");
+    static_assert(BAREFLANK_PAGE_SIZE >= sizeof(T), "T is too large");
 
 public:
 
@@ -742,7 +780,7 @@ public:
     pointer allocate(size_type n)
     {
         if (n != 1) {
-            return static_cast<pointer>(g_mm->alloc(n * OBJECT_ALLOCATOR_PAGE_SIZE));
+            return reinterpret_cast<pointer>(malloc_page());
         }
 
         return static_cast<pointer>(m_d.allocate());
@@ -759,11 +797,22 @@ public:
     void deallocate(pointer p, size_type n)
     {
         if (n != 1) {
-            return g_mm->free(p);
+            free_page(p);
         }
 
         m_d.deallocate(p);
     }
+
+    /// Contains
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param p to lookup
+    /// @return true if the allocator contains p, false otherwise
+    ///
+    bool contains(pointer p) const noexcept
+    { return m_d.contains(p); }
 
     /// Construct
     ///

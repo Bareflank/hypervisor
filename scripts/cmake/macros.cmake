@@ -561,7 +561,7 @@ function(add_format_targets NAME PREFIX SOURCE_DIR)
 
     add_custom_command(
         TARGET format
-        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle diff ${SOURCE_DIR}
+        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle all ${SOURCE_DIR}
     )
 
     add_custom_command(
@@ -571,7 +571,7 @@ function(add_format_targets NAME PREFIX SOURCE_DIR)
 
     add_custom_command(
         TARGET format-${NAME}_${PREFIX}
-        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle diff ${SOURCE_DIR}
+        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle all ${SOURCE_DIR}
     )
 
     add_custom_command(

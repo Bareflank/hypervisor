@@ -20,3 +20,10 @@ do_test(test_buddy_allocator
     SOURCES test_buddy_allocator.cpp
     DEFINES STATIC_MEMORY_MANAGER
 )
+
+if(NOT WIN32)
+    do_test(test_object_allocator
+        SOURCES test_object_allocator.cpp
+        DEFINES STATIC_MEMORY_MANAGER
+    )
+endif()

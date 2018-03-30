@@ -23,18 +23,12 @@
 #include <bfbitmanip.h>
 #include <bfexception.h>
 
-#include <mutex>
-
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
 
 #ifndef BUDDY_ALLOCATOR_DEBUG
 #define BUDDY_ALLOCATOR_DEBUG 5
-#endif
-
-#ifndef BUDDY_ALLOCATOR_PAGE_SIZE
-#define BUDDY_ALLOCATOR_PAGE_SIZE 0x1000
 #endif
 
 /// Round to Next Power of 2
@@ -55,7 +49,6 @@ next_power_2(uint64_t size)
 
     return size;
 }
-
 
 // -----------------------------------------------------------------------------
 // Buddy Allocator Definition
@@ -116,40 +109,40 @@ private:
         size_type size;
     };
 
-    auto get_size(node_t *node) const
+    inline auto get_size(node_t *node) const
     { return get_bits(node->size, 0x0FFFFFFFFFFFFFFF); }
 
-    auto is_unused(node_t *node) const
+    inline auto is_unused(node_t *node) const
     { return get_bits(node->size, 0xC000000000000000) == 0x0000000000000000; }
 
-    auto is_leaf(node_t *node) const
+    inline auto is_leaf(node_t *node) const
     { return get_bits(node->size, 0xC000000000000000) == 0x4000000000000000; }
 
-    auto is_parent(node_t *node) const
+    inline auto is_parent(node_t *node) const
     { return get_bits(node->size, 0xC000000000000000) == 0x8000000000000000; }
 
-    auto is_full(node_t *node) const
+    inline auto is_full(node_t *node) const
     { return get_bits(node->size, 0xC000000000000000) == 0xC000000000000000; }
 
-    node_t *set_unused(node_t *node)
+    inline node_t *set_unused(node_t *node)
     {
         node->size = set_bits(node->size, 0xC000000000000000, 0x0000000000000000);
         return node;
     }
 
-    node_t *set_leaf(node_t *node)
+    inline node_t *set_leaf(node_t *node)
     {
         node->size = set_bits(node->size, 0xC000000000000000, 0x4000000000000000);
         return node;
     }
 
-    node_t *set_parent(node_t *node)
+    inline node_t *set_parent(node_t *node)
     {
         node->size = set_bits(node->size, 0xC000000000000000, 0x8000000000000000);
         return node;
     }
 
-    node_t *set_full(node_t *node)
+    inline node_t *set_full(node_t *node)
     {
         node->size = set_bits(node->size, 0xC000000000000000, 0xC000000000000000);
         return node;
@@ -166,7 +159,7 @@ public:
     ///     that the buddy allocator will never dereference the address
     ///     provided here, allowing it to be used for virtual memory allocation
     /// @param k the size of the buffer using the formula:
-    ///     (1ULL << k) * BUDDY_ALLOCATOR_PAGE_SIZE
+    ///     (1ULL << k) * BAREFLANK_PAGE_SIZE
     /// @param node_tree the buffer that will be used to store the buddy
     ///     allocators binary tree. This buffer is assume to be
     ///     buddy_allocator::node_tree_size(k).
@@ -188,7 +181,7 @@ public:
     ///     that the buddy allocator will never dereference the address
     ///     provided here, allowing it to be used for virtual memory allocation
     /// @param k the size of the buffer using the formula:
-    ///     (1ULL << k) * BUDDY_ALLOCATOR_PAGE_SIZE
+    ///     (1ULL << k) * BAREFLANK_PAGE_SIZE
     /// @param node_tree the buffer that will be used to store the buddy
     ///     allocators binary tree. This buffer is assume to be
     ///     buddy_allocator::node_tree_size(k).
@@ -226,17 +219,16 @@ public:
     /// @param size the size of the allocation
     /// @return an allocated object. Throws otherwise
     ///
-    pointer allocate(size_type size)
+    inline pointer allocate(size_type size)
     {
         if (size > m_buffer_size || size == 0) {
             throw std::bad_alloc();
         }
 
-        if (get_bits(size, BUDDY_ALLOCATOR_PAGE_SIZE - 1) != 0x0) {
-            size = BUDDY_ALLOCATOR_PAGE_SIZE;
+        if (size < BAREFLANK_PAGE_SIZE) {
+            size = BAREFLANK_PAGE_SIZE;
         }
 
-        std::lock_guard<std::mutex> lock(m_mutex);
         if (auto ptr = this->private_allocate(next_power_2(size), nullptr, m_root)) {
             return ptr;
         }
@@ -251,16 +243,14 @@ public:
     ///
     /// @param ptr a pointer to a previously allocated object to be deallocated
     ///
-    void deallocate(pointer ptr)
+    inline void deallocate(pointer ptr)
     {
-        auto uintptr = reinterpret_cast<integer_pointer>(ptr);
-
         if (ptr == nullptr) {
             return;
         }
 
-        std::lock_guard<std::mutex> lock(m_mutex);
-        this->private_deallocate(uintptr, nullptr, m_root);
+        this->private_deallocate(
+            reinterpret_cast<integer_pointer>(ptr), nullptr, m_root);
     }
 
     /// Size
@@ -271,16 +261,14 @@ public:
     /// @param ptr a pointer to a previously allocated object
     /// @return the size of ptr
     ///
-    size_type size(pointer ptr) const
+    inline size_type size(pointer ptr) const
     {
-        auto uintptr = reinterpret_cast<integer_pointer>(ptr);
-
         if (ptr == nullptr) {
             return 0;
         }
 
-        std::lock_guard<std::mutex> lock(m_mutex);
-        return this->private_size(uintptr, nullptr, m_root);
+        return this->private_size(
+                   reinterpret_cast<integer_pointer>(ptr), nullptr, m_root);
     }
 
     /// Contains Address
@@ -294,9 +282,12 @@ public:
     /// @param ptr to lookup
     /// @return true if the buddy allocator contains ptr, false otherwise
     ///
-    bool
-    contains(integer_pointer ptr) const noexcept
-    { return (ptr >= m_buffer && ptr < m_buffer + m_buffer_size); }
+    inline bool
+    contains(pointer ptr) const noexcept
+    {
+        auto uintptr = reinterpret_cast<integer_pointer>(ptr);
+        return (uintptr >= m_buffer) && (uintptr < m_buffer + m_buffer_size);
+    }
 
     /// Buffer Size
     ///
@@ -304,11 +295,11 @@ public:
     /// @ensures none
     ///
     /// @param k the size of the buffer using the formula:
-    ///     (1ULL << k) * BUDDY_ALLOCATOR_PAGE_SIZE
+    ///     (1ULL << k) * BAREFLANK_PAGE_SIZE
     /// @return the size of buffer given size k
     ///
-    constexpr static size_type buffer_size(size_type k)
-    { return (1ULL << k) * BUDDY_ALLOCATOR_PAGE_SIZE; }
+    inline constexpr static size_type buffer_size(size_type k)
+    { return (1ULL << k) * BAREFLANK_PAGE_SIZE; }
 
     /// Node Tree Size
     ///
@@ -316,10 +307,10 @@ public:
     /// @ensures none
     ///
     /// @param k the size of the buffer using the formula:
-    ///     (1ULL << k) * BUDDY_ALLOCATOR_PAGE_SIZE
+    ///     (1ULL << k) * BAREFLANK_PAGE_SIZE
     /// @return the size of the node tree given size k
     ///
-    constexpr static size_type node_tree_size(size_type k)
+    inline constexpr static size_type node_tree_size(size_type k)
     { return ((2ULL << k) - 1ULL) * sizeof(node_t); }
 
 private:
@@ -515,8 +506,6 @@ private:
 
     node_t *m_root{nullptr};
     size_type m_node_index{0};
-
-    mutable std::mutex m_mutex;
 
 public:
 

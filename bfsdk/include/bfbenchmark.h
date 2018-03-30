@@ -69,6 +69,14 @@ void *
 operator new (std::size_t size)
 { return custom_new(size); }
 
+void *
+operator new (std::size_t count, const std::nothrow_t &)
+{ return custom_new(count); }
+
+void *
+operator new[](std::size_t count, const std::nothrow_t &)
+{ return custom_new(count); }
+
 void
 operator delete (void *ptr, std::size_t size) throw()
 { custom_delete(ptr, size); }
