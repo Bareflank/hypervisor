@@ -26,11 +26,15 @@ TEST_CASE("support")
     CHECK_NOTHROW(_write_msr(0, 0));
 
     CHECK_NOTHROW(_read_cr0());
+    CHECK_NOTHROW(_read_cr2());
     CHECK_NOTHROW(_read_cr3());
     CHECK_NOTHROW(_read_cr4());
+    CHECK_NOTHROW(_read_cr8());
     CHECK_NOTHROW(_write_cr0(0));
+    CHECK_NOTHROW(_write_cr2(0));
     CHECK_NOTHROW(_write_cr3(0));
     CHECK_NOTHROW(_write_cr4(0));
+    CHECK_NOTHROW(_write_cr8(0));
 
     CHECK_NOTHROW(_read_dr7());
     CHECK_NOTHROW(_write_dr7(0));
@@ -47,6 +51,13 @@ TEST_CASE("support")
     CHECK_NOTHROW(_read_tr());
     CHECK_NOTHROW(_read_ldtr());
 
+    CHECK_NOTHROW(_inb(0));
+    CHECK_NOTHROW(_inw(0));
+    CHECK_NOTHROW(_ind(0));
+    CHECK_NOTHROW(_outb(0, 0));
+    CHECK_NOTHROW(_outw(0, 0));
+    CHECK_NOTHROW(_outd(0, 0));
+
     CHECK_NOTHROW(_write_es(0));
     CHECK_NOTHROW(_write_cs(0));
     CHECK_NOTHROW(_write_ss(0));
@@ -59,6 +70,7 @@ TEST_CASE("support")
     CHECK_NOTHROW(_read_gdt(&g_gdtr));
     CHECK_NOTHROW(_read_idt(&g_gdtr));
 
+    CHECK_NOTHROW(_halt());
     CHECK_NOTHROW(_stop());
     CHECK_NOTHROW(_wbinvd());
     CHECK_NOTHROW(_invlpg(nullptr));
@@ -67,6 +79,7 @@ TEST_CASE("support")
     CHECK_NOTHROW(_cpuid_eax(0));
     CHECK_NOTHROW(_cpuid_subebx(0, 0));
     CHECK_NOTHROW(_cpuid_ecx(0));
+    CHECK_NOTHROW(_cpuid_edx(0));
 
     CHECK_NOTHROW(_vmptrld(nullptr));
     CHECK_NOTHROW(_vmlaunch_demote());
