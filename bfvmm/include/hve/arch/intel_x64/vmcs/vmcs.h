@@ -187,7 +187,7 @@ protected:
 
 private:
 
-    std::unique_ptr<uint32_t[]> m_vmcs_region;
+    std::unique_ptr<uint32_t, void(*)(void *)> m_vmcs_region;
     uintptr_t m_vmcs_region_phys;
 
 public:

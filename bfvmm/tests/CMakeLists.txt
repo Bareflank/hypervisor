@@ -33,4 +33,5 @@ add_subdirectory(debug)
 add_subdirectory(hve)
 add_subdirectory(memory_manager)
 add_subdirectory(vcpu)
-add_subdirectory(support)
+
+install(DIRECTORY ../include/test/ DESTINATION include/bfvmm/test)

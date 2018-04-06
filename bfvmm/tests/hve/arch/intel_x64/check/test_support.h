@@ -16,13 +16,62 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <support/arch/intel_x64/test_support.h>
+#include <catch/catch.hpp>
+#include <hippomocks.h>
+
+#include <test/support.h>
 
 using namespace x64;
 using namespace intel_x64;
 using namespace vmcs;
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
+
+alignas(0x1000) static char g_map[100];
+
+bool g_virt_to_phys_fails = false;
+bool g_phys_to_virt_fails = false;
+
+uint64_t g_test_addr = 0U;
+uint64_t g_virt_apic_addr = 0U;
+uint64_t g_virt_apic_mem[64] = {0U};
+uint64_t g_vmcs_link_addr = 1U;
+uint64_t g_vmcs_link_mem[1] = {0U};
+uint64_t g_pdpt_addr = 2U;
+uint64_t g_pdpt_mem[4] = {0U};
+
+std::map<uint64_t, void *> g_mock_mem {
+    {
+        {g_virt_apic_addr, static_cast<void *>(&g_virt_apic_mem)},
+        {g_vmcs_link_addr, static_cast<void *>(&g_vmcs_link_mem)},
+        {g_pdpt_addr, static_cast<void *>(&g_pdpt_mem)}
+    }
+};
+
+void *
+physint_to_virtptr(uintptr_t ptr)
+{
+    bfignored(ptr);
+
+    if (g_phys_to_virt_fails) {
+        return nullptr;
+    }
+
+    return static_cast<void *>(g_mock_mem[g_test_addr]);
+}
+
+auto
+setup_mm(MockRepository &mocks)
+{
+    auto mm = mocks.Mock<bfvmm::memory_manager>();
+    mocks.OnCallFunc(bfvmm::memory_manager::instance).Return(mm);
+
+    mocks.OnCall(mm, bfvmm::memory_manager::alloc_map).Return(static_cast<char *>(g_map));
+    mocks.OnCall(mm, bfvmm::memory_manager::free_map);
+    mocks.OnCall(mm, bfvmm::memory_manager::physint_to_virtptr).Do(physint_to_virtptr);
+
+    return mm;
+}
 
 struct control_flow_path {
     std::function<void()> setup{};

@@ -19,7 +19,6 @@
 #include <catch/catch.hpp>
 
 #include <bfgsl.h>
-#include <bfnewdelete.h>
 #include <debug/debug_ring/debug_ring.h>
 
 using namespace bfvmm;
@@ -47,16 +46,6 @@ TEST_CASE("get_drr: get_drr_invalid_drr")
 TEST_CASE("get_drr: get_drr_invalid_vcpuid")
 {
     CHECK(get_drr(0x1000, &drr) == GET_DRR_FAILURE);
-}
-
-TEST_CASE("debug_ring: constructor_out_of_memory")
-{
-    auto __ = gsl::finally([&] {
-        g_new_throws_bad_alloc = 0;
-    });
-
-    g_new_throws_bad_alloc = sizeof(debug_ring_resources_t);
-    debug_ring dr(0);
 }
 
 TEST_CASE("debug_ring: write_out_of_memory")

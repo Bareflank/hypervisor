@@ -354,32 +354,6 @@ public:
     virtual pointer physptr_to_virtptr(
         pointer phys) const;
 
-    /// Virtual Address To Attribute
-    ///
-    /// Given a virtual address, returns the memory's attributes
-    ///
-    /// @expects virt != 0
-    /// @ensures none
-    ///
-    /// @param virt virtual address for the attributes to fetch
-    /// @return attributes associated with virt
-    ///
-    virtual attr_type virtint_to_attrint(
-        integer_pointer virt) const;
-
-    /// Virtual Address To Attribute
-    ///
-    /// Given a virtual address, returns the memory's attributes
-    ///
-    /// @expects virt != nullptr
-    /// @ensures none
-    ///
-    /// @param virt virtual address for the attributes to fetch
-    /// @return attributes associated with virt
-    ///
-    virtual attr_type virtptr_to_attrint(
-        pointer virt) const;
-
     /// Adds Memory Descriptor
     ///
     /// Adds a memory descriptor to the memory manager.
@@ -406,9 +380,10 @@ public:
     /// @ensures none
     ///
     /// @param virt virtual address to remove
+    /// @param phys physical address mapped to virt
     ///
     virtual void remove_md(
-        integer_pointer virt) noexcept;
+        integer_pointer virt, integer_pointer phys) noexcept;
 
     /// Descriptor List
     ///
@@ -430,9 +405,18 @@ private:
 
 private:
 
-    std::unordered_map<integer_pointer, integer_pointer> m_virt_to_phys_map;
-    std::unordered_map<integer_pointer, integer_pointer> m_phys_to_virt_map;
-    std::unordered_map<integer_pointer, attr_type> m_virt_to_attr_map;
+    struct virt_t {
+        integer_pointer phys;
+        integer_pointer attr;
+    };
+
+    struct phys_t {
+        integer_pointer virt;
+        integer_pointer attr;
+    };
+
+    std::unordered_map<integer_pointer, virt_t> m_virt_map;
+    std::unordered_map<integer_pointer, phys_t> m_phys_map;
 
     buddy_allocator g_page_pool;
     buddy_allocator g_huge_pool;
@@ -472,6 +456,28 @@ public:
 /// @ensures g_mm != nullptr
 ///
 #define g_mm bfvmm::memory_manager::instance()
+
+/// Allocate Page
+///
+/// This function allocates a page of memory directly from the page pool.
+///
+/// @expects
+/// @ensures
+///
+/// @return Returns a pointer to the newly allocated page
+///
+extern "C" void *alloc_page();
+
+/// Free Page
+///
+/// This function frees a previous allocated page of memory from the page pool.
+///
+/// @expects
+/// @ensures
+///
+/// @param ptr a pointer to the previously allocated page
+///
+extern "C" void free_page(void *ptr);
 
 #ifdef _MSC_VER
 #pragma warning(pop)

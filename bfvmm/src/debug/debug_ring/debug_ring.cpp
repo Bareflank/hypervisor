@@ -63,20 +63,16 @@ namespace bfvmm
 
 debug_ring::debug_ring(vcpuid::type vcpuid) noexcept
 {
-    try {
-        m_vcpuid = vcpuid;
-        m_drr = std::make_unique<debug_ring_resources_t>();
+    m_vcpuid = vcpuid;
+    m_drr = std::make_unique<debug_ring_resources_t>();
 
-        m_drr->epos = 0;
-        m_drr->spos = 0;
-        m_drr->tag1 = 0xDB60DB60DB60DB60;
-        m_drr->tag2 = 0x06BD06BD06BD06BD;
+    m_drr->epos = 0;
+    m_drr->spos = 0;
+    m_drr->tag1 = 0xDB60DB60DB60DB60;
+    m_drr->tag2 = 0x06BD06BD06BD06BD;
 
-        std::lock_guard<std::mutex> guard(g_debug_mutex);
-        drr_map()[vcpuid] = m_drr.get();
-    }
-    catch (...)
-    { }
+    std::lock_guard<std::mutex> guard(g_debug_mutex);
+    drr_map()[vcpuid] = m_drr.get();
 }
 
 debug_ring::~debug_ring() noexcept
@@ -88,72 +84,68 @@ debug_ring::~debug_ring() noexcept
 void
 debug_ring::write(const std::string &str) noexcept
 {
-    try {
+    // TODO: A more interesting implementation would use an optimized
+    //       memcpy to implement this code. Doing so would increase it's
+    //       performance, but would require some better math, and an
+    //       optimized memcpy that used both rep string instructions and
+    //       SIMD instructions
 
-        // TODO: A more interesting implementation would use an optimized
-        //       memcpy to implement this code. Doing so would increase it's
-        //       performance, but would require some better math, and an
-        //       optimized memcpy that used both rep string instructions and
-        //       SIMD instructions
+    if (!m_drr || str.empty() || str.length() >= DEBUG_RING_SIZE) {
+        return;
+    }
 
-        expects(m_drr);
-        expects(str.length() > 0);
-        expects(str.length() < DEBUG_RING_SIZE);
+    // The length that we were given is equivalent to strlen, which does not
+    // include the '\0', so we add one to the length to account for that.
+    auto len = str.length() + 1;
 
-        // The length that we were given is equivalent to strlen, which does not
-        // include the '\0', so we add one to the length to account for that.
-        auto len = str.length() + 1;
+    auto epos = m_drr->epos & (DEBUG_RING_SIZE - 1);
+    auto cpos = m_drr->spos & (DEBUG_RING_SIZE - 1);
+    auto space = DEBUG_RING_SIZE - (m_drr->epos - m_drr->spos);
 
-        auto epos = m_drr->epos & (DEBUG_RING_SIZE - 1);
-        auto cpos = m_drr->spos & (DEBUG_RING_SIZE - 1);
-        auto space = DEBUG_RING_SIZE - (m_drr->epos - m_drr->spos);
+    if (space < len) {
 
-        if (space < len) {
+        // Make room for the write. Normally, with a circular buffer, you
+        // would just move the start position when a read occurs, but in
+        // this case, the vmm needs to be able to write as it wishes to the
+        // buffer. If we just move the start position based on the amount
+        // of space we need, you would end up with the first string being
+        // cropped once the ring wraps. The following code makes sure that
+        // we are making room by removing complete strings.
+        //
+        // Note: There is still a race condition with this code. If the
+        //       reader reads at the same time we are writing, you could
+        //       end up with a cropped string for the first string, but
+        //       that's fine, as this is just debug text, and if we add
+        //       locks, we would greatly increase the complexity of this
+        //       code, while serializing the code, which is not a good idea.
+        //
 
-            // Make room for the write. Normally, with a circular buffer, you
-            // would just move the start position when a read occurs, but in
-            // this case, the vmm needs to be able to write as it wishes to the
-            // buffer. If we just move the start position based on the amount
-            // of space we need, you would end up with the first string being
-            // cropped once the ring wraps. The following code makes sure that
-            // we are making room by removing complete strings.
-            //
-            // Note: There is still a race condition with this code. If the
-            //       reader reads at the same time we are writing, you could
-            //       end up with a cropped string for the first string, but
-            //       that's fine, as this is just debug text, and if we add
-            //       locks, we would greatly increase the complexity of this
-            //       code, while serializing the code, which is not a good idea.
-            //
-
-            while (space <= DEBUG_RING_SIZE) {
-                if (cpos >= DEBUG_RING_SIZE) {
-                    cpos = 0;
-                }
-
-                space++;
-                m_drr->spos++;
-
-                if (gsl::at(m_drr->buf, static_cast<std::ptrdiff_t>(cpos)) == '\0' && space >= len) {
-                    break;
-                }
-
-                gsl::at(m_drr->buf, static_cast<std::ptrdiff_t>(cpos++)) = '\0';
-            }
-        }
-
-        for (auto i = 0U; i < len; i++) {
-            if (epos >= DEBUG_RING_SIZE) {
-                epos = 0;
+        while (space <= DEBUG_RING_SIZE) {
+            if (cpos >= DEBUG_RING_SIZE) {
+                cpos = 0;
             }
 
-            gsl::at(m_drr->buf, static_cast<std::ptrdiff_t>(epos)) = str[i];
+            space++;
+            m_drr->spos++;
 
-            epos++;
-            m_drr->epos++;
+            if (gsl::at(m_drr->buf, static_cast<std::ptrdiff_t>(cpos)) == '\0' && space >= len) {
+                break;
+            }
+
+            gsl::at(m_drr->buf, static_cast<std::ptrdiff_t>(cpos++)) = '\0';
         }
     }
-    catch (...) { }
+
+    for (auto i = 0U; i < len; i++) {
+        if (epos >= DEBUG_RING_SIZE) {
+            epos = 0;
+        }
+
+        gsl::at(m_drr->buf, static_cast<std::ptrdiff_t>(epos)) = str[i];
+
+        epos++;
+        m_drr->epos++;
+    }
 }
 
 }

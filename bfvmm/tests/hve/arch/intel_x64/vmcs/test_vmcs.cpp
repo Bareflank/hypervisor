@@ -16,17 +16,17 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <support/arch/intel_x64/test_support.h>
+#include <catch/catch.hpp>
+#include <hippomocks.h>
+
+#include <test/support.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
 auto
 setup_vmcs(MockRepository &mocks)
 {
-    setup_msrs();
-    setup_mm(mocks);
-    setup_pt(mocks);
-
+    setup_test_support();
     return bfvmm::intel_x64::vmcs{0x0};
 }
 
@@ -92,6 +92,7 @@ TEST_CASE("vmcs: promote failure")
     MockRepository mocks;
     auto vmcs = setup_vmcs(mocks);
 
+    ::intel_x64::vmcs::guest_cr3::set(0x1000);
     CHECK_THROWS(vmcs.promote());
 }
 

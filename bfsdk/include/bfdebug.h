@@ -1067,8 +1067,12 @@ __bfdebug_fail(
 /* ---------------------------------------------------------------------------*/
 
 #define bfline bfdebug_ndec(0, "line", __LINE__);
-#define bffield(a) bfdebug_ndec(0, #a, a);
-#define bffield_hex(a) bfdebug_nhex(0, #a, a);
+#define __bffield1(a,b) bfdebug_ndec(0, "[" #b "] " #a, a);
+#define __bffield2(a,b) __bffield1(a,b);
+#define bffield(a) __bffield2(a,__LINE__)
+#define __bffield_hex1(a,b) bfdebug_nhex(0, "[" #b "] " #a, a);
+#define __bffield_hex2(a,b) __bffield_hex1(a,b);
+#define bffield_hex(a) __bffield_hex2(a,__LINE__)
 
 #endif
 

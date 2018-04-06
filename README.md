@@ -110,7 +110,7 @@ sudo pacman -S linux-headers nasm cmake base-devel clang
 
 #### Ubuntu 17.10 (or Higher):
 ```
-sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cmake
+sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cmake libelf-dev
 ```
 
 #### Windows (Cygwin):

@@ -22,7 +22,7 @@
 #include <bfthreadcontext.h>
 
 #include <memory_manager/memory_manager.h>
-#include <memory_manager/arch/x64/map_ptr.h>
+#include <memory_manager/arch/x64/unique_map.h>
 
 #include <hve/arch/intel_x64/vmcs/vmcs.h>
 
@@ -52,7 +52,7 @@ namespace intel_x64
 
 vmcs::vmcs(vcpuid::type vcpuid) :
     m_save_state{std::make_unique<save_state_t>()},
-    m_vmcs_region{std::make_unique<uint32_t[]>(1024)},
+    m_vmcs_region{static_cast<uint32_t *>(alloc_page()), free_page},
     m_vmcs_region_phys{g_mm->virtptr_to_physint(m_vmcs_region.get())}
 {
     gsl::span<uint32_t> id{m_vmcs_region.get(), 1024};
@@ -92,11 +92,10 @@ void
 vmcs::promote()
 {
     auto gdt =
-        bfvmm::x64::make_unique_map<char>(
+        bfvmm::x64::make_unique_map<uint64_t>(
             ::intel_x64::vmcs::guest_gdtr_base::get(),
             ::intel_x64::vmcs::guest_cr3::get(),
-            ::intel_x64::vmcs::guest_gdtr_limit::size(),
-            ::intel_x64::vmcs::guest_ia32_pat::get()
+            ::intel_x64::vmcs::guest_gdtr_limit::size()
         );
 
     vmcs_promote(m_save_state.get(), gdt.get());

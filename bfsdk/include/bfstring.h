@@ -75,20 +75,15 @@ to_string(const T val, const int base)
     std::stringstream stream;
 
     switch (base) {
-        case 8:
-            stream << "0";
-            break;
-
         case 16:
-            stream << "0x";
-            stream << std::setfill('0') << std::setw(16);
+            stream << std::setfill('0') << std::setw(18) << std::internal;
             break;
 
         default:
             break;
     };
 
-    stream << std::setbase(base) << std::uppercase << val;
+    stream << std::setbase(base) << std::showbase << val;
     return stream.str();
 }
 

@@ -28,6 +28,7 @@
 #include <arch/x64/idt.h>
 #include <arch/x64/misc.h>
 #include <arch/x64/msrs.h>
+#include <arch/x64/paging.h>
 #include <arch/x64/pm.h>
 #include <arch/x64/portio.h>
 #include <arch/x64/rdtsc.h>

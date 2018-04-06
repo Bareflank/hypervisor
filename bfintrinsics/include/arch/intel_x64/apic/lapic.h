@@ -24,7 +24,7 @@
 // -----------------------------------------------------------------------------
 
 #include <bfexports.h>
-#include <arch/x64/misc.h>
+#include <arch/x64/paging.h>
 #include <arch/intel_x64/msrs.h>
 #include <arch/intel_x64/cpuid.h>
 #include <arch/intel_x64/apic/x2apic.h>
@@ -335,7 +335,7 @@ extern std::array<attr_t, count> attributes;
 ///         before using to access the apic
 ///
 constexpr inline auto mem_addr_to_offset(uint64_t mem_addr)
-{ return (mem_addr & (::x64::page_size - 1U)) >> 4U; }
+{ return (mem_addr & (::x64::pt::page_size - 1U)) >> 4U; }
 
 /// Msr addr to offset
 ///

@@ -16,8 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef GDT_REG_X64_H
-#define GDT_REG_X64_H
+#ifndef GDT_X64_H
+#define GDT_X64_H
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -48,6 +48,50 @@ extern "C" void _write_gdt(void *gdt_reg) noexcept;
 
 namespace x64
 {
+
+namespace access_rights
+{
+    namespace type
+    {
+        constexpr const auto tss_busy = 0x0000000BU;
+        constexpr const auto tss_available = 0x00000009U;
+
+        constexpr const auto read_only = 0x00000000U;
+        constexpr const auto read_only_accessed = 0x00000001U;
+        constexpr const auto read_write = 0x00000002U;
+        constexpr const auto read_write_accessed = 0x00000003U;
+        constexpr const auto read_only_expand_down = 0x00000004U;
+        constexpr const auto read_only_expand_down_accessed = 0x00000005U;
+        constexpr const auto read_write_expand_down = 0x00000006U;
+        constexpr const auto read_write_expand_down_accessed = 0x00000007U;
+
+        constexpr const auto execute_only = 0x00000008U;
+        constexpr const auto execute_only_accessed = 0x00000009U;
+        constexpr const auto read_execute = 0x0000000AU;
+        constexpr const auto read_execute_accessed = 0x0000000BU;
+        constexpr const auto execute_only_conforming = 0x0000000CU;
+        constexpr const auto execute_only_conforming_accessed = 0x0000000DU;
+        constexpr const auto read_execute_conforming = 0x0000000EU;
+        constexpr const auto read_execute_conforming_accessed = 0x0000000FU;
+    }
+
+    namespace dpl
+    {
+        constexpr const auto ring0 = 0x00000000U;
+        constexpr const auto ring1 = 0x00000001U;
+        constexpr const auto ring2 = 0x00000002U;
+        constexpr const auto ring3 = 0x00000003U;
+    }
+
+    constexpr const auto ring0_cs_descriptor = 0x0000A09BU;
+    constexpr const auto ring0_ss_descriptor = 0x0000C093U;
+    constexpr const auto ring0_fs_descriptor = 0x00008093U;
+    constexpr const auto ring0_gs_descriptor = 0x00008093U;
+    constexpr const auto ring0_tr_descriptor = 0x0000008BU;
+
+    constexpr const auto unusable = 0x00010000U;
+}
+
 namespace gdt_reg
 {
 

@@ -110,41 +110,41 @@ private:
     };
 
     inline auto get_size(node_t *node) const
-    { return get_bits(node->size, 0x0FFFFFFFFFFFFFFF); }
+    { return get_bits(node->size, 0x0FFFFFFFFFFFFFFFULL); }
 
     inline auto is_unused(node_t *node) const
-    { return get_bits(node->size, 0xC000000000000000) == 0x0000000000000000; }
+    { return get_bits(node->size, 0xC000000000000000ULL) == 0x0000000000000000ULL; }
 
     inline auto is_leaf(node_t *node) const
-    { return get_bits(node->size, 0xC000000000000000) == 0x4000000000000000; }
+    { return get_bits(node->size, 0xC000000000000000ULL) == 0x4000000000000000ULL; }
 
     inline auto is_parent(node_t *node) const
-    { return get_bits(node->size, 0xC000000000000000) == 0x8000000000000000; }
+    { return get_bits(node->size, 0xC000000000000000ULL) == 0x8000000000000000ULL; }
 
     inline auto is_full(node_t *node) const
-    { return get_bits(node->size, 0xC000000000000000) == 0xC000000000000000; }
+    { return get_bits(node->size, 0xC000000000000000ULL) == 0xC000000000000000ULL; }
 
     inline node_t *set_unused(node_t *node)
     {
-        node->size = set_bits(node->size, 0xC000000000000000, 0x0000000000000000);
+        node->size = set_bits(node->size, 0xC000000000000000ULL, 0x0000000000000000ULL);
         return node;
     }
 
     inline node_t *set_leaf(node_t *node)
     {
-        node->size = set_bits(node->size, 0xC000000000000000, 0x4000000000000000);
+        node->size = set_bits(node->size, 0xC000000000000000ULL, 0x4000000000000000ULL);
         return node;
     }
 
     inline node_t *set_parent(node_t *node)
     {
-        node->size = set_bits(node->size, 0xC000000000000000, 0x8000000000000000);
+        node->size = set_bits(node->size, 0xC000000000000000ULL, 0x8000000000000000ULL);
         return node;
     }
 
     inline node_t *set_full(node_t *node)
     {
-        node->size = set_bits(node->size, 0xC000000000000000, 0xC000000000000000);
+        node->size = set_bits(node->size, 0xC000000000000000ULL, 0xC000000000000000ULL);
         return node;
     }
 
@@ -340,7 +340,7 @@ private:
         if (size == this->get_size(node)) {
             if (this->is_unused(node)) {
 
-                bfdebug_transaction(1, [&](std::string * msg) {
+                bfdebug_transaction(BUDDY_ALLOCATOR_DEBUG, [&](std::string * msg) {
                     bfdebug_info(BUDDY_ALLOCATOR_DEBUG, "allocate", msg);
                     bfdebug_subnhex(BUDDY_ALLOCATOR_DEBUG, "ptr", node->ptr, msg);
                     bfdebug_subnhex(BUDDY_ALLOCATOR_DEBUG, "size", this->get_size(node), msg);
@@ -428,7 +428,7 @@ private:
     {
         if (this->is_leaf(node)) {
 
-            bfdebug_transaction(1, [&](std::string * msg) {
+            bfdebug_transaction(BUDDY_ALLOCATOR_DEBUG, [&](std::string * msg) {
                 bfdebug_info(BUDDY_ALLOCATOR_DEBUG, "deallocate", msg);
                 bfdebug_subnhex(BUDDY_ALLOCATOR_DEBUG, "ptr", node->ptr, msg);
                 bfdebug_subnhex(BUDDY_ALLOCATOR_DEBUG, "size", this->get_size(node), msg);
