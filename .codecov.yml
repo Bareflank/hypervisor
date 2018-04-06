@@ -39,9 +39,12 @@ parsers:
 
 ignore:
   - "bfintrinsics/**"
-  - "bfm/ioctl/arch/linux/**"
-  - "bfvmm/include/memory_manager/**"
-  - "bfvmm/src/memory_manager/**"
+  - "bfm/ioctl/arch/**"
+  - "bfvmm/include/test/**"
+  - "bfvmm/include/memory_manager/memory_manager.h"
+  - "bfvmm/src/memory_manager/memory_manager.cpp"
+  - "bfvmm/include/memory_manager/arch/x64/unique_map.h"
+  - "bfvmm/include/memory_manager/arch/x64/cr3/helpers.h"
 
 comment:
   layout: "header, diff, files"

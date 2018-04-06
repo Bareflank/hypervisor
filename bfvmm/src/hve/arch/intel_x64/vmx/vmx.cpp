@@ -35,7 +35,7 @@ namespace intel_x64
 {
 
 vmx::vmx() :
-    m_vmx_region{std::make_unique<uint32_t[]>(1024)},
+    m_vmx_region{static_cast<uint32_t *>(alloc_page()), free_page},
     m_vmx_region_phys{g_mm->virtptr_to_physint(m_vmx_region.get())}
 {
     this->reset_vmx();

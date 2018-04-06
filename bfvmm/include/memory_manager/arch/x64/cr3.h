@@ -16,44 +16,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <catch/catch.hpp>
-#include <hippomocks.h>
+#ifndef CR3_H
+#define CR3_H
 
-#include <test/support.h>
+#include "cr3/mmap.h"
+#include "cr3/helpers.h"
 
-TEST_CASE("idt_constructor_no_size")
-{
-    setup_test_support();
-    bfvmm::x64::idt idt;
-}
-
-TEST_CASE("idt_constructor_zero_size")
-{
-    setup_test_support();
-    CHECK_NOTHROW(bfvmm::x64::idt{0});
-}
-
-TEST_CASE("idt_constructor_size")
-{
-    setup_test_support();
-
-    bfvmm::x64::idt idt{4};
-    CHECK(idt.base() != 0);
-    CHECK(idt.limit() == (4 * sizeof(bfvmm::x64::idt::interrupt_descriptor_type)) - 1);
-}
-
-TEST_CASE("idt_base")
-{
-    setup_test_support();
-
-    bfvmm::x64::idt idt;
-    CHECK(idt.base() == reinterpret_cast<bfvmm::x64::idt::integer_pointer>(g_idt.data()));
-}
-
-TEST_CASE("idt_limit")
-{
-    setup_test_support();
-
-    bfvmm::x64::idt idt;
-    CHECK(idt.limit() == (4 * sizeof(bfvmm::x64::idt::interrupt_descriptor_type)) - 1);
-}
+#endif

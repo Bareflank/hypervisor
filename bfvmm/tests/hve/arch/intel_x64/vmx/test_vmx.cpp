@@ -16,32 +16,18 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <support/arch/intel_x64/test_support.h>
-
-#ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
-
-auto
-setup_vmx_tests(MockRepository &mocks)
-{
-    setup_msrs();
-    setup_cpuid();
-    setup_registers();
-
-    return setup_mm(mocks);
-}
+#include <catch/catch.hpp>
+#include <test/support.h>
 
 TEST_CASE("vmx: start_success")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
-
+    setup_test_support();
     CHECK_NOTHROW(bfvmm::intel_x64::vmx{});
 }
 
 TEST_CASE("vmx: start_execute_vmxon_failure")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_vmxon_fails = true;
     auto ___ = gsl::finally([&] {
@@ -53,8 +39,7 @@ TEST_CASE("vmx: start_execute_vmxon_failure")
 
 TEST_CASE("vmx: reset")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     ::intel_x64::cr4::vmx_enable_bit::enable();
     auto ___ = gsl::finally([&] {
@@ -66,8 +51,7 @@ TEST_CASE("vmx: reset")
 
 TEST_CASE("vmx: start_check_ia32_vmx_cr4_fixed0_msr_failure")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_msrs[intel_x64::msrs::ia32_vmx_cr4_fixed0::addr] = 0x1;
     CHECK_THROWS(bfvmm::intel_x64::vmx{});
@@ -75,8 +59,7 @@ TEST_CASE("vmx: start_check_ia32_vmx_cr4_fixed0_msr_failure")
 
 TEST_CASE("vmx: start_check_ia32_vmx_cr4_fixed1_msr_failure")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_cr4 = 0x1;
     g_msrs[intel_x64::msrs::ia32_vmx_cr4_fixed1::addr] = 0xFFFFFFFFFFFFFFF0;
@@ -86,8 +69,7 @@ TEST_CASE("vmx: start_check_ia32_vmx_cr4_fixed1_msr_failure")
 
 TEST_CASE("vmx: start_enable_vmx_operation_failure")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_write_cr4_fails = true;
     auto ___ = gsl::finally([&] {
@@ -99,8 +81,7 @@ TEST_CASE("vmx: start_enable_vmx_operation_failure")
 
 TEST_CASE("vmx: start_v8086_disabled_failure")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_rflags = 0xFFFFFFFFFFFFFFFF;
     CHECK_THROWS(bfvmm::intel_x64::vmx{});
@@ -108,8 +89,7 @@ TEST_CASE("vmx: start_v8086_disabled_failure")
 
 TEST_CASE("vmx: start_check_ia32_feature_control_msr_unlocked")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_msrs[intel_x64::msrs::ia32_feature_control::addr] = 0;
 
@@ -120,8 +100,7 @@ TEST_CASE("vmx: start_check_ia32_feature_control_msr_unlocked")
 
 TEST_CASE("vmx: start_check_ia32_feature_control_msr_locked")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     intel_x64::msrs::ia32_feature_control::lock_bit::enable();
     CHECK_NOTHROW(bfvmm::intel_x64::vmx{});
@@ -129,8 +108,7 @@ TEST_CASE("vmx: start_check_ia32_feature_control_msr_locked")
 
 TEST_CASE("vmx: start_check_ia32_vmx_cr0_fixed0_msr")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_msrs[intel_x64::msrs::ia32_vmx_cr0_fixed0::addr] = 0x1;
     CHECK_THROWS(bfvmm::intel_x64::vmx{});
@@ -138,8 +116,7 @@ TEST_CASE("vmx: start_check_ia32_vmx_cr0_fixed0_msr")
 
 TEST_CASE("vmx: start_check_ia32_vmx_cr0_fixed1_msr")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_cr0 = 0x1;
     g_msrs[intel_x64::msrs::ia32_vmx_cr0_fixed1::addr] = 0xFFFFFFFFFFFFFFF0;
@@ -149,8 +126,7 @@ TEST_CASE("vmx: start_check_ia32_vmx_cr0_fixed1_msr")
 
 TEST_CASE("vmx: start_check_vmx_capabilities_msr_memtype_failure")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_msrs[intel_x64::msrs::ia32_vmx_basic::addr] = (1ULL << 55);
     CHECK_THROWS(bfvmm::intel_x64::vmx{});
@@ -158,8 +134,7 @@ TEST_CASE("vmx: start_check_vmx_capabilities_msr_memtype_failure")
 
 TEST_CASE("vmx: start_check_vmx_capabilities_msr_addr_width_failure")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_msrs[intel_x64::msrs::ia32_vmx_basic::addr] = (1ULL << 55) | (6ULL << 50) | (1ULL << 48);
     CHECK_THROWS(bfvmm::intel_x64::vmx{});
@@ -167,8 +142,7 @@ TEST_CASE("vmx: start_check_vmx_capabilities_msr_addr_width_failure")
 
 TEST_CASE("vmx: start_check_vmx_capabilities_true_based_controls_failure")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_msrs[intel_x64::msrs::ia32_vmx_basic::addr] = (6ULL << 50);
     CHECK_THROWS(bfvmm::intel_x64::vmx{});
@@ -176,30 +150,15 @@ TEST_CASE("vmx: start_check_vmx_capabilities_true_based_controls_failure")
 
 TEST_CASE("vmx: start_check_cpuid_vmx_supported_failure")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_ecx_cpuid[intel_x64::cpuid::feature_information::addr] = 0;
     CHECK_THROWS(bfvmm::intel_x64::vmx{});
 }
 
-TEST_CASE("vmx: start_virt_to_phys_failure")
-{
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
-
-    g_virt_to_phys_fails = true;
-    auto ___ = gsl::finally([&] {
-        g_virt_to_phys_fails = false;
-    });
-
-    CHECK_THROWS(bfvmm::intel_x64::vmx{});
-}
-
 TEST_CASE("vmx: stop_vmxoff_failure")
 {
-    MockRepository mocks;
-    auto mm = setup_vmx_tests(mocks);
+    setup_test_support();
 
     g_vmxoff_fails = true;
     auto ___ = gsl::finally([&] {
@@ -209,5 +168,3 @@ TEST_CASE("vmx: stop_vmxoff_failure")
     bfvmm::intel_x64::vmx{};
     CHECK(::intel_x64::cr4::vmx_enable_bit::is_enabled());
 }
-
-#endif

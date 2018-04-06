@@ -27,7 +27,7 @@
 // Prototypes
 // -----------------------------------------------------------------------------
 
-extern "C" void *malloc_page();
+extern "C" void *alloc_page();
 extern "C" void free_page(void *ptr);
 
 // -----------------------------------------------------------------------------
@@ -36,6 +36,10 @@ extern "C" void free_page(void *ptr);
 
 constexpr const auto pagepool_size = 255U;
 constexpr const auto objtpool_size = 255U;
+
+#ifndef OBJECT_ALLOCATOR_DEBUG
+#define OBJECT_ALLOCATOR_DEBUG 5
+#endif
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -68,7 +72,7 @@ S *__oa_alloc()
     static_assert(BAREFLANK_PAGE_SIZE == sizeof(S), "allocation is not a page");
     void *addr;
 
-    if (GSL_LIKELY(addr = malloc_page())) {
+    if (GSL_LIKELY(addr = alloc_page())) {
         return static_cast<S *>(std::memset(addr, 0, sizeof(S)));
     }
 
@@ -219,7 +223,7 @@ public:
     ~basic_object_allocator() noexcept
     {
         if (m_used_stack_top != nullptr) {
-            bfalert_nhex(0, "basic_object_allocator leaked memory", num_used());
+            bfalert_nhex(OBJECT_ALLOCATOR_DEBUG, "basic_object_allocator leaked memory", num_used());
             return;
         }
 
@@ -249,7 +253,7 @@ public:
         if (GSL_UNLIKELY(this != &other)) {
 
             if (m_used_stack_top != nullptr) {
-                bfalert_nhex(0, "basic_object_allocator leaked memory", num_used());
+                bfalert_nhex(OBJECT_ALLOCATOR_DEBUG, "basic_object_allocator leaked memory", num_used());
             }
             else {
                 cleanup();
@@ -492,7 +496,7 @@ private:
         }
 
         auto page = &gsl::at(m_page_stack_top->pool, m_page_stack_top->index);
-        page->addr = static_cast<gsl::byte *>(malloc_page());
+        page->addr = static_cast<gsl::byte *>(alloc_page());
         page->index = 0;
 
         ++m_pages_consumed;
@@ -539,7 +543,7 @@ private:
     inline object_t *used_stack_pop()
     {
         if (GSL_UNLIKELY(m_used_stack_top == nullptr)) {
-            bfalert_info(0, "used_stack_pop empty. memory corruption likely");
+            bfalert_info(OBJECT_ALLOCATOR_DEBUG, "used_stack_pop empty. memory corruption likely");
             used_stack_push(get_next_object());
         }
 
@@ -584,7 +588,7 @@ private:
     {
         guard_exceptions([&]() {
 
-            bfdebug_ndec(1, "basic_object_allocator: pages used", num_page());
+            bfdebug_ndec(OBJECT_ALLOCATOR_DEBUG, "basic_object_allocator: pages used", num_page());
 
             while (m_page_stack_top != nullptr) {
                 if (m_page_stack_top->index != 0) {
@@ -780,7 +784,7 @@ public:
     pointer allocate(size_type n)
     {
         if (n != 1) {
-            return reinterpret_cast<pointer>(malloc_page());
+            return reinterpret_cast<pointer>(alloc_page());
         }
 
         return static_cast<pointer>(m_d.allocate());

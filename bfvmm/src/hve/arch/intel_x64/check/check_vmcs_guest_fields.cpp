@@ -1916,18 +1916,18 @@ guest_hlt_valid_interrupts()
             return;
 
         case interruption_type::hardware_exception:
-            if (vector == ::x64::interrupt::debug_exception) {
+            if (vector == ::x64::exception::debug_exception) {
                 return;
             }
 
-            if (vector == ::x64::interrupt::machine_check) {
+            if (vector == ::x64::exception::machine_check) {
                 return;
             }
 
             break;
 
         case interruption_type::other_event:
-            if (vector == ::x64::interrupt::divide_error) {
+            if (vector == ::x64::exception::divide_error) {
                 return;
             }
 
@@ -1961,7 +1961,7 @@ guest_shutdown_valid_interrupts()
             return;
 
         case interruption_type::hardware_exception:
-            if (vector == ::x64::interrupt::machine_check) {
+            if (vector == ::x64::exception::machine_check) {
                 return;
             }
 
@@ -2315,19 +2315,19 @@ guest_valid_pdpte_with_ept_disabled()
         throw std::logic_error("pdpt address is null");
     }
 
-    if ((virt_pdpt[0] & ::x64::pdpte::reserved::mask()) != 0U) {
+    if ((virt_pdpt[0] & ::x64::pdpt::entry::reserved::mask()) != 0U) {
         throw std::logic_error("pdpte0 reserved bits set with ept disabled and pae paging enabled");
     }
 
-    if ((virt_pdpt[1] & ::x64::pdpte::reserved::mask()) != 0U) {
+    if ((virt_pdpt[1] & ::x64::pdpt::entry::reserved::mask()) != 0U) {
         throw std::logic_error("pdpte1 reserved bits set with ept disabled and pae paging enabled");
     }
 
-    if ((virt_pdpt[2] & ::x64::pdpte::reserved::mask()) != 0U) {
+    if ((virt_pdpt[2] & ::x64::pdpt::entry::reserved::mask()) != 0U) {
         throw std::logic_error("pdpte2 reserved bits set with ept disabled and pae paging enabled");
     }
 
-    if ((virt_pdpt[3] & ::x64::pdpte::reserved::mask()) != 0U) {
+    if ((virt_pdpt[3] & ::x64::pdpt::entry::reserved::mask()) != 0U) {
         throw std::logic_error("pdpte3 reserved bits set with ept disabled and pae paging enabled");
     }
 }

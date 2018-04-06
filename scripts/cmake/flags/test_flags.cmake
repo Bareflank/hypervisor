@@ -28,7 +28,6 @@ list(APPEND BFFLAGS_TEST
     -D${OSTYPE}
     -D${ABITYPE}
     -DENABLE_BUILD_TEST
-    -DDEBUG_LEVEL=5
 )
 
 if(NOT WIN32)
@@ -46,6 +45,7 @@ if(NOT WIN32)
     list(APPEND BFFLAGS_TEST_CXX
         -std=c++14
         -fvisibility-inlines-hidden
+        -Wno-sized-deallocation
     )
 
     list(APPEND BFFLAGS_TEST_X86_64

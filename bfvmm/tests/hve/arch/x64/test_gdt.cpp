@@ -16,11 +16,14 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <support/arch/intel_x64/test_support.h>
+#include <catch/catch.hpp>
+#include <hippomocks.h>
+
+#include <test/support.h>
 
 TEST_CASE("gdt_constructor_no_size")
 {
-    setup_gdt();
+    setup_test_support();
     bfvmm::x64::gdt gdt;
 }
 
@@ -54,7 +57,7 @@ TEST_CASE("gdt_limit")
 
 TEST_CASE("gdt_set_base_zero_index")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.set_base(0, 0x10));
@@ -62,7 +65,7 @@ TEST_CASE("gdt_set_base_zero_index")
 
 TEST_CASE("gdt_set_base_invalid_index")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.set_base(1000, 0x10));
@@ -70,7 +73,7 @@ TEST_CASE("gdt_set_base_invalid_index")
 
 TEST_CASE("gdt_set_base_tss_at_end_of_gdt")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.set_base(7, 0x10));
@@ -78,7 +81,7 @@ TEST_CASE("gdt_set_base_tss_at_end_of_gdt")
 
 TEST_CASE("gdt_set_base_descriptor_success")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_NOTHROW(gdt.set_base(5, 0xBBBBBBBB12345678));
@@ -87,7 +90,7 @@ TEST_CASE("gdt_set_base_descriptor_success")
 
 TEST_CASE("gdt_set_base_tss_success")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_NOTHROW(gdt.set_base(6, 0x1234567812345678));
@@ -97,7 +100,7 @@ TEST_CASE("gdt_set_base_tss_success")
 
 TEST_CASE("gdt_base_zero_index")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.base(0));
@@ -105,7 +108,7 @@ TEST_CASE("gdt_base_zero_index")
 
 TEST_CASE("gdt_base_invalid_index")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.base(1000));
@@ -113,7 +116,7 @@ TEST_CASE("gdt_base_invalid_index")
 
 TEST_CASE("gdt_base_tss_at_end_of_gdt")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.base(7));
@@ -121,7 +124,7 @@ TEST_CASE("gdt_base_tss_at_end_of_gdt")
 
 TEST_CASE("gdt_base_descriptor_success")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     gdt.m_gdt.at(5) = 0x12FFFF345678FFFF;
@@ -130,7 +133,7 @@ TEST_CASE("gdt_base_descriptor_success")
 
 TEST_CASE("gdt_base_tss_success")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     gdt.m_gdt.at(6) = 0x12FF8F345678FFFF;
@@ -140,7 +143,7 @@ TEST_CASE("gdt_base_tss_success")
 
 TEST_CASE("gdt_set_limit_zero_index")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.set_limit(0, 0x10));
@@ -148,7 +151,7 @@ TEST_CASE("gdt_set_limit_zero_index")
 
 TEST_CASE("gdt_set_limit_invalid_index")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.set_limit(1000, 0x10));
@@ -156,7 +159,7 @@ TEST_CASE("gdt_set_limit_invalid_index")
 
 TEST_CASE("gdt_set_limit_descriptor_success")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_NOTHROW(gdt.set_limit(5, 0x12345678));
@@ -165,7 +168,7 @@ TEST_CASE("gdt_set_limit_descriptor_success")
 
 TEST_CASE("gdt_limit_zero_index")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.limit(0));
@@ -173,7 +176,7 @@ TEST_CASE("gdt_limit_zero_index")
 
 TEST_CASE("gdt_limit_invalid_index")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.limit(1000));
@@ -181,7 +184,7 @@ TEST_CASE("gdt_limit_invalid_index")
 
 TEST_CASE("gdt_limit_descriptor_success")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     gdt.m_gdt.at(5) = 0xFFF4FFFFFFFF5678;
@@ -190,7 +193,7 @@ TEST_CASE("gdt_limit_descriptor_success")
 
 TEST_CASE("gdt_limit_descriptor_in_bytes_success")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     gdt.m_gdt.at(5) = 0xFF74FFFFFFFF5678;
@@ -199,7 +202,7 @@ TEST_CASE("gdt_limit_descriptor_in_bytes_success")
 
 TEST_CASE("gdt_set_access_rights_zero_index")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.set_access_rights(0, 0x10));
@@ -207,7 +210,7 @@ TEST_CASE("gdt_set_access_rights_zero_index")
 
 TEST_CASE("gdt_set_access_rights_invalid_index")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.set_access_rights(1000, 0x10));
@@ -215,7 +218,7 @@ TEST_CASE("gdt_set_access_rights_invalid_index")
 
 TEST_CASE("gdt_set_access_rights_descriptor_success")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_NOTHROW(gdt.set_access_rights(5, 0x12345678));
@@ -224,7 +227,7 @@ TEST_CASE("gdt_set_access_rights_descriptor_success")
 
 TEST_CASE("gdt_access_rights_zero_index")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.access_rights(0));
@@ -232,7 +235,7 @@ TEST_CASE("gdt_access_rights_zero_index")
 
 TEST_CASE("gdt_access_rights_invalid_index")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     CHECK_THROWS(gdt.access_rights(1000));
@@ -240,7 +243,7 @@ TEST_CASE("gdt_access_rights_invalid_index")
 
 TEST_CASE("gdt_access_rights_descriptor_success")
 {
-    setup_gdt();
+    setup_test_support();
 
     bfvmm::x64::gdt gdt;
     gdt.m_gdt.at(5) = 0xFF5F78FFFFFFFFFF;
