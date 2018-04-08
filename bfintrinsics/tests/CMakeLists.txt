@@ -29,6 +29,7 @@ do_test(test_cpuid_intel_x64 SOURCES arch/intel_x64/test_cpuid.cpp)
 do_test(test_crs_intel_x64 SOURCES arch/intel_x64/test_crs.cpp)
 do_test(test_drs_intel_x64 SOURCES arch/intel_x64/test_drs.cpp)
 do_test(test_msrs_intel_x64 SOURCES arch/intel_x64/test_msrs.cpp)
+do_test(test_mtrr_intel_x64 SOURCES arch/intel_x64/test_mtrr.cpp)
 do_test(test_vmx_intel_x64 SOURCES arch/intel_x64/test_vmx.cpp)
 
 do_test(test_16bit_control_fields SOURCES arch/intel_x64/vmcs/test_16bit_control_fields.cpp)

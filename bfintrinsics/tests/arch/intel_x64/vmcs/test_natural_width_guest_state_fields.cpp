@@ -19,7 +19,8 @@
 #include <catch/catch.hpp>
 
 #include <map>
-#include <intrinsics.h>
+#include <arch/intel_x64/msrs.h>
+#include <arch/intel_x64/vmcs/natural_width_guest_state_fields.h>
 
 using namespace intel_x64;
 
