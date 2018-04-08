@@ -19,7 +19,10 @@
 #include <catch/catch.hpp>
 
 #include <map>
-#include <intrinsics.h>
+
+#include <arch/x64/cpuid.h>
+#include <arch/intel_x64/msrs.h>
+#include <arch/intel_x64/vmcs/64bit_guest_state_fields.h>
 
 using namespace intel_x64;
 

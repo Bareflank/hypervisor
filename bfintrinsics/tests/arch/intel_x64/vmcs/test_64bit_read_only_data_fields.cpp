@@ -19,7 +19,9 @@
 #include <catch/catch.hpp>
 
 #include <map>
-#include <intrinsics.h>
+
+#include <arch/intel_x64/msrs.h>
+#include <arch/intel_x64/vmcs/64bit_read_only_data_fields.h>
 
 using namespace intel_x64;
 
