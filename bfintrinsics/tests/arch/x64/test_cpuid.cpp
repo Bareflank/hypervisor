@@ -19,7 +19,7 @@
 #include <catch/catch.hpp>
 
 #include <map>
-#include <intrinsics.h>
+#include <arch/x64/cpuid.h>
 
 using namespace x64;
 
