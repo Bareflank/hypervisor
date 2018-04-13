@@ -643,7 +643,7 @@ public:
     /// @param other the unique_map_ptr to copy
     /// @return reference to this
     ///
-    unique_map_ptr &operator=(unique_map_ptr other) noexcept
+    unique_map_ptr &operator=(unique_map_ptr &&other) noexcept
     {
         reset(other.release());
         return *this;
