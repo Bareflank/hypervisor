@@ -1262,9 +1262,11 @@ endmacro(set_bfm_vmm)
 #     is not in the same directory, allowing you to pass a source file with
 #     a directory. Nomrally FILENAME should still match the filename being
 #     used.
+# @param CMD_LINE_ARGS Command line arguements to be passed to the test
+#     executable by ctest
 #
 function(do_test FILENAME)
-    set(multiVal DEFINES DEPENDS SOURCES)
+    set(multiVal DEFINES DEPENDS SOURCES CMD_LINE_ARGS)
     cmake_parse_arguments(ARG "" "" "${multiVal}" ${ARGN})
 
     set(DEPENDS "")
@@ -1281,7 +1283,7 @@ function(do_test FILENAME)
     add_executable(test_${NAME} ${ARG_SOURCES})
     target_link_libraries(test_${NAME} ${DEPENDS} test_catch)
     target_compile_definitions(test_${NAME} PRIVATE ${ARG_DEFINES})
-    add_test(test_${NAME} test_${NAME})
+    add_test(test_${NAME} test_${NAME} ${ARG_CMD_LINE_ARGS})
     if(CYGWIN OR WIN32)
         target_link_libraries(test_${NAME} setupapi)
     endif()
