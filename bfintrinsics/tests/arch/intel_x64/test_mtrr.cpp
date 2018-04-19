@@ -1169,9 +1169,9 @@ TEST_CASE("mtrr::fix16k_A0000")
     CHECK(range7::get(reg) == 0xDDULL);
 }
 
-TEST_CASE("mtrr::fix04k_C0000")
+TEST_CASE("mtrr::fix4k_C0000")
 {
-    using namespace intel_x64::mtrr::fix04k_C0000;
+    using namespace intel_x64::mtrr::fix4k_C0000;
 
     set(0xFFFFFFFF11111111ULL);
     CHECK(get() == 0xFFFFFFFF11111111ULL);
@@ -1215,9 +1215,9 @@ TEST_CASE("mtrr::fix04k_C0000")
     CHECK(range7::get(reg) == 0xDDULL);
 }
 
-TEST_CASE("mtrr::fix04k_C8000")
+TEST_CASE("mtrr::fix4k_C8000")
 {
-    using namespace intel_x64::mtrr::fix04k_C8000;
+    using namespace intel_x64::mtrr::fix4k_C8000;
 
     set(0xFFFFFFFF11111111ULL);
     CHECK(get() == 0xFFFFFFFF11111111ULL);
@@ -1261,9 +1261,9 @@ TEST_CASE("mtrr::fix04k_C8000")
     CHECK(range7::get(reg) == 0xDDULL);
 }
 
-TEST_CASE("mtrr::fix04k_D0000")
+TEST_CASE("mtrr::fix4k_D0000")
 {
-    using namespace intel_x64::mtrr::fix04k_D0000;
+    using namespace intel_x64::mtrr::fix4k_D0000;
 
     set(0xFFFFFFFF11111111ULL);
     CHECK(get() == 0xFFFFFFFF11111111ULL);
@@ -1307,9 +1307,9 @@ TEST_CASE("mtrr::fix04k_D0000")
     CHECK(range7::get(reg) == 0xDDULL);
 }
 
-TEST_CASE("mtrr::fix04k_D8000")
+TEST_CASE("mtrr::fix4k_D8000")
 {
-    using namespace intel_x64::mtrr::fix04k_D8000;
+    using namespace intel_x64::mtrr::fix4k_D8000;
 
     set(0xFFFFFFFF11111111ULL);
     CHECK(get() == 0xFFFFFFFF11111111ULL);
@@ -1353,9 +1353,9 @@ TEST_CASE("mtrr::fix04k_D8000")
     CHECK(range7::get(reg) == 0xDDULL);
 }
 
-TEST_CASE("mtrr::fix04k_E0000")
+TEST_CASE("mtrr::fix4k_E0000")
 {
-    using namespace intel_x64::mtrr::fix04k_E0000;
+    using namespace intel_x64::mtrr::fix4k_E0000;
 
     set(0xFFFFFFFF11111111ULL);
     CHECK(get() == 0xFFFFFFFF11111111ULL);
@@ -1399,9 +1399,9 @@ TEST_CASE("mtrr::fix04k_E0000")
     CHECK(range7::get(reg) == 0xDDULL);
 }
 
-TEST_CASE("mtrr::fix04k_E8000")
+TEST_CASE("mtrr::fix4k_E8000")
 {
-    using namespace intel_x64::mtrr::fix04k_E8000;
+    using namespace intel_x64::mtrr::fix4k_E8000;
 
     set(0xFFFFFFFF11111111ULL);
     CHECK(get() == 0xFFFFFFFF11111111ULL);
@@ -1445,9 +1445,9 @@ TEST_CASE("mtrr::fix04k_E8000")
     CHECK(range7::get(reg) == 0xDDULL);
 }
 
-TEST_CASE("mtrr::fix04k_F0000")
+TEST_CASE("mtrr::fix4k_F0000")
 {
-    using namespace intel_x64::mtrr::fix04k_F0000;
+    using namespace intel_x64::mtrr::fix4k_F0000;
 
     set(0xFFFFFFFF11111111ULL);
     CHECK(get() == 0xFFFFFFFF11111111ULL);
@@ -1491,9 +1491,9 @@ TEST_CASE("mtrr::fix04k_F0000")
     CHECK(range7::get(reg) == 0xDDULL);
 }
 
-TEST_CASE("mtrr::fix04k_F8000")
+TEST_CASE("mtrr::fix4k_F8000")
 {
-    using namespace intel_x64::mtrr::fix04k_F8000;
+    using namespace intel_x64::mtrr::fix4k_F8000;
 
     set(0xFFFFFFFF11111111ULL);
     CHECK(get() == 0xFFFFFFFF11111111ULL);

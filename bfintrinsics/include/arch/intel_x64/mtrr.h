@@ -2218,10 +2218,10 @@ namespace fix16k_A0000
     }
 }
 
-namespace fix04k_C0000
+namespace fix4k_C0000
 {
     constexpr const auto addr = 0x00000268U;
-    constexpr const auto name = "fix04k_C0000";
+    constexpr const auto name = "fix4k_C0000";
 
     inline auto get() noexcept
     { return _read_msr(addr); }
@@ -2418,10 +2418,10 @@ namespace fix04k_C0000
     }
 }
 
-namespace fix04k_C8000
+namespace fix4k_C8000
 {
     constexpr const auto addr = 0x00000269U;
-    constexpr const auto name = "fix04k_C8000";
+    constexpr const auto name = "fix4k_C8000";
 
     inline auto get() noexcept
     { return _read_msr(addr); }
@@ -2618,10 +2618,10 @@ namespace fix04k_C8000
     }
 }
 
-namespace fix04k_D0000
+namespace fix4k_D0000
 {
     constexpr const auto addr = 0x0000026AU;
-    constexpr const auto name = "fix04k_D0000";
+    constexpr const auto name = "fix4k_D0000";
 
     inline auto get() noexcept
     { return _read_msr(addr); }
@@ -2818,10 +2818,10 @@ namespace fix04k_D0000
     }
 }
 
-namespace fix04k_D8000
+namespace fix4k_D8000
 {
     constexpr const auto addr = 0x0000026BU;
-    constexpr const auto name = "fix04k_D8000";
+    constexpr const auto name = "fix4k_D8000";
 
     inline auto get() noexcept
     { return _read_msr(addr); }
@@ -3018,10 +3018,10 @@ namespace fix04k_D8000
     }
 }
 
-namespace fix04k_E0000
+namespace fix4k_E0000
 {
     constexpr const auto addr = 0x0000026CU;
-    constexpr const auto name = "fix04k_E0000";
+    constexpr const auto name = "fix4k_E0000";
 
     inline auto get() noexcept
     { return _read_msr(addr); }
@@ -3218,10 +3218,10 @@ namespace fix04k_E0000
     }
 }
 
-namespace fix04k_E8000
+namespace fix4k_E8000
 {
     constexpr const auto addr = 0x0000026DU;
-    constexpr const auto name = "fix04k_E8000";
+    constexpr const auto name = "fix4k_E8000";
 
     inline auto get() noexcept
     { return _read_msr(addr); }
@@ -3418,10 +3418,10 @@ namespace fix04k_E8000
     }
 }
 
-namespace fix04k_F0000
+namespace fix4k_F0000
 {
     constexpr const auto addr = 0x0000026EU;
-    constexpr const auto name = "fix04k_F0000";
+    constexpr const auto name = "fix4k_F0000";
 
     inline auto get() noexcept
     { return _read_msr(addr); }
@@ -3618,10 +3618,10 @@ namespace fix04k_F0000
     }
 }
 
-namespace fix04k_F8000
+namespace fix4k_F8000
 {
     constexpr const auto addr = 0x0000026FU;
-    constexpr const auto name = "fix04k_F8000";
+    constexpr const auto name = "fix4k_F8000";
 
     inline auto get() noexcept
     { return _read_msr(addr); }

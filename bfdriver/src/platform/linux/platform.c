@@ -38,6 +38,7 @@
 #endif
 
 #include <asm/tlbflush.h>
+#include <asm/fixmap.h>
 
 typedef long (*set_affinity_fn)(pid_t, const struct cpumask *);
 set_affinity_fn set_cpu_affinity = 0;
@@ -228,13 +229,17 @@ platform_populate_info(struct platform_info_t *info)
         platform_memset(info, 0, sizeof(struct platform_info_t));
     }
 
+    info->xapic_virt = fix_to_virt(FIX_APIC_BASE);
     return BF_SUCCESS;
 }
 
 void
 platform_unload_info(struct platform_info_t *info)
 {
-    (void) info;
+    if (info->xapic_virt) {
+        info->xapic_virt = 0;
+    }
 }
+
 
 #endif
