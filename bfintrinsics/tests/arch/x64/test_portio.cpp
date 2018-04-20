@@ -19,7 +19,10 @@
 #include <catch/catch.hpp>
 
 #include <map>
-#include <intrinsics.h>
+#include <cstring>
+
+#include <bfgsl.h>
+#include <arch/x64/portio.h>
 
 using namespace x64;
 

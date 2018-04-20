@@ -118,6 +118,9 @@ struct section_info_t {
 struct platform_info_t {
     int _dummy;
 
+    /// Driver's virtual address of the xAPIC
+    uintptr_t xapic_virt;
+
 #if defined(BF_AARCH64)
     /// Address of serial peripheral within kernel space
     uintptr_t serial_address;
