@@ -113,6 +113,17 @@ int64_t
 common_unload_vmm(void);
 
 /**
+ * Start VMM on current core
+ *
+ * This function starts the vmm. Before the VMM can be started, it must first
+ * be loaded.
+ *
+ * @return BF_SUCCESS on success, negative error code on failure
+ */
+int64_t
+common_start_core(void);
+
+/**
  * Start VMM
  *
  * This function starts the vmm. Before the VMM can be started, it must first
@@ -122,6 +133,17 @@ common_unload_vmm(void);
  */
 int64_t
 common_start_vmm(void);
+
+/**
+ * Stop VMM on current core
+ *
+ * This function stops the vmm. Before a VMM can be stopped, it must first be
+ * loaded, and running.
+ *
+ * @return BF_SUCCESS on success, negative error code on failure
+ */
+int64_t
+common_stop_core(void);
 
 /**
  * Stop VMM

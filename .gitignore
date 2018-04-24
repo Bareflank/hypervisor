@@ -53,3 +53,8 @@ bfdriver/src/common.o
 bfdriver/src/platform/windows/.vs/
 bfdriver/src/platform/windows/bareflank.VC.db
 bfdriver/src/platform/windows/x64/
+
+bfdriver/src/platform/efi/*.efi
+bfdriver/src/platform/efi/src/*.o
+bfdriver/src/platform/efi/src/gnuefi/*.o
+bfdriver/src/platform/efi/module/*
