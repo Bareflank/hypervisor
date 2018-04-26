@@ -94,6 +94,7 @@ if(NOT WIN32)
 endif()
 
 include_dependency(newlib)
+include_dependency(capstone)
 include_dependency(llvm)
 include_dependency(libcxxabi)
 include_dependency(libcxx)
