@@ -693,6 +693,16 @@ set(BINUTILS_URL_MD5 "a332503c7f72ad02f4ef624fac34c4af"
     "Binutils URL MD5 hash"
 )
 
+set(CAPSTONE_URL "https://github.com/bareflank/capstone/archive/v2.0.zip"
+    CACHE INTERNAL FORCE
+    "Capstone URL"
+)
+
+set(CAPSTONE_URL_MD5 "9cdf0439244777a54ab5ce632db35a65"
+    CACHE INTERNAL FORCE
+    "Capstone URL MD5 hash"
+)
+
 set(NEWLIB_URL "https://github.com/Bareflank/newlib/archive/v2.0.zip"
     CACHE INTERNAL FORCE
     "Newlib URL"

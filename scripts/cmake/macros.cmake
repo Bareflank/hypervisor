@@ -1166,6 +1166,7 @@ function(add_vmm_executable NAME)
         endif()
 
         list(APPEND LIBRARIES
+            ${CMAKE_INSTALL_PREFIX}/lib/libcapstone.so
             ${CMAKE_INSTALL_PREFIX}/lib/libc++.so
             ${CMAKE_INSTALL_PREFIX}/lib/libc++abi.so
             ${CMAKE_INSTALL_PREFIX}/lib/libbfpthread_shared.so
@@ -1201,6 +1202,7 @@ function(add_vmm_executable NAME)
         endif()
 
         list(APPEND LIBRARIES
+            ${CMAKE_INSTALL_PREFIX}/lib/libcapstone.a
             ${CMAKE_INSTALL_PREFIX}/lib/libc++.a
             ${CMAKE_INSTALL_PREFIX}/lib/libc++abi.a
             ${CMAKE_INSTALL_PREFIX}/lib/libbfpthread_static.a
