@@ -163,7 +163,7 @@ namespace ioapic
 
         namespace vector
         {
-            constexpr const auto mask = 0x00000000000000FFU;
+            constexpr const auto mask = 0x00000000000000FFULL;
             constexpr const auto from = 0U;
             constexpr const auto name = "vector";
             constexpr const auto min = 0x10U;
@@ -181,7 +181,7 @@ namespace ioapic
 
         namespace delivery_mode
         {
-            constexpr const auto mask = 0x0000000000000700U;
+            constexpr const auto mask = 0x0000000000000700ULL;
             constexpr const auto from = 8U;
             constexpr const auto name = "delivery_mode";
 
@@ -212,7 +212,7 @@ namespace ioapic
 
         namespace destination_mode
         {
-            constexpr const auto mask = 0x0000000000000800U;
+            constexpr const auto mask = 0x0000000000000800ULL;
             constexpr const auto from = 11U;
             constexpr const auto name = "destination_mode";
 
@@ -238,7 +238,7 @@ namespace ioapic
 
         namespace delivery_status
         {
-            constexpr const auto mask = 0x0000000000001000U;
+            constexpr const auto mask = 0x0000000000001000ULL;
             constexpr const auto from = 12U;
             constexpr const auto name = "delivery_status";
 
@@ -257,7 +257,7 @@ namespace ioapic
 
         namespace polarity
         {
-            constexpr const auto mask = 0x0000000000002000U;
+            constexpr const auto mask = 0x0000000000002000ULL;
             constexpr const auto from = 13U;
             constexpr const auto name = "polarity";
 
@@ -283,7 +283,7 @@ namespace ioapic
 
         namespace remote_irr
         {
-            constexpr const auto mask = 0x0000000000004000U;
+            constexpr const auto mask = 0x0000000000004000ULL;
             constexpr const auto from = 14U;
             constexpr const auto name = "remote_irr";
 
@@ -305,7 +305,7 @@ namespace ioapic
 
         namespace trigger_mode
         {
-            constexpr const auto mask = 0x0000000000008000U;
+            constexpr const auto mask = 0x0000000000008000ULL;
             constexpr const auto from = 15U;
             constexpr const auto name = "trigger_mode";
 
@@ -331,7 +331,7 @@ namespace ioapic
 
         namespace mask_bit
         {
-            constexpr const auto mask = 0x0000000000010000U;
+            constexpr const auto mask = 0x0000000000010000ULL;
             constexpr const auto from = 16U;
             constexpr const auto name = "mask_bit";
 
@@ -353,7 +353,7 @@ namespace ioapic
 
         namespace logical_destination
         {
-            constexpr const auto mask = 0xFF00000000000000U;
+            constexpr const auto mask = 0xFF00000000000000ULL;
             constexpr const auto from = 56U;
             constexpr const auto name = "logical_destination";
 
@@ -369,7 +369,7 @@ namespace ioapic
 
         namespace physical_destination
         {
-            constexpr const auto mask = 0x0F00000000000000U;
+            constexpr const auto mask = 0x0F00000000000000ULL;
             constexpr const auto from = 56U;
             constexpr const auto name = "physical_destination";
 
