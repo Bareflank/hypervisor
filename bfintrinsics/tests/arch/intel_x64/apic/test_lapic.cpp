@@ -16,17 +16,31 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <catch/catch.hpp>
-#include <intrinsics.h>
+#include <map>
+#include <set>
 #include <hippomocks.h>
+#include <catch/catch.hpp>
+#include <arch/intel_x64/apic/lapic.h>
+#include <arch/intel_x64/apic/x2apic.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
+namespace intel_x64
+{
+namespace lapic
+{
+std::array<attr_t, count> attributes;
+}
+}
+
 using namespace intel_x64;
+using namespace msrs;
 using namespace lapic;
 
 std::map<msrs::field_type, msrs::value_type> g_msrs;
 std::map<cpuid::field_type, cpuid::value_type> g_edx_cpuid;
+
+std::set<uint64_t> x2apic_write_only = {0x3FU};
 
 extern "C" uint64_t
 _read_msr(uint32_t addr) noexcept
@@ -391,6 +405,156 @@ TEST_CASE("lapic_is_present")
     CHECK(lapic::is_present());
     g_edx_cpuid[addr] = 0x0ULL;
     CHECK(!lapic::is_present());
+}
+
+TEST_CASE("uninitialized attributes")
+{
+    for (const auto reg : attributes) {
+        CHECK(!exists_in_xapic(reg));
+        CHECK(!exists_in_x2apic(reg));
+    }
+}
+
+TEST_CASE("check x2apic write-only")
+{
+    init_attributes();
+
+    for (auto i = 0U; i < attributes.size(); ++i) {
+        if (offset_to_msr_addr(i) == ia32_x2apic_self_ipi::addr) {
+            CHECK(exists_in_x2apic(i));
+            CHECK(writable_in_x2apic(i));
+            CHECK(!readable_in_x2apic(i));
+            CHECK(x2apic_write_only.count(i) == 1U);
+        }
+    }
+}
+
+TEST_CASE("check xapic read-write")
+{
+    init_attributes();
+
+    for (auto i = 0U; i < attributes.size(); ++i) {
+        switch (i) {
+            case mem_addr_to_offset(xapic_default_base | 0x0E0U):
+            case mem_addr_to_offset(xapic_default_base | 0x310U):
+                CHECK(exists_in_xapic(i));
+                CHECK(readable_in_xapic(i));
+                CHECK(writable_in_xapic(i));
+                CHECK(!exists_in_x2apic(i));
+                CHECK(!readable_in_x2apic(i));
+                CHECK(!writable_in_x2apic(i));
+                break;
+
+            default:
+                break;
+        }
+    }
+}
+
+TEST_CASE("check both write-only")
+{
+    init_attributes();
+
+    for (auto i = 0U; i < attributes.size(); ++i) {
+        switch (i) {
+            case mem_addr_to_offset(xapic_default_base | 0x0B0U):
+                CHECK(i == msr_addr_to_offset(ia32_x2apic_eoi::addr));
+                CHECK(exists_in_xapic(i));
+                CHECK(exists_in_x2apic(i));
+                CHECK(writable_in_xapic(i));
+                CHECK(writable_in_x2apic(i));
+                CHECK(!readable_in_xapic(i));
+                CHECK(!readable_in_x2apic(i));
+                break;
+
+            default:
+                break;
+        }
+    }
+}
+
+TEST_CASE("check both read-only")
+{
+    init_attributes();
+
+    for (auto i = 0U; i < attributes.size(); ++i) {
+        switch (i) {
+            case mem_addr_to_offset(xapic_default_base | 0x020U):
+            case mem_addr_to_offset(xapic_default_base | 0x030U):
+            case mem_addr_to_offset(xapic_default_base | 0x0A0U):
+            case mem_addr_to_offset(xapic_default_base | 0x100U):
+            case mem_addr_to_offset(xapic_default_base | 0x110U):
+            case mem_addr_to_offset(xapic_default_base | 0x120U):
+            case mem_addr_to_offset(xapic_default_base | 0x130U):
+            case mem_addr_to_offset(xapic_default_base | 0x140U):
+            case mem_addr_to_offset(xapic_default_base | 0x150U):
+            case mem_addr_to_offset(xapic_default_base | 0x160U):
+            case mem_addr_to_offset(xapic_default_base | 0x170U):
+
+            case mem_addr_to_offset(xapic_default_base | 0x180U):
+            case mem_addr_to_offset(xapic_default_base | 0x190U):
+            case mem_addr_to_offset(xapic_default_base | 0x1A0U):
+            case mem_addr_to_offset(xapic_default_base | 0x1B0U):
+            case mem_addr_to_offset(xapic_default_base | 0x1C0U):
+            case mem_addr_to_offset(xapic_default_base | 0x1D0U):
+            case mem_addr_to_offset(xapic_default_base | 0x1E0U):
+            case mem_addr_to_offset(xapic_default_base | 0x1F0U):
+
+            case mem_addr_to_offset(xapic_default_base | 0x200U):
+            case mem_addr_to_offset(xapic_default_base | 0x210U):
+            case mem_addr_to_offset(xapic_default_base | 0x220U):
+            case mem_addr_to_offset(xapic_default_base | 0x230U):
+            case mem_addr_to_offset(xapic_default_base | 0x240U):
+            case mem_addr_to_offset(xapic_default_base | 0x250U):
+            case mem_addr_to_offset(xapic_default_base | 0x260U):
+            case mem_addr_to_offset(xapic_default_base | 0x270U):
+
+            case mem_addr_to_offset(xapic_default_base | 0x390U):
+                CHECK(exists_in_xapic(i));
+                CHECK(exists_in_x2apic(i));
+                CHECK(!writable_in_xapic(i));
+                CHECK(!writable_in_x2apic(i));
+                CHECK(readable_in_xapic(i));
+                CHECK(readable_in_x2apic(i));
+                break;
+
+            default:
+                break;
+        }
+    }
+}
+
+TEST_CASE("check both read-write")
+{
+    init_attributes();
+
+    for (auto i = 0U; i < attributes.size(); ++i) {
+        switch (i) {
+            case mem_addr_to_offset(xapic_default_base | 0x080U):
+            case mem_addr_to_offset(xapic_default_base | 0x0F0U):
+            case mem_addr_to_offset(xapic_default_base | 0x280U):
+            case mem_addr_to_offset(xapic_default_base | 0x2F0U):
+            case mem_addr_to_offset(xapic_default_base | 0x300U):
+            case mem_addr_to_offset(xapic_default_base | 0x320U):
+            case mem_addr_to_offset(xapic_default_base | 0x330U):
+            case mem_addr_to_offset(xapic_default_base | 0x340U):
+            case mem_addr_to_offset(xapic_default_base | 0x350U):
+            case mem_addr_to_offset(xapic_default_base | 0x360U):
+            case mem_addr_to_offset(xapic_default_base | 0x370U):
+            case mem_addr_to_offset(xapic_default_base | 0x380U):
+            case mem_addr_to_offset(xapic_default_base | 0x3E0U):
+                CHECK(exists_in_xapic(i));
+                CHECK(exists_in_x2apic(i));
+                CHECK(writable_in_xapic(i));
+                CHECK(writable_in_x2apic(i));
+                CHECK(readable_in_xapic(i));
+                CHECK(readable_in_x2apic(i));
+                break;
+
+            default:
+                break;
+        }
+    }
 }
 
 #endif

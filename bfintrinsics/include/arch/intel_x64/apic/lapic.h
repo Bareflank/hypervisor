@@ -24,6 +24,7 @@
 // -----------------------------------------------------------------------------
 
 #include <bfexports.h>
+#include <arch/x64/misc.h>
 #include <arch/intel_x64/msrs.h>
 #include <arch/intel_x64/cpuid.h>
 #include <arch/intel_x64/apic/x2apic.h>
@@ -266,8 +267,10 @@ namespace ia32_apic_base
 namespace lapic
 {
 
-inline void dump_delivery_status(int lev, value_type val, std::string *msg = nullptr);
-inline void dump_delivery_mode(int lev, value_type val, std::string *msg = nullptr);
+inline void dump_delivery_status(
+    int lev, value_type val, std::string *msg = nullptr);
+inline void dump_delivery_mode(
+    int lev, value_type val, std::string *msg = nullptr);
 
 ///
 /// x2APIC MSR address space bounds
@@ -286,8 +289,283 @@ constexpr const auto xapic_default_base = 0xFEE00000U;
 /// @return false if a LAPIC is not available on the platform
 ///
 inline auto is_present() noexcept
+{ return ::intel_x64::cpuid::feature_information::edx::apic::is_enabled(); }
+
+/// LAPIC Registers
+///
+/// Defines the "canonical" offset of each LAPIC register along
+/// with the set of valid operations in xAPIC and x2APIC mode. Each
+/// canonical offset may be derived from an MSR address:
+///
+///     canonical offset = (msr_addr & ~0x800)
+///
+/// or from a memory address:
+///
+///     canonical offset = (mem_addr & (0x1000 - 1)) >> 4
+///
+/// Note that this mapping is _not_ invertible, meaning that in
+/// general you cannot always reconstruct a valid x2APIC (MSR) or
+/// xAPIC (MMIO) register address given a canonical offset.
+/// Users should always check the valid operations before
+/// accessing the APIC with it.
+///
+
+/// Lapic register attribute type
+using attr_t = uint64_t;
+
+/// Lapic register canonical offset type
+using offset_t = uint64_t;
+
+/// Total number of (x2)apic registers
+constexpr const auto count = (x2apic_last - x2apic_base) + 1U;
+
+/// Lapic register attributes
+extern std::array<attr_t, count> attributes;
+
+/// Mem addr to offset
+///
+/// Convert an integer interpreted as equal to (xapic_base | mmio_offset)
+/// to a canonical offset.
+///
+/// @expects
+/// @ensures
+///
+/// @param mem_addr the address to convert to a canonical offset
+/// @return may or may not be a valid offset. Always check
+///         before using to access the apic
+///
+constexpr inline auto mem_addr_to_offset(uint64_t mem_addr)
+{ return (mem_addr & (::x64::page_size - 1U)) >> 4U; }
+
+/// Msr addr to offset
+///
+/// Convert an integer interpreted as equal to (x2apic_base | msr_offset)
+/// to a canonical offset.
+///
+/// @expects
+/// @ensures
+///
+/// @param msr_addr the address to convert to a canonical offset
+/// @return may or may not be a valid offset. Always check
+///         before using to access the apic
+///
+constexpr inline auto msr_addr_to_offset(uint64_t msr_addr)
+{ return (msr_addr & ~x2apic_base); }
+
+/// Offset to memory address
+///
+/// Convert an offset to the corresponding xAPIC MMIO address
+///
+/// @expects
+/// @ensures
+///
+/// @param offset the offset to convert
+/// @param base the base MMIO address of the xAPIC. Equals
+///        0xFEE00000 by default
+/// @return may or may not be a valid xAPIC register address. Check
+///         before using to access the apic
+///
+constexpr inline auto offset_to_mem_addr(
+    offset_t offset, uintptr_t base = xapic_default_base)
+{ return base | (offset << 4U); }
+
+/// Offset to msr address
+///
+/// Convert an offset to the corresponding x2APIC MSR address
+///
+/// @expects
+/// @ensures
+///
+/// @param offset the offset to convert
+/// @return may or may not be a valid x2APIC register address. Check
+///         before using to access the apic
+///
+constexpr inline auto offset_to_msr_addr(offset_t offset)
+{ return x2apic_base | offset; }
+
+/// A register is 'unstable' if its value cannot be reliably read
+/// even when interrupts are disabled (e.g. IRR)
+namespace xapic_unstable
 {
-    return ::intel_x64::cpuid::feature_information::edx::apic::is_enabled();
+    constexpr const auto mask = 0x20U;
+    constexpr const auto from = 5U;
+    constexpr const auto name = "xapic_unstable";
+
+    constexpr inline auto is_enabled(attr_t attr) noexcept
+    { return is_bit_set(attr, from); }
+
+    constexpr inline auto is_disabled(attr_t attr) noexcept
+    { return is_bit_cleared(attr, from); }
+
+    constexpr inline auto enable(attr_t attr) noexcept
+    { return set_bit(attr, from); }
+
+    constexpr inline auto disable(attr_t attr) noexcept
+    { return clear_bit(attr, from); }
+
+    inline void dump(int level, attr_t attr, std::string *msg = nullptr)
+    { bfdebug_subbool(level, name, is_enabled(attr), msg); }
+}
+
+namespace x2apic_unstable
+{
+    constexpr const auto mask = 0x10U;
+    constexpr const auto from = 4U;
+    constexpr const auto name = "x2apic_unstable";
+
+    constexpr inline auto is_enabled(attr_t attr) noexcept
+    { return is_bit_set(attr, from); }
+
+    constexpr inline auto is_disabled(attr_t attr) noexcept
+    { return is_bit_cleared(attr, from); }
+
+    constexpr inline auto enable(attr_t attr) noexcept
+    { return set_bit(attr, from); }
+
+    constexpr inline auto disable(attr_t attr) noexcept
+    { return clear_bit(attr, from); }
+
+    inline void dump(int level, attr_t attr, std::string *msg = nullptr)
+    { bfdebug_subbool(level, name, is_enabled(attr), msg); }
+}
+
+namespace xapic_readable
+{
+    constexpr const auto mask = 0x08U;
+    constexpr const auto from = 3U;
+    constexpr const auto name = "xapic_readable";
+
+    constexpr inline auto is_enabled(attr_t attr) noexcept
+    { return is_bit_set(attr, from); }
+
+    constexpr inline auto is_disabled(attr_t attr) noexcept
+    { return is_bit_cleared(attr, from); }
+
+    constexpr inline auto enable(attr_t attr) noexcept
+    { return set_bit(attr, from); }
+
+    constexpr inline auto disable(attr_t attr) noexcept
+    { return clear_bit(attr, from); }
+
+    inline void dump(int level, attr_t attr, std::string *msg = nullptr)
+    { bfdebug_subbool(level, name, is_enabled(attr), msg); }
+}
+
+namespace xapic_writable
+{
+    constexpr const auto mask = 0x04U;
+    constexpr const auto from = 2U;
+    constexpr const auto name = "xapic_writable";
+
+    constexpr inline auto is_enabled(attr_t attr) noexcept
+    { return is_bit_set(attr, from); }
+
+    constexpr inline auto is_disabled(attr_t attr) noexcept
+    { return is_bit_cleared(attr, from); }
+
+    constexpr inline auto enable(attr_t attr) noexcept
+    { return set_bit(attr, from); }
+
+    constexpr inline auto disable(attr_t attr) noexcept
+    { return clear_bit(attr, from); }
+
+    inline void dump(int level, attr_t attr, std::string *msg = nullptr)
+    { bfdebug_subbool(level, name, is_enabled(attr), msg); }
+}
+
+namespace x2apic_readable
+{
+    constexpr const auto mask = 0x02U;
+    constexpr const auto from = 1U;
+    constexpr const auto name = "x2apic_readable";
+
+    constexpr inline auto is_enabled(attr_t attr) noexcept
+    { return is_bit_set(attr, from); }
+
+    constexpr inline auto is_disabled(attr_t attr) noexcept
+    { return is_bit_cleared(attr, from); }
+
+    constexpr inline auto enable(attr_t attr) noexcept
+    { return set_bit(attr, from); }
+
+    constexpr inline auto disable(attr_t attr) noexcept
+    { return clear_bit(attr, from); }
+
+    inline void dump(int level, attr_t attr, std::string *msg = nullptr)
+    { bfdebug_subbool(level, name, is_enabled(attr), msg); }
+}
+
+namespace x2apic_writable
+{
+    constexpr const auto mask = 0x01U;
+    constexpr const auto from = 0U;
+    constexpr const auto name = "x2apic_writable";
+
+    constexpr inline auto is_enabled(attr_t attr) noexcept
+    { return is_bit_set(attr, from); }
+
+    constexpr inline auto is_disabled(attr_t attr) noexcept
+    { return is_bit_cleared(attr, from); }
+
+    constexpr inline auto enable(attr_t attr) noexcept
+    { return set_bit(attr, from); }
+
+    constexpr inline auto disable(attr_t attr) noexcept
+    { return clear_bit(attr, from); }
+
+    inline void dump(int level, attr_t attr, std::string *msg = nullptr)
+    { bfdebug_subbool(level, name, is_enabled(attr), msg); }
+}
+
+inline auto exists_in_x2apic(offset_t offset)
+{
+    const auto attr = attributes.at(offset);
+    return x2apic_readable::is_enabled(attr) ||
+           x2apic_writable::is_enabled(attr);
+}
+
+inline auto readable_in_x2apic(offset_t offset)
+{
+    const auto attr = attributes.at(offset);
+    return x2apic_readable::is_enabled(attr);
+}
+
+inline auto writable_in_x2apic(offset_t offset)
+{
+    const auto attr = attributes.at(offset);
+    return x2apic_writable::is_enabled(attr);
+}
+
+inline auto stable_in_x2apic(offset_t offset)
+{
+    const auto attr = attributes.at(offset);
+    return x2apic_unstable::is_disabled(attr);
+}
+
+inline auto exists_in_xapic(offset_t offset)
+{
+    const auto attr = attributes.at(offset);
+
+    return xapic_readable::is_enabled(attr) ||
+           xapic_writable::is_enabled(attr);
+}
+
+inline auto readable_in_xapic(offset_t offset)
+{
+    const auto attr = attributes.at(offset);
+    return xapic_readable::is_enabled(attr);
+}
+
+inline auto writable_in_xapic(offset_t offset)
+{
+    const auto attr = attributes.at(offset);
+    return xapic_writable::is_enabled(attr);
+}
+
+inline auto stable_in_xapic(offset_t offset)
+{
+    const auto attr = attributes.at(offset);
+    return xapic_unstable::is_disabled(attr);
 }
 
 namespace lvt
@@ -1522,9 +1800,193 @@ inline void dump_delivery_mode(int lev, value_type val, std::string *msg)
     }
 }
 
-// *INDENT-ON*
+inline void init_nonexistent(uint64_t offset) noexcept
+{
+    attr_t attr = 0ULL;
+
+    attr = xapic_readable::disable(attr);
+    attr = xapic_writable::disable(attr);
+
+    attr = x2apic_readable::disable(attr);
+    attr = x2apic_writable::disable(attr);
+
+    attributes.at(offset) = attr;
+}
+
+
+inline void init_xapic_read_write(uint64_t offset) noexcept
+{
+    attr_t attr = attributes.at(offset);
+
+    attr = x2apic_readable::disable(attr);
+    attr = x2apic_writable::disable(attr);
+
+    attr = xapic_readable::enable(attr);
+    attr = xapic_writable::enable(attr);
+
+    attributes.at(offset) = attr;
+}
+
+inline void init_x2apic_write_only(uint64_t offset) noexcept
+{
+    attr_t attr = attributes.at(offset);
+
+    attr = x2apic_readable::disable(attr);
+    attr = x2apic_writable::enable(attr);
+
+    attr = xapic_readable::disable(attr);
+    attr = xapic_writable::disable(attr);
+
+    attributes.at(offset) = attr;
+}
+
+inline void init_both_write_only(uint64_t offset) noexcept
+{
+    attr_t attr = attributes.at(offset);
+
+    attr = x2apic_readable::disable(attr);
+    attr = x2apic_writable::enable(attr);
+
+    attr = xapic_readable::disable(attr);
+    attr = xapic_writable::enable(attr);
+
+    attributes.at(offset) = attr;
+}
+
+inline void init_both_read_only(uint64_t offset) noexcept
+{
+    attr_t attr = attributes.at(offset);
+
+    attr = x2apic_readable::enable(attr);
+    attr = x2apic_writable::disable(attr);
+
+    attr = xapic_readable::enable(attr);
+    attr = xapic_writable::disable(attr);
+
+    attributes.at(offset) = attr;
+}
+
+inline void init_both_read_write(uint64_t offset) noexcept
+{
+    attr_t attr = attributes.at(offset);
+
+    attr = x2apic_readable::enable(attr);
+    attr = x2apic_writable::enable(attr);
+
+    attr = xapic_readable::enable(attr);
+    attr = xapic_writable::enable(attr);
+
+    attributes.at(offset) = attr;
+}
+
+
+inline void init_unstable(uint64_t offset) noexcept
+{
+    attr_t attr = attributes.at(offset);
+
+    attr = x2apic_unstable::enable(attr);
+    attr = xapic_unstable::enable(attr);
+
+    attributes.at(offset) = attr;
+}
+
+/// Note the isr, irr, and tmr are marked as unstable. This
+/// means that even though they are readable, we can't be sure that
+/// the value read from a physical piece won't change before we
+/// enter into the guest.
+///
+/// In the eapis, unstable registers will be initialized to 0 in the virt_lapic
+/// initializers that read from the physical lapics. There are alot of
+/// decisions made based on the values of the isr and irr, so starting from
+/// known values will be better for debugging.
+
+inline void init_attributes() noexcept
+{
+    using namespace ::intel_x64::msrs;
+
+    const auto dfr_addr = xapic_default_base | 0x0E0ULL;
+    const auto icr_high = xapic_default_base | 0x310ULL;
+
+    for (auto i = 0ULL; i < count; i++) {
+        attributes.at(i) = 0ULL;
+
+        switch (i) {
+            case mem_addr_to_offset(dfr_addr):
+            case mem_addr_to_offset(icr_high):
+                init_xapic_read_write(i);
+                break;
+
+            case msr_addr_to_offset(ia32_x2apic_self_ipi::addr):
+                init_x2apic_write_only(i);
+                break;
+
+            case msr_addr_to_offset(ia32_x2apic_eoi::addr):
+                init_both_write_only(i);
+                break;
+
+            case msr_addr_to_offset(ia32_x2apic_apicid::addr):
+            case msr_addr_to_offset(ia32_x2apic_version::addr):
+            case msr_addr_to_offset(ia32_x2apic_ppr::addr):
+
+            case msr_addr_to_offset(ia32_x2apic_isr0::addr):
+            case msr_addr_to_offset(ia32_x2apic_isr1::addr):
+            case msr_addr_to_offset(ia32_x2apic_isr2::addr):
+            case msr_addr_to_offset(ia32_x2apic_isr3::addr):
+            case msr_addr_to_offset(ia32_x2apic_isr4::addr):
+            case msr_addr_to_offset(ia32_x2apic_isr5::addr):
+            case msr_addr_to_offset(ia32_x2apic_isr6::addr):
+            case msr_addr_to_offset(ia32_x2apic_isr7::addr):
+
+            case msr_addr_to_offset(ia32_x2apic_tmr0::addr):
+            case msr_addr_to_offset(ia32_x2apic_tmr1::addr):
+            case msr_addr_to_offset(ia32_x2apic_tmr2::addr):
+            case msr_addr_to_offset(ia32_x2apic_tmr3::addr):
+            case msr_addr_to_offset(ia32_x2apic_tmr4::addr):
+            case msr_addr_to_offset(ia32_x2apic_tmr5::addr):
+            case msr_addr_to_offset(ia32_x2apic_tmr6::addr):
+            case msr_addr_to_offset(ia32_x2apic_tmr7::addr):
+
+            case msr_addr_to_offset(ia32_x2apic_irr0::addr):
+            case msr_addr_to_offset(ia32_x2apic_irr1::addr):
+            case msr_addr_to_offset(ia32_x2apic_irr2::addr):
+            case msr_addr_to_offset(ia32_x2apic_irr3::addr):
+            case msr_addr_to_offset(ia32_x2apic_irr4::addr):
+            case msr_addr_to_offset(ia32_x2apic_irr5::addr):
+            case msr_addr_to_offset(ia32_x2apic_irr6::addr):
+            case msr_addr_to_offset(ia32_x2apic_irr7::addr):
+                init_unstable(i);
+
+            case msr_addr_to_offset(ia32_x2apic_cur_count::addr):
+                init_both_read_only(i);
+                break;
+
+            case msr_addr_to_offset(ia32_x2apic_tpr::addr):
+            case msr_addr_to_offset(ia32_x2apic_sivr::addr):
+            case msr_addr_to_offset(ia32_x2apic_esr::addr):
+            case msr_addr_to_offset(ia32_x2apic_icr::addr):
+
+            case msr_addr_to_offset(ia32_x2apic_lvt_cmci::addr):
+            case msr_addr_to_offset(ia32_x2apic_lvt_timer::addr):
+            case msr_addr_to_offset(ia32_x2apic_lvt_thermal::addr):
+            case msr_addr_to_offset(ia32_x2apic_lvt_pmi::addr):
+            case msr_addr_to_offset(ia32_x2apic_lvt_lint0::addr):
+            case msr_addr_to_offset(ia32_x2apic_lvt_lint1::addr):
+            case msr_addr_to_offset(ia32_x2apic_lvt_error::addr):
+
+            case msr_addr_to_offset(ia32_x2apic_init_count::addr):
+            case msr_addr_to_offset(ia32_x2apic_div_conf::addr):
+                init_both_read_write(i);
+                break;
+
+            default:
+                init_nonexistent(i);
+                break;
+        }
+    }
+}
 
 }
 }
+// *INDENT-ON*
 
 #endif

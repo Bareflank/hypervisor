@@ -39,6 +39,7 @@ if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
         arch/intel_x64/crs.asm
         arch/intel_x64/drs.asm
         arch/intel_x64/vmx.asm
+        arch/intel_x64/apic/lapic.cpp
     )
 elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
     message(WARNING "Unimplemented")

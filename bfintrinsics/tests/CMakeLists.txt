@@ -22,6 +22,7 @@ project(bfintrinsics_test C CXX)
 include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project()
 
+do_test(test_ioapic SOURCES arch/intel_x64/apic/test_ioapic.cpp)
 do_test(test_lapic SOURCES arch/intel_x64/apic/test_lapic.cpp)
 do_test(test_x2apic SOURCES arch/intel_x64/apic/test_x2apic.cpp)
 
