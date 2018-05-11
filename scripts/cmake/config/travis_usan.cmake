@@ -24,3 +24,6 @@ set(ENABLE_BUILD_TEST ON)
 
 set(CMAKE_BUILD_TYPE Debug)
 set(ENABLE_COMPILER_WARNINGS ON)
+
+set(C_FLAGS_TEST "-fuse-ld=gold")
+set(CXX_FLAGS_TEST "-fuse-ld=gold")

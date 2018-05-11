@@ -82,8 +82,8 @@ TEST_CASE("read / write success")
 
 TEST_CASE("extension")
 {
-    CHECK(g_file.extension("") == "");
-    CHECK(g_file.extension("no_extension") == "");
+    CHECK(g_file.extension("").empty());
+    CHECK(g_file.extension("no_extension").empty());
     CHECK(g_file.extension("no_extension.") == ".");
     CHECK(g_file.extension(".nofilename") == ".nofilename");
     CHECK(g_file.extension("no_path.ext") == ".ext");

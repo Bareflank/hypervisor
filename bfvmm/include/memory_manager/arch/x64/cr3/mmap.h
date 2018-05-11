@@ -19,15 +19,12 @@
 #ifndef MMAP_CR3_X64_H
 #define MMAP_CR3_X64_H
 
-#if defined(__clang__) || defined(__GNUC__)
-#pragma GCC system_header
-#endif
-
 #include <vector>
 
+#include <bfgsl.h>
 #include <bfdebug.h>
-#include <intrinsics.h>
 
+#include <intrinsics.h>
 #include "../../../memory_manager.h"
 
 // -----------------------------------------------------------------------------
@@ -75,7 +72,7 @@ class EXPORT_MEMORY_MANAGER mmap
 public:
 
     using phys_addr_t = uintptr_t;                      ///< Phys Address Type (as Int)
-    using virt_addr_t = uintptr_t *;                    ///< Virt Address Type (as Ptr)
+    using virt_addr_t = uintptr_t;                      ///< Virt Address Type (as Ptr)
     using size_type = size_t;                           ///< Size Type
     using entry_type = uintptr_t;                       ///< Entry Type
     using index_type = std::ptrdiff_t;                  ///< Index Type
@@ -93,7 +90,7 @@ public:
     };
 
     struct pair {
-        virt_addr_t virt_addr;
+        gsl::span<virt_addr_t> virt_addr;
         phys_addr_t phys_addr;
     };
 
@@ -116,7 +113,7 @@ public:
     ~mmap()
     {
         for (auto pml4i = 0; pml4i < ::x64::pml4::num_entries; pml4i++) {
-            auto &entry = m_pml4.virt_addr[pml4i];
+            auto &entry = m_pml4.virt_addr.at(pml4i);
 
             if (entry == 0) {
                 continue;
@@ -162,7 +159,7 @@ public:
     ///
     entry_type &
     map_1g(
-        virt_addr_t virt_addr,
+        virt_addr_t *virt_addr,
         phys_addr_t phys_addr,
         attr_type attr = attr_type::read_write,
         memory_type cache = memory_type::write_back)
@@ -185,12 +182,12 @@ public:
     ///
     entry_type &
     map_1g(
-        uintptr_t virt_addr,
+        virt_addr_t virt_addr,
         phys_addr_t phys_addr,
         attr_type attr = attr_type::read_write,
         memory_type cache = memory_type::write_back)
     {
-        return map_1g(reinterpret_cast<virt_addr_t>(virt_addr), phys_addr, attr, cache);
+        return map_1g(reinterpret_cast<virt_addr_t *>(virt_addr), phys_addr, attr, cache);
     }
 
     /// Map 2m Virt Address to Phys Address
@@ -207,7 +204,7 @@ public:
     ///
     entry_type &
     map_2m(
-        virt_addr_t virt_addr,
+        virt_addr_t *virt_addr,
         phys_addr_t phys_addr,
         attr_type attr = attr_type::read_write,
         memory_type cache = memory_type::write_back)
@@ -232,12 +229,12 @@ public:
     ///
     entry_type &
     map_2m(
-        uintptr_t virt_addr,
+        virt_addr_t virt_addr,
         phys_addr_t phys_addr,
         attr_type attr = attr_type::read_write,
         memory_type cache = memory_type::write_back)
     {
-        return map_2m(reinterpret_cast<virt_addr_t>(virt_addr), phys_addr, attr, cache);
+        return map_2m(reinterpret_cast<virt_addr_t *>(virt_addr), phys_addr, attr, cache);
     }
 
     /// Map 4k Virt Address to Phys Address
@@ -254,7 +251,7 @@ public:
     ///
     entry_type &
     map_4k(
-        virt_addr_t virt_addr,
+        virt_addr_t *virt_addr,
         phys_addr_t phys_addr,
         attr_type attr = attr_type::read_write,
         memory_type cache = memory_type::write_back)
@@ -280,12 +277,12 @@ public:
     ///
     entry_type &
     map_4k(
-        uintptr_t virt_addr,
+        virt_addr_t virt_addr,
         phys_addr_t phys_addr,
         attr_type attr = attr_type::read_write,
         memory_type cache = memory_type::write_back)
     {
-        return map_4k(reinterpret_cast<virt_addr_t>(virt_addr), phys_addr, attr, cache);
+        return map_4k(reinterpret_cast<virt_addr_t *>(virt_addr), phys_addr, attr, cache);
     }
 
     /// Unmap Virtual Address
@@ -296,10 +293,10 @@ public:
     /// @param virt_addr the virtual address to unmap
     ///
     void
-    unmap(virt_addr_t virt_addr)
+    unmap(virt_addr_t *virt_addr)
     {
         this->map_pdpt(::x64::pml4::index(virt_addr));
-        auto &pdpte = m_pdpt.virt_addr[::x64::pdpt::index(virt_addr)];
+        auto &pdpte = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
 
         if (pdpte == 0) {
             return;
@@ -311,7 +308,7 @@ public:
         }
 
         this->map_pd(::x64::pdpt::index(virt_addr));
-        auto &pde = m_pd.virt_addr[::x64::pd::index(virt_addr)];
+        auto &pde = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
 
         if (pde == 0) {
             return;
@@ -323,7 +320,7 @@ public:
         }
 
         this->map_pt(::x64::pd::index(virt_addr));
-        m_pt.virt_addr[::x64::pt::index(virt_addr)] = 0;
+        m_pt.virt_addr.at(::x64::pt::index(virt_addr)) = 0;
     }
 
     /// Unmap Virtual Address
@@ -338,8 +335,8 @@ public:
     ///
     /// @param virt_addr the virtual address to unmap
     ///
-    void unmap(uintptr_t virt_addr)
-    { unmap(reinterpret_cast<virt_addr_t>(virt_addr)); }
+    void unmap(virt_addr_t virt_addr)
+    { unmap(reinterpret_cast<virt_addr_t *>(virt_addr)); }
 
     /// Release Virtual Address
     ///
@@ -355,10 +352,10 @@ public:
     /// @param virt_addr the virtual address to unmap
     ///
     void
-    release(virt_addr_t virt_addr)
+    release(virt_addr_t *virt_addr)
     {
         if (this->release_pdpte(virt_addr)) {
-            m_pml4.virt_addr[::x64::pml4::index(virt_addr)] = 0;
+            m_pml4.virt_addr.at(::x64::pml4::index(virt_addr)) = 0;
         }
     }
 
@@ -375,8 +372,8 @@ public:
     ///
     /// @param virt_addr the virtual address to unmap
     ///
-    void release(uintptr_t virt_addr)
-    { release(reinterpret_cast<virt_addr_t>(virt_addr)); }
+    void release(virt_addr_t virt_addr)
+    { release(reinterpret_cast<virt_addr_t *>(virt_addr)); }
 
     /// Virtual Address to Physical Address
     ///
@@ -387,24 +384,24 @@ public:
     /// @return Returns the phys_addr for the map
     ///
     phys_addr_t
-    virt_to_phys(virt_addr_t virt_addr)
+    virt_to_phys(virt_addr_t *virt_addr)
     {
         this->map_pdpt(::x64::pml4::index(virt_addr));
-        auto &pdpte = m_pdpt.virt_addr[::x64::pdpt::index(virt_addr)];
+        auto &pdpte = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
 
         if (::x64::pdpt::entry::ps::is_enabled(pdpte)) {
             return ::x64::pdpt::entry::phys_addr::get(pdpte);
         }
 
         this->map_pd(::x64::pdpt::index(virt_addr));
-        auto &pde = m_pd.virt_addr[::x64::pd::index(virt_addr)];
+        auto &pde = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
 
         if (::x64::pd::entry::ps::is_enabled(pde)) {
             return ::x64::pd::entry::phys_addr::get(pde);
         }
 
         this->map_pt(::x64::pd::index(virt_addr));
-        auto &pte = m_pt.virt_addr[::x64::pt::index(virt_addr)];
+        auto &pte = m_pt.virt_addr.at(::x64::pt::index(virt_addr));
 
         return ::x64::pt::entry::phys_addr::get(pte);
     }
@@ -417,8 +414,8 @@ public:
     /// @param virt_addr the virtual address to be converted
     /// @return Returns the phys_addr for the map
     ///
-    phys_addr_t virt_to_phys(uintptr_t virt_addr)
-    { return virt_to_phys(reinterpret_cast<virt_addr_t>(virt_addr)); }
+    phys_addr_t virt_to_phys(virt_addr_t virt_addr)
+    { return virt_to_phys(reinterpret_cast<virt_addr_t *>(virt_addr)); }
 
     /// Memory Descriptor List
     ///
@@ -440,15 +437,25 @@ private:
     pair
     allocate(size_type num_entries)
     {
-        auto virt_addr = static_cast<virt_addr_t>(alloc_page());
-        auto phys_addr = g_mm->virtptr_to_physint(virt_addr);
+        auto span =
+            gsl::make_span(
+                static_cast<virt_addr_t *>(alloc_page()),
+                num_entries
+            );
 
-        m_mdl.push_back({virt_addr, phys_addr});
-        return {virt_addr, phys_addr};
+        pair ptrs = {
+            span,
+            g_mm->virtptr_to_physint(
+                span.data()
+            )
+        };
+
+        m_mdl.push_back(ptrs);
+        return ptrs;
     }
 
     void
-    free(virt_addr_t virt_addr)
+    free(const gsl::span<virt_addr_t> &virt_addr)
     {
         for (auto iter = m_mdl.begin(); iter != m_mdl.end(); ++iter) {
             if (iter->virt_addr == virt_addr) {
@@ -457,15 +464,28 @@ private:
             }
         }
 
-        free_page(virt_addr);
+        free_page(virt_addr.data());
     }
 
 private:
 
+    pair
+    phys_to_pair(phys_addr_t phys_addr, size_type num_entries)
+    {
+        auto virt_addr = static_cast<virt_addr_t *>(
+                             g_mm->physint_to_virtptr(phys_addr)
+                         );
+
+        return {
+            gsl::make_span<virt_addr_t>(virt_addr, num_entries),
+            phys_addr
+        };
+    }
+
     void
     map_pdpt(index_type pml4i)
     {
-        auto &entry = m_pml4.virt_addr[pml4i];
+        auto &entry = m_pml4.virt_addr.at(pml4i);
 
         if (entry != 0) {
             auto phys_addr = ::x64::pml4::entry::phys_addr::get(entry);
@@ -474,11 +494,7 @@ private:
                 return;
             }
 
-            m_pdpt = {
-                reinterpret_cast<virt_addr_t>(g_mm->physint_to_virtptr(phys_addr)),
-                phys_addr
-            };
-
+            m_pdpt = phys_to_pair(phys_addr, ::x64::pdpt::num_entries);
             return;
         }
 
@@ -493,7 +509,7 @@ private:
     void
     map_pd(index_type pdpti)
     {
-        auto &entry = m_pdpt.virt_addr[pdpti];
+        auto &entry = m_pdpt.virt_addr.at(pdpti);
 
         if (entry != 0) {
             auto phys_addr = ::x64::pdpt::entry::phys_addr::get(entry);
@@ -502,11 +518,7 @@ private:
                 return;
             }
 
-            m_pd = {
-                reinterpret_cast<virt_addr_t>(g_mm->physint_to_virtptr(phys_addr)),
-                phys_addr
-            };
-
+            m_pd = phys_to_pair(phys_addr, ::x64::pd::num_entries);
             return;
         }
 
@@ -521,7 +533,7 @@ private:
     void
     map_pt(index_type pdi)
     {
-        auto &entry = m_pd.virt_addr[pdi];
+        auto &entry = m_pd.virt_addr.at(pdi);
 
         if (entry != 0) {
             auto phys_addr = ::x64::pd::entry::phys_addr::get(entry);
@@ -530,11 +542,7 @@ private:
                 return;
             }
 
-            m_pt = {
-                reinterpret_cast<virt_addr_t>(g_mm->physint_to_virtptr(phys_addr)),
-                phys_addr
-            };
-
+            m_pt = phys_to_pair(phys_addr, ::x64::pt::num_entries);
             return;
         }
 
@@ -552,7 +560,7 @@ private:
         this->map_pdpt(pml4i);
 
         for (auto pdpti = 0; pdpti < ::x64::pdpt::num_entries; pdpti++) {
-            auto &entry = m_pdpt.virt_addr[pdpti];
+            auto &entry = m_pdpt.virt_addr.at(pdpti);
 
             if (entry == 0) {
                 continue;
@@ -575,7 +583,7 @@ private:
         this->map_pd(pdpti);
 
         for (auto pdi = 0; pdi < ::x64::pd::num_entries; pdi++) {
-            auto &entry = m_pd.virt_addr[pdi];
+            auto &entry = m_pd.virt_addr.at(pdi);
 
             if (entry == 0) {
                 continue;
@@ -603,10 +611,10 @@ private:
 
     entry_type &
     map_pdpte(
-        virt_addr_t virt_addr, phys_addr_t phys_addr,
+        virt_addr_t *virt_addr, phys_addr_t phys_addr,
         attr_type attr, memory_type cache)
     {
-        auto &entry = m_pdpt.virt_addr[::x64::pdpt::index(virt_addr)];
+        auto &entry = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
 
         if (entry != 0) {
             throw std::runtime_error(
@@ -646,10 +654,10 @@ private:
 
     entry_type &
     map_pde(
-        virt_addr_t virt_addr, phys_addr_t phys_addr,
+        virt_addr_t *virt_addr, phys_addr_t phys_addr,
         attr_type attr, memory_type cache)
     {
-        auto &entry = m_pd.virt_addr[::x64::pd::index(virt_addr)];
+        auto &entry = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
 
         if (entry != 0) {
             throw std::runtime_error(
@@ -689,10 +697,10 @@ private:
 
     entry_type &
     map_pte(
-        virt_addr_t virt_addr, phys_addr_t phys_addr,
+        virt_addr_t *virt_addr, phys_addr_t phys_addr,
         attr_type attr, memory_type cache)
     {
-        auto &entry = m_pt.virt_addr[::x64::pt::index(virt_addr)];
+        auto &entry = m_pt.virt_addr.at(::x64::pt::index(virt_addr));
 
         if (entry != 0) {
             throw std::runtime_error(
@@ -730,10 +738,10 @@ private:
     }
 
     bool
-    release_pdpte(virt_addr_t virt_addr)
+    release_pdpte(virt_addr_t *virt_addr)
     {
         this->map_pdpt(::x64::pml4::index(virt_addr));
-        auto &entry = m_pdpt.virt_addr[::x64::pdpt::index(virt_addr)];
+        auto &entry = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
 
         if (::x64::pdpt::entry::ps::is_disabled(entry)) {
             if (!this->release_pde(virt_addr)) {
@@ -745,7 +753,7 @@ private:
 
         auto empty = true;
         for (auto pdpti = 0; pdpti < ::x64::pdpt::num_entries; pdpti++) {
-            if (m_pdpt.virt_addr[pdpti] != 0) {
+            if (m_pdpt.virt_addr.at(pdpti) != 0) {
                 empty = false;
             }
         }
@@ -759,10 +767,10 @@ private:
     }
 
     bool
-    release_pde(virt_addr_t virt_addr)
+    release_pde(virt_addr_t *virt_addr)
     {
         this->map_pd(::x64::pdpt::index(virt_addr));
-        auto &entry = m_pd.virt_addr[::x64::pd::index(virt_addr)];
+        auto &entry = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
 
         if (::x64::pd::entry::ps::is_disabled(entry)) {
             if (!this->release_pte(virt_addr)) {
@@ -774,7 +782,7 @@ private:
 
         auto empty = true;
         for (auto pdi = 0; pdi < ::x64::pd::num_entries; pdi++) {
-            if (m_pd.virt_addr[pdi] != 0) {
+            if (m_pd.virt_addr.at(pdi) != 0) {
                 empty = false;
             }
         }
@@ -788,14 +796,14 @@ private:
     }
 
     bool
-    release_pte(virt_addr_t virt_addr)
+    release_pte(virt_addr_t *virt_addr)
     {
         this->map_pt(::x64::pd::index(virt_addr));
-        m_pt.virt_addr[::x64::pt::index(virt_addr)] = 0;
+        m_pt.virt_addr.at(::x64::pt::index(virt_addr)) = 0;
 
         auto empty = true;
         for (auto pti = 0; pti < ::x64::pt::num_entries; pti++) {
-            if (m_pt.virt_addr[pti] != 0) {
+            if (m_pt.virt_addr.at(pti) != 0) {
                 empty = false;
             }
         }

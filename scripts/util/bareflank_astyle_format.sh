@@ -19,38 +19,31 @@
 
 OUTPUT=$PWD/.astyle_results.txt
 
-rm -f $OUTPUT
+get_changed_files() {
+    if [[ "$1" == "all" ]]; then
+        files=$(git ls-files | grep -Ee "\.(cpp|h|c)$" || true)
+    elif [[ "$1" == "upstream" ]]; then
+        files=$(git diff --relative --name-only upstream/master $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+    else
+        files=$(git diff --relative --name-only origin $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+    fi
+}
 
 if [[ "$#" -lt 2 ]]; then
     echo "ERROR: missing arguments"
     exit 1
 fi
 
-if [[ "$#" == 3 ]]; then
-    echo $3
-    cd $3
-fi
-
-if [[ ! "$2" == "all" ]] && [[ ! "$2" == "diff" ]]; then
-    echo "ERROR: invalid opcode '$2'. Expecting 'all' or 'diff'"
+if [[ ! "$2" == "all" ]] && [[ ! "$2" == "diff" ]] && [[ ! "$2" == "upstream" ]]; then
+    echo "ERROR: invalid opcode '$2'. Expecting 'all', 'diff' or 'upstream'"
     exit 1
 fi
 
-if [[ "$2" == "all" ]]; then
-    files=$(git ls-files | grep -Ee "\.(cpp|h|c)$" || true)
-else
-    files=$(git diff --relative --name-only HEAD $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+cd $3
+get_changed_files $2
 
-    if [[ ! -z "$files" ]]; then
-        echo "  Files undergoing astyle checks:"
-        for f in $files; do
-            echo "    - $f"
-        done
-    fi
-fi
-
-if [[ -z "${files// }" ]]; then
-    echo -e "\033[1;32m\xe2\x9c\x93 no files to format. astyle passed\033[0m"
+if [[ -z "$files" ]]; then
+    echo -e "\033[1;32m\xE2\x9C\x93 nothing changed:\033[0m $3";
     exit 0
 fi
 
@@ -78,13 +71,16 @@ $1 \
     $files > $OUTPUT
 
 if [[ -z $(grep -s Formatted $OUTPUT) ]]; then
-    echo -e "\033[1;32m\xe2\x9c\x93 astyle passed\033[0m"
-    rm -Rf $OUTPUT
-    exit
+    echo -e "\033[1;32m\xE2\x9C\x93 passed:\033[0m $3";
 else
-    echo -e "\xe2\x9c\x97 astyle failed: the following files were formatted:"
-    grep -s Formatted $OUTPUT | awk '{print $2}'
+    echo -e ""
+    echo -e "\033[1;31m########################\033[0m"
+    echo -e "\033[1;31m# Astyle Checks Failed #\033[0m"
+    echo -e "\033[1;31m########################\033[0m"
+    echo -e ""
+    grep --color -s Formatted $OUTPUT | awk '{print $2}'
     echo ""
-    rm -Rf $OUTPUT
     exit -1
 fi
+
+rm $OUTPUT

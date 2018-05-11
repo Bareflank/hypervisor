@@ -74,15 +74,15 @@ unsafe_write_cstr(const char *cstr, size_t len)
 }
 
 extern "C" EXPORT_SYM int
-write(int file, const void *buffer, size_t count)
+write(int __fd, const void *__buf, size_t __nbyte)
 {
-    if (buffer == nullptr || count == 0) {
+    if (__buf == nullptr || __nbyte == 0) {
         return 0;
     }
 
-    if (file != 1 && file != 2) {
+    if (__fd != 1 && __fd != 2) {
         return 0;
     }
 
-    return gsl::narrow_cast<int>(write_str(std::string(static_cast<const char *>(buffer), count)));
+    return gsl::narrow_cast<int>(write_str(std::string(static_cast<const char *>(__buf), __nbyte)));
 }

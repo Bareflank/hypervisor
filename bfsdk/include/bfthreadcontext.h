@@ -45,7 +45,7 @@ uint64_t thread_context_cpuid(void);
  *
  * @return returns the TLS data for the currently executing thread
  */
-void **thread_context_tlsptr(void);
+uint64_t *thread_context_tlsptr(void);
 
 /**
  * @struct thread_context_t
@@ -73,7 +73,7 @@ void **thread_context_tlsptr(void);
  */
 struct thread_context_t {
     uint64_t cpuid;
-    void **tlsptr;
+    uint64_t *tlsptr;
     uint64_t reserved1;
     uint64_t reserved2;
 };

@@ -178,15 +178,21 @@ serial_pl011::get_status_full_transmitter() const noexcept
 uint32_t
 serial_pl011::read_32(ptrdiff_t offset) const noexcept
 {
-    auto ptr = reinterpret_cast<uint32_t const volatile *>(port() + static_cast<uintptr_t>(offset));
-    return *ptr;
+    bfignored(offset);
+    return 0;
+
+    // auto ptr = reinterpret_cast<uint32_t const volatile *>(port() + static_cast<uintptr_t>(offset));
+    // return *ptr;
 }
 
 void
 serial_pl011::write_32(ptrdiff_t offset, uint32_t data) const noexcept
 {
-    auto ptr = reinterpret_cast<uint32_t volatile *>(port() + static_cast<uintptr_t>(offset));
-    *ptr = data;
+    bfignored(offset);
+    bfignored(data);
+
+    // auto ptr = reinterpret_cast<uint32_t volatile *>(port() + static_cast<uintptr_t>(offset));
+    // *ptr = data;
 }
 
 }

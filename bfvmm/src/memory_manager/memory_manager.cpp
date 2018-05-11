@@ -16,6 +16,21 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+// TIDY_EXCLUSION=-cert-err58-cpp
+//
+// Reason:
+//     This triggers a false positive WRT the allocators, which are marked
+//     as noexcept, yet this check still thinks an exception could occur.
+//
+
+// TIDY_EXCLUSION=-cppcoreguidelines-pro-type-reinterpret-cast
+//
+// Reason:
+//     Although in general this is a good rule, for hypervisor level code that
+//     interfaces with the kernel, and raw hardware, this rule is
+//     impractical.
+//
+
 #include <bfgsl.h>
 #include <bfconstants.h>
 #include <bfexception.h>
@@ -463,9 +478,9 @@ memory_manager::descriptors() const
 }
 
 memory_manager::memory_manager() noexcept :
-    g_page_pool(g_page_pool_buffer, g_page_pool_k, g_page_pool_node_tree),
-    g_huge_pool(g_huge_pool_buffer, g_huge_pool_k, g_huge_pool_node_tree),
-    g_mem_map_pool(MEM_MAP_POOL_START, g_mem_map_pool_k, g_mem_map_pool_node_tree),
+    g_page_pool(static_cast<void *>(g_page_pool_buffer), g_page_pool_k, static_cast<void *>(g_page_pool_node_tree)),
+    g_huge_pool(static_cast<void *>(g_huge_pool_buffer), g_huge_pool_k, static_cast<void *>(g_huge_pool_node_tree)),
+    g_mem_map_pool(MEM_MAP_POOL_START, g_mem_map_pool_k, static_cast<void *>(g_mem_map_pool_node_tree)),
     slab010(0x010, 0),
     slab020(0x020, 0),
     slab030(0x030, 0),

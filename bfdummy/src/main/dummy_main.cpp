@@ -16,6 +16,14 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+// TIDY_EXCLUSION=-cppcoreguidelines-pro*
+//
+// Reason:
+//     Although written in C++, this code needs to implement C specific logic
+//     that by its very definition will not adhere to the core guidelines
+//     similar to libc which is needed by all C++ implementations.
+//
+
 #ifndef REQUEST_INIT_FAILS
 #define REQUEST_INIT_RETURN ENTRY_SUCCESS
 #else
@@ -57,6 +65,7 @@
 #include <bfexports.h>
 #include <bfsupport.h>
 
+#include <cstdlib>
 #include <cstring>
 #include <stdexcept>
 
@@ -80,8 +89,8 @@ main(int argc, char *argv[])
     catch (std::exception &) {
         auto view = gsl::make_span(argv, argc);
 
-        return g_derived1.foo(gsl::narrow_cast<int>(atoi(view[0]))) +
-               g_derived2.foo(gsl::narrow_cast<int>(atoi(view[1])));
+        return g_derived1.foo(gsl::narrow_cast<int>(strtol(view[0], nullptr, 10))) +
+               g_derived2.foo(gsl::narrow_cast<int>(strtol(view[1], nullptr, 10)));
     }
 
     return 0;
@@ -169,7 +178,7 @@ _calloc_r(struct _reent *ent, size_t nmemb, size_t size)
 {
     bfignored(ent);
 
-    if (auto ptr = malloc(nmemb * size)) {
+    if (auto ptr = _malloc_r(nullptr, nmemb * size)) {
         return memset(ptr, 0, nmemb * size);
     }
 
@@ -186,11 +195,11 @@ _realloc_r(struct _reent *ent, void *ptr, size_t size)
     return nullptr;
 }
 
-extern "C" EXPORT_SYM void **
+extern "C" EXPORT_SYM uint64_t *
 thread_context_tlsptr(void)
 {
-    static char s_tls[0x1000] = {};
-    return reinterpret_cast<void **>(s_tls);
+    static uint64_t s_tls[0x1000] = {};
+    return s_tls;
 }
 
 extern "C" EXPORT_SYM uint64_t

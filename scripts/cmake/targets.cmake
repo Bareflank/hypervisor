@@ -27,22 +27,19 @@ endif()
 # ------------------------------------------------------------------------------
 
 if(ENABLE_BUILD_TEST)
-    if(POLICY CMP0037)
-        cmake_policy(SET CMP0037 OLD)
-    endif()
-
-    add_custom_target(test)
     add_custom_target(unittest)
 endif()
 
 if(ENABLE_TIDY)
     add_custom_target(tidy)
     add_custom_target(tidy-all)
+    add_custom_target(tidy-upstream)
 endif()
 
 if(ENABLE_FORMAT)
     add_custom_target(format)
     add_custom_target(format-all)
+    add_custom_target(format-upstream)
 endif()
 
 add_custom_target(clean-depends)
@@ -107,25 +104,6 @@ if(NOT WIN32)
         TARGET driver_quick
         COMMENT "Unload, clean, build, and load the Bareflank driver"
     )
-endif()
-
-# ------------------------------------------------------------------------------
-# EFI
-# ------------------------------------------------------------------------------
-
-if(NOT WIN32 AND ENABLE_BUILD_EFI)
-
-    add_custom_target(efi_build
-        DEPENDS eapis_efi_${VMM_PREFIX}
-        DEPENDS gnuefi_${USERSPACE_PREFIX}
-        COMMAND ${SOURCE_UTIL_DIR}/efi_build.sh ${SOURCE_BFDRIVER_DIR} ${USERSPACE_PREFIX_PATH} ${VMM_PREFIX_PATH}/bin/eapis_efi_static
-        USES_TERMINAL
-    )
-    add_custom_target_info(
-        TARGET efi_build
-        COMMENT "Build the Bareflank EFI boot-time loader"
-    )
-
 endif()
 
 # ------------------------------------------------------------------------------
@@ -235,7 +213,7 @@ if(UNIX AND ENABLE_BUILD_VMM AND ENABLE_BUILD_USERSPACE)
     )
     add_custom_target_info(
         TARGET oppss
-        COMMENT "driver_load, load, start"
+        COMMENT "Sync, driver load, hypervisor load, start"
     )
 endif()
 
@@ -281,7 +259,7 @@ if(ENABLE_BUILD_TEST)
     add_custom_target_category("Unit Testing")
 
     add_custom_target_info(
-        TARGET test
+        TARGET unittest
         COMMENT "Run Bareflank unit tests"
     )
 endif()

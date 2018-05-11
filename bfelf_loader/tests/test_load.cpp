@@ -16,6 +16,21 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+// TIDY_EXCLUSION=-cppcoreguidelines-pro-type-reinterpret-cast
+//
+// Reason:
+//     Although in general this is a good rule, for hypervisor level code that
+//     interfaces with the kernel, and raw hardware, this rule is
+//     impractical.
+//
+
+// TIDY_EXCLUSION=-cppcoreguidelines-pro-type-const-cast
+//
+// Reason:
+//     This is test code, and we need to use const_cast so that we can modify
+//     our ELF file so that it looks bad. This can safely be ignored.
+//
+
 #include <hippomocks.h>
 #include <catch/catch.hpp>
 

@@ -16,6 +16,22 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+// TIDY_EXCLUSION=-readability-non-const-parameter
+//
+// Reason:
+//     This file implements C specific functions with defintions that we do
+//     not have control over. As a result, this test triggers a false
+//     positive
+//
+
+// TIDY_EXCLUSION=-cppcoreguidelines-pro*
+//
+// Reason:
+//     Although written in C++, this code needs to implement C specific logic
+//     that by its very definition will not adhere to the core guidelines
+//     similar to libc which is needed by all C++ implementations.
+//
+
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
@@ -46,11 +62,11 @@ times(struct tms *buf)
 }
 
 extern "C" EXPORT_SYM int
-execve(const char *path, char *const argv[], char *const envp[])
+execve(const char *__path, char *const __argv[], char *const __envp[])
 {
-    bfignored(path);
-    bfignored(argv);
-    bfignored(envp);
+    bfignored(__path);
+    bfignored(__argv);
+    bfignored(__envp);
 
     UNHANDLED();
 
@@ -65,9 +81,9 @@ getpid(void)
 }
 
 extern "C" EXPORT_SYM int
-isatty(int fd)
+isatty(int __fildes)
 {
-    bfignored(fd);
+    bfignored(__fildes);
 
     UNHANDLED();
 
@@ -76,11 +92,11 @@ isatty(int fd)
 }
 
 extern "C" EXPORT_SYM off_t
-lseek(int fd, off_t offset, int whence)
+lseek(int __fildes, off_t __offset, int __whence)
 {
-    bfignored(fd);
-    bfignored(offset);
-    bfignored(whence);
+    bfignored(__fildes);
+    bfignored(__offset);
+    bfignored(__whence);
 
     UNHANDLED();
 
@@ -116,11 +132,11 @@ wait(int *status)
 }
 
 extern "C" EXPORT_SYM _READ_WRITE_RETURN_TYPE
-read(int fd, void *buffer, size_t length)
+read(int __fd, void *__buf, size_t __nbyte)
 {
-    bfignored(fd);
-    bfignored(buffer);
-    bfignored(length);
+    bfignored(__fd);
+    bfignored(__buf);
+    bfignored(__nbyte);
 
     UNHANDLED();
 
@@ -129,9 +145,9 @@ read(int fd, void *buffer, size_t length)
 }
 
 extern "C" EXPORT_SYM int
-unlink(const char *file)
+unlink(const char *__path)
 {
-    bfignored(file);
+    bfignored(__path);
 
     UNHANDLED();
 
@@ -172,10 +188,10 @@ regcomp(regex_t *preg, const char *regex, int cflags)
 }
 
 extern "C" EXPORT_SYM int
-gettimeofday(struct timeval *tp, void *tzp)
+gettimeofday(struct timeval *__p, void *__tz)
 {
-    bfignored(tp);
-    bfignored(tzp);
+    bfignored(__p);
+    bfignored(__tz);
 
     UNHANDLED();
 
@@ -184,9 +200,9 @@ gettimeofday(struct timeval *tp, void *tzp)
 }
 
 extern "C" EXPORT_SYM int
-clock_gettime(clockid_t clk_id, struct timespec *tp) __THROW
+clock_gettime(clockid_t clock_id, struct timespec *tp) __THROW
 {
-    bfignored(clk_id);
+    bfignored(clock_id);
     bfignored(tp);
 
     UNHANDLED();
@@ -215,10 +231,10 @@ _fini(void)
 { }
 
 extern "C" EXPORT_SYM int
-stat(const char *pathname, struct stat *buf)
+stat(const char *__path, struct stat *__sbuf)
 {
-    bfignored(pathname);
-    bfignored(buf);
+    bfignored(__path);
+    bfignored(__sbuf);
 
     UNHANDLED();
 
@@ -227,10 +243,10 @@ stat(const char *pathname, struct stat *buf)
 }
 
 extern "C" EXPORT_SYM int
-link(const char *oldpath, const char *newpath)
+link(const char *__path1, const char *__path2)
 {
-    bfignored(oldpath);
-    bfignored(newpath);
+    bfignored(__path1);
+    bfignored(__path2);
 
     UNHANDLED();
 
@@ -239,11 +255,11 @@ link(const char *oldpath, const char *newpath)
 }
 
 extern "C" EXPORT_SYM void
-_exit(int status)
+_exit(int __status)
 {
-    bfignored(status);
+    bfignored(__status);
 
-    while (1)
+    while (true)
     { }
 }
 
@@ -280,10 +296,10 @@ fcntl(int fd, int cmd, ...)
 }
 
 extern "C" EXPORT_SYM int
-mkdir(const char *path, mode_t mode)
+mkdir(const char *_path, mode_t __mode)
 {
-    bfignored(path);
-    bfignored(mode);
+    bfignored(_path);
+    bfignored(__mode);
 
     UNHANDLED();
 
@@ -304,9 +320,9 @@ posix_memalign(void **memptr, size_t alignment, size_t size)
 }
 
 extern "C" EXPORT_SYM int
-close(int fd)
+close(int __fildes)
 {
-    bfignored(fd);
+    bfignored(__fildes);
 
     UNHANDLED();
 
@@ -315,11 +331,11 @@ close(int fd)
 }
 
 extern "C" EXPORT_SYM int
-sigprocmask(int how, const sigset_t *set, sigset_t *oldset)
+sigprocmask(int how, const sigset_t *set, sigset_t *oset)
 {
     bfignored(how);
     bfignored(set);
-    bfignored(oldset);
+    bfignored(oset);
 
     UNHANDLED();
 
@@ -328,9 +344,9 @@ sigprocmask(int how, const sigset_t *set, sigset_t *oldset)
 }
 
 extern "C" EXPORT_SYM long
-sysconf(int name)
+sysconf(int __name)
 {
-    bfignored(name);
+    bfignored(__name);
 
     UNHANDLED();
 
@@ -339,10 +355,10 @@ sysconf(int name)
 }
 
 extern "C" EXPORT_SYM int
-nanosleep(const struct timespec *req, struct timespec *rem)
+nanosleep(const struct timespec *rqtp, struct timespec *rmtp)
 {
-    bfignored(req);
-    bfignored(rem);
+    bfignored(rqtp);
+    bfignored(rmtp);
 
     UNHANDLED();
 
@@ -351,10 +367,10 @@ nanosleep(const struct timespec *req, struct timespec *rem)
 }
 
 extern "C" EXPORT_SYM int
-fstat(int file, struct stat *sbuf)
+fstat(int __fd, struct stat *__sbuf)
 {
-    bfignored(file);
-    bfignored(sbuf);
+    bfignored(__fd);
+    bfignored(__sbuf);
 
     errno = -ENOSYS;
     return -1;
@@ -431,37 +447,37 @@ get_dwarf_sections() noexcept
 { return __g_dwarf_sections; }
 
 extern "C" EXPORT_SYM void *
-malloc(size_t size)
-{ return _malloc_r(0, size); }
+malloc(size_t __size)
+{ return _malloc_r(nullptr, __size); }
 
 extern "C" EXPORT_SYM void
-free(void *ptr)
-{ _free_r(0, ptr); }
+free(void *__ptr)
+{ _free_r(nullptr, __ptr); }
 
 extern "C" EXPORT_SYM void *
-calloc(size_t nmemb, size_t size)
-{ return _calloc_r(0, nmemb, size); }
+calloc(size_t __nmemb, size_t __size)
+{ return _calloc_r(nullptr, __nmemb, __size); }
 
 extern "C" EXPORT_SYM void *
-realloc(void *ptr, size_t size)
-{ return _realloc_r(0, ptr, size); }
+realloc(void *__r, size_t __size)
+{ return _realloc_r(nullptr, __r, __size); }
 
 extern "C" EXPORT_SYM void *
-WEAK_SYM _malloc_r(struct _reent *, size_t)
+WEAK_SYM _malloc_r(struct _reent * /*unused*/, size_t /*unused*/)
 { return nullptr; }
 
 extern "C" EXPORT_SYM void
-WEAK_SYM _free_r(struct _reent *, void *)
+WEAK_SYM _free_r(struct _reent * /*unused*/, void * /*unused*/)
 { }
 
 extern "C" EXPORT_SYM void *
-WEAK_SYM _calloc_r(struct _reent *, size_t, size_t)
+WEAK_SYM _calloc_r(struct _reent * /*unused*/, size_t /*unused*/, size_t /*unused*/)
 { return nullptr; }
 
 extern "C" EXPORT_SYM void *
-WEAK_SYM _realloc_r(struct _reent *, void *, size_t)
+WEAK_SYM _realloc_r(struct _reent * /*unused*/, void * /*unused*/, size_t /*unused*/)
 { return nullptr; }
 
 extern "C" EXPORT_SYM int
-WEAK_SYM write(int, const void *, size_t)
+WEAK_SYM write(int /*unused*/, const void * /*unused*/, size_t /*unused*/)
 { return 0; }

@@ -78,8 +78,8 @@ serial_ns16550a::instance() noexcept
 void
 serial_ns16550a::set_baud_rate(baud_rate_t rate) noexcept
 {
-    uint8_t lsb = gsl::narrow_cast<uint8_t>((rate & 0x000000FF) >> 0);
-    uint8_t msb = gsl::narrow_cast<uint8_t>((rate & 0x0000FF00) >> 8);
+    auto lsb = gsl::narrow_cast<uint8_t>((rate & 0x000000FF) >> 0);
+    auto msb = gsl::narrow_cast<uint8_t>((rate & 0x0000FF00) >> 8);
 
     this->enable_dlab();
 
@@ -230,7 +230,7 @@ serial_ns16550a::is_transmit_empty() const noexcept
 void
 serial_ns16550a::write(char c) const noexcept
 {
-    while (is_transmit_empty() == 0)
+    while (!is_transmit_empty())
     { }
 
     outb(0, static_cast<uint8_t>(c));

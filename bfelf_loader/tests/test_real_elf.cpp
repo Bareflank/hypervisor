@@ -16,6 +16,20 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+// TIDY_EXCLUSION=-cert-err58-cpp
+//
+// Reason:
+//     This triggers on g_filenames which is only used for testing. This
+//     is not a false positive, but it can be safely ignored.
+//
+
+// TIDY_EXCLUSION=-cppcoreguidelines-owning-memory
+//
+// Reason:
+//     This triggers during the allocation which is part of the test harness
+//     so this can be safely ignored.
+//
+
 #include <test_real_elf.h>
 
 #include <map>

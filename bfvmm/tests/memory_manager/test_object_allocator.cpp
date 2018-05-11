@@ -16,6 +16,16 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+// TIDY_EXCLUSION=-cppcoreguidelines-owning-memory
+//
+// Reason:
+//     This test triggers false positives during testing when attempting to
+//     transfer ownership, which is currently a known issue
+//
+//     https://clang.llvm.org/extra/clang-tidy/checks/
+//     cppcoreguidelines-owning-memory.html
+//
+
 #include <catch/catch.hpp>
 
 #include <list>

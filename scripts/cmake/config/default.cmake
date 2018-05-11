@@ -406,14 +406,14 @@ set(TEST_PREFIX_PATH ${PREFIXES_DIR}/${TEST_PREFIX}
 # Scripts
 # ------------------------------------------------------------------------------
 
-set(ASTYLE_SCRIPT "${SOURCE_UTIL_DIR}/bareflank_astyle_format.sh"
-    CACHE INTERNAL
-    "Astyle script"
-)
-
 set(TIDY_SCRIPT "${SOURCE_UTIL_DIR}/bareflank_clang_tidy.sh"
     CACHE INTERNAL
     "Clang Tidy script"
+)
+
+set(ASTYLE_SCRIPT "${SOURCE_UTIL_DIR}/bareflank_astyle_format.sh"
+    CACHE INTERNAL
+    "Astyle script"
 )
 
 # ------------------------------------------------------------------------------
@@ -541,73 +541,6 @@ add_config(
     CONFIG_TYPE BOOL
     DEFAULT_VAL OFF
     DESCRIPTION "Enable astyle formatting"
-)
-
-# ------------------------------------------------------------------------------
-# Tidy Exclusions
-# ------------------------------------------------------------------------------
-
-add_config(
-    CONFIG_NAME TIDY_EXCLUSION_DRIVER
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ""
-    DESCRIPTION "Cland Tidy exclusions for bfdriver"
-)
-
-add_config(
-    CONFIG_NAME TIDY_EXCLUSION_BFDUMMY
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ""
-    DESCRIPTION "Cland Tidy exclusions for bfdummy"
-)
-
-add_config(
-    CONFIG_NAME TIDY_EXCLUSION_BFELF_LOADER
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ",-cppcoreguidelines-pro-type-const-cast"
-    DESCRIPTION "Cland Tidy exclusions for bfelf_loader"
-)
-
-add_config(
-    CONFIG_NAME TIDY_EXCLUSION_BFINTRINSICS
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ""
-    DESCRIPTION "Cland Tidy exclusions for bfintrinsics"
-)
-
-add_config(
-    CONFIG_NAME TIDY_EXCLUSION_BFM
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ""
-    DESCRIPTION "Cland Tidy exclusions for bfm"
-)
-
-add_config(
-    CONFIG_NAME TIDY_EXCLUSION_BFRUNTIME
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ",-cppcoreguidelines-pro*,-cert-err34-c,-misc-misplaced-widening-cast"
-    DESCRIPTION "Cland Tidy exclusions for bfruntime"
-)
-
-add_config(
-    CONFIG_NAME TIDY_EXCLUSION_BFSDK
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ""
-    DESCRIPTION "Cland Tidy exclusions for bfsdk"
-)
-
-add_config(
-    CONFIG_NAME TIDY_EXCLUSION_BFUNWIND
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ""
-    DESCRIPTION "Cland Tidy exclusions for bfunwind"
-)
-
-add_config(
-    CONFIG_NAME TIDY_EXCLUSION_BFVMM
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ""
-    DESCRIPTION "Cland Tidy exclusions for bfvmm"
 )
 
 # ------------------------------------------------------------------------------

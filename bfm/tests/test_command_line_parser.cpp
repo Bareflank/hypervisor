@@ -128,7 +128,7 @@ TEST_CASE("test command line parser with load no modules")
 
     CHECK_NOTHROW(clp.parse(args));
     CHECK(clp.cmd() == command_line_parser::command_type::load);
-    CHECK(clp.modules() == "");
+    CHECK(clp.modules().empty());
 }
 
 TEST_CASE("test command line parser with valid load")

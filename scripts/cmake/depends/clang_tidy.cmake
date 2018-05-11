@@ -18,13 +18,13 @@
 
 if(ENABLE_TIDY)
     if(NOT CLANG_TIDY_BIN)
-        find_program(CLANG_TIDY_BIN clang-tidy-4.0)
+        find_program(CLANG_TIDY_BIN clang-tidy-6.0)
 
         if(NOT CLANG_TIDY_BIN)
             message(STATUS "Including dependency: clang-tidy")
-            message(STATUS "*** FATAL ERROR: Clang Tidy 4.0 was not found. To Fix:")
-            message(STATUS "  - install clang-tidy-4.0 or")
-            message(STATUS "  - ln -s /usr/bin/clang-tidy /usr/bin/clang-tidy-4.0")
+            message(STATUS "*** FATAL ERROR: Clang Tidy 6.0 was not found. To Fix:")
+            message(STATUS "  - install clang-tidy-6.0 or")
+            message(STATUS "  - ln -s /usr/bin/clang-tidy /usr/bin/clang-tidy-6.0")
             message(FATAL_ERROR "Unable to find: clang-tidy")
         endif()
     endif()
