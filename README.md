@@ -16,19 +16,19 @@ The Bareflank Hypervisor is an open source, hypervisor Software Development Tool
 Assured Information Security, Inc. (AIS), that provides a set of APIs needed to
 rapidly prototype and create new hypervisors. To ease development, Bareflank
 is written in C/C++, and includes support for C++ exceptions, JSON, the GSL and the C++ Standard
-Template Library (STL). 
+Template Library (STL).
 
 The Bareflank Hypervisor uses a layered, modular approach.
-- [hypervisor](https://github.com/Bareflank/hypervisor): provides a minimal, hypervisor 
-implementation, the build system, and architecture specific intrinsics. 
-- [extended_apis](https://github.com/Bareflank/extended_apis): adds hardware virtualization extension 
-APIs to the hypervisor. 
-- [hyperkernel](https://github.com/Bareflank/hyperkernel): adds guest support APIs to the 
-hypervisor. 
-- [pv_interface](https://github.com/Bareflank/pv_interface): adds a hypercall API/ABI and 
-PV interface to the hypervisor. 
+- [hypervisor](https://github.com/Bareflank/hypervisor): provides a minimal implementation
+of a host-only hypervisor, the build system, and architecture specific intrinsics.
+- [extended_apis](https://github.com/Bareflank/extended_apis): provides convenient APIs
+for hardware virtualization extensions.
+- [hyperkernel](https://github.com/Bareflank/hyperkernel): Adds guest support APIs to the
+hypervisor.
+- [pv_interface](https://github.com/Bareflank/pv_interface): Adds a hypercall API/ABI and
+PV interface to the hypervisor.
 
-To support Bareflank's design approach, the hypervisor is licensed
+To support Bareflank's design approach, the entire hypervisor is licensed
 under the GNU Lesser General Public License v2.1 (LGPL), specifically
 enabling users of the project to both contribute back to the project, but
 also create proprietary extensions of the VMM if so desired.
@@ -78,7 +78,7 @@ diversity, and even architectural research like the
 [MoRE](https://github.com/ainfosec/MoRE) hypervisor. All of these use
 cases start the same way, by spending months standing up the hypervisor
 itself before you can start working on your actual project. Existing open
-source hypervisors are burdened with legacy support and unnecessary complexity 
+source hypervisors are burdened with legacy support and unnecessary complexity
 that make them painful to work with when conducting hypervisor research.
 
 ## Links
@@ -211,9 +211,9 @@ The master branch is our development branch and should be considered unstable.
 It is possible these additional projects might not compile with master. If you
 need a stable branch that works with these repos, please use a tagged release.
 
-Since the main, hypervisor repo only provides the a minimal implementation, 
+Since the main, hypervisor repo only provides the a minimal implementation,
 we have created other repositories that extend Bareflank to provide additional
-capabilities that you might find useful. 
+capabilities that you might find useful.
 
 **Extended APIs:**<br>
 https://github.com/Bareflank/extended_apis
@@ -249,7 +249,7 @@ https://github.com/Bareflank/extended_apis_example_hook
 ## License
 
 The Bareflank Hypervisor is licensed under the GNU Lesser General Public License
-v2.1 (LGPL). The Windows and EFI drivers are licensed under the MIT License. The 
+v2.1 (LGPL). The Windows and EFI drivers are licensed under the MIT License. The
 Linux driver is licensed under the General Public License v2.0 (GPL) License.
 
 ## Related
