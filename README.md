@@ -19,16 +19,16 @@ is written in C/C++, and includes support for C++ exceptions, JSON, the GSL and 
 Template Library (STL).
 
 The Bareflank Hypervisor uses a layered, modular approach.
-- [hypervisor](https://github.com/Bareflank/hypervisor): provides a minimal implementation
-of a host-only hypervisor, the build system, and architecture specific intrinsics.
-- [extended_apis](https://github.com/Bareflank/extended_apis): provides convenient APIs
-for hardware virtualization extensions.
-- [hyperkernel](https://github.com/Bareflank/hyperkernel): Adds guest support APIs to the
+- [hypervisor](https://github.com/Bareflank/hypervisor): provides a minimal, hypervisor
+implementation, the build system, and architecture specific intrinsics.
+- [extended_apis](https://github.com/Bareflank/extended_apis): adds hardware virtualization extension
+APIs to the hypervisor.
+- [hyperkernel](https://github.com/Bareflank/hyperkernel): adds guest support APIs to the
 hypervisor.
-- [pv_interface](https://github.com/Bareflank/pv_interface): Adds a hypercall API/ABI and
+- [pv_interface](https://github.com/Bareflank/pv_interface): adds a hypercall API/ABI and
 PV interface to the hypervisor.
 
-To support Bareflank's design approach, the entire hypervisor is licensed
+To support Bareflank's design approach, the hypervisor is licensed
 under the GNU Lesser General Public License v2.1 (LGPL), specifically
 enabling users of the project to both contribute back to the project, but
 also create proprietary extensions of the VMM if so desired.
