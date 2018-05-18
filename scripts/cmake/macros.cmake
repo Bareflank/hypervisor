@@ -1229,7 +1229,7 @@ function(add_vmm_executable NAME)
             ${CMAKE_INSTALL_PREFIX}/lib/libc.so
             ${CMAKE_INSTALL_PREFIX}/lib/libm.so
             ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall_shared.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
+            --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
         )
 
         target_link_libraries(${NAME}_shared ${LIBRARIES})
@@ -1264,7 +1264,7 @@ function(add_vmm_executable NAME)
             ${CMAKE_INSTALL_PREFIX}/lib/libc.a
             ${CMAKE_INSTALL_PREFIX}/lib/libm.a
             ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall_static.a
-            ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
+            --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
         )
 
         target_link_libraries(${NAME}_static ${LIBRARIES})

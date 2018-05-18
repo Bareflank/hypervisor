@@ -310,13 +310,20 @@ mkdir(const char *_path, mode_t __mode)
 extern "C" EXPORT_SYM int
 posix_memalign(void **memptr, size_t alignment, size_t size)
 {
-    bfignored(memptr);
     bfignored(alignment);
-    bfignored(size);
 
-    UNHANDLED();
+    // TODO:
+    //
+    // At some point, we need to implement the alignment part of
+    // this function, but it is being used by C++17 so the implementation
+    // below works for now.
+    //
 
-    return 0;
+    if ((*memptr = _malloc_r(nullptr, size)) != nullptr) {
+        return 0;
+    }
+
+    return -ENOMEM;
 }
 
 extern "C" EXPORT_SYM int
