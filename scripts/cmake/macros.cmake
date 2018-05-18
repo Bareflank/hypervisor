@@ -682,7 +682,6 @@ function(add_targets NAME PREFIX SOURCE_DIR)
             add_custom_target(tidy-${NAME}_${FULLPREFIX}-all)
             add_custom_target(tidy-${NAME}_${FULLPREFIX}-upstream)
             add_tidy_targets(${NAME} ${PREFIX} ${SOURCE_DIR})
-            add_tidy_targets(${NAME} ${PREFIX} ${SOURCE_DIR}/../include)
         endif()
 
         if(ENABLE_FORMAT)
