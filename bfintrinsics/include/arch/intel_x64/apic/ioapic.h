@@ -78,10 +78,10 @@ namespace ioapic
         inline value_t get(value_t reg)
         { return get_bits(reg, mask) >> from; }
 
-        inline value_t set(value_t reg, value_t id)
-        { return set_bits(reg, mask, (id << from)); }
+        inline void set(value_t &reg, value_t id)
+        { reg = set_bits(reg, mask, (id << from)); }
 
-        inline void dump(int level, value_t reg, std::string *msg = nullptr)
+        inline void dump(int level, value_t &reg, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(reg), msg); }
     }
 
@@ -100,10 +100,10 @@ namespace ioapic
             inline value_t get(value_t reg)
             { return get_bits(reg, mask) >> from; }
 
-            inline value_t set(value_t reg, value_t ver)
-            { return set_bits(reg, mask, (ver << from)); }
+            inline void set(value_t &reg, value_t ver)
+            { reg = set_bits(reg, mask, (ver << from)); }
 
-            inline void dump(int level, value_t reg, std::string *msg = nullptr)
+            inline void dump(int level, value_t &reg, std::string *msg = nullptr)
             { bfdebug_subndec(level, name, get(reg), msg); }
         }
 
@@ -116,14 +116,14 @@ namespace ioapic
             inline value_t get(value_t reg)
             { return get_bits(reg, mask) >> from; }
 
-            inline value_t set(value_t reg, value_t ver)
-            { return set_bits(reg, mask, (ver << from)); }
+            inline void set(value_t &reg, value_t ver)
+            { reg = set_bits(reg, mask, (ver << from)); }
 
-            inline void dump(int level, value_t reg, std::string *msg = nullptr)
+            inline void dump(int level, value_t &reg, std::string *msg = nullptr)
             { bfdebug_subndec(level, name, get(reg), msg); }
         }
 
-        inline void dump(int level, value_t reg, std::string *msg = nullptr)
+        inline void dump(int level, value_t &reg, std::string *msg = nullptr)
         {
             version::dump(level, reg, msg);
             max_rte_number::dump(level, reg, msg);
@@ -145,14 +145,14 @@ namespace ioapic
             inline value_t get(value_t reg)
             { return get_bits(reg, mask) >> from; }
 
-            inline value_t set(value_t reg, value_t arb)
-            { return set_bits(reg, mask, (arb << from)); }
+            inline void set(value_t &reg, value_t arb)
+            { reg = set_bits(reg, mask, (arb << from)); }
 
-            inline void dump(int level, value_t reg, std::string *msg = nullptr)
+            inline void dump(int level, value_t &reg, std::string *msg = nullptr)
             { bfdebug_subndec(level, name, get(reg), msg); }
         }
 
-        inline void dump(int level, value_t reg, std::string *msg = nullptr)
+        inline void dump(int level, value_t &reg, std::string *msg = nullptr)
         { id::dump(level, reg, msg); }
     }
 
@@ -172,10 +172,10 @@ namespace ioapic
             inline auto get(rte_t val) noexcept
             { return get_bits(val, mask) >> from; }
 
-            inline auto set(rte_t reg, rte_t val) noexcept
-            { return set_bits(reg, mask, val << from); }
+            inline void set(rte_t &reg, rte_t val) noexcept
+            { reg = set_bits(reg, mask, val << from); }
 
-            inline void dump(int lev, rte_t val, std::string *msg = nullptr)
+            inline void dump(int lev, rte_t &val, std::string *msg = nullptr)
             { bfdebug_subnhex(lev, name, get(val), msg); }
         }
 
@@ -195,10 +195,10 @@ namespace ioapic
             inline auto get(rte_t val) noexcept
             { return get_bits(val, mask) >> from; }
 
-            inline auto set(rte_t reg, rte_t val) noexcept
-            { return set_bits(reg, mask, val << from); }
+            inline void set(rte_t &reg, rte_t val) noexcept
+            { reg = set_bits(reg, mask, val << from); }
 
-            inline void dump(int lev, rte_t val, std::string *msg = nullptr)
+            inline void dump(int lev, rte_t &val, std::string *msg = nullptr)
             {
                 const auto mode = get(val);
                 if (mode == lowest_priority) {
@@ -222,10 +222,10 @@ namespace ioapic
             inline auto get(rte_t val) noexcept
             { return get_bits(val, mask) >> from; }
 
-            inline auto set(rte_t reg, rte_t val) noexcept
-            { return set_bits(reg, mask, val << from); }
+            inline void set(rte_t &reg, rte_t val) noexcept
+            { reg = set_bits(reg, mask, val << from); }
 
-            inline void dump(int lev, rte_t val, std::string *msg = nullptr)
+            inline void dump(int lev, rte_t &val, std::string *msg = nullptr)
             {
                 if (get(val) == physical) {
                     bfdebug_subtext(lev, name, "physical", msg);
@@ -248,10 +248,10 @@ namespace ioapic
             inline auto get(rte_t val) noexcept
             { return get_bits(val, mask) >> from; }
 
-            inline auto set(rte_t reg, rte_t val) noexcept
-            { return set_bits(reg, mask, val << from); }
+            inline void set(rte_t &reg, rte_t val) noexcept
+            { reg = set_bits(reg, mask, val << from); }
 
-            inline void dump(int lev, rte_t val, std::string *msg = nullptr)
+            inline void dump(int lev, rte_t &val, std::string *msg = nullptr)
             { ::intel_x64::lapic::dump_delivery_status(lev, get(val), msg); }
         }
 
@@ -267,10 +267,10 @@ namespace ioapic
             inline auto get(rte_t val) noexcept
             { return get_bits(val, mask) >> from; }
 
-            inline auto set(rte_t reg, rte_t val) noexcept
-            { return set_bits(reg, mask, val << from); }
+            inline void set(rte_t &reg, rte_t val) noexcept
+            { reg = set_bits(reg, mask, val << from); }
 
-            inline void dump(int lev, rte_t val, std::string *msg = nullptr)
+            inline void dump(int lev, rte_t &val, std::string *msg = nullptr)
             {
                 if (get(val) == active_high) {
                     bfdebug_subtext(lev, name, "active_high", msg);
@@ -293,13 +293,13 @@ namespace ioapic
             inline auto is_disabled(rte_t val)
             { return is_bit_cleared(val, from); }
 
-            inline auto enable(rte_t val)
-            { return set_bit(val, from); }
+            inline void enable(rte_t &val)
+            { val = set_bit(val, from); }
 
-            inline auto disable(rte_t val)
-            { return clear_bit(val, from); }
+            inline void disable(rte_t &val)
+            { val = clear_bit(val, from); }
 
-            inline void dump(int lev, rte_t val, std::string *msg = nullptr)
+            inline void dump(int lev, rte_t &val, std::string *msg = nullptr)
             { bfdebug_subbool(lev, name, is_enabled(val), msg); }
         }
 
@@ -315,10 +315,10 @@ namespace ioapic
             inline auto get(rte_t val) noexcept
             { return get_bits(val, mask) >> from; }
 
-            inline auto set(rte_t reg, rte_t val) noexcept
-            { return set_bits(reg, mask, val << from); }
+            inline void set(rte_t &reg, rte_t val) noexcept
+            { reg = set_bits(reg, mask, val << from); }
 
-            inline void dump(int lev, rte_t val, std::string *msg = nullptr)
+            inline void dump(int lev, rte_t &val, std::string *msg = nullptr)
             {
                 if (get(val) == edge) {
                     bfdebug_subtext(lev, name, "edge", msg);
@@ -341,13 +341,13 @@ namespace ioapic
             inline auto is_disabled(rte_t val)
             { return is_bit_cleared(val, from); }
 
-            inline auto enable(rte_t val)
-            { return set_bit(val, from); }
+            inline void enable(rte_t &val)
+            { val = set_bit(val, from); }
 
-            inline auto disable(rte_t val)
-            { return clear_bit(val, from); }
+            inline void disable(rte_t &val)
+            { val = clear_bit(val, from); }
 
-            inline void dump(int lev, rte_t val, std::string *msg = nullptr)
+            inline void dump(int lev, rte_t &val, std::string *msg = nullptr)
             { bfdebug_subbool(lev, name, is_enabled(val), msg); }
         }
 
@@ -360,10 +360,10 @@ namespace ioapic
             inline auto get(rte_t val) noexcept
             { return get_bits(val, mask) >> from; }
 
-            inline auto set(rte_t reg, rte_t val) noexcept
-            { return set_bits(reg, mask, val << from); }
+            inline void set(rte_t &reg, rte_t val) noexcept
+            { reg = set_bits(reg, mask, val << from); }
 
-            inline void dump(int lev, rte_t val, std::string *msg = nullptr)
+            inline void dump(int lev, rte_t &val, std::string *msg = nullptr)
             { bfdebug_subnhex(lev, name, get(val), msg); }
         }
 
@@ -376,14 +376,14 @@ namespace ioapic
             inline auto get(rte_t val) noexcept
             { return get_bits(val, mask) >> from; }
 
-            inline auto set(rte_t reg, rte_t val) noexcept
-            { return set_bits(reg, mask, val << from); }
+            inline void set(rte_t &reg, rte_t val) noexcept
+            { reg = set_bits(reg, mask, val << from); }
 
-            inline void dump(int lev, rte_t val, std::string *msg = nullptr)
+            inline void dump(int lev, rte_t &val, std::string *msg = nullptr)
             { bfdebug_subnhex(lev, name, get(val), msg); }
         }
 
-        inline void dump(int lev, rte_t val, std::string *msg = nullptr)
+        inline void dump(int lev, rte_t &val, std::string *msg = nullptr)
         {
             bfdebug_nhex(lev, name, val,  msg);
             vector::dump(lev, val, msg);

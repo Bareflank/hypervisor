@@ -83,14 +83,14 @@ namespace carry_flag
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -117,14 +117,14 @@ namespace parity_flag
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -151,14 +151,14 @@ namespace auxiliary_carry_flag
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -185,14 +185,14 @@ namespace zero_flag
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -219,14 +219,14 @@ namespace sign_flag
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -253,14 +253,14 @@ namespace trap_flag
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -287,14 +287,14 @@ namespace interrupt_enable_flag
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -321,14 +321,14 @@ namespace direction_flag
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -355,14 +355,14 @@ namespace overflow_flag
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -383,8 +383,8 @@ namespace privilege_level
     inline void set(value_type val) noexcept
     { _write_rflags(set_bits(_read_rflags(), mask, val << from)); }
 
-    inline auto set(value_type rflags, value_type val) noexcept
-    { return set_bits(rflags, mask, val << from); }
+    inline void set(value_type &rflags, value_type val) noexcept
+    { rflags = set_bits(rflags, mask, val << from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subnhex(level, name, get(), msg); }
@@ -411,14 +411,14 @@ namespace nested_task
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -445,14 +445,14 @@ namespace resume_flag
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -479,14 +479,14 @@ namespace virtual_8086_mode
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -513,14 +513,14 @@ namespace alignment_check_access_control
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -547,14 +547,14 @@ namespace virtual_interupt_flag
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -581,14 +581,14 @@ namespace virtual_interupt_pending
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -615,14 +615,14 @@ namespace id_flag
     inline void enable()
     { _write_rflags(set_bit(_read_rflags(), from)); }
 
-    inline auto enable(value_type rflags)
-    { return set_bit(rflags, from); }
+    inline void enable(value_type &rflags)
+    { rflags = set_bit(rflags, from); }
 
     inline void disable()
     { _write_rflags(clear_bit(_read_rflags(), from)); }
 
-    inline auto disable(value_type rflags)
-    { return clear_bit(rflags, from); }
+    inline void disable(value_type &rflags)
+    { rflags = clear_bit(rflags, from); }
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_subbool(level, name, is_enabled(), msg); }
