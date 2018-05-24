@@ -204,12 +204,6 @@ if(ENABLE_BUILD_TEST)
     )
 
     add_subproject(
-        bfintrinsics test
-        DEPENDS bfsdk
-        NOINSTALL
-    )
-
-    add_subproject(
         bfvmm test
         DEPENDS bfsdk
     )
