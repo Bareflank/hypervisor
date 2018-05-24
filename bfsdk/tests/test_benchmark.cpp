@@ -28,15 +28,19 @@ TEST_CASE("benchmark")
 
 TEST_CASE("non-array new/delete")
 {
-    std::make_unique<char>();
+    auto dontcare0 = std::make_unique<char>();
+    bfignored(dontcare0);
 }
 
 TEST_CASE("array new/delete")
 {
     clear_memory_stats();
 
-    std::make_unique<char[]>(42);
-    std::make_unique<char[]>(0x1000);
+    auto dontcare1 = std::make_unique<char[]>(42);
+    auto dontcare2 = std::make_unique<char[]>(0x1000);
+
+    bfignored(dontcare1);
+    bfignored(dontcare2);
 
     auto page_allocs = g_page_allocs;
     auto nonpage_allocs = g_nonpage_allocs;
