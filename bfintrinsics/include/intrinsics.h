@@ -62,6 +62,17 @@
 #include <arch/intel_x64/vmcs/natural_width_guest_state_fields.h>
 #include <arch/intel_x64/vmcs/natural_width_host_state_fields.h>
 #include <arch/intel_x64/vmcs/natural_width_read_only_data_fields.h>
+#include <arch/intel_x64/vtd/context_entry.h>
+#include <arch/intel_x64/vtd/extended_context_entry.h>
+#include <arch/intel_x64/vtd/extended_root_entry.h>
+#include <arch/intel_x64/vtd/fault_record.h>
+#include <arch/intel_x64/vtd/first_level_paging_entries.h>
+#include <arch/intel_x64/vtd/irte.h>
+#include <arch/intel_x64/vtd/pasid_entry.h>
+#include <arch/intel_x64/vtd/pasid_state_entry.h>
+#include <arch/intel_x64/vtd/pid.h>
+#include <arch/intel_x64/vtd/root_entry.h>
+#include <arch/intel_x64/vtd/second_level_paging_entries.h>
 #endif
 
 #ifdef BF_AARCH64
