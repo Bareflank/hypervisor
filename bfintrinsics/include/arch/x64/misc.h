@@ -315,6 +315,15 @@ inline auto is_physical_address_valid(uintptr_t addr)
     return ((addr & mask) == 0);
 }
 
+///
+/// @param pas the physical address size
+///
+inline auto is_physical_address_valid(uintptr_t addr, uint64_t pas)
+{
+    auto mask = (0xFFFFFFFFFFFFFFFFULL >> pas) << pas;
+    return ((addr & mask) == 0);
+}
+
 inline auto is_physical_address_valid(void *addr)
 { return is_physical_address_valid(reinterpret_cast<uintptr_t>(addr)); }
 }
