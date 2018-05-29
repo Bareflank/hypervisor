@@ -38,6 +38,7 @@ parsers:
       macro: no
 
 ignore:
+  - "bfintrinsics/**"
   - "bfm/ioctl/arch/linux/**"
   - "bfvmm/include/memory_manager/**"
   - "bfvmm/src/memory_manager/**"

@@ -73,8 +73,8 @@ namespace guest_es_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -110,8 +110,8 @@ namespace guest_es_selector
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -119,8 +119,8 @@ namespace guest_es_selector
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -128,8 +128,8 @@ namespace guest_es_selector
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -156,8 +156,8 @@ namespace guest_es_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -213,8 +213,8 @@ namespace guest_cs_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -250,8 +250,8 @@ namespace guest_cs_selector
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -259,8 +259,8 @@ namespace guest_cs_selector
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -268,8 +268,8 @@ namespace guest_cs_selector
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -296,8 +296,8 @@ namespace guest_cs_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -353,8 +353,8 @@ namespace guest_ss_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -390,8 +390,8 @@ namespace guest_ss_selector
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -399,8 +399,8 @@ namespace guest_ss_selector
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -408,8 +408,8 @@ namespace guest_ss_selector
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -436,8 +436,8 @@ namespace guest_ss_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -493,8 +493,8 @@ namespace guest_ds_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -530,8 +530,8 @@ namespace guest_ds_selector
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -539,8 +539,8 @@ namespace guest_ds_selector
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -548,8 +548,8 @@ namespace guest_ds_selector
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -576,8 +576,8 @@ namespace guest_ds_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -633,8 +633,8 @@ namespace guest_fs_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -670,8 +670,8 @@ namespace guest_fs_selector
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -679,8 +679,8 @@ namespace guest_fs_selector
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -688,8 +688,8 @@ namespace guest_fs_selector
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -716,8 +716,8 @@ namespace guest_fs_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -773,8 +773,8 @@ namespace guest_gs_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -810,8 +810,8 @@ namespace guest_gs_selector
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -819,8 +819,8 @@ namespace guest_gs_selector
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -828,8 +828,8 @@ namespace guest_gs_selector
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -856,8 +856,8 @@ namespace guest_gs_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -913,8 +913,8 @@ namespace guest_ldtr_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -950,8 +950,8 @@ namespace guest_ldtr_selector
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -959,8 +959,8 @@ namespace guest_ldtr_selector
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -968,8 +968,8 @@ namespace guest_ldtr_selector
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -996,8 +996,8 @@ namespace guest_ldtr_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -1053,8 +1053,8 @@ namespace guest_tr_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }
@@ -1090,8 +1090,8 @@ namespace guest_tr_selector
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1099,8 +1099,8 @@ namespace guest_tr_selector
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1108,8 +1108,8 @@ namespace guest_tr_selector
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1136,8 +1136,8 @@ namespace guest_tr_selector
         inline void set(value_type val)
         { set_vmcs_field_bits(val, addr, mask, from, name, exists()); }
 
-        inline auto set(value_type field, value_type val)
-        { return set_bits(field, mask, (val << from)); }
+        inline void set(value_type &field, value_type val)
+        { field = set_bits(field, mask, (val << from)); }
 
         inline void set_if_exists(value_type val, bool verbose = false)
         { set_vmcs_field_bits_if_exists(val, addr, mask, from, name, verbose, exists()); }

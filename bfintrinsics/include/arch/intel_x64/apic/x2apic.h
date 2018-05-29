@@ -186,8 +186,8 @@ namespace ia32_x2apic_sivr
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -214,14 +214,14 @@ namespace ia32_x2apic_sivr
         inline void enable()
         { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
-        inline auto enable(value_type msr)
-        { return set_bit(msr, from); }
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
 
         inline void disable()
         { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
-        inline auto disable(value_type msr)
-        { return clear_bit(msr, from); }
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -248,14 +248,14 @@ namespace ia32_x2apic_sivr
         inline void disable()
         { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
-        inline auto disable(value_type msr)
-        { return set_bit(msr, from); }
+        inline void disable(value_type &msr)
+        { msr = set_bit(msr, from); }
 
         inline void enable()
         { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
-        inline auto enable(value_type msr)
-        { return clear_bit(msr, from); }
+        inline void enable(value_type &msr)
+        { msr = clear_bit(msr, from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -282,14 +282,14 @@ namespace ia32_x2apic_sivr
         inline void enable()
         { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
-        inline auto enable(value_type msr)
-        { return set_bit(msr, from); }
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
 
         inline void disable()
         { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
-        inline auto disable(value_type msr)
-        { return clear_bit(msr, from); }
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -634,8 +634,8 @@ namespace ia32_x2apic_lvt_cmci
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -662,8 +662,8 @@ namespace ia32_x2apic_lvt_cmci
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -696,8 +696,8 @@ namespace ia32_x2apic_lvt_cmci
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -729,14 +729,14 @@ namespace ia32_x2apic_lvt_cmci
         inline void enable()
         { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
-        inline auto enable(value_type msr)
-        { return set_bit(msr, from); }
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
 
         inline void disable()
         { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
-        inline auto disable(value_type msr)
-        { return clear_bit(msr, from); }
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -778,8 +778,8 @@ namespace ia32_x2apic_icr
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -806,8 +806,8 @@ namespace ia32_x2apic_icr
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -840,8 +840,8 @@ namespace ia32_x2apic_icr
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -870,8 +870,8 @@ namespace ia32_x2apic_icr
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -903,14 +903,14 @@ namespace ia32_x2apic_icr
         inline void enable()
         { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
-        inline auto enable(value_type msr)
-        { return set_bit(msr, from); }
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
 
         inline void disable()
         { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
-        inline auto disable(value_type msr)
-        { return clear_bit(msr, from); }
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -934,8 +934,8 @@ namespace ia32_x2apic_icr
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -966,8 +966,8 @@ namespace ia32_x2apic_icr
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int lev, std::string *msg = nullptr)
         {
@@ -995,8 +995,8 @@ namespace ia32_x2apic_icr
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -1041,8 +1041,8 @@ namespace ia32_x2apic_lvt_timer
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -1066,8 +1066,8 @@ namespace ia32_x2apic_lvt_timer
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1099,14 +1099,14 @@ namespace ia32_x2apic_lvt_timer
         inline void enable()
         { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
-        inline auto enable(value_type msr)
-        { return set_bit(msr, from); }
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
 
         inline void disable()
         { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
-        inline auto disable(value_type msr)
-        { return clear_bit(msr, from); }
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -1131,8 +1131,8 @@ namespace ia32_x2apic_lvt_timer
         inline void set(value_type val)
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val)
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val)
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1181,8 +1181,8 @@ namespace ia32_x2apic_lvt_thermal
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -1209,8 +1209,8 @@ namespace ia32_x2apic_lvt_thermal
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1243,8 +1243,8 @@ namespace ia32_x2apic_lvt_thermal
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1276,14 +1276,14 @@ namespace ia32_x2apic_lvt_thermal
         inline void enable()
         { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
-        inline auto enable(value_type msr)
-        { return set_bit(msr, from); }
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
 
         inline void disable()
         { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
-        inline auto disable(value_type msr)
-        { return clear_bit(msr, from); }
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -1325,8 +1325,8 @@ namespace ia32_x2apic_lvt_pmi
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -1353,8 +1353,8 @@ namespace ia32_x2apic_lvt_pmi
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1387,8 +1387,8 @@ namespace ia32_x2apic_lvt_pmi
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1420,14 +1420,14 @@ namespace ia32_x2apic_lvt_pmi
         inline void enable()
         { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
-        inline auto enable(value_type msr)
-        { return set_bit(msr, from); }
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
 
         inline void disable()
         { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
-        inline auto disable(value_type msr)
-        { return clear_bit(msr, from); }
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -1469,8 +1469,8 @@ namespace ia32_x2apic_lvt_lint0
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -1497,8 +1497,8 @@ namespace ia32_x2apic_lvt_lint0
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1531,8 +1531,8 @@ namespace ia32_x2apic_lvt_lint0
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1561,8 +1561,8 @@ namespace ia32_x2apic_lvt_lint0
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1607,8 +1607,8 @@ namespace ia32_x2apic_lvt_lint0
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1640,14 +1640,14 @@ namespace ia32_x2apic_lvt_lint0
         inline void enable()
         { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
-        inline auto enable(value_type msr)
-        { return set_bit(msr, from); }
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
 
         inline void disable()
         { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
-        inline auto disable(value_type msr)
-        { return clear_bit(msr, from); }
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -1691,8 +1691,8 @@ namespace ia32_x2apic_lvt_lint1
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -1719,8 +1719,8 @@ namespace ia32_x2apic_lvt_lint1
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1753,8 +1753,8 @@ namespace ia32_x2apic_lvt_lint1
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1783,8 +1783,8 @@ namespace ia32_x2apic_lvt_lint1
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1829,8 +1829,8 @@ namespace ia32_x2apic_lvt_lint1
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -1862,14 +1862,14 @@ namespace ia32_x2apic_lvt_lint1
         inline void enable()
         { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
-        inline auto enable(value_type msr)
-        { return set_bit(msr, from); }
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
 
         inline void disable()
         { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
-        inline auto disable(value_type msr)
-        { return clear_bit(msr, from); }
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -1913,8 +1913,8 @@ namespace ia32_x2apic_lvt_error
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
@@ -1938,8 +1938,8 @@ namespace ia32_x2apic_lvt_error
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -2020,8 +2020,8 @@ namespace ia32_x2apic_div_conf
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         {
@@ -2062,8 +2062,8 @@ namespace ia32_x2apic_self_ipi
         inline void set(value_type val) noexcept
         { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-        inline auto set(value_type msr, value_type val) noexcept
-        { return set_bits(msr, mask, val << from); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
     }
 }
 }

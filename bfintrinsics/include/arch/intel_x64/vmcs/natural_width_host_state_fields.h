@@ -82,8 +82,8 @@ namespace host_cr0
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -91,8 +91,8 @@ namespace host_cr0
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -100,8 +100,8 @@ namespace host_cr0
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -137,8 +137,8 @@ namespace host_cr0
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -146,8 +146,8 @@ namespace host_cr0
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -155,8 +155,8 @@ namespace host_cr0
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -192,8 +192,8 @@ namespace host_cr0
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -201,8 +201,8 @@ namespace host_cr0
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -210,8 +210,8 @@ namespace host_cr0
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -247,8 +247,8 @@ namespace host_cr0
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -256,8 +256,8 @@ namespace host_cr0
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -265,8 +265,8 @@ namespace host_cr0
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -302,8 +302,8 @@ namespace host_cr0
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -311,8 +311,8 @@ namespace host_cr0
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -320,8 +320,8 @@ namespace host_cr0
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -357,8 +357,8 @@ namespace host_cr0
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -366,8 +366,8 @@ namespace host_cr0
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -375,8 +375,8 @@ namespace host_cr0
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -412,8 +412,8 @@ namespace host_cr0
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -421,8 +421,8 @@ namespace host_cr0
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -430,8 +430,8 @@ namespace host_cr0
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -467,8 +467,8 @@ namespace host_cr0
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -476,8 +476,8 @@ namespace host_cr0
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -485,8 +485,8 @@ namespace host_cr0
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -522,8 +522,8 @@ namespace host_cr0
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -531,8 +531,8 @@ namespace host_cr0
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -540,8 +540,8 @@ namespace host_cr0
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -577,8 +577,8 @@ namespace host_cr0
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -586,8 +586,8 @@ namespace host_cr0
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -595,8 +595,8 @@ namespace host_cr0
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -632,8 +632,8 @@ namespace host_cr0
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -641,8 +641,8 @@ namespace host_cr0
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -650,8 +650,8 @@ namespace host_cr0
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -748,8 +748,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -757,8 +757,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -766,8 +766,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -803,8 +803,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -812,8 +812,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -821,8 +821,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -858,8 +858,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -867,8 +867,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -876,8 +876,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -913,8 +913,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -922,8 +922,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -931,8 +931,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -968,8 +968,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -977,8 +977,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -986,8 +986,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1023,8 +1023,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1032,8 +1032,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1041,8 +1041,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1078,8 +1078,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1087,8 +1087,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1096,8 +1096,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1133,8 +1133,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1142,8 +1142,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1151,8 +1151,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1188,8 +1188,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1197,8 +1197,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1206,8 +1206,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1243,8 +1243,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1252,8 +1252,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1261,8 +1261,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1298,8 +1298,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1307,8 +1307,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1316,8 +1316,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1353,8 +1353,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1362,8 +1362,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1371,8 +1371,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1408,8 +1408,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1417,8 +1417,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1426,8 +1426,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1463,8 +1463,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1472,8 +1472,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1481,8 +1481,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1518,8 +1518,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1527,8 +1527,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1536,8 +1536,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1573,8 +1573,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1582,8 +1582,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1591,8 +1591,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1628,8 +1628,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1637,8 +1637,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1646,8 +1646,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1683,8 +1683,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1692,8 +1692,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1701,8 +1701,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
@@ -1738,8 +1738,8 @@ namespace host_cr4
         inline void enable()
         { set_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto enable(value_type field)
-        { return set_bit(field, from); }
+        inline void enable(value_type &field)
+        { field = set_bit(field, from); }
 
         inline void enable_if_exists(bool verbose = false)
         { set_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1747,8 +1747,8 @@ namespace host_cr4
         inline void disable()
         { clear_vmcs_field_bit(addr, from, name, exists()); }
 
-        inline auto disable(value_type field)
-        { return clear_bit(field, from); }
+        inline void disable(value_type &field)
+        { field = clear_bit(field, from); }
 
         inline void disable_if_exists(bool verbose = false)
         { clear_vmcs_field_bit_if_exists(addr, from, name, verbose, exists()); }
@@ -1756,8 +1756,8 @@ namespace host_cr4
         inline void set(bool val)
         { val ? enable() : disable(); }
 
-        inline auto set(value_type field, bool val)
-        { return val ? enable(field) : disable(field); }
+        inline void set(value_type &field, bool val)
+        { val ? enable(field) : disable(field); }
 
         inline void set_if_exists(bool val, bool verbose = false)
         { val ? enable_if_exists(verbose) : disable_if_exists(verbose); }
