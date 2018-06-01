@@ -49,10 +49,10 @@ namespace intel_x64
 namespace bit
 {
     inline uint64_t bsf(uint64_t value) noexcept
-    { _bsf(value); }
+    { return _bsf(value); }
 
     inline uint64_t popcnt(uint64_t value) noexcept
-    { _popcnt(value); }
+    { return _popcnt(value); }
 }
 }
 // *INDENT-ON*
