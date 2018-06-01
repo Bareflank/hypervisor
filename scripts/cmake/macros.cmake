@@ -886,6 +886,26 @@ function(add_subproject NAME PREFIX)
 endfunction(add_subproject)
 
 # ------------------------------------------------------------------------------
+# EFI Build
+# ------------------------------------------------------------------------------
+
+function(add_efi_module)
+    cmake_parse_arguments(ARG "" "NAME" "SOURCES" ${ARGV})
+
+    message(STATUS "Adding EFI module: ${ARG_NAME}")
+
+    foreach(SOURCE ${ARG_SOURCES})
+        set(SOURCE_PATH ${SOURCE})
+        if (NOT IS_ABSOLUTE ${SOURCE})
+            get_filename_component(SOURCE_PATH ${CMAKE_CURRENT_LIST_DIR}/${SOURCE} ABSOLUTE)
+        endif()
+        file(APPEND ${EFI_SOURCES_CMAKE} "${SOURCE_PATH};")
+    endforeach()
+
+    file(APPEND ${EFI_MODULE_H} "EFI_MODULE(${ARG_NAME})\n")
+endfunction(add_efi_module)
+
+# ------------------------------------------------------------------------------
 # Extensions
 # ------------------------------------------------------------------------------
 
@@ -898,6 +918,11 @@ function(vmm_extension NAME)
         ${NAME} vmm
         ${ARGN}
     )
+
+    if(ENABLE_BUILD_EFI)
+        add_dependencies(efi_main_${VMM_PREFIX} ${NAME}_${VMM_PREFIX})
+    endif()
+
 endfunction(vmm_extension)
 
 function(userspace_extension NAME)
@@ -1214,6 +1239,7 @@ function(add_vmm_executable NAME)
         target_link_libraries(${NAME}_static ${LIBRARIES})
         install(TARGETS ${NAME}_static DESTINATION bin)
     endif()
+
 endfunction(add_vmm_executable)
 
 # ------------------------------------------------------------------------------

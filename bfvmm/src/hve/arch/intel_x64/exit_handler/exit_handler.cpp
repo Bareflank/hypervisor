@@ -465,7 +465,7 @@ exit_handler::write_guest_state()
     guest_ldtr_access_rights::set(
         ldtr_index != 0 ? guest_gdt.access_rights(ldtr_index) : ::x64::access_rights::unusable);
     guest_tr_access_rights::set(
-        tr_index != 0 ? guest_gdt.access_rights(tr_index) : ::x64::access_rights::unusable);
+        tr_index != 0 ? guest_gdt.access_rights(tr_index) : ::x64::access_rights::type::tss_busy | 0x80U);
 
     guest_es_base::set(es_index != 0 ? guest_gdt.base(es_index) : 0);
     guest_cs_base::set(cs_index != 0 ? guest_gdt.base(cs_index) : 0);

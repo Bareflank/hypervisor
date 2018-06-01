@@ -33,6 +33,18 @@ if(NOT BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
 endif()
 
 # ------------------------------------------------------------------------------
+# EFI build validation
+# ------------------------------------------------------------------------------
+
+if (ENABLE_BUILD_EFI AND NOT BUILD_STATIC_LIBS)
+    invalid_config("BUILD_STATIC_LIBS must be enabled to build EFI-bootable vmm (ENABLE_BUILD_EFI)")
+endif()
+
+if (ENABLE_BUILD_EFI AND NOT ENABLE_BUILD_VMM)
+    invalid_config("ENABLE_BUILD_VMM must be enabled to build EFI-bootable vmm (ENABLE_BUILD_EFI)")
+endif()
+
+# ------------------------------------------------------------------------------
 # Developer Features
 # ------------------------------------------------------------------------------
 

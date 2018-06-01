@@ -410,39 +410,6 @@ corrupted:
 }
 
 int64_t
-common_start_core(void)
-{
-    int64_t ret = -1;
-    int64_t cpuid = -1;
-    int64_t ignore_ret = -1;
-
-    cpuid = platform_get_current_cpu_num();
-    if (cpuid < 0) {
-        goto failure;
-    }
-
-    ret = private_call_vmm(BF_REQUEST_VMM_INIT, (uint64_t)cpuid, 0, 0);
-    if (ret != BF_SUCCESS) {
-        goto failure;
-    }
-
-    g_num_cpus_started++;
-
-    platform_start();
-
-    g_vmm_status = VMM_RUNNING;
-
-    return BF_SUCCESS;
-
-failure:
-
-    //ignore_ret = common_stop_vmm();
-    bfignored(ignore_ret);
-
-    return ret;
-}
-
-int64_t
 common_start_vmm(void)
 {
     int64_t ret = 0;
@@ -488,34 +455,6 @@ failure:
     ignore_ret = common_stop_vmm();
     bfignored(ignore_ret);
 
-    return ret;
-}
-
-int64_t
-common_stop_core(void)
-{
-    int64_t ret = 0;
-    int64_t cpuid = 0;
-
-    cpuid = platform_get_current_cpu_num();
-    if (cpuid < 0) {
-        goto corrupted;
-    }
-
-    ret = private_call_vmm(BF_REQUEST_VMM_FINI, (uint64_t)cpuid, 0, 0);
-    if (ret != BFELF_SUCCESS) {
-        goto corrupted;
-    }
-
-    g_num_cpus_started--;
-
-    platform_stop();
-
-    return BF_SUCCESS;
-
-corrupted:
-
-    g_vmm_status = VMM_CORRUPT;
     return ret;
 }
 

@@ -52,6 +52,16 @@ include_dependency(hippomocks)
 include_dependency(python)
 
 # ------------------------------------------------------------------------------
+# EFI Cleanup
+# ------------------------------------------------------------------------------
+
+if (ENABLE_BUILD_EFI)
+    file(MAKE_DIRECTORY ${EFI_OUTPUT_DIR})
+    file(REMOVE ${EFI_MODULE_H})
+    file(REMOVE ${EFI_SOURCES_CMAKE})
+endif()
+
+# ------------------------------------------------------------------------------
 # No Build Components
 # ------------------------------------------------------------------------------
 
@@ -147,10 +157,6 @@ if(ENABLE_BUILD_VMM)
     )
 endif()
 
-if (ENABLE_BUILD_EFI)
-    include_dependency(gnuefi)
-endif()
-
 # ------------------------------------------------------------------------------
 # Unit Tests
 # ------------------------------------------------------------------------------
@@ -225,6 +231,29 @@ if(ENABLE_BUILD_USERSPACE)
         DEPENDS gsl
         DEPENDS json
     )
+endif()
+
+# ------------------------------------------------------------------------------
+# EFI Components
+# ------------------------------------------------------------------------------
+
+if (ENABLE_BUILD_EFI)
+    include_dependency(gnuefi)
+
+    add_subproject(
+        efi_main vmm
+        DEPENDS gnuefi bfvmm_main
+        SOURCE_DIR ${SOURCE_BFDRIVER_DIR}/src/platform/efi
+        TOOLCHAIN ${EFI_TOOLCHAIN_PATH}
+    )
+
+    add_efi_module(
+        NAME base
+        SOURCES ${SOURCE_BFDRIVER_DIR}/src/platform/efi/efi_base/base.c
+        SOURCES ${SOURCE_BFDRIVER_DIR}/src/platform/efi/efi_base/platform.c
+        SOURCES ${SOURCE_BFDRIVER_DIR}/src/common.c
+    )
+
 endif()
 
 # ------------------------------------------------------------------------------
