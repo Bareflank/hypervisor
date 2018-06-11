@@ -16,28 +16,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <catch/catch.hpp>
-#include <hippomocks.h>
-
-#include "../../../hve/arch/intel_x64/vmx/vmx.h"
-#include "../../../hve/arch/intel_x64/vmcs/vmcs.h"
-#include "../../../hve/arch/intel_x64/check/check.h"
-#include "../../../hve/arch/intel_x64/exit_handler/exit_handler.h"
-
-#include "../../../hve/arch/x64/gdt.h"
-#include "../../../hve/arch/x64/idt.h"
-
 #include <intrinsics.h>
-#include <bfnewdelete.h>
 
-#include "../../../memory_manager/arch/x64/map_ptr.h"
-#include "../../../memory_manager/arch/x64/root_page_table.h"
-#include "../../../memory_manager/memory_manager.h"
-
-bfvmm::intel_x64::save_state_t g_save_state{};
+#ifdef BF_X64
 
 std::map<uint32_t, uint64_t> g_msrs;
-std::map<uint64_t, uint64_t> g_vmcs_fields;
 std::map<uint32_t, uint32_t> g_eax_cpuid;
 std::map<uint32_t, uint32_t> g_ebx_cpuid;
 std::map<uint32_t, uint32_t> g_ecx_cpuid;
@@ -45,12 +28,6 @@ std::map<uint32_t, uint32_t> g_edx_cpuid;
 std::map<x64::portio::port_addr_type, x64::portio::port_32bit_type> g_ports;
 
 x64::rflags::value_type g_rflags = 0;
-intel_x64::cr0::value_type g_cr0 = 0;
-intel_x64::cr2::value_type g_cr2 = 0;
-intel_x64::cr3::value_type g_cr3 = 0;
-intel_x64::cr4::value_type g_cr4 = 0;
-intel_x64::cr8::value_type g_cr8 = 0;
-intel_x64::dr7::value_type g_dr7 = 0;
 
 uint16_t g_es;
 uint16_t g_cs;
@@ -64,49 +41,6 @@ uint16_t g_tr;
 ::x64::gdt_reg::reg_t g_gdtr{};
 ::x64::idt_reg::reg_t g_idtr{};
 
-std::vector<bfvmm::x64::gdt::segment_descriptor_type> g_gdt = {
-    0x0,
-    0xFF7FFFFFFFFFFFFF,
-    0xFF7FFFFFFFFFFFFF,
-    0xFF7FFFFFFFFFFFFF,
-    0xFF7FFFFFFFFFFFFF,
-    0xFFFFFFFFFFFFFFFF,
-    0xFFFF8FFFFFFFFFFF,
-    0x00000000FFFFFFFF,
-};
-
-std::vector<bfvmm::x64::idt::interrupt_descriptor_type> g_idt = {
-    0xFFFFFFFFFFFFFFFF,
-    0xFFFFFFFFFFFFFFFF,
-    0xFFFFFFFFFFFFFFFF,
-    0xFFFFFFFFFFFFFFFF
-};
-
-alignas(0x1000) static char g_map[100];
-
-bool g_virt_to_phys_fails = false;
-bool g_phys_to_virt_fails = false;
-bool g_vmload_fails = false;
-bool g_vmlaunch_fails = false;
-bool g_vmxon_fails = false;
-bool g_vmxoff_fails = false;
-bool g_write_cr4_fails = false;
-
-uint64_t g_test_addr = 0U;
-uint64_t g_virt_apic_addr = 0U;
-uint64_t g_virt_apic_mem[64] = {0U};
-uint64_t g_vmcs_link_addr = 1U;
-uint64_t g_vmcs_link_mem[1] = {0U};
-uint64_t g_pdpt_addr = 2U;
-uint64_t g_pdpt_mem[4] = {0U};
-
-std::map<uint64_t, void *> g_mock_mem {
-    {
-        {g_virt_apic_addr, static_cast<void *>(&g_virt_apic_mem)},
-        {g_vmcs_link_addr, static_cast<void *>(&g_vmcs_link_mem)},
-        {g_pdpt_addr, static_cast<void *>(&g_pdpt_mem)}
-    }};
-
 extern "C" uint64_t
 _read_msr(uint32_t addr) noexcept
 { return g_msrs[addr]; }
@@ -114,60 +48,6 @@ _read_msr(uint32_t addr) noexcept
 extern "C" void
 _write_msr(uint32_t addr, uint64_t val) noexcept
 { g_msrs[addr] = val; }
-
-extern "C" uint64_t
-_read_cr0(void) noexcept
-{ return g_cr0; }
-
-extern "C" uint64_t
-_read_cr2(void) noexcept
-{ return g_cr2; }
-
-extern "C" uint64_t
-_read_cr3(void) noexcept
-{ return g_cr3; }
-
-extern "C" uint64_t
-_read_cr4(void) noexcept
-{ return g_cr4; }
-
-extern "C" uint64_t
-_read_cr8(void) noexcept
-{ return g_cr8; }
-
-extern "C" void
-_write_cr0(uint64_t val) noexcept
-{ g_cr0 = val; }
-
-extern "C" void
-_write_cr2(uint64_t val) noexcept
-{ g_cr2 = val; }
-
-extern "C" void
-_write_cr3(uint64_t val) noexcept
-{ g_cr3 = val; }
-
-extern "C" void
-_write_cr4(uint64_t val) noexcept
-{
-    if (g_write_cr4_fails) {
-        return;
-    }
-
-    g_cr4 = val;
-}
-
-extern "C" void
-_write_cr8(uint64_t val) noexcept
-{ g_cr8 = val; }
-
-extern "C" uint64_t
-_read_dr7() noexcept
-{ return g_dr7; }
-
-extern "C" void
-_write_dr7(uint64_t val) noexcept
-{ g_dr7 = val; }
 
 extern "C" uint64_t
 _read_rflags(void) noexcept
@@ -314,6 +194,85 @@ extern "C" uint32_t
 _cpuid_edx(uint32_t val) noexcept
 { return g_edx_cpuid[val]; }
 
+void
+setup_registers_x64()
+{
+    g_rflags = 0x0;
+}
+
+#endif
+
+#ifdef BF_INTEL_X64
+
+intel_x64::cr0::value_type g_cr0 = 0;
+intel_x64::cr2::value_type g_cr2 = 0;
+intel_x64::cr3::value_type g_cr3 = 0;
+intel_x64::cr4::value_type g_cr4 = 0;
+intel_x64::cr8::value_type g_cr8 = 0;
+intel_x64::dr7::value_type g_dr7 = 0;
+
+bool g_vmload_fails = false;
+bool g_vmlaunch_fails = false;
+bool g_vmxon_fails = false;
+bool g_vmxoff_fails = false;
+bool g_write_cr4_fails = false;
+
+std::map<uint64_t, uint64_t> g_vmcs_fields;
+
+extern "C" uint64_t
+_read_cr0(void) noexcept
+{ return g_cr0; }
+
+extern "C" uint64_t
+_read_cr2(void) noexcept
+{ return g_cr2; }
+
+extern "C" uint64_t
+_read_cr3(void) noexcept
+{ return g_cr3; }
+
+extern "C" uint64_t
+_read_cr4(void) noexcept
+{ return g_cr4; }
+
+extern "C" uint64_t
+_read_cr8(void) noexcept
+{ return g_cr8; }
+
+extern "C" void
+_write_cr0(uint64_t val) noexcept
+{ g_cr0 = val; }
+
+extern "C" void
+_write_cr2(uint64_t val) noexcept
+{ g_cr2 = val; }
+
+extern "C" void
+_write_cr3(uint64_t val) noexcept
+{ g_cr3 = val; }
+
+extern "C" void
+_write_cr4(uint64_t val) noexcept
+{
+    if (g_write_cr4_fails) {
+        return;
+    }
+
+    g_cr4 = val;
+}
+
+extern "C" void
+_write_cr8(uint64_t val) noexcept
+{ g_cr8 = val; }
+
+extern "C" uint64_t
+_read_dr7() noexcept
+{ return g_dr7; }
+
+extern "C" void
+_write_dr7(uint64_t val) noexcept
+{ g_dr7 = val; }
+
 extern "C" bool
 _vmread(uint64_t field, uint64_t *value) noexcept
 {
@@ -344,59 +303,19 @@ extern "C" bool
 _vmxoff() noexcept
 { return !g_vmxoff_fails; }
 
-extern "C" uint64_t
-thread_context_cpuid(void)
-{ return 0; }
-
-extern "C" uint64_t
-thread_context_tlsptr(void)
-{ return 0; }
-
-uintptr_t
-virtptr_to_physint(void *ptr)
+void
+setup_registers_intel_x64()
 {
-    bfignored(ptr);
-
-    if (g_virt_to_phys_fails) {
-        throw gsl::fail_fast("");
-    }
-
-    return 0x0000000ABCDEF0000;
+    g_cr0 = 0;
+    g_cr2 = 0;
+    g_cr3 = 0;
+    g_cr4 = 0;
+    g_cr8 = 0;
+    g_dr7 = 0;
 }
-
-void *
-physint_to_virtptr(uintptr_t ptr)
-{
-    bfignored(ptr);
-
-    if (g_phys_to_virt_fails) {
-        return nullptr;
-    }
-
-    return static_cast<void *>(g_mock_mem[g_test_addr]);
-}
-
-extern "C" uint64_t
-unsafe_write_cstr(const char *cstr, size_t len)
-{ bfignored(cstr); bfignored(len); return 0; }
-
-extern "C" void vmcs_launch(
-    bfvmm::intel_x64::save_state_t *save_state) noexcept
-{ bfignored(save_state); }
-
-extern "C" void vmcs_promote(
-    bfvmm::intel_x64::save_state_t *save_state, const void *gdt) noexcept
-{ bfignored(save_state); bfignored(gdt); }
-
-extern "C" void vmcs_resume(
-    bfvmm::intel_x64::save_state_t *save_state) noexcept
-{ bfignored(save_state); }
-
-extern "C" void exit_handler_entry(void)
-{ }
 
 void
-setup_msrs()
+setup_msrs_intel_x64()
 {
     g_msrs[intel_x64::msrs::ia32_vmx_basic::addr] = (1ULL << 55) | (6ULL << 50);
 
@@ -416,68 +335,9 @@ setup_msrs()
 }
 
 void
-setup_cpuid()
+setup_cpuid_intel_x64()
 {
     g_ecx_cpuid[intel_x64::cpuid::feature_information::addr] = intel_x64::cpuid::feature_information::ecx::vmx::mask;
-}
-
-void
-setup_registers()
-{
-    g_cr0 = 0x0;
-    g_cr3 = 0x0;
-    g_cr4 = 0x0;
-    g_rflags = 0x0;
-}
-
-void
-setup_gdt()
-{
-    auto limit = g_gdt.size() * sizeof(bfvmm::x64::gdt::segment_descriptor_type) - 1;
-
-    g_gdtr.base = reinterpret_cast<uint64_t>(&g_gdt.at(0));
-    g_gdtr.limit = gsl::narrow_cast<uint16_t>(limit);
-}
-
-void
-setup_idt()
-{
-    auto limit = g_idt.size() * sizeof(bfvmm::x64::idt::interrupt_descriptor_type) - 1;
-
-    g_idtr.base = reinterpret_cast<uint64_t>(&g_idt.at(0));
-    g_idtr.limit = gsl::narrow_cast<uint16_t>(limit);
-}
-
-#ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
-
-auto
-setup_mm(MockRepository &mocks)
-{
-    auto mm = mocks.Mock<bfvmm::memory_manager>();
-    mocks.OnCallFunc(bfvmm::memory_manager::instance).Return(mm);
-
-    mocks.OnCall(mm, bfvmm::memory_manager::alloc_map).Return(static_cast<char *>(g_map));
-    mocks.OnCall(mm, bfvmm::memory_manager::free_map);
-    mocks.OnCall(mm, bfvmm::memory_manager::virtptr_to_physint).Do(virtptr_to_physint);
-    mocks.OnCall(mm, bfvmm::memory_manager::physint_to_virtptr).Do(physint_to_virtptr);
-
-    mocks.OnCallFunc(bfvmm::x64::map_with_cr3);
-    mocks.OnCallFunc(bfvmm::x64::virt_to_phys_with_cr3).Return(0x42);
-
-    return mm;
-}
-
-auto
-setup_pt(MockRepository &mocks)
-{
-    auto pt = mocks.Mock<bfvmm::x64::root_page_table>();
-    mocks.OnCallFunc(bfvmm::x64::root_pt).Return(pt);
-
-    mocks.OnCall(pt, bfvmm::x64::root_page_table::map_4k);
-    mocks.OnCall(pt, bfvmm::x64::root_page_table::unmap);
-    mocks.OnCall(pt, bfvmm::x64::root_page_table::cr3).Return(0x000000ABCDEF0000);
-
-    return pt;
 }
 
 #endif

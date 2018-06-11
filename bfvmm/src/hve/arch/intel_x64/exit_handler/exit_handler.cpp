@@ -26,8 +26,8 @@
 #include <hve/arch/intel_x64/check/check.h>
 #include <hve/arch/intel_x64/exit_handler/exit_handler.h>
 
+#include <memory_manager/arch/x64/cr3.h>
 #include <memory_manager/memory_manager.h>
-#include <memory_manager/arch/x64/root_page_table.h>
 
 // -----------------------------------------------------------------------------
 // C Prototypes
@@ -265,6 +265,42 @@ handle_wrmsr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 
 namespace bfvmm
 {
+
+namespace x64
+{
+
+// TODO
+//
+// Find a way to get rid of the bfignored(g_mm) call. This is there to
+// ensure that the memory manager is constructed before the mmap, otherwise
+// you end up with errors during deconstruction.
+//
+gsl::not_null<cr3::mmap *>
+mmap()
+{
+    bfignored(g_mm);
+    static std::unique_ptr<bfvmm::x64::cr3::mmap> g_mmap;
+
+    if (g_mmap) {
+        return g_mmap.get();
+    }
+
+    g_mmap = std::make_unique<cr3::mmap>();
+
+    for (const auto &md : g_mm->descriptors()) {
+        if (md.type == (MEMORY_TYPE_R | MEMORY_TYPE_E)) {
+            g_mmap->map_4k(md.virt, md.phys, cr3::mmap::attr_type::read_execute);
+            continue;
+        }
+
+        g_mmap->map_4k(md.virt, md.phys, cr3::mmap::attr_type::read_write);
+    }
+
+    return g_mmap.get();
+}
+
+}
+
 namespace intel_x64
 {
 
@@ -287,44 +323,46 @@ exit_handler::exit_handler(
     m_host_gdt.set(4, nullptr, 0xFFFFFFFF, ::x64::access_rights::ring0_gs_descriptor);
     m_host_gdt.set(5, &m_host_tss, sizeof(m_host_tss), ::x64::access_rights::ring0_tr_descriptor);
 
-    s_ia32_pat_msr |= ::x64::pat::pat_value;
+    if (vcpuid::is_bootstrap_vcpu(id)) {
 
-    s_ia32_efer_msr |= ::intel_x64::msrs::ia32_efer::lme::mask;
-    s_ia32_efer_msr |= ::intel_x64::msrs::ia32_efer::lma::mask;
-    s_ia32_efer_msr |= ::intel_x64::msrs::ia32_efer::nxe::mask;
+        s_ia32_efer_msr |= ::intel_x64::msrs::ia32_efer::lme::mask;
+        s_ia32_efer_msr |= ::intel_x64::msrs::ia32_efer::lma::mask;
+        s_ia32_efer_msr |= ::intel_x64::msrs::ia32_efer::nxe::mask;
 
-    s_cr0 |= ::intel_x64::cr0::protection_enable::mask;
-    s_cr0 |= ::intel_x64::cr0::monitor_coprocessor::mask;
-    s_cr0 |= ::intel_x64::cr0::extension_type::mask;
-    s_cr0 |= ::intel_x64::cr0::numeric_error::mask;
-    s_cr0 |= ::intel_x64::cr0::write_protect::mask;
-    s_cr0 |= ::intel_x64::cr0::paging::mask;
+        s_cr0 |= ::intel_x64::cr0::protection_enable::mask;
+        s_cr0 |= ::intel_x64::cr0::monitor_coprocessor::mask;
+        s_cr0 |= ::intel_x64::cr0::extension_type::mask;
+        s_cr0 |= ::intel_x64::cr0::numeric_error::mask;
+        s_cr0 |= ::intel_x64::cr0::write_protect::mask;
+        s_cr0 |= ::intel_x64::cr0::paging::mask;
 
-    s_cr3 = g_pt->cr3();
+        s_cr3 = x64::mmap()->cr3();
+        s_ia32_pat_msr = x64::mmap()->pat();
 
-    s_cr4 |= ::intel_x64::cr4::v8086_mode_extensions::mask;
-    s_cr4 |= ::intel_x64::cr4::protected_mode_virtual_interrupts::mask;
-    s_cr4 |= ::intel_x64::cr4::time_stamp_disable::mask;
-    s_cr4 |= ::intel_x64::cr4::debugging_extensions::mask;
-    s_cr4 |= ::intel_x64::cr4::page_size_extensions::mask;
-    s_cr4 |= ::intel_x64::cr4::physical_address_extensions::mask;
-    s_cr4 |= ::intel_x64::cr4::machine_check_enable::mask;
-    s_cr4 |= ::intel_x64::cr4::page_global_enable::mask;
-    s_cr4 |= ::intel_x64::cr4::performance_monitor_counter_enable::mask;
-    s_cr4 |= ::intel_x64::cr4::osfxsr::mask;
-    s_cr4 |= ::intel_x64::cr4::osxmmexcpt::mask;
-    s_cr4 |= ::intel_x64::cr4::vmx_enable_bit::mask;
+        s_cr4 |= ::intel_x64::cr4::v8086_mode_extensions::mask;
+        s_cr4 |= ::intel_x64::cr4::protected_mode_virtual_interrupts::mask;
+        s_cr4 |= ::intel_x64::cr4::time_stamp_disable::mask;
+        s_cr4 |= ::intel_x64::cr4::debugging_extensions::mask;
+        s_cr4 |= ::intel_x64::cr4::page_size_extensions::mask;
+        s_cr4 |= ::intel_x64::cr4::physical_address_extensions::mask;
+        s_cr4 |= ::intel_x64::cr4::machine_check_enable::mask;
+        s_cr4 |= ::intel_x64::cr4::page_global_enable::mask;
+        s_cr4 |= ::intel_x64::cr4::performance_monitor_counter_enable::mask;
+        s_cr4 |= ::intel_x64::cr4::osfxsr::mask;
+        s_cr4 |= ::intel_x64::cr4::osxmmexcpt::mask;
+        s_cr4 |= ::intel_x64::cr4::vmx_enable_bit::mask;
 
-    if (::intel_x64::cpuid::feature_information::ecx::xsave::is_enabled()) {
-        s_cr4 |= ::intel_x64::cr4::osxsave::mask;
-    }
+        if (::intel_x64::cpuid::feature_information::ecx::xsave::is_enabled()) {
+            s_cr4 |= ::intel_x64::cr4::osxsave::mask;
+        }
 
-    if (::intel_x64::cpuid::extended_feature_flags::subleaf0::ebx::smep::is_enabled()) {
-        s_cr4 |= ::intel_x64::cr4::smep_enable_bit::mask;
-    }
+        if (::intel_x64::cpuid::extended_feature_flags::subleaf0::ebx::smep::is_enabled()) {
+            s_cr4 |= ::intel_x64::cr4::smep_enable_bit::mask;
+        }
 
-    if (::intel_x64::cpuid::extended_feature_flags::subleaf0::ebx::smap::is_enabled()) {
-        s_cr4 |= ::intel_x64::cr4::smap_enable_bit::mask;
+        if (::intel_x64::cpuid::extended_feature_flags::subleaf0::ebx::smap::is_enabled()) {
+            s_cr4 |= ::intel_x64::cr4::smap_enable_bit::mask;
+        }
     }
 
     this->write_host_state();

@@ -16,7 +16,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <support/arch/intel_x64/test_support.h>
+#include <catch/catch.hpp>
+#include <hippomocks.h>
+
+#include <test/support.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
@@ -27,9 +30,7 @@ handle_test(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 auto
 setup_vmcs(MockRepository &mocks, ::intel_x64::vmcs::value_type reason)
 {
-    setup_msrs();
-    setup_mm(mocks);
-    setup_pt(mocks);
+    setup_test_support();
 
     auto vmcs = mocks.Mock<bfvmm::intel_x64::vmcs>();
 
@@ -71,6 +72,9 @@ TEST_CASE("exit_handler: construct / destruct")
 {
     MockRepository mocks;
     auto &&vmcs = setup_vmcs(mocks, 0x0);
+
+    g_mm->add_md(0x1000, 0x1000, MEMORY_TYPE_R | MEMORY_TYPE_E);
+    g_mm->add_md(0x2000, 0x2000, MEMORY_TYPE_R | MEMORY_TYPE_W);
 
     CHECK_NOTHROW(bfvmm::intel_x64::exit_handler{vmcs});
 }

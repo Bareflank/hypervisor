@@ -2694,27 +2694,27 @@ setup_check_guest_hlt_valid_interrupts_paths(std::vector<struct control_flow_pat
 
     g_path.setup = [&] {
         interruption_type::set(interruption_type::hardware_exception);
-        vector::set(x64::interrupt::debug_exception);
+        vector::set(x64::exception::debug_exception);
     };
     g_path.throws_exception = false;
     cfg.push_back(g_path);
 
-    g_path.setup = [&] { vector::set(x64::interrupt::machine_check); };
+    g_path.setup = [&] { vector::set(x64::exception::machine_check); };
     g_path.throws_exception = false;
     cfg.push_back(g_path);
 
-    g_path.setup = [&] { vector::set(x64::interrupt::double_fault); };
+    g_path.setup = [&] { vector::set(x64::exception::double_fault); };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
     g_path.setup = [&] {
         interruption_type::set(interruption_type::other_event);
-        vector::set(x64::interrupt::divide_error);
+        vector::set(x64::exception::divide_error);
     };
     g_path.throws_exception = false;
     cfg.push_back(g_path);
 
-    g_path.setup = [&] { vector::set(x64::interrupt::double_fault); };
+    g_path.setup = [&] { vector::set(x64::exception::double_fault); };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
@@ -2748,12 +2748,12 @@ setup_check_guest_shutdown_valid_interrupts_paths(std::vector<struct control_flo
 
     g_path.setup = [&] {
         interruption_type::set(interruption_type::hardware_exception);
-        vector::set(x64::interrupt::machine_check);
+        vector::set(x64::exception::machine_check);
     };
     g_path.throws_exception = false;
     cfg.push_back(g_path);
 
-    g_path.setup = [&] { vector::set(x64::interrupt::double_fault); };
+    g_path.setup = [&] { vector::set(x64::exception::double_fault); };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
@@ -3258,28 +3258,28 @@ setup_check_guest_valid_pdpte_with_ept_disabled_paths(std::vector<struct control
         g_phys_to_virt_fails = false;
         g_test_addr = g_pdpt_addr;
         g_eax_cpuid[x64::cpuid::addr_size::addr] = 48U;
-        g_pdpt_mem[0] = x64::pdpte::reserved::mask();
+        g_pdpt_mem[0] = ::x64::pdpt::entry::reserved::mask();
     };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
     g_path.setup = [&] {
         g_pdpt_mem[0] = 0x0U;
-        g_pdpt_mem[1] = x64::pdpte::reserved::mask();
+        g_pdpt_mem[1] = ::x64::pdpt::entry::reserved::mask();
     };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
     g_path.setup = [&] {
         g_pdpt_mem[1] = 0x0U;
-        g_pdpt_mem[2] = x64::pdpte::reserved::mask();
+        g_pdpt_mem[2] = ::x64::pdpt::entry::reserved::mask();
     };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
     g_path.setup = [&] {
         g_pdpt_mem[2] = 0x0U;
-        g_pdpt_mem[3] = x64::pdpte::reserved::mask();
+        g_pdpt_mem[3] = ::x64::pdpt::entry::reserved::mask();
     };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
@@ -3333,28 +3333,28 @@ setup_check_guest_valid_pdpte_with_ept_enabled_paths(std::vector<struct control_
         proc_ctl_allow1(intel_x64::msrs::ia32_vmx_true_procbased_ctls::activate_secondary_controls::mask);
         proc_ctl2_allow1(intel_x64::msrs::ia32_vmx_procbased_ctls2::enable_ept::mask);
         secondary_processor_based_vm_execution_controls::enable_ept::enable();
-        guest_pdpte0::set(x64::pdpte::reserved::mask());
+        guest_pdpte0::set(::x64::pdpt::entry::reserved::mask());
     };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
     g_path.setup = [&] {
         guest_pdpte0::reserved::set(0U);
-        guest_pdpte1::set(x64::pdpte::reserved::mask());
+        guest_pdpte1::set(::x64::pdpt::entry::reserved::mask());
     };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
     g_path.setup = [&] {
         guest_pdpte1::reserved::set(0U);
-        guest_pdpte2::reserved::set(x64::pdpte::reserved::mask());
+        guest_pdpte2::reserved::set(::x64::pdpt::entry::reserved::mask());
     };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
     g_path.setup = [&] {
         guest_pdpte2::reserved::set(0U);
-        guest_pdpte3::reserved::set(x64::pdpte::reserved::mask());
+        guest_pdpte3::reserved::set(::x64::pdpt::entry::reserved::mask());
     };
     g_path.throws_exception = true;
     cfg.push_back(g_path);

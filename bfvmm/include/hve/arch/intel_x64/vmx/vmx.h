@@ -97,7 +97,7 @@ private:
 
 private:
 
-    std::unique_ptr<uint32_t[]> m_vmx_region;
+    std::unique_ptr<uint32_t, void(*)(void *)> m_vmx_region;
     uintptr_t m_vmx_region_phys;
 
 public:
