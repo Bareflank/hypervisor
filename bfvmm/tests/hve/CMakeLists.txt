@@ -68,5 +68,3 @@ do_test(test_vmx
     SOURCES arch/intel_x64/vmx/test_vmx.cpp
     ${ARGN}
 )
-
-install(DIRECTORY ../../include/support/ DESTINATION include/bfvmm/support)

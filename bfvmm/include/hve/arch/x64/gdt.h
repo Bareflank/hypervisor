@@ -16,8 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef GDT_X64_H
-#define GDT_X64_H
+#ifndef BFVMM_GDT_X64_H
+#define BFVMM_GDT_X64_H
 
 #include <vector>
 #include <algorithm>

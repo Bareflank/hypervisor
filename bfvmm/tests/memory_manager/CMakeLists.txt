@@ -18,12 +18,26 @@
 
 do_test(test_buddy_allocator
     SOURCES test_buddy_allocator.cpp
+    DEPENDS bfvmm_memory_manager
     DEFINES STATIC_MEMORY_MANAGER
 )
 
 if(NOT WIN32)
     do_test(test_object_allocator
         SOURCES test_object_allocator.cpp
+        DEPENDS bfvmm_memory_manager
         DEFINES STATIC_MEMORY_MANAGER
     )
+endif()
+
+if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
+    do_test(test_mmap
+        SOURCES arch/x64/cr3/test_mmap.cpp
+        DEPENDS bfvmm_memory_manager
+        DEFINES STATIC_MEMORY_MANAGER
+    )
+elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
+    message(WARNING "Unimplemented")
+else()
+    message(FATAL_ERROR "Unsupported archiecture")
 endif()

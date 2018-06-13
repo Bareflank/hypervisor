@@ -16,33 +16,19 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <catch/catch.hpp>
+#ifndef CR3_H
+#define CR3_H
 
-#include <bfgsl.h>
-#include <bfnewdelete.h>
+#include "cr3/mmap.h"
 
-#ifndef _WIN32
-
-TEST_CASE("bad alloc")
+namespace bfvmm
 {
-    g_new_throws_bad_alloc = 42;
-    auto ___ = gsl::finally([] {
-        g_new_throws_bad_alloc = 0;
-    });
+namespace x64
+{
 
-    CHECK_THROWS(std::make_unique<char[]>(42));
-    CHECK_THROWS(std::make_unique<char[]>(0xFFFFFFFFFFFFFFFF));
+gsl::not_null<cr3::mmap *> mmap();
+
 }
-
-TEST_CASE("non-array new/delete")
-{
-    std::make_unique<char>();
-}
-
-TEST_CASE("array new/delete")
-{
-    std::make_unique<char[]>(42);
-    std::make_unique<char[]>(0x1000);
 }
 
 #endif

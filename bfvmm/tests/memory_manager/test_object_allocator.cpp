@@ -17,40 +17,15 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <catch/catch.hpp>
-#include <hippomocks.h>
 
-#include <set>
 #include <list>
 #include <queue>
 #include <memory>
 
-#include <bfgsl.h>
+#include <test/support.h>
 #include <memory_manager/object_allocator.h>
 
-#ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
-
 constexpr const auto blocks_per_page = 512;
-std::set<void *> g_allocated_memory;
-
-bool g_out_of_memory = false;
-
-extern "C" void *malloc_page()
-{
-    if (g_out_of_memory) {
-        return nullptr;
-    }
-
-    auto ptr = malloc(BAREFLANK_PAGE_SIZE);
-    g_allocated_memory.insert(ptr);
-
-    return ptr;
-}
-
-extern "C" void free_page(void *ptr)
-{
-    free(ptr);
-    g_allocated_memory.erase(ptr);
-}
 
 TEST_CASE("basic allocator of 0 size")
 {
@@ -69,7 +44,7 @@ TEST_CASE("construction: limited")
         CHECK(pool.num_used() == 0);
     }
 
-    CHECK(g_allocated_memory.empty());
+    CHECK(g_allocated_pages.empty());
 }
 
 TEST_CASE("construction: limited out of memory")
@@ -99,7 +74,7 @@ TEST_CASE("construction: unlimited")
         CHECK(pool.num_used() == 0);
     }
 
-    CHECK(g_allocated_memory.empty());
+    CHECK(g_allocated_pages.empty());
 }
 
 TEST_CASE("allocate: single allocation")
@@ -119,7 +94,7 @@ TEST_CASE("allocate: single allocation")
         pool.deallocate(ptr, 1);
     }
 
-    CHECK(g_allocated_memory.empty());
+    CHECK(g_allocated_pages.empty());
 }
 
 TEST_CASE("allocate: single allocation without free")
@@ -136,13 +111,14 @@ TEST_CASE("allocate: single allocation without free")
         CHECK(pool.num_used() == 1);
     }
 
-    CHECK(!g_allocated_memory.empty());
+    CHECK(!g_allocated_pages.empty());
 
-    for (const auto &ptr : g_allocated_memory) {
-        free(ptr);
+    auto pages = g_allocated_pages;
+    for (const auto &ptr : pages) {
+        free_page(ptr);
     }
 
-    g_allocated_memory.clear();
+    g_allocated_pages.clear();
 }
 
 TEST_CASE("allocate: single allocation n != 1")
@@ -162,7 +138,7 @@ TEST_CASE("allocate: single allocation n != 1")
         pool.deallocate(ptr, 10);
     }
 
-    CHECK(g_allocated_memory.empty());
+    CHECK(g_allocated_pages.empty());
 }
 
 TEST_CASE("allocate: multiple allocations")
@@ -181,13 +157,14 @@ TEST_CASE("allocate: multiple allocations")
         CHECK(pool.num_used() == blocks_per_page * 4);
     }
 
-    CHECK(!g_allocated_memory.empty());
+    CHECK(!g_allocated_pages.empty());
 
-    for (const auto &ptr : g_allocated_memory) {
-        free(ptr);
+    auto pages = g_allocated_pages;
+    for (const auto &ptr : pages) {
+        free_page(ptr);
     }
 
-    g_allocated_memory.clear();
+    g_allocated_pages.clear();
 }
 
 TEST_CASE("allocate: multiple allocations with odd sized T")
@@ -220,13 +197,14 @@ TEST_CASE("allocate: multiple allocations with odd sized T")
         CHECK(pool.num_used() == (0x1000U / sizeof(test)) + 1);
     }
 
-    CHECK(!g_allocated_memory.empty());
+    CHECK(!g_allocated_pages.empty());
 
-    for (const auto &ptr : g_allocated_memory) {
-        free(ptr);
+    auto pages = g_allocated_pages;
+    for (const auto &ptr : pages) {
+        free_page(ptr);
     }
 
-    g_allocated_memory.clear();
+    g_allocated_pages.clear();
 }
 
 TEST_CASE("allocate: over limit")
@@ -247,13 +225,14 @@ TEST_CASE("allocate: over limit")
         CHECK_THROWS(pool.allocate(1));
     }
 
-    CHECK(!g_allocated_memory.empty());
+    CHECK(!g_allocated_pages.empty());
 
-    for (const auto &ptr : g_allocated_memory) {
-        free(ptr);
+    auto pages = g_allocated_pages;
+    for (const auto &ptr : pages) {
+        free_page(ptr);
     }
 
-    g_allocated_memory.clear();
+    g_allocated_pages.clear();
 }
 
 TEST_CASE("deallocate: deallocate without allocate")
@@ -265,7 +244,7 @@ TEST_CASE("deallocate: deallocate without allocate")
         CHECK_NOTHROW(pool.deallocate(&nothing, 1));
     }
 
-    CHECK(g_allocated_memory.empty());
+    CHECK(g_allocated_pages.empty());
 }
 
 TEST_CASE("deallocate: deallocate single allocation")
@@ -290,7 +269,7 @@ TEST_CASE("deallocate: deallocate single allocation")
         CHECK(pool.num_used() == 0);
     }
 
-    CHECK(g_allocated_memory.empty());
+    CHECK(g_allocated_pages.empty());
 }
 
 TEST_CASE("deallocate: deallocate multiple allocations")
@@ -320,7 +299,7 @@ TEST_CASE("deallocate: deallocate multiple allocations")
         CHECK(pool.num_used() == 0);
     }
 
-    CHECK(g_allocated_memory.empty());
+    CHECK(g_allocated_pages.empty());
 }
 
 TEST_CASE("max_size: can allocate max_size")
@@ -337,13 +316,14 @@ TEST_CASE("max_size: can allocate max_size")
         CHECK(pool.num_used() == 1);
     }
 
-    CHECK(!g_allocated_memory.empty());
+    CHECK(!g_allocated_pages.empty());
 
-    for (const auto &ptr : g_allocated_memory) {
-        free(ptr);
+    auto pages = g_allocated_pages;
+    for (const auto &ptr : pages) {
+        free_page(ptr);
     }
 
-    g_allocated_memory.clear();
+    g_allocated_pages.clear();
 }
 
 TEST_CASE("max_size: can allocate max_size more than once")
@@ -362,13 +342,14 @@ TEST_CASE("max_size: can allocate max_size more than once")
         CHECK(pool.num_used() == 3);
     }
 
-    CHECK(!g_allocated_memory.empty());
+    CHECK(!g_allocated_pages.empty());
 
-    for (const auto &ptr : g_allocated_memory) {
-        free(ptr);
+    auto pages = g_allocated_pages;
+    for (const auto &ptr : pages) {
+        free_page(ptr);
     }
 
-    g_allocated_memory.clear();
+    g_allocated_pages.clear();
 }
 
 TEST_CASE("operators: unlimited are not equal")
@@ -381,7 +362,7 @@ TEST_CASE("operators: unlimited are not equal")
         CHECK(!(pool1 == pool2));
     }
 
-    CHECK(g_allocated_memory.empty());
+    CHECK(g_allocated_pages.empty());
 }
 
 TEST_CASE("operators: limited are not equal")
@@ -394,7 +375,7 @@ TEST_CASE("operators: limited are not equal")
         CHECK(!(pool1 == pool2));
     }
 
-    CHECK(g_allocated_memory.empty());
+    CHECK(g_allocated_pages.empty());
 }
 
 TEST_CASE("operators: move unlimited")
@@ -412,7 +393,7 @@ TEST_CASE("operators: move unlimited")
         CHECK(pool1.num_used() == 0);
     }
 
-    CHECK(g_allocated_memory.empty());
+    CHECK(g_allocated_pages.empty());
 }
 
 TEST_CASE("operators: move unlimited with allocations")
@@ -431,13 +412,14 @@ TEST_CASE("operators: move unlimited with allocations")
         CHECK(pool1.num_used() == 0);
     }
 
-    CHECK(!g_allocated_memory.empty());
+    CHECK(!g_allocated_pages.empty());
 
-    for (const auto &ptr : g_allocated_memory) {
-        free(ptr);
+    auto pages = g_allocated_pages;
+    for (const auto &ptr : pages) {
+        free_page(ptr);
     }
 
-    g_allocated_memory.clear();
+    g_allocated_pages.clear();
 }
 
 TEST_CASE("operators: move limited")
@@ -455,7 +437,7 @@ TEST_CASE("operators: move limited")
         CHECK(pool1.num_used() == 0);
     }
 
-    CHECK(g_allocated_memory.empty());
+    CHECK(g_allocated_pages.empty());
 }
 
 TEST_CASE("allocate: contains")
@@ -482,7 +464,7 @@ TEST_CASE("allocate: contains")
         pool.deallocate(ptr4, 1);
     }
 
-    CHECK(g_allocated_memory.empty());
+    CHECK(g_allocated_pages.empty());
 }
 
 // -----------------------------------------------------------------------------
@@ -597,5 +579,3 @@ TEST_CASE("limited queue")
         CHECK_THROWS(d.push(42));
     }
 }
-
-#endif

@@ -16,44 +16,34 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <catch/catch.hpp>
-#include <hippomocks.h>
+#ifndef TEST_SUPPORT_H
+#define TEST_SUPPORT_H
 
-#include <test/support.h>
+#include <set>
+#include <map>
+#include <vector>
 
-TEST_CASE("idt_constructor_no_size")
+#include <bfarch.h>
+
+#include "intrinsics.h"
+
+#include "hve.h"
+#include "memory_manager.h"
+#include "misc.h"
+
+void setup_test_support()
 {
-    setup_test_support();
-    bfvmm::x64::idt idt;
+#ifdef BF_X64
+    setup_registers_x64();
+    setup_gdt_x64();
+    setup_idt_x64();
+#endif
+
+#ifdef BF_INTEL_X64
+    setup_registers_intel_x64();
+    setup_msrs_intel_x64();
+    setup_cpuid_intel_x64();
+#endif
 }
 
-TEST_CASE("idt_constructor_zero_size")
-{
-    setup_test_support();
-    CHECK_NOTHROW(bfvmm::x64::idt{0});
-}
-
-TEST_CASE("idt_constructor_size")
-{
-    setup_test_support();
-
-    bfvmm::x64::idt idt{4};
-    CHECK(idt.base() != 0);
-    CHECK(idt.limit() == (4 * sizeof(bfvmm::x64::idt::interrupt_descriptor_type)) - 1);
-}
-
-TEST_CASE("idt_base")
-{
-    setup_test_support();
-
-    bfvmm::x64::idt idt;
-    CHECK(idt.base() == reinterpret_cast<bfvmm::x64::idt::integer_pointer>(g_idt.data()));
-}
-
-TEST_CASE("idt_limit")
-{
-    setup_test_support();
-
-    bfvmm::x64::idt idt;
-    CHECK(idt.limit() == (4 * sizeof(bfvmm::x64::idt::interrupt_descriptor_type)) - 1);
-}
+#endif

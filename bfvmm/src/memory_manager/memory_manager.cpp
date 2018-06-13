@@ -22,8 +22,6 @@
 #include <bfupperlower.h>
 
 #include <memory_manager/memory_manager.h>
-#include <memory_manager/arch/x64/map_ptr.h>
-#include <memory_manager/arch/x64/page_table.h>
 
 // -----------------------------------------------------------------------------
 // Mutexes
@@ -350,7 +348,7 @@ memory_manager::virtint_to_physint(integer_pointer virt) const
     expects(virt != 0);
 
     std::lock_guard<std::mutex> guard(g_add_md_mutex);
-    return bfn::upper(m_virt_to_phys_map.at(bfn::upper(virt))) | bfn::lower(virt);
+    return bfn::upper(m_virt_map.at(bfn::upper(virt)).phys) | bfn::lower(virt);
 }
 
 memory_manager::integer_pointer
@@ -372,7 +370,7 @@ memory_manager::physint_to_virtint(integer_pointer phys) const
     expects(phys != 0);
 
     std::lock_guard<std::mutex> guard(g_add_md_mutex);
-    return bfn::upper(m_phys_to_virt_map.at(bfn::upper(phys))) | bfn::lower(phys);
+    return bfn::upper(m_phys_map.at(bfn::upper(phys)).virt) | bfn::lower(phys);
 }
 
 memory_manager::integer_pointer
@@ -387,50 +385,49 @@ memory_manager::pointer
 memory_manager::physptr_to_virtptr(pointer phys) const
 { return reinterpret_cast<pointer>(this->physptr_to_virtint(phys)); }
 
-memory_manager::attr_type
-memory_manager::virtint_to_attrint(integer_pointer virt) const
-{
-    expects(virt != 0);
-
-    std::lock_guard<std::mutex> guard(g_add_md_mutex);
-    return m_virt_to_attr_map.at(bfn::upper(virt));
-}
-
-memory_manager::attr_type
-memory_manager::virtptr_to_attrint(pointer virt) const
-{ return this->virtint_to_attrint(reinterpret_cast<integer_pointer>(virt)); }
-
 void
 memory_manager::add_md(integer_pointer virt, integer_pointer phys, attr_type attr)
 {
     auto ___ = gsl::on_failure([&] {
         std::lock_guard<std::mutex> guard(g_add_md_mutex);
 
-        m_virt_to_phys_map.erase(virt);
-        m_phys_to_virt_map.erase(phys);
-        m_virt_to_attr_map.erase(virt);
+        m_virt_map.erase(virt);
+        m_phys_map.erase(phys);
     });
 
-    expects(attr != 0);
     expects(bfn::lower(virt) == 0);
     expects(bfn::lower(phys) == 0);
 
     {
         std::lock_guard<std::mutex> guard(g_add_md_mutex);
 
-        m_virt_to_phys_map[virt] = phys;
-        m_phys_to_virt_map[phys] = virt;
-        m_virt_to_attr_map[virt] = attr;
+        if (m_virt_map.find(virt) != m_virt_map.end()) {
+            throw std::runtime_error(
+                "memory_manager::add_md: virt already added: " + bfn::to_string(virt, 16)
+            );
+        }
+
+        if (m_phys_map.find(phys) != m_phys_map.end()) {
+            throw std::runtime_error(
+                "memory_manager::add_md: phys already added: " + bfn::to_string(phys, 16)
+            );
+        }
+
+        m_virt_map[virt] = {phys, attr};
+        m_phys_map[phys] = {virt, attr};
     }
 }
 
 void
-memory_manager::remove_md(integer_pointer virt) noexcept
+memory_manager::remove_md(integer_pointer virt, integer_pointer phys) noexcept
 {
-    integer_pointer phys;
-
     if (virt == 0) {
         bfalert_info(0, "memory_manager::remove_md: virt == 0");
+        return;
+    }
+
+    if (phys == 0) {
+        bfalert_info(0, "memory_manager::remove_md: phys == 0");
         return;
     }
 
@@ -439,13 +436,16 @@ memory_manager::remove_md(integer_pointer virt) noexcept
         return;
     }
 
+    if (bfn::lower(phys) != 0) {
+        bfalert_nhex(0, "memory_manager::remove_md: bfn::lower(phys) != 0", bfn::lower(phys));
+        return;
+    }
+
     guard_exceptions([&] {
-        phys = virtint_to_physint(virt);
         std::lock_guard<std::mutex> guard(g_add_md_mutex);
 
-        m_virt_to_phys_map.erase(virt);
-        m_phys_to_virt_map.erase(phys);
-        m_virt_to_attr_map.erase(virt);
+        m_virt_map.erase(virt);
+        m_phys_map.erase(phys);
     });
 }
 
@@ -455,12 +455,8 @@ memory_manager::descriptors() const
     memory_descriptor_list list;
     std::lock_guard<std::mutex> guard(g_add_md_mutex);
 
-    for (const auto &p : m_virt_to_phys_map) {
-        auto virt = p.first;
-        auto phys = p.second;
-        auto attr = m_virt_to_attr_map.at(virt);
-
-        list.push_back({phys, virt, attr});
+    for (const auto &p : m_virt_map) {
+        list.push_back({p.second.phys, p.first, p.second.attr});
     }
 
     return list;
@@ -532,19 +528,11 @@ _realloc_r(struct _reent *ent, void *ptr, size_t size)
 }
 
 extern "C" EXPORT_SYM void *
-malloc_page()
-{ return g_mm->alloc_page(); }
+alloc_page()
+{ return memset(g_mm->alloc_page(), 0, BAREFLANK_PAGE_SIZE); }
 
 extern "C" EXPORT_SYM void
 free_page(void *ptr)
 { g_mm->free_page(ptr); }
-
-#else
-
-extern "C" void *malloc_page()
-{ return malloc(BAREFLANK_PAGE_SIZE); }
-
-extern "C" void free_page(void *ptr)
-{ free(ptr); }
 
 #endif
