@@ -24,7 +24,7 @@
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
 auto
-setup_vmcs(MockRepository &mocks)
+setup_vmcs()
 {
     setup_test_support();
     return bfvmm::intel_x64::vmcs{0x0};
@@ -33,7 +33,7 @@ setup_vmcs(MockRepository &mocks)
 TEST_CASE("vmcs: construct / destruct")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs(mocks);
+    auto vmcs = setup_vmcs();
 
     CHECK_NOTHROW(bfvmm::intel_x64::vmcs{0});
 }
@@ -41,7 +41,7 @@ TEST_CASE("vmcs: construct / destruct")
 TEST_CASE("vmcs: launch demote success")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs(mocks);
+    auto vmcs = setup_vmcs();
 
     CHECK_NOTHROW(vmcs.launch());
 }
@@ -49,7 +49,7 @@ TEST_CASE("vmcs: launch demote success")
 TEST_CASE("vmcs: launch demote failure")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs(mocks);
+    auto vmcs = setup_vmcs();
 
     mocks.OnCallFunc(bfvmm::intel_x64::check::all);
     mocks.OnCallFunc(::intel_x64::vmcs::debug::dump);
@@ -65,7 +65,7 @@ TEST_CASE("vmcs: launch demote failure")
 TEST_CASE("vmcs: launch failure")
 {
     MockRepository mocks;
-    setup_vmcs(mocks);
+    setup_vmcs();
 
     mocks.OnCallFunc(bfvmm::intel_x64::check::all);
     mocks.OnCallFunc(::intel_x64::vmcs::debug::dump);
@@ -77,7 +77,7 @@ TEST_CASE("vmcs: launch failure")
 TEST_CASE("vmcs: load failure")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs(mocks);
+    auto vmcs = setup_vmcs();
 
     g_vmload_fails = true;
     auto ___ = gsl::finally([&] {
@@ -90,7 +90,7 @@ TEST_CASE("vmcs: load failure")
 TEST_CASE("vmcs: promote failure")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs(mocks);
+    auto vmcs = setup_vmcs();
 
     ::intel_x64::vmcs::guest_cr3::set(0x1000);
     CHECK_THROWS(vmcs.promote());
@@ -99,7 +99,7 @@ TEST_CASE("vmcs: promote failure")
 TEST_CASE("vmcs: resume failure")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs(mocks);
+    auto vmcs = setup_vmcs();
 
     CHECK_THROWS(vmcs.resume());
 }
@@ -107,7 +107,7 @@ TEST_CASE("vmcs: resume failure")
 TEST_CASE("vmcs: save state")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs(mocks);
+    auto vmcs = setup_vmcs();
 
     CHECK(vmcs.save_state() != nullptr);
 }

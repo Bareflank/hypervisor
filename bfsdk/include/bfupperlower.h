@@ -24,6 +24,7 @@
 #define BFUPPERLOWER_H
 
 #include <bftypes.h>
+#include <type_traits>
 
 namespace bfn
 {
@@ -35,7 +36,7 @@ namespace bfn
 ///
 template <
     typename T,
-    typename = std::enable_if_t<std::is_integral<T>::value>
+    typename = std::enable_if<std::is_integral<T>::value>
     >
 auto
 lower(T val) noexcept
@@ -63,7 +64,7 @@ lower(T *val) noexcept
 ///
 template <
     typename T,
-    typename = std::enable_if_t<std::is_integral<T>::value>
+    typename = std::enable_if<std::is_integral<T>::value>
     >
 auto
 lower(T val, uintptr_t from) noexcept
@@ -91,7 +92,7 @@ lower(T *val, uintptr_t from) noexcept
 ///
 template <
     typename T,
-    typename = std::enable_if_t<std::is_integral<T>::value>
+    typename = std::enable_if<std::is_integral<T>::value>
     >
 auto
 upper(T val) noexcept
@@ -119,7 +120,7 @@ upper(T *val) noexcept
 ///
 template <
     typename T,
-    typename = std::enable_if_t<std::is_integral<T>::value>
+    typename = std::enable_if<std::is_integral<T>::value>
     >
 auto
 upper(T val, uintptr_t from) noexcept
