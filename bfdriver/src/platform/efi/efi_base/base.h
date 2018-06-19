@@ -21,53 +21,24 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef HYP_LOADER_H
-#define HYP_LOADER_H
+#ifndef BF_BASE_H
+#define BF_BASE_H
 
-#include "bfefi.h"
+#include "efi.h"
+#include "efilib.h"
 
-/**
- * EFI_HANDLE this_image_h
- *
- * Globally accessible handle to this image, passed in by firmware
- */
-extern EFI_HANDLE this_image_h;
+typedef struct {
+    uint64_t version;
+    uint64_t startup_data;
+} startup_data_t;
 
-/**
- * EFI_MP_SERVICES_PROTOCOL *g_mp_services;
- *
- * Globally accessible pointer to EFI_MP_SERVICES_PROTOCOL interface
- */
-extern EFI_MP_SERVICES_PROTOCOL *g_mp_services;
+void _set_ne()
+{
+    __asm volatile("movq %%cr0, %%rax\n \
+                    orq $(1<<5), %%rax\n \
+                    movq %%rax, %%cr0" : : : "rax");
+}
 
-/**
- * Get keystroke
- *
- * Wait for keystroke from user
- *
- * @param key IN/OUT:
- * @return EFI_STATUS EFI_SUCCESS if successful
- */
-EFI_STATUS console_get_keystroke(EFI_INPUT_KEY *key);
-
-/**
- * Boot next image by order
- *
- * Boots the image after this one in BootOrder variable.  Not really necessary unless
- * we find firmware that doesn't do this automatically when this image returns EFI_NOT_FOUND
- *
- * @return EFI_STATUS Return status of next image.  Generally doesn't return.
- */
-EFI_STATUS bf_boot_next_by_order();
-
-/**
- * bf_start_by_startupallaps()
- *
- * Uses MP services protocol (StartupAllAPs) to launch hypervisor
- * on all cores
- *
- * @return EFI_STATUS EFI_SUCCESS on success
- */
-EFI_STATUS bf_start_by_startupallaps();
+int64_t platform_start_core(void);
 
 #endif

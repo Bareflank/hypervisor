@@ -1589,7 +1589,8 @@ guest_gs_access_rights_remaining_reserved_bit_0()
 void
 guest_tr_type_must_be_11()
 {
-    switch (::intel_x64::vmcs::guest_tr_access_rights::type::get()) {
+    const auto rights = ::intel_x64::vmcs::guest_tr_access_rights::type::get();
+    switch (rights) {
         case ::x64::access_rights::type::read_write_accessed:
             if (::intel_x64::vmcs::vm_entry_controls::ia_32e_mode_guest::is_enabled()) {
                 throw std::logic_error("tr type cannot be 3 if ia_32e_mode_guest is enabled");
@@ -1601,7 +1602,8 @@ guest_tr_type_must_be_11()
             return;
 
         default:
-            throw std::logic_error("tr type must be 3 or 11");
+            throw std::logic_error("tr type must be 3 or 11, received "
+                                   + std::to_string(rights & 0xFU));
     }
 }
 

@@ -220,6 +220,11 @@ set(BUILD_BFVMM_MAIN_DIR ${CMAKE_BINARY_DIR}/bfvmm_main
     "bfvmm main build dir"
 )
 
+set(BUILD_EFI_MAIN_DIR ${CMAKE_BINARY_DIR}/efi_main
+    CACHE INTERNAL
+    "efi main build dir"
+)
+
 # ------------------------------------------------------------------------------
 # Includes
 # ------------------------------------------------------------------------------
@@ -444,6 +449,38 @@ add_config(
 )
 
 # ------------------------------------------------------------------------------
+# EFI Configs
+# ------------------------------------------------------------------------------
+
+add_config(
+    CONFIG_NAME EFI_VMM_NAME
+    CONFIG_TYPE STRING
+    DEFAULT_VAL bfvmm_static
+    DESCRIPTION "Name of VMM to include in EFI loader"
+)
+
+add_config(
+    CONFIG_NAME EFI_OUTPUT_DIR
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ${BUILD_EFI_MAIN_DIR}/${VMM_PREFIX}/build/output
+    DESCRIPTION "Directory for intermediary EFI files to communicate between EFI extensions"
+)
+
+add_config(
+    CONFIG_NAME EFI_MODULE_H
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ${EFI_OUTPUT_DIR}/module.h
+    DESCRIPTION "File name of generated module.h for EFI extension adding"
+)
+
+add_config(
+    CONFIG_NAME EFI_SOURCES_CMAKE
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ${EFI_OUTPUT_DIR}/efi_sources.cmake
+    DESCRIPTION "File name of generated efi_sources.cmake for EFI extension adding"
+)
+
+# ------------------------------------------------------------------------------
 # Binutils
 # ------------------------------------------------------------------------------
 
@@ -582,6 +619,14 @@ add_config(
     CONFIG_TYPE FILEPATH
     DEFAULT_VAL ${SOURCE_TOOLCHAIN_DIR}/clang_${BUILD_TARGET_ARCH}_vmm.cmake
     DESCRIPTION "Path to the default cmake toolchain file for building vmm components"
+    ADVANCED
+)
+
+add_config(
+    CONFIG_NAME EFI_TOOLCHAIN_PATH
+    CONFIG_TYPE FILEPATH
+    DEFAULT_VAL ${SOURCE_TOOLCHAIN_DIR}/clang_${BUILD_TARGET_ARCH}_efi.cmake
+    DESCRIPTION "Path to the default cmake toolchain file for building EFI components"
     ADVANCED
 )
 
