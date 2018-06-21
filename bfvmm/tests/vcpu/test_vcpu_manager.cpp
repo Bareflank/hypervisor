@@ -45,10 +45,10 @@ namespace bfvmm
 {
 
 WEAK_SYM std::unique_ptr<vcpu>
-vcpu_factory::make_vcpu(vcpuid::type vcpuid, bfobject *data)
+vcpu_factory::make_vcpu(vcpuid::type vcpuid, bfobject *obj)
 {
     bfignored(vcpuid);
-    bfignored(data);
+    bfignored(obj);
 
     if (make_vcpu_throws) {
         throw std::runtime_error("make_vcpu error");

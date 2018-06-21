@@ -19,8 +19,8 @@
 unset(BFFLAGS_ASAN)
 
 list(APPEND BFFLAGS_ASAN
+    -O1
     -g
-    -fuse-ld=gold
     -fno-omit-frame-pointer
     -fsanitize=address
     -fsanitize=leak

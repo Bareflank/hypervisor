@@ -26,6 +26,6 @@ extern "C" uint64_t
 thread_context_cpuid(void)
 { return 0; }
 
-extern "C" uint64_t
+extern "C" uint64_t *
 thread_context_tlsptr(void)
 { return 0; }

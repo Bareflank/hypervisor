@@ -19,6 +19,5 @@
 unset(BFFLAGS_USAN)
 
 list(APPEND BFFLAGS_USAN
-    -fuse-ld=gold
     -fsanitize=undefined
 )

@@ -23,7 +23,9 @@
 #define GSL_ABORT ut_abort
 
 void ut_abort()
-{ }
+{
+    std::cout << "test\n";
+}
 
 #include <bfgsl.h>
 #include <bftypes.h>

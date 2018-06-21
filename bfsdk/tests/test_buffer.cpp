@@ -16,6 +16,14 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+// TIDY_EXCLUSION=-cppcoreguidelines-owning-memory
+//
+// Reason:
+//     This triggers during a test of release(), which is a function we wish
+//     to support to stay inline with a unique_ptr, but is known to be
+//     unsafe. Since this is a test, this is a false positive
+//
+
 #include <catch/catch.hpp>
 #include <bfbuffer.h>
 

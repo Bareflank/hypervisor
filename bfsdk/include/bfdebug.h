@@ -128,9 +128,9 @@ bfitoa(size_t value, char *str, size_t base)
 
 #define CALLED() \
     { \
-        const char *str_text = "\033[1;32mDEBUG\033[0m: function called = "; \
-        const char *str_func = __BFFUNC__; \
-        const char *str_endl = "\n"; \
+        const auto *str_text = "\033[1;32mDEBUG\033[0m: function called = "; \
+        const auto *str_func = __BFFUNC__; \
+        const auto *str_endl = "\n"; \
         unsafe_write_cstr(str_text, strlen(str_text)); \
         unsafe_write_cstr(str_func, strlen(str_func)); \
         unsafe_write_cstr(str_endl, strlen(str_endl)); \
@@ -138,9 +138,9 @@ bfitoa(size_t value, char *str, size_t base)
 
 #define WARNING(a) \
     { \
-        const char *str_text = "\033[1;33mWARNING\033[0m: " a " = "; \
-        const char *str_func = __BFFUNC__; \
-        const char *str_endl = "\n"; \
+        const auto *str_text = "\033[1;33mWARNING\033[0m: " a " = "; \
+        const auto *str_func = __BFFUNC__; \
+        const auto *str_endl = "\n"; \
         unsafe_write_cstr(str_text, strlen(str_text)); \
         unsafe_write_cstr(str_func, strlen(str_func)); \
         unsafe_write_cstr(str_endl, strlen(str_endl)); \
@@ -148,9 +148,9 @@ bfitoa(size_t value, char *str, size_t base)
 
 #define UNHANDLED() \
     { \
-        const char *str_text = "\033[1;33mWARNING\033[0m: unsupported function called = "; \
-        const char *str_func = __BFFUNC__; \
-        const char *str_endl = "\n"; \
+        const auto *str_text = "\033[1;33mWARNING\033[0m: unsupported function called = "; \
+        const auto *str_func = __BFFUNC__; \
+        const auto *str_endl = "\n"; \
         unsafe_write_cstr(str_text, strlen(str_text)); \
         unsafe_write_cstr(str_func, strlen(str_func)); \
         unsafe_write_cstr(str_endl, strlen(str_endl)); \
@@ -158,9 +158,9 @@ bfitoa(size_t value, char *str, size_t base)
 
 #define ARG_UNSUPPORTED(a) \
     { \
-        const char *str_text = "\033[1;33mWARNING\033[0m: " a " not supported for function called = "; \
-        const char *str_func = __BFFUNC__; \
-        const char *str_endl = "\n"; \
+        const auto *str_text = "\033[1;33mWARNING\033[0m: " a " not supported for function called = "; \
+        const auto *str_func = __BFFUNC__; \
+        const auto *str_endl = "\n"; \
         unsafe_write_cstr(str_text, strlen(str_text)); \
         unsafe_write_cstr(str_func, strlen(str_func)); \
         unsafe_write_cstr(str_endl, strlen(str_endl)); \
@@ -169,8 +169,8 @@ bfitoa(size_t value, char *str, size_t base)
 
 #define DEBUG_STR(a,b) \
     { \
-        const char *str_text = "\033[1;32mDEBUG\033[0m: " a " = "; \
-        const char *str_endl = "\n"; \
+        const auto *str_text = "\033[1;32mDEBUG\033[0m: " a " = "; \
+        const auto *str_endl = "\n"; \
         unsafe_write_cstr(str_text, strlen(str_text)); \
         unsafe_write_cstr(b, strlen(b)); \
         unsafe_write_cstr(str_endl, strlen(str_endl)); \
@@ -180,8 +180,8 @@ bfitoa(size_t value, char *str, size_t base)
     { \
         char numstr[64]; \
         bfitoa(b, numstr, 10); \
-        const char *str_text = "\033[1;32mDEBUG\033[0m: " a " = "; \
-        const char *str_endl = "\n"; \
+        const auto *str_text = "\033[1;32mDEBUG\033[0m: " a " = "; \
+        const auto *str_endl = "\n"; \
         unsafe_write_cstr(str_text, strlen(str_text)); \
         unsafe_write_cstr(numstr, strlen(numstr)); \
         unsafe_write_cstr(str_endl, strlen(str_endl)); \
@@ -191,8 +191,8 @@ bfitoa(size_t value, char *str, size_t base)
     { \
         char numstr[64]; \
         bfitoa(b, numstr, 16); \
-        const char *str_text = "\033[1;32mDEBUG\033[0m: " a " = "; \
-        const char *str_endl = "\n"; \
+        const auto *str_text = "\033[1;32mDEBUG\033[0m: " a " = "; \
+        const auto *str_endl = "\n"; \
         unsafe_write_cstr(str_text, strlen(str_text)); \
         unsafe_write_cstr(numstr, strlen(numstr)); \
         unsafe_write_cstr(str_endl, strlen(str_endl)); \
@@ -202,10 +202,10 @@ bfitoa(size_t value, char *str, size_t base)
     { \
         char numstr[64]; \
         bfitoa(__LINE__, numstr, 10); \
-        const char *str_text = "\033[1;32mDEBUG\033[0m: "; \
-        const char *str_func = __BFFUNC__; \
-        const char *str_next = " = "; \
-        const char *str_endl = "\n"; \
+        const auto *str_text = "\033[1;32mDEBUG\033[0m: "; \
+        const auto *str_func = __BFFUNC__; \
+        const auto *str_next = " = "; \
+        const auto *str_endl = "\n"; \
         unsafe_write_cstr(str_text, strlen(str_text)); \
         unsafe_write_cstr(str_func, strlen(str_func)); \
         unsafe_write_cstr(str_next, strlen(str_next)); \

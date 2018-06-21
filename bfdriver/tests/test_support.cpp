@@ -16,6 +16,13 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+// TIDY_EXCLUSION=-cert-err58-cpp
+//
+// Reason:
+//     This triggers on g_filenames_xxx which is only used for testing. This
+//     is not a false positive, but it can be safely ignored.
+//
+
 #include <vector>
 #include <string>
 

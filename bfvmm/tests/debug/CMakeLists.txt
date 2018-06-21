@@ -30,9 +30,9 @@ do_test(test_serial_ns16550a
     DEFINES STATIC_INTRINSICS
 )
 
-do_test(test_serial_port_pl011
-    SOURCES serial/test_serial_pl011.cpp
-    DEPENDS bfvmm_debug
-    DEFINES STATIC_DEBUG
-    DEFINES STATIC_INTRINSICS
-)
+# do_test(test_serial_port_pl011
+#     SOURCES serial/test_serial_pl011.cpp
+#     DEPENDS bfvmm_debug
+#     DEFINES STATIC_DEBUG
+#     DEFINES STATIC_INTRINSICS
+# )

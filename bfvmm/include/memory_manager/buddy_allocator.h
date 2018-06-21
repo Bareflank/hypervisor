@@ -124,25 +124,25 @@ private:
     inline auto is_full(node_t *node) const
     { return get_bits(node->size, 0xC000000000000000ULL) == 0xC000000000000000ULL; }
 
-    inline node_t *set_unused(node_t *node)
+    inline node_t *set_unused(node_t *node) noexcept
     {
         node->size = set_bits(node->size, 0xC000000000000000ULL, 0x0000000000000000ULL);
         return node;
     }
 
-    inline node_t *set_leaf(node_t *node)
+    inline node_t *set_leaf(node_t *node) noexcept
     {
         node->size = set_bits(node->size, 0xC000000000000000ULL, 0x4000000000000000ULL);
         return node;
     }
 
-    inline node_t *set_parent(node_t *node)
+    inline node_t *set_parent(node_t *node) noexcept
     {
         node->size = set_bits(node->size, 0xC000000000000000ULL, 0x8000000000000000ULL);
         return node;
     }
 
-    inline node_t *set_full(node_t *node)
+    inline node_t *set_full(node_t *node) noexcept
     {
         node->size = set_bits(node->size, 0xC000000000000000ULL, 0xC000000000000000ULL);
         return node;
@@ -267,8 +267,10 @@ public:
             return 0;
         }
 
-        return this->private_size(
-                   reinterpret_cast<integer_pointer>(ptr), nullptr, m_root);
+        return
+            this->private_size(
+                reinterpret_cast<integer_pointer>(ptr), nullptr, m_root
+            );
     }
 
     /// Contains Address
@@ -298,7 +300,7 @@ public:
     ///     (1ULL << k) * BAREFLANK_PAGE_SIZE
     /// @return the size of buffer given size k
     ///
-    inline constexpr static size_type buffer_size(size_type k)
+    inline constexpr static size_type buffer_size(size_type k) noexcept
     { return (1ULL << k) * BAREFLANK_PAGE_SIZE; }
 
     /// Node Tree Size
@@ -310,7 +312,7 @@ public:
     ///     (1ULL << k) * BAREFLANK_PAGE_SIZE
     /// @return the size of the node tree given size k
     ///
-    inline constexpr static size_type node_tree_size(size_type k)
+    inline constexpr static size_type node_tree_size(size_type k) noexcept
     { return ((2ULL << k) - 1ULL) * sizeof(node_t); }
 
 private:

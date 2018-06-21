@@ -191,8 +191,8 @@ function(generate_flags PREFIX)
     set(multiVal C_FLAGS CXX_FLAGS)
     cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
 
-    list(APPEND _C_FLAGS ${ARG_C_FLAGS} ${GLOBAL_C_FLAGS})
-    list(APPEND _CXX_FLAGS ${ARG_CXX_FLAGS} ${GLOBAL_CXX_FLAGS})
+    list(APPEND _C_FLAGS ${ARG_C_FLAGS} $ENV{C_FLAGS})
+    list(APPEND _CXX_FLAGS ${ARG_CXX_FLAGS} $ENV{CXX_FLAGS})
 
     if(PREFIX STREQUAL "vmm")
         list(APPEND _C_FLAGS ${BFFLAGS_VMM} ${BFFLAGS_VMM_C} ${C_FLAGS_VMM})
@@ -546,6 +546,58 @@ endfunction(add_dependency_step)
 
 # Private
 #
+function(add_tidy_targets NAME PREFIX SOURCE_DIR)
+    if(PREFIX STREQUAL "vmm")
+        set(PREFIX ${VMM_PREFIX})
+    elseif(PREFIX STREQUAL "userspace")
+        set(PREFIX ${USERSPACE_PREFIX})
+    elseif(PREFIX STREQUAL "test")
+        set(PREFIX ${TEST_PREFIX})
+    endif()
+
+    if(NOT EXISTS "${SOURCE_DIR}")
+        return()
+    endif()
+
+    add_custom_command(
+        TARGET tidy
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}/build
+            ${TIDY_SCRIPT} diff ${SOURCE_DIR}
+    )
+
+    add_custom_command(
+        TARGET tidy-all
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}/build
+            ${TIDY_SCRIPT} all ${SOURCE_DIR}
+    )
+
+    add_custom_command(
+        TARGET tidy-upstream
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}/build
+            ${TIDY_SCRIPT} upstream ${SOURCE_DIR}
+    )
+
+    add_custom_command(
+        TARGET tidy-${NAME}_${PREFIX}
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}/build
+            ${TIDY_SCRIPT} diff ${SOURCE_DIR}
+    )
+
+    add_custom_command(
+        TARGET tidy-${NAME}_${PREFIX}-all
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}/build
+            ${TIDY_SCRIPT} all ${SOURCE_DIR}
+    )
+
+    add_custom_command(
+        TARGET tidy-${NAME}_${PREFIX}-upstream
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}/build
+            ${TIDY_SCRIPT} upstream ${SOURCE_DIR}
+    )
+endfunction(add_tidy_targets)
+
+# Private
+#
 function(add_format_targets NAME PREFIX SOURCE_DIR)
     if(PREFIX STREQUAL "vmm")
         set(PREFIX ${VMM_PREFIX})
@@ -561,7 +613,7 @@ function(add_format_targets NAME PREFIX SOURCE_DIR)
 
     add_custom_command(
         TARGET format
-        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle all ${SOURCE_DIR}
+        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle diff ${SOURCE_DIR}
     )
 
     add_custom_command(
@@ -570,13 +622,23 @@ function(add_format_targets NAME PREFIX SOURCE_DIR)
     )
 
     add_custom_command(
+        TARGET format-upstream
+        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle upstream ${SOURCE_DIR}
+    )
+
+    add_custom_command(
         TARGET format-${NAME}_${PREFIX}
-        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle all ${SOURCE_DIR}
+        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle diff ${SOURCE_DIR}
     )
 
     add_custom_command(
         TARGET format-${NAME}_${PREFIX}-all
         COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle all ${SOURCE_DIR}
+    )
+
+    add_custom_command(
+        TARGET format-${NAME}_${PREFIX}-upstream
+        COMMAND ${ASTYLE_SCRIPT} ${USERSPACE_PREFIX_PATH}/bin/astyle upstream ${SOURCE_DIR}
     )
 endfunction(add_format_targets)
 
@@ -614,60 +676,36 @@ function(add_targets NAME PREFIX SOURCE_DIR)
             COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}
             COMMAND ${CMAKE_COMMAND} --build . --target ${NAME}_${FULLPREFIX}
         )
-    endif()
 
-    if(ENABLE_FORMAT)
-        add_custom_target(format-${NAME}_${FULLPREFIX})
-        add_custom_target(format-${NAME}_${FULLPREFIX}-all)
-        add_format_targets(${NAME} ${PREFIX} ${SOURCE_DIR})
+        if(ENABLE_TIDY)
+            add_custom_target(tidy-${NAME}_${FULLPREFIX})
+            add_custom_target(tidy-${NAME}_${FULLPREFIX}-all)
+            add_custom_target(tidy-${NAME}_${FULLPREFIX}-upstream)
+            add_tidy_targets(${NAME} ${PREFIX} ${SOURCE_DIR})
+            add_tidy_targets(${NAME} ${PREFIX} ${SOURCE_DIR}/../include)
+        endif()
+
+        if(ENABLE_FORMAT)
+            add_custom_target(format-${NAME}_${FULLPREFIX})
+            add_custom_target(format-${NAME}_${FULLPREFIX}-all)
+            add_custom_target(format-${NAME}_${FULLPREFIX}-upstream)
+            add_format_targets(${NAME} ${PREFIX} ${SOURCE_DIR})
+            add_format_targets(${NAME} ${PREFIX} ${SOURCE_DIR}/../include)
+        endif()
     endif()
 
     if(PREFIX STREQUAL "test")
-        string(TOUPPER "TIDY_EXCLUSION_${NAME}" TIDY_EXCLUSION)
-
         add_custom_command(
             TARGET unittest
             COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
                 ctest --output-on-failure
         )
 
-        add_custom_command(
-            TARGET test
-            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
-                ctest --output-on-failure
-        )
-
         add_custom_target(
-            test-${NAME}_${FULLPREFIX}
+            unittest-${NAME}_${FULLPREFIX}
             COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
                 ctest --output-on-failure
         )
-
-        if(ENABLE_TIDY)
-            add_custom_command(
-                TARGET tidy
-                COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
-                    ${TIDY_SCRIPT} diff ${SOURCE_DIR} ${${TIDY_EXCLUSION}}
-            )
-
-            add_custom_command(
-                TARGET tidy-all
-                COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
-                    ${TIDY_SCRIPT} all ${SOURCE_DIR} ${${TIDY_EXCLUSION}}
-            )
-
-            add_custom_target(
-                tidy-${NAME}_${FULLPREFIX}
-                COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
-                    ${TIDY_SCRIPT} diff ${SOURCE_DIR} ${${TIDY_EXCLUSION}}
-            )
-
-            add_custom_target(
-                tidy-${NAME}_${FULLPREFIX}-all
-                COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
-                    ${TIDY_SCRIPT} all ${SOURCE_DIR} ${${TIDY_EXCLUSION}}
-            )
-        endif()
     endif()
 endfunction(add_targets)
 
@@ -780,12 +818,6 @@ function(add_subproject NAME PREFIX)
     endif()
 
     add_targets(${NAME} ${PREFIX} ${SOURCE_DIR})
-
-    if(ENABLE_FORMAT)
-        if(NOT ARG_SOURCE_DIR AND NOT PREFIX STREQUAL "test")
-            add_format_targets(${NAME} ${PREFIX} ${CMAKE_CURRENT_LIST_DIR}/${NAME}/include)
-        endif()
-    endif()
 
     if(ARG_NOBUILD)
         return()
@@ -978,7 +1010,6 @@ endmacro(enable_asm)
 # after running project(), and enables ASM, sets up include and library
 # folders and addition flags.
 #
-# @param TIDY_EXCLUSIONS Exclusions for Clang Tidy
 # @param C_FLAGS Additonal flags to add to CMAKE_C_FLAGS
 # @param CXX_FLAGS Additonal flags to add to CMAKE_CXX_FLAGS
 # @param INCLUDES Additional includes
@@ -1288,8 +1319,6 @@ endmacro(set_bfm_vmm)
 #     is not in the same directory, allowing you to pass a source file with
 #     a directory. Nomrally FILENAME should still match the filename being
 #     used.
-# @param CMD_LINE_ARGS Command line arguements to be passed to the test
-#     executable by ctest
 #
 function(do_test FILENAME)
     set(multiVal DEFINES DEPENDS SOURCES CMD_LINE_ARGS)
@@ -1344,7 +1373,7 @@ function(print_usage)
         message(STATUS "")
     else()
         message(STATUS "${Green} Additional build options:${ColorReset}")
-        message(STATUS "${Yellow}    cmake --build . --target test${ColorReset}")
+        message(STATUS "${Yellow}    cmake --build . --target unittest${ColorReset}")
         message(STATUS "${Yellow}    cmake --build . --target clean-all${ColorReset}")
         message(STATUS "")
     endif()

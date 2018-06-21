@@ -60,7 +60,7 @@ list(APPEND BFFLAGS_VMM_C
 
 list(APPEND BFFLAGS_VMM_CXX
     -x c++
-    -std=c++14
+    -std=c++17
 )
 
 list(APPEND BFFLAGS_VMM_X86_64

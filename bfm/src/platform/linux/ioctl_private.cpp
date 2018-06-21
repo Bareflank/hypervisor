@@ -16,6 +16,13 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+// TIDY_EXCLUSION=-cppcoreguidelines-pro-type-vararg
+//
+// Reason:
+//    The Linux APIs require the use of var-args, so this test has to be
+//    disabled.
+//
+
 #include <ioctl_private.h>
 
 #include <bfgsl.h>

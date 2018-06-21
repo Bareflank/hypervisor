@@ -46,27 +46,28 @@ before_script:
   - cd build
 
   #
-  # Update / Install CMake
-  #
-  - |
-    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-      mkdir -p external/cmake
-      pushd external/cmake
-      wget https://cmake.org/files/v3.7/cmake-3.7.0-Linux-x86_64.sh
-      chmod +x cmake-*-Linux-x86_64.sh
-      ./cmake-*-Linux-x86_64.sh --exclude-subdir --skip-license
-      export PATH="${PWD}/bin:$PATH"
-      popd
-    else
-      if ! brew ls --version cmake &>/dev/null; then brew install cmake; fi
-    fi
-
-  #
   # Update GCC
   #
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 100
-  - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-6 100
+  - |
+    if [[ -f "/usr/bin/gcc-6" ]]; then
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 100
+      sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-6 100
+    fi
+
+  - |
+    if [[ -f "/usr/bin/gcc-7" ]]; then
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 100
+      sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-7 100
+    fi
+
+  - |
+    if [[ -f "/usr/bin/gcc-8" ]]; then
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 100
+      sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 100
+    fi
 
 #
 # Build Matrix
@@ -83,8 +84,8 @@ matrix:
         sources:
           - ubuntu-toolchain-r-test
         packages:
-          - gcc-6
-          - g++-6
+          - gcc-8
+          - g++-8
           - doxygen
     env:
       - TEST="Doxygen"
@@ -108,8 +109,8 @@ matrix:
         sources:
           - ubuntu-toolchain-r-test
         packages:
-          - gcc-6
-          - g++-6
+          - gcc-8
+          - g++-8
     env:
       - TEST="Git Check"
     script:
@@ -129,18 +130,18 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-4.0
+          - llvm-toolchain-trusty-6.0
         packages:
-          - gcc-6
-          - g++-6
-          - clang-4.0
+          - gcc-8
+          - g++-8
+          - clang-6.0
           - nasm
     env:
       - TEST="Format"
     script:
       - cmake -DCONFIG=travis_format ..
       - make astyle_x86_64-userspace-elf
-      - make format-all
+      - make format
       - |
         if [[ -n $(git diff) ]]; then
           echo "You must run make format before submitting a pull request"
@@ -157,12 +158,12 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-4.0
+          - llvm-toolchain-trusty-6.0
         packages:
-          - clang-4.0
-          - clang-tidy-4.0
-          - gcc-6
-          - g++-6
+          - clang-6.0
+          - clang-tidy-6.0
+          - gcc-8
+          - g++-8
           - nasm
     env:
       - TEST="Clang Tidy"
@@ -179,11 +180,11 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-4.0
+          - llvm-toolchain-trusty-6.0
         packages:
           - gcc-6
           - g++-6
-          - clang-4.0
+          - clang-6.0
           - nasm
     env:
       - TEST="Codecov"
@@ -191,7 +192,7 @@ matrix:
       - export LD_BIN=ld.gold
       - cmake -DCONFIG=travis_codecov ..
       - make -j3
-      - make test
+      - make unittest
       - cd ..
       - bash <(curl -s https://codecov.io/bash)
 
@@ -203,18 +204,18 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-4.0
+          - llvm-toolchain-trusty-6.0
         packages:
-          - gcc-6
-          - g++-6
-          - clang-4.0
+          - gcc-8
+          - g++-8
+          - clang-6.0
           - nasm
     env:
       - TEST="Google Address Sanitizer"
     script:
       - cmake -DCONFIG=travis_asan ..
       - make -j3
-      - make test
+      - make unittest
 
   #
   # Google Undefined Sanitizer
@@ -224,81 +225,18 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-4.0
+          - llvm-toolchain-trusty-6.0
         packages:
-          - gcc-6
-          - g++-6
-          - clang-4.0
+          - gcc-8
+          - g++-8
+          - clang-6.0
           - nasm
     env:
       - TEST="Google Undefined Sanitizer"
     script:
       - cmake -DCONFIG=travis_usan ..
       - make -j3
-      - make test
-
-  #
-  # Clang 3.8 (Static Libraries)
-  #
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-3.8
-        packages:
-          - gcc-6
-          - g++-6
-          - clang-3.8
-          - nasm
-    env:
-      - TEST="Clang 3.8 (Static Libraries)"
-    script:
-      - export CLANG_BIN=clang-3.8
-      - cmake -DCONFIG=travis_static ..
-      - make -j3
-
-  #
-  # Clang 3.9 (Static Libraries)
-  #
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-3.9
-        packages:
-          - gcc-6
-          - g++-6
-          - clang-3.9
-          - nasm
-    env:
-      - TEST="Clang 3.9 (Static Libraries)"
-    script:
-      - export CLANG_BIN=clang-3.9
-      - cmake -DCONFIG=travis_static ..
-      - make -j3
-
-  #
-  # Clang 4.0 (Static Libraries)
-  #
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-4.0
-        packages:
-          - gcc-6
-          - g++-6
-          - clang-4.0
-          - nasm
-    env:
-      - TEST="Clang 4.0 (Static Libraries)"
-    script:
-      - export CLANG_BIN=clang-4.0
-      - cmake -DCONFIG=travis_static ..
-      - make -j3
+      - make unittest
 
   #
   # Clang 5.0 (Static Libraries)
@@ -310,8 +248,8 @@ matrix:
           - ubuntu-toolchain-r-test
           - llvm-toolchain-trusty-5.0
         packages:
-          - gcc-6
-          - g++-6
+          - gcc-8
+          - g++-8
           - clang-5.0
           - nasm
     env:
@@ -331,8 +269,8 @@ matrix:
           - ubuntu-toolchain-r-test
           - llvm-toolchain-trusty-6.0
         packages:
-          - gcc-6
-          - g++-6
+          - gcc-8
+          - g++-8
           - clang-6.0
           - nasm
     env:
@@ -340,69 +278,6 @@ matrix:
     script:
       - export CLANG_BIN=clang-6.0
       - cmake -DCONFIG=travis_static ..
-      - make -j3
-
-  #
-  # Clang 3.8 (Shared Libraries)
-  #
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-3.8
-        packages:
-          - gcc-6
-          - g++-6
-          - clang-3.8
-          - nasm
-    env:
-      - TEST="Clang 3.8 (Shared Libraries)"
-    script:
-      - export CLANG_BIN=clang-3.8
-      - cmake -DCONFIG=travis_shared ..
-      - make -j3
-
-  #
-  # Clang 3.9 (Shared Libraries)
-  #
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-3.9
-        packages:
-          - gcc-6
-          - g++-6
-          - clang-3.9
-          - nasm
-    env:
-      - TEST="Clang 3.9 (Shared Libraries)"
-    script:
-      - export CLANG_BIN=clang-3.9
-      - cmake -DCONFIG=travis_shared ..
-      - make -j3
-
-  #
-  # Clang 4.0 (Shared Libraries)
-  #
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-4.0
-        packages:
-          - gcc-6
-          - g++-6
-          - clang-4.0
-          - nasm
-    env:
-      - TEST="Clang 4.0 (Shared Libraries)"
-    script:
-      - export CLANG_BIN=clang-4.0
-      - cmake -DCONFIG=travis_shared ..
       - make -j3
 
   #
@@ -415,8 +290,8 @@ matrix:
           - ubuntu-toolchain-r-test
           - llvm-toolchain-trusty-5.0
         packages:
-          - gcc-6
-          - g++-6
+          - gcc-8
+          - g++-8
           - clang-5.0
           - nasm
     env:
@@ -436,14 +311,74 @@ matrix:
           - ubuntu-toolchain-r-test
           - llvm-toolchain-trusty-6.0
         packages:
-          - gcc-6
-          - g++-6
+          - gcc-8
+          - g++-8
           - clang-6.0
           - nasm
     env:
       - TEST="Clang 6.0 (Shared Libraries)"
     script:
       - export CLANG_BIN=clang-6.0
+      - cmake -DCONFIG=travis_shared ..
+      - make -j3
+
+  #
+  # GCC 6
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-6.0
+        packages:
+          - gcc-6
+          - g++-6
+          - clang-6.0
+          - nasm
+    env:
+      - TEST="GCC 6"
+    script:
+      - cmake -DCONFIG=travis_shared ..
+      - make -j3
+
+  #
+  # GCC 7
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-6.0
+        packages:
+          - gcc-7
+          - g++-7
+          - clang-6.0
+          - nasm
+    env:
+      - TEST="GCC 7"
+    script:
+      - cmake -DCONFIG=travis_shared ..
+      - make -j3
+
+  #
+  # GCC 8
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-6.0
+        packages:
+          - gcc-8
+          - g++-8
+          - clang-6.0
+          - nasm
+    env:
+      - TEST="GCC 8"
+    script:
       - cmake -DCONFIG=travis_shared ..
       - make -j3
 
@@ -455,11 +390,11 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-4.0
+          - llvm-toolchain-trusty-6.0
         packages:
-          - gcc-6
-          - g++-6
-          - clang-4.0
+          - gcc-8
+          - g++-8
+          - clang-6.0
           - nasm
     env:
       - TEST="ld.gold"
@@ -476,11 +411,11 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-4.0
+          - llvm-toolchain-trusty-6.0
         packages:
-          - gcc-6
-          - g++-6
-          - clang-4.0
+          - gcc-8
+          - g++-8
+          - clang-6.0
           - nasm
     env:
       - TEST="ld.lld"

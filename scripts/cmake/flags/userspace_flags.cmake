@@ -42,7 +42,7 @@ if(NOT WIN32)
     )
 
     list(APPEND BFFLAGS_USERSPACE_CXX
-        -std=c++14
+        -std=c++17
         -fvisibility-inlines-hidden
     )
 

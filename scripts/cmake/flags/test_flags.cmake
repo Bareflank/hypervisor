@@ -43,9 +43,8 @@ if(NOT WIN32)
     )
 
     list(APPEND BFFLAGS_TEST_CXX
-        -std=c++14
+        -std=c++17
         -fvisibility-inlines-hidden
-        -Wno-sized-deallocation
     )
 
     list(APPEND BFFLAGS_TEST_X86_64

@@ -33,44 +33,44 @@ vcpu::vcpu(vcpuid::type id) :
 }
 
 void
-vcpu::run(bfobject *data)
+vcpu::run(bfobject *obj)
 {
     for (const auto &d : m_run_delegates) {
-        d(data);
+        d(obj);
     }
 
     m_is_running = true;
 }
 
 void
-vcpu::hlt(bfobject *data)
+vcpu::hlt(bfobject *obj)
 {
     for (const auto &d : m_hlt_delegates) {
-        d(data);
+        d(obj);
     }
 
     m_is_running = false;
 }
 
 void
-vcpu::init(bfobject *data)
+vcpu::init(bfobject *obj)
 {
     for (const auto &d : m_init_delegates) {
-        d(data);
+        d(obj);
     }
 
     m_is_initialized = true;
 }
 
 void
-vcpu::fini(bfobject *data)
+vcpu::fini(bfobject *obj)
 {
     if (m_is_running) {
         this->hlt();
     }
 
     for (const auto &d : m_fini_delegates) {
-        d(data);
+        d(obj);
     }
 
     m_is_initialized = false;
