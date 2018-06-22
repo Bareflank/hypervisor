@@ -42,7 +42,7 @@ verify_analysis() {
         grep --color -E '^|warning: |error: ' $OUTPUT
         exit -1;
     else
-        echo -e "  \033[1;32m\xE2\x9C\x93 passed:\033[0m $3: $4";
+        echo -e "  \033[1;32m\xE2\x9C\x93 passed:\033[0m $3: $(realpath $2/$4)";
     fi
 }
 
@@ -69,7 +69,7 @@ run_clang_tidy_script() {
         -header-filter="*.h" \
         -j=$NUM_CORES \
         -checks=$checks \
-        files $2/$4 > $OUTPUT 2>&1
+        files $(realpath $2/$4) > $OUTPUT 2>&1
 }
 
 analyze() {
@@ -106,7 +106,9 @@ if [[ -z "$files" ]]; then
     echo -e "\033[1;32m\xE2\x9C\x93 nothing changed:\033[0m $2";
     exit 0
 else
-    echo -e "\033[1;33m- processing:\033[0m $2";
+    echo -e "\033[1;33m- processing:";
+    echo -e "  \033[1;35msrc - \033[0m$2";
+    echo -e "  \033[1;35mbld - \033[0m$PWD";
 fi
 
 #
