@@ -16,4 +16,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(${SOURCE_CMAKE_DIR}/macros.cmake)
+string(REPLACE "|" ";" PROJECT_INCLUDE_LIST "${PROJECT_INCLUDE_LIST}")
+foreach(file ${PROJECT_INCLUDE_LIST})
+    include(${file})
+endforeach(file)

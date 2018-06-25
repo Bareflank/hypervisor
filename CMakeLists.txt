@@ -20,11 +20,17 @@ cmake_minimum_required(VERSION 3.6)
 project(hypervisor)
 
 # ------------------------------------------------------------------------------
-# Config / Targets
+# Config
 # ------------------------------------------------------------------------------
 
-include(scripts/cmake/config/default.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/scripts/cmake/config/default.cmake)
 include_external_config()
+
+# ------------------------------------------------------------------------------
+# Project File
+# ------------------------------------------------------------------------------
+
+add_project_include(${SOURCE_CMAKE_DIR}/macros.cmake)
 
 # ------------------------------------------------------------------------------
 # BFM VMM
@@ -43,19 +49,19 @@ include(scripts/cmake/targets.cmake)
 # General Dependencies
 # ------------------------------------------------------------------------------
 
-include_dependency(gsl)
-include_dependency(json)
-include_dependency(astyle)
-include_dependency(clang_tidy)
-include_dependency(catch)
-include_dependency(hippomocks)
-include_dependency(python)
+include_dependency(SOURCE_DEPENDS_DIR gsl)
+include_dependency(SOURCE_DEPENDS_DIR json)
+include_dependency(SOURCE_DEPENDS_DIR astyle)
+include_dependency(SOURCE_DEPENDS_DIR clang_tidy)
+include_dependency(SOURCE_DEPENDS_DIR catch)
+include_dependency(SOURCE_DEPENDS_DIR hippomocks)
+include_dependency(SOURCE_DEPENDS_DIR python)
 
 # ------------------------------------------------------------------------------
 # EFI Cleanup
 # ------------------------------------------------------------------------------
 
-if (ENABLE_BUILD_EFI)
+if(ENABLE_BUILD_EFI)
     file(MAKE_DIRECTORY ${EFI_OUTPUT_DIR})
     file(REMOVE ${EFI_MODULE_H})
     file(REMOVE ${EFI_SOURCES_CMAKE})
@@ -86,7 +92,7 @@ endif()
 # VMM Components
 # ------------------------------------------------------------------------------
 
-include_dependency(binutils)
+include_dependency(SOURCE_DEPENDS_DIR binutils)
 
 if(NOT WIN32)
     if(NOT ENABLE_BUILD_BINUTILS)
@@ -103,10 +109,10 @@ if(NOT WIN32)
     endif()
 endif()
 
-include_dependency(newlib)
-include_dependency(llvm)
-include_dependency(libcxxabi)
-include_dependency(libcxx)
+include_dependency(SOURCE_DEPENDS_DIR newlib)
+include_dependency(SOURCE_DEPENDS_DIR llvm)
+include_dependency(SOURCE_DEPENDS_DIR libcxxabi)
+include_dependency(SOURCE_DEPENDS_DIR libcxx)
 
 if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
     add_subproject(
@@ -232,7 +238,7 @@ endif()
 # ------------------------------------------------------------------------------
 
 if (ENABLE_BUILD_EFI)
-    include_dependency(gnuefi)
+    include_dependency(SOURCE_DEPENDS_DIR gnuefi)
 
     add_subproject(
         efi_main vmm
