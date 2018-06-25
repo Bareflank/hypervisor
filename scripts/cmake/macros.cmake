@@ -118,6 +118,16 @@ macro(add_config)
 endmacro(add_config)
 
 # ------------------------------------------------------------------------------
+# Macro File List
+# ------------------------------------------------------------------------------
+
+# Private
+#
+macro(add_project_include FILE)
+    set(PROJECT_INCLUDE_LIST "${PROJECT_INCLUDE_LIST}|${FILE}")
+endmacro(add_project_include)
+
+# ------------------------------------------------------------------------------
 # include_external_config
 # ------------------------------------------------------------------------------
 
@@ -273,8 +283,8 @@ endfunction(generate_flags)
 
 # Private
 #
-function(include_dependency NAME)
-    include(${SOURCE_DEPENDS_DIR}/${NAME}.cmake)
+function(include_dependency DIR NAME)
+    include(${${DIR}}/${NAME}.cmake)
 endfunction(include_dependency)
 
 # ------------------------------------------------------------------------------
@@ -876,6 +886,7 @@ function(add_subproject NAME PREFIX)
         -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN}
         -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
         -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        -DPROJECT_INCLUDE_LIST=${PROJECT_INCLUDE_LIST}
     )
 
     if(NOT WIN32 AND NOT CMAKE_GENERATOR STREQUAL "Ninja")
@@ -942,7 +953,8 @@ endfunction(add_efi_module)
 
 function(vmm_extension NAME)
     list(APPEND ARGN
-        DEPENDS bfvmm bfintrinsics
+        DEPENDS bfvmm
+        DEPENDS bfintrinsics
     )
 
     add_subproject(
@@ -953,7 +965,6 @@ function(vmm_extension NAME)
     if(ENABLE_BUILD_EFI)
         add_dependencies(efi_main_${VMM_PREFIX} ${NAME}_${VMM_PREFIX})
     endif()
-
 endfunction(vmm_extension)
 
 function(userspace_extension NAME)

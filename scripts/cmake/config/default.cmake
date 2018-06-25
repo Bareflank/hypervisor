@@ -86,11 +86,6 @@ set(SOURCE_CONFIG_DIR ${CMAKE_SOURCE_DIR}/scripts/cmake/config
     "Cmake configurations directory"
 )
 
-set(SOURCE_CONFIG_DIR ${CMAKE_SOURCE_DIR}/scripts/cmake/config
-    CACHE INTERNAL
-    "Cmake configurations directory"
-)
-
 set(SOURCE_DEPENDS_DIR ${CMAKE_SOURCE_DIR}/scripts/cmake/depends
     CACHE INTERNAL
     "Cmake dependencies directory"
