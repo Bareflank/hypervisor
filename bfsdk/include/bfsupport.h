@@ -132,8 +132,6 @@ struct efi_data_t {
  *      Struct signature
  * @var platform_info_t::version
  *      Struct version
- * @var platform_info_t::xapic_virt
- *      Driver's virtual address of the xAPIC
  * @var platform_info_t::efi
  *      Data specifying EFI booting behavior
  * @var platform_info_t::extension_data
@@ -144,7 +142,6 @@ struct efi_data_t {
 struct platform_info_t {
     uint8_t signature[4];
     uint8_t version[4];
-    uintptr_t xapic_virt;
     struct efi_data_t efi;
     void *extension_data;
     int _dummy;

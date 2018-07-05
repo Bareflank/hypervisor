@@ -44,6 +44,24 @@ bf_start_hypervisor_on_core(VOID *data)
     return;
 }
 
+static EFI_STATUS startup_ap(UINTN cpu)
+{
+    EFI_STATUS status = g_mp_services->StartupThisAP(
+                            g_mp_services,
+                            (EFI_AP_PROCEDURE)bf_start_hypervisor_on_core,
+                            cpu,
+                            NULL,
+                            10000000,
+                            NULL,
+                            NULL
+                        );
+    if (EFI_ERROR(status)) {
+        Print(L"base_start_fn StartupThisAP returned %r\n", status);
+        return BOOT_ABORT;
+    }
+    return BOOT_CONTINUE;
+}
+
 boot_ret_t base_start_fn()
 {
     EFI_STATUS status;
@@ -72,23 +90,14 @@ boot_ret_t base_start_fn()
     }
 
     Print(L"Starting hypervisor...\n");
-    if (cpus > 1) {
-        status = g_mp_services->StartupAllAPs(
-                     g_mp_services,
-                     (EFI_AP_PROCEDURE)bf_start_hypervisor_on_core,
-                     TRUE,
-                     NULL,
-                     10000000,
-                     NULL,
-                     NULL
-                 );
-        if (EFI_ERROR(status)) {
-            Print(L"base_start_fn StartupAllAPs returned %r\n", status);
-            goto fail;
+    for (uint64_t i = 1; i < cpus; i++) {
+        status = startup_ap(i);
+        if (status != BOOT_CONTINUE) {
+            return status;
         }
     }
-    bf_start_hypervisor_on_core(NULL);
 
+    bf_start_hypervisor_on_core(NULL);
     return BOOT_CONTINUE;
 
 fail:
@@ -110,7 +119,6 @@ boot_ret_t base_prestart_fn()
     }
 
     boot_platform_info.efi.enabled = 1;
-
     return BOOT_CONTINUE;
 }
 

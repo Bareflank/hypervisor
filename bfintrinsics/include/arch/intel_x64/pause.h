@@ -16,8 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef BARRIER_INTEL_X64_H
-#define BARRIER_INTEL_X64_H
+#ifndef PAUSE_INTEL_X64_H
+#define PAUSE_INTEL_X64_H
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -39,18 +39,16 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
-extern "C" void _sfence(void) noexcept;
+extern "C" void _pause(void) noexcept;
 
 // *INDENT-OFF*
 
 namespace intel_x64
 {
-namespace barrier
-{
-    inline void sfence() noexcept
-    { _sfence(); }
+    inline auto pause() noexcept
+    { _pause(); }
 }
-}
+
 // *INDENT-ON*
 
 #endif

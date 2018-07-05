@@ -25,9 +25,7 @@
 #include <bfsupport.h>
 #include "efi.h"
 #include "efilib.h"
-#include "boot.h"
 #include "mp_service.h"
-
 
 void *platform_alloc(uint64_t len, EFI_MEMORY_TYPE type)
 {
@@ -164,16 +162,19 @@ int64_t
 platform_populate_info(struct platform_info_t *info)
 {
     if (info) {
-        platform_memcpy(info, &boot_platform_info, sizeof(struct platform_info_t));
+        platform_memset(info, 0, sizeof(struct platform_info_t));
     }
 
+    info->efi.enabled = 1;
     return BF_SUCCESS;
 }
 
 void
 platform_unload_info(struct platform_info_t *info)
 {
-    (void) info;
+    if (info) {
+        platform_memset(info, 0, sizeof(struct platform_info_t));
+    }
 }
 
 int printf(const char *format, ...)

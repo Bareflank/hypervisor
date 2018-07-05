@@ -1985,10 +1985,10 @@ namespace ia32_x2apic_cur_count
     { bfdebug_nhex(level, name, get(), msg); }
 }
 
-namespace ia32_x2apic_div_conf
+namespace ia32_x2apic_dcr
 {
     constexpr const auto addr = 0x0000083EU;
-    constexpr const auto name = "ia32_x2apic_div_conf";
+    constexpr const auto name = "ia32_x2apic_dcr";
 
     inline auto get() noexcept
     { return _read_msr(addr); }

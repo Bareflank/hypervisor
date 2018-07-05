@@ -16,15 +16,17 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <catch/catch.hpp>
+#include <hippomocks.h>
 #include <arch/intel_x64/apic/lapic.h>
 
-namespace intel_x64
-{
-namespace lapic
-{
+#include <test/support.h>
 
-/// Lapic register attributes
-std::array<attr_t, count> attributes;
+#ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
+TEST_CASE("offsets")
+{
+    CHECK(::intel_x64::lapic::offset::list.size() == 47U);
 }
-}
+
+#endif

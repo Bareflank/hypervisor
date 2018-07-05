@@ -24,6 +24,7 @@ if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
         arch/intel_x64/exit_handler/exit_handler.cpp
         arch/intel_x64/vmcs/vmcs.cpp
         arch/intel_x64/vmx/vmx.cpp
+        arch/intel_x64/apic/lapic.cpp
     )
 
     if(NOT WIN32 AND NOT ENABLE_MOCKING)

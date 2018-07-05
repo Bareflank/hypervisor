@@ -21,7 +21,7 @@ default rel
 
 section .text
 
-global _sfence:function
-_sfence:
-    sfence
+global _pause:function
+_pause:
+    pause
     ret
