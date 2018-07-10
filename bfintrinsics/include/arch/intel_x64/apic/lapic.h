@@ -19,15 +19,19 @@
 #ifndef INTRINSICS_LAPIC_INTEL_X64_H
 #define INTRINSICS_LAPIC_INTEL_X64_H
 
+#include <array>
+#include <unordered_map>
+#include <arch/x64/misc.h>
+#include <arch/x64/paging.h>
+#include <arch/intel_x64/msrs.h>
+#include <arch/intel_x64/cpuid.h>
+#include <arch/intel_x64/apic/x2apic.h>
+
 // -----------------------------------------------------------------------------
 // Exports
 // -----------------------------------------------------------------------------
 
 #include <bfexports.h>
-#include <arch/x64/paging.h>
-#include <arch/intel_x64/msrs.h>
-#include <arch/intel_x64/cpuid.h>
-#include <arch/intel_x64/apic/x2apic.h>
 
 #ifndef STATIC_INTRINSICS
 #ifdef SHARED_INTRINSICS
@@ -97,6 +101,9 @@ namespace ia32_apic_base
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
+
+        inline void dump(int level, value_type val, std::string *msg = nullptr)
+        { bfdebug_subbool(level, name, is_enabled(val), msg); }
     }
 
     namespace extd
@@ -131,6 +138,9 @@ namespace ia32_apic_base
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
+
+        inline void dump(int level, value_type val, std::string *msg = nullptr)
+        { bfdebug_subbool(level, name, is_enabled(val), msg); }
     }
 
     namespace en
@@ -165,6 +175,9 @@ namespace ia32_apic_base
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
+
+        inline void dump(int level, value_type val, std::string *msg = nullptr)
+        { bfdebug_subbool(level, name, is_enabled(val), msg); }
     }
 
     ///
@@ -212,9 +225,9 @@ namespace ia32_apic_base
         inline void disable(value_type &msr) noexcept
         { msr = set_bits(msr, mask, disabled << from); }
 
-        inline void dump(int level, std::string *msg = nullptr)
+        inline void dump(int level, value_type val, std::string *msg = nullptr)
         {
-            switch (get()) {
+            switch (val) {
                 case x2apic:
                     bfdebug_subtext(level, name, "x2apic", msg);
                     return;
@@ -229,6 +242,9 @@ namespace ia32_apic_base
                     return;
             }
         }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        { dump(level, get(), msg); }
     }
 
     namespace apic_base
@@ -251,6 +267,10 @@ namespace ia32_apic_base
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subnhex(level, name, get(), msg); }
+
+        inline void dump(int level, value_type val, std::string *msg = nullptr)
+        { bfdebug_subnhex(level, name, val, msg); }
+
     }
 
     inline void dump(int level, std::string *msg = nullptr)
@@ -261,6 +281,16 @@ namespace ia32_apic_base
         en::dump(level, msg);
         apic_base::dump(level, msg);
     }
+
+    inline void dump(int level, value_type val, std::string *msg = nullptr)
+    {
+        bfdebug_nhex(level, name, val, msg);
+        bsp::dump(level, val, msg);
+        extd::dump(level, val, msg);
+        en::dump(level, val, msg);
+        state::dump(level, val, msg);
+        apic_base::dump(level, val, msg);
+    }
 }
 }
 
@@ -269,8 +299,11 @@ namespace lapic
 
 inline void dump_delivery_status(
     int lev, value_type val, std::string *msg = nullptr);
-inline void dump_delivery_mode(
+inline void dump_lvt_delivery_mode(
     int lev, value_type val, std::string *msg = nullptr);
+inline void dump_icr_delivery_mode(
+    int lev, value_type val, std::string *msg = nullptr);
+
 
 ///
 /// x2APIC MSR address space bounds
@@ -297,11 +330,11 @@ inline auto is_present() noexcept
 /// with the set of valid operations in xAPIC and x2APIC mode. Each
 /// canonical offset may be derived from an MSR address:
 ///
-///     canonical offset = (msr_addr & ~0x800)
+///     canonical offset = (msr_addr - x2apic_base) << 4
 ///
 /// or from a memory address:
 ///
-///     canonical offset = (mem_addr & (0x1000 - 1)) >> 4
+///     canonical offset = (mem_addr & (0x1000 - 1))
 ///
 /// Note that this mapping is _not_ invertible, meaning that in
 /// general you cannot always reconstruct a valid x2APIC (MSR) or
@@ -316,13 +349,64 @@ using attr_t = uint64_t;
 /// Lapic register canonical offset type
 using offset_t = uint64_t;
 
-/// Total number of (x2)apic registers
-constexpr const auto count = (x2apic_last - x2apic_base) + 1U;
+/// Canonical offsets
+namespace offset
+{
+    constexpr const uint64_t id = 0x020;
+    constexpr const uint64_t version = 0x030;
+    constexpr const uint64_t tpr = 0x080;
+    constexpr const uint64_t apr = 0x090;
+    constexpr const uint64_t ppr = 0x0A0;
+    constexpr const uint64_t eoi = 0x0B0;
+    constexpr const uint64_t ldr = 0x0D0;
+    constexpr const uint64_t dfr = 0x0E0;
+    constexpr const uint64_t svr = 0x0F0;
 
-/// Lapic register attributes
-extern std::array<attr_t, count> attributes;
+    constexpr const uint64_t isr0 = 0x100;
+    constexpr const uint64_t isr1 = 0x110;
+    constexpr const uint64_t isr2 = 0x120;
+    constexpr const uint64_t isr3 = 0x130;
+    constexpr const uint64_t isr4 = 0x140;
+    constexpr const uint64_t isr5 = 0x150;
+    constexpr const uint64_t isr6 = 0x160;
+    constexpr const uint64_t isr7 = 0x170;
 
-/// Mem addr to offset
+    constexpr const uint64_t tmr0 = 0x180;
+    constexpr const uint64_t tmr1 = 0x190;
+    constexpr const uint64_t tmr2 = 0x1A0;
+    constexpr const uint64_t tmr3 = 0x1B0;
+    constexpr const uint64_t tmr4 = 0x1C0;
+    constexpr const uint64_t tmr5 = 0x1D0;
+    constexpr const uint64_t tmr6 = 0x1E0;
+    constexpr const uint64_t tmr7 = 0x1F0;
+
+    constexpr const uint64_t irr0 = 0x200;
+    constexpr const uint64_t irr1 = 0x210;
+    constexpr const uint64_t irr2 = 0x220;
+    constexpr const uint64_t irr3 = 0x230;
+    constexpr const uint64_t irr4 = 0x240;
+    constexpr const uint64_t irr5 = 0x250;
+    constexpr const uint64_t irr6 = 0x260;
+    constexpr const uint64_t irr7 = 0x270;
+
+    constexpr const uint64_t esr = 0x280;
+    constexpr const uint64_t lvt_cmci = 0x2F0;
+    constexpr const uint64_t icr0 = 0x300;
+    constexpr const uint64_t icr1 = 0x310;
+    constexpr const uint64_t lvt_timer = 0x320;
+    constexpr const uint64_t lvt_thermal = 0x330;
+    constexpr const uint64_t lvt_pmi = 0x340;
+    constexpr const uint64_t lvt_lint0 = 0x350;
+    constexpr const uint64_t lvt_lint1 = 0x360;
+    constexpr const uint64_t lvt_error = 0x370;
+    constexpr const uint64_t init_count = 0x380;
+    constexpr const uint64_t cur_count = 0x390;
+    constexpr const uint64_t dcr = 0x3E0;
+    constexpr const uint64_t self_ipi = 0x3F0;
+
+extern std::array<uint32_t, 47> list;
+
+/// from_mem_addr
 ///
 /// Convert an integer interpreted as equal to (xapic_base | mmio_offset)
 /// to a canonical offset.
@@ -334,10 +418,10 @@ extern std::array<attr_t, count> attributes;
 /// @return may or may not be a valid offset. Always check
 ///         before using to access the apic
 ///
-constexpr inline auto mem_addr_to_offset(uint64_t mem_addr)
-{ return (mem_addr & (::x64::pt::page_size - 1U)) >> 4U; }
+constexpr inline auto from_mem_addr(uint64_t mem_addr)
+{ return (mem_addr & (::x64::pt::page_size - 1U)); }
 
-/// Msr addr to offset
+/// from_msr_addr
 ///
 /// Convert an integer interpreted as equal to (x2apic_base | msr_offset)
 /// to a canonical offset.
@@ -349,10 +433,10 @@ constexpr inline auto mem_addr_to_offset(uint64_t mem_addr)
 /// @return may or may not be a valid offset. Always check
 ///         before using to access the apic
 ///
-constexpr inline auto msr_addr_to_offset(uint64_t msr_addr)
-{ return (msr_addr & ~x2apic_base); }
+constexpr inline auto from_msr_addr(uint64_t msr_addr)
+{ return (msr_addr - x2apic_base) << 4; }
 
-/// Offset to memory address
+/// to_mem_addr
 ///
 /// Convert an offset to the corresponding xAPIC MMIO address
 ///
@@ -365,11 +449,11 @@ constexpr inline auto msr_addr_to_offset(uint64_t msr_addr)
 /// @return may or may not be a valid xAPIC register address. Check
 ///         before using to access the apic
 ///
-constexpr inline auto offset_to_mem_addr(
+constexpr inline auto to_mem_addr(
     offset_t offset, uintptr_t base = xapic_default_base)
-{ return base | (offset << 4U); }
+{ return base | offset; }
 
-/// Offset to msr address
+/// to_msr_addr
 ///
 /// Convert an offset to the corresponding x2APIC MSR address
 ///
@@ -380,8 +464,12 @@ constexpr inline auto offset_to_mem_addr(
 /// @return may or may not be a valid x2APIC register address. Check
 ///         before using to access the apic
 ///
-constexpr inline auto offset_to_msr_addr(offset_t offset)
-{ return x2apic_base | offset; }
+constexpr inline auto to_msr_addr(offset_t offset)
+{ return x2apic_base | (offset >> 4U); }
+
+}
+
+extern std::unordered_map<uint32_t, attr_t> attributes;
 
 /// A register is 'unstable' if its value cannot be reliably read
 /// even when interrupts are disabled (e.g. IRR)
@@ -613,7 +701,7 @@ namespace cmci
         { reg = set_bits(reg, mask, val << from); }
 
         inline void dump(int lev, value_type val, std::string *msg = nullptr)
-        { dump_delivery_mode(lev, get(val), msg); }
+        { dump_lvt_delivery_mode(lev, get(val), msg); }
     }
 
     namespace delivery_status
@@ -810,7 +898,7 @@ namespace thermal
         { reg = set_bits(reg, mask, val << from); }
 
         inline void dump(int lev, value_type val, std::string *msg = nullptr)
-        { dump_delivery_mode(lev, get(val), msg); }
+        { dump_lvt_delivery_mode(lev, get(val), msg); }
     }
 
     namespace delivery_status
@@ -903,7 +991,7 @@ namespace pmi
         { reg = set_bits(reg, mask, val << from); }
 
         inline void dump(int lev, value_type val, std::string *msg = nullptr)
-        { dump_delivery_mode(lev, get(val), msg); }
+        { dump_lvt_delivery_mode(lev, get(val), msg); }
     }
 
     namespace delivery_status
@@ -996,7 +1084,7 @@ namespace lint0
         { reg = set_bits(reg, mask, val << from); }
 
         inline void dump(int lev, value_type val, std::string *msg = nullptr)
-        { dump_delivery_mode(lev, get(val), msg); }
+        { dump_lvt_delivery_mode(lev, get(val), msg); }
     }
 
     namespace delivery_status
@@ -1156,7 +1244,7 @@ namespace lint1
         { reg = set_bits(reg, mask, val << from); }
 
         inline void dump(int lev, value_type val, std::string *msg = nullptr)
-        { dump_delivery_mode(lev, get(val), msg); }
+        { dump_lvt_delivery_mode(lev, get(val), msg); }
     }
 
     namespace delivery_status
@@ -1377,10 +1465,11 @@ namespace icr
         constexpr const auto name = "delivery_mode";
 
         constexpr const auto fixed = 0U;
+        constexpr const auto lowest_priority = 1U;
         constexpr const auto smi = 2U;
         constexpr const auto nmi = 4U;
         constexpr const auto init = 5U;
-        constexpr const auto extint = 7U;
+        constexpr const auto sipi = 6U;
 
         inline auto get(value_type val) noexcept
         { return get_bits(val, mask) >> from; }
@@ -1389,7 +1478,7 @@ namespace icr
         { reg = set_bits(reg, mask, val << from); }
 
         inline void dump(int lev, value_type val, std::string *msg = nullptr)
-        { dump_delivery_mode(lev, get(val), msg); }
+        { dump_icr_delivery_mode(lev, get(val), msg); }
     }
 
     namespace destination_mode
@@ -1413,7 +1502,6 @@ namespace icr
                 bfdebug_subtext(lev, name, "physical", msg);
                 return;
             }
-
             bfdebug_subtext(lev, name, "logical", msg);
         }
     }
@@ -1443,6 +1531,9 @@ namespace icr
         constexpr const auto from = 14ULL;
         constexpr const auto name = "level";
 
+        constexpr const auto deassert = 0U;
+        constexpr const auto assert = 1U;
+
         inline auto is_enabled(value_type val)
         { return is_bit_set(val, from); }
 
@@ -1456,7 +1547,13 @@ namespace icr
         { val = clear_bit(val, from); }
 
         inline void dump(int lev, value_type val, std::string *msg = nullptr)
-        { bfdebug_subbool(lev, name, val, msg); }
+        {
+            if (is_disabled(val)) {
+                bfdebug_subtext(lev, name, "deassert", msg);
+                return;
+            }
+            bfdebug_subtext(lev, name, "assert", msg);
+        }
     }
 
     namespace trigger_mode
@@ -1480,7 +1577,6 @@ namespace icr
                 bfdebug_subtext(lev, name, "edge", msg);
                 return;
             }
-
             bfdebug_subtext(lev, name, "level", msg);
         }
     }
@@ -1542,22 +1638,6 @@ namespace icr
         { bfdebug_subnhex(lev, name, get(val), msg); }
     }
 
-    namespace xapic_destination
-    {
-        constexpr const auto mask = 0xFF00000000000000ULL;
-        constexpr const auto from = 56ULL;
-        constexpr const auto name = "xapic_destination";
-
-        inline auto get(value_type val) noexcept
-        { return get_bits(val, mask) >> from; }
-
-        inline void set(value_type &reg, value_type val) noexcept
-        { reg = set_bits(reg, mask, val << from); }
-
-        inline void dump(int lev, value_type val, std::string *msg = nullptr)
-        { bfdebug_subnhex(lev, name, get(val), msg); }
-    }
-
     inline void dump(int lev, value_type val, std::string *msg = nullptr)
     {
         bfdebug_nhex(lev, name, val, msg);
@@ -1568,7 +1648,6 @@ namespace icr
         trigger_mode::dump(lev, val, msg);
         destination_shorthand::dump(lev, val, msg);
         x2apic_destination::dump(lev, val, msg);
-        xapic_destination::dump(lev, val, msg);
     }
 }
 
@@ -1782,7 +1861,7 @@ inline void dump_delivery_status(int lev, value_type val, std::string *msg)
     }
 }
 
-inline void dump_delivery_mode(int lev, value_type val, std::string *msg)
+inline void dump_lvt_delivery_mode(int lev, value_type val, std::string *msg)
 {
     const auto name = "delivery_mode";
 
@@ -1800,21 +1879,25 @@ inline void dump_delivery_mode(int lev, value_type val, std::string *msg)
     }
 }
 
-inline void init_nonexistent(uint64_t offset) noexcept
+inline void dump_icr_delivery_mode(int lev, value_type val, std::string *msg)
 {
-    attr_t attr = 0ULL;
+    const auto name = "delivery_mode";
 
-    xapic_readable::disable(attr);
-    xapic_writable::disable(attr);
+    switch (val) {
+        case 0: bfdebug_subtext(lev, name, "fixed", msg); break;
+        case 1: bfdebug_subtext(lev, name, "lowest_priority", msg); break;
+        case 2: bfdebug_subtext(lev, name, "smi", msg); break;
+        case 4: bfdebug_subtext(lev, name, "nmi", msg); break;
+        case 5: bfdebug_subtext(lev, name, "init", msg); break;
+        case 6: bfdebug_subtext(lev, name, "sipi", msg); break;
 
-    x2apic_readable::disable(attr);
-    x2apic_writable::disable(attr);
-
-    attributes.at(offset) = attr;
+        default:
+            bfalert_subtext(lev, name, "reserved", msg);
+            bfalert_subnhex(lev, "value", val, msg);
+    }
 }
 
-
-inline void init_xapic_read_write(uint64_t offset) noexcept
+inline void init_xapic_read_write(offset_t offset) noexcept
 {
     attr_t attr = attributes.at(offset);
 
@@ -1827,7 +1910,7 @@ inline void init_xapic_read_write(uint64_t offset) noexcept
     attributes.at(offset) = attr;
 }
 
-inline void init_x2apic_write_only(uint64_t offset) noexcept
+inline void init_x2apic_write_only(offset_t offset) noexcept
 {
     attr_t attr = attributes.at(offset);
 
@@ -1840,7 +1923,7 @@ inline void init_x2apic_write_only(uint64_t offset) noexcept
     attributes.at(offset) = attr;
 }
 
-inline void init_both_write_only(uint64_t offset) noexcept
+inline void init_both_write_only(offset_t offset) noexcept
 {
     attr_t attr = attributes.at(offset);
 
@@ -1853,7 +1936,7 @@ inline void init_both_write_only(uint64_t offset) noexcept
     attributes.at(offset) = attr;
 }
 
-inline void init_both_read_only(uint64_t offset) noexcept
+inline void init_both_read_only(offset_t offset) noexcept
 {
     attr_t attr = attributes.at(offset);
 
@@ -1866,7 +1949,7 @@ inline void init_both_read_only(uint64_t offset) noexcept
     attributes.at(offset) = attr;
 }
 
-inline void init_both_read_write(uint64_t offset) noexcept
+inline void init_both_read_write(offset_t offset) noexcept
 {
     attr_t attr = attributes.at(offset);
 
@@ -1878,108 +1961,79 @@ inline void init_both_read_write(uint64_t offset) noexcept
 
     attributes.at(offset) = attr;
 }
-
-
-inline void init_unstable(uint64_t offset) noexcept
-{
-    attr_t attr = attributes.at(offset);
-
-    x2apic_unstable::enable(attr);
-    xapic_unstable::enable(attr);
-
-    attributes.at(offset) = attr;
-}
-
-/// Note the isr, irr, and tmr are marked as unstable. This
-/// means that even though they are readable, we can't be sure that
-/// the value read from a physical piece won't change before we
-/// enter into the guest.
-///
-/// In the eapis, unstable registers will be initialized to 0 in the virt_lapic
-/// initializers that read from the physical lapics. There are alot of
-/// decisions made based on the values of the isr and irr, so starting from
-/// known values will be better for debugging.
 
 inline void init_attributes() noexcept
 {
-    using namespace ::intel_x64::msrs;
-
-    const auto dfr_addr = xapic_default_base | 0x0E0ULL;
-    const auto icr_high = xapic_default_base | 0x310ULL;
-
-    for (auto i = 0ULL; i < count; i++) {
-        attributes.at(i) = 0ULL;
+    for (const auto i : offset::list) {
+        attributes[i] = 0ULL;
 
         switch (i) {
-            case mem_addr_to_offset(dfr_addr):
-            case mem_addr_to_offset(icr_high):
+            case lapic::offset::dfr:
+            case lapic::offset::icr1:
                 init_xapic_read_write(i);
                 break;
 
-            case msr_addr_to_offset(ia32_x2apic_self_ipi::addr):
+            case lapic::offset::self_ipi:
                 init_x2apic_write_only(i);
                 break;
 
-            case msr_addr_to_offset(ia32_x2apic_eoi::addr):
+            case lapic::offset::eoi:
                 init_both_write_only(i);
                 break;
 
-            case msr_addr_to_offset(ia32_x2apic_apicid::addr):
-            case msr_addr_to_offset(ia32_x2apic_version::addr):
-            case msr_addr_to_offset(ia32_x2apic_ppr::addr):
+            case lapic::offset::isr0:
+            case lapic::offset::isr1:
+            case lapic::offset::isr2:
+            case lapic::offset::isr3:
+            case lapic::offset::isr4:
+            case lapic::offset::isr5:
+            case lapic::offset::isr6:
+            case lapic::offset::isr7:
 
-            case msr_addr_to_offset(ia32_x2apic_isr0::addr):
-            case msr_addr_to_offset(ia32_x2apic_isr1::addr):
-            case msr_addr_to_offset(ia32_x2apic_isr2::addr):
-            case msr_addr_to_offset(ia32_x2apic_isr3::addr):
-            case msr_addr_to_offset(ia32_x2apic_isr4::addr):
-            case msr_addr_to_offset(ia32_x2apic_isr5::addr):
-            case msr_addr_to_offset(ia32_x2apic_isr6::addr):
-            case msr_addr_to_offset(ia32_x2apic_isr7::addr):
+            case lapic::offset::tmr0:
+            case lapic::offset::tmr1:
+            case lapic::offset::tmr2:
+            case lapic::offset::tmr3:
+            case lapic::offset::tmr4:
+            case lapic::offset::tmr5:
+            case lapic::offset::tmr6:
+            case lapic::offset::tmr7:
 
-            case msr_addr_to_offset(ia32_x2apic_tmr0::addr):
-            case msr_addr_to_offset(ia32_x2apic_tmr1::addr):
-            case msr_addr_to_offset(ia32_x2apic_tmr2::addr):
-            case msr_addr_to_offset(ia32_x2apic_tmr3::addr):
-            case msr_addr_to_offset(ia32_x2apic_tmr4::addr):
-            case msr_addr_to_offset(ia32_x2apic_tmr5::addr):
-            case msr_addr_to_offset(ia32_x2apic_tmr6::addr):
-            case msr_addr_to_offset(ia32_x2apic_tmr7::addr):
+            case lapic::offset::irr0:
+            case lapic::offset::irr1:
+            case lapic::offset::irr2:
+            case lapic::offset::irr3:
+            case lapic::offset::irr4:
+            case lapic::offset::irr5:
+            case lapic::offset::irr6:
+            case lapic::offset::irr7:
 
-            case msr_addr_to_offset(ia32_x2apic_irr0::addr):
-            case msr_addr_to_offset(ia32_x2apic_irr1::addr):
-            case msr_addr_to_offset(ia32_x2apic_irr2::addr):
-            case msr_addr_to_offset(ia32_x2apic_irr3::addr):
-            case msr_addr_to_offset(ia32_x2apic_irr4::addr):
-            case msr_addr_to_offset(ia32_x2apic_irr5::addr):
-            case msr_addr_to_offset(ia32_x2apic_irr6::addr):
-            case msr_addr_to_offset(ia32_x2apic_irr7::addr):
-                init_unstable(i);
-
-            case msr_addr_to_offset(ia32_x2apic_cur_count::addr):
+            case lapic::offset::cur_count:
+            case lapic::offset::id:
+            case lapic::offset::version:
+            case lapic::offset::ppr:
                 init_both_read_only(i);
                 break;
 
-            case msr_addr_to_offset(ia32_x2apic_tpr::addr):
-            case msr_addr_to_offset(ia32_x2apic_sivr::addr):
-            case msr_addr_to_offset(ia32_x2apic_esr::addr):
-            case msr_addr_to_offset(ia32_x2apic_icr::addr):
+            case lapic::offset::tpr:
+            case lapic::offset::svr:
+            case lapic::offset::esr:
+            case lapic::offset::icr0:
 
-            case msr_addr_to_offset(ia32_x2apic_lvt_cmci::addr):
-            case msr_addr_to_offset(ia32_x2apic_lvt_timer::addr):
-            case msr_addr_to_offset(ia32_x2apic_lvt_thermal::addr):
-            case msr_addr_to_offset(ia32_x2apic_lvt_pmi::addr):
-            case msr_addr_to_offset(ia32_x2apic_lvt_lint0::addr):
-            case msr_addr_to_offset(ia32_x2apic_lvt_lint1::addr):
-            case msr_addr_to_offset(ia32_x2apic_lvt_error::addr):
+            case lapic::offset::lvt_cmci:
+            case lapic::offset::lvt_timer:
+            case lapic::offset::lvt_thermal:
+            case lapic::offset::lvt_pmi:
+            case lapic::offset::lvt_lint0:
+            case lapic::offset::lvt_lint1:
+            case lapic::offset::lvt_error:
 
-            case msr_addr_to_offset(ia32_x2apic_init_count::addr):
-            case msr_addr_to_offset(ia32_x2apic_div_conf::addr):
+            case lapic::offset::init_count:
+            case lapic::offset::dcr:
                 init_both_read_write(i);
                 break;
 
             default:
-                init_nonexistent(i);
                 break;
         }
     }

@@ -206,7 +206,7 @@ namespace ioapic
                     return;
                 }
 
-                ::intel_x64::lapic::dump_delivery_mode(lev, get(val), msg);
+                ::intel_x64::lapic::dump_lvt_delivery_mode(lev, get(val), msg);
             }
         }
 

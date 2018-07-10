@@ -19,8 +19,9 @@
 // TIDY_EXCLUSION=-cert-err58-cpp
 //
 // Reason:
-//     This triggers on g_filenames_xxx which is only used for testing. This
-//     is not a false positive, but it can be safely ignored.
+//     The operator+ may throw an exception, and since these vectors
+//     have static storage, tidy raises this error. This is unlikely to happen,
+//     and if it does, it will only happen in the bfdriver unittests
 //
 
 #include <vector>

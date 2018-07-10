@@ -19,6 +19,8 @@
 #ifndef BIT_INTEL_X64_H
 #define BIT_INTEL_X64_H
 
+#include <cstdint>
+
 // -----------------------------------------------------------------------------
 // Exports
 // -----------------------------------------------------------------------------
@@ -40,6 +42,7 @@
 // -----------------------------------------------------------------------------
 
 extern "C" uint64_t _bsf(uint64_t value) noexcept;
+extern "C" uint64_t _bsr(uint64_t value) noexcept;
 extern "C" uint64_t _popcnt(uint64_t value) noexcept;
 
 // *INDENT-OFF*
@@ -50,6 +53,9 @@ namespace bit
 {
     inline uint64_t bsf(uint64_t value) noexcept
     { return _bsf(value); }
+
+    inline uint64_t bsr(uint64_t value) noexcept
+    { return _bsr(value); }
 
     inline uint64_t popcnt(uint64_t value) noexcept
     { return _popcnt(value); }

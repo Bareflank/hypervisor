@@ -331,8 +331,9 @@ exit_handler::exit_handler(
     m_host_gdt.set(4, nullptr, 0xFFFFFFFF, ::x64::access_rights::ring0_gs_descriptor);
     m_host_gdt.set(5, &m_host_tss, sizeof(m_host_tss), ::x64::access_rights::ring0_tr_descriptor);
 
-    if (vcpuid::is_bootstrap_vcpu(id)) {
+    static bool need_init = true;
 
+    if (need_init) {
         s_ia32_efer_msr |= ::intel_x64::msrs::ia32_efer::lme::mask;
         s_ia32_efer_msr |= ::intel_x64::msrs::ia32_efer::lma::mask;
         s_ia32_efer_msr |= ::intel_x64::msrs::ia32_efer::nxe::mask;
@@ -371,6 +372,8 @@ exit_handler::exit_handler(
         if (::intel_x64::cpuid::extended_feature_flags::subleaf0::ebx::smap::is_enabled()) {
             s_cr4 |= ::intel_x64::cr4::smap_enable_bit::mask;
         }
+
+        need_init = false;
     }
 
     this->write_host_state();

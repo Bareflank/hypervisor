@@ -21,7 +21,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-
 #include "boot.h"
 
 static boot_fn_t _prestart_fns[NR_START_FNS] = {0};

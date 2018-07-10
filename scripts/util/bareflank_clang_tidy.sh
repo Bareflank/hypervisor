@@ -25,9 +25,9 @@ get_changed_files() {
     if [[ "$1" == "all" ]]; then
         files=$(git ls-files | grep -Ee "\.(cpp|h|c)$" || true)
     elif [[ "$1" == "upstream" ]]; then
-        files=$(git diff --relative --name-only upstream/master $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+        files=$(git diff --relative --name-only --diff-filter=d upstream/master $PWD | grep -Ee "\.(cpp|h|c)$" || true)
     else
-        files=$(git diff --relative --name-only origin $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+        files=$(git diff --relative --name-only --diff-filter=d origin $PWD | grep -Ee "\.(cpp|h|c)$" || true)
     fi
     popd > /dev/null
 }
@@ -84,12 +84,6 @@ if [[ "$#" -lt 2 ]]; then
     exit 1
 fi
 
-if [[ ! -f "compile_commands.json" ]]; then
-    echo "ERROR: database is missing. Did you run?"
-    echo "    - cmake -DENABLE_TIDY=ON .."
-    exit 1
-fi
-
 if [[ ! -x "$(which run-clang-tidy-6.0.py)" ]]; then
     echo "ERROR: run-clang-tidy-6.0.py not in PATH"
     exit 1
@@ -106,6 +100,13 @@ if [[ -z "$files" ]]; then
     echo -e "\033[1;32m\xE2\x9C\x93 nothing changed:\033[0m $2";
     exit 0
 else
+    if [[ ! -f "compile_commands.json" ]]; then
+        echo "ERROR: database is missing. Did you run?"
+        echo "    - cmake -DENABLE_TIDY=ON .."
+        echo "    - files: $files"
+        exit 1
+    fi
+
     echo -e "\033[1;33m- processing:";
     echo -e "  \033[1;35msrc - \033[0m$2";
     echo -e "  \033[1;35mbld - \033[0m$PWD";

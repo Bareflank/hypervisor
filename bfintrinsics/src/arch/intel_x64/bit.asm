@@ -30,3 +30,8 @@ global _bsf:function
 _bsf:
     bsf rax, rdi
     ret
+
+global _bsr:function
+_bsr:
+    bsr rax, rdi
+    ret

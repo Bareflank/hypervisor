@@ -23,9 +23,9 @@ get_changed_files() {
     if [[ "$1" == "all" ]]; then
         files=$(git ls-files | grep -Ee "\.(cpp|h|c)$" || true)
     elif [[ "$1" == "upstream" ]]; then
-        files=$(git diff --relative --name-only upstream/master $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+        files=$(git diff --relative --name-only --diff-filter=d upstream/master $PWD | grep -Ee "\.(cpp|h|c)$" || true)
     else
-        files=$(git diff --relative --name-only origin $PWD | grep -Ee "\.(cpp|h|c)$" || true)
+        files=$(git diff --relative --name-only --diff-filter=d origin $PWD | grep -Ee "\.(cpp|h|c)$" || true)
     fi
 }
 
