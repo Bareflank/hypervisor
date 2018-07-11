@@ -122,3 +122,28 @@ _vmx_failure:
 _vmx_success:
     mov rax, 0x1
     ret
+
+global _vmcall:function
+_vmcall:
+
+    push rbx
+
+%ifdef MS64
+    mov rax, rcx
+    mov rbx, rdx
+    mov rcx, r8
+    mov rdx, r9
+%else
+    mov r10, rdx
+    mov r11, rcx
+
+    mov rax, rdi
+    mov rbx, rsi
+    mov rcx, r10
+    mov rdx, r11
+%endif
+
+    vmcall
+
+    pop rbx
+    ret

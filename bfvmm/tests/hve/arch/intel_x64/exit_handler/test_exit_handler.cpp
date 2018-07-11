@@ -50,12 +50,19 @@ setup_vmcs(MockRepository &mocks, ::intel_x64::vmcs::value_type reason)
     return vmcs;
 }
 
-TEST_CASE("exit_handler: halt")
+TEST_CASE("quiet")
 {
     MockRepository mocks;
     auto &&vmcs = setup_vmcs(mocks, 0x0);
 
     handle_test(vmcs);
+}
+
+TEST_CASE("exit_handler: halt")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0x0);
+
     CHECK_NOTHROW(halt(vmcs));
 }
 
@@ -64,7 +71,6 @@ TEST_CASE("exit_handler: advance")
     MockRepository mocks;
     auto &&vmcs = setup_vmcs(mocks, 0x0);
 
-    handle_test(vmcs);
     CHECK_NOTHROW(advance(vmcs));
 }
 

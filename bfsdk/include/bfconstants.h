@@ -24,6 +24,20 @@
 #include <bftypes.h>
 
 /*
+ * Max Physical Address
+ *
+ * Defines the maximum physical address the system can access. This can be
+ * used by CR3 and EPT to define the memory map used by the VMM. Note that
+ * if this value is too large, its possible additional memory would be needed
+ * by the VMM to setup CR3 or EPT depending on the granulairty used.
+ *
+ * Note: defined in bytes
+ */
+#ifndef MAX_PHYS_ADDR
+#define MAX_PHYS_ADDR 0x1000000000
+#endif
+
+/*
  * Max Page Size
  *
  * Defines the maximum page size that is supported by the VMM (not the max

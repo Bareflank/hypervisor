@@ -42,7 +42,7 @@ void test()
     }
 }
 
-TEST_CASE("no return")
+TEST_CASE("one function, no return")
 {
     g_test = test_case::throw_logic_error;
     CHECK_NOTHROW(guard_exceptions(test));
@@ -57,17 +57,47 @@ TEST_CASE("no return")
     CHECK_NOTHROW(guard_exceptions(test));
 }
 
-TEST_CASE("with return")
+TEST_CASE("one function, with return")
 {
     g_test = test_case::throw_logic_error;
-    CHECK(guard_exceptions(10L, test) == 10L);
+    CHECK(guard_exceptions(static_cast<int64_t>(10), test) == 10);
 
     g_test = test_case::throw_bad_alloc;
-    CHECK(guard_exceptions(10L, test) == BF_BAD_ALLOC);
+    CHECK(guard_exceptions(static_cast<int64_t>(10), test) == BF_BAD_ALLOC);
 
     g_test = test_case::throw_int;
-    CHECK(guard_exceptions(10L, test) == 10L);
+    CHECK(guard_exceptions(static_cast<int64_t>(10), test) == 10);
 
     g_test = test_case::no_throw;
-    CHECK(guard_exceptions(10L, test) == SUCCESS);
+    CHECK(guard_exceptions(static_cast<int64_t>(10), test) == SUCCESS);
+}
+
+TEST_CASE("two functions, no return")
+{
+    g_test = test_case::throw_logic_error;
+    CHECK_NOTHROW(guard_exceptions(test, [] {}));
+
+    g_test = test_case::throw_bad_alloc;
+    CHECK_NOTHROW(guard_exceptions(test, [] {}));
+
+    g_test = test_case::throw_int;
+    CHECK_NOTHROW(guard_exceptions(test, [] {}));
+
+    g_test = test_case::no_throw;
+    CHECK_NOTHROW(guard_exceptions(test, [] {}));
+}
+
+TEST_CASE("two functions, with return")
+{
+    g_test = test_case::throw_logic_error;
+    CHECK(guard_exceptions(static_cast<int64_t>(10), test, [] {}) == 10);
+
+    g_test = test_case::throw_bad_alloc;
+    CHECK(guard_exceptions(static_cast<int64_t>(10), test, [] {}) == BF_BAD_ALLOC);
+
+    g_test = test_case::throw_int;
+    CHECK(guard_exceptions(static_cast<int64_t>(10), test, [] {}) == 10);
+
+    g_test = test_case::no_throw;
+    CHECK(guard_exceptions(static_cast<int64_t>(10), test, [] {}) == SUCCESS);
 }

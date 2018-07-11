@@ -9,17 +9,48 @@
 //
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// MERCHANTABILITY or FITNESS FOR A PARTICULLAR PURPOSE. See the GNU
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef CR3_H
-#define CR3_H
+#ifndef BFCALLONCE
+#define BFCALLONCE
 
-#include "cr3/mmap.h"
-#include "cr3/helpers.h"
+/// @cond
+
+#include <mutex>
+
+// TODO
+//
+// This code is only needed because there seems to be a bug with GCC that
+// causes a system error when --coverage is enabled. The following was written
+// to have the same names and implementation as std::call_once so that at
+// some point this code can easily be removed.
+//
+namespace bfn
+{
+
+struct once_flag {
+    bool m_value{false};
+    mutable std::mutex m_mutex{};
+};
+
+template<typename FUNC>
+void call_once(once_flag &flag, FUNC func)
+{
+    std::lock_guard<std::mutex> lock(flag.m_mutex);
+
+    if (!flag.m_value) {
+        func();
+        flag.m_value = true;
+    }
+}
+
+}
+
+/// @endcond
 
 #endif

@@ -43,10 +43,30 @@
 // -----------------------------------------------------------------------------
 
 #include <mutex>
-std::mutex g_add_md_mutex;
-std::mutex m_alloc_mutex;
-std::mutex m_alloc_page_mutex;
-std::mutex m_alloc_mem_map_mutex;
+
+auto &add_md_mutex()
+{
+    static std::mutex s_add_md_mutex{};
+    return s_add_md_mutex;
+}
+
+auto &alloc_mutex()
+{
+    static std::mutex s_alloc_mutex{};
+    return s_alloc_mutex;
+}
+
+auto &alloc_page_mutex()
+{
+    static std::mutex s_alloc_page_mutex{};
+    return s_alloc_page_mutex;
+}
+
+auto &alloc_mem_map_mutex()
+{
+    static std::mutex s_alloc_mem_map_mutex{};
+    return s_alloc_mem_map_mutex;
+}
 
 // -----------------------------------------------------------------------------
 // Stats
@@ -143,7 +163,7 @@ memory_manager::instance() noexcept
 memory_manager::pointer
 memory_manager::alloc(size_type size) noexcept
 {
-    std::lock_guard<std::mutex> lock(m_alloc_mutex);
+    std::lock_guard<std::mutex> lock(alloc_mutex());
 
     try {
         if (size <= 0x010) {
@@ -197,7 +217,7 @@ memory_manager::alloc(size_type size) noexcept
 memory_manager::pointer
 memory_manager::alloc_page() noexcept
 {
-    std::lock_guard<std::mutex> lock(m_alloc_page_mutex);
+    std::lock_guard<std::mutex> lock(alloc_page_mutex());
 
     try {
         return static_cast<pointer>(g_page_pool.allocate(BAREFLANK_PAGE_SIZE));
@@ -211,7 +231,7 @@ memory_manager::alloc_page() noexcept
 memory_manager::pointer
 memory_manager::alloc_map(size_type size) noexcept
 {
-    std::lock_guard<std::mutex> lock(m_alloc_mem_map_mutex);
+    std::lock_guard<std::mutex> lock(alloc_mem_map_mutex());
 
     try {
         return reinterpret_cast<pointer>(g_mem_map_pool.allocate(size));
@@ -225,7 +245,7 @@ memory_manager::alloc_map(size_type size) noexcept
 void
 memory_manager::free(pointer ptr) noexcept
 {
-    std::lock_guard<std::mutex> lock(m_alloc_mutex);
+    std::lock_guard<std::mutex> lock(alloc_mutex());
 
     if (slab010.contains(ptr)) {
         return slab010.deallocate(ptr);
@@ -273,21 +293,21 @@ memory_manager::free(pointer ptr) noexcept
 void
 memory_manager::free_page(pointer ptr) noexcept
 {
-    std::lock_guard<std::mutex> lock(m_alloc_page_mutex);
+    std::lock_guard<std::mutex> lock(alloc_page_mutex());
     return g_page_pool.deallocate(ptr);
 }
 
 void
 memory_manager::free_map(pointer ptr) noexcept
 {
-    std::lock_guard<std::mutex> lock(m_alloc_mem_map_mutex);
+    std::lock_guard<std::mutex> lock(alloc_mem_map_mutex());
     return g_mem_map_pool.deallocate(ptr);
 }
 
 memory_manager::size_type
 memory_manager::size(pointer ptr) const noexcept
 {
-    std::lock_guard<std::mutex> lock(m_alloc_mutex);
+    std::lock_guard<std::mutex> lock(alloc_mutex());
 
     if (slab010.contains(ptr)) {
         return slab010.size(ptr);
@@ -335,7 +355,7 @@ memory_manager::size(pointer ptr) const noexcept
 memory_manager::size_type
 memory_manager::size_page(pointer ptr) const noexcept
 {
-    std::lock_guard<std::mutex> lock(m_alloc_page_mutex);
+    std::lock_guard<std::mutex> lock(alloc_page_mutex());
 
     if (g_page_pool.contains(ptr)) {
         return g_page_pool.size(ptr);
@@ -347,7 +367,7 @@ memory_manager::size_page(pointer ptr) const noexcept
 memory_manager::size_type
 memory_manager::size_map(pointer ptr) const noexcept
 {
-    std::lock_guard<std::mutex> lock(m_alloc_mem_map_mutex);
+    std::lock_guard<std::mutex> lock(alloc_mem_map_mutex());
 
     if (g_mem_map_pool.contains(ptr)) {
         return g_mem_map_pool.size(ptr);
@@ -362,12 +382,12 @@ memory_manager::virtint_to_physint(integer_pointer virt) const
     // [[ensures ret: ret != 0]]
     expects(virt != 0);
 
-    std::lock_guard<std::mutex> guard(g_add_md_mutex);
+    std::lock_guard<std::mutex> guard(add_md_mutex());
     return bfn::upper(m_virt_map.at(bfn::upper(virt)).phys) | bfn::lower(virt);
 }
 
 memory_manager::integer_pointer
-memory_manager::virtptr_to_physint(pointer virt) const
+memory_manager::virtptr_to_physint(const pointer virt) const
 { return this->virtint_to_physint(reinterpret_cast<integer_pointer>(virt)); }
 
 memory_manager::pointer
@@ -375,7 +395,7 @@ memory_manager::virtint_to_physptr(integer_pointer virt) const
 { return reinterpret_cast<pointer>(this->virtint_to_physint(virt)); }
 
 memory_manager::pointer
-memory_manager::virtptr_to_physptr(pointer virt) const
+memory_manager::virtptr_to_physptr(const pointer virt) const
 { return reinterpret_cast<pointer>(this->virtptr_to_physint(virt)); }
 
 memory_manager::integer_pointer
@@ -384,12 +404,12 @@ memory_manager::physint_to_virtint(integer_pointer phys) const
     // [[ensures ret: ret != 0]]
     expects(phys != 0);
 
-    std::lock_guard<std::mutex> guard(g_add_md_mutex);
+    std::lock_guard<std::mutex> guard(add_md_mutex());
     return bfn::upper(m_phys_map.at(bfn::upper(phys)).virt) | bfn::lower(phys);
 }
 
 memory_manager::integer_pointer
-memory_manager::physptr_to_virtint(pointer phys) const
+memory_manager::physptr_to_virtint(const pointer phys) const
 { return this->physint_to_virtint(reinterpret_cast<integer_pointer>(phys)); }
 
 memory_manager::pointer
@@ -397,14 +417,14 @@ memory_manager::physint_to_virtptr(integer_pointer phys) const
 { return reinterpret_cast<pointer>(this->physint_to_virtint(phys)); }
 
 memory_manager::pointer
-memory_manager::physptr_to_virtptr(pointer phys) const
+memory_manager::physptr_to_virtptr(const pointer phys) const
 { return reinterpret_cast<pointer>(this->physptr_to_virtint(phys)); }
 
 void
 memory_manager::add_md(integer_pointer virt, integer_pointer phys, attr_type attr)
 {
     auto ___ = gsl::on_failure([&] {
-        std::lock_guard<std::mutex> guard(g_add_md_mutex);
+        std::lock_guard<std::mutex> guard(add_md_mutex());
 
         m_virt_map.erase(virt);
         m_phys_map.erase(phys);
@@ -414,7 +434,7 @@ memory_manager::add_md(integer_pointer virt, integer_pointer phys, attr_type att
     expects(bfn::lower(phys) == 0);
 
     {
-        std::lock_guard<std::mutex> guard(g_add_md_mutex);
+        std::lock_guard<std::mutex> guard(add_md_mutex());
 
         if (m_virt_map.find(virt) != m_virt_map.end()) {
             throw std::runtime_error(
@@ -457,7 +477,7 @@ memory_manager::remove_md(integer_pointer virt, integer_pointer phys) noexcept
     }
 
     guard_exceptions([&] {
-        std::lock_guard<std::mutex> guard(g_add_md_mutex);
+        std::lock_guard<std::mutex> guard(add_md_mutex());
 
         m_virt_map.erase(virt);
         m_phys_map.erase(phys);
@@ -468,7 +488,7 @@ memory_manager::memory_descriptor_list
 memory_manager::descriptors() const
 {
     memory_descriptor_list list;
-    std::lock_guard<std::mutex> guard(g_add_md_mutex);
+    std::lock_guard<std::mutex> guard(add_md_mutex());
 
     for (const auto &p : m_virt_map) {
         list.push_back({p.second.phys, p.first, p.second.attr});

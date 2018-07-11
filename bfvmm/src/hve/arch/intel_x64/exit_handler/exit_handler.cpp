@@ -26,6 +26,7 @@
 
 #include <bfgsl.h>
 #include <bfdebug.h>
+#include <bfcallonce.h>
 #include <bfconstants.h>
 #include <bfexception.h>
 #include <bferrorcodes.h>
@@ -44,14 +45,86 @@
 extern "C" void exit_handler_entry(void) noexcept;
 
 // -----------------------------------------------------------------------------
-// Static Variables
+// Global Variables
 // -----------------------------------------------------------------------------
 
-::intel_x64::cr0::value_type bfvmm::intel_x64::exit_handler::s_cr0 = 0;
-::intel_x64::cr3::value_type bfvmm::intel_x64::exit_handler::s_cr3 = 0;
-::intel_x64::cr4::value_type bfvmm::intel_x64::exit_handler::s_cr4 = 0;
-::intel_x64::msrs::value_type bfvmm::intel_x64::exit_handler::s_ia32_pat_msr = 0;
-::intel_x64::msrs::value_type bfvmm::intel_x64::exit_handler::s_ia32_efer_msr = 0;
+namespace bfvmm
+{
+namespace x64
+{
+gsl::not_null<cr3::mmap *>
+mmap()
+{
+    static cr3::mmap s_mmap;
+    return &s_mmap;
+}
+}
+}
+
+static bfn::once_flag g_once_flag{};
+static ::intel_x64::cr0::value_type g_cr0{};
+static ::intel_x64::cr3::value_type g_cr3{};
+static ::intel_x64::cr4::value_type g_cr4{};
+static ::intel_x64::msrs::value_type g_ia32_pat_msr{};
+static ::intel_x64::msrs::value_type g_ia32_efer_msr{};
+
+static void
+setup()
+{
+    using namespace ::intel_x64;
+    using namespace ::intel_x64::cpuid;
+
+    using namespace bfvmm::x64;
+    using attr_type = bfvmm::x64::cr3::mmap::attr_type;
+
+    for (const auto &md : g_mm->descriptors()) {
+        if (md.type == (MEMORY_TYPE_R | MEMORY_TYPE_E)) {
+            mmap()->map_4k(md.virt, md.phys, attr_type::read_execute);
+            continue;
+        }
+
+        mmap()->map_4k(md.virt, md.phys, attr_type::read_write);
+    }
+
+    g_ia32_efer_msr |= msrs::ia32_efer::lme::mask;
+    g_ia32_efer_msr |= msrs::ia32_efer::lma::mask;
+    g_ia32_efer_msr |= msrs::ia32_efer::nxe::mask;
+
+    g_cr0 |= cr0::protection_enable::mask;
+    g_cr0 |= cr0::monitor_coprocessor::mask;
+    g_cr0 |= cr0::extension_type::mask;
+    g_cr0 |= cr0::numeric_error::mask;
+    g_cr0 |= cr0::write_protect::mask;
+    g_cr0 |= cr0::paging::mask;
+
+    g_cr3 = mmap()->cr3();
+    g_ia32_pat_msr = mmap()->pat();
+
+    g_cr4 |= cr4::v8086_mode_extensions::mask;
+    g_cr4 |= cr4::protected_mode_virtual_interrupts::mask;
+    g_cr4 |= cr4::time_stamp_disable::mask;
+    g_cr4 |= cr4::debugging_extensions::mask;
+    g_cr4 |= cr4::page_size_extensions::mask;
+    g_cr4 |= cr4::physical_address_extensions::mask;
+    g_cr4 |= cr4::machine_check_enable::mask;
+    g_cr4 |= cr4::page_global_enable::mask;
+    g_cr4 |= cr4::performance_monitor_counter_enable::mask;
+    g_cr4 |= cr4::osfxsr::mask;
+    g_cr4 |= cr4::osxmmexcpt::mask;
+    g_cr4 |= cr4::vmx_enable_bit::mask;
+
+    if (feature_information::ecx::xsave::is_enabled()) {
+        g_cr4 |= ::intel_x64::cr4::osxsave::mask;
+    }
+
+    if (extended_feature_flags::subleaf0::ebx::smep::is_enabled()) {
+        g_cr4 |= ::intel_x64::cr4::smep_enable_bit::mask;
+    }
+
+    if (extended_feature_flags::subleaf0::ebx::smap::is_enabled()) {
+        g_cr4 |= ::intel_x64::cr4::smap_enable_bit::mask;
+    }
+}
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -88,40 +161,44 @@ halt(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs) noexcept
 bool
 advance(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs) noexcept
 {
-    vmcs->save_state()->rip += ::intel_x64::vmcs::vm_exit_instruction_length::get();
+    using namespace ::intel_x64::vmcs;
+
+    vmcs->save_state()->rip += vm_exit_instruction_length::get();
     return true;
 }
 
 ::x64::msrs::value_type
 emulate_rdmsr(::x64::msrs::field_type msr)
 {
+    using namespace ::intel_x64::vmcs;
+
     switch (msr) {
         case ::intel_x64::msrs::ia32_debugctl::addr:
-            return ::intel_x64::vmcs::guest_ia32_debugctl::get();
+            return guest_ia32_debugctl::get();
 
         case ::x64::msrs::ia32_pat::addr:
-            return ::intel_x64::vmcs::guest_ia32_pat::get();
+            return guest_ia32_pat::get();
 
         case ::intel_x64::msrs::ia32_efer::addr:
-            return ::intel_x64::vmcs::guest_ia32_efer::get();
+            return guest_ia32_efer::get();
 
         case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
-            return ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::get_if_exists();
+            return guest_ia32_perf_global_ctrl::get_if_exists();
 
         case ::intel_x64::msrs::ia32_sysenter_cs::addr:
-            return ::intel_x64::vmcs::guest_ia32_sysenter_cs::get();
+            return guest_ia32_sysenter_cs::get();
 
         case ::intel_x64::msrs::ia32_sysenter_esp::addr:
-            return ::intel_x64::vmcs::guest_ia32_sysenter_esp::get();
+            return guest_ia32_sysenter_esp::get();
 
         case ::intel_x64::msrs::ia32_sysenter_eip::addr:
-            return ::intel_x64::vmcs::guest_ia32_sysenter_eip::get();
+            return guest_ia32_sysenter_eip::get();
 
         case ::intel_x64::msrs::ia32_fs_base::addr:
-            return ::intel_x64::vmcs::guest_fs_base::get();
+            return guest_fs_base::get();
 
         case ::intel_x64::msrs::ia32_gs_base::addr:
-            return ::intel_x64::vmcs::guest_gs_base::get();
+            return guest_gs_base::get();
 
         default:
             return ::intel_x64::msrs::get(msr);
@@ -148,41 +225,43 @@ emulate_rdmsr(::x64::msrs::field_type msr)
 void
 emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val)
 {
+    using namespace ::intel_x64::vmcs;
+
     switch (msr) {
         case ::intel_x64::msrs::ia32_debugctl::addr:
-            ::intel_x64::vmcs::guest_ia32_debugctl::set(val);
+            guest_ia32_debugctl::set(val);
             return;
 
         case ::x64::msrs::ia32_pat::addr:
-            ::intel_x64::vmcs::guest_ia32_pat::set(val);
+            guest_ia32_pat::set(val);
             return;
 
         case ::intel_x64::msrs::ia32_efer::addr:
-            ::intel_x64::vmcs::guest_ia32_efer::set(val);
+            guest_ia32_efer::set(val);
             return;
 
         case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
-            ::intel_x64::vmcs::guest_ia32_perf_global_ctrl::set_if_exists(val);
+            guest_ia32_perf_global_ctrl::set_if_exists(val);
             return;
 
         case ::intel_x64::msrs::ia32_sysenter_cs::addr:
-            ::intel_x64::vmcs::guest_ia32_sysenter_cs::set(val);
+            guest_ia32_sysenter_cs::set(val);
             return;
 
         case ::intel_x64::msrs::ia32_sysenter_esp::addr:
-            ::intel_x64::vmcs::guest_ia32_sysenter_esp::set(val);
+            guest_ia32_sysenter_esp::set(val);
             return;
 
         case ::intel_x64::msrs::ia32_sysenter_eip::addr:
-            ::intel_x64::vmcs::guest_ia32_sysenter_eip::set(val);
+            guest_ia32_sysenter_eip::set(val);
             return;
 
         case ::intel_x64::msrs::ia32_fs_base::addr:
-            ::intel_x64::vmcs::guest_fs_base::set(val);
+            guest_fs_base::set(val);
             return;
 
         case ::intel_x64::msrs::ia32_gs_base::addr:
-            ::intel_x64::vmcs::guest_gs_base::set(val);
+            guest_gs_base::set(val);
             return;
 
         default:
@@ -198,6 +277,8 @@ emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val)
 static bool
 handle_cpuid(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 {
+    using namespace ::x64::cpuid;
+
     if (vmcs->save_state()->rax == 0xBF01) {
         bfdebug_info(0, "host os is" bfcolor_green " now " bfcolor_end "in a vm");
         return advance(vmcs);
@@ -205,15 +286,15 @@ handle_cpuid(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 
     if (vmcs->save_state()->rax == 0xBF00) {
         bfdebug_info(0, "host os is" bfcolor_red " not " bfcolor_end "in a vm");
-        return advance(vmcs);
+        vmcs->promote();
     }
 
     auto ret =
         ::x64::cpuid::get(
-            gsl::narrow_cast<::x64::cpuid::field_type>(vmcs->save_state()->rax),
-            gsl::narrow_cast<::x64::cpuid::field_type>(vmcs->save_state()->rbx),
-            gsl::narrow_cast<::x64::cpuid::field_type>(vmcs->save_state()->rcx),
-            gsl::narrow_cast<::x64::cpuid::field_type>(vmcs->save_state()->rdx)
+            gsl::narrow_cast<field_type>(vmcs->save_state()->rax),
+            gsl::narrow_cast<field_type>(vmcs->save_state()->rbx),
+            gsl::narrow_cast<field_type>(vmcs->save_state()->rcx),
+            gsl::narrow_cast<field_type>(vmcs->save_state()->rdx)
         );
 
     vmcs->save_state()->rax = ret.rax;
@@ -232,18 +313,12 @@ handle_invd(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 }
 
 static bool
-handle_vmxoff(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
-{
-    vmcs->promote();
-    return true;        // Only executed during unit tests
-}
-
-static bool
 handle_rdmsr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 {
-    auto val = emulate_rdmsr(
-                   gsl::narrow_cast<::x64::msrs::field_type>(vmcs->save_state()->rcx)
-               );
+    auto val =
+        emulate_rdmsr(
+            gsl::narrow_cast<::x64::msrs::field_type>(vmcs->save_state()->rcx)
+        );
 
     vmcs->save_state()->rax = ((val >> 0x00) & 0x00000000FFFFFFFF);
     vmcs->save_state()->rdx = ((val >> 0x20) & 0x00000000FFFFFFFF);
@@ -273,42 +348,6 @@ handle_wrmsr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 
 namespace bfvmm
 {
-
-namespace x64
-{
-
-// TODO
-//
-// Find a way to get rid of the bfignored(g_mm) call. This is there to
-// ensure that the memory manager is constructed before the mmap, otherwise
-// you end up with errors during deconstruction.
-//
-gsl::not_null<cr3::mmap *>
-mmap()
-{
-    bfignored(g_mm);
-    static std::unique_ptr<bfvmm::x64::cr3::mmap> g_mmap;
-
-    if (g_mmap) {
-        return g_mmap.get();
-    }
-
-    g_mmap = std::make_unique<cr3::mmap>();
-
-    for (const auto &md : g_mm->descriptors()) {
-        if (md.type == (MEMORY_TYPE_R | MEMORY_TYPE_E)) {
-            g_mmap->map_4k(md.virt, md.phys, cr3::mmap::attr_type::read_execute);
-            continue;
-        }
-
-        g_mmap->map_4k(md.virt, md.phys, cr3::mmap::attr_type::read_write);
-    }
-
-    return g_mmap.get();
-}
-
-}
-
 namespace intel_x64
 {
 
@@ -318,68 +357,25 @@ exit_handler::exit_handler(
     m_vmcs{vmcs},
     m_stack{std::make_unique<gsl::byte[]>(STACK_SIZE * 2)}
 {
+    using namespace bfvmm::x64;
     using namespace ::intel_x64::vmcs;
+    using namespace ::x64::access_rights;
+
+    bfn::call_once(g_once_flag, setup);
 
     m_vmcs->load();
     m_vmcs->save_state()->exit_handler_ptr = reinterpret_cast<uintptr_t>(this);
 
-    auto id = m_vmcs->save_state()->vcpuid;
-
-    m_host_gdt.set(1, nullptr, 0xFFFFFFFF, ::x64::access_rights::ring0_cs_descriptor);
-    m_host_gdt.set(2, nullptr, 0xFFFFFFFF, ::x64::access_rights::ring0_ss_descriptor);
-    m_host_gdt.set(3, nullptr, 0xFFFFFFFF, ::x64::access_rights::ring0_fs_descriptor);
-    m_host_gdt.set(4, nullptr, 0xFFFFFFFF, ::x64::access_rights::ring0_gs_descriptor);
-    m_host_gdt.set(5, &m_host_tss, sizeof(m_host_tss), ::x64::access_rights::ring0_tr_descriptor);
-
-    static bool need_init = true;
-
-    if (need_init) {
-        s_ia32_efer_msr |= ::intel_x64::msrs::ia32_efer::lme::mask;
-        s_ia32_efer_msr |= ::intel_x64::msrs::ia32_efer::lma::mask;
-        s_ia32_efer_msr |= ::intel_x64::msrs::ia32_efer::nxe::mask;
-
-        s_cr0 |= ::intel_x64::cr0::protection_enable::mask;
-        s_cr0 |= ::intel_x64::cr0::monitor_coprocessor::mask;
-        s_cr0 |= ::intel_x64::cr0::extension_type::mask;
-        s_cr0 |= ::intel_x64::cr0::numeric_error::mask;
-        s_cr0 |= ::intel_x64::cr0::write_protect::mask;
-        s_cr0 |= ::intel_x64::cr0::paging::mask;
-
-        s_cr3 = x64::mmap()->cr3();
-        s_ia32_pat_msr = x64::mmap()->pat();
-
-        s_cr4 |= ::intel_x64::cr4::v8086_mode_extensions::mask;
-        s_cr4 |= ::intel_x64::cr4::protected_mode_virtual_interrupts::mask;
-        s_cr4 |= ::intel_x64::cr4::time_stamp_disable::mask;
-        s_cr4 |= ::intel_x64::cr4::debugging_extensions::mask;
-        s_cr4 |= ::intel_x64::cr4::page_size_extensions::mask;
-        s_cr4 |= ::intel_x64::cr4::physical_address_extensions::mask;
-        s_cr4 |= ::intel_x64::cr4::machine_check_enable::mask;
-        s_cr4 |= ::intel_x64::cr4::page_global_enable::mask;
-        s_cr4 |= ::intel_x64::cr4::performance_monitor_counter_enable::mask;
-        s_cr4 |= ::intel_x64::cr4::osfxsr::mask;
-        s_cr4 |= ::intel_x64::cr4::osxmmexcpt::mask;
-        s_cr4 |= ::intel_x64::cr4::vmx_enable_bit::mask;
-
-        if (::intel_x64::cpuid::feature_information::ecx::xsave::is_enabled()) {
-            s_cr4 |= ::intel_x64::cr4::osxsave::mask;
-        }
-
-        if (::intel_x64::cpuid::extended_feature_flags::subleaf0::ebx::smep::is_enabled()) {
-            s_cr4 |= ::intel_x64::cr4::smep_enable_bit::mask;
-        }
-
-        if (::intel_x64::cpuid::extended_feature_flags::subleaf0::ebx::smap::is_enabled()) {
-            s_cr4 |= ::intel_x64::cr4::smap_enable_bit::mask;
-        }
-
-        need_init = false;
-    }
+    m_host_gdt.set(1, nullptr, 0xFFFFFFFF, ring0_cs_descriptor);
+    m_host_gdt.set(2, nullptr, 0xFFFFFFFF, ring0_ss_descriptor);
+    m_host_gdt.set(3, nullptr, 0xFFFFFFFF, ring0_fs_descriptor);
+    m_host_gdt.set(4, nullptr, 0xFFFFFFFF, ring0_gs_descriptor);
+    m_host_gdt.set(5, &m_host_tss, sizeof(m_host_tss), ring0_tr_descriptor);
 
     this->write_host_state();
     this->write_control_state();
 
-    if (vcpuid::is_hvm_vcpu(id)) {
+    if (vcpuid::is_hvm_vcpu(m_vmcs->save_state()->vcpuid)) {
         this->write_guest_state();
     }
 
@@ -391,11 +387,6 @@ exit_handler::exit_handler(
     add_handler(
         exit_reason::basic_exit_reason::invd,
         handler_delegate_t::create<handle_invd>()
-    );
-
-    add_handler(
-        exit_reason::basic_exit_reason::vmxoff,
-        handler_delegate_t::create<handle_vmxoff>()
     );
 
     add_handler(
@@ -420,23 +411,18 @@ exit_handler::write_host_state()
 {
     using namespace ::intel_x64::vmcs;
 
-    host_cs_selector::set(
-        gsl::narrow_cast<::x64::segment_register::value_type>(1 << 3));
-    host_ss_selector::set(
-        gsl::narrow_cast<::x64::segment_register::value_type>(2 << 3));
-    host_fs_selector::set(
-        gsl::narrow_cast<::x64::segment_register::value_type>(3 << 3));
-    host_gs_selector::set(
-        gsl::narrow_cast<::x64::segment_register::value_type>(4 << 3));
-    host_tr_selector::set(
-        gsl::narrow_cast<::x64::segment_register::value_type>(5 << 3));
+    host_cs_selector::set(1 << 3);
+    host_ss_selector::set(2 << 3);
+    host_fs_selector::set(3 << 3);
+    host_gs_selector::set(4 << 3);
+    host_tr_selector::set(5 << 3);
 
-    host_ia32_pat::set(s_ia32_pat_msr);
-    host_ia32_efer::set(s_ia32_efer_msr);
+    host_ia32_pat::set(g_ia32_pat_msr);
+    host_ia32_efer::set(g_ia32_efer_msr);
 
-    host_cr0::set(s_cr0);
-    host_cr3::set(s_cr3);
-    host_cr4::set(s_cr4);
+    host_cr0::set(g_cr0);
+    host_cr3::set(g_cr3);
+    host_cr4::set(g_cr4);
 
     host_gs_base::set(reinterpret_cast<uintptr_t>(m_vmcs->save_state()));
     host_tr_base::set(m_host_gdt.base(5));
@@ -451,37 +437,44 @@ exit_handler::write_host_state()
 void
 exit_handler::write_guest_state()
 {
+    using namespace ::intel_x64;
     using namespace ::intel_x64::vmcs;
+    using namespace ::intel_x64::cpuid;
+
+    using namespace ::x64::access_rights;
+    using namespace ::x64::segment_register;
 
     x64::gdt guest_gdt;
     x64::idt guest_idt;
 
-    auto es_index = ::x64::segment_register::es::index::get();
-    auto cs_index = ::x64::segment_register::cs::index::get();
-    auto ss_index = ::x64::segment_register::ss::index::get();
-    auto ds_index = ::x64::segment_register::ds::index::get();
-    auto fs_index = ::x64::segment_register::fs::index::get();
-    auto gs_index = ::x64::segment_register::gs::index::get();
-    auto ldtr_index = ::x64::segment_register::ldtr::index::get();
-    auto tr_index = ::x64::segment_register::tr::index::get();
+    auto es_index = es::index::get();
+    auto cs_index = cs::index::get();
+    auto ss_index = ss::index::get();
+    auto ds_index = ds::index::get();
+    auto fs_index = fs::index::get();
+    auto gs_index = gs::index::get();
+    auto ldtr_index = ldtr::index::get();
+    auto tr_index = tr::index::get();
 
     vmcs_link_pointer::set(0xFFFFFFFFFFFFFFFF);
 
-    guest_es_selector::set(::x64::segment_register::es::get());
-    guest_cs_selector::set(::x64::segment_register::cs::get());
-    guest_ss_selector::set(::x64::segment_register::ss::get());
-    guest_ds_selector::set(::x64::segment_register::ds::get());
-    guest_fs_selector::set(::x64::segment_register::fs::get());
-    guest_gs_selector::set(::x64::segment_register::gs::get());
-    guest_ldtr_selector::set(::x64::segment_register::ldtr::get());
-    guest_tr_selector::set(::x64::segment_register::tr::get());
+    guest_es_selector::set(es::get());
+    guest_cs_selector::set(cs::get());
+    guest_ss_selector::set(ss::get());
+    guest_ds_selector::set(ds::get());
+    guest_fs_selector::set(fs::get());
+    guest_gs_selector::set(gs::get());
+    guest_ldtr_selector::set(ldtr::get());
+    guest_tr_selector::set(tr::get());
 
-    guest_ia32_debugctl::set(::intel_x64::msrs::ia32_debugctl::get());
+    guest_ia32_debugctl::set(msrs::ia32_debugctl::get());
     guest_ia32_pat::set(::x64::msrs::ia32_pat::get());
-    guest_ia32_efer::set(::intel_x64::msrs::ia32_efer::get());
+    guest_ia32_efer::set(msrs::ia32_efer::get());
 
-    if (::intel_x64::cpuid::arch_perf_monitoring::eax::version_id::get() >= 2) {
-        guest_ia32_perf_global_ctrl::set_if_exists(::intel_x64::msrs::ia32_perf_global_ctrl::get());
+    if (arch_perf_monitoring::eax::version_id::get() >= 2) {
+        guest_ia32_perf_global_ctrl::set_if_exists(
+            msrs::ia32_perf_global_ctrl::get()
+        );
     }
 
     guest_gdtr_limit::set(guest_gdt.limit());
@@ -500,41 +493,41 @@ exit_handler::write_guest_state()
     guest_tr_limit::set(tr_index != 0 ? guest_gdt.limit(tr_index) : 0);
 
     guest_es_access_rights::set(
-        es_index != 0 ? guest_gdt.access_rights(es_index) : ::x64::access_rights::unusable);
+        es_index != 0 ? guest_gdt.access_rights(es_index) : unusable);
     guest_cs_access_rights::set(
-        cs_index != 0 ? guest_gdt.access_rights(cs_index) : ::x64::access_rights::unusable);
+        cs_index != 0 ? guest_gdt.access_rights(cs_index) : unusable);
     guest_ss_access_rights::set(
-        ss_index != 0 ? guest_gdt.access_rights(ss_index) : ::x64::access_rights::unusable);
+        ss_index != 0 ? guest_gdt.access_rights(ss_index) : unusable);
     guest_ds_access_rights::set(
-        ds_index != 0 ? guest_gdt.access_rights(ds_index) : ::x64::access_rights::unusable);
+        ds_index != 0 ? guest_gdt.access_rights(ds_index) : unusable);
     guest_fs_access_rights::set(
-        fs_index != 0 ? guest_gdt.access_rights(fs_index) : ::x64::access_rights::unusable);
+        fs_index != 0 ? guest_gdt.access_rights(fs_index) : unusable);
     guest_gs_access_rights::set(
-        gs_index != 0 ? guest_gdt.access_rights(gs_index) : ::x64::access_rights::unusable);
+        gs_index != 0 ? guest_gdt.access_rights(gs_index) : unusable);
     guest_ldtr_access_rights::set(
-        ldtr_index != 0 ? guest_gdt.access_rights(ldtr_index) : ::x64::access_rights::unusable);
+        ldtr_index != 0 ? guest_gdt.access_rights(ldtr_index) : unusable);
     guest_tr_access_rights::set(
-        tr_index != 0 ? guest_gdt.access_rights(tr_index) : ::x64::access_rights::type::tss_busy | 0x80U);
+        tr_index != 0 ? guest_gdt.access_rights(tr_index) : type::tss_busy | 0x80U);
 
     guest_es_base::set(es_index != 0 ? guest_gdt.base(es_index) : 0);
     guest_cs_base::set(cs_index != 0 ? guest_gdt.base(cs_index) : 0);
     guest_ss_base::set(ss_index != 0 ? guest_gdt.base(ss_index) : 0);
     guest_ds_base::set(ds_index != 0 ? guest_gdt.base(ds_index) : 0);
-    guest_fs_base::set(::intel_x64::msrs::ia32_fs_base::get());
-    guest_gs_base::set(::intel_x64::msrs::ia32_gs_base::get());
+    guest_fs_base::set(msrs::ia32_fs_base::get());
+    guest_gs_base::set(msrs::ia32_gs_base::get());
     guest_ldtr_base::set(ldtr_index != 0 ? guest_gdt.base(ldtr_index) : 0);
     guest_tr_base::set(tr_index != 0 ? guest_gdt.base(tr_index) : 0);
 
-    guest_cr0::set(::intel_x64::cr0::get());
-    guest_cr3::set(::intel_x64::cr3::get());
-    guest_cr4::set(::intel_x64::cr4::get() | ::intel_x64::cr4::vmx_enable_bit::mask);
-    guest_dr7::set(::intel_x64::dr7::get());
+    guest_cr0::set(cr0::get());
+    guest_cr3::set(cr3::get());
+    guest_cr4::set(cr4::get() | cr4::vmx_enable_bit::mask);
+    guest_dr7::set(dr7::get());
 
     guest_rflags::set(::x64::rflags::get());
 
-    guest_ia32_sysenter_cs::set(::intel_x64::msrs::ia32_sysenter_cs::get());
-    guest_ia32_sysenter_esp::set(::intel_x64::msrs::ia32_sysenter_esp::get());
-    guest_ia32_sysenter_eip::set(::intel_x64::msrs::ia32_sysenter_eip::get());
+    guest_ia32_sysenter_cs::set(msrs::ia32_sysenter_cs::get());
+    guest_ia32_sysenter_esp::set(msrs::ia32_sysenter_esp::get());
+    guest_ia32_sysenter_eip::set(msrs::ia32_sysenter_eip::get());
 }
 
 void
@@ -571,10 +564,13 @@ exit_handler::write_control_state()
         ((ia32_vmx_entry_ctls_msr >> 32) & 0x00000000FFFFFFFF)
     );
 
-    primary_processor_based_vm_execution_controls::activate_secondary_controls::enable_if_allowed();
-    secondary_processor_based_vm_execution_controls::enable_rdtscp::enable_if_allowed();
-    secondary_processor_based_vm_execution_controls::enable_invpcid::enable_if_allowed();
-    secondary_processor_based_vm_execution_controls::enable_xsaves_xrstors::enable_if_allowed();
+    using namespace primary_processor_based_vm_execution_controls;
+    using namespace secondary_processor_based_vm_execution_controls;
+
+    activate_secondary_controls::enable_if_allowed();
+    enable_rdtscp::enable_if_allowed();
+    enable_invpcid::enable_if_allowed();
+    enable_xsaves_xrstors::enable_if_allowed();
 
     vm_exit_controls::save_debug_controls::enable();
     vm_exit_controls::host_address_space_size::enable();
@@ -595,11 +591,12 @@ void
 exit_handler::handle(
     bfvmm::intel_x64::exit_handler *exit_handler) noexcept
 {
-    guard_exceptions([&]() {
+    using namespace ::intel_x64::vmcs;
 
+    guard_exceptions([&]() {
         const auto &handlers =
             exit_handler->m_handlers.at(
-                ::intel_x64::vmcs::exit_reason::basic_exit_reason::get()
+                exit_reason::basic_exit_reason::get()
             );
 
         for (const auto &d : handlers) {
@@ -615,12 +612,12 @@ exit_handler::handle(
 
             bferror_subtext(
                 0, "exit_reason",
-                ::intel_x64::vmcs::exit_reason::basic_exit_reason::description(), msg
+                exit_reason::basic_exit_reason::description(), msg
             );
         });
 
-        if (::intel_x64::vmcs::exit_reason::vm_entry_failure::is_enabled()) {
-            ::intel_x64::vmcs::debug::dump();
+        if (exit_reason::vm_entry_failure::is_enabled()) {
+            debug::dump();
             check::all();
         }
     });

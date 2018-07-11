@@ -23,6 +23,7 @@
 
 #include <list>
 #include <array>
+#include <mutex>
 #include <memory>
 
 #include <intrinsics.h>
@@ -203,12 +204,6 @@ private:
 
     vmcs *m_vmcs;
     std::unique_ptr<gsl::byte[]> m_stack;
-
-    static ::intel_x64::cr0::value_type s_cr0;
-    static ::intel_x64::cr3::value_type s_cr3;
-    static ::intel_x64::cr4::value_type s_cr4;
-    static ::intel_x64::msrs::value_type s_ia32_pat_msr;
-    static ::intel_x64::msrs::value_type s_ia32_efer_msr;
 
     std::array<std::list<handler_delegate_t>, 128> m_handlers;
 

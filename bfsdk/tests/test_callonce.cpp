@@ -16,10 +16,21 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef CR3_H
-#define CR3_H
+#include <catch/catch.hpp>
+#include <bfcallonce.h>
 
-#include "cr3/mmap.h"
-#include "cr3/helpers.h"
+TEST_CASE("set bit")
+{
+    int count = 0;
+    bfn::once_flag flag;
 
-#endif
+    auto func = [&] {
+        count++;
+    };
+
+    bfn::call_once(flag, func);
+    bfn::call_once(flag, func);
+    bfn::call_once(flag, func);
+
+    CHECK(count == 1);
+}

@@ -111,7 +111,9 @@ public:
         m_vmcs->load();
         m_vmcs->launch();
 
-        ::x64::cpuid::get(0xBF01, 0, 0, 0);
+        if (this->is_host_vm_vcpu()) {
+            ::x64::cpuid::get(0xBF01, 0, 0, 0);
+        }
     }
 
     /// Halt Delegate
@@ -126,7 +128,10 @@ public:
     void hlt_delegate(bfobject *obj)
     {
         bfignored(obj);
-        ::x64::cpuid::get(0xBF00, 0, 0, 0);
+
+        if (this->is_host_vm_vcpu()) {
+            ::x64::cpuid::get(0xBF00, 0, 0, 0);
+        }
     }
 
     /// Get VMCS

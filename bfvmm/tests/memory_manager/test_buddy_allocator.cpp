@@ -100,6 +100,16 @@ TEST_CASE("buddy_allocator: unaligned allocation")
     CHECK_NOTHROW(buddy.allocate(10));
 }
 
+TEST_CASE("buddy_allocator: contains")
+{
+    auto nt = std::make_unique<char[]>(node_tree_size);
+    buddy_allocator buddy{0x100000ULL, k, nt.get()};
+
+    auto addr = buddy.allocate(0x1000);
+    CHECK(buddy.contains(addr));
+    CHECK(!buddy.contains(reinterpret_cast<void *>(42)));
+}
+
 TEST_CASE("buddy_allocator: allocation all 4k blocks")
 {
     auto nt = std::make_unique<char[]>(node_tree_size);

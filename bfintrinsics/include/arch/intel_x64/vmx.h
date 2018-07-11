@@ -53,6 +53,7 @@ extern "C" bool _vmwrite(uint64_t field, uint64_t value) noexcept;
 extern "C" bool _vmlaunch_demote(void) noexcept;
 extern "C" bool _invept(uint64_t type, void *ptr) noexcept;
 extern "C" bool _invvpid(uint64_t type, void *ptr) noexcept;
+extern "C" uintptr_t _vmcall(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4) noexcept;
 
 // *INDENT-OFF*
 
@@ -188,6 +189,9 @@ namespace vm
             throw std::runtime_error("vm::launch_demote failed");
         }
     }
+
+    inline uintptr_t call(uintptr_t r1 = 0, uintptr_t r2 = 0, uintptr_t r3 = 0, uintptr_t r4 = 0)
+    { return _vmcall(r1, r2, r3, r4); }
 }
 }
 

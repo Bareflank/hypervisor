@@ -16,13 +16,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef EPT_PAGING_INTEL_X64_H
-#define EPT_PAGING_INTEL_X64_H
+#ifndef EPT_INTEL_X64_H
+#define EPT_INTEL_X64_H
 
 #include <bfdebug.h>
 #include <bfbitmanip.h>
-
-#include <arch/x64/cpuid.h>
 
 // *INDENT-OFF*
 
@@ -34,25 +32,6 @@ namespace ept
 constexpr auto page_size_4k = 0x1000ULL;
 constexpr auto page_size_2m = 0x200000ULL;
 constexpr auto page_size_1g = 0x40000000ULL;
-
-enum class attr_type {
-    trap,
-    read_only,
-    read_write,
-    execute_only,
-    read_execute,
-    pass_through,
-    invalid
-};
-
-enum class memory_type {
-    uncacheable,
-    write_combining,
-    write_through,
-    write_back,
-    write_protected,
-    invalid
-};
 
 namespace pml4
 {
@@ -134,72 +113,6 @@ namespace pml4
 
             inline void disable(value_type &entry) noexcept
             { entry = clear_bit(entry, from); }
-        }
-
-        namespace attr_type
-        {
-            constexpr const auto mask = 0x0000000000000007ULL;
-            constexpr const auto from = 0ULL;
-            constexpr const auto name = "attr_type";
-
-            constexpr const auto trap = 0x00ULL;
-            constexpr const auto read_only = 0x01ULL;
-            constexpr const auto read_write = 0x03ULL;
-            constexpr const auto execute_only = 0x04ULL;
-            constexpr const auto read_execute = 0x05ULL;
-            constexpr const auto pass_through = 0x07ULL;
-
-            inline auto get(value_type &entry)
-            {
-                switch (get_bits(entry, mask) >> from) {
-                    case trap:
-                        return ::intel_x64::ept::attr_type::trap;
-
-                    case read_only:
-                        return ::intel_x64::ept::attr_type::read_only;
-
-                    case read_write:
-                        return ::intel_x64::ept::attr_type::read_write;
-
-                    case execute_only:
-                        return ::intel_x64::ept::attr_type::execute_only;
-
-                    case read_execute:
-                        return ::intel_x64::ept::attr_type::read_execute;
-
-                    default:
-                        return ::intel_x64::ept::attr_type::invalid;
-                };
-            }
-
-            inline void set(value_type &entry, ::intel_x64::ept::attr_type attr)
-            {
-                switch (attr) {
-                    case ::intel_x64::ept::attr_type::trap:
-                        entry = set_bits(entry, mask, trap << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::read_only:
-                        entry = set_bits(entry, mask, read_only << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::read_write:
-                        entry = set_bits(entry, mask, read_write << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::execute_only:
-                        entry = set_bits(entry, mask, execute_only << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::read_execute:
-                        entry = set_bits(entry, mask, read_execute << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::pass_through:
-                        entry = set_bits(entry, mask, pass_through << from);
-                        break;
-                };
-            }
         }
 
         namespace accessed_flag
@@ -358,72 +271,6 @@ namespace pdpt
             { entry = clear_bit(entry, from); }
         }
 
-        namespace attr_type
-        {
-            constexpr const auto mask = 0x0000000000000007ULL;
-            constexpr const auto from = 0ULL;
-            constexpr const auto name = "attr_type";
-
-            constexpr const auto trap = 0x00ULL;
-            constexpr const auto read_only = 0x01ULL;
-            constexpr const auto read_write = 0x03ULL;
-            constexpr const auto execute_only = 0x04ULL;
-            constexpr const auto read_execute = 0x05ULL;
-            constexpr const auto pass_through = 0x07ULL;
-
-            inline auto get(value_type &entry)
-            {
-                switch (get_bits(entry, mask) >> from) {
-                    case trap:
-                        return ::intel_x64::ept::attr_type::trap;
-
-                    case read_only:
-                        return ::intel_x64::ept::attr_type::read_only;
-
-                    case read_write:
-                        return ::intel_x64::ept::attr_type::read_write;
-
-                    case execute_only:
-                        return ::intel_x64::ept::attr_type::execute_only;
-
-                    case read_execute:
-                        return ::intel_x64::ept::attr_type::read_execute;
-
-                    default:
-                        return ::intel_x64::ept::attr_type::invalid;
-                };
-            }
-
-            inline void set(value_type &entry, ::intel_x64::ept::attr_type attr)
-            {
-                switch (attr) {
-                    case ::intel_x64::ept::attr_type::trap:
-                        entry = set_bits(entry, mask, trap << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::read_only:
-                        entry = set_bits(entry, mask, read_only << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::read_write:
-                        entry = set_bits(entry, mask, read_write << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::execute_only:
-                        entry = set_bits(entry, mask, execute_only << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::read_execute:
-                        entry = set_bits(entry, mask, read_execute << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::pass_through:
-                        entry = set_bits(entry, mask, pass_through << from);
-                        break;
-                };
-            }
-        }
-
         namespace memory_type
         {
             constexpr const auto mask = 0x0000000000000038ULL;
@@ -436,53 +283,11 @@ namespace pdpt
             constexpr const auto write_protected = 0x5ULL;
             constexpr const auto write_back = 0x6ULL;
 
-            inline auto get(value_type &entry)
-            {
-                switch (get_bits(entry, mask) >> from) {
-                    case uncacheable:
-                        return ::intel_x64::ept::memory_type::uncacheable;
+            inline auto get(value_type &entry) noexcept
+            { return get_bits(entry, mask) >> from; }
 
-                    case write_combining:
-                        return ::intel_x64::ept::memory_type::write_combining;
-
-                    case write_through:
-                        return ::intel_x64::ept::memory_type::write_through;
-
-                    case write_back:
-                        return ::intel_x64::ept::memory_type::write_back;
-
-                    case write_protected:
-                        return ::intel_x64::ept::memory_type::write_protected;
-
-                    default:
-                        return ::intel_x64::ept::memory_type::invalid;
-                };
-            }
-
-            inline void set(value_type &entry, ::intel_x64::ept::memory_type cache)
-            {
-                switch (cache) {
-                    case ::intel_x64::ept::memory_type::uncacheable:
-                        entry = set_bits(entry, mask, uncacheable << from);
-                        break;
-
-                    case ::intel_x64::ept::memory_type::write_combining:
-                        entry = set_bits(entry, mask, write_combining << from);
-                        break;
-
-                    case ::intel_x64::ept::memory_type::write_through:
-                        entry = set_bits(entry, mask, write_through << from);
-                        break;
-
-                    case ::intel_x64::ept::memory_type::write_back:
-                        entry = set_bits(entry, mask, write_back << from);
-                        break;
-
-                    case ::intel_x64::ept::memory_type::write_protected:
-                        entry = set_bits(entry, mask, write_protected << from);
-                        break;
-                };
-            }
+            inline void set(value_type &entry, value_type val) noexcept
+            { entry = set_bits(entry, mask, val << from); }
         }
 
         namespace ignore_pat
@@ -504,11 +309,11 @@ namespace pdpt
             { entry = clear_bit(entry, from); }
         }
 
-        namespace entry_type
+        namespace ps
         {
             constexpr const auto mask = 0x0000000000000080ULL;
             constexpr const auto from = 7ULL;
-            constexpr const auto name = "entry_type";
+            constexpr const auto name = "ps";
 
             inline auto is_enabled(value_type &entry) noexcept
             { return is_bit_set(entry, from); }
@@ -698,72 +503,6 @@ namespace pd
             { entry = clear_bit(entry, from); }
         }
 
-        namespace attr_type
-        {
-            constexpr const auto mask = 0x0000000000000007ULL;
-            constexpr const auto from = 0ULL;
-            constexpr const auto name = "attr_type";
-
-            constexpr const auto trap = 0x00ULL;
-            constexpr const auto read_only = 0x01ULL;
-            constexpr const auto read_write = 0x03ULL;
-            constexpr const auto execute_only = 0x04ULL;
-            constexpr const auto read_execute = 0x05ULL;
-            constexpr const auto pass_through = 0x07ULL;
-
-            inline auto get(value_type &entry)
-            {
-                switch (get_bits(entry, mask) >> from) {
-                    case trap:
-                        return ::intel_x64::ept::attr_type::trap;
-
-                    case read_only:
-                        return ::intel_x64::ept::attr_type::read_only;
-
-                    case read_write:
-                        return ::intel_x64::ept::attr_type::read_write;
-
-                    case execute_only:
-                        return ::intel_x64::ept::attr_type::execute_only;
-
-                    case read_execute:
-                        return ::intel_x64::ept::attr_type::read_execute;
-
-                    default:
-                        return ::intel_x64::ept::attr_type::invalid;
-                };
-            }
-
-            inline void set(value_type &entry, ::intel_x64::ept::attr_type attr)
-            {
-                switch (attr) {
-                    case ::intel_x64::ept::attr_type::trap:
-                        entry = set_bits(entry, mask, trap << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::read_only:
-                        entry = set_bits(entry, mask, read_only << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::read_write:
-                        entry = set_bits(entry, mask, read_write << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::execute_only:
-                        entry = set_bits(entry, mask, execute_only << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::read_execute:
-                        entry = set_bits(entry, mask, read_execute << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::pass_through:
-                        entry = set_bits(entry, mask, pass_through << from);
-                        break;
-                };
-            }
-        }
-
         namespace memory_type
         {
             constexpr const auto mask = 0x0000000000000038ULL;
@@ -776,53 +515,11 @@ namespace pd
             constexpr const auto write_protected = 0x5ULL;
             constexpr const auto write_back = 0x6ULL;
 
-            inline auto get(value_type &entry)
-            {
-                switch (get_bits(entry, mask) >> from) {
-                    case uncacheable:
-                        return ::intel_x64::ept::memory_type::uncacheable;
+            inline auto get(value_type &entry) noexcept
+            { return get_bits(entry, mask) >> from; }
 
-                    case write_combining:
-                        return ::intel_x64::ept::memory_type::write_combining;
-
-                    case write_through:
-                        return ::intel_x64::ept::memory_type::write_through;
-
-                    case write_back:
-                        return ::intel_x64::ept::memory_type::write_back;
-
-                    case write_protected:
-                        return ::intel_x64::ept::memory_type::write_protected;
-
-                    default:
-                        return ::intel_x64::ept::memory_type::invalid;
-                };
-            }
-
-            inline void set(value_type &entry, ::intel_x64::ept::memory_type cache)
-            {
-                switch (cache) {
-                    case ::intel_x64::ept::memory_type::uncacheable:
-                        entry = set_bits(entry, mask, uncacheable << from);
-                        break;
-
-                    case ::intel_x64::ept::memory_type::write_combining:
-                        entry = set_bits(entry, mask, write_combining << from);
-                        break;
-
-                    case ::intel_x64::ept::memory_type::write_through:
-                        entry = set_bits(entry, mask, write_through << from);
-                        break;
-
-                    case ::intel_x64::ept::memory_type::write_back:
-                        entry = set_bits(entry, mask, write_back << from);
-                        break;
-
-                    case ::intel_x64::ept::memory_type::write_protected:
-                        entry = set_bits(entry, mask, write_protected << from);
-                        break;
-                };
-            }
+            inline void set(value_type &entry, value_type val) noexcept
+            { entry = set_bits(entry, mask, val << from); }
         }
 
         namespace ignore_pat
@@ -844,11 +541,11 @@ namespace pd
             { entry = clear_bit(entry, from); }
         }
 
-        namespace entry_type
+        namespace ps
         {
             constexpr const auto mask = 0x0000000000000080ULL;
             constexpr const auto from = 7ULL;
-            constexpr const auto name = "entry_type";
+            constexpr const auto name = "ps";
 
             inline auto is_enabled(value_type &entry) noexcept
             { return is_bit_set(entry, from); }
@@ -1038,72 +735,6 @@ namespace pt
             { entry = clear_bit(entry, from); }
         }
 
-        namespace attr_type
-        {
-            constexpr const auto mask = 0x0000000000000007ULL;
-            constexpr const auto from = 0ULL;
-            constexpr const auto name = "attr_type";
-
-            constexpr const auto trap = 0x00ULL;
-            constexpr const auto read_only = 0x01ULL;
-            constexpr const auto read_write = 0x03ULL;
-            constexpr const auto execute_only = 0x04ULL;
-            constexpr const auto read_execute = 0x05ULL;
-            constexpr const auto pass_through = 0x07ULL;
-
-            inline auto get(value_type &entry)
-            {
-                switch (get_bits(entry, mask) >> from) {
-                    case trap:
-                        return ::intel_x64::ept::attr_type::trap;
-
-                    case read_only:
-                        return ::intel_x64::ept::attr_type::read_only;
-
-                    case read_write:
-                        return ::intel_x64::ept::attr_type::read_write;
-
-                    case execute_only:
-                        return ::intel_x64::ept::attr_type::execute_only;
-
-                    case read_execute:
-                        return ::intel_x64::ept::attr_type::read_execute;
-
-                    default:
-                        return ::intel_x64::ept::attr_type::invalid;
-                };
-            }
-
-            inline void set(value_type &entry, ::intel_x64::ept::attr_type attr)
-            {
-                switch (attr) {
-                    case ::intel_x64::ept::attr_type::trap:
-                        entry = set_bits(entry, mask, trap << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::read_only:
-                        entry = set_bits(entry, mask, read_only << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::read_write:
-                        entry = set_bits(entry, mask, read_write << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::execute_only:
-                        entry = set_bits(entry, mask, execute_only << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::read_execute:
-                        entry = set_bits(entry, mask, read_execute << from);
-                        break;
-
-                    case ::intel_x64::ept::attr_type::pass_through:
-                        entry = set_bits(entry, mask, pass_through << from);
-                        break;
-                };
-            }
-        }
-
         namespace memory_type
         {
             constexpr const auto mask = 0x0000000000000038ULL;
@@ -1116,53 +747,11 @@ namespace pt
             constexpr const auto write_protected = 0x5ULL;
             constexpr const auto write_back = 0x6ULL;
 
-            inline auto get(value_type &entry)
-            {
-                switch (get_bits(entry, mask) >> from) {
-                    case uncacheable:
-                        return ::intel_x64::ept::memory_type::uncacheable;
+            inline auto get(value_type &entry) noexcept
+            { return get_bits(entry, mask) >> from; }
 
-                    case write_combining:
-                        return ::intel_x64::ept::memory_type::write_combining;
-
-                    case write_through:
-                        return ::intel_x64::ept::memory_type::write_through;
-
-                    case write_back:
-                        return ::intel_x64::ept::memory_type::write_back;
-
-                    case write_protected:
-                        return ::intel_x64::ept::memory_type::write_protected;
-
-                    default:
-                        return ::intel_x64::ept::memory_type::invalid;
-                };
-            }
-
-            inline void set(value_type &entry, ::intel_x64::ept::memory_type cache)
-            {
-                switch (cache) {
-                    case ::intel_x64::ept::memory_type::uncacheable:
-                        entry = set_bits(entry, mask, uncacheable << from);
-                        break;
-
-                    case ::intel_x64::ept::memory_type::write_combining:
-                        entry = set_bits(entry, mask, write_combining << from);
-                        break;
-
-                    case ::intel_x64::ept::memory_type::write_through:
-                        entry = set_bits(entry, mask, write_through << from);
-                        break;
-
-                    case ::intel_x64::ept::memory_type::write_back:
-                        entry = set_bits(entry, mask, write_back << from);
-                        break;
-
-                    case ::intel_x64::ept::memory_type::write_protected:
-                        entry = set_bits(entry, mask, write_protected << from);
-                        break;
-                };
-            }
+            inline void set(value_type &entry, value_type val) noexcept
+            { entry = set_bits(entry, mask, val << from); }
         }
 
         namespace ignore_pat
@@ -1184,11 +773,11 @@ namespace pt
             { entry = clear_bit(entry, from); }
         }
 
-        namespace entry_type
+        namespace ps
         {
             constexpr const auto mask = 0x0000000000000080ULL;
             constexpr const auto from = 7ULL;
-            constexpr const auto name = "entry_type";
+            constexpr const auto name = "ps";
 
             inline auto is_enabled(value_type &entry) noexcept
             { return is_bit_set(entry, from); }
