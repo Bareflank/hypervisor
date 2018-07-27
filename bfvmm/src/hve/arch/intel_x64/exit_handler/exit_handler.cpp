@@ -33,6 +33,8 @@
 #include <bfthreadcontext.h>
 
 #include <hve/arch/intel_x64/check/check.h>
+#include <hve/arch/intel_x64/event/exception.h>
+#include <hve/arch/intel_x64/event/nmi.h>
 #include <hve/arch/intel_x64/exit_handler/exit_handler.h>
 
 #include <memory_manager/arch/x64/cr3.h>
@@ -275,6 +277,50 @@ emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val)
 // -----------------------------------------------------------------------------
 
 static bool
+handle_nmi(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+{
+    bfignored(vmcs);
+    using namespace ::intel_x64::vmcs;
+    using namespace vm_exit_interruption_information;
+    using namespace primary_processor_based_vm_execution_controls;
+
+    if (interruption_type::get() != interruption_type::non_maskable_interrupt) {
+        return false;
+    }
+
+    nmi_window_exiting::enable();
+    return true;
+}
+
+// We could get an NMI on an NMI-window exit. If the NMI is handled through
+// the IDT before the call to nmi_window_exiting::disable completes, then
+// the IDT-based NMI handler's work will be undone (meaning NMI-window exiting
+// will be disabled). This is OK because we know we have an open window. It does
+// mean that the most recent NMI will be dropped (along with any other NMIs received
+// before VM-entry).
+//
+// If the NMI is handled after the call to nmi_window_exiting::disable, then
+// the IDT-based NMI handler will win the race to the VMCS field and
+// NMI-window exiting will be enabled.
+//
+// Since the exit_handler enables the "virtual-NMIs" pin control on init,
+// virtual-NMI blocking will be in effect (section 26.5.1.1). This means that
+// the injection will take priority over the window exit i.e. the window
+// exit wont occur until the guest does an IRET
+//
+static bool
+handle_nmi_window(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+{
+    bfignored(vmcs);
+    using namespace ::intel_x64::vmcs;
+    using namespace primary_processor_based_vm_execution_controls;
+
+    inject_nmi();
+    nmi_window_exiting::disable();
+    return true;
+}
+
+static bool
 handle_cpuid(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 {
     using namespace ::x64::cpuid;
@@ -380,6 +426,16 @@ exit_handler::exit_handler(
     }
 
     add_handler(
+        exit_reason::basic_exit_reason::exception_or_non_maskable_interrupt,
+        handler_delegate_t::create<handle_nmi>()
+    );
+
+    add_handler(
+        exit_reason::basic_exit_reason::nmi_window,
+        handler_delegate_t::create<handle_nmi_window>()
+    );
+
+    add_handler(
         exit_reason::basic_exit_reason::cpuid,
         handler_delegate_t::create<handle_cpuid>()
     );
@@ -429,6 +485,11 @@ exit_handler::write_host_state()
 
     host_gdtr_base::set(m_host_gdt.base());
     host_idtr_base::set(m_host_idt.base());
+
+    m_ist1 = std::make_unique<gsl::byte[]>(STACK_SIZE << 1U);
+    m_host_tss.ist1 = setup_stack(m_ist1.get());
+    set_default_esrs(&m_host_idt, 8);
+    set_nmi_handler(&m_host_idt, 8);
 
     host_rip::set(exit_handler_entry);
     host_rsp::set(setup_stack(m_stack.get()));
@@ -564,9 +625,13 @@ exit_handler::write_control_state()
         ((ia32_vmx_entry_ctls_msr >> 32) & 0x00000000FFFFFFFF)
     );
 
+    using namespace pin_based_vm_execution_controls;
     using namespace primary_processor_based_vm_execution_controls;
     using namespace secondary_processor_based_vm_execution_controls;
 
+    nmi_exiting::enable();
+    virtual_nmis::enable();
+    nmi_window_exiting::disable();
     activate_secondary_controls::enable_if_allowed();
     enable_rdtscp::enable_if_allowed();
     enable_invpcid::enable_if_allowed();

@@ -49,8 +49,13 @@ do_test(test_check_vmcs_host_fields
     ${ARGN}
 )
 
-do_test(test_lapic
-    SOURCES arch/intel_x64/apic/test_lapic.cpp
+do_test(test_nmi
+    SOURCES arch/intel_x64/event/test_nmi.cpp
+    ${ARGN}
+)
+
+do_test(test_exception
+    SOURCES arch/intel_x64/event/test_exception.cpp
     ${ARGN}
 )
 
