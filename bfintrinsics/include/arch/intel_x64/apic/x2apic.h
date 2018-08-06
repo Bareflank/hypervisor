@@ -160,10 +160,10 @@ namespace ia32_x2apic_ldr
     }
 }
 
-namespace ia32_x2apic_sivr
+namespace ia32_x2apic_svr
 {
     constexpr const auto addr = 0x0000080FU;
-    constexpr const auto name = "ia32_x2apic_sivr";
+    constexpr const auto name = "ia32_x2apic_svr";
 
     inline auto get() noexcept
     { return _read_msr(addr); }

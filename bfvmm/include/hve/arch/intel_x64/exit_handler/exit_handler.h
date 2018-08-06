@@ -204,6 +204,7 @@ private:
 
     vmcs *m_vmcs;
     std::unique_ptr<gsl::byte[]> m_stack;
+    std::unique_ptr<gsl::byte[]> m_ist1;
 
     std::array<std::list<handler_delegate_t>, 128> m_handlers;
 

@@ -1,5 +1,6 @@
 //
 // Bareflank Hypervisor
+//
 // Copyright (C) 2018 Assured Information Security, Inc.
 //
 // This library is free software; you can redistribute it and/or
@@ -16,17 +17,34 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <catch/catch.hpp>
-#include <hippomocks.h>
-#include <arch/intel_x64/apic/lapic.h>
+#ifndef NMI_INTEL_X64_H
+#define NMI_INTEL_X64_H
 
-#include <test/support.h>
+#include <bfexports.h>
+#include "../../x64/idt.h"
 
-#ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
+/// _handle_nmi
+///
+/// The NMI handler referenced by vector 2 of the IDT
+/// Enables NMI-window exiting
+///
+extern "C" void _handle_nmi(void) noexcept;
 
-TEST_CASE("offsets")
-{
-    CHECK(::intel_x64::lapic::offset::list.size() == 47U);
-}
+/// set_nmi_handler
+///
+/// @param idt the address of the IDT
+/// @param selector the selector of the IDT descriptor
+///
+void set_nmi_handler(
+    bfvmm::x64::idt *idt,
+    bfvmm::x64::idt::selector_type selector
+) noexcept;
+
+/// inject_nmi
+///
+/// Program the VMCS to inject an NMI on VM-entry.
+/// This should only be called from an NMI-window exit handler.
+///
+void inject_nmi() noexcept;
 
 #endif

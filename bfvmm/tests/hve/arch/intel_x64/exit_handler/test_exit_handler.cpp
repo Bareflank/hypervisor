@@ -134,6 +134,59 @@ TEST_CASE("exit_handler: unhandled exit reason, invalid reason")
     CHECK_NOTHROW(ehlr.handle(&ehlr));
 }
 
+TEST_CASE("exit_handler: handle_nmi, incorrect type")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::exception_or_non_maskable_interrupt);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
+
+    g_save_state.rip = 0;
+    g_vmcs_fields[::intel_x64::vmcs::vm_exit_interruption_information::addr]
+        = ::intel_x64::vmcs::vm_exit_interruption_information::interruption_type::hardware_exception
+          << ::intel_x64::vmcs::vm_exit_interruption_information::interruption_type::from;
+
+    ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::disable();
+
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
+    CHECK(g_save_state.rip == 0);
+    CHECK(::intel_x64::vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::is_disabled());
+}
+
+TEST_CASE("exit_handler: handle_nmi, correct type")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::exception_or_non_maskable_interrupt);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
+
+    g_save_state.rip = 0;
+    g_vmcs_fields[::intel_x64::vmcs::vm_exit_interruption_information::addr]
+        = ::intel_x64::vmcs::vm_exit_interruption_information::interruption_type::non_maskable_interrupt
+          << ::intel_x64::vmcs::vm_exit_interruption_information::interruption_type::from;
+
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
+    CHECK(g_save_state.rip == 0);
+    CHECK(::intel_x64::vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::is_enabled());
+}
+
+TEST_CASE("exit_handler: handle_nmi_window")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::nmi_window);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
+
+    g_save_state.rip = 0;
+    ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::enable();
+    ::intel_x64::vmcs::vm_entry_interruption_information::set(0);
+
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
+    CHECK(g_save_state.rip == 0);
+    CHECK(::intel_x64::vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::is_disabled());
+    CHECK(::intel_x64::vmcs::vm_entry_interruption_information::vector::get() == 2);
+    CHECK(::intel_x64::vmcs::vm_entry_interruption_information::valid_bit::is_enabled());
+    CHECK(::intel_x64::vmcs::vm_entry_interruption_information::interruption_type::get()
+          == ::intel_x64::vmcs::vm_entry_interruption_information::interruption_type::non_maskable_interrupt);
+}
+
 TEST_CASE("exit_handler: handle_cpuid")
 {
     MockRepository mocks;
