@@ -51,10 +51,12 @@ add_shared_library(
     bfintrinsics
     SOURCES ${SOURCES}
     DEFINES SHARED_INTRINSICS
+    ALWAYS
 )
 
 add_static_library(
     bfintrinsics
     SOURCES ${SOURCES}
     DEFINES STATIC_INTRINSICS
+    ALWAYS
 )

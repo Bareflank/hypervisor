@@ -274,7 +274,7 @@ public:
     /// @return physical address
     ///
     virtual integer_pointer virtptr_to_physint(
-        pointer virt) const;
+        const pointer virt) const;
 
     /// Virtual Address To Physical Address
     ///
@@ -300,7 +300,7 @@ public:
     /// @return physical address
     ///
     virtual pointer virtptr_to_physptr(
-        pointer virt) const;
+        const pointer virt) const;
 
     /// Physical Address To Virtual Address
     ///
@@ -326,7 +326,7 @@ public:
     /// @return virtual address
     ///
     virtual integer_pointer physptr_to_virtint(
-        pointer phys) const;
+        const pointer phys) const;
 
     /// Physical Address To Virtual Address
     ///
@@ -352,7 +352,7 @@ public:
     /// @return virtual address
     ///
     virtual pointer physptr_to_virtptr(
-        pointer phys) const;
+        const pointer phys) const;
 
     /// Adds Memory Descriptor
     ///

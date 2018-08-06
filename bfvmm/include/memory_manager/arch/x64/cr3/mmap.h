@@ -90,8 +90,8 @@ public:
     };
 
     struct pair {
-        gsl::span<virt_addr_t> virt_addr;
-        phys_addr_t phys_addr;
+        gsl::span<virt_addr_t> virt_addr{};
+        phys_addr_t phys_addr{};
     };
 
     // @endcond
@@ -102,7 +102,7 @@ public:
     /// @ensures
     ///
     mmap() :
-        m_pml4{this->allocate(::x64::pml4::num_entries)}
+        m_pml4{allocate_span(::x64::pml4::num_entries), 0}
     { }
 
     /// Destructor
@@ -122,7 +122,7 @@ public:
             this->clear_pdpt(pml4i);
         }
 
-        this->free(m_pml4.virt_addr);
+        free_page(m_pml4.virt_addr.data());
     }
 
     /// CR3
@@ -133,7 +133,13 @@ public:
     /// @return Returns the value that should be written into CR3
     ///
     uintptr_t cr3()
-    { return m_pml4.phys_addr; }
+    {
+        if (m_pml4.phys_addr == 0) {
+            m_pml4.phys_addr = g_mm->virtptr_to_physint(m_pml4.virt_addr.data());
+        }
+
+        return m_pml4.phys_addr;
+    }
 
     /// PAT
     ///
@@ -375,6 +381,60 @@ public:
     void release(virt_addr_t virt_addr)
     { release(reinterpret_cast<virt_addr_t *>(virt_addr)); }
 
+    /// Virtual Address to Entry
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to be converted
+    /// @return returns entry for the map
+    ///
+    entry_type &
+    entry(virt_addr_t *virt_addr)
+    {
+        this->map_pdpt(::x64::pml4::index(virt_addr));
+        auto &pdpte = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
+
+        if (pdpte == 0) {
+            throw std::runtime_error("entry: pdpte not mapped");
+        }
+
+        if (::x64::pdpt::entry::ps::is_enabled(pdpte)) {
+            return pdpte;
+        }
+
+        this->map_pd(::x64::pdpt::index(virt_addr));
+        auto &pde = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
+
+        if (pde == 0) {
+            throw std::runtime_error("entry: pde not mapped");
+        }
+
+        if (::x64::pd::entry::ps::is_enabled(pde)) {
+            return pde;
+        }
+
+        this->map_pt(::x64::pd::index(virt_addr));
+        auto &pte = m_pt.virt_addr.at(::x64::pt::index(virt_addr));
+
+        if (pte == 0) {
+            throw std::runtime_error("entry: pte not mapped");
+        }
+
+        return pte;
+    }
+
+    /// Virtual Address to Entry
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to be converted
+    /// @return returns entry for the map
+    ///
+    entry_type &entry(virt_addr_t virt_addr)
+    { return entry(reinterpret_cast<virt_addr_t *>(virt_addr)); }
+
     /// Virtual Address to Physical Address
     ///
     /// @expects
@@ -387,21 +447,33 @@ public:
     virt_to_phys(virt_addr_t *virt_addr)
     {
         this->map_pdpt(::x64::pml4::index(virt_addr));
-        auto &pdpte = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
+        auto pdpte = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
+
+        if (pdpte == 0) {
+            throw std::runtime_error("virt_to_phys: pdpte not mapped");
+        }
 
         if (::x64::pdpt::entry::ps::is_enabled(pdpte)) {
             return ::x64::pdpt::entry::phys_addr::get(pdpte);
         }
 
         this->map_pd(::x64::pdpt::index(virt_addr));
-        auto &pde = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
+        auto pde = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
+
+        if (pde == 0) {
+            throw std::runtime_error("virt_to_phys: pde not mapped");
+        }
 
         if (::x64::pd::entry::ps::is_enabled(pde)) {
             return ::x64::pd::entry::phys_addr::get(pde);
         }
 
         this->map_pt(::x64::pd::index(virt_addr));
-        auto &pte = m_pt.virt_addr.at(::x64::pt::index(virt_addr));
+        auto pte = m_pt.virt_addr.at(::x64::pt::index(virt_addr));
+
+        if (pte == 0) {
+            throw std::runtime_error("virt_to_phys: pte not mapped");
+        }
 
         return ::x64::pt::entry::phys_addr::get(pte);
     }
@@ -417,22 +489,143 @@ public:
     phys_addr_t virt_to_phys(virt_addr_t virt_addr)
     { return virt_to_phys(reinterpret_cast<virt_addr_t *>(virt_addr)); }
 
-    /// Memory Descriptor List
-    ///
-    /// @note The returned memory descriptor list does not describe memory
-    /// mapped by the page tables, but rather the memory used to hold the
-    /// page tables themselves.
+    /// Virtual Address to From
     ///
     /// @expects
     /// @ensures
     ///
-    /// @return List of memory descriptors that describe the page tables
+    /// @param virt_addr the virtual address to test
+    /// @return returns page size of the mapping (i.e. from)
     ///
-    const std::vector<pair> &
-    mdl() const
-    { return m_mdl; }
+    auto
+    from(virt_addr_t *virt_addr)
+    {
+        this->map_pdpt(::x64::pml4::index(virt_addr));
+        auto pdpte = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
+
+        if (pdpte == 0) {
+            throw std::runtime_error("from: pdpte not mapped");
+        }
+
+        if (::x64::pdpt::entry::ps::is_enabled(pdpte)) {
+            return ::x64::pdpt::from;
+        }
+
+        this->map_pd(::x64::pdpt::index(virt_addr));
+        auto pde = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
+
+        if (pde == 0) {
+            throw std::runtime_error("from: pde not mapped");
+        }
+
+        if (::x64::pd::entry::ps::is_enabled(pde)) {
+            return ::x64::pd::from;
+        }
+
+        this->map_pt(::x64::pd::index(virt_addr));
+        auto pte = m_pt.virt_addr.at(::x64::pt::index(virt_addr));
+
+        if (pte == 0) {
+            throw std::runtime_error("from: pte not mapped");
+        }
+
+        return ::x64::pt::from;
+    }
+
+    /// Virtual Address to From
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to test
+    /// @return returns page size of the mapping (i.e. from)
+    ///
+    auto from(virt_addr_t virt_addr)
+    { return from(reinterpret_cast<virt_addr_t *>(virt_addr)); }
+
+    /// Is 1g
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to test
+    /// @return returns true if the virtual address was mapped as 1g page,
+    ///     false otherwise
+    ///
+    inline auto is_1g(virt_addr_t *virt_addr)
+    { return from(virt_addr) == ::x64::pdpt::from; }
+
+    /// Is 1g
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to test
+    /// @return returns true if the virtual address was mapped as 1g page,
+    ///     false otherwise
+    ///
+    inline auto is_1g(virt_addr_t virt_addr)
+    { return is_1g(reinterpret_cast<virt_addr_t *>(virt_addr)); }
+
+    /// Is 2m
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to test
+    /// @return returns true if the virtual address was mapped as 2m page,
+    ///     false otherwise
+    ///
+    inline auto is_2m(virt_addr_t *virt_addr)
+    { return from(virt_addr) == ::x64::pd::from; }
+
+    /// Is 2m
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to test
+    /// @return returns true if the virtual address was mapped as 2m page,
+    ///     false otherwise
+    ///
+    inline auto is_2m(virt_addr_t virt_addr)
+    { return is_2m(reinterpret_cast<virt_addr_t *>(virt_addr)); }
+
+    /// Is 4k
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to test
+    /// @return returns true if the virtual address was mapped as 4k page,
+    ///     false otherwise
+    ///
+    inline auto is_4k(virt_addr_t *virt_addr)
+    { return from(virt_addr) == ::x64::pt::from; }
+
+    /// Is 4k
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to test
+    /// @return returns true if the virtual address was mapped as 4k page,
+    ///     false otherwise
+    ///
+    inline auto is_4k(virt_addr_t virt_addr)
+    { return is_4k(reinterpret_cast<virt_addr_t *>(virt_addr)); }
 
 private:
+
+    gsl::span<virt_addr_t>
+    allocate_span(size_type num_entries)
+    {
+        return
+            gsl::make_span(
+                static_cast<virt_addr_t *>(alloc_page()),
+                num_entries
+            );
+    }
 
     pair
     allocate(size_type num_entries)
@@ -450,31 +643,22 @@ private:
             )
         };
 
-        m_mdl.push_back(ptrs);
         return ptrs;
     }
 
     void
     free(const gsl::span<virt_addr_t> &virt_addr)
-    {
-        for (auto iter = m_mdl.begin(); iter != m_mdl.end(); ++iter) {
-            if (iter->virt_addr == virt_addr) {
-                m_mdl.erase(iter);
-                break;
-            }
-        }
-
-        free_page(virt_addr.data());
-    }
+    { free_page(virt_addr.data()); }
 
 private:
 
     pair
     phys_to_pair(phys_addr_t phys_addr, size_type num_entries)
     {
-        auto virt_addr = static_cast<virt_addr_t *>(
-                             g_mm->physint_to_virtptr(phys_addr)
-                         );
+        auto virt_addr =
+            static_cast<virt_addr_t *>(
+                g_mm->physint_to_virtptr(phys_addr)
+            );
 
         return {
             gsl::make_span<virt_addr_t>(virt_addr, num_entries),
@@ -817,8 +1001,6 @@ private:
     }
 
 private:
-
-    std::vector<pair> m_mdl;
 
     pair m_pml4;
     pair m_pdpt;

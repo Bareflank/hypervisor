@@ -42,6 +42,12 @@ TEST_CASE("basic allocator of 0 size")
     basic_object_allocator pool{0, 0};
 }
 
+TEST_CASE("basic allocator size")
+{
+    basic_object_allocator pool{sizeof(uint64_t), 0};
+    CHECK(pool.size(nullptr) == sizeof(uint64_t));
+}
+
 TEST_CASE("construction: limited")
 {
     {

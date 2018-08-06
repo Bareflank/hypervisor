@@ -57,7 +57,7 @@
 # any of the Bareflank repos, this option will be needed as it enables
 # formatting, static / dynamic analysis, etc...
 #
-set(ENABLE_DEVELOPER_MODE ON)
+set(ENABLE_DEVELOPER_MODE OFF)
 
 # Tests only
 #
@@ -81,13 +81,14 @@ set(ENABLE_HYPERVISOR_EXAMPLE_VPID OFF)
 set(ENABLE_HYPERVISOR_EXAMPLE_RDTSC OFF)
 set(ENABLE_HYPERVISOR_EXAMPLE_CPUIDCOUNT OFF)
 set(ENABLE_HYPERVISOR_EXAMPLE_MSR_BITMAP OFF)
+set(ENABLE_EXTENDED_APIS_EXAMPLE_HOOK OFF)
 
 # Override VMM
 #
 # If the override VMM is set, this VMM will be used instead of the default VMM
 # based on the current configuration.
 #
-# set(OVERRIDE_VMM eapis_integration_intel_x64_io_instruction_trap_in_out)
+# set(OVERRIDE_VMM <name>)
 
 # Override Compiler Warnings
 #
@@ -222,6 +223,13 @@ if(ENABLE_HYPERVISOR_EXAMPLE_MSR_BITMAP)
     set_bfm_vmm(example_vmm)
     list(APPEND EXTENSION
         ${CMAKE_CURRENT_LIST_DIR}/hypervisor_example_msr_bitmap
+    )
+endif()
+
+if(ENABLE_EXTENDED_APIS_EXAMPLE_HOOK)
+    set_bfm_vmm(example_vmm)
+    list(APPEND EXTENSION
+        ${CMAKE_CURRENT_LIST_DIR}/extended_apis_example_hook
     )
 endif()
 

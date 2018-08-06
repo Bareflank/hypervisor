@@ -40,17 +40,24 @@
 ///
 /// @param error_code an error code to return if an exception occurs
 /// @param func the function to run that is guarded
+/// @param error_func the function to run when an exception occurs
 /// @return error_code on failure, SUCCESS on success
 ///
-template<class T>
+template <
+    typename FUNC,
+    typename ERROR_FUNC,
+    typename = std::enable_if<std::is_pointer<FUNC>::value>,
+    typename = std::enable_if<std::is_pointer<ERROR_FUNC>::value>
+    >
 int64_t
-guard_exceptions(int64_t error_code, T func)
+guard_exceptions(int64_t error_code, FUNC func, ERROR_FUNC error_func)
 {
     try {
         func();
         return SUCCESS;
     }
     catch (std::bad_alloc &) {
+        error_func();
         return BF_BAD_ALLOC;
     }
     catch (std::exception &e) {
@@ -71,6 +78,7 @@ guard_exceptions(int64_t error_code, T func)
         });
     }
 
+    error_func();
     return error_code;
 }
 
@@ -82,11 +90,55 @@ guard_exceptions(int64_t error_code, T func)
 /// @expects
 /// @ensures
 ///
+/// @param error_code an error code to return if an exception occurs
+/// @param func the function to run that is guarded
+/// @return error_code on failure, SUCCESS on success
+///
+template <
+    typename FUNC,
+    typename = std::enable_if<std::is_pointer<FUNC>::value>
+    >
+int64_t
+guard_exceptions(int64_t error_code, FUNC && func)
+{ return guard_exceptions(error_code, std::forward<FUNC>(func), [] {}); }
+
+/// Guard Exceptions
+///
+/// Catches all exceptions and prints the exception that occurred. The point of
+/// this function is to prevent any exception from bubbling beyond this point.
+///
+/// @expects
+/// @ensures
+///
 /// @param func the function to run that is guarded
 ///
-template<class T>
+template <
+    typename FUNC,
+    typename = std::enable_if<std::is_pointer<FUNC>::value>
+    >
 void
-guard_exceptions(T &&func)
-{ guard_exceptions(0L, std::forward<T>(func)); }
+guard_exceptions(FUNC && func)
+{ guard_exceptions(0L, std::forward<FUNC>(func), [] {}); }
+
+/// Guard Exceptions
+///
+/// Catches all exceptions and prints the exception that occurred. The point of
+/// this function is to prevent any exception from bubbling beyond this point.
+///
+/// @expects
+/// @ensures
+///
+/// @param func the function to run that is guarded
+/// @param error_func the function to run when an exception occurs
+///
+template <
+    typename FUNC,
+    typename ERROR_FUNC,
+    typename = std::enable_if<std::is_pointer<FUNC>::value>,
+    typename = std::enable_if<std::is_pointer<ERROR_FUNC>::value>
+    >
+void
+guard_exceptions(FUNC && func, ERROR_FUNC && error_func)
+{ guard_exceptions(0L, std::forward<FUNC>(func), std::forward<ERROR_FUNC>(error_func)); }
 
 #endif

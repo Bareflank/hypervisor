@@ -227,6 +227,12 @@ endif()
 
 if(ENABLE_BUILD_USERSPACE)
     add_subproject(
+        bfintrinsics userspace
+        DEPENDS gsl
+        DEPENDS json
+    )
+
+    add_subproject(
         bfm userspace
         DEPENDS gsl
         DEPENDS json
@@ -299,3 +305,11 @@ print_usage()
 # ------------------------------------------------------------------------------
 
 git_dir_script()
+
+# ------------------------------------------------------------------------------
+# Info
+# ------------------------------------------------------------------------------
+
+if(NOT WIN32)
+    add_custom_command(TARGET info COMMAND ${CMAKE_COMMAND} -E cmake_echo_color " ")
+endif()

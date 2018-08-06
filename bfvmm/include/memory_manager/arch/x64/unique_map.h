@@ -43,6 +43,8 @@ namespace bfvmm
 namespace x64
 {
 
+gsl::not_null<bfvmm::x64::cr3::mmap *> mmap();
+
 template <class T>
 class unique_map_ptr;
 
@@ -909,12 +911,11 @@ virt_to_phys_with_cr3(
     uintptr_t from;
 
     expects(cr3 != 0);
-    expects(bfn::lower(cr3) == 0);
     expects(virt != 0);
 
     from = ::x64::pml4::from;
     auto pml4_idx = ::x64::pml4::index(virt);
-    auto pml4_map = make_unique_map<uintptr_t>(cr3);
+    auto pml4_map = make_unique_map<uintptr_t>(bfn::upper(cr3));
     auto pml4_pte = pml4_map.get()[pml4_idx];
 
     expects(::x64::pml4::entry::phys_addr::get(pml4_pte) != 0);
@@ -957,6 +958,11 @@ virt_to_phys_with_cr3(
     return bfn::upper(::x64::pt::entry::phys_addr::get(pt_pte), from) |
            bfn::lower(virt, from);
 }
+
+inline uintptr_t
+virt_to_phys_with_cr3(
+    void *virt, uintptr_t cr3)
+{ return virt_to_phys_with_cr3(reinterpret_cast<uintptr_t>(virt), cr3); }
 
 inline void
 map_with_cr3(

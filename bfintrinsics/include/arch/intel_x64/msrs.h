@@ -4180,7 +4180,7 @@ namespace ia32_dca_0_cap
     }
 }
 
-namespace ia32_mtrr_physbase0
+namespace ia32_mtrr_physbase
 {
     constexpr const auto addr = 0x00000200U;
     constexpr const auto name = "ia32_mtrr_physbase0";
@@ -4188,11 +4188,65 @@ namespace ia32_mtrr_physbase0
     inline auto get() noexcept
     { return _read_msr(addr); }
 
+    namespace type
+    {
+        constexpr const auto mask = 0x00000000000000FFULL;
+        constexpr const auto from = 0ULL;
+        constexpr const auto name = "type";
+
+        constexpr const auto uncacheable = 0U;
+        constexpr const auto write_combining = 1U;
+        constexpr const auto write_through = 4U;
+        constexpr const auto write_protected = 5U;
+        constexpr const auto write_back = 6U;
+
+        inline auto get() noexcept
+        { return get_bits(_read_msr(addr), mask) >> from; }
+
+        inline auto get(value_type msr) noexcept
+        { return get_bits(msr, mask) >> from; }
+
+        inline void set(value_type val) noexcept
+        { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
+
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        { bfdebug_subnhex(level, name, get(), msg); }
+    }
+
+    namespace physbase
+    {
+        constexpr const auto mask = 0x000FFFFFFFFFF000ULL;
+        constexpr const auto from = 12ULL;
+        constexpr const auto name = "physbase";
+
+        inline auto get() noexcept
+        { return get_bits(_read_msr(addr), mask) >> from; }
+
+        inline auto get(value_type msr) noexcept
+        { return get_bits(msr, mask) >> from; }
+
+        inline void set(value_type val) noexcept
+        { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
+
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        { bfdebug_subnhex(level, name, get(), msg); }
+    }
+
     inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
+    {
+        bfdebug_nhex(level, name, get(), msg);
+        type::dump(level, msg);
+        physbase::dump(level, msg);
+    }
 }
 
-namespace ia32_mtrr_physmask0
+namespace ia32_mtrr_physmask
 {
     constexpr const auto addr = 0x00000201U;
     constexpr const auto name = "ia32_mtrr_physmask0";
@@ -4200,224 +4254,68 @@ namespace ia32_mtrr_physmask0
     inline auto get() noexcept
     { return _read_msr(addr); }
 
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
+    namespace valid
+    {
+        constexpr const auto mask = 0x0000000000000800ULL;
+        constexpr const auto from = 11ULL;
+        constexpr const auto name = "valid";
 
-namespace ia32_mtrr_physbase1
-{
-    constexpr const auto addr = 0x00000202U;
-    constexpr const auto name = "ia32_mtrr_physbase1";
+        inline auto is_enabled()
+        { return is_bit_set(_read_msr(addr), from); }
 
-    inline auto get() noexcept
-    { return _read_msr(addr); }
+        inline auto is_enabled(value_type msr)
+        { return is_bit_set(msr, from); }
 
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
+        inline auto is_disabled()
+        { return is_bit_cleared(_read_msr(addr), from); }
 
-namespace ia32_mtrr_physmask1
-{
-    constexpr const auto addr = 0x00000203U;
-    constexpr const auto name = "ia32_mtrr_physmask1";
+        inline auto is_disabled(value_type msr)
+        { return is_bit_cleared(msr, from); }
 
-    inline auto get() noexcept
-    { return _read_msr(addr); }
+        inline void enable()
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
 
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
 
-namespace ia32_mtrr_physbase2
-{
-    constexpr const auto addr = 0x00000204U;
-    constexpr const auto name = "ia32_mtrr_physbase2";
+        inline void disable()
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
 
-    inline auto get() noexcept
-    { return _read_msr(addr); }
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
 
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
+        inline void dump(int level, std::string *msg = nullptr)
+        { bfdebug_subbool(level, name, is_enabled(), msg); }
+    }
 
-namespace ia32_mtrr_physmask2
-{
-    constexpr const auto addr = 0x00000205U;
-    constexpr const auto name = "ia32_mtrr_physmask2";
+    namespace physmask
+    {
+        constexpr const auto mask = 0x000FFFFFFFFFF000ULL;
+        constexpr const auto from = 12ULL;
+        constexpr const auto name = "physmask";
 
-    inline auto get() noexcept
-    { return _read_msr(addr); }
+        inline auto get() noexcept
+        { return get_bits(_read_msr(addr), mask) >> from; }
 
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
+        inline auto get(value_type msr) noexcept
+        { return get_bits(msr, mask) >> from; }
 
-namespace ia32_mtrr_physbase3
-{
-    constexpr const auto addr = 0x00000206U;
-    constexpr const auto name = "ia32_mtrr_physbase3";
+        inline void set(value_type val) noexcept
+        { _write_msr(addr, set_bits(_read_msr(addr), mask, val << from)); }
 
-    inline auto get() noexcept
-    { return _read_msr(addr); }
+        inline void set(value_type &msr, value_type val) noexcept
+        { msr = set_bits(msr, mask, val << from); }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        { bfdebug_subnhex(level, name, get(), msg); }
+    }
 
     inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physmask3
-{
-    constexpr const auto addr = 0x00000207U;
-    constexpr const auto name = "ia32_mtrr_physmask3";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physbase4
-{
-    constexpr const auto addr = 0x00000208U;
-    constexpr const auto name = "ia32_mtrr_physbase4";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physmask4
-{
-    constexpr const auto addr = 0x00000209U;
-    constexpr const auto name = "ia32_mtrr_physmask4";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physbase5
-{
-    constexpr const auto addr = 0x0000020AU;
-    constexpr const auto name = "ia32_mtrr_physbase5";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physmask5
-{
-    constexpr const auto addr = 0x0000020BU;
-    constexpr const auto name = "ia32_mtrr_physmask5";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physbase6
-{
-    constexpr const auto addr = 0x0000020CU;
-    constexpr const auto name = "ia32_mtrr_physbase6";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physmask6
-{
-    constexpr const auto addr = 0x0000020DU;
-    constexpr const auto name = "ia32_mtrr_physmask6";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physbase7
-{
-    constexpr const auto addr = 0x0000020EU;
-    constexpr const auto name = "ia32_mtrr_physbase7";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physmask7
-{
-    constexpr const auto addr = 0x0000020FU;
-    constexpr const auto name = "ia32_mtrr_physmask7";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physbase8
-{
-    constexpr const auto addr = 0x00000210U;
-    constexpr const auto name = "ia32_mtrr_physbase8";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physmask8
-{
-    constexpr const auto addr = 0x00000211U;
-    constexpr const auto name = "ia32_mtrr_physmask8";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physbase9
-{
-    constexpr const auto addr = 0x00000212U;
-    constexpr const auto name = "ia32_mtrr_physbase9";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
-}
-
-namespace ia32_mtrr_physmask9
-{
-    constexpr const auto addr = 0x00000213U;
-    constexpr const auto name = "ia32_mtrr_physmask9";
-
-    inline auto get() noexcept
-    { return _read_msr(addr); }
-
-    inline void dump(int level, std::string *msg = nullptr)
-    { bfdebug_nhex(level, name, get(), msg); }
+    {
+        bfdebug_nhex(level, name, get(), msg);
+        valid::dump(level, msg);
+        physmask::dump(level, msg);
+    }
 }
 
 namespace ia32_mtrr_fix64k_00000
@@ -6963,11 +6861,17 @@ namespace ia32_mtrr_def_type
     inline void set(value_type val) noexcept
     { _write_msr(addr, val); }
 
-    namespace def_mem_type
+    namespace type
     {
         constexpr const auto mask = 0x0000000000000007ULL;
         constexpr const auto from = 0ULL;
-        constexpr const auto name = "def_mem_type";
+        constexpr const auto name = "type";
+
+        constexpr const auto uncacheable = 0U;
+        constexpr const auto write_combining = 1U;
+        constexpr const auto write_through = 4U;
+        constexpr const auto write_protected = 5U;
+        constexpr const auto write_back = 6U;
 
         inline auto get() noexcept
         { return get_bits(_read_msr(addr), mask) >> from; }
@@ -6985,7 +6889,7 @@ namespace ia32_mtrr_def_type
         { bfdebug_subnhex(level, name, get(), msg); }
     }
 
-    namespace fixed_range_mtrr
+    namespace fixed_range_mtrrs_enable
     {
         constexpr const auto mask = 0x0000000000000400ULL;
         constexpr const auto from = 10ULL;
@@ -7019,7 +6923,7 @@ namespace ia32_mtrr_def_type
         { bfdebug_subbool(level, name, is_enabled(), msg); }
     }
 
-    namespace mtrr
+    namespace mtrr_enable
     {
         constexpr const auto mask = 0x0000000000000800ULL;
         constexpr const auto from = 11ULL;
@@ -7056,9 +6960,9 @@ namespace ia32_mtrr_def_type
     inline void dump(int level, std::string *msg = nullptr)
     {
         bfdebug_nhex(level, name, get(), msg);
-        def_mem_type::dump(level, msg);
-        fixed_range_mtrr::dump(level, msg);
-        mtrr::dump(level, msg);
+        type::dump(level, msg);
+        fixed_range_mtrrs_enable::dump(level, msg);
+        mtrr_enable::dump(level, msg);
     }
 }
 

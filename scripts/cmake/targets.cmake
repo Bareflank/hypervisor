@@ -209,6 +209,7 @@ if(UNIX AND ENABLE_BUILD_VMM AND ENABLE_BUILD_USERSPACE)
         COMMAND ${SOURCE_UTIL_DIR}/driver_load.sh ${SOURCE_BFDRIVER_DIR}
         COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm load ${BFM_VMM_BIN_PATH}/${BFM_VMM}
         COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm start
+        COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm dump
         USES_TERMINAL
     )
     add_custom_target_info(
@@ -237,7 +238,7 @@ add_custom_target(
 )
 add_custom_target_info(
     TARGET clean-all
-    COMMENT "Clean the build tree, dependencies, prefixes, and subprojects"
+    COMMENT "Clean everything"
 )
 
 add_custom_target(
@@ -298,12 +299,4 @@ if(ENABLE_FORMAT)
         TARGET format-all
         COMMENT "Format all files"
     )
-endif()
-
-# ------------------------------------------------------------------------------
-# Cleanup
-# ------------------------------------------------------------------------------
-
-if(NOT WIN32)
-    add_custom_command(TARGET info COMMAND ${CMAKE_COMMAND} -E cmake_echo_color " ")
 endif()

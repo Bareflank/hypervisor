@@ -970,6 +970,7 @@ endfunction(vmm_extension)
 function(userspace_extension NAME)
     add_subproject(
         ${NAME} userspace
+        ${ARGN}
     )
 endfunction(userspace_extension)
 
@@ -1180,6 +1181,36 @@ function(add_static_library NAME)
         install(TARGETS ${NAME}_static DESTINATION lib)
     endif()
 endfunction(add_static_library)
+
+# ------------------------------------------------------------------------------
+# target_link_xxx_libraries
+# ------------------------------------------------------------------------------
+
+# Target Link Shared Libraries
+#
+# This function is similar to target_link_libraries, but adds _shared
+# to the library name before adding the library to the target
+#
+# @param NAME The name of the target.
+#
+function(target_link_shared_libraries NAME)
+    foreach(l ${ARGN})
+        target_link_libraries(${NAME} ${l}_shared)
+    endforeach(l)
+endfunction(target_link_shared_libraries)
+
+# Target Link Static Libraries
+#
+# This function is similar to target_link_libraries, but adds _static
+# to the library name before adding the library to the target
+#
+# @param NAME The name of the target.
+#
+function(target_link_static_libraries NAME)
+    foreach(l ${ARGN})
+        target_link_libraries(${NAME} ${l}_static)
+    endforeach(l)
+endfunction(target_link_static_libraries)
 
 # ------------------------------------------------------------------------------
 # add_vmm

@@ -24,11 +24,6 @@
 
 using namespace bfvmm::x64;
 
-TEST_CASE("quiet")
-{
-    unsafe_write_cstr("", 0);
-}
-
 TEST_CASE("mmap: constructor / destructor")
 {
     {
@@ -37,11 +32,21 @@ TEST_CASE("mmap: constructor / destructor")
     CHECK(g_allocated_pages.empty());
 }
 
+TEST_CASE("mmap: cr3")
+{
+    {
+        cr3::mmap mmap{};
+        CHECK(mmap.cr3() != 0);
+        CHECK(mmap.cr3() != 0);
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
 TEST_CASE("mmap: map 1g")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_1g(0x2A, 0x2A);
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -50,7 +55,7 @@ TEST_CASE("mmap: map 2m")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_2m(0x2A, 0x2A);
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -59,73 +64,97 @@ TEST_CASE("mmap: map 4k")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_4k(0x2A, 0x2A);
     }
     CHECK(g_allocated_pages.empty());
 }
 
-TEST_CASE("mmap: map 1g uncacheable")
+TEST_CASE("mmap: map 1g attribute types")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_1g(
-            0x2A, 0x2A,
-            bfvmm::x64::cr3::mmap::attr_type::read_write,
-            bfvmm::x64::cr3::mmap::memory_type::uncacheable
-        );
+        mmap.map_1g(0x50000002A, 0x50000002A,
+                    cr3::mmap::attr_type::read_write
+                   );
+        mmap.map_1g(0x60000002A, 0x60000002A,
+                    cr3::mmap::attr_type::read_execute
+                   );
     }
     CHECK(g_allocated_pages.empty());
 }
 
-TEST_CASE("mmap: map 2m uncacheable")
+TEST_CASE("mmap: map 2m attribute types")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_2m(
-            0x2A, 0x2A,
-            bfvmm::x64::cr3::mmap::attr_type::read_write,
-            bfvmm::x64::cr3::mmap::memory_type::uncacheable
-        );
+        mmap.map_2m(0x50000002A, 0x50000002A,
+                    cr3::mmap::attr_type::read_write
+                   );
+        mmap.map_2m(0x60000002A, 0x60000002A,
+                    cr3::mmap::attr_type::read_execute
+                   );
     }
     CHECK(g_allocated_pages.empty());
 }
 
-TEST_CASE("mmap: map 4k uncacheable")
+TEST_CASE("mmap: map 4k attribute types")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(
-            0x2A, 0x2A,
-            bfvmm::x64::cr3::mmap::attr_type::read_write,
-            bfvmm::x64::cr3::mmap::memory_type::uncacheable
-        );
+        mmap.map_4k(0x50000002A, 0x50000002A,
+                    cr3::mmap::attr_type::read_write
+                   );
+        mmap.map_4k(0x60000002A, 0x60000002A,
+                    cr3::mmap::attr_type::read_execute
+                   );
     }
     CHECK(g_allocated_pages.empty());
 }
 
-TEST_CASE("mmap: map 1g RE")
+TEST_CASE("mmap: map 1g memory types")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_execute);
+        mmap.map_1g(0x10000002A, 0x10000002A,
+                    cr3::mmap::attr_type::read_write,
+                    cr3::mmap::memory_type::uncacheable
+                   );
+        mmap.map_1g(0x50000002A, 0x50000002A,
+                    cr3::mmap::attr_type::read_write,
+                    cr3::mmap::memory_type::write_back
+                   );
     }
     CHECK(g_allocated_pages.empty());
 }
 
-TEST_CASE("mmap: map 2m RE")
+TEST_CASE("mmap: map 2m memory types")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_execute);
+        mmap.map_2m(0x10000002A, 0x10000002A,
+                    cr3::mmap::attr_type::read_write,
+                    cr3::mmap::memory_type::uncacheable
+                   );
+        mmap.map_2m(0x50000002A, 0x50000002A,
+                    cr3::mmap::attr_type::read_write,
+                    cr3::mmap::memory_type::write_back
+                   );
     }
     CHECK(g_allocated_pages.empty());
 }
 
-TEST_CASE("mmap: map 4k RE")
+TEST_CASE("mmap: map 4k memory types")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_execute);
+        mmap.map_4k(0x10000002A, 0x10000002A,
+                    cr3::mmap::attr_type::read_write,
+                    cr3::mmap::memory_type::uncacheable
+                   );
+        mmap.map_4k(0x50000002A, 0x50000002A,
+                    cr3::mmap::attr_type::read_write,
+                    cr3::mmap::memory_type::write_back
+                   );
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -134,8 +163,8 @@ TEST_CASE("mmap: map 1g twice fails")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
-        CHECK_THROWS(mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write));
+        mmap.map_1g(0x2A, 0x2A);
+        CHECK_THROWS(mmap.map_1g(0x2A, 0x2A));
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -144,8 +173,8 @@ TEST_CASE("mmap: map 2m twice fails")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
-        CHECK_THROWS(mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write));
+        mmap.map_2m(0x2A, 0x2A);
+        CHECK_THROWS(mmap.map_2m(0x2A, 0x2A));
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -154,8 +183,8 @@ TEST_CASE("mmap: map 4k twice fails")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
-        CHECK_THROWS(mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write));
+        mmap.map_4k(0x2A, 0x2A);
+        CHECK_THROWS(mmap.map_4k(0x2A, 0x2A));
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -164,7 +193,7 @@ TEST_CASE("mmap: unmap 1g")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_1g(0x2A, 0x2A);
         mmap.unmap(0x2A);
     }
     CHECK(g_allocated_pages.empty());
@@ -174,7 +203,7 @@ TEST_CASE("mmap: unmap 2m")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_2m(0x2A, 0x2A);
         mmap.unmap(0x2A);
     }
     CHECK(g_allocated_pages.empty());
@@ -184,7 +213,7 @@ TEST_CASE("mmap: unmap 4k")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_4k(0x2A, 0x2A);
         mmap.unmap(0x2A);
     }
     CHECK(g_allocated_pages.empty());
@@ -194,7 +223,7 @@ TEST_CASE("mmap: unmap 1g twice")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_1g(0x2A, 0x2A);
         mmap.unmap(0x2A);
         mmap.unmap(0x2A);
     }
@@ -205,7 +234,7 @@ TEST_CASE("mmap: unmap 2m twice")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_2m(0x2A, 0x2A);
         mmap.unmap(0x2A);
         mmap.unmap(0x2A);
     }
@@ -216,7 +245,7 @@ TEST_CASE("mmap: unmap 4k twice")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_4k(0x2A, 0x2A);
         mmap.unmap(0x2A);
         mmap.unmap(0x2A);
     }
@@ -227,10 +256,10 @@ TEST_CASE("mmap: map / unmap 1g different ranges")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
-        mmap.map_1g(0x8000002A, 0x8000002A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_1g(0x2A, 0x2A);
+        mmap.map_1g(0x10000002A, 0x10000002A);
         mmap.unmap(0x2A);
-        mmap.unmap(0x8000002A);
+        mmap.unmap(0x10000002A);
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -239,10 +268,10 @@ TEST_CASE("mmap: map / unmap 2m different ranges")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
-        mmap.map_2m(0x8000002A, 0x8000002A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_2m(0x2A, 0x2A);
+        mmap.map_2m(0x10000002A, 0x10000002A);
         mmap.unmap(0x2A);
-        mmap.unmap(0x8000002A);
+        mmap.unmap(0x10000002A);
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -251,13 +280,14 @@ TEST_CASE("mmap: map / unmap 4k different ranges")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
-        mmap.map_4k(0x8000002A, 0x8000002A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_4k(0x2A, 0x2A);
+        mmap.map_4k(0x10000002A, 0x10000002A);
         mmap.unmap(0x2A);
-        mmap.unmap(0x8000002A);
+        mmap.unmap(0x10000002A);
     }
     CHECK(g_allocated_pages.empty());
 }
+
 TEST_CASE("mmap: unmap non-mapped address")
 {
     {
@@ -267,13 +297,33 @@ TEST_CASE("mmap: unmap non-mapped address")
     CHECK(g_allocated_pages.empty());
 }
 
+TEST_CASE("mmap: unmap non-mapped address 1g")
+{
+    {
+        cr3::mmap mmap{};
+        mmap.map_1g(0x2A, 0x2A);
+        mmap.unmap(0x10000002A);
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: unmap non-mapped address 2m")
+{
+    {
+        cr3::mmap mmap{};
+        mmap.map_1g(0x2A, 0x2A);
+        mmap.unmap(0x100002A);
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
 TEST_CASE("mmap: map 1g twice with unmap succeeds")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_1g(0x2A, 0x2A);
         mmap.unmap(0x2A);
-        mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_1g(0x2A, 0x2A);
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -282,9 +332,9 @@ TEST_CASE("mmap: map 2m twice with unmap succeeds")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_2m(0x2A, 0x2A);
         mmap.unmap(0x2A);
-        mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_2m(0x2A, 0x2A);
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -293,9 +343,9 @@ TEST_CASE("mmap: map 4k twice with unmap succeeds")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_4k(0x2A, 0x2A);
         mmap.unmap(0x2A);
-        mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_4k(0x2A, 0x2A);
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -303,7 +353,7 @@ TEST_CASE("mmap: map 4k twice with unmap succeeds")
 TEST_CASE("mmap: release 1g")
 {
     cr3::mmap mmap{};
-    mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+    mmap.map_1g(0x2A, 0x2A);
     mmap.release(0x2A);
     CHECK(g_allocated_pages.size() == 1);
 }
@@ -311,7 +361,7 @@ TEST_CASE("mmap: release 1g")
 TEST_CASE("mmap: release 2m")
 {
     cr3::mmap mmap{};
-    mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+    mmap.map_2m(0x2A, 0x2A);
     mmap.release(0x2A);
     CHECK(g_allocated_pages.size() == 1);
 }
@@ -319,7 +369,7 @@ TEST_CASE("mmap: release 2m")
 TEST_CASE("mmap: release 4k")
 {
     cr3::mmap mmap{};
-    mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+    mmap.map_4k(0x2A, 0x2A);
     mmap.release(0x2A);
     CHECK(g_allocated_pages.size() == 1);
 }
@@ -327,7 +377,7 @@ TEST_CASE("mmap: release 4k")
 TEST_CASE("mmap: release 1g twice")
 {
     cr3::mmap mmap{};
-    mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+    mmap.map_1g(0x2A, 0x2A);
     mmap.release(0x2A);
     mmap.release(0x2A);
     CHECK(g_allocated_pages.size() == 1);
@@ -336,7 +386,7 @@ TEST_CASE("mmap: release 1g twice")
 TEST_CASE("mmap: release 2m twice")
 {
     cr3::mmap mmap{};
-    mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+    mmap.map_2m(0x2A, 0x2A);
     mmap.release(0x2A);
     mmap.release(0x2A);
     CHECK(g_allocated_pages.size() == 1);
@@ -345,7 +395,7 @@ TEST_CASE("mmap: release 2m twice")
 TEST_CASE("mmap: release 4k twice")
 {
     cr3::mmap mmap{};
-    mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+    mmap.map_4k(0x2A, 0x2A);
     mmap.release(0x2A);
     mmap.release(0x2A);
     CHECK(g_allocated_pages.size() == 1);
@@ -358,13 +408,33 @@ TEST_CASE("mmap: release non-mapped address")
     CHECK(g_allocated_pages.size() == 1);
 }
 
+TEST_CASE("mmap: release non-mapped address 1g")
+{
+    {
+        cr3::mmap mmap{};
+        mmap.map_1g(0x2A, 0x2A);
+        mmap.release(0x10000002A);
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: release non-mapped address 2m")
+{
+    {
+        cr3::mmap mmap{};
+        mmap.map_1g(0x2A, 0x2A);
+        mmap.release(0x100002A);
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
 TEST_CASE("mmap: map 1g twice with release succeeds")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_1g(0x2A, 0x2A);
         mmap.release(0x2A);
-        mmap.map_1g(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_1g(0x2A, 0x2A);
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -373,9 +443,9 @@ TEST_CASE("mmap: map 2m twice with release succeeds")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_2m(0x2A, 0x2A);
         mmap.release(0x2A);
-        mmap.map_2m(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_2m(0x2A, 0x2A);
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -384,21 +454,99 @@ TEST_CASE("mmap: map 4k twice with release succeeds")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_4k(0x2A, 0x2A);
         mmap.release(0x2A);
-        mmap.map_4k(0x2A, 0x2A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_4k(0x2A, 0x2A);
     }
     CHECK(g_allocated_pages.empty());
 }
 
-TEST_CASE("mmap: map twise, release once")
+TEST_CASE("mmap: map twice, release once")
 {
     {
         cr3::mmap mmap{};
 
-        mmap.map_4k(0x102A, 0x102A, bfvmm::x64::cr3::mmap::attr_type::read_write);
-        mmap.map_4k(0x202A, 0x202A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_4k(0x102A, 0x102A);
+        mmap.map_4k(0x202A, 0x202A);
         mmap.release(0x202A);
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: map 1g, entry")
+{
+    {
+        cr3::mmap mmap{};
+
+        mmap.map_1g(0x102A, 0x102A);
+        CHECK_NOTHROW(mmap.entry(0x102A));
+        CHECK_NOTHROW(mmap.entry(0x100000));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: map 2m, entry")
+{
+    {
+        cr3::mmap mmap{};
+
+        mmap.map_2m(0x102A, 0x102A);
+        CHECK_NOTHROW(mmap.entry(0x102A));
+        CHECK_NOTHROW(mmap.entry(0x10000));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: map 4k, entry")
+{
+    {
+        cr3::mmap mmap{};
+
+        mmap.map_4k(0x102A, 0x102A);
+        CHECK_NOTHROW(mmap.entry(0x102A));
+        CHECK_NOTHROW(mmap.entry(0x1000));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: entry non-mapped address")
+{
+    {
+        cr3::mmap mmap{};
+        CHECK_THROWS(mmap.entry(0x102A));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: entry non-mapped address 1g")
+{
+    {
+        cr3::mmap mmap{};
+
+        mmap.map_4k(0x102A, 0x102A);
+        CHECK_THROWS(mmap.entry(0x10000002A));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: entry non-mapped address 2m")
+{
+    {
+        cr3::mmap mmap{};
+
+        mmap.map_4k(0x102A, 0x102A);
+        CHECK_THROWS(mmap.entry(0x100002A));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: entry non-mapped address 4k")
+{
+    {
+        cr3::mmap mmap{};
+
+        mmap.map_4k(0x102A, 0x102A);
+        CHECK_THROWS(mmap.entry(0x1002A));
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -408,8 +556,8 @@ TEST_CASE("mmap: map 1g, virt_to_phys")
     {
         cr3::mmap mmap{};
 
-        mmap.map_1g(0x102A, 0x102A, bfvmm::x64::cr3::mmap::attr_type::read_write);
-        CHECK(mmap.virt_to_phys(0x2A) == 0x1000);
+        mmap.map_1g(0x102A, 0x102A);
+        CHECK(mmap.virt_to_phys(0x102A) == 0x1000);
         CHECK(mmap.virt_to_phys(0x100000) == 0x1000);
     }
     CHECK(g_allocated_pages.empty());
@@ -420,7 +568,7 @@ TEST_CASE("mmap: map 2m, virt_to_phys")
     {
         cr3::mmap mmap{};
 
-        mmap.map_2m(0x102A, 0x102A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_2m(0x102A, 0x102A);
         CHECK(mmap.virt_to_phys(0x102A) == 0x1000);
         CHECK(mmap.virt_to_phys(0x10000) == 0x1000);
     }
@@ -432,7 +580,7 @@ TEST_CASE("mmap: map 4k, virt_to_phys")
     {
         cr3::mmap mmap{};
 
-        mmap.map_4k(0x102A, 0x102A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_4k(0x102A, 0x102A);
         CHECK(mmap.virt_to_phys(0x102A) == 0x1000);
         CHECK(mmap.virt_to_phys(0x1000) == 0x1000);
     }
@@ -443,40 +591,127 @@ TEST_CASE("mmap: virt_to_phys non-mapped address")
 {
     {
         cr3::mmap mmap{};
-        CHECK(mmap.virt_to_phys(0x102A) == 0x0);
+        CHECK_THROWS(mmap.virt_to_phys(0x102A));
     }
     CHECK(g_allocated_pages.empty());
 }
 
-TEST_CASE("mmap: virt_to_phys after unmap")
+TEST_CASE("mmap: virt_to_phys non-mapped address 1g")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(0x102A, 0x102A, bfvmm::x64::cr3::mmap::attr_type::read_write);
-        CHECK(mmap.virt_to_phys(0x102A) == 0x1000);
-        mmap.unmap(0x102A);
-        CHECK(mmap.virt_to_phys(0x102A) == 0x0);
+
+        mmap.map_4k(0x102A, 0x102A);
+        CHECK_THROWS(mmap.virt_to_phys(0x10000002A));
     }
     CHECK(g_allocated_pages.empty());
 }
 
-TEST_CASE("mmap: mdl")
+TEST_CASE("mmap: virt_to_phys non-mapped address 2m")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(0x102A, 0x102A, bfvmm::x64::cr3::mmap::attr_type::read_write);
-        CHECK(mmap.mdl().size() == 4);
+
+        mmap.map_4k(0x102A, 0x102A);
+        CHECK_THROWS(mmap.virt_to_phys(0x100002A));
     }
     CHECK(g_allocated_pages.empty());
 }
 
-TEST_CASE("mmap: mdl after release")
+TEST_CASE("mmap: virt_to_phys non-mapped address 4k")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(0x102A, 0x102A, bfvmm::x64::cr3::mmap::attr_type::read_write);
-        mmap.release(0x102A);
-        CHECK(mmap.mdl().size() == 1);
+
+        mmap.map_4k(0x102A, 0x102A);
+        CHECK_THROWS(mmap.virt_to_phys(0x1002A));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: map 1g, from")
+{
+    {
+        cr3::mmap mmap{};
+
+        mmap.map_1g(0x102A, 0x102A);
+        CHECK(mmap.from(0x102A) == ::x64::pdpt::from);
+        CHECK(mmap.from(0x100000) == ::x64::pdpt::from);
+        CHECK(mmap.is_1g(0x102A));
+        CHECK(!mmap.is_2m(0x102A));
+        CHECK(!mmap.is_4k(0x102A));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: map 2m, from")
+{
+    {
+        cr3::mmap mmap{};
+
+        mmap.map_2m(0x102A, 0x102A);
+        CHECK(mmap.from(0x102A) == ::x64::pd::from);
+        CHECK(mmap.from(0x10000) == ::x64::pd::from);
+        CHECK(!mmap.is_1g(0x102A));
+        CHECK(mmap.is_2m(0x102A));
+        CHECK(!mmap.is_4k(0x102A));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: map 4k, from")
+{
+    {
+        cr3::mmap mmap{};
+
+        mmap.map_4k(0x102A, 0x102A);
+        CHECK(mmap.from(0x102A) == ::x64::pt::from);
+        CHECK(mmap.from(0x1000) == ::x64::pt::from);
+        CHECK(!mmap.is_1g(0x102A));
+        CHECK(!mmap.is_2m(0x102A));
+        CHECK(mmap.is_4k(0x102A));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: from non-mapped address")
+{
+    {
+        cr3::mmap mmap{};
+        CHECK_THROWS(mmap.from(0x102A));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: from non-mapped address 1g")
+{
+    {
+        cr3::mmap mmap{};
+
+        mmap.map_4k(0x102A, 0x102A);
+        CHECK_THROWS(mmap.from(0x10000002A));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: from non-mapped address 2m")
+{
+    {
+        cr3::mmap mmap{};
+
+        mmap.map_4k(0x102A, 0x102A);
+        CHECK_THROWS(mmap.from(0x100002A));
+    }
+    CHECK(g_allocated_pages.empty());
+}
+
+TEST_CASE("mmap: from non-mapped address 4k")
+{
+    {
+        cr3::mmap mmap{};
+
+        mmap.map_4k(0x102A, 0x102A);
+        CHECK_THROWS(mmap.from(0x1002A));
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -485,9 +720,9 @@ TEST_CASE("mmap: remap 2m to 4k")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_4k(0x102A, 0x102A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_4k(0x102A, 0x102A);
         mmap.release(0x102A);
-        mmap.map_2m(0x102A, 0x102A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_2m(0x102A, 0x102A);
     }
     CHECK(g_allocated_pages.empty());
 }
@@ -496,9 +731,9 @@ TEST_CASE("mmap: remap 4k to 2m")
 {
     {
         cr3::mmap mmap{};
-        mmap.map_2m(0x102A, 0x102A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_2m(0x102A, 0x102A);
         mmap.release(0x102A);
-        mmap.map_4k(0x102A, 0x102A, bfvmm::x64::cr3::mmap::attr_type::read_write);
+        mmap.map_4k(0x102A, 0x102A);
     }
     CHECK(g_allocated_pages.empty());
 }
