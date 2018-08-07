@@ -29,10 +29,6 @@ namespace intel_x64
 namespace ept
 {
 
-constexpr auto page_size_4k = 0x1000ULL;
-constexpr auto page_size_2m = 0x200000ULL;
-constexpr auto page_size_1g = 0x40000000ULL;
-
 namespace pml4
 {
     constexpr const auto num_entries = 512;
@@ -194,7 +190,7 @@ namespace pdpt
     constexpr const auto from = 30U;
     constexpr const auto size = num_entries * sizeof(uintptr_t);
 
-    constexpr const auto page_size = 0x40000000;
+    constexpr const auto page_size = 0x40000000ULL;
 
     inline auto index(uintptr_t virt)
     {
@@ -426,7 +422,7 @@ namespace pd
     constexpr const auto from = 21U;
     constexpr const auto size = num_entries * sizeof(uintptr_t);
 
-    constexpr const auto page_size = 0x200000;
+    constexpr const auto page_size = 0x200000ULL;
 
     inline auto index(uintptr_t virt)
     {
@@ -658,7 +654,7 @@ namespace pt
     constexpr const auto from = 12U;
     constexpr const auto size = num_entries * sizeof(uintptr_t);
 
-    constexpr const auto page_size = 0x1000;
+    constexpr const auto page_size = 0x1000ULL;
 
     inline auto index(uintptr_t virt)
     {
