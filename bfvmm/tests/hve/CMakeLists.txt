@@ -78,8 +78,3 @@ do_test(test_vmx
     SOURCES arch/intel_x64/vmx/test_vmx.cpp
     ${ARGN}
 )
-
-do_test(test_phys_iommu
-    SOURCES arch/intel_x64/vtd/test_phys_iommu.cpp
-    ${ARGN}
-)
