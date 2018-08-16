@@ -21,7 +21,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include <driver.h>
 #define INITGUID
 
 #include <ntddk.h>

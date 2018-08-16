@@ -124,11 +124,13 @@ setup-x86\_64.exe to C:\\cygwin64\\bin. From there, open a Cygwin terminal and
 run the following:
 
 ```
-setup-x86_64.exe -q -P make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext
+setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext,bash-completion
+git config --global core.autocrlf false
 ```
 
-After installing the the above packages you must enable test signing mode.
-This can be done from a command prompt with admin privileges:
+After installing the the above packages and disabling auto CRLF (which breaks
+bash scripts) you must enable test signing mode. This can be done from a
+command prompt with admin privileges:
 ```
 bcdedit.exe /set testsigning ON
 <reboot>
