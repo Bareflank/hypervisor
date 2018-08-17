@@ -184,7 +184,8 @@ make distclean
 
 ## Serial Instructions
 
-On Windows, serial output might not work. If this is the case, disbale the
+On Windows, serial output might not work, and on systems (e.g. Intel NUC),
+may prevent Bareflank from starting at all. If this is the case, disable the
 default Serial device using the following:
 ```
 reg add "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\Serial" /f /v "start" /t REG_DWORD /d "4"
