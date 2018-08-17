@@ -43,17 +43,17 @@ case $(uname -s) in
 CYGWIN_NT-6.1*)
     find_msbuild
     cd $1/src/platform/windows/
-    >&2 eval "'$msbuild' /m:3 /p:Configuration=Debug /p:Platform=x64 /p:TargetVersion=Windows7 bareflank.sln"
+    >&2 eval "'$msbuild' /m:3 /p:Configuration=Release /p:Platform=x64 /p:TargetVersion=Windows7 bareflank.sln"
     ;;
 CYGWIN_NT-6.3*)
     find_msbuild
     cd $1/src/platform/windows/
-    >&2 eval "'$msbuild' /m:3 /p:Configuration=Debug /p:Platform=x64 /p:TargetVersion=WindowsV6.3 bareflank.sln"
+    >&2 eval "'$msbuild' /m:3 /p:Configuration=Release /p:Platform=x64 /p:TargetVersion=WindowsV6.3 bareflank.sln"
     ;;
 CYGWIN_NT-10.0*)
     find_msbuild
     cd $1/src/platform/windows/
-    >&2 eval "'$msbuild' /m:3 /p:Configuration=Debug /p:Platform=x64 /p:TargetVersion=Windows10 bareflank.sln"
+    >&2 eval "'$msbuild' /m:3 /p:Configuration=Release /p:Platform=x64 /p:TargetVersion=Windows10 bareflank.sln"
     ;;
 Linux)
     cd $1/src/platform/linux
