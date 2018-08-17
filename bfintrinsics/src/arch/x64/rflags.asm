@@ -21,13 +21,13 @@ default rel
 
 section .text
 
-global _read_rflags:function
+global _read_rflags
 _read_rflags:
     pushfq
     pop rax
     ret
 
-global _write_rflags:function
+global _write_rflags
 _write_rflags:
     push rdi
     popf

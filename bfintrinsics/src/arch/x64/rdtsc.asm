@@ -35,7 +35,7 @@ section .text
 ; randomly accessing different leaf functions in CPUID introducing variance.
 ;
 
-global _read_tsc:function
+global _read_tsc
 _read_tsc:
 
     push rbx
@@ -53,7 +53,7 @@ _read_tsc:
     pop rbx
     ret
 
-global _read_tscp:function
+global _read_tscp
 _read_tscp:
 
     push rbx

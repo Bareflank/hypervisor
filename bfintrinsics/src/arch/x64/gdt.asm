@@ -21,12 +21,12 @@ default rel
 
 section .text
 
-global _read_gdt:function
+global _read_gdt
 _read_gdt:
     sgdt [rdi]
     ret
 
-global _write_gdt:function
+global _write_gdt
 _write_gdt:
     lgdt [rdi]
     ret

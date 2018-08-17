@@ -21,7 +21,7 @@ default rel
 
 section .text
 
-global _pause:function
+global _pause
 _pause:
     pause
     ret

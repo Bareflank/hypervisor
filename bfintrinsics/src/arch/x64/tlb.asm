@@ -21,7 +21,7 @@ default rel
 
 section .text
 
-global _invlpg:function
+global _invlpg
 _invlpg:
     invlpg [rdi]
     ret

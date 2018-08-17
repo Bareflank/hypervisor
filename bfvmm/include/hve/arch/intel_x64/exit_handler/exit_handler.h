@@ -114,7 +114,7 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    virtual ~exit_handler() = default;
+    VIRTUAL ~exit_handler() = default;
 
     /// Add Handler Delegate
     ///
@@ -134,7 +134,7 @@ public:
     /// @param reason The exit reason for the handler being registered
     /// @param d The delegate being registered
     ///
-    void add_handler(
+    VIRTUAL void add_handler(
         ::intel_x64::vmcs::value_type reason,
         handler_delegate_t &&d
     );
