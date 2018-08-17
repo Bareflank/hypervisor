@@ -21,12 +21,12 @@ default rel
 
 section .text
 
-global _read_dr7:function
+global _read_dr7
 _read_dr7:
     mov rax, dr7
     ret
 
-global _write_dr7:function
+global _write_dr7
 _write_dr7:
     mov dr7, rdi
     ret

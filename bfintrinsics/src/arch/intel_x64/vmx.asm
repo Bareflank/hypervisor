@@ -18,43 +18,43 @@
 
 section .text
 
-global _vmxon:function
+global _vmxon
 _vmxon:
     vmxon [rdi]
     jbe _vmx_failure
     jmp _vmx_success
 
-global _vmxoff:function
+global _vmxoff
 _vmxoff:
     vmxoff
     jbe _vmx_failure
     jmp _vmx_success
 
-global _vmclear:function
+global _vmclear
 _vmclear:
     vmclear [rdi]
     jbe _vmx_failure
     jmp _vmx_success
 
-global _vmptrld:function
+global _vmptrld
 _vmptrld:
     vmptrld [rdi]
     jbe _vmx_failure
     jmp _vmx_success
 
-global _vmptrst:function
+global _vmptrst
 _vmptrst:
     vmptrst [rdi]
     jbe _vmx_failure
     jmp _vmx_success
 
-global _vmread:function
+global _vmread
 _vmread:
     vmread [rsi], rdi
     jbe _vmx_failure
     jmp _vmx_success
 
-global _vmwrite:function
+global _vmwrite
 _vmwrite:
     vmwrite rdi, rsi
     jbe _vmx_failure
@@ -80,7 +80,7 @@ _vmwrite:
 ; continue execution.
 ;
 
-global _vmlaunch_demote:function
+global _vmlaunch_demote
 _vmlaunch_demote:
     call _vmlaunch_trampoline
     ret
@@ -101,13 +101,13 @@ _vmlaunch_trampoline:
 
     jmp rsi
 
-global _invept:function
+global _invept
 _invept:
     invept rdi, [rsi]
     jbe _vmx_failure
     jmp _vmx_success
 
-global _invvpid:function
+global _invvpid
 _invvpid:
     invvpid rdi, [rsi]
     jbe _vmx_failure
@@ -123,7 +123,7 @@ _vmx_success:
     mov rax, 0x1
     ret
 
-global _vmcall:function
+global _vmcall
 _vmcall:
 
     push rbx

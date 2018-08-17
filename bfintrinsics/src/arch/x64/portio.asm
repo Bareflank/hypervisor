@@ -21,28 +21,28 @@ default rel
 
 section .text
 
-global _inb:function
+global _inb
 _inb:
     xor rax, rax
     mov rdx, rdi
     in al, dx
     ret
 
-global _inw:function
+global _inw
 _inw:
     xor rax, rax
     mov rdx, rdi
     in ax, dx
     ret
 
-global _ind:function
+global _ind
 _ind:
     xor rax, rax
     mov rdx, rdi
     in eax, dx
     ret
 
-global _insb:function
+global _insb
 _insb:
     mov rdx, rdi
     mov rdi, rsi
@@ -50,7 +50,7 @@ _insb:
     xor rax, rax
     ret
 
-global _insw:function
+global _insw
 _insw:
     mov rdx, rdi
     mov rdi, rsi
@@ -58,7 +58,7 @@ _insw:
     xor rax, rax
     ret
 
-global _insd:function
+global _insd
 _insd:
     mov rdx, rdi
     mov rdi, rsi
@@ -66,7 +66,7 @@ _insd:
     xor rax, rax
     ret
 
-global _insbrep:function
+global _insbrep
 _insbrep:
     mov rcx, rdx
     mov rdx, rdi
@@ -76,7 +76,7 @@ _insbrep:
     xor rax, rax
     ret
 
-global _inswrep:function
+global _inswrep
 _inswrep:
     mov rcx, rdx
     mov rdx, rdi
@@ -86,7 +86,7 @@ _inswrep:
     xor rax, rax
     ret
 
-global _insdrep:function
+global _insdrep
 _insdrep:
     mov rcx, rdx
     mov rdx, rdi
@@ -96,7 +96,7 @@ _insdrep:
     xor rax, rax
     ret
 
-global _outb:function
+global _outb
 _outb:
     mov rdx, rdi
     mov rax, rsi
@@ -104,7 +104,7 @@ _outb:
     xor rax, rax
     ret
 
-global _outw:function
+global _outw
 _outw:
     mov rdx, rdi
     mov rax, rsi
@@ -112,7 +112,7 @@ _outw:
     xor rax, rax
     ret
 
-global _outd:function
+global _outd
 _outd:
     mov rdx, rdi
     mov rax, rsi
@@ -120,7 +120,7 @@ _outd:
     xor rax, rax
     ret
 
-global _outsb:function
+global _outsb
 _outsb:
     mov rdx, rdi
     mov rdi, rsi
@@ -128,7 +128,7 @@ _outsb:
     xor rax, rax
     ret
 
-global _outsw:function
+global _outsw
 _outsw:
     mov rdx, rdi
     mov rdi, rsi
@@ -136,7 +136,7 @@ _outsw:
     xor rax, rax
     ret
 
-global _outsd:function
+global _outsd
 _outsd:
     mov rdx, rdi
     mov rdi, rsi
@@ -144,7 +144,7 @@ _outsd:
     xor rax, rax
     ret
 
-global _outsbrep:function
+global _outsbrep
 _outsbrep:
     mov rcx, rdx
     mov rdx, rdi
@@ -154,7 +154,7 @@ _outsbrep:
     xor rax, rax
     ret
 
-global _outswrep:function
+global _outswrep
 _outswrep:
     mov rcx, rdx
     mov rdx, rdi
@@ -164,7 +164,7 @@ _outswrep:
     xor rax, rax
     ret
 
-global _outsdrep:function
+global _outsdrep
 _outsdrep:
     mov rcx, rdx
     mov rdx, rdi

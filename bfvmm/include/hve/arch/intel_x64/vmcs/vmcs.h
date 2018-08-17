@@ -90,7 +90,7 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    virtual ~vmcs() = default;
+    VIRTUAL ~vmcs() = default;
 
     /// Launch
     ///

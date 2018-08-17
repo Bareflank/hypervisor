@@ -21,25 +21,25 @@ default rel
 
 section .text
 
-global _read_es:function
+global _read_es
 _read_es:
     xor rax, rax
     mov ax, es
     ret
 
-global _write_es:function
+global _write_es
 _write_es:
     xor rax, rax
     mov es, di
     ret
 
-global _read_cs:function
+global _read_cs
 _read_cs:
     xor rax, rax
     mov ax, cs
     ret
 
-global _write_cs:function
+global _write_cs
 _write_cs:
 
     ; The added 0x48 is an undocumented issue with NASM. Basically, even though
@@ -54,68 +54,68 @@ _write_cs:
     db 0x48
     retf
 
-global _read_ss:function
+global _read_ss
 _read_ss:
     xor rax, rax
     mov ax, ss
     ret
 
-global _write_ss:function
+global _write_ss
 _write_ss:
     mov ss, di
     ret
 
-global _read_ds:function
+global _read_ds
 _read_ds:
     xor rax, rax
     mov ax, ds
     ret
 
-global _write_ds:function
+global _write_ds
 _write_ds:
     mov ds, di
     ret
 
-global _read_fs:function
+global _read_fs
 _read_fs:
     xor rax, rax
     mov ax, fs
     ret
 
-global _write_fs:function
+global _write_fs
 _write_fs:
     mov fs, di
     ret
 
-global _read_gs:function
+global _read_gs
 _read_gs:
     xor rax, rax
     mov ax, gs
     ret
 
-global _write_gs:function
+global _write_gs
 _write_gs:
     mov gs, di
     ret
 
-global _read_ldtr:function
+global _read_ldtr
 _read_ldtr:
     xor rax, rax
     sldt ax
     ret
 
-global _write_ldtr:function
+global _write_ldtr
 _write_ldtr:
     lldt di
     ret
 
-global _read_tr:function
+global _read_tr
 _read_tr:
     xor rax, rax
     str ax
     ret
 
-global _write_tr:function
+global _write_tr
 _write_tr:
     ltr di
     ret

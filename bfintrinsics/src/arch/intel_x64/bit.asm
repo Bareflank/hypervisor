@@ -21,17 +21,17 @@ default rel
 
 section .text
 
-global _popcnt:function
+global _popcnt
 _popcnt:
     popcnt rax, rdi
     ret
 
-global _bsf:function
+global _bsf
 _bsf:
     bsf rax, rdi
     ret
 
-global _bsr:function
+global _bsr
 _bsr:
     bsr rax, rdi
     ret
