@@ -68,18 +68,7 @@ In the future, we would also like to support:
 
 ## Motivation
 
-Most people think that hypervisors are meant to virtualize servers and
-provide a means to run Windows on a Mac, but there is a whole field
-of research where hypervisors are used, and in some cases even without guest virtual
-machines. Since a hypervisor is capable of controlling the host OS
-running underneath it (so called "ring -1"), hypervisors have been
-used for introspection, reverse engineering, anti-virus, containerization,
-diversity, and even architectural research like the
-[MoRE](https://github.com/ainfosec/MoRE) hypervisor. All of these use
-cases start the same way, by spending months standing up the hypervisor
-itself before you can start working on your actual project. Existing open
-source hypervisors are burdened with legacy support and unnecessary complexity
-that make them painful to work with when conducting hypervisor research.
+Most people think that hypervisors are meant to virtualize servers and provide a means to run Windows on a Mac, but there is a whole field of research where hypervisors without guest virtual machines. Since a hypervisor is capable of controlling the host OS running underneath it (so-called "ring -1"), host-only hypervisors support introspection, reverse engineering, anti-virus, containerization, diversity, and even architectural research like [MoRE](https://github.com/ainfosec/MoRE). All of these use cases start the same way, by spending months standing up the hypervisor itself before you can start working on your actual project. Existing open source hypervisors are burdened with legacy support and unnecessary complexity that make them painful to work with when conducting hypervisor research.
 
 ## Links
 

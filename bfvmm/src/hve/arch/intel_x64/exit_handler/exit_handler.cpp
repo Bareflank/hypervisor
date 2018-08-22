@@ -459,7 +459,7 @@ exit_handler::exit_handler(
 void
 exit_handler::add_handler(
     ::intel_x64::vmcs::value_type reason,
-    handler_delegate_t &&d)
+    const handler_delegate_t &d)
 { m_handlers.at(reason).push_front(d); }
 
 void
