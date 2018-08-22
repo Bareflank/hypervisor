@@ -136,7 +136,7 @@ public:
     ///
     VIRTUAL void add_handler(
         ::intel_x64::vmcs::value_type reason,
-        handler_delegate_t &&d
+        const handler_delegate_t &d
     );
 
     /// Handle
