@@ -1,6 +1,6 @@
 ;
 ; Bareflank Hypervisor
-; Copyright (C) 2015 Assured Information Security, Inc.
+; Copyright (C) 2018 Assured Information Security, Inc.
 ;
 ; This library is free software; you can redistribute it and/or
 ; modify it under the terms of the GNU Lesser General Public
@@ -21,62 +21,10 @@ default rel
 
 section .text
 
-global _read_cr0
-_read_cr0:
+global _set_ne
+_set_ne:
     mov rax, cr0
-    ret
-
-global _write_cr0
-_write_cr0:
-    mov cr0, rdi
-    ret
-
-global _read_cr2
-_read_cr2:
-    mov rax, cr2
-    ret
-
-global _write_cr2
-_write_cr2:
-    mov cr2, rdi
-    ret
-
-global _read_cr3
-_read_cr3:
-    mov rax, cr3
-    ret
-
-global _write_cr3
-_write_cr3:
-    mov cr3, rdi
-    ret
-
-global _read_cr4
-_read_cr4:
-    mov rax, cr4
-    ret
-
-global _write_cr4
-_write_cr4:
-    mov cr4, rdi
-    ret
-
-global _read_cr8
-_read_cr8:
-    mov rax, cr8
-    ret
-
-global _write_cr8
-_write_cr8:
-    mov cr8, rdi
-    ret
-
-global _write_xcr0
-_write_xcr0:
-    mov rax, rdi
-    mov rdx, rdi
-    shr rdx, 32
-    mov rcx, 0
-    xsetbv
+    or rax, 0x20
+    mov cr0, rax
 
     ret

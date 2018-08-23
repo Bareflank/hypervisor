@@ -18,10 +18,10 @@
  */
 
 #include <bfarch.h>
-#include <bftypes.h>
 #include <bfdebug.h>
 #include <bfplatform.h>
-#include <bfelf_loader.h>
+
+#include <common.h>
 
 #include <linux/mm.h>
 #include <linux/slab.h>
@@ -37,11 +37,20 @@
 #   include <asm/io.h>
 #endif
 
-#include <asm/tlbflush.h>
-#include <asm/fixmap.h>
-
 typedef long (*set_affinity_fn)(pid_t, const struct cpumask *);
-set_affinity_fn set_cpu_affinity = 0;
+set_affinity_fn set_cpu_affinity = nullptr;
+
+int64_t
+platform_init(void)
+{
+    set_cpu_affinity = (set_affinity_fn)kallsyms_lookup_name("sched_setaffinity");
+    if (set_cpu_affinity == nullptr) {
+        BFALERT("Failed to locate sched_setaffinity\n");
+        return -1;
+    }
+
+    return BF_SUCCESS;
+}
 
 void *
 platform_alloc_rw(uint64_t len)
@@ -56,7 +65,7 @@ platform_alloc_rw(uint64_t len)
     addr = vmalloc(len);
 
     if (addr == nullptr) {
-        BFALERT("platform_alloc_rw: failed to vmalloc mem: %lld\n", len);
+        BFALERT("platform_alloc_rw: failed to vmalloc rw mem: %lld\n", len);
     }
 
     return addr;
@@ -75,7 +84,7 @@ platform_alloc_rwe(uint64_t len)
     addr = __vmalloc(len, GFP_KERNEL, PAGE_KERNEL_EXEC);
 
     if (addr == nullptr) {
-        BFALERT("platform_alloc_rwe: failed to vmalloc executable mem: %lld\n", len);
+        BFALERT("platform_alloc_rwe: failed to vmalloc rwe mem: %lld\n", len);
     }
 
     return addr;
@@ -138,22 +147,6 @@ platform_memcpy(void *dst, const void *src, uint64_t num)
     return memcpy(dst, src, num);
 }
 
-void
-platform_start(void)
-{
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
-    cr4_init_shadow();
-#endif
-}
-
-void
-platform_stop(void)
-{
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
-    cr4_init_shadow();
-#endif
-}
-
 int64_t
 platform_num_cpus(void)
 {
@@ -167,75 +160,12 @@ platform_num_cpus(void)
 }
 
 int64_t
-platform_set_affinity(int64_t affinity)
+platform_call_vmm_on_core(
+    uint64_t cpuid, uint64_t request, uintptr_t arg1, uintptr_t arg2)
 {
-    if (!set_cpu_affinity) {
-        set_cpu_affinity = (set_affinity_fn)kallsyms_lookup_name("sched_setaffinity");
-        if (set_cpu_affinity == nullptr) {
-            BFALERT("Failed to locate sched_setaffinity\n");
-            return BF_ERROR_UNKNOWN;
-        }
-    }
-
-    if (set_cpu_affinity(current->pid, cpumask_of(affinity)) != 0) {
+    if (set_cpu_affinity(current->pid, cpumask_of(cpuid)) != 0) {
         return BF_ERROR_UNKNOWN;
     }
 
-    return affinity;
+    return common_call_vmm(cpuid, request, arg1, arg2);
 }
-
-void
-platform_restore_affinity(int64_t affinity)
-{
-    bfignored(affinity);
-}
-
-int64_t
-platform_get_current_cpu_num(void)
-{
-    return get_cpu();
-}
-
-void
-platform_restore_preemption(void)
-{
-    put_cpu();
-}
-
-#if defined(BF_AARCH64)
-
-int64_t
-platform_populate_info(struct platform_info_t *info)
-{
-    info->serial_address = (uintptr_t) ioremap(DEFAULT_COM_PORT, DEFAULT_COM_LENGTH);
-    return BF_SUCCESS;
-}
-
-void
-platform_unload_info(struct platform_info_t *info)
-{
-    if (info->serial_address) {
-        iounmap((void *) info->serial_address);
-        info->serial_address = 0;
-    }
-}
-
-#else
-
-int64_t
-platform_populate_info(struct platform_info_t *info)
-{
-    if (info) {
-        platform_memset(info, 0, sizeof(struct platform_info_t));
-    }
-
-    return BF_SUCCESS;
-}
-
-void
-platform_unload_info(struct platform_info_t *info)
-{
-}
-
-
-#endif

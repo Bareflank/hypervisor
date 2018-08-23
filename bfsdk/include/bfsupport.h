@@ -107,52 +107,6 @@ struct section_info_t {
 };
 
 /**
- * @struct efi_data_t
- *
- * Binary interface for relaying EFI-related information and desired behavior (16 bytes)
- *
- * @var efi_data_t::enabled
- *      Enable EFI exit handlers
- * @var efi_data_t::padding
- *      Reserved for alignment and future use
- */
-#pragma pack(push,8)
-struct efi_data_t {
-    uint8_t enabled;
-    uint8_t padding[15];
-};
-
-/**
- * @struct platform_info_t
- *
- * Provides platform-specific information to be passed into the VMM from
- * bfdriver. Definition of this struct varies based on build target.
- *
- * @var platform_info_t::signature
- *      Struct signature
- * @var platform_info_t::version
- *      Struct version
- * @var platform_info_t::efi
- *      Data specifying EFI booting behavior
- * @var platform_info_t::extension_data
- *      Pointer to possible extension-defined struct
- * @var platform_info_t::_dummy
- *      Dummy member to avoid an empty struct on platforms not needing platform info
- */
-struct platform_info_t {
-    uint8_t signature[4];
-    uint8_t version[4];
-    struct efi_data_t efi;
-    void *extension_data;
-    int _dummy;
-#if defined(BF_AARCH64)
-    /// Address of serial peripheral within kernel space
-    uintptr_t serial_address;
-#endif
-};
-#pragma pack(pop)
-
-/**
  * @struct crt_info_t
  *
  * Provides information for executing an application including section
@@ -182,8 +136,6 @@ struct platform_info_t {
  *     (optional) vcpuid the executable is running on
  * @var crt_info_t::program_break
  *     (optional) the executable's program break
- * @var crt_info_t::platform_info
- *     platform-specific information from bfdriver
  */
 struct crt_info_t {
 
@@ -203,8 +155,6 @@ struct crt_info_t {
     uintptr_t func;
     uintptr_t vcpuid;
     uintptr_t program_break;
-
-    struct platform_info_t platform_info;
 };
 
 /**
@@ -237,17 +187,6 @@ using _start_t = int64_t (*)(char *stack, const struct crt_info_t *);
 #else
 typedef int64_t (*_start_t)(char *stack, const struct crt_info_t *);
 #endif
-
-/**
- * get_platform_info
- *
- * Get a pointer to a populated platform_info_t. The returned struct is not
- * to be freed by the caller. Returned pointer will never be null.
- *
- * @return pointer to populated platform_info_t
- */
-EXPORT_SYM struct platform_info_t *
-get_platform_info(void);
 
 #ifdef __cplusplus
 }

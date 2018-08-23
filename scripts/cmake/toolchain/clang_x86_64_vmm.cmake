@@ -39,9 +39,15 @@ if(NOT WIN32)
     endif()
 endif()
 
+if(DEFINED ENV{LD_BIN})
+    set(LD_BIN $ENV{LD_BIN})
+else()
+    set(LD_BIN ${CMAKE_INSTALL_PREFIX}/bin/ld)
+endif()
+
 string(CONCAT LD_FLAGS
     "--sysroot=${CMAKE_INSTALL_PREFIX} "
-    "-L${CMAKE_INSTALL_PREFIX}/lib "
+    "-L ${CMAKE_INSTALL_PREFIX}/lib "
     "-z max-page-size=4096 "
     "-z common-page-size=4096 "
     "-z relro "
@@ -55,12 +61,6 @@ if(EXISTS "${CMAKE_INSTALL_PREFIX}/lib/libbfdso_static.a")
     )
 endif()
 
-if(DEFINED ENV{LD_BIN})
-    set(LD_BIN $ENV{LD_BIN})
-else()
-    set(LD_BIN ${CMAKE_INSTALL_PREFIX}/bin/ld)
-endif()
-
 set(CMAKE_C_ARCHIVE_CREATE
     "ar qc <TARGET> <OBJECTS>"
 )
@@ -70,7 +70,7 @@ set(CMAKE_CXX_ARCHIVE_CREATE
 )
 
 set(CMAKE_C_LINK_EXECUTABLE
-    "${LD_BIN} ${LD_FLAGS} -pie <OBJECTS> -o <TARGET> <LINK_LIBRARIES> "
+    "${LD_BIN} ${LD_FLAGS} -pie <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
 )
 
 set(CMAKE_CXX_LINK_EXECUTABLE
@@ -84,3 +84,6 @@ set(CMAKE_C_CREATE_SHARED_LIBRARY
 set(CMAKE_CXX_CREATE_SHARED_LIBRARY
     "${LD_BIN} ${LD_FLAGS} -shared <OBJECTS> -o <TARGET>"
 )
+
+set(CMAKE_C_COMPILER_WORKS 1)
+set(CMAKE_CXX_COMPILER_WORKS 1)

@@ -73,6 +73,14 @@ set(ENABLE_TESTS_ONLY OFF)
 #
 set(ENABLE_EXTENDED_APIS OFF)
 
+# Enable EFI
+#
+# This will enable building EFI targets after the VMM has compiled. Note that
+# this forces static build, disables testing, ASAN, codecov and clang tidy,
+# and requries the VMM be compiled
+#
+set(ENABLE_BUILD_EFI OFF)
+
 # Examples
 #
 # These options enable the examples
@@ -86,9 +94,12 @@ set(ENABLE_EXTENDED_APIS_EXAMPLE_HOOK OFF)
 # Override VMM
 #
 # If the override VMM is set, this VMM will be used instead of the default VMM
-# based on the current configuration.
+# based on the current configuration. Note that you can also set the override
+# VMM target to use, which might be needed for EFI so that EFI knows which
+# target to wait for
 #
 # set(OVERRIDE_VMM <name>)
+# set(OVERRIDE_VMM_TARGET <name>)
 
 # Override Compiler Warnings
 #
@@ -123,7 +134,7 @@ endif()
 # contact AIS, Inc at quinnr@ainfosec.com. Finally, both binary types can be
 # built simultaniously.
 #
-if(ENABLE_DEVELOPER_MODE)
+if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI)
     set(BUILD_SHARED_LIBS ON)
     set(BUILD_STATIC_LIBS OFF)
 else()
@@ -154,13 +165,13 @@ else()
     set(ENABLE_BUILD_USERSPACE ON)
 endif()
 
-if(ENABLE_DEVELOPER_MODE)
+if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI)
     set(ENABLE_BUILD_TEST ON)
 else()
     set(ENABLE_BUILD_TEST OFF)
 endif()
 
-if(ENABLE_DEVELOPER_MODE AND NOT HOST_SYSTEM_NAME STREQUAL "Windows")
+if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI AND NOT WIN32)
     set(ENABLE_ASAN ON)
     set(ENABLE_TIDY ON)
     set(ENABLE_FORMAT ON)
@@ -168,7 +179,7 @@ if(ENABLE_DEVELOPER_MODE AND NOT HOST_SYSTEM_NAME STREQUAL "Windows")
 else()
     set(ENABLE_ASAN OFF)
     set(ENABLE_TIDY OFF)
-    set(ENABLE_FORMAT OFF)
+    set(ENABLE_FORMAT ON)
     set(ENABLE_CODECOV OFF)
 endif()
 
@@ -188,7 +199,7 @@ endif()
 # ------------------------------------------------------------------------------
 
 if(ENABLE_EXTENDED_APIS)
-    set_bfm_vmm(eapis_vmm)
+    set_bfm_vmm(eapis_bfvmm)
     list(APPEND EXTENSION
         ${CMAKE_CURRENT_LIST_DIR}/extended_apis
     )
@@ -238,5 +249,9 @@ endif()
 # ------------------------------------------------------------------------------
 
 if(OVERRIDE_VMM)
-    set_bfm_vmm(${OVERRIDE_VMM})
+    if(OVERRIDE_VMM_TARGET)
+        set_bfm_vmm(${OVERRIDE_VMM} TARGET ${OVERRIDE_VMM_TARGET})
+    else()
+        set_bfm_vmm(${OVERRIDE_VMM})
+    endif()
 endif()

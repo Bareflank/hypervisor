@@ -200,8 +200,20 @@ _wbinvd() noexcept
 { }
 
 extern "C" void
+_pause() noexcept
+{ }
+
+extern "C" void
 _invlpg(const void *addr) noexcept
 { bfignored(addr); }
+
+extern "C" bool
+_invept(uint64_t type, void *ptr) noexcept
+{ bfignored(ptr); return true; }
+
+extern "C" bool
+_invvpid(uint64_t type, void *ptr) noexcept
+{ bfignored(ptr); return true; }
 
 extern "C" void
 _cpuid(void *eax, void *ebx, void *ecx, void *edx) noexcept
@@ -298,6 +310,10 @@ _write_cr4(uint64_t val) noexcept
 extern "C" void
 _write_cr8(uint64_t val) noexcept
 { g_cr8 = val; }
+
+extern "C" void
+_write_xcr0(uint64_t val) noexcept
+{ bfignored(val); }
 
 extern "C" uint64_t
 _read_dr7() noexcept

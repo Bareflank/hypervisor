@@ -28,7 +28,6 @@
 #ifndef _MP_SERVICE_PROTOCOL_H_
 #define _MP_SERVICE_PROTOCOL_H_
 
-
 ///
 /// Global ID for the EFI_MP_SERVICES_PROTOCOL.
 ///
@@ -41,7 +40,6 @@
 /// Forward declaration for the EFI_MP_SERVICES_PROTOCOL.
 ///
 typedef struct _EFI_MP_SERVICES_PROTOCOL EFI_MP_SERVICES_PROTOCOL;
-extern EFI_MP_SERVICES_PROTOCOL *g_mp_services;
 
 ///
 /// Terminator for a list of failed CPUs returned by StartAllAPs().
@@ -625,7 +623,5 @@ struct _EFI_MP_SERVICES_PROTOCOL {
     EFI_MP_SERVICES_ENABLEDISABLEAP           EnableDisableAP;
     EFI_MP_SERVICES_WHOAMI                    WhoAmI;
 };
-
-extern EFI_GUID gEfiMpServiceProtocolGuid;
 
 #endif

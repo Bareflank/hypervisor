@@ -16,23 +16,46 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if(ENABLE_BUILD_EFI AND NOT WIN32)
-    message(STATUS "Including dependency: gnuefi")
+unset(BFFLAGS_EFI)
+unset(BFFLAGS_EFI_C)
+unset(BFFLAGS_EFI_CXX)
+unset(BFFLAGS_EFI_X86_64)
+unset(BFFLAGS_EFI_AARCH64)
 
-    download_dependency(
-        gnuefi
-        URL         ${GNUEFI_URL}
-        URL_MD5     ${GNUEFI_URL_MD5}
-    )
+list(APPEND BFFLAGS_EFI
+    -isystem ${EFI_PREFIX_PATH}/include/efi/
+    -isystem ${EFI_PREFIX_PATH}/include/efi/x86_64/
+)
 
-    add_dependency(
-        gnuefi efi
-        CONFIGURE_COMMAND   ${CMAKE_COMMAND} -E copy_directory ${CACHE_DIR}/gnuefi/ ${DEPENDS_DIR}/gnuefi/${EFI_PREFIX}/build
-        BUILD_COMMAND       make
-        COMMAND             make -C lib
-        COMMAND             make -C gnuefi
-        INSTALL_COMMAND     make INSTALLROOT=${PREFIXES_DIR}/ PREFIX=${EFI_PREFIX} install
-        COMMAND             make INSTALLROOT=${PREFIXES_DIR}/ PREFIX=${EFI_PREFIX} -C lib install
-        COMMAND             make INSTALLROOT=${PREFIXES_DIR}/ PREFIX=${EFI_PREFIX} -C gnuefi install
-    )
-endif()
+list(APPEND BFFLAGS_EFI
+    -mno-red-zone
+    -mno-avx
+    # -maccumulate-outgoing-args
+    -fpic
+    -g
+    -O2
+    -Wall
+    -Wextra
+    -Wno-error=pragmas
+    -fshort-wchar
+    -fno-strict-aliasing
+    -ffreestanding
+    -fno-stack-protector
+    -fno-stack-check
+    -fno-merge-all-constants
+    -DCONFIG_x86_64
+    -DGNU_EFI_USE_MS_ABI
+    -D__KERNEL__
+    -DKERNEL
+    -DEFI
+)
+
+list(APPEND BFFLAGS_EFI_C
+    --std=c11
+)
+
+list(APPEND BFFLAGS_EFI_CXX
+)
+
+list(APPEND BFFLAGS_EFI_X86_64
+)

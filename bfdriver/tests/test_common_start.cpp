@@ -102,11 +102,14 @@ TEST_CASE("common_start_vmm: set affinity fails")
         REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
     }
 
-    MockRepository mocks;
-    mocks.OnCallFunc(platform_set_affinity).Return(BF_ERROR_UNKNOWN);
-
     CHECK(common_load_vmm() == BF_SUCCESS);
-    CHECK(common_start_vmm() == BF_ERROR_UNKNOWN);
+
+    {
+        MockRepository mocks;
+        mocks.OnCallFunc(platform_call_vmm_on_core).Return(BF_ERROR_UNKNOWN);
+        CHECK(common_start_vmm() == BF_ERROR_UNKNOWN);
+    }
+
     CHECK(common_fini() == BF_SUCCESS);
 }
 

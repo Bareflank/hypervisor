@@ -17,18 +17,47 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 cmake_minimum_required(VERSION 3.6)
-project(efi_main C CXX)
+project(efi C CXX)
 
 include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project(
-    INCLUDES ${VMM_PREFIX_PATH}/include
-    INCLUDES ${VMM_PREFIX_PATH}/include/efi
-    INCLUDES ${VMM_PREFIX_PATH}/include/efi/${BUILD_TARGET_ARCH}
-    INCLUDES ${EFI_OUTPUT_DIR}
-    INCLUDES ${SOURCE_BFDRIVER_DIR}/include
-    INCLUDES ${SOURCE_BFDRIVER_DIR}/src/platform/efi/efi_main
-    INCLUDES ${SOURCE_BFELF_LOADER_DIR}/include
-    INCLUDES ${SOURCE_BFSDK_DIR}/include
+    INCLUDES ../../../include
+    INCLUDES ${CMAKE_BINARY_DIR}
 )
 
-add_subdirectory(efi_main)
+list(APPEND SOURCES
+    entry.c
+    platform.c
+    platform.asm
+    ../../../src/common.c
+    ${EFI_EXTENSION_SOURCES}
+)
+
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/vmm.h
+    COMMAND ${CMAKE_COMMAND}
+    ARGS -E copy ${BFM_VMM_BIN_PATH}/${BFM_VMM} vmm
+    COMMAND xxd
+    ARGS -i vmm > ${CMAKE_BINARY_DIR}/vmm.h
+    DEPENDS ${BFM_VMM_BIN_PATH}/${BFM_VMM}
+    COMMENT "  EFI VMM: ${BFM_VMM_BIN_PATH}/${BFM_VMM}"
+)
+
+add_custom_target(
+    bareflank_xxd
+    DEPENDS ${CMAKE_BINARY_DIR}/vmm.h
+)
+
+add_library(bareflank SHARED ${SOURCES})
+add_dependencies(bareflank bareflank_xxd)
+
+add_custom_command(
+    TARGET bareflank
+    POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY}
+    ARGS -j .text -j .sdata -j .data -j .dynamic -j .dynsym
+    ARGS -j .rel -j .rela -j .rel.* -j .rela.* -j .rel* -j .rela* -j .reloc
+    ARGS --target efi-app-${BUILD_TARGET_ARCH} libbareflank.so ${CMAKE_BINARY_DIR}/bareflank.efi
+)
+
+install(FILES ${CMAKE_BINARY_DIR}/bareflank.efi DESTINATION bin)

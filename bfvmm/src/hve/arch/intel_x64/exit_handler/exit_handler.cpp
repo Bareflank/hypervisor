@@ -50,16 +50,13 @@ extern "C" void exit_handler_entry(void) noexcept;
 // Global Variables
 // -----------------------------------------------------------------------------
 
-namespace bfvmm
-{
-namespace x64
+namespace bfvmm::x64
 {
 gsl::not_null<cr3::mmap *>
 mmap()
 {
     static cr3::mmap s_mmap;
     return &s_mmap;
-}
 }
 }
 
@@ -272,6 +269,136 @@ emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val)
     }
 }
 
+uintptr_t
+emulate_rdgpr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+{
+    using namespace ::intel_x64::vmcs;
+    using namespace exit_qualification::control_register_access;
+
+    switch (general_purpose_register::get()) {
+        case general_purpose_register::rax:
+            return vmcs->save_state()->rax;
+
+        case general_purpose_register::rbx:
+            return vmcs->save_state()->rbx;
+
+        case general_purpose_register::rcx:
+            return vmcs->save_state()->rcx;
+
+        case general_purpose_register::rdx:
+            return vmcs->save_state()->rdx;
+
+        case general_purpose_register::rsp:
+            return vmcs->save_state()->rsp;
+
+        case general_purpose_register::rbp:
+            return vmcs->save_state()->rbp;
+
+        case general_purpose_register::rsi:
+            return vmcs->save_state()->rsi;
+
+        case general_purpose_register::rdi:
+            return vmcs->save_state()->rdi;
+
+        case general_purpose_register::r8:
+            return vmcs->save_state()->r08;
+
+        case general_purpose_register::r9:
+            return vmcs->save_state()->r09;
+
+        case general_purpose_register::r10:
+            return vmcs->save_state()->r10;
+
+        case general_purpose_register::r11:
+            return vmcs->save_state()->r11;
+
+        case general_purpose_register::r12:
+            return vmcs->save_state()->r12;
+
+        case general_purpose_register::r13:
+            return vmcs->save_state()->r13;
+
+        case general_purpose_register::r14:
+            return vmcs->save_state()->r14;
+
+        default:
+            return vmcs->save_state()->r15;
+    }
+}
+
+void
+emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs, uintptr_t val)
+{
+    using namespace ::intel_x64::vmcs;
+    using namespace exit_qualification::control_register_access;
+
+    switch (general_purpose_register::get()) {
+        case general_purpose_register::rax:
+            vmcs->save_state()->rax = val;
+            return;
+
+        case general_purpose_register::rbx:
+            vmcs->save_state()->rbx = val;
+            return;
+
+        case general_purpose_register::rcx:
+            vmcs->save_state()->rcx = val;
+            return;
+
+        case general_purpose_register::rdx:
+            vmcs->save_state()->rdx = val;
+            return;
+
+        case general_purpose_register::rsp:
+            vmcs->save_state()->rsp = val;
+            return;
+
+        case general_purpose_register::rbp:
+            vmcs->save_state()->rbp = val;
+            return;
+
+        case general_purpose_register::rsi:
+            vmcs->save_state()->rsi = val;
+            return;
+
+        case general_purpose_register::rdi:
+            vmcs->save_state()->rdi = val;
+            return;
+
+        case general_purpose_register::r8:
+            vmcs->save_state()->r08 = val;
+            return;
+
+        case general_purpose_register::r9:
+            vmcs->save_state()->r09 = val;
+            return;
+
+        case general_purpose_register::r10:
+            vmcs->save_state()->r10 = val;
+            return;
+
+        case general_purpose_register::r11:
+            vmcs->save_state()->r11 = val;
+            return;
+
+        case general_purpose_register::r12:
+            vmcs->save_state()->r12 = val;
+            return;
+
+        case general_purpose_register::r13:
+            vmcs->save_state()->r13 = val;
+            return;
+
+        case general_purpose_register::r14:
+            vmcs->save_state()->r14 = val;
+            return;
+
+        default:
+            vmcs->save_state()->r15 = val;
+            return;
+    }
+}
+
 // -----------------------------------------------------------------------------
 // Handlers
 // -----------------------------------------------------------------------------
@@ -281,33 +408,12 @@ handle_nmi(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 {
     bfignored(vmcs);
     using namespace ::intel_x64::vmcs;
-    using namespace vm_exit_interruption_information;
     using namespace primary_processor_based_vm_execution_controls;
-
-    if (interruption_type::get() != interruption_type::non_maskable_interrupt) {
-        return false;
-    }
 
     nmi_window_exiting::enable();
     return true;
 }
 
-// We could get an NMI on an NMI-window exit. If the NMI is handled through
-// the IDT before the call to nmi_window_exiting::disable completes, then
-// the IDT-based NMI handler's work will be undone (meaning NMI-window exiting
-// will be disabled). This is OK because we know we have an open window. It does
-// mean that the most recent NMI will be dropped (along with any other NMIs received
-// before VM-entry).
-//
-// If the NMI is handled after the call to nmi_window_exiting::disable, then
-// the IDT-based NMI handler will win the race to the VMCS field and
-// NMI-window exiting will be enabled.
-//
-// Since the exit_handler enables the "virtual-NMIs" pin control on init,
-// virtual-NMI blocking will be in effect (section 26.5.1.1). This means that
-// the injection will take priority over the window exit i.e. the window
-// exit wont occur until the guest does an IRET
-//
 static bool
 handle_nmi_window(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 {
@@ -317,6 +423,7 @@ handle_nmi_window(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 
     inject_nmi();
     nmi_window_exiting::disable();
+
     return true;
 }
 
@@ -388,6 +495,30 @@ handle_wrmsr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
     return advance(vmcs);
 }
 
+static bool
+handle_wrcr4(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+{
+    using namespace ::intel_x64::vmcs;
+    using namespace exit_qualification::control_register_access;
+
+    switch (control_register_number::get()) {
+        case 4: {
+            auto val = emulate_rdgpr(vmcs);
+            cr4_read_shadow::set(val);
+
+            val |= ::intel_x64::cr4::vmx_enable_bit::mask;
+            guest_cr4::set(val);
+
+            return advance(vmcs);
+        }
+
+        default:
+            break;
+    }
+
+    return false;
+}
+
 // -----------------------------------------------------------------------------
 // Implementation
 // -----------------------------------------------------------------------------
@@ -425,34 +556,39 @@ exit_handler::exit_handler(
         this->write_guest_state();
     }
 
-    add_handler(
+    this->add_handler(
         exit_reason::basic_exit_reason::exception_or_non_maskable_interrupt,
         handler_delegate_t::create<handle_nmi>()
     );
 
-    add_handler(
+    this->add_handler(
         exit_reason::basic_exit_reason::nmi_window,
         handler_delegate_t::create<handle_nmi_window>()
     );
 
-    add_handler(
+    this->add_handler(
         exit_reason::basic_exit_reason::cpuid,
         handler_delegate_t::create<handle_cpuid>()
     );
 
-    add_handler(
+    this->add_handler(
         exit_reason::basic_exit_reason::invd,
         handler_delegate_t::create<handle_invd>()
     );
 
-    add_handler(
+    this->add_handler(
         exit_reason::basic_exit_reason::rdmsr,
         handler_delegate_t::create<handle_rdmsr>()
     );
 
-    add_handler(
+    this->add_handler(
         exit_reason::basic_exit_reason::wrmsr,
         handler_delegate_t::create<handle_wrmsr>()
+    );
+
+    this->add_handler(
+        exit_reason::basic_exit_reason::control_register_accesses,
+        handler_delegate_t::create<handle_wrcr4>()
     );
 }
 
@@ -579,9 +715,9 @@ exit_handler::write_guest_state()
     guest_ldtr_base::set(ldtr_index != 0 ? guest_gdt.base(ldtr_index) : 0);
     guest_tr_base::set(tr_index != 0 ? guest_gdt.base(tr_index) : 0);
 
-    guest_cr0::set(cr0::get());
+    guest_cr0::set(cr0::get() | ::intel_x64::msrs::ia32_vmx_cr0_fixed0::get());
     guest_cr3::set(cr3::get());
-    guest_cr4::set(cr4::get() | cr4::vmx_enable_bit::mask);
+    guest_cr4::set(cr4::get() | ::intel_x64::msrs::ia32_vmx_cr4_fixed0::get());
     guest_dr7::set(dr7::get());
 
     guest_rflags::set(::x64::rflags::get());
@@ -589,6 +725,8 @@ exit_handler::write_guest_state()
     guest_ia32_sysenter_cs::set(msrs::ia32_sysenter_cs::get());
     guest_ia32_sysenter_esp::set(msrs::ia32_sysenter_esp::get());
     guest_ia32_sysenter_eip::set(msrs::ia32_sysenter_eip::get());
+
+    cr4_read_shadow::set(cr4::get());
 }
 
 void
@@ -631,7 +769,7 @@ exit_handler::write_control_state()
 
     nmi_exiting::enable();
     virtual_nmis::enable();
-    nmi_window_exiting::disable();
+
     activate_secondary_controls::enable_if_allowed();
     enable_rdtscp::enable_if_allowed();
     enable_invpcid::enable_if_allowed();
@@ -650,6 +788,8 @@ exit_handler::write_control_state()
     vm_entry_controls::load_ia32_perf_global_ctrl::enable_if_allowed();
     vm_entry_controls::load_ia32_pat::enable();
     vm_entry_controls::load_ia32_efer::enable();
+
+    cr4_guest_host_mask::set(::intel_x64::cr4::vmx_enable_bit::mask);
 }
 
 void

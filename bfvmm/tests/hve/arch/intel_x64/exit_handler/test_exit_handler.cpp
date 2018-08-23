@@ -134,25 +134,7 @@ TEST_CASE("exit_handler: unhandled exit reason, invalid reason")
     CHECK_NOTHROW(ehlr.handle(&ehlr));
 }
 
-TEST_CASE("exit_handler: handle_nmi, incorrect type")
-{
-    MockRepository mocks;
-    auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::exception_or_non_maskable_interrupt);
-    auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
-
-    g_save_state.rip = 0;
-    g_vmcs_fields[::intel_x64::vmcs::vm_exit_interruption_information::addr]
-        = ::intel_x64::vmcs::vm_exit_interruption_information::interruption_type::hardware_exception
-          << ::intel_x64::vmcs::vm_exit_interruption_information::interruption_type::from;
-
-    ::intel_x64::vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::disable();
-
-    CHECK_NOTHROW(ehlr.handle(&ehlr));
-    CHECK(g_save_state.rip == 0);
-    CHECK(::intel_x64::vmcs::primary_processor_based_vm_execution_controls::nmi_window_exiting::is_disabled());
-}
-
-TEST_CASE("exit_handler: handle_nmi, correct type")
+TEST_CASE("exit_handler: handle_nmi")
 {
     MockRepository mocks;
     auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::exception_or_non_maskable_interrupt);
@@ -573,6 +555,380 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_default")
 
     CHECK_NOTHROW(ehlr.handle(&ehlr));
     CHECK(g_msrs[0x10] == 0x0000000A00000009);
+}
+
+TEST_CASE("exit_handler: vm_exit_reason_wrcr4")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::control_register_accesses);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 4;
+
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
+    CHECK(::intel_x64::vmcs::guest_cr4::vmx_enable_bit::is_enabled());
+}
+
+TEST_CASE("exit_handler: vm_exit_reason_wrcr4 invalid")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::control_register_accesses);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vmcs};
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 42;
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr rax")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000000ULL;
+    vmcs->save_state()->rax = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr rcx")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000100ULL;
+    vmcs->save_state()->rcx = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr rdx")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000200ULL;
+    vmcs->save_state()->rdx = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr rbx")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000300ULL;
+    vmcs->save_state()->rbx = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr rsp")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000400ULL;
+    vmcs->save_state()->rsp = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr rbp")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000500ULL;
+    vmcs->save_state()->rbp = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr rsi")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000600ULL;
+    vmcs->save_state()->rsi = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr rdi")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000700ULL;
+    vmcs->save_state()->rdi = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr r8")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000800ULL;
+    vmcs->save_state()->r08 = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr r9")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000900ULL;
+    vmcs->save_state()->r09 = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr r10")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000A00ULL;
+    vmcs->save_state()->r10 = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr r11")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000B00ULL;
+    vmcs->save_state()->r11 = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr r12")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000C00ULL;
+    vmcs->save_state()->r12 = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr r13")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000D00ULL;
+    vmcs->save_state()->r13 = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr r14")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000E00ULL;
+    vmcs->save_state()->r14 = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_rdgpr r15")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000F00ULL;
+    vmcs->save_state()->r15 = 42;
+
+    CHECK(emulate_rdgpr(vmcs) == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr rax")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000000ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->rax == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr rcx")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000100ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->rcx == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr rdx")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000200ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->rdx == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr rbx")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000300ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->rbx == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr rsp")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000400ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->rsp == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr rbp")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000500ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->rbp == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr rsi")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000600ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->rsi == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr rdi")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000700ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->rdi == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr r8")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000800ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->r08 == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr r9")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000900ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->r09 == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr r10")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000A00ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->r10 == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr r11")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000B00ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->r11 == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr r12")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000C00ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->r12 == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr r13")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000D00ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->r13 == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr r14")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000E00ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->r14 == 42);
+}
+
+TEST_CASE("exit_handler: emulate_wrgpr r15")
+{
+    MockRepository mocks;
+    auto &&vmcs = setup_vmcs(mocks, 0);
+
+    g_vmcs_fields[::intel_x64::vmcs::exit_qualification::addr] = 0x0000000000000F00ULL;
+    emulate_wrgpr(vmcs, 42);
+
+    CHECK(vmcs->save_state()->r15 == 42);
 }
 
 #endif

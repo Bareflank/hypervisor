@@ -53,7 +53,7 @@ common_reset(void);
  * sets up some resources that are needed throughout the lifetime of the
  * driver entry.
  */
-void
+int64_t
 common_init(void);
 
 /**
@@ -148,6 +148,26 @@ common_stop_vmm(void);
  */
 int64_t
 common_dump_vmm(struct debug_ring_resources_t **drr, uint64_t vcpuid);
+
+/**
+ * Call VMM
+ *
+ * Executes the VMM. The VMM has a single entry point, with a switch statement
+ * that executes the provided "request". When this occurs, arg1 and arg2 are
+ * provided to the requested function. Note that the first arg takes a cpuid,
+ * which is the core number you are currently executing on. This is needed
+ * because this function needs to set up the proper stack before executing
+ * the VMM, and it needs to know which core you are on to use the proper stack
+ * which in turn also executes with the proper TLS region.
+ *
+ * @param cpuid the core id this code is currently being executed on
+ * @param request the requested function in the VMM to execute
+ * @param arg1 arg #1
+ * @param arg2 arg #2
+ * @return BF_SUCCESS on success, negative error code on failure
+ */
+int64_t
+common_call_vmm(uint64_t cpuid, uint64_t request, uintptr_t arg1, uintptr_t arg2);
 
 #ifdef __cplusplus
 }

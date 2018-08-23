@@ -125,4 +125,14 @@ typedef INT_PTR intptr_t;
 #define PRId64 "lld"
 #endif
 
+/* -------------------------------------------------------------------------- */
+/* EFI Types                                                                  */
+/* -------------------------------------------------------------------------- */
+
+#if defined(KERNEL) && defined(EFI)
+#include "efi.h"
+#include "efilib.h"
+#define PRId64 "lld"
+#endif
+
 #endif

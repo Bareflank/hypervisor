@@ -17,12 +17,26 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <catch/catch.hpp>
+#include <hippomocks.h>
+
 #include <bfdriverinterface.h>
 
 #include <common.h>
 #include <test_support.h>
 
+#ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
+
 TEST_CASE("run init")
 {
-    common_init();
+    CHECK(common_init() == BF_SUCCESS);
 }
+
+TEST_CASE("failure")
+{
+    MockRepository mocks;
+    mocks.OnCallFunc(platform_init).Return(BF_ERROR_UNKNOWN);
+
+    CHECK(common_init() == BF_ERROR_UNKNOWN);
+}
+
+#endif
