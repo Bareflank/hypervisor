@@ -57,6 +57,8 @@ extern "C" void _write_cr4(uint64_t val) noexcept;
 extern "C" uint64_t _read_cr8(void) noexcept;
 extern "C" void _write_cr8(uint64_t val) noexcept;
 
+extern "C" void _write_xcr0(uint64_t val) noexcept;
+
 // *INDENT-OFF*
 
 namespace intel_x64
@@ -1195,6 +1197,17 @@ namespace cr8
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_nhex(level, name, get(), msg); }
 }
+
+namespace xcr0
+{
+    constexpr const auto name = "xcr0";
+
+    using value_type = uint64_t;
+
+    inline void set(value_type val) noexcept
+    { _write_xcr0(val); }
+}
+
 
 }
 

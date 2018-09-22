@@ -382,6 +382,15 @@ add_config(
     ADVANCED
 )
 
+add_config(
+    CONFIG_NAME EFI_PREFIX
+    CONFIG_TYPE PATH
+    DEFAULT_VAL ${BUILD_TARGET_ARCH}-efi-pe
+    DESCRIPTION "EFI prefix name"
+    SKIP_VALIDATION
+    ADVANCED
+)
+
 set(VMM_PREFIX_PATH ${PREFIXES_DIR}/${VMM_PREFIX}
     CACHE INTERNAL
     "VMM prefix path"
@@ -395,6 +404,11 @@ set(USERSPACE_PREFIX_PATH ${PREFIXES_DIR}/${USERSPACE_PREFIX}
 set(TEST_PREFIX_PATH ${PREFIXES_DIR}/${TEST_PREFIX}
     CACHE INTERNAL
     "Test prefix path"
+)
+
+set(EFI_PREFIX_PATH ${PREFIXES_DIR}/${EFI_PREFIX}
+    CACHE INTERNAL
+    "EFI prefix path"
 )
 
 # ------------------------------------------------------------------------------
@@ -447,33 +461,19 @@ add_config(
 # EFI Configs
 # ------------------------------------------------------------------------------
 
-add_config(
-    CONFIG_NAME EFI_VMM_NAME
-    CONFIG_TYPE STRING
-    DEFAULT_VAL bfvmm_static
-    DESCRIPTION "Name of VMM to include in EFI loader"
-)
+# add_config(
+#     CONFIG_NAME EFI_MODULE_H
+#     CONFIG_TYPE STRING
+#     DEFAULT_VAL ${EFI_OUTPUT_DIR}/module.h
+#     DESCRIPTION "File name of generated module.h for EFI extension adding"
+# )
 
-add_config(
-    CONFIG_NAME EFI_OUTPUT_DIR
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ${BUILD_EFI_MAIN_DIR}/${VMM_PREFIX}/build/output
-    DESCRIPTION "Directory for intermediary EFI files to communicate between EFI extensions"
-)
-
-add_config(
-    CONFIG_NAME EFI_MODULE_H
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ${EFI_OUTPUT_DIR}/module.h
-    DESCRIPTION "File name of generated module.h for EFI extension adding"
-)
-
-add_config(
-    CONFIG_NAME EFI_SOURCES_CMAKE
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ${EFI_OUTPUT_DIR}/efi_sources.cmake
-    DESCRIPTION "File name of generated efi_sources.cmake for EFI extension adding"
-)
+# add_config(
+#     CONFIG_NAME EFI_SOURCES_CMAKE
+#     CONFIG_TYPE STRING
+#     DEFAULT_VAL ${EFI_OUTPUT_DIR}/efi_sources.cmake
+#     DESCRIPTION "File name of generated efi_sources.cmake for EFI extension adding"
+# )
 
 # ------------------------------------------------------------------------------
 # Binutils
@@ -551,14 +551,6 @@ add_config(
 )
 
 add_config(
-    CONFIG_NAME EFI_TOOLCHAIN_PATH
-    CONFIG_TYPE FILEPATH
-    DEFAULT_VAL ${SOURCE_TOOLCHAIN_DIR}/clang_${BUILD_TARGET_ARCH}_efi.cmake
-    DESCRIPTION "Path to the default cmake toolchain file for building EFI components"
-    ADVANCED
-)
-
-add_config(
     CONFIG_NAME USERSPACE_TOOLCHAIN_PATH
     CONFIG_TYPE FILEPATH
     DEFAULT_VAL ""
@@ -573,6 +565,14 @@ add_config(
     DEFAULT_VAL ""
     DESCRIPTION "Path to the default cmake toolchain file for building unit tests"
     SKIP_VALIDATION
+    ADVANCED
+)
+
+add_config(
+    CONFIG_NAME EFI_TOOLCHAIN_PATH
+    CONFIG_TYPE FILEPATH
+    DEFAULT_VAL ${SOURCE_TOOLCHAIN_DIR}/clang_${BUILD_TARGET_ARCH}_efi.cmake
+    DESCRIPTION "Path to the default cmake toolchain file for building EFI components"
     ADVANCED
 )
 
@@ -726,11 +726,11 @@ set(HIPPOMOCKS_URL_MD5 "6a0928dfee03fbf4c12c36219c696bae"
     "Hippomocks URL MD5 hash"
 )
 
-set(GNUEFI_URL "https://github.com/vathpela/gnu-efi/archive/f99001c.zip"
+set(GNUEFI_URL "https://github.com/Bareflank/gnu-efi/archive/v2.0.zip"
     CACHE INTERNAL FORCE
     "gnu-efi URL")
 
-set(GNUEFI_URL_MD5 "fe6c4de01d570f74a0813a42034ae79a"
+set(GNUEFI_URL_MD5 "3cd10dc9c14f4a3891f8537fd78ed04f"
     CACHE INTERNAL FORCE
     "gnu-efi URL MD5 hash")
 
@@ -769,6 +769,7 @@ add_config(
 
 include(scripts/cmake/flags/asan_flags.cmake)
 include(scripts/cmake/flags/codecov_flags.cmake)
+include(scripts/cmake/flags/efi_flags.cmake)
 include(scripts/cmake/flags/test_flags.cmake)
 include(scripts/cmake/flags/usan_flags.cmake)
 include(scripts/cmake/flags/userspace_flags.cmake)

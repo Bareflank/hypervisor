@@ -142,7 +142,7 @@
 #if defined(BF_AARCH64)
 #   define DEFAULT_COM_PORT 0x09000000
 #else
-#   define DEFAULT_COM_PORT 0x3F8U
+#   define DEFAULT_COM_PORT 0x03F8U
 #   define DEFAULT_COM_DRIVER serial_ns16550a
 #endif
 #endif

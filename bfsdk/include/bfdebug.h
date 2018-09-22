@@ -1096,7 +1096,7 @@ __bfdebug_fail(
 /* -------------------------------------------------------------------------- */
 
 #ifdef KERNEL
-#if defined(__linux__)
+#ifdef __linux__
 #include <linux/module.h>
 #define BFDEBUG(...) printk(KERN_INFO "[BAREFLANK DEBUG]: " __VA_ARGS__)
 #define BFALERT(...) printk(KERN_INFO "[BAREFLANK ALERT]: " __VA_ARGS__)
@@ -1116,6 +1116,21 @@ __bfdebug_fail(
 #define BFERROR(...) DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[BAREFLANK ERROR]: " __VA_ARGS__)
 #endif
 #endif
+
+/* -------------------------------------------------------------------------- */
+/* EFI Debugging                                                              */
+/* -------------------------------------------------------------------------- */
+
+#ifdef KERNEL
+#ifdef EFI
+#include "efi.h"
+#include "efilib.h"
+#define BFDEBUG(...) Print(L"[BAREFLANK DEBUG]: " __VA_ARGS__)
+#define BFALERT(...) Print(L"[BAREFLANK ALERT]: " __VA_ARGS__)
+#define BFERROR(...) Print(L"[BAREFLANK ERROR]: " __VA_ARGS__)
+#endif
+#endif
+
 
 /** @endcond */
 

@@ -32,6 +32,16 @@ extern "C" {
 #endif
 
 /**
+ * Initalize Platform Logic
+ *
+ * @expects none
+ * @ensures none
+ *
+ * @return BF_SUCCESS on success, negative error code on failure
+ */
+int64_t platform_init(void);
+
+/**
  * Allocate Memory
  *
  * @expects none
@@ -120,26 +130,6 @@ void *platform_memset(void *ptr, char value, uint64_t num);
 void *platform_memcpy(void *dst, const void *src, uint64_t num);
 
 /**
- * Start
- *
- * Run after the start function has been executed.
- *
- * @expects none
- * @ensures none
- */
-void platform_start(void);
-
-/**
- * Stop
- *
- * Run after the stop function has been executed.
- *
- * @expects none
- * @ensures none
- */
-void platform_stop(void);
-
-/**
  * Get Number of CPUs
  *
  * @expects none
@@ -150,70 +140,22 @@ void platform_stop(void);
 int64_t platform_num_cpus(void);
 
 /**
- * Set CPU affinity
+ * Call VMM on Core
  *
- * @expects none
- * @ensures none
+ * Executes the VMM. The VMM has a single entry point, with a switch statement
+ * that executes the provided "request". When this occurs, arg1 and arg2 are
+ * provided to the requested function. Note that the first arg takes a cpuid,
+ * which is the core number want to execute the VMM on. If a -1 is provided,
+ * the currently executing core will be used.
  *
- * @param affinity the cpu number to change to
- * @return The affinity of the CPU before the change
+ * @param cpuid the core id this code is to be execute on
+ * @param request the requested function in the VMM to execute
+ * @param arg1 arg #1
+ * @param arg2 arg #2
+ * @return BF_SUCCESS on success, negative error code on failure
  */
-int64_t platform_set_affinity(int64_t affinity);
-
-/**
- * Restore CPU affinity
- *
- * @expects none
- * @ensures none
- *
- * @param affinity the cpu number to change to
- */
-void platform_restore_affinity(int64_t affinity);
-
-/**
- * Get CPU Number
- *
- * @expects none
- * @ensures none
- *
- * @return returns the current CPU number and on some systems, disables
- *     preemption
- */
-int64_t platform_get_current_cpu_num(void);
-
-/**
- * Restore Preemption
- *
- * @expects none
- * @ensures none
- */
-void platform_restore_preemption(void);
-
-/**
- * Get platform-specific information for the VMM
- *
- * Populate a struct with platform-specific information that is to be passed
- * from bfdriver to bfvmm at initialization.
- *
- * @expects none
- * @ensures none
- *
- * @param info platform-specific info struct to be populated
- *
- * @return BF_SUCCESS or an error code on failure
- */
-int64_t platform_populate_info(struct platform_info_t *info);
-
-/**
- * Unload platform-specific information after the VMM is unloaded.
- *
- * @expects info is either filled with zero bytes or previously populated
- *          by platform_populate_info()
- * @ensures none
- *
- * @param info platform-specific info struct to be unloaded
- */
-void platform_unload_info(struct platform_info_t *info);
+int64_t platform_call_vmm_on_core(
+    uint64_t cpuid, uint64_t request, uintptr_t arg1, uintptr_t arg2);
 
 #ifdef __cplusplus
 }

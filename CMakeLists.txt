@@ -37,7 +37,9 @@ add_project_include(${SOURCE_CMAKE_DIR}/macros.cmake)
 # ------------------------------------------------------------------------------
 
 set_bfm_vmm(${DEFAULT_VMM} DEFAULT)
-message(STATUS "Bareflank Manager VMM: ${BFM_VMM}")
+message(STATUS "Bareflank Manager VMM")
+message(STATUS "    vmm: ${BFM_VMM}")
+message(STATUS "    target: ${BFM_VMM_TARGET}")
 
 # ------------------------------------------------------------------------------
 # Targets
@@ -56,16 +58,6 @@ include_dependency(SOURCE_DEPENDS_DIR clang_tidy)
 include_dependency(SOURCE_DEPENDS_DIR catch)
 include_dependency(SOURCE_DEPENDS_DIR hippomocks)
 include_dependency(SOURCE_DEPENDS_DIR python)
-
-# ------------------------------------------------------------------------------
-# EFI Cleanup
-# ------------------------------------------------------------------------------
-
-if(ENABLE_BUILD_EFI)
-    file(MAKE_DIRECTORY ${EFI_OUTPUT_DIR})
-    file(REMOVE ${EFI_MODULE_H})
-    file(REMOVE ${EFI_SOURCES_CMAKE})
-endif()
 
 # ------------------------------------------------------------------------------
 # No Build Components
@@ -240,33 +232,24 @@ if(ENABLE_BUILD_USERSPACE)
 endif()
 
 # ------------------------------------------------------------------------------
-# EFI Components
-# ------------------------------------------------------------------------------
-
-if (ENABLE_BUILD_EFI)
-    include_dependency(SOURCE_DEPENDS_DIR gnuefi)
-
-    add_subproject(
-        efi_main vmm
-        DEPENDS gnuefi bfvmm_main
-        SOURCE_DIR ${SOURCE_BFDRIVER_DIR}/src/platform/efi
-        TOOLCHAIN ${EFI_TOOLCHAIN_PATH}
-    )
-
-    add_efi_module(
-        NAME base
-        SOURCES ${SOURCE_BFDRIVER_DIR}/src/platform/efi/efi_base/base.c
-        SOURCES ${SOURCE_BFDRIVER_DIR}/src/platform/efi/efi_base/platform.c
-        SOURCES ${SOURCE_BFDRIVER_DIR}/src/common.c
-    )
-
-endif()
-
-# ------------------------------------------------------------------------------
 # External Components
 # ------------------------------------------------------------------------------
 
 include_external_extensions()
+
+# ------------------------------------------------------------------------------
+# EFI Components
+# ------------------------------------------------------------------------------
+
+if(ENABLE_BUILD_EFI AND NOT WIN32)
+    include_dependency(SOURCE_DEPENDS_DIR gnuefi)
+
+    add_subproject(
+        efi efi
+        DEPENDS gnuefi ${BFM_VMM_TARGET}
+        SOURCE_DIR ${SOURCE_BFDRIVER_DIR}/src/platform/efi
+    )
+endif()
 
 # ------------------------------------------------------------------------------
 # Force Rebuild

@@ -174,24 +174,4 @@ TEST_CASE("common_load_vmm: add tss mdl fails")
     CHECK(common_fini() == BF_SUCCESS);
 }
 
-extern int platform_info_should_fail;
-
-TEST_CASE("common_load_vmm: populate_platform_info fails")
-{
-    auto ___ = gsl::finally([&] {
-        platform_info_should_fail = 0;
-    });
-
-    platform_info_should_fail = 1;
-
-    binaries_info info{&g_file, g_filenames_success, false};
-
-    for (const auto &binary : info.binaries()) {
-        REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
-    }
-
-    CHECK(common_load_vmm() != BF_SUCCESS);
-    CHECK(common_fini() == BF_SUCCESS);
-}
-
 #endif

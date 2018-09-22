@@ -71,6 +71,9 @@ bool advance(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs) noexcept;
 ::x64::msrs::value_type emulate_rdmsr(::x64::msrs::field_type msr);
 void emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val);
 
+uintptr_t emulate_rdgpr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs);
+void emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs, uintptr_t val);
+
 // -----------------------------------------------------------------------------
 // Exit Handler
 // -----------------------------------------------------------------------------

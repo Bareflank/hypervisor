@@ -29,6 +29,10 @@
 #define BF_TAG 'BFLK'
 #define BF_NX_TAG 'BFNX'
 
+int64_t
+platform_init(void)
+{ return BF_SUCCESS; }
+
 void *
 platform_alloc_rw(uint64_t len)
 {
@@ -122,18 +126,6 @@ platform_memcpy(void *dst, const void *src, uint64_t num)
     return dst;
 }
 
-void
-platform_start()
-{
-
-}
-
-void
-platform_stop()
-{
-
-}
-
 int64_t
 platform_num_cpus()
 {
@@ -142,41 +134,14 @@ platform_num_cpus()
 }
 
 int64_t
-platform_set_affinity(int64_t affinity)
+platform_call_vmm_on_core(
+    uint64_t cpuid, uint64_t request, uintptr_t arg1, uintptr_t arg2)
 {
-    KAFFINITY new_affinity = (1ULL << affinity);
-    return (int64_t)KeSetSystemAffinityThreadEx(new_affinity);
-}
+    int64_t ret;
+    KAFFINITY old = KeSetSystemAffinityThreadEx(1ULL << cpuid);
 
-void
-platform_restore_affinity(int64_t affinity)
-{
-    KeRevertToUserAffinityThreadEx((KAFFINITY)(affinity));
-}
+    ret = common_call_vmm(cpuid, request, arg1, arg2);
 
-int64_t
-platform_get_current_cpu_num(void)
-{
-    return KeGetCurrentProcessorNumberEx(nullptr);
-}
-
-void
-platform_restore_preemption(void)
-{
-}
-
-int64_t
-platform_populate_info(struct platform_info_t *info)
-{
-    if (info) {
-        platform_memset(info, 0, sizeof(struct platform_info_t));
-    }
-
-    return BF_SUCCESS;
-}
-
-void
-platform_unload_info(struct platform_info_t *info)
-{
-    (void) info;
+    KeRevertToUserAffinityThreadEx(old);
+    return ret;
 }

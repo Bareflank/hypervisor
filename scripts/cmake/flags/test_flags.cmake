@@ -62,7 +62,11 @@ else()
         /DNOMINMAX
     )
 
+    list(APPEND BFFLAGS_TEST_C
+        /std:c++17
+    )
+
     list(APPEND BFFLAGS_TEST_CXX
-        /std:c++latest
+        /std:c++17
     )
 endif()

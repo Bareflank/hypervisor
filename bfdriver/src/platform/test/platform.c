@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <common.h>
 #include <bfplatform.h>
 #include <bfconstants.h>
 
@@ -33,6 +34,10 @@
 int platform_info_should_fail = 0;
 
 #define PAGE_ROUND_UP(x) ( (((uintptr_t)(x)) + BAREFLANK_PAGE_SIZE-1)  & (~(BAREFLANK_PAGE_SIZE-1)) )
+
+int64_t
+platform_init(void)
+{ return BF_SUCCESS; }
 
 void *
 platform_alloc_rw(uint64_t len)
@@ -88,49 +93,13 @@ void *
 platform_memcpy(void *dst, const void *src, uint64_t num)
 { return memcpy(dst, src, num); }
 
-void
-platform_start(void)
-{ }
-
-void
-platform_stop(void)
-{ }
-
 int64_t
 platform_num_cpus(void)
 { return 1; }
 
 int64_t
-platform_set_affinity(int64_t affinity)
+platform_call_vmm_on_core(
+    uint64_t cpuid, uint64_t request, uintptr_t arg1, uintptr_t arg2)
 {
-    bfignored(affinity);
-    return 0;
-}
-
-void
-platform_restore_affinity(int64_t affinity)
-{ bfignored(affinity); }
-
-int64_t
-platform_get_current_cpu_num(void)
-{ return 0; }
-
-void
-platform_restore_preemption(void)
-{ }
-
-int64_t
-platform_populate_info(struct platform_info_t *info)
-{
-    if (info) {
-        platform_memset(info, 0, sizeof(struct platform_info_t));
-    }
-
-    return platform_info_should_fail ? BF_ERROR_UNKNOWN : BF_SUCCESS;
-}
-
-void
-platform_unload_info(struct platform_info_t *info)
-{
-    (void) info;
+    return common_call_vmm(cpuid, request, arg1, arg2);
 }

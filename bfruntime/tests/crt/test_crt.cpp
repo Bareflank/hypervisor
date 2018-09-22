@@ -257,8 +257,3 @@ TEST_CASE("_start_c: bfmain fini success")
 
     CHECK(_start_c(&info) == -1);
 }
-
-TEST_CASE("get_platform_info")
-{
-    CHECK(get_platform_info() != nullptr);
-}

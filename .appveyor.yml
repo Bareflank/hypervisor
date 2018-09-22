@@ -16,63 +16,64 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#
+# Setup
+#
 os: Visual Studio 2017
 platform: x64
 
-#
-# Custom environment variables
-#
 environment:
-  global:
+  matrix:
+    - type: native
+    - type: cygwin
+
+for:
+
+#
+# Visual Studio (Native)
+#
+-
+  matrix:
+    only:
+      - type: native
+
+  environment:
+    PATH: '%PATH%;C:\Program Files\NASM'
+
+  install:
+    - ps: Start-FileDownload "http://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win64/nasm-2.13.03-installer-x64.exe" -FileName "nasm-installer-x64.exe"
+    - nasm-installer-x64.exe /S
+
+  build_script:
+    - mkdir build_msbuild
+    - cd build_msbuild
+    - cmake -G "Visual Studio 15 2017 Win64" -DENABLE_BUILD_VMM=OFF -DENABLE_BUILD_USERSPACE=OFF -DENABLE_BUILD_TEST=ON ..
+    - msbuild /m:3 hypervisor.sln
+    - cmake --build . --target unittest
+
+  test: off
+
+#
+# Cygwin
+#
+-
+  matrix:
+    only:
+      - type: cygwin
+
+  environment:
     CYG_ROOT: C:\cygwin_bareflank
     CYG_BASH: C:\cygwin_bareflank\bin\bash
     CYG_MIRROR: http://mirrors.kernel.org/sourceware/cygwin/
     CYG_PACKAGES: make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext
-    BFPATH: '%PATH%'
-    PATH: '%PATH%;C:\Program Files\NASM'
 
-cache:
-  - ../cache
+  install:
+    - ps: Start-FileDownload "https://cygwin.com/setup-x86_64.exe" -FileName "setup-x86_64.exe"
+    - setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_ROOT%\var\cache\setup" --packages "%CYG_PACKAGES%"
 
-#
-# Setup Cygwin
-#
-install:
+  build_script:
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; mkdir build_cygwin"'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; cmake .."'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make -j3"'
 
-  #
-  # Nasm
-  #
-  - ps: Start-FileDownload "http://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win64/nasm-2.13.03-installer-x64.exe" -FileName "nasm-installer-x64.exe"
-  - nasm-installer-x64.exe /S
-
-  #
-  # Cygwin
-  #
-  - ps: Start-FileDownload "https://cygwin.com/setup-x86_64.exe" -FileName "setup-x86_64.exe"
-  - setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_ROOT%\var\cache\setup" --packages "%CYG_PACKAGES%"
-
-#
-# Build
-#
-build_script:
-
-  #
-  # Visual Studio (MSBuild / Static Libraries)
-  #
-  - mkdir build_msbuild
-  - cd build_msbuild
-  - cmake -G "Visual Studio 15 2017 Win64" -DENABLE_BUILD_VMM=OFF -DENABLE_BUILD_USERSPACE=OFF -DENABLE_BUILD_TEST=ON ..
-  - msbuild /m:3 hypervisor.sln
-  - cmake --build . --target unittest
-
-  #
-  # Cygwin (Shared Libraries)
-  #
-  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; mkdir build_cygwin"'
-  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; cmake .."'
-  - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make -j3"'
-
-#
-# No AppVeyor Tests
-#
-test: off
+  test: off

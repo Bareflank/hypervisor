@@ -61,7 +61,11 @@ else()
         /DNOMINMAX
     )
 
+    list(APPEND BFFLAGS_USERSPACE_C
+        /std:c++17
+    )
+
     list(APPEND BFFLAGS_USERSPACE_CXX
-        /std:c++latest
+        /std:c++17
     )
 endif()

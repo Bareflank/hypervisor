@@ -26,32 +26,12 @@ set(CMAKE_SYSTEM_NAME Linux)
 
 if(NOT WIN32)
     if(NOT DEFINED ENV{CLANG_BIN})
-        find_program(CLANG_BIN_60 clang-6.0)
-        find_program(CLANG_BIN_50 clang-5.0)
-        find_program(CLANG_BIN_40 clang-4.0)
-        find_program(CLANG_BIN_39 clang-3.9)
-        find_program(CLANG_BIN_38 clang-3.8)
         find_program(CLANG_BIN clang)
     else()
         set(CLANG_BIN $ENV{CLANG_BIN})
     endif()
 
-    if(CLANG_BIN_60)
-        set(CMAKE_C_COMPILER ${CLANG_BIN_60})
-        set(CMAKE_CXX_COMPILER ${CLANG_BIN_60})
-    elseif(CLANG_BIN_50)
-        set(CMAKE_C_COMPILER ${CLANG_BIN_50})
-        set(CMAKE_CXX_COMPILER ${CLANG_BIN_50})
-    elseif(CLANG_BIN_40)
-        set(CMAKE_C_COMPILER ${CLANG_BIN_40})
-        set(CMAKE_CXX_COMPILER ${CLANG_BIN_40})
-    elseif(CLANG_BIN_39)
-        set(CMAKE_C_COMPILER ${CLANG_BIN_39})
-        set(CMAKE_CXX_COMPILER ${CLANG_BIN_39})
-    elseif(CLANG_BIN_38)
-        set(CMAKE_C_COMPILER ${CLANG_BIN_38})
-        set(CMAKE_CXX_COMPILER ${CLANG_BIN_38})
-    elseif(CLANG_BIN)
+    if(CLANG_BIN)
         set(CMAKE_C_COMPILER ${CLANG_BIN})
         set(CMAKE_CXX_COMPILER ${CLANG_BIN})
     else()
@@ -59,47 +39,28 @@ if(NOT WIN32)
     endif()
 endif()
 
-if(DEFINED ENV{LD_BIN})
-    set(LD_BIN $ENV{LD_BIN})
-else()
-    set(LD_BIN ${CMAKE_INSTALL_PREFIX}/bin/ld)
-endif()
-
-string(CONCAT EFI_C_FLAGS
-    "-mno-red-zone "
-    "-mno-avx "
-    "-fpic  "
-    "-g "
-    "-O2 "
-    "-Wall "
-    "-Wextra "
-    "-fshort-wchar "
-    "-fno-strict-aliasing "
-    "-fno-merge-all-constants "
-    "-ffreestanding "
-    "-fno-stack-protector "
-    "-fno-stack-check "
-    "-DCONFIG_x86_64 "
-    "-DGNU_EFI_USE_MS_ABI "
-    "--std=c11 "
-    "-D__KERNEL__ "
-)
-
-string(CONCAT EFI_LD_FLAGS
+string(CONCAT LD_FLAGS_PRE
     "-nostdlib "
-    "--warn-common "
-    "--no-undefined "
-    "--fatal-warnings "
     "-shared "
     "-Bsymbolic "
-    "-defsym=EFI_SUBSYSTEM=0xa "
-    "--no-undefined "
+    "-no-undefined "
+    "-L ${CMAKE_INSTALL_PREFIX}/lib "
+    "${CMAKE_INSTALL_PREFIX}/lib/crt0-efi-x86_64.o "
 )
 
-set(CMAKE_C_COMPILE_OBJECT "clang <DEFINES> <INCLUDES> ${EFI_C_FLAGS} -o <OBJECT> -c <SOURCE>")
+string(CONCAT LD_FLAGS_POST
+    "-lefi "
+    "-lgnuefi "
+    "-T ${CMAKE_INSTALL_PREFIX}/lib/elf_x86_64_efi.lds "
+)
 
-set(CMAKE_SKIP_RPATH TRUE)
-set(CMAKE_C_CREATE_SHARED_LIBRARY "ld ${EFI_LD_FLAGS} <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+set(CMAKE_C_CREATE_SHARED_LIBRARY
+    "ld ${LD_FLAGS_PRE} <OBJECTS> ${LD_FLAGS_POST} -o <TARGET>"
+)
+
+set(CMAKE_CXX_CREATE_SHARED_LIBRARY
+    "ld ${LD_FLAGS_PRE} <OBJECTS> ${LD_FLAGS_POST} -o <TARGET>"
+)
 
 set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)
