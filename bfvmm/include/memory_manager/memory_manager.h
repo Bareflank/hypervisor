@@ -383,7 +383,7 @@ public:
     /// @param phys physical address mapped to virt
     ///
     virtual void remove_md(
-        integer_pointer virt, integer_pointer phys) noexcept;
+        integer_pointer virt, integer_pointer phys);
 
     /// Descriptor List
     ///

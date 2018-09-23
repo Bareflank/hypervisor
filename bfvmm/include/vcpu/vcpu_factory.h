@@ -94,7 +94,7 @@ public:
     /// @param obj object passed to the vcpu
     /// @return returns a pointer to a newly created vCPU.
     ///
-    virtual std::unique_ptr<vcpu> make_vcpu(
+    virtual std::unique_ptr<vcpu> make(
         vcpuid::type vcpuid, bfobject *obj = nullptr);
 
 public:

@@ -31,11 +31,6 @@ do_test(test_vcpu
     ${ARGN}
 )
 
-do_test(test_vcpu_manager
-    SOURCES test_vcpu_manager.cpp
-    ${ARGN}
-)
-
 do_test(test_vcpu_factory
     SOURCES test_vcpu_factory.cpp
     ${ARGN}

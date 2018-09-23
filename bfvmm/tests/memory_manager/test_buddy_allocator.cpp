@@ -25,19 +25,12 @@
 //
 
 #include <catch/catch.hpp>
-#include <memory_manager/buddy_allocator.h>
 
-extern "C" uint64_t
-unsafe_write_cstr(const char *cstr, size_t len)
-{ bfignored(cstr); bfignored(len); return 0; }
+#include <test/support.h>
+#include <memory_manager/buddy_allocator.h>
 
 auto k = 3ULL;
 auto node_tree_size = buddy_allocator::node_tree_size(k);
-
-TEST_CASE("buddy_allocator: quiet")
-{
-    unsafe_write_cstr("", 0);
-}
 
 TEST_CASE("buddy_allocator: next_power_2")
 {

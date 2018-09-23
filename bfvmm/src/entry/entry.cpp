@@ -70,12 +70,12 @@ private_init_vmm(uint64_t arg) noexcept
 {
     return guard_exceptions(ENTRY_ERROR_VMM_START_FAILED, [&]() {
 
-        g_vcm->create_vcpu(arg, pre_create_vcpu(arg));
+        g_vcm->create(arg, pre_create_vcpu(arg));
 
         auto ___ = gsl::on_failure([&]
-        { g_vcm->delete_vcpu(arg); });
+        { g_vcm->destroy(arg); });
 
-        g_vcm->run_vcpu(arg, pre_run_vcpu(arg));
+        g_vcm->run(arg, pre_run_vcpu(arg));
 
         return ENTRY_SUCCESS;
     });
@@ -86,7 +86,7 @@ WEAK_SYM pre_hlt_vcpu(vcpuid::type id)
 { (void) id; return nullptr; }
 
 bfobject *
-WEAK_SYM pre_delete_vcpu(vcpuid::type id)
+WEAK_SYM pre_destroy_vcpu(vcpuid::type id)
 { (void) id; return nullptr; }
 
 extern "C" int64_t
@@ -94,8 +94,8 @@ private_fini_vmm(uint64_t arg) noexcept
 {
     return guard_exceptions(ENTRY_ERROR_VMM_STOP_FAILED, [&]() {
 
-        g_vcm->hlt_vcpu(arg, pre_hlt_vcpu(arg));
-        g_vcm->delete_vcpu(arg, pre_delete_vcpu(arg));
+        g_vcm->hlt(arg, pre_hlt_vcpu(arg));
+        g_vcm->destroy(arg, pre_destroy_vcpu(arg));
 
         return ENTRY_SUCCESS;
     });

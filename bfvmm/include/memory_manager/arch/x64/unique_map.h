@@ -227,9 +227,6 @@ auto make_unique_map(
 
 #ifdef ENABLE_BUILD_TEST
 
-    (void) cr3;
-
-    expects(virt != 0xDEADBEEF);
     return unique_map_ptr<T> {reinterpret_cast<typename unique_map_ptr<T>::integer_pointer>(vmap), cr3};
 
 #else

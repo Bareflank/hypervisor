@@ -16,6 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+/// @cond
+
 #include <bftypes.h>
 
 extern "C" uint64_t
@@ -29,3 +31,5 @@ thread_context_cpuid(void)
 extern "C" uint64_t *
 thread_context_tlsptr(void)
 { return 0; }
+
+/// @endcond

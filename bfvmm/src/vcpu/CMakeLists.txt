@@ -18,7 +18,6 @@
 
 list(APPEND SOURCES
     vcpu.cpp
-    vcpu_manager.cpp
 )
 
 add_shared_library(

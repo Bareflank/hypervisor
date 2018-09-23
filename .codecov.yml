@@ -41,8 +41,9 @@ ignore:
   - "bfintrinsics/**"
   - "bfm/ioctl/arch/**"
   - "bfvmm/include/test/**"
-  - "bfvmm/include/memory_manager/memory_manager.h"
-  - "bfvmm/src/memory_manager/memory_manager.cpp"
+
+  # This needs to be fully unittested once we add support for 2m and 1g pages
+  # to prevent the need to map in 4k pages only
   - "bfvmm/include/memory_manager/arch/x64/unique_map.h"
 
 comment:
