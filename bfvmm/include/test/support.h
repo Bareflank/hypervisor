@@ -16,6 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+/// @cond
+
 #ifndef TEST_SUPPORT_H
 #define TEST_SUPPORT_H
 
@@ -30,6 +32,13 @@
 #include "hve.h"
 #include "memory_manager.h"
 #include "misc.h"
+
+struct quiet {
+    quiet()
+    { unsafe_write_cstr(nullptr, 0); }
+};
+
+quiet g_quite{};
 
 void setup_test_support()
 {
@@ -47,3 +56,5 @@ void setup_test_support()
 }
 
 #endif
+
+/// @endcond

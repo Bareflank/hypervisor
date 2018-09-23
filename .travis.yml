@@ -182,8 +182,8 @@ matrix:
           - ubuntu-toolchain-r-test
           - llvm-toolchain-trusty-6.0
         packages:
-          - gcc-6
-          - g++-6
+          - gcc-7
+          - g++-7
           - clang-6.0
           - nasm
     env:

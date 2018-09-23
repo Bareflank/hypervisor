@@ -17,7 +17,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <catch/catch.hpp>
-#include <hippomocks.h>
 
 #include <test/support.h>
 #include <memory_manager/arch/x64/cr3/mmap.h>

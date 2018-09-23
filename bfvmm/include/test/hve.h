@@ -16,6 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+/// @cond
+
 #ifdef BF_X64
 
 #include "../hve/arch/x64/gdt.h"
@@ -84,3 +86,5 @@ extern "C" void exit_handler_entry(void)
 { }
 
 #endif
+
+/// @endcond

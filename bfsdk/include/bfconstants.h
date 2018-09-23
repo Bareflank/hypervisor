@@ -38,12 +38,10 @@
 #endif
 
 /*
- * Max Page Size
+ * Bareflank Page Size
  *
- * Defines the maximum page size that is supported by the VMM (not the max
- * size supported by hardware, which is likely different). For now, this is
- * set to a value that is likely supported by most hardware. All pages must
- * be translated to this value, as the VMM only supports one page size.
+ * Defines the page size that is supported by the VMM. For now, this is
+ * set to a value that is likely supported by most hardware.
  *
  * Note: defined in bytes
  */
@@ -52,10 +50,44 @@
 #endif
 
 /*
+ * Page Pool K
+ *
+ * Defines the size of the initial page pool used by the VMM. If more memory
+ * is needed by the VMM initially, this value may be increased. Note that
+ * increasing "K" by 1 will double the amount of memory.
+ */
+#ifndef PAGE_POOL_K
+#define PAGE_POOL_K (15ULL)
+#endif
+
+/*
+* Huge Pool K
+*
+* Defines the size of the initial huge pool used by the VMM. If more memory
+* is needed by the VMM initially, this value may be increased. Note that
+* increasing "K" by 1 will double the amount of memory.
+*/
+
+#ifndef HUGE_POOL_K
+#define HUGE_POOL_K (15ULL)
+#endif
+/*
+* Memory Map Pool K
+*
+* Defines the size of the initial mem map pool used by the VMM. If more memory
+* is needed by the VMM for mapping, this value may be increased. Note that
+* increasing "K" by 1 will double the amount of memory.
+*/
+#ifndef MEM_MAP_POOL_K
+#define MEM_MAP_POOL_K (15ULL)
+#endif
+
+/*
  * Memory Map Pool Start
  *
  * This defines the starting location of the virtual memory that is used
- * for memory mapping.
+ * for memory mapping. Note that on some systems, this might need to be
+ * changed to prevent collisions.
  *
  * Note: defined in bytes (defaults to 2MB)
  */
@@ -66,9 +98,8 @@
 /*
  * Max Supported Modules
  *
- * The maximum number of modules supported by the VMM. Note that the ELF loader
- * has its own version of this that likely will need to be changed if this
- * value changes.
+ * The maximum number of modules supported by the VMM. If you VMM has a large
+ * number of dynamic libraries to load, this value might need to be increased
  */
 #ifndef MAX_NUM_MODULES
 #define MAX_NUM_MODULES (75LL)
@@ -77,11 +108,13 @@
 /*
  * Debug Ring Size
  *
- * Defines the size of the debug ring. Note that each vCPU gets one of these,
- * and thus the total amount of memory that is used can add up quickly. That
- * being said, make these as large as you can afford. Also note that these
- * will be allocated using the mem pool, so make sure that it is large enough
- * to hold the debug rings for each vCPU and then some.
+ * Defines the size of the debug ring. Note that the memory manager is used to
+ *     allocate memory for the debug ring, so if you need more than one ring,
+ *     which is supported, make sure the memory manager has enough memory in
+ *     the huge pool to support your needs.
+ *
+ * Note: Must be defined using a bit shift as this prevents the debug ring from
+ *     allocating memory that generates fragmentation in the memory manager
  *
  * Note: defined in bytes
  */
@@ -102,6 +135,8 @@
  * Note: This is hard coded in the thread_context.asm as there is no way to
  *       use this include in NASM. If you change this, you must change the
  *       value in that file as well.
+ *
+ * Note: defined in bytes
  */
 #ifndef STACK_SIZE
 #define STACK_SIZE (1ULL << 15ULL)

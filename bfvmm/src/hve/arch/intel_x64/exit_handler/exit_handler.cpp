@@ -689,22 +689,14 @@ exit_handler::write_guest_state()
     guest_ldtr_limit::set(ldtr_index != 0 ? guest_gdt.limit(ldtr_index) : 0);
     guest_tr_limit::set(tr_index != 0 ? guest_gdt.limit(tr_index) : 0);
 
-    guest_es_access_rights::set(
-        es_index != 0 ? guest_gdt.access_rights(es_index) : unusable);
-    guest_cs_access_rights::set(
-        cs_index != 0 ? guest_gdt.access_rights(cs_index) : unusable);
-    guest_ss_access_rights::set(
-        ss_index != 0 ? guest_gdt.access_rights(ss_index) : unusable);
-    guest_ds_access_rights::set(
-        ds_index != 0 ? guest_gdt.access_rights(ds_index) : unusable);
-    guest_fs_access_rights::set(
-        fs_index != 0 ? guest_gdt.access_rights(fs_index) : unusable);
-    guest_gs_access_rights::set(
-        gs_index != 0 ? guest_gdt.access_rights(gs_index) : unusable);
-    guest_ldtr_access_rights::set(
-        ldtr_index != 0 ? guest_gdt.access_rights(ldtr_index) : unusable);
-    guest_tr_access_rights::set(
-        tr_index != 0 ? guest_gdt.access_rights(tr_index) : type::tss_busy | 0x80U);
+    guest_es_access_rights::set(es_index != 0 ? guest_gdt.access_rights(es_index) : unusable);
+    guest_cs_access_rights::set(cs_index != 0 ? guest_gdt.access_rights(cs_index) : unusable);
+    guest_ss_access_rights::set(ss_index != 0 ? guest_gdt.access_rights(ss_index) : unusable);
+    guest_ds_access_rights::set(ds_index != 0 ? guest_gdt.access_rights(ds_index) : unusable);
+    guest_fs_access_rights::set(fs_index != 0 ? guest_gdt.access_rights(fs_index) : unusable);
+    guest_gs_access_rights::set(gs_index != 0 ? guest_gdt.access_rights(gs_index) : unusable);
+    guest_ldtr_access_rights::set(ldtr_index != 0 ? guest_gdt.access_rights(ldtr_index) : unusable);
+    guest_tr_access_rights::set(tr_index != 0 ? guest_gdt.access_rights(tr_index) : type::tss_busy | 0x80U);
 
     guest_es_base::set(es_index != 0 ? guest_gdt.base(es_index) : 0);
     guest_cs_base::set(cs_index != 0 ? guest_gdt.base(cs_index) : 0);

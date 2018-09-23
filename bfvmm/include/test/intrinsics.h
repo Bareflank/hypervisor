@@ -16,6 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+/// @cond
+
 #include <intrinsics.h>
 
 #ifdef BF_X64
@@ -391,3 +393,5 @@ setup_cpuid_intel_x64()
 }
 
 #endif
+
+/// @endcond

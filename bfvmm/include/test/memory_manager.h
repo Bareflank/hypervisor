@@ -16,6 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+/// @cond
+
 #include "../memory_manager/memory_manager.h"
 
 bool g_out_of_memory = false;
@@ -64,3 +66,5 @@ free_page(void *ptr)
 
     g_allocated_pages.erase(ptr);
 }
+
+/// @endcond
