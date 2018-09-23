@@ -59,7 +59,7 @@ Intel _Sandy Bridge_ and above hardware:
 - Ubuntu 17.10+
 - Windows 10
 - Windows 7
-- UEFI (64bit)
+- UEFI
 
 In the future, we would also like to support:
 - macOS
@@ -124,8 +124,6 @@ command prompt with admin privileges:
 bcdedit.exe /set testsigning ON
 <reboot>
 ```
-#### UEFI:
-TBD
 
 ## Compilation Instructions
 
@@ -170,6 +168,26 @@ to clean up:
 ```
 make distclean
 ```
+
+## UEFI:
+A UEFI application version of Bareflank may be compiled on either Linux or 
+Cygwin (Visual Studio is currently not supported). To compile for UEFI, add the 
+following to CMake when configuring:
+```
+-DENABLE_BUILD_EFI=ON
+```
+It should be noted that unit tests must be disabled, and static builds are currently
+required (the example config provides an example of how to configure Bareflank as 
+needed for more complex builds). The resulting UEFI application can be found here:
+```
+build/prefixes/x86_64-efi-pe/bin/bareflank.efi
+```
+Place this binary in your EFI partition (e.g., on Ubuntu this is 
+/boot/efi/EFI/BOOT/bareflank.efi) and execute it like any other EFI application. 
+Once Bareflank is running, if you wish to boot Windows or Linux, the Extended APIs 
+are needed (as additional emulation is needed to succesfully boot an OS). Also
+note that utilities like "make dump" do not work when using EFI as the driver 
+doesn't have access to the debug ring. 
 
 ## Serial Instructions
 
