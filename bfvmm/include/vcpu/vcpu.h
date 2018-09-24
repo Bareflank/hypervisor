@@ -255,7 +255,30 @@ public:
     /// @return true if this vCPU belongs to the host VM, false otherwise
     ///
     VIRTUAL bool is_host_vm_vcpu()
-    { return vcpuid::is_hvm_vcpu(m_id); }
+    { return vcpuid::is_host_vm_vcpu(m_id); }
+
+    /// Is Guest VM vCPU
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return true if this vCPU belongs to a guest VM, false otherwise
+    ///
+    VIRTUAL bool is_guest_vm_vcpu()
+    { return vcpuid::is_guest_vm_vcpu(m_id); }
+
+    /// Generate vCPU ID
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @return Returns a new, unique vcpu id
+    ///
+    static vcpuid::type generate_vcpuid()
+    {
+        static vcpuid::type s_id = (~vcpuid::guest_mask) + 1;
+        return s_id++;
+    }
 
     /// Add Run Delegate
     ///
@@ -268,7 +291,7 @@ public:
     ///
     /// @param d the delegate to add to the vcpu
     ///
-    VIRTUAL void add_run_delegate(run_delegate_t &&d) noexcept
+    VIRTUAL void add_run_delegate(const run_delegate_t &d) noexcept
     { m_run_delegates.push_front(std::move(d)); }
 
     /// Add Halt Delegate
@@ -282,7 +305,7 @@ public:
     ///
     /// @param d the delegate to add to the vcpu
     ///
-    VIRTUAL void add_hlt_delegate(hlt_delegate_t &&d) noexcept
+    VIRTUAL void add_hlt_delegate(const hlt_delegate_t &d) noexcept
     { m_hlt_delegates.push_front(std::move(d)); }
 
     /// Add Init Delegate
@@ -296,7 +319,7 @@ public:
     ///
     /// @param d the delegate to add to the vcpu
     ///
-    VIRTUAL void add_init_delegate(init_delegate_t &&d) noexcept
+    VIRTUAL void add_init_delegate(const init_delegate_t &d) noexcept
     { m_init_delegates.push_front(std::move(d)); }
 
     /// Add Fini Delegate
@@ -310,7 +333,7 @@ public:
     ///
     /// @param d the delegate to add to the vcpu
     ///
-    VIRTUAL void add_fini_delegate(fini_delegate_t &&d) noexcept
+    VIRTUAL void add_fini_delegate(const fini_delegate_t &d) noexcept
     { m_fini_delegates.push_front(std::move(d)); }
 
 private:

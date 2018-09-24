@@ -25,6 +25,8 @@
 #include "save_state.h"
 #include "check.h"
 
+#include "../../../memory_manager/memory_manager.h"
+
 // -----------------------------------------------------------------------------
 // Exports
 // -----------------------------------------------------------------------------
@@ -187,7 +189,7 @@ protected:
 
 private:
 
-    std::unique_ptr<uint32_t, void(*)(void *)> m_vmcs_region;
+    page_ptr<uint32_t> m_vmcs_region;
     uintptr_t m_vmcs_region_phys;
 
 public:
@@ -205,6 +207,8 @@ public:
 
 }
 }
+
+using vmcs_t = bfvmm::intel_x64::vmcs;
 
 #ifdef _MSC_VER
 #pragma warning(pop)

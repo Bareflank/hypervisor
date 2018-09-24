@@ -24,6 +24,7 @@ if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
         arch/intel_x64/exception.cpp
         arch/intel_x64/nmi.cpp
         arch/intel_x64/exit_handler.cpp
+        arch/intel_x64/vcpu.cpp
         arch/intel_x64/vmcs.cpp
         arch/intel_x64/vmx.cpp
     )
@@ -48,6 +49,7 @@ add_shared_library(
     bfvmm_hve
     SOURCES ${SOURCES}
     DEFINES SHARED_HVE
+    DEFINES SHARED_VCPU
     DEFINES SHARED_MEMORY_MANAGER
     DEFINES SHARED_INTRINSICS
 )
@@ -56,6 +58,7 @@ add_static_library(
     bfvmm_hve
     SOURCES ${SOURCES}
     DEFINES STATIC_HVE
+    DEFINES STATIC_VCPU
     DEFINES STATIC_MEMORY_MANAGER
     DEFINES STATIC_INTRINSICS
 )

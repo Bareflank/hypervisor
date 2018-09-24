@@ -17,15 +17,21 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ///
-/// @file bfbuffer.h
+/// @file bfaffinity.h
 ///
-///
+
+#ifndef WIN64
+#define _GNU_SOURCE
+#include <sched.h>
+#endif
+
+#include <bftypes.h>
 
 #ifdef WIN64
 
 #include <windows.h>
 
-inline int
+static inline int
 set_affinity(uint64_t core)
 {
     if (SetProcessAffinityMask(GetCurrentProcess(), 1ULL << core) == 0) {
@@ -37,13 +43,7 @@ set_affinity(uint64_t core)
 
 #else
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-
-#include <sched.h>
-
-inline int
+static inline int
 set_affinity(uint64_t core)
 {
     cpu_set_t  mask;

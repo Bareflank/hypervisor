@@ -30,7 +30,7 @@
 uint64_t g_vcpuid = 0;
 
 struct pmodule_t {
-    const char *data;
+    char *data;
     int64_t size;
 };
 
@@ -264,7 +264,7 @@ bareflankEvtIoDeviceControl(
         status = WdfRequestRetrieveInputBuffer(Request, InputBufferLength, &in, &in_size);
 
         if (!NT_SUCCESS(status)) {
-            goto FAILURE;
+            goto IOCTL_FAILURE;
         }
     }
 
@@ -272,7 +272,7 @@ bareflankEvtIoDeviceControl(
         status = WdfRequestRetrieveOutputBuffer(Request, OutputBufferLength, &out, &out_size);
 
         if (!NT_SUCCESS(status)) {
-            goto FAILURE;
+            goto IOCTL_FAILURE;
         }
     }
 
@@ -310,7 +310,7 @@ bareflankEvtIoDeviceControl(
             break;
 
         default:
-            goto FAILURE;
+            goto IOCTL_FAILURE;
     }
 
     if (OutputBufferLength != 0) {
@@ -318,13 +318,13 @@ bareflankEvtIoDeviceControl(
     }
 
     if (ret != BF_IOCTL_SUCCESS) {
-        goto FAILURE;
+        goto IOCTL_FAILURE;
     }
 
     WdfRequestComplete(Request, STATUS_SUCCESS);
     return;
 
-FAILURE:
+IOCTL_FAILURE:
 
     WdfRequestComplete(Request, STATUS_ACCESS_DENIED);
     return;

@@ -67,6 +67,7 @@ setup_idt_x64()
 #include "../hve/arch/intel_x64/vmcs.h"
 #include "../hve/arch/intel_x64/check.h"
 #include "../hve/arch/intel_x64/exit_handler.h"
+#include "../hve/arch/intel_x64/vcpu.h"
 
 bfvmm::intel_x64::save_state_t g_save_state{};
 

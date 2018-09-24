@@ -19,10 +19,12 @@
 #ifndef MMAP_CR3_X64_H
 #define MMAP_CR3_X64_H
 
-#include <vector>
+#include <mutex>
+#include <unordered_map>
 
 #include <bfgsl.h>
 #include <bfdebug.h>
+#include <bfupperlower.h>
 
 #include <intrinsics.h>
 #include "../../../memory_manager.h"
@@ -52,11 +54,7 @@
 // Definition
 // -----------------------------------------------------------------------------
 
-namespace bfvmm
-{
-namespace x64
-{
-namespace cr3
+namespace bfvmm::x64::cr3
 {
 
 /// CR3 Memory Map
@@ -65,6 +63,24 @@ namespace cr3
 /// APIs to map virtual to physical addresses to these pages. For more
 /// information on how CR3 page tables work, please see the Intel SDM. This
 /// implementation attempts to map directly to the SDM text.
+///
+/// TODO:
+///
+/// Currently, we have a last lookup cache set up that helps to reduce the
+/// time it takes to map. We need to implement a TLB as well, and the TLB
+/// should be enabled by default.
+///
+/// The goal of the TLB would be to queue unmaps based on incoming maps,
+/// similar to the way the hardware's TLB removes entries from the actual
+/// hardware TLB. All unmaps are added to a queue. Each time an unmap occurs,
+/// the unmap is added to the top of the queue. If the unmap is already in
+/// the queue, it is moved to the top. Once the queue reaches a certain limit,
+/// an unmap causes the unmap at the end of the queue to actually be
+/// unmapped. The queue should be hand made to prevent the need for memory
+/// allocations. This will provide huge increase in performance for mapping
+/// operations as it will prevent the map from mapping and unmapping the same
+/// addresses. Note that attemps to map an address that is in the unmap queue
+/// should remove the map from the unmap queue and do nothing else.
 ///
 class EXPORT_MEMORY_MANAGER mmap
 {
@@ -81,7 +97,8 @@ public:
 
     enum class attr_type {
         read_write,
-        read_execute
+        read_execute,
+        read_write_execute
     };
 
     enum class memory_type {
@@ -112,7 +129,9 @@ public:
     ///
     ~mmap()
     {
-        for (auto pml4i = 0; pml4i < ::x64::pml4::num_entries; pml4i++) {
+        using namespace ::x64;
+
+        for (auto pml4i = 0; pml4i < pml4::num_entries; pml4i++) {
             auto &entry = m_pml4.virt_addr.at(pml4i);
 
             if (entry == 0) {
@@ -134,6 +153,8 @@ public:
     ///
     uintptr_t cr3()
     {
+        std::lock_guard lock(m_mutex);
+
         if (m_pml4.phys_addr == 0) {
             m_pml4.phys_addr = g_mm->virtptr_to_physint(m_pml4.virt_addr.data());
         }
@@ -148,7 +169,7 @@ public:
     ///
     /// @return Returns the value that should be written into the PAT
     ///
-    uint64_t pat()
+    inline uint64_t pat()
     { return 0x0606060606060600; }
 
     /// Map 1g Virt Address to Phys Address
@@ -165,12 +186,15 @@ public:
     ///
     entry_type &
     map_1g(
-        virt_addr_t *virt_addr,
+        void *virt_addr,
         phys_addr_t phys_addr,
         attr_type attr = attr_type::read_write,
         memory_type cache = memory_type::write_back)
     {
-        this->map_pdpt(::x64::pml4::index(virt_addr));
+        using namespace ::x64;
+        std::lock_guard lock(m_mutex);
+
+        this->map_pdpt(pml4::index(virt_addr));
         return this->map_pdpte(virt_addr, phys_addr, attr, cache);
     }
 
@@ -193,7 +217,7 @@ public:
         attr_type attr = attr_type::read_write,
         memory_type cache = memory_type::write_back)
     {
-        return map_1g(reinterpret_cast<virt_addr_t *>(virt_addr), phys_addr, attr, cache);
+        return map_1g(reinterpret_cast<void *>(virt_addr), phys_addr, attr, cache);
     }
 
     /// Map 2m Virt Address to Phys Address
@@ -210,13 +234,16 @@ public:
     ///
     entry_type &
     map_2m(
-        virt_addr_t *virt_addr,
+        void *virt_addr,
         phys_addr_t phys_addr,
         attr_type attr = attr_type::read_write,
         memory_type cache = memory_type::write_back)
     {
-        this->map_pdpt(::x64::pml4::index(virt_addr));
-        this->map_pd(::x64::pdpt::index(virt_addr));
+        using namespace ::x64;
+        std::lock_guard lock(m_mutex);
+
+        this->map_pdpt(pml4::index(virt_addr));
+        this->map_pd(pdpt::index(virt_addr));
 
         return this->map_pde(virt_addr, phys_addr, attr, cache);
     }
@@ -240,7 +267,7 @@ public:
         attr_type attr = attr_type::read_write,
         memory_type cache = memory_type::write_back)
     {
-        return map_2m(reinterpret_cast<virt_addr_t *>(virt_addr), phys_addr, attr, cache);
+        return map_2m(reinterpret_cast<void *>(virt_addr), phys_addr, attr, cache);
     }
 
     /// Map 4k Virt Address to Phys Address
@@ -257,14 +284,17 @@ public:
     ///
     entry_type &
     map_4k(
-        virt_addr_t *virt_addr,
+        void *virt_addr,
         phys_addr_t phys_addr,
         attr_type attr = attr_type::read_write,
         memory_type cache = memory_type::write_back)
     {
-        this->map_pdpt(::x64::pml4::index(virt_addr));
-        this->map_pd(::x64::pdpt::index(virt_addr));
-        this->map_pt(::x64::pd::index(virt_addr));
+        using namespace ::x64;
+        std::lock_guard lock(m_mutex);
+
+        this->map_pdpt(pml4::index(virt_addr));
+        this->map_pd(pdpt::index(virt_addr));
+        this->map_pt(pd::index(virt_addr));
 
         return this->map_pte(virt_addr, phys_addr, attr, cache);
     }
@@ -288,7 +318,7 @@ public:
         attr_type attr = attr_type::read_write,
         memory_type cache = memory_type::write_back)
     {
-        return map_4k(reinterpret_cast<virt_addr_t *>(virt_addr), phys_addr, attr, cache);
+        return map_4k(reinterpret_cast<void *>(virt_addr), phys_addr, attr, cache);
     }
 
     /// Unmap Virtual Address
@@ -299,34 +329,37 @@ public:
     /// @param virt_addr the virtual address to unmap
     ///
     void
-    unmap(virt_addr_t *virt_addr)
+    unmap(void *virt_addr)
     {
-        this->map_pdpt(::x64::pml4::index(virt_addr));
-        auto &pdpte = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
+        using namespace ::x64;
+        std::lock_guard lock(m_mutex);
+
+        this->map_pdpt(pml4::index(virt_addr));
+        auto &pdpte = m_pdpt.virt_addr.at(pdpt::index(virt_addr));
 
         if (pdpte == 0) {
             return;
         }
 
-        if (::x64::pdpt::entry::ps::is_enabled(pdpte)) {
+        if (pdpt::entry::ps::is_enabled(pdpte)) {
             pdpte = 0;
             return;
         }
 
-        this->map_pd(::x64::pdpt::index(virt_addr));
-        auto &pde = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
+        this->map_pd(pdpt::index(virt_addr));
+        auto &pde = m_pd.virt_addr.at(pd::index(virt_addr));
 
         if (pde == 0) {
             return;
         }
 
-        if (::x64::pd::entry::ps::is_enabled(pde)) {
+        if (pd::entry::ps::is_enabled(pde)) {
             pde = 0;
             return;
         }
 
-        this->map_pt(::x64::pd::index(virt_addr));
-        m_pt.virt_addr.at(::x64::pt::index(virt_addr)) = 0;
+        this->map_pt(pd::index(virt_addr));
+        m_pt.virt_addr.at(pt::index(virt_addr)) = 0;
     }
 
     /// Unmap Virtual Address
@@ -341,8 +374,8 @@ public:
     ///
     /// @param virt_addr the virtual address to unmap
     ///
-    void unmap(virt_addr_t virt_addr)
-    { unmap(reinterpret_cast<virt_addr_t *>(virt_addr)); }
+    inline void unmap(virt_addr_t virt_addr)
+    { unmap(reinterpret_cast<void *>(virt_addr)); }
 
     /// Release Virtual Address
     ///
@@ -358,10 +391,13 @@ public:
     /// @param virt_addr the virtual address to unmap
     ///
     void
-    release(virt_addr_t *virt_addr)
+    release(void *virt_addr)
     {
+        using namespace ::x64;
+        std::lock_guard lock(m_mutex);
+
         if (this->release_pdpte(virt_addr)) {
-            m_pml4.virt_addr.at(::x64::pml4::index(virt_addr)) = 0;
+            m_pml4.virt_addr.at(pml4::index(virt_addr)) = 0;
         }
     }
 
@@ -378,8 +414,8 @@ public:
     ///
     /// @param virt_addr the virtual address to unmap
     ///
-    void release(virt_addr_t virt_addr)
-    { release(reinterpret_cast<virt_addr_t *>(virt_addr)); }
+    inline void release(virt_addr_t virt_addr)
+    { release(reinterpret_cast<void *>(virt_addr)); }
 
     /// Virtual Address to Entry
     ///
@@ -389,39 +425,42 @@ public:
     /// @param virt_addr the virtual address to be converted
     /// @return returns entry for the map
     ///
-    entry_type &
-    entry(virt_addr_t *virt_addr)
+    std::pair<std::reference_wrapper<entry_type>, uintptr_t>
+    entry(void *virt_addr)
     {
-        this->map_pdpt(::x64::pml4::index(virt_addr));
-        auto &pdpte = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
+        using namespace ::x64;
+        std::lock_guard lock(m_mutex);
+
+        this->map_pdpt(pml4::index(virt_addr));
+        auto &pdpte = m_pdpt.virt_addr.at(pdpt::index(virt_addr));
 
         if (pdpte == 0) {
             throw std::runtime_error("entry: pdpte not mapped");
         }
 
-        if (::x64::pdpt::entry::ps::is_enabled(pdpte)) {
-            return pdpte;
+        if (pdpt::entry::ps::is_enabled(pdpte)) {
+            return {pdpte, pdpt::from};
         }
 
-        this->map_pd(::x64::pdpt::index(virt_addr));
-        auto &pde = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
+        this->map_pd(pdpt::index(virt_addr));
+        auto &pde = m_pd.virt_addr.at(pd::index(virt_addr));
 
         if (pde == 0) {
             throw std::runtime_error("entry: pde not mapped");
         }
 
-        if (::x64::pd::entry::ps::is_enabled(pde)) {
-            return pde;
+        if (pd::entry::ps::is_enabled(pde)) {
+            return {pde, pd::from};
         }
 
-        this->map_pt(::x64::pd::index(virt_addr));
-        auto &pte = m_pt.virt_addr.at(::x64::pt::index(virt_addr));
+        this->map_pt(pd::index(virt_addr));
+        auto &pte = m_pt.virt_addr.at(pt::index(virt_addr));
 
         if (pte == 0) {
             throw std::runtime_error("entry: pte not mapped");
         }
 
-        return pte;
+        return {pte, pt::from};
     }
 
     /// Virtual Address to Entry
@@ -432,10 +471,16 @@ public:
     /// @param virt_addr the virtual address to be converted
     /// @return returns entry for the map
     ///
-    entry_type &entry(virt_addr_t virt_addr)
-    { return entry(reinterpret_cast<virt_addr_t *>(virt_addr)); }
+    inline std::pair<std::reference_wrapper<entry_type>, uintptr_t>
+    entry(virt_addr_t virt_addr)
+    { return entry(reinterpret_cast<void *>(virt_addr)); }
 
     /// Virtual Address to Physical Address
+    ///
+    /// This function converts a virtual address to a physical address. If
+    /// the map is being used for the VMM itself, this is a regular virtual
+    /// address to physical address conversion, just like on any OS. If the
+    /// map is used for a guest, this is a GVA to GPA conversion.
     ///
     /// @expects
     /// @ensures
@@ -443,51 +488,68 @@ public:
     /// @param virt_addr the virtual address to be converted
     /// @return Returns the phys_addr for the map
     ///
-    phys_addr_t
-    virt_to_phys(virt_addr_t *virt_addr)
+    inline std::pair<uintptr_t, uintptr_t> virt_to_phys(void *virt_addr)
+    { return virt_to_phys(reinterpret_cast<uintptr_t>(virt_addr)); }
+
+    /// Virtual Address to Physical Address
+    ///
+    /// This function converts a virtual address to a physical address. If
+    /// the map is being used for the VMM itself, this is a regular virtual
+    /// address to physical address conversion, just like on any OS. If the
+    /// map is used for a guest, this is a GVA to GPA conversion.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to be converted
+    /// @return Returns the phys_addr for the map
+    ///
+    std::pair<uintptr_t, uintptr_t>
+    virt_to_phys(virt_addr_t virt_addr)
     {
-        this->map_pdpt(::x64::pml4::index(virt_addr));
-        auto pdpte = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
+        using namespace ::x64;
+        std::lock_guard lock(m_mutex);
+
+        this->map_pdpt(pml4::index(virt_addr));
+        auto pdpte = m_pdpt.virt_addr.at(pdpt::index(virt_addr));
 
         if (pdpte == 0) {
             throw std::runtime_error("virt_to_phys: pdpte not mapped");
         }
 
-        if (::x64::pdpt::entry::ps::is_enabled(pdpte)) {
-            return ::x64::pdpt::entry::phys_addr::get(pdpte);
+        if (pdpt::entry::ps::is_enabled(pdpte)) {
+            return {
+                pdpt::entry::phys_addr::get(pdpte) | bfn::lower(virt_addr, pdpt::from),
+                pdpt::from
+            };
         }
 
-        this->map_pd(::x64::pdpt::index(virt_addr));
-        auto pde = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
+        this->map_pd(pdpt::index(virt_addr));
+        auto pde = m_pd.virt_addr.at(pd::index(virt_addr));
 
         if (pde == 0) {
             throw std::runtime_error("virt_to_phys: pde not mapped");
         }
 
-        if (::x64::pd::entry::ps::is_enabled(pde)) {
-            return ::x64::pd::entry::phys_addr::get(pde);
+        if (pd::entry::ps::is_enabled(pde)) {
+            return {
+                pd::entry::phys_addr::get(pde) | bfn::lower(virt_addr, pd::from),
+                pd::from
+            };
         }
 
-        this->map_pt(::x64::pd::index(virt_addr));
-        auto pte = m_pt.virt_addr.at(::x64::pt::index(virt_addr));
+        this->map_pt(pd::index(virt_addr));
+        auto pte = m_pt.virt_addr.at(pt::index(virt_addr));
 
         if (pte == 0) {
             throw std::runtime_error("virt_to_phys: pte not mapped");
         }
 
-        return ::x64::pt::entry::phys_addr::get(pte);
+        return {
+            pt::entry::phys_addr::get(pte) | bfn::lower(virt_addr, pt::from),
+            pt::from
+        };
     }
-
-    /// Virtual Address to Physical Address
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    /// @param virt_addr the virtual address to be converted
-    /// @return Returns the phys_addr for the map
-    ///
-    phys_addr_t virt_to_phys(virt_addr_t virt_addr)
-    { return virt_to_phys(reinterpret_cast<virt_addr_t *>(virt_addr)); }
 
     /// Virtual Address to From
     ///
@@ -497,39 +559,42 @@ public:
     /// @param virt_addr the virtual address to test
     /// @return returns page size of the mapping (i.e. from)
     ///
-    auto
-    from(virt_addr_t *virt_addr)
+    uint64_t
+    from(void *virt_addr)
     {
-        this->map_pdpt(::x64::pml4::index(virt_addr));
-        auto pdpte = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
+        using namespace ::x64;
+        std::lock_guard lock(m_mutex);
+
+        this->map_pdpt(pml4::index(virt_addr));
+        auto pdpte = m_pdpt.virt_addr.at(pdpt::index(virt_addr));
 
         if (pdpte == 0) {
             throw std::runtime_error("from: pdpte not mapped");
         }
 
-        if (::x64::pdpt::entry::ps::is_enabled(pdpte)) {
-            return ::x64::pdpt::from;
+        if (pdpt::entry::ps::is_enabled(pdpte)) {
+            return pdpt::from;
         }
 
-        this->map_pd(::x64::pdpt::index(virt_addr));
-        auto pde = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
+        this->map_pd(pdpt::index(virt_addr));
+        auto pde = m_pd.virt_addr.at(pd::index(virt_addr));
 
         if (pde == 0) {
             throw std::runtime_error("from: pde not mapped");
         }
 
-        if (::x64::pd::entry::ps::is_enabled(pde)) {
-            return ::x64::pd::from;
+        if (pd::entry::ps::is_enabled(pde)) {
+            return pd::from;
         }
 
-        this->map_pt(::x64::pd::index(virt_addr));
-        auto pte = m_pt.virt_addr.at(::x64::pt::index(virt_addr));
+        this->map_pt(pd::index(virt_addr));
+        auto pte = m_pt.virt_addr.at(pt::index(virt_addr));
 
         if (pte == 0) {
             throw std::runtime_error("from: pte not mapped");
         }
 
-        return ::x64::pt::from;
+        return pt::from;
     }
 
     /// Virtual Address to From
@@ -540,8 +605,8 @@ public:
     /// @param virt_addr the virtual address to test
     /// @return returns page size of the mapping (i.e. from)
     ///
-    auto from(virt_addr_t virt_addr)
-    { return from(reinterpret_cast<virt_addr_t *>(virt_addr)); }
+    inline uint64_t from(virt_addr_t virt_addr)
+    { return from(reinterpret_cast<void *>(virt_addr)); }
 
     /// Is 1g
     ///
@@ -552,7 +617,7 @@ public:
     /// @return returns true if the virtual address was mapped as 1g page,
     ///     false otherwise
     ///
-    inline auto is_1g(virt_addr_t *virt_addr)
+    inline bool is_1g(void *virt_addr)
     { return from(virt_addr) == ::x64::pdpt::from; }
 
     /// Is 1g
@@ -564,8 +629,8 @@ public:
     /// @return returns true if the virtual address was mapped as 1g page,
     ///     false otherwise
     ///
-    inline auto is_1g(virt_addr_t virt_addr)
-    { return is_1g(reinterpret_cast<virt_addr_t *>(virt_addr)); }
+    inline bool is_1g(virt_addr_t virt_addr)
+    { return is_1g(reinterpret_cast<void *>(virt_addr)); }
 
     /// Is 2m
     ///
@@ -576,7 +641,7 @@ public:
     /// @return returns true if the virtual address was mapped as 2m page,
     ///     false otherwise
     ///
-    inline auto is_2m(virt_addr_t *virt_addr)
+    inline bool is_2m(void *virt_addr)
     { return from(virt_addr) == ::x64::pd::from; }
 
     /// Is 2m
@@ -588,8 +653,8 @@ public:
     /// @return returns true if the virtual address was mapped as 2m page,
     ///     false otherwise
     ///
-    inline auto is_2m(virt_addr_t virt_addr)
-    { return is_2m(reinterpret_cast<virt_addr_t *>(virt_addr)); }
+    inline bool is_2m(virt_addr_t virt_addr)
+    { return is_2m(reinterpret_cast<void *>(virt_addr)); }
 
     /// Is 4k
     ///
@@ -600,7 +665,7 @@ public:
     /// @return returns true if the virtual address was mapped as 4k page,
     ///     false otherwise
     ///
-    inline auto is_4k(virt_addr_t *virt_addr)
+    inline bool is_4k(void *virt_addr)
     { return from(virt_addr) == ::x64::pt::from; }
 
     /// Is 4k
@@ -612,8 +677,20 @@ public:
     /// @return returns true if the virtual address was mapped as 4k page,
     ///     false otherwise
     ///
-    inline auto is_4k(virt_addr_t virt_addr)
-    { return is_4k(reinterpret_cast<virt_addr_t *>(virt_addr)); }
+    inline bool is_4k(virt_addr_t virt_addr)
+    { return is_4k(reinterpret_cast<void *>(virt_addr)); }
+
+    /// Memory Descriptor List
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @return a list of all of the pages used to construct the mmap.
+    ///     This list does not contain the mapped addressed, just the
+    ///     addresses of the pages used to construct the table
+    ///
+    std::unordered_map<void *, phys_addr_t> &mdl()
+    { return m_mdl; }
 
 private:
 
@@ -643,12 +720,16 @@ private:
             )
         };
 
+        m_mdl[ptrs.virt_addr.data()] = ptrs.phys_addr;
         return ptrs;
     }
 
     void
     free(const gsl::span<virt_addr_t> &virt_addr)
-    { free_page(virt_addr.data()); }
+    {
+        free_page(virt_addr.data());
+        m_mdl.erase(virt_addr.data());
+    }
 
 private:
 
@@ -669,88 +750,92 @@ private:
     void
     map_pdpt(index_type pml4i)
     {
+        using namespace ::x64;
         auto &entry = m_pml4.virt_addr.at(pml4i);
 
         if (entry != 0) {
-            auto phys_addr = ::x64::pml4::entry::phys_addr::get(entry);
+            auto phys_addr = pml4::entry::phys_addr::get(entry);
 
             if (m_pdpt.phys_addr == phys_addr) {
                 return;
             }
 
-            m_pdpt = phys_to_pair(phys_addr, ::x64::pdpt::num_entries);
+            m_pdpt = phys_to_pair(phys_addr, pdpt::num_entries);
             return;
         }
 
-        m_pdpt = this->allocate(::x64::pdpt::num_entries);
+        m_pdpt = this->allocate(pdpt::num_entries);
 
-        ::x64::pml4::entry::phys_addr::set(entry, m_pdpt.phys_addr);
-        ::x64::pml4::entry::pat_index::set(entry, 1);
-        ::x64::pml4::entry::present::enable(entry);
-        ::x64::pml4::entry::rw::enable(entry);
+        pml4::entry::phys_addr::set(entry, m_pdpt.phys_addr);
+        pml4::entry::pat_index::set(entry, 1);
+        pml4::entry::present::enable(entry);
+        pml4::entry::rw::enable(entry);
     }
 
     void
     map_pd(index_type pdpti)
     {
+        using namespace ::x64;
         auto &entry = m_pdpt.virt_addr.at(pdpti);
 
         if (entry != 0) {
-            auto phys_addr = ::x64::pdpt::entry::phys_addr::get(entry);
+            auto phys_addr = pdpt::entry::phys_addr::get(entry);
 
             if (m_pd.phys_addr == phys_addr) {
                 return;
             }
 
-            m_pd = phys_to_pair(phys_addr, ::x64::pd::num_entries);
+            m_pd = phys_to_pair(phys_addr, pd::num_entries);
             return;
         }
 
-        m_pd = this->allocate(::x64::pd::num_entries);
+        m_pd = this->allocate(pd::num_entries);
 
-        ::x64::pdpt::entry::phys_addr::set(entry, m_pd.phys_addr);
-        ::x64::pdpt::entry::pat_index::set(entry, 1);
-        ::x64::pdpt::entry::present::enable(entry);
-        ::x64::pdpt::entry::rw::enable(entry);
+        pdpt::entry::phys_addr::set(entry, m_pd.phys_addr);
+        pdpt::entry::pat_index::set(entry, 1);
+        pdpt::entry::present::enable(entry);
+        pdpt::entry::rw::enable(entry);
     }
 
     void
     map_pt(index_type pdi)
     {
+        using namespace ::x64;
         auto &entry = m_pd.virt_addr.at(pdi);
 
         if (entry != 0) {
-            auto phys_addr = ::x64::pd::entry::phys_addr::get(entry);
+            auto phys_addr = pd::entry::phys_addr::get(entry);
 
             if (m_pt.phys_addr == phys_addr) {
                 return;
             }
 
-            m_pt = phys_to_pair(phys_addr, ::x64::pt::num_entries);
+            m_pt = phys_to_pair(phys_addr, pt::num_entries);
             return;
         }
 
-        m_pt = this->allocate(::x64::pt::num_entries);
+        m_pt = this->allocate(pt::num_entries);
 
-        ::x64::pd::entry::phys_addr::set(entry, m_pt.phys_addr);
-        ::x64::pd::entry::pat_index::set(entry, 1);
-        ::x64::pd::entry::present::enable(entry);
-        ::x64::pd::entry::rw::enable(entry);
+        pd::entry::phys_addr::set(entry, m_pt.phys_addr);
+        pd::entry::pat_index::set(entry, 1);
+        pd::entry::present::enable(entry);
+        pd::entry::rw::enable(entry);
     }
 
     void
     clear_pdpt(index_type pml4i)
     {
+        using namespace ::x64;
         this->map_pdpt(pml4i);
 
-        for (auto pdpti = 0; pdpti < ::x64::pdpt::num_entries; pdpti++) {
+        for (auto pdpti = 0; pdpti < pdpt::num_entries; pdpti++) {
             auto &entry = m_pdpt.virt_addr.at(pdpti);
 
             if (entry == 0) {
                 continue;
             }
 
-            if (::x64::pdpt::entry::ps::is_disabled(entry)) {
+            if (pdpt::entry::ps::is_disabled(entry)) {
                 this->clear_pd(pdpti);
             }
 
@@ -764,16 +849,17 @@ private:
     void
     clear_pd(index_type pdpti)
     {
+        using namespace ::x64;
         this->map_pd(pdpti);
 
-        for (auto pdi = 0; pdi < ::x64::pd::num_entries; pdi++) {
+        for (auto pdi = 0; pdi < pd::num_entries; pdi++) {
             auto &entry = m_pd.virt_addr.at(pdi);
 
             if (entry == 0) {
                 continue;
             }
 
-            if (::x64::pd::entry::ps::is_disabled(entry)) {
+            if (pd::entry::ps::is_disabled(entry)) {
                 this->clear_pt(pdi);
             }
 
@@ -795,10 +881,11 @@ private:
 
     entry_type &
     map_pdpte(
-        virt_addr_t *virt_addr, phys_addr_t phys_addr,
+        void *virt_addr, phys_addr_t phys_addr,
         attr_type attr, memory_type cache)
     {
-        auto &entry = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
+        using namespace ::x64;
+        auto &entry = m_pdpt.virt_addr.at(pdpt::index(virt_addr));
 
         if (entry != 0) {
             throw std::runtime_error(
@@ -807,41 +894,47 @@ private:
             );
         }
 
-        ::x64::pdpt::entry::phys_addr::set(entry, phys_addr);
-        ::x64::pdpt::entry::present::enable(entry);
+        pdpt::entry::phys_addr::set(entry, phys_addr);
+        pdpt::entry::present::enable(entry);
 
         switch (attr) {
             case attr_type::read_write:
-                ::x64::pdpt::entry::rw::enable(entry);
-                ::x64::pdpt::entry::xd::enable(entry);
+                pdpt::entry::rw::enable(entry);
+                pdpt::entry::xd::enable(entry);
                 break;
 
             case attr_type::read_execute:
-                ::x64::pdpt::entry::rw::disable(entry);
-                ::x64::pdpt::entry::xd::disable(entry);
+                pdpt::entry::rw::disable(entry);
+                pdpt::entry::xd::disable(entry);
+                break;
+
+            case attr_type::read_write_execute:
+                pdpt::entry::rw::enable(entry);
+                pdpt::entry::xd::disable(entry);
                 break;
         };
 
         switch (cache) {
             case memory_type::uncacheable:
-                ::x64::pdpt::entry::pat_index::set(entry, 0);
+                pdpt::entry::pat_index::set(entry, 0);
                 break;
 
             case memory_type::write_back:
-                ::x64::pdpt::entry::pat_index::set(entry, 1);
+                pdpt::entry::pat_index::set(entry, 1);
                 break;
         };
 
-        ::x64::pdpt::entry::ps::enable(entry);
+        pdpt::entry::ps::enable(entry);
         return entry;
     }
 
     entry_type &
     map_pde(
-        virt_addr_t *virt_addr, phys_addr_t phys_addr,
+        void *virt_addr, phys_addr_t phys_addr,
         attr_type attr, memory_type cache)
     {
-        auto &entry = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
+        using namespace ::x64;
+        auto &entry = m_pd.virt_addr.at(pd::index(virt_addr));
 
         if (entry != 0) {
             throw std::runtime_error(
@@ -850,41 +943,47 @@ private:
             );
         }
 
-        ::x64::pd::entry::phys_addr::set(entry, phys_addr);
-        ::x64::pd::entry::present::enable(entry);
+        pd::entry::phys_addr::set(entry, phys_addr);
+        pd::entry::present::enable(entry);
 
         switch (attr) {
             case attr_type::read_write:
-                ::x64::pd::entry::rw::enable(entry);
-                ::x64::pd::entry::xd::enable(entry);
+                pd::entry::rw::enable(entry);
+                pd::entry::xd::enable(entry);
                 break;
 
             case attr_type::read_execute:
-                ::x64::pd::entry::rw::disable(entry);
-                ::x64::pd::entry::xd::disable(entry);
+                pd::entry::rw::disable(entry);
+                pd::entry::xd::disable(entry);
+                break;
+
+            case attr_type::read_write_execute:
+                pd::entry::rw::enable(entry);
+                pd::entry::xd::disable(entry);
                 break;
         };
 
         switch (cache) {
             case memory_type::uncacheable:
-                ::x64::pd::entry::pat_index::set(entry, 0);
+                pd::entry::pat_index::set(entry, 0);
                 break;
 
             case memory_type::write_back:
-                ::x64::pd::entry::pat_index::set(entry, 1);
+                pd::entry::pat_index::set(entry, 1);
                 break;
         };
 
-        ::x64::pd::entry::ps::enable(entry);
+        pd::entry::ps::enable(entry);
         return entry;
     }
 
     entry_type &
     map_pte(
-        virt_addr_t *virt_addr, phys_addr_t phys_addr,
+        void *virt_addr, phys_addr_t phys_addr,
         attr_type attr, memory_type cache)
     {
-        auto &entry = m_pt.virt_addr.at(::x64::pt::index(virt_addr));
+        using namespace ::x64;
+        auto &entry = m_pt.virt_addr.at(pt::index(virt_addr));
 
         if (entry != 0) {
             throw std::runtime_error(
@@ -893,28 +992,33 @@ private:
             );
         }
 
-        ::x64::pt::entry::phys_addr::set(entry, phys_addr);
-        ::x64::pt::entry::present::enable(entry);
+        pt::entry::phys_addr::set(entry, phys_addr);
+        pt::entry::present::enable(entry);
 
         switch (attr) {
             case attr_type::read_write:
-                ::x64::pt::entry::rw::enable(entry);
-                ::x64::pt::entry::xd::enable(entry);
+                pt::entry::rw::enable(entry);
+                pt::entry::xd::enable(entry);
                 break;
 
             case attr_type::read_execute:
-                ::x64::pt::entry::rw::disable(entry);
-                ::x64::pt::entry::xd::disable(entry);
+                pt::entry::rw::disable(entry);
+                pt::entry::xd::disable(entry);
+                break;
+
+            case attr_type::read_write_execute:
+                pt::entry::rw::enable(entry);
+                pt::entry::xd::disable(entry);
                 break;
         };
 
         switch (cache) {
             case memory_type::uncacheable:
-                ::x64::pt::entry::pat_index::set(entry, 0);
+                pt::entry::pat_index::set(entry, 0);
                 break;
 
             case memory_type::write_back:
-                ::x64::pt::entry::pat_index::set(entry, 1);
+                pt::entry::pat_index::set(entry, 1);
                 break;
         };
 
@@ -922,12 +1026,14 @@ private:
     }
 
     bool
-    release_pdpte(virt_addr_t *virt_addr)
+    release_pdpte(void *virt_addr)
     {
-        this->map_pdpt(::x64::pml4::index(virt_addr));
-        auto &entry = m_pdpt.virt_addr.at(::x64::pdpt::index(virt_addr));
+        using namespace ::x64;
 
-        if (::x64::pdpt::entry::ps::is_disabled(entry)) {
+        this->map_pdpt(pml4::index(virt_addr));
+        auto &entry = m_pdpt.virt_addr.at(pdpt::index(virt_addr));
+
+        if (pdpt::entry::ps::is_disabled(entry)) {
             if (!this->release_pde(virt_addr)) {
                 return false;
             }
@@ -936,7 +1042,7 @@ private:
         entry = 0;
 
         auto empty = true;
-        for (auto pdpti = 0; pdpti < ::x64::pdpt::num_entries; pdpti++) {
+        for (auto pdpti = 0; pdpti < pdpt::num_entries; pdpti++) {
             if (m_pdpt.virt_addr.at(pdpti) != 0) {
                 empty = false;
             }
@@ -951,12 +1057,14 @@ private:
     }
 
     bool
-    release_pde(virt_addr_t *virt_addr)
+    release_pde(void *virt_addr)
     {
-        this->map_pd(::x64::pdpt::index(virt_addr));
-        auto &entry = m_pd.virt_addr.at(::x64::pd::index(virt_addr));
+        using namespace ::x64;
 
-        if (::x64::pd::entry::ps::is_disabled(entry)) {
+        this->map_pd(pdpt::index(virt_addr));
+        auto &entry = m_pd.virt_addr.at(pd::index(virt_addr));
+
+        if (pd::entry::ps::is_disabled(entry)) {
             if (!this->release_pte(virt_addr)) {
                 return false;
             }
@@ -965,7 +1073,7 @@ private:
         entry = 0;
 
         auto empty = true;
-        for (auto pdi = 0; pdi < ::x64::pd::num_entries; pdi++) {
+        for (auto pdi = 0; pdi < pd::num_entries; pdi++) {
             if (m_pd.virt_addr.at(pdi) != 0) {
                 empty = false;
             }
@@ -980,13 +1088,15 @@ private:
     }
 
     bool
-    release_pte(virt_addr_t *virt_addr)
+    release_pte(void *virt_addr)
     {
-        this->map_pt(::x64::pd::index(virt_addr));
-        m_pt.virt_addr.at(::x64::pt::index(virt_addr)) = 0;
+        using namespace ::x64;
+
+        this->map_pt(pd::index(virt_addr));
+        m_pt.virt_addr.at(pt::index(virt_addr)) = 0;
 
         auto empty = true;
-        for (auto pti = 0; pti < ::x64::pt::num_entries; pti++) {
+        for (auto pti = 0; pti < pt::num_entries; pti++) {
             if (m_pt.virt_addr.at(pti) != 0) {
                 empty = false;
             }
@@ -1007,6 +1117,9 @@ private:
     pair m_pd;
     pair m_pt;
 
+    mutable std::mutex m_mutex;
+    std::unordered_map<void *, phys_addr_t> m_mdl;
+
 public:
 
     /// @cond
@@ -1020,8 +1133,6 @@ public:
     /// @endcond
 };
 
-}
-}
 }
 
 #endif

@@ -68,7 +68,11 @@ struct EXPORT_HVE tss {
     uint32_t reserved5{0};
     uint16_t reserved6{0};
     uint16_t iomap{0};
+
+    uint8_t pad[3992];
 };
+
+static_assert(sizeof(tss) == 0x1000, "TSS is not a page in size");
 
 /* @endcond */
 

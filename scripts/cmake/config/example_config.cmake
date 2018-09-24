@@ -59,19 +59,19 @@
 #
 set(ENABLE_DEVELOPER_MODE OFF)
 
-# Tests only
-#
-# If you are only interested in compiling the tests, this option can speed up
-# your build times .
-#
-set(ENABLE_TESTS_ONLY OFF)
-
 # Extended APIs
 #
 # This option enables the use of the extended APIs. It assumes the extended
 # APIs are located in the same directory as this configuration file.
 #
 set(ENABLE_EXTENDED_APIS OFF)
+
+# Hyperkernel
+#
+# This option enables the use of the hyperkernel. It assumes the
+# hyperkernel is located in the same directory as this configuration file.
+#
+set(ENABLE_HYPERKERNEL OFF)
 
 # Enable EFI
 #
@@ -94,9 +94,7 @@ set(ENABLE_EXTENDED_APIS_EXAMPLE_HOOK OFF)
 # Override VMM
 #
 # If the override VMM is set, this VMM will be used instead of the default VMM
-# based on the current configuration. Note that you can also set the override
-# VMM target to use, which might be needed for EFI so that EFI knows which
-# target to wait for
+# based on the current configuration.
 #
 # set(OVERRIDE_VMM <name>)
 # set(OVERRIDE_VMM_TARGET <name>)
@@ -157,14 +155,6 @@ set(CACHE_DIR ${CMAKE_CURRENT_LIST_DIR}/cache)
 # There are several enable bits that can be used to enable additional
 # functionality, or reduce which portions of the hypervisor are built.
 #
-if(ENABLE_TESTS_ONLY)
-    set(ENABLE_BUILD_VMM OFF)
-    set(ENABLE_BUILD_USERSPACE OFF)
-else()
-    set(ENABLE_BUILD_VMM ON)
-    set(ENABLE_BUILD_USERSPACE ON)
-endif()
-
 if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI)
     set(ENABLE_BUILD_TEST ON)
 else()
@@ -179,7 +169,7 @@ if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI AND NOT WIN32)
 else()
     set(ENABLE_ASAN OFF)
     set(ENABLE_TIDY OFF)
-    set(ENABLE_FORMAT ON)
+    set(ENABLE_FORMAT OFF)
     set(ENABLE_CODECOV OFF)
 endif()
 
@@ -191,7 +181,7 @@ endif()
 if(ENABLE_DEVELOPER_MODE AND NOT OVERRIDE_COMPILER_WARNINGS)
     set(ENABLE_COMPILER_WARNINGS OFF)
 else()
-    set(ENABLE_COMPILER_WARNINGS ON)
+    set(ENABLE_COMPILER_WARNINGS ${OVERRIDE_COMPILER_WARNINGS})
 endif()
 
 # ------------------------------------------------------------------------------
@@ -202,6 +192,17 @@ if(ENABLE_EXTENDED_APIS)
     set_bfm_vmm(eapis_bfvmm)
     list(APPEND EXTENSION
         ${CMAKE_CURRENT_LIST_DIR}/extended_apis
+    )
+endif()
+
+# ------------------------------------------------------------------------------
+# Hyperkernel
+# ------------------------------------------------------------------------------
+
+if(ENABLE_HYPERKERNEL)
+    set_bfm_vmm(hyperkernel_bfvmm)
+    list(APPEND EXTENSION
+        ${CMAKE_CURRENT_LIST_DIR}/hyperkernel
     )
 endif()
 

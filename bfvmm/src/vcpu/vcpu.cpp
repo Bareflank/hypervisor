@@ -35,11 +35,17 @@ vcpu::vcpu(vcpuid::type id) :
 void
 vcpu::run(bfobject *obj)
 {
-    for (const auto &d : m_run_delegates) {
-        d(obj);
-    }
-
     m_is_running = true;
+
+    try {
+        for (const auto &d : m_run_delegates) {
+            d(obj);
+        }
+    }
+    catch (...) {
+        m_is_running = false;
+        throw;
+    }
 }
 
 void
@@ -55,11 +61,17 @@ vcpu::hlt(bfobject *obj)
 void
 vcpu::init(bfobject *obj)
 {
-    for (const auto &d : m_init_delegates) {
-        d(obj);
-    }
-
     m_is_initialized = true;
+
+    try {
+        for (const auto &d : m_init_delegates) {
+            d(obj);
+        }
+    }
+    catch (...) {
+        m_is_initialized = false;
+        throw;
+    }
 }
 
 void

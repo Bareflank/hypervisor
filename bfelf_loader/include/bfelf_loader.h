@@ -178,7 +178,7 @@ struct bfelf_ehdr;
  * - get the number of load instructions
  * - loop through each load instruction and copy the file char * to the mem
  *   char * using the file/mem offset/size.
- * - map memory using the virt_addr and mem_size
+ * - map memory using the phys_addr and mem_size
  *
  * @var bfelf_load_instr::perm
  *      defines the permissions (read/write/execute) for this segment
@@ -190,7 +190,7 @@ struct bfelf_ehdr;
  *      defines the segment size in memory
  * @var bfelf_load_instr::filesz
  *      defines the segment size in the ELF file
- * @var bfelf_load_instr::virt_addr
+ * @var bfelf_load_instr::phys_addr
  *      defines the assumed virtual address of the segment if PIC == false
  */
 struct bfelf_load_instr {
@@ -199,7 +199,7 @@ struct bfelf_load_instr {
     bfelf64_off file_offset;
     bfelf64_xword memsz;
     bfelf64_xword filesz;
-    bfelf64_addr virt_addr;
+    bfelf64_addr phys_addr;
 };
 
 /*
@@ -272,10 +272,6 @@ struct bfelf_file_t {
     bfelf64_xword eh_framesz;
 
     bfelf64_xword flags_1;
-    bfelf64_xword stack_flags;
-
-    bfelf64_addr relaro_vaddr;
-    bfelf64_xword relaro_memsz;
 
     bfelf64_word added;
 };
@@ -1157,7 +1153,7 @@ private_process_segments(struct bfelf_file_t *ef)
             case bfpt_load:
 
                 if (ef->num_loadable_segments < BFELF_MAX_SEGMENTS) {
-                    ef->total_memsz = phdr->p_vaddr + phdr->p_memsz;
+                    ef->total_memsz = phdr->p_paddr + phdr->p_memsz;
                     ef->loadable_segments[ef->num_loadable_segments++] = phdr;
                 }
 
@@ -1167,20 +1163,11 @@ private_process_segments(struct bfelf_file_t *ef)
                 ef->dynoff = phdr->p_offset;
                 ef->dynnum = phdr->p_filesz / sizeof(struct bfelf_dyn);
                 break;
-
-            case bfpt_gnu_stack:
-                ef->stack_flags = phdr->p_flags;
-                break;
-
-            case bfpt_gnu_relro:
-                ef->relaro_vaddr = phdr->p_vaddr;
-                ef->relaro_memsz = phdr->p_memsz;
-                break;
         }
     }
 
     if (ef->num_loadable_segments > 0) {
-        ef->start_addr = ef->loadable_segments[0]->p_vaddr;
+        ef->start_addr = ef->loadable_segments[0]->p_paddr;
         ef->total_memsz -= ef->start_addr;
     }
 
@@ -1188,11 +1175,11 @@ private_process_segments(struct bfelf_file_t *ef)
         const struct bfelf_phdr *phdr = ef->loadable_segments[i];
 
         ef->load_instr[i].perm = phdr->p_flags;
-        ef->load_instr[i].mem_offset = phdr->p_vaddr - ef->start_addr;
+        ef->load_instr[i].mem_offset = phdr->p_paddr - ef->start_addr;
         ef->load_instr[i].file_offset = phdr->p_offset;
         ef->load_instr[i].memsz = phdr->p_memsz;
         ef->load_instr[i].filesz = phdr->p_filesz;
-        ef->load_instr[i].virt_addr = phdr->p_vaddr;
+        ef->load_instr[i].phys_addr = phdr->p_paddr;
 
         ef->num_load_instr++;
     }
@@ -1561,75 +1548,6 @@ bfelf_file_get_entry(const struct bfelf_file_t *ef, void **addr)
 }
 
 /**
- * Get Stack Permissions
- *
- * Returns the ELF file's stack permissions.
- *
- * @expects ef != nullptr
- * @expects perm != nullptr
- * @ensures returns BFELF_SUCCESS if params == valid
- *
- * @param ef the ELF file to get the stack permission info from
- * @param perm the resulting permissions
- * @return BFELF_SUCCESS on success, negative on error
- */
-static inline int64_t
-bfelf_file_get_stack_perm(const struct bfelf_file_t *ef, bfelf64_xword *perm)
-{
-    if (ef == nullptr) {
-        return bfinvalid_argument("ef == nullptr");
-    }
-
-    if (perm == nullptr) {
-        return bfinvalid_argument("perm == nullptr");
-    }
-
-    *perm = ef->stack_flags;
-    return BFELF_SUCCESS;
-}
-
-/**
- * Get Relocation Read-Only Info
- *
- * Returns the ELF file's RELRO information for
- * re-mapping previously writable memory to read-only
- *
- * @expects ef != nullptr
- * @expects addr != nullptr
- * @expects size != nullptr
- * @ensures returns BFELF_SUCCESS if params == valid
- *
- * @param ef the ELF file to get the relro info from
- * @param addr the resulting address
- * @param size the resulting size
- * @return BFELF_SUCCESS on success, negative on error
- */
-static inline int64_t
-bfelf_file_get_relro(
-    const struct bfelf_file_t *ef, bfelf64_addr *addr, bfelf64_xword *size)
-{
-    if (ef == nullptr) {
-        return bfinvalid_argument("ef == nullptr");
-    }
-
-    if (addr == nullptr) {
-        return bfinvalid_argument("addr == nullptr");
-    }
-
-    if (size == nullptr) {
-        return bfinvalid_argument("size == nullptr");
-    }
-
-    if (ef->added == 0) {
-        return bfinvalid_argument("ef must be added to a loader first");
-    }
-
-    *addr = ef->relaro_vaddr + bfrcast(bfelf64_addr, ef->exec_virt);
-    *size = ef->relaro_memsz;
-    return BFELF_SUCCESS;
-}
-
-/**
  * Get Number of Needed Libraries
  *
  * Returns the number of DT_NEEDED entries in the ELF
@@ -1699,14 +1617,14 @@ bfelf_file_get_needed(
  * @param ef the ELF file to get the total size from
  * @return number of needed entries on success, negative on error
  */
-static inline int64_t
+static inline uint64_t
 bfelf_file_get_total_size(const struct bfelf_file_t *ef)
 {
     if (ef == nullptr) {
-        return bfinvalid_argument("ef == nullptr");
+        return 0;
     }
 
-    return bfscast(int64_t, ef->total_memsz);
+    return ef->total_memsz;
 }
 
 /**
@@ -1785,7 +1703,7 @@ bfelf_loader_add(
         ef->exec_virt = exec_virt;
     }
 
-    start = bfrcast(bfelf64_addr, ef->exec_addr - ef->start_addr);
+    start = bfrcast(bfelf64_addr, ef->exec_addr);
 
     ef->hash = bfcadd(const bfelf64_word *, ef->hash, start);
     ef->strtab = bfcadd(const char *, ef->strtab_offset, start);
@@ -1904,6 +1822,7 @@ bfelf_loader_resolve_symbol(
 
 struct bfelf_binary_t {
     char *exec;
+    char *start_addr;
     const char *file;
     uint64_t exec_size;
     uint64_t file_size;
@@ -1915,7 +1834,7 @@ private_load_binary(struct bfelf_binary_t *binary)
 {
     int64_t i = 0;
     int64_t ret = 0;
-    int64_t num_segments = 0;
+    int64_t exec_size, num_segments = 0;
 
     /*
      * Note:
@@ -1933,8 +1852,17 @@ private_load_binary(struct bfelf_binary_t *binary)
         }
     }
 
+    exec_size = bfelf_file_get_total_size(&binary->ef);
     num_segments = bfelf_file_get_num_load_instrs(&binary->ef);
-    binary->exec_size = bfscast(uint64_t, bfelf_file_get_total_size(&binary->ef));
+
+    if (binary->exec_size == 0) {
+        binary->exec_size = exec_size;
+    }
+    else {
+        if (binary->exec_size < exec_size) {
+            return bfinvalid_argument("binary->exec_size < exec_size");
+        }
+    }
 
     /*
      * TODO:
@@ -1954,9 +1882,26 @@ private_load_binary(struct bfelf_binary_t *binary)
      * operating systems such that memory can be allocated RW, and changed
      * to RE as needed. If this functionality is found, the code here will have
      * to be changed to support this.
+     *
+     * Note:
+     *
+     * Also note that we first make sure that this memory has not already
+     * been allocated for us. This is only the case for guest VMs that act more
+     * like traditional virtual machines where RAM is allocated. In this case,
+     * a giant chunk of RAM is allocated, and the ELF file takes up the first
+     * portion of this RAM. The rest is left for the VM to allocate as needed.
+     * In this case, we just make sure the allocated memory is large enough,
+     * and then we load ourselves in the already allocated memory.
+     *
+     * Finally, it is possible for the above code to only dictate the size of
+     * RAM, but leave the allocation of this RAM to use in the code below so
+     * that permissions can be changed as needed when this is supported.
      */
 
-    binary->exec = bfscast(char *, platform_alloc_rwe(binary->exec_size));
+    if (binary->exec == nullptr) {
+        binary->exec = bfscast(char *, platform_alloc_rwe(binary->exec_size));
+    }
+
     if (binary->exec == nullptr) {
         return bfout_of_memory("unable to allocate exec RWE memory");
     }
@@ -1991,8 +1936,19 @@ private_relocate_binaries(
     int64_t ret = 0;
 
     for (i = 0; i < num_binaries; i++) {
-        ret = bfelf_loader_add(loader, &binaries[i].ef, binaries[i].exec, binaries[i].exec);
-        bfignored(ret);
+
+        if (binaries[i].start_addr == 0) {
+            ret = bfelf_loader_add(loader, &binaries[i].ef, binaries[i].exec, binaries[i].exec);
+            bfignored(ret);
+        }
+        else {
+            ret = bfelf_loader_add(loader, &binaries[i].ef, binaries[i].exec, binaries[i].start_addr);
+            bfignored(ret);
+        }
+
+        if (binaries[i].ef.start_addr != 0) {
+            binaries[i].start_addr = (char *)binaries[i].ef.start_addr;
+        }
     }
 
     ret = bfelf_loader_relocate(loader);
