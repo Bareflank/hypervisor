@@ -1,6 +1,6 @@
 ;
 ; Bareflank Hypervisor
-; Copyright (C) 2015 Assured Information Security, Inc.
+; Copyright (C) 2018 Assured Information Security, Inc.
 ;
 ; This library is free software; you can redistribute it and/or
 ; modify it under the terms of the GNU Lesser General Public
@@ -62,8 +62,6 @@ default rel
 %define VMCS_GUEST_CR4                                            0x00006804
 %define VMCS_GUEST_DR7                                            0x0000681A
 
-global vmcs_promote:function
-
 extern _write_es
 extern _write_cs
 extern _write_ss
@@ -73,14 +71,13 @@ extern _write_fs
 extern _write_ldtr
 extern _write_tr
 extern _write_msr
+extern _write_msr
 extern _write_gdt
 extern _write_idt
 extern _write_cr0
 extern _write_cr3
 extern _write_cr4
-extern _write_cr8
 extern _write_dr7
-
 extern _cpuid_eax
 
 section .text
@@ -95,34 +92,43 @@ section .text
 ;       state save structure in the intrinsics code. If you change that
 ;       code, make sure you update this code to reflect the change.
 ;
+global vmcs_promote
 vmcs_promote:
 
-    cli
     mov r15, rdi
-    mov r14, rsi
 
     ;
-    ; Clear TSS Busy
-    ;
-    ; rsi contains the virtual address of the guest's GDT mapped r/w
-    ; in the VMM's address space (see handle_vmxoff)
+    ; Restore Control Registers
     ;
 
-    mov rdi, rsi
-    mov rsi, VMCS_GUEST_TR_SELECTOR
-    vmread rsi, rsi
+    mov rsi, VMCS_GUEST_CR0
+    vmread rdi, rsi
+    call _write_cr0 wrt ..plt
 
-    add rdi, rsi
-    mov rax, 0xFFFFFDFFFFFFFFFF
-    and [rdi], rax
+    mov rsi, VMCS_GUEST_CR3
+    vmread rdi, rsi
+    push rdi
+
+    and rdi, 0xFFFFFFFFFFFFF000
+    call _write_cr3 wrt ..plt
+
+    mov rsi, VMCS_GUEST_CR4
+    vmread rdi, rsi
+    call _write_cr4 wrt ..plt
+
+    pop rdi
+    call _write_cr3 wrt ..plt
+
+    mov rsi, VMCS_GUEST_DR7
+    vmread rdi, rsi
+    call _write_dr7 wrt ..plt
 
     ;
-    ; Temporarily load the guest's GDT using the r/w mapping
-    ; so that writes to it (e.g. ltr) don't fault when
-    ; restoring segment registers.
+    ; Restore GDT
     ;
 
-    mov rdi, r14
+    mov rsi, VMCS_GUEST_GDTR_BASE
+    vmread rdi, rsi
     push rdi
 
     mov rsi, VMCS_GUEST_GDTR_LIMIT
@@ -131,6 +137,35 @@ vmcs_promote:
 
     mov rdi, rsp
     call _write_gdt wrt ..plt
+
+    ;
+    ; Restore IDT
+    ;
+
+    mov rsi, VMCS_GUEST_IDTR_BASE
+    vmread rdi, rsi
+    push rdi
+
+    mov rsi, VMCS_GUEST_IDTR_LIMIT
+    vmread rdi, rsi
+    push di
+
+    mov rdi, rsp
+    call _write_idt wrt ..plt
+
+    ;
+    ; Clear TSS Busy
+    ;
+
+    mov rsi, VMCS_GUEST_GDTR_BASE
+    vmread rdi, rsi
+    mov rsi, VMCS_GUEST_TR_SELECTOR
+    vmread rsi, rsi
+
+    add rdi, rsi
+
+    mov rax, 0xFFFFFDFFFFFFFFFF
+    and [rdi], rax
 
     ;
     ; Restore Selectors
@@ -167,79 +202,6 @@ vmcs_promote:
     mov rsi, VMCS_GUEST_TR_SELECTOR
     vmread rdi, rsi
     call _write_tr wrt ..plt
-
-    ;
-    ; Restore Control Registers
-    ;
-
-    mov rsi, VMCS_GUEST_CR0
-    vmread rdi, rsi
-    call _write_cr0 wrt ..plt
-
-    ;
-    ; Save the guest's cr3
-    ;
-
-    mov rsi, VMCS_GUEST_CR3
-    vmread rdi, rsi
-    push rdi
-
-    ;
-    ; Clear cr3[11:0] and then update cr4. This ensures that
-    ; if cr4.pcide is changing to 1, we avoid a #GP if the
-    ; guest's original cr3[11:0] != 0 (see section 4.10.1).
-    ;
-
-    mov rax, 0xFFFFFFFFFFFFF000
-    and rdi, rax
-    call _write_cr3 wrt ..plt
-    mov rsi, VMCS_GUEST_CR4
-    vmread rdi, rsi
-    call _write_cr4 wrt ..plt
-
-    ;
-    ; Restore the guest's actual cr3
-    ;
-
-    pop rdi
-    call _write_cr3 wrt ..plt
-
-    mov rdi, 0x0
-    call _write_cr8 wrt ..plt
-
-    mov rsi, VMCS_GUEST_DR7
-    vmread rdi, rsi
-    call _write_dr7 wrt ..plt
-
-    ;
-    ; Restore the guest's actual GDT
-    ;
-
-    mov rsi, VMCS_GUEST_GDTR_BASE
-    vmread rdi, rsi
-    push rdi
-
-    mov rsi, VMCS_GUEST_GDTR_LIMIT
-    vmread rdi, rsi
-    push di
-
-    mov rdi, rsp
-    call _write_gdt wrt ..plt
-
-    ;
-    ; Restore IDT
-    ;
-
-    mov rsi, VMCS_GUEST_IDTR_BASE
-    vmread rdi, rsi
-    push rdi
-
-    mov rsi, VMCS_GUEST_IDTR_LIMIT
-    vmread rdi, rsi
-    push di
-
-    mov rdi, rsp
-    call _write_idt wrt ..plt
 
     ;
     ; Restore MSRs
@@ -308,14 +270,14 @@ vmcs_promote:
 
     mov rdi, r15
 
-    movdqa xmm7,  [rdi + 0x1A0]
-    movdqa xmm6,  [rdi + 0x180]
-    movdqa xmm5,  [rdi + 0x160]
-    movdqa xmm4,  [rdi + 0x140]
-    movdqa xmm3,  [rdi + 0x120]
-    movdqa xmm2,  [rdi + 0x100]
-    movdqa xmm1,  [rdi + 0x0E0]
-    movdqa xmm0,  [rdi + 0x0C0]
+    movdqa xmm7,   [rdi + 0x1A0]
+    movdqa xmm6,   [rdi + 0x180]
+    movdqa xmm5,   [rdi + 0x160]
+    movdqa xmm4,   [rdi + 0x140]
+    movdqa xmm3,   [rdi + 0x120]
+    movdqa xmm2,   [rdi + 0x100]
+    movdqa xmm1,   [rdi + 0x0E0]
+    movdqa xmm0,   [rdi + 0x0C0]
 
     mov rsp,       [rdi + 0x080]
     mov rax,       [rdi + 0x078]

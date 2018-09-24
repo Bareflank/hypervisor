@@ -80,7 +80,7 @@ platform_virt_to_phys(void *virt)
 }
 
 void
-platform_free_rw(const void *addr, uint64_t len)
+platform_free_rw(void *addr, uint64_t len)
 {
     (void) len;
 
@@ -89,11 +89,11 @@ platform_free_rw(const void *addr, uint64_t len)
         return;
     }
 
-    ExFreePoolWithTag((void *)addr, BF_TAG);
+    ExFreePoolWithTag(addr, BF_TAG);
 }
 
 void
-platform_free_rwe(const void *addr, uint64_t len)
+platform_free_rwe(void *addr, uint64_t len)
 {
     (void) len;
 
@@ -102,7 +102,7 @@ platform_free_rwe(const void *addr, uint64_t len)
         return;
     }
 
-    ExFreePoolWithTag((void *)addr, BF_TAG);
+    ExFreePoolWithTag(addr, BF_TAG);
 }
 
 void *

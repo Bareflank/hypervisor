@@ -29,12 +29,12 @@
  * Defines the maximum physical address the system can access. This can be
  * used by CR3 and EPT to define the memory map used by the VMM. Note that
  * if this value is too large, its possible additional memory would be needed
- * by the VMM to setup CR3 or EPT depending on the granulairty used.
+ * by the VMM to setup CR3 or EPT depending on the granularity used.
  *
- * Note: defined in bytes
+ * Note: defined in bytes (512GB by default)
  */
 #ifndef MAX_PHYS_ADDR
-#define MAX_PHYS_ADDR 0x1000000000
+#define MAX_PHYS_ADDR 0x8000000000
 #endif
 
 /*
@@ -89,10 +89,20 @@
  * for memory mapping. Note that on some systems, this might need to be
  * changed to prevent collisions.
  *
- * Note: defined in bytes (defaults to 2MB)
+ * By default, the VMM maps memory in the lower half of the canoncial address
+ * space to prevent collisions with the Host OS during init/fini. To prevent
+ * collisions with EFI and other boot environments the starting address is set
+ * really high in the lower half as it is unlikely the VMM will be loaded in an
+ * address so high (as that would likely suggest that much memory was used by
+ * the bootloader and BIOS which is unlikely)
+ *
+ * Using an address of this nature also makes it a lot easier to locate VMM
+ * specific memory addresses in memory dumps and fault handlers.
+ *
+ * Note: defined in bytes
  */
 #ifndef MEM_MAP_POOL_START
-#define MEM_MAP_POOL_START 0x200000ULL
+#define MEM_MAP_POOL_START 0xBF000000000ULL
 #endif
 
 /*

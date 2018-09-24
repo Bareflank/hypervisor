@@ -22,7 +22,7 @@
 TEST_CASE("bfelf_file_get_total_size: invalid elf file")
 {
     auto ret = bfelf_file_get_total_size(nullptr);
-    CHECK(ret == BFELF_ERROR_INVALID_ARG);
+    CHECK(ret == 0);
 }
 
 TEST_CASE("bfelf_file_get_total_size: success")
