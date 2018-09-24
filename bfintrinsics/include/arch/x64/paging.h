@@ -268,6 +268,7 @@ namespace pdpt
     constexpr const auto size = num_entries * sizeof(uintptr_t);
 
     constexpr const auto page_size = 0x40000000ULL;
+    constexpr const auto page_shift = 30;
 
     inline auto index(uintptr_t virt)
     {
@@ -645,6 +646,7 @@ namespace pd
     constexpr const auto size = num_entries * sizeof(uintptr_t);
 
     constexpr const auto page_size = 0x200000ULL;
+    constexpr const auto page_shift = 21;
 
     inline auto index(uintptr_t virt)
     {
@@ -1013,6 +1015,7 @@ namespace pt
     constexpr const auto size = num_entries * sizeof(uintptr_t);
 
     constexpr const auto page_size = 0x1000ULL;
+    constexpr const auto page_shift = 12;
 
     inline auto index(uintptr_t virt)
     {

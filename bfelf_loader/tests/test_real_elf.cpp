@@ -59,7 +59,7 @@ file g_file;
 bool out_of_memory = false;
 static std::map<const void *, std::shared_ptr<char>> g_memory;
 
-void *
+extern "C" void *
 platform_alloc_rwe(uint64_t len)
 {
     if (out_of_memory) {
@@ -79,17 +79,17 @@ platform_alloc_rwe(uint64_t len)
     return addr;
 }
 
-void
-platform_free_rwe(const void *addr, uint64_t len)
+extern "C" void
+platform_free_rwe(void *addr, uint64_t len)
 {
     bfignored(len);
     g_memory.erase(addr);
 }
 
-void *
+extern "C" void *
 platform_memset(void *ptr, char value, uint64_t num)
 { return memset(ptr, value, num); }
 
-void *
+extern "C" void *
 platform_memcpy(void *dst, const void *src, uint64_t num)
 { return memcpy(dst, src, num); }

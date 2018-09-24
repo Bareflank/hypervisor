@@ -122,7 +122,6 @@ TEST_CASE("test_manager: factory_throws")
     });
 
     CHECK_THROWS(g_test_manager->create(0));
-    g_test_manager->destroy(0);
 }
 
 TEST_CASE("test_manager: factory_nullptr")
@@ -133,7 +132,6 @@ TEST_CASE("test_manager: factory_nullptr")
     });
 
     CHECK_THROWS(g_test_manager->create(0));
-    g_test_manager->destroy(0);
 }
 
 TEST_CASE("test_manager: create_init_throws")
@@ -144,7 +142,6 @@ TEST_CASE("test_manager: create_init_throws")
     });
 
     CHECK_THROWS(g_test_manager->create(0));
-    g_test_manager->destroy(0);
 }
 
 TEST_CASE("test_manager: delete_valid")
@@ -157,12 +154,11 @@ TEST_CASE("test_manager: delete_valid_twice")
 {
     g_test_manager->create(0);
     CHECK_NOTHROW(g_test_manager->destroy(0));
-    CHECK_NOTHROW(g_test_manager->destroy(0));
 }
 
 TEST_CASE("test_manager: delete_no_create")
 {
-    CHECK_NOTHROW(g_test_manager->destroy(0));
+    CHECK_THROWS(g_test_manager->destroy(0));
 }
 
 TEST_CASE("test_manager: delete_fini_throws")
@@ -205,8 +201,7 @@ TEST_CASE("test_manager: run_throws")
 
 TEST_CASE("test_manager: run_no_create")
 {
-    CHECK_NOTHROW(g_test_manager->run(0));
-    g_test_manager->destroy(0);
+    CHECK_THROWS(g_test_manager->run(0));
 }
 
 TEST_CASE("test_manager: hlt_valid")
@@ -244,6 +239,5 @@ TEST_CASE("test_manager: hlt_hlt_throws")
 
 TEST_CASE("test_manager: hlt_no_create")
 {
-    CHECK_NOTHROW(g_test_manager->hlt(0));
-    g_test_manager->destroy(0);
+    CHECK_THROWS(g_test_manager->hlt(0));
 }

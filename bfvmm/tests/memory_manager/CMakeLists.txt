@@ -48,12 +48,6 @@ if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
         DEPENDS bfvmm_memory_manager
         DEFINES STATIC_MEMORY_MANAGER
     )
-
-    do_test(test_unique_map
-        SOURCES arch/x64/test_unique_map.cpp
-        DEPENDS bfvmm_memory_manager
-        DEFINES STATIC_MEMORY_MANAGER
-    )
 elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
     message(WARNING "Unimplemented")
 else()

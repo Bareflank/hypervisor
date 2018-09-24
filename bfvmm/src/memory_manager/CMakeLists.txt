@@ -20,6 +20,16 @@ list(APPEND SOURCES
     memory_manager.cpp
 )
 
+if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
+    list(APPEND SOURCES
+        arch/x64/cr3/helpers.cpp
+    )
+elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
+    message(WARNING "Unimplemented")
+else()
+    message(FATAL_ERROR "Unsupported archiecture")
+endif()
+
 add_shared_library(
     bfvmm_memory_manager
     SOURCES ${SOURCES}

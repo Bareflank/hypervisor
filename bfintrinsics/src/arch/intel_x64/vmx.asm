@@ -128,6 +128,15 @@ _vmcall:
 
     push rbx
 
+%ifdef vmm
+    mov r10, rdx
+    mov r11, rcx
+
+    mov rax, rdi
+    mov rbx, rsi
+    mov rcx, r10
+    mov rdx, r11
+%else
 %ifdef MS64
     mov rax, rcx
     mov rbx, rdx
@@ -141,6 +150,7 @@ _vmcall:
     mov rbx, rsi
     mov rcx, r10
     mov rdx, r11
+%endif
 %endif
 
     vmcall

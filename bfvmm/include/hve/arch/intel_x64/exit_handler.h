@@ -23,7 +23,6 @@
 
 #include <list>
 #include <array>
-#include <mutex>
 #include <memory>
 
 #include <intrinsics.h>
@@ -58,7 +57,12 @@
 // Handler Types
 // -----------------------------------------------------------------------------
 
-using handler_t = bool(gsl::not_null<bfvmm::intel_x64::vmcs *>);
+namespace bfvmm::intel_x64
+{
+class vcpu;
+}
+
+using handler_t = bool(gsl::not_null<bfvmm::intel_x64::vcpu *>);
 using handler_delegate_t = delegate<handler_t>;
 using init_handler_delegate_t = delegate<handler_t>;
 using fini_handler_delegate_t = delegate<handler_t>;
@@ -67,14 +71,14 @@ using fini_handler_delegate_t = delegate<handler_t>;
 // Helpers
 // -----------------------------------------------------------------------------
 
-void halt(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs) noexcept;
-bool advance(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs) noexcept;
+void halt(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu) noexcept;
+bool advance(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu) noexcept;
 
 ::x64::msrs::value_type emulate_rdmsr(::x64::msrs::field_type msr);
 void emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val);
 
-uintptr_t emulate_rdgpr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs);
-void emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs, uintptr_t val);
+uintptr_t emulate_rdgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu);
+void emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu, uintptr_t val);
 
 // -----------------------------------------------------------------------------
 // Exit Handler
@@ -108,10 +112,10 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    /// @param vmcs The VMCS associated with this exit handler
+    /// @param vcpu The vCPU associated with this exit handler
     ///
     exit_handler(
-        gsl::not_null<vmcs *> vmcs
+        gsl::not_null<vcpu *> vcpu
     );
 
     /// Destructor
@@ -141,6 +145,23 @@ public:
     ///
     VIRTUAL void add_handler(
         ::intel_x64::vmcs::value_type reason,
+        const handler_delegate_t &d
+    );
+
+    /// Add Exit Delegate
+    ///
+    /// Adds an exit function to the exit list. Exit functions are executed
+    /// right after a vCPU exits for any reason. Use this with care because
+    /// this function will be executed a lot.
+    ///
+    /// Note the return value of the delegate is ignored
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param d The delegate being registered
+    ///
+    VIRTUAL void add_exit_handler(
         const handler_delegate_t &d
     );
 
@@ -238,17 +259,18 @@ protected:
 
 private:
 
-    bool handle_cpuid(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs);
+    bool handle_cpuid(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu);
 
 private:
 
-    vmcs *m_vmcs;
+    vcpu *m_vcpu;
     std::unique_ptr<gsl::byte[]> m_stack;
     std::unique_ptr<gsl::byte[]> m_ist1;
 
+    std::list<init_handler_delegate_t> m_exit_handlers;
     std::list<init_handler_delegate_t> m_init_handlers;
     std::list<fini_handler_delegate_t> m_fini_handlers;
-    std::array<std::list<handler_delegate_t>, 128> m_exit_handlers;
+    std::array<std::list<handler_delegate_t>, 128> m_exit_handlers_array;
 
 public:
 
@@ -265,6 +287,8 @@ public:
 
 }
 }
+
+using exit_handler_t = bfvmm::intel_x64::exit_handler;
 
 #ifdef _MSC_VER
 #pragma warning(pop)

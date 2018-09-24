@@ -35,7 +35,7 @@
 uint64_t g_vcpuid = 0;
 
 struct pmodule_t {
-    const char *data;
+    char *data;
     uint64_t size;
 };
 

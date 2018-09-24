@@ -91,7 +91,7 @@ platform_alloc_rwe(uint64_t len)
 }
 
 void
-platform_free_rw(const void *addr, uint64_t len)
+platform_free_rw(void *addr, uint64_t len)
 {
     bfignored(len);
 
@@ -104,7 +104,7 @@ platform_free_rw(const void *addr, uint64_t len)
 }
 
 void
-platform_free_rwe(const void *addr, uint64_t len)
+platform_free_rwe(void *addr, uint64_t len)
 {
     bfignored(len);
 
@@ -163,11 +163,23 @@ int64_t
 platform_call_vmm_on_core(
     uint64_t cpuid, uint64_t request, uintptr_t arg1, uintptr_t arg2)
 {
+    int64_t ret = 0;
+
     if (set_cpu_affinity(current->pid, cpumask_of(cpuid)) != 0) {
         return BF_ERROR_UNKNOWN;
     }
 
-    return common_call_vmm(cpuid, request, arg1, arg2);
+    if (request == BF_REQUEST_VMM_FINI) {
+        load_direct_gdt(raw_smp_processor_id());
+    }
+
+    ret = common_call_vmm(cpuid, request, arg1, arg2);
+
+    if (request == BF_REQUEST_VMM_FINI) {
+        load_fixmap_gdt(raw_smp_processor_id());
+    }
+
+    return ret;
 }
 
 void *

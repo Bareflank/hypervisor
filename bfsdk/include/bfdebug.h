@@ -33,7 +33,11 @@
 #include <bfgsl.h>
 #include <bfstring.h>
 
+#include <exception>
 #include <type_traits>
+
+#include <cxxabi.h>
+#include <typeinfo>
 
 #ifdef _MSC_VER
 #define bfcolor_black ""
@@ -96,6 +100,40 @@ view_as_pointer(const T val)
 
 extern "C" uint64_t
 unsafe_write_cstr(const char *cstr, size_t len);
+
+template<typename T>
+std::string type_name()
+{
+    int status;
+    std::string name = typeid(T).name();
+
+    auto demangled_name =
+        abi::__cxa_demangle(name.c_str(), nullptr, nullptr, &status);
+
+    if (status == 0) {
+        name = demangled_name;
+        std::free(demangled_name);
+    }
+
+    return name;
+}
+
+template<typename T>
+std::string type_name(const T &t)
+{
+    int status;
+    std::string name = typeid(t).name();
+
+    auto demangled_name =
+        abi::__cxa_demangle(name.c_str(), nullptr, nullptr, &status);
+
+    if (status == 0) {
+        name = demangled_name;
+        std::free(demangled_name);
+    }
+
+    return name;
+}
 
 /* ---------------------------------------------------------------------------*/
 /* Low Level Debugging                                                        */
@@ -1063,6 +1101,48 @@ __bfdebug_fail(
 #define bferror_subtest(...) GET_MACRO(bferror_subtest, __VA_ARGS__)
 
 /* ---------------------------------------------------------------------------*/
+/* Exception                                                                  */
+/* ---------------------------------------------------------------------------*/
+
+inline void
+bfdebug_exception()
+{
+    bfdebug_transaction(0, [&](std::string * msg) {
+        bferror_lnbr(0, msg);
+        bferror_brk1(0, msg);
+        bferror_info(0, "unknown exception", msg);
+        bferror_brk1(0, msg);
+        bferror_lnbr(0, msg);
+    });
+}
+
+inline void
+bfdebug_exception(const std::exception &e)
+{
+    bfdebug_transaction(0, [&](std::string * msg) {
+        bferror_lnbr(0, msg);
+        bferror_brk1(0, msg);
+        bferror_info(0, type_name(e).c_str(), msg);
+        bferror_brk1(0, msg);
+        bferror_info(0, e.what(), msg);
+        bferror_lnbr(0, msg);
+    });
+}
+
+#define catchall(a)                                                             \
+    catch (std::bad_alloc &) {                                                  \
+        a;                                                                      \
+    }                                                                           \
+    catch (std::exception &e) {                                                 \
+        bfdebug_exception(e);                                                   \
+        a;                                                                      \
+    }                                                                           \
+    catch (...) {                                                               \
+        bfdebug_exception();                                                    \
+        a;                                                                      \
+    }
+
+/* ---------------------------------------------------------------------------*/
 /* Line / Field                                                               */
 /* ---------------------------------------------------------------------------*/
 
@@ -1086,6 +1166,7 @@ __bfdebug_fail(
 #else
 #include <stdio.h>
 #endif
+#define BFINFO(...) printf(__VA_ARGS__)
 #define BFDEBUG(...) printf("[BAREFLANK DEBUG]: " __VA_ARGS__)
 #define BFALERT(...) printf("[BAREFLANK ALERT]: " __VA_ARGS__)
 #define BFERROR(...) printf("[BAREFLANK ERROR]: " __VA_ARGS__)
@@ -1098,6 +1179,7 @@ __bfdebug_fail(
 #ifdef KERNEL
 #ifdef __linux__
 #include <linux/module.h>
+#define BFINFO(...) printk(KERN_INFO __VA_ARGS__)
 #define BFDEBUG(...) printk(KERN_INFO "[BAREFLANK DEBUG]: " __VA_ARGS__)
 #define BFALERT(...) printk(KERN_INFO "[BAREFLANK ALERT]: " __VA_ARGS__)
 #define BFERROR(...) printk(KERN_ALERT "[BAREFLANK ERROR]: " __VA_ARGS__)
@@ -1111,6 +1193,7 @@ __bfdebug_fail(
 #ifdef KERNEL
 #ifdef _WIN32
 #include <wdm.h>
+#define BFINFO(...) DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, __VA_ARGS__)
 #define BFDEBUG(...) DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "[BAREFLANK DEBUG]: " __VA_ARGS__)
 #define BFALERT(...) DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "[BAREFLANK ALERT]: " __VA_ARGS__)
 #define BFERROR(...) DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[BAREFLANK ERROR]: " __VA_ARGS__)
@@ -1125,6 +1208,7 @@ __bfdebug_fail(
 #ifdef EFI
 #include "efi.h"
 #include "efilib.h"
+#define BFINFO(...) Print(L__VA_ARGS__)
 #define BFDEBUG(...) Print(L"[BAREFLANK DEBUG]: " __VA_ARGS__)
 #define BFALERT(...) Print(L"[BAREFLANK ALERT]: " __VA_ARGS__)
 #define BFERROR(...) Print(L"[BAREFLANK ERROR]: " __VA_ARGS__)

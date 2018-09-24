@@ -79,6 +79,9 @@ inline uintptr_t g_rsdp = 0;
 #include <arch/intel_x64/vtd/pid.h>
 #include <arch/intel_x64/vtd/root_entry.h>
 #include <arch/intel_x64/vtd/second_level_paging_entries.h>
+
+namespace vmcs_n = ::intel_x64::vmcs;
+
 #endif
 
 #ifdef BF_AARCH64

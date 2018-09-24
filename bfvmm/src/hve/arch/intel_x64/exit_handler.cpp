@@ -32,6 +32,7 @@
 #include <bferrorcodes.h>
 #include <bfthreadcontext.h>
 
+#include <hve/arch/intel_x64/vcpu.h>
 #include <hve/arch/intel_x64/check.h>
 #include <hve/arch/intel_x64/exception.h>
 #include <hve/arch/intel_x64/nmi.h>
@@ -50,20 +51,10 @@ extern "C" void exit_handler_entry(void) noexcept;
 // Global Variables
 // -----------------------------------------------------------------------------
 
-namespace bfvmm::x64
-{
-gsl::not_null<cr3::mmap *>
-mmap()
-{
-    static cr3::mmap s_mmap;
-    return &s_mmap;
-}
-}
-
 static bfn::once_flag g_once_flag{};
-static ::intel_x64::cr0::value_type g_cr0{};
-static ::intel_x64::cr3::value_type g_cr3{};
-static ::intel_x64::cr4::value_type g_cr4{};
+static ::intel_x64::cr0::value_type g_cr0_reg{};
+static ::intel_x64::cr3::value_type g_cr3_reg{};
+static ::intel_x64::cr4::value_type g_cr4_reg{};
 static ::intel_x64::msrs::value_type g_ia32_pat_msr{};
 static ::intel_x64::msrs::value_type g_ia32_efer_msr{};
 
@@ -78,50 +69,50 @@ setup()
 
     for (const auto &md : g_mm->descriptors()) {
         if (md.type == (MEMORY_TYPE_R | MEMORY_TYPE_E)) {
-            mmap()->map_4k(md.virt, md.phys, attr_type::read_execute);
+            g_cr3->map_4k(md.virt, md.phys, attr_type::read_execute);
             continue;
         }
 
-        mmap()->map_4k(md.virt, md.phys, attr_type::read_write);
+        g_cr3->map_4k(md.virt, md.phys, attr_type::read_write);
     }
 
     g_ia32_efer_msr |= msrs::ia32_efer::lme::mask;
     g_ia32_efer_msr |= msrs::ia32_efer::lma::mask;
     g_ia32_efer_msr |= msrs::ia32_efer::nxe::mask;
 
-    g_cr0 |= cr0::protection_enable::mask;
-    g_cr0 |= cr0::monitor_coprocessor::mask;
-    g_cr0 |= cr0::extension_type::mask;
-    g_cr0 |= cr0::numeric_error::mask;
-    g_cr0 |= cr0::write_protect::mask;
-    g_cr0 |= cr0::paging::mask;
+    g_cr0_reg |= cr0::protection_enable::mask;
+    g_cr0_reg |= cr0::monitor_coprocessor::mask;
+    g_cr0_reg |= cr0::extension_type::mask;
+    g_cr0_reg |= cr0::numeric_error::mask;
+    g_cr0_reg |= cr0::write_protect::mask;
+    g_cr0_reg |= cr0::paging::mask;
 
-    g_cr3 = mmap()->cr3();
-    g_ia32_pat_msr = mmap()->pat();
+    g_cr3_reg = g_cr3->cr3();
+    g_ia32_pat_msr = g_cr3->pat();
 
-    g_cr4 |= cr4::v8086_mode_extensions::mask;
-    g_cr4 |= cr4::protected_mode_virtual_interrupts::mask;
-    g_cr4 |= cr4::time_stamp_disable::mask;
-    g_cr4 |= cr4::debugging_extensions::mask;
-    g_cr4 |= cr4::page_size_extensions::mask;
-    g_cr4 |= cr4::physical_address_extensions::mask;
-    g_cr4 |= cr4::machine_check_enable::mask;
-    g_cr4 |= cr4::page_global_enable::mask;
-    g_cr4 |= cr4::performance_monitor_counter_enable::mask;
-    g_cr4 |= cr4::osfxsr::mask;
-    g_cr4 |= cr4::osxmmexcpt::mask;
-    g_cr4 |= cr4::vmx_enable_bit::mask;
+    g_cr4_reg |= cr4::v8086_mode_extensions::mask;
+    g_cr4_reg |= cr4::protected_mode_virtual_interrupts::mask;
+    g_cr4_reg |= cr4::time_stamp_disable::mask;
+    g_cr4_reg |= cr4::debugging_extensions::mask;
+    g_cr4_reg |= cr4::page_size_extensions::mask;
+    g_cr4_reg |= cr4::physical_address_extensions::mask;
+    g_cr4_reg |= cr4::machine_check_enable::mask;
+    g_cr4_reg |= cr4::page_global_enable::mask;
+    g_cr4_reg |= cr4::performance_monitor_counter_enable::mask;
+    g_cr4_reg |= cr4::osfxsr::mask;
+    g_cr4_reg |= cr4::osxmmexcpt::mask;
+    g_cr4_reg |= cr4::vmx_enable_bit::mask;
 
     if (feature_information::ecx::xsave::is_enabled()) {
-        g_cr4 |= ::intel_x64::cr4::osxsave::mask;
+        g_cr4_reg |= ::intel_x64::cr4::osxsave::mask;
     }
 
     if (extended_feature_flags::subleaf0::ebx::smep::is_enabled()) {
-        g_cr4 |= ::intel_x64::cr4::smep_enable_bit::mask;
+        g_cr4_reg |= ::intel_x64::cr4::smep_enable_bit::mask;
     }
 
     if (extended_feature_flags::subleaf0::ebx::smap::is_enabled()) {
-        g_cr4 |= ::intel_x64::cr4::smap_enable_bit::mask;
+        g_cr4_reg |= ::intel_x64::cr4::smap_enable_bit::mask;
     }
 }
 
@@ -130,39 +121,52 @@ setup()
 // -----------------------------------------------------------------------------
 
 void
-halt(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs) noexcept
+halt(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu) noexcept
 {
+    using namespace ::intel_x64::vmcs;
+
     bferror_lnbr(0);
     bferror_info(0, "halting vcpu");
     bferror_brk1(0);
 
-    bferror_subnhex(0, "rax", vmcs->save_state()->rax);
-    bferror_subnhex(0, "rbx", vmcs->save_state()->rbx);
-    bferror_subnhex(0, "rcx", vmcs->save_state()->rcx);
-    bferror_subnhex(0, "rdx", vmcs->save_state()->rdx);
-    bferror_subnhex(0, "rbp", vmcs->save_state()->rbp);
-    bferror_subnhex(0, "rsi", vmcs->save_state()->rsi);
-    bferror_subnhex(0, "rdi", vmcs->save_state()->rdi);
-    bferror_subnhex(0, "r08", vmcs->save_state()->r08);
-    bferror_subnhex(0, "r09", vmcs->save_state()->r09);
-    bferror_subnhex(0, "r10", vmcs->save_state()->r10);
-    bferror_subnhex(0, "r11", vmcs->save_state()->r11);
-    bferror_subnhex(0, "r12", vmcs->save_state()->r12);
-    bferror_subnhex(0, "r13", vmcs->save_state()->r13);
-    bferror_subnhex(0, "r14", vmcs->save_state()->r14);
-    bferror_subnhex(0, "r15", vmcs->save_state()->r15);
-    bferror_subnhex(0, "rip", vmcs->save_state()->rip);
-    bferror_subnhex(0, "rsp", vmcs->save_state()->rsp);
+    bferror_subnhex(0, "rax", vcpu->rax());
+    bferror_subnhex(0, "rbx", vcpu->rbx());
+    bferror_subnhex(0, "rcx", vcpu->rcx());
+    bferror_subnhex(0, "rdx", vcpu->rdx());
+    bferror_subnhex(0, "rbp", vcpu->rbp());
+    bferror_subnhex(0, "rsi", vcpu->rsi());
+    bferror_subnhex(0, "rdi", vcpu->rdi());
+    bferror_subnhex(0, "r08", vcpu->r08());
+    bferror_subnhex(0, "r09", vcpu->r09());
+    bferror_subnhex(0, "r10", vcpu->r10());
+    bferror_subnhex(0, "r11", vcpu->r11());
+    bferror_subnhex(0, "r12", vcpu->r12());
+    bferror_subnhex(0, "r13", vcpu->r13());
+    bferror_subnhex(0, "r14", vcpu->r14());
+    bferror_subnhex(0, "r15", vcpu->r15());
+    bferror_subnhex(0, "rip", vcpu->rip());
+    bferror_subnhex(0, "rsp", vcpu->rsp());
+
+    bferror_subnhex(0, "cr0", guest_cr0::get());
+    bferror_subnhex(0, "cr2", ::intel_x64::cr2::get());
+    bferror_subnhex(0, "cr3", guest_cr3::get());
+    bferror_subnhex(0, "cr4", guest_cr4::get());
+
+    bferror_subnhex(0, "linear address", guest_linear_address::get());
+    bferror_subnhex(0, "physical address", guest_physical_address::get());
+
+    bferror_subnhex(0, "exit reason", exit_reason::get());
+    bferror_subnhex(0, "exit qualification", exit_qualification::get());
 
     ::x64::pm::stop();
 }
 
 bool
-advance(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs) noexcept
+advance(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu) noexcept
 {
     using namespace ::intel_x64::vmcs;
 
-    vmcs->save_state()->rip += vm_exit_instruction_length::get();
+    vcpu->set_rip(vcpu->rip() + vm_exit_instruction_length::get());
     return true;
 }
 
@@ -270,131 +274,131 @@ emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val)
 }
 
 uintptr_t
-emulate_rdgpr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+emulate_rdgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 {
     using namespace ::intel_x64::vmcs;
     using namespace exit_qualification::control_register_access;
 
     switch (general_purpose_register::get()) {
         case general_purpose_register::rax:
-            return vmcs->save_state()->rax;
+            return vcpu->rax();
 
         case general_purpose_register::rbx:
-            return vmcs->save_state()->rbx;
+            return vcpu->rbx();
 
         case general_purpose_register::rcx:
-            return vmcs->save_state()->rcx;
+            return vcpu->rcx();
 
         case general_purpose_register::rdx:
-            return vmcs->save_state()->rdx;
+            return vcpu->rdx();
 
         case general_purpose_register::rsp:
-            return vmcs->save_state()->rsp;
+            return vcpu->rsp();
 
         case general_purpose_register::rbp:
-            return vmcs->save_state()->rbp;
+            return vcpu->rbp();
 
         case general_purpose_register::rsi:
-            return vmcs->save_state()->rsi;
+            return vcpu->rsi();
 
         case general_purpose_register::rdi:
-            return vmcs->save_state()->rdi;
+            return vcpu->rdi();
 
         case general_purpose_register::r8:
-            return vmcs->save_state()->r08;
+            return vcpu->r08();
 
         case general_purpose_register::r9:
-            return vmcs->save_state()->r09;
+            return vcpu->r09();
 
         case general_purpose_register::r10:
-            return vmcs->save_state()->r10;
+            return vcpu->r10();
 
         case general_purpose_register::r11:
-            return vmcs->save_state()->r11;
+            return vcpu->r11();
 
         case general_purpose_register::r12:
-            return vmcs->save_state()->r12;
+            return vcpu->r12();
 
         case general_purpose_register::r13:
-            return vmcs->save_state()->r13;
+            return vcpu->r13();
 
         case general_purpose_register::r14:
-            return vmcs->save_state()->r14;
+            return vcpu->r14();
 
         default:
-            return vmcs->save_state()->r15;
+            return vcpu->r15();
     }
 }
 
 void
-emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs, uintptr_t val)
+emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu, uintptr_t val)
 {
     using namespace ::intel_x64::vmcs;
     using namespace exit_qualification::control_register_access;
 
     switch (general_purpose_register::get()) {
         case general_purpose_register::rax:
-            vmcs->save_state()->rax = val;
+            vcpu->set_rax(val);
             return;
 
         case general_purpose_register::rbx:
-            vmcs->save_state()->rbx = val;
+            vcpu->set_rbx(val);
             return;
 
         case general_purpose_register::rcx:
-            vmcs->save_state()->rcx = val;
+            vcpu->set_rcx(val);
             return;
 
         case general_purpose_register::rdx:
-            vmcs->save_state()->rdx = val;
+            vcpu->set_rdx(val);
             return;
 
         case general_purpose_register::rsp:
-            vmcs->save_state()->rsp = val;
+            vcpu->set_rsp(val);
             return;
 
         case general_purpose_register::rbp:
-            vmcs->save_state()->rbp = val;
+            vcpu->set_rbp(val);
             return;
 
         case general_purpose_register::rsi:
-            vmcs->save_state()->rsi = val;
+            vcpu->set_rsi(val);
             return;
 
         case general_purpose_register::rdi:
-            vmcs->save_state()->rdi = val;
+            vcpu->set_rdi(val);
             return;
 
         case general_purpose_register::r8:
-            vmcs->save_state()->r08 = val;
+            vcpu->set_r08(val);
             return;
 
         case general_purpose_register::r9:
-            vmcs->save_state()->r09 = val;
+            vcpu->set_r09(val);
             return;
 
         case general_purpose_register::r10:
-            vmcs->save_state()->r10 = val;
+            vcpu->set_r10(val);
             return;
 
         case general_purpose_register::r11:
-            vmcs->save_state()->r11 = val;
+            vcpu->set_r11(val);
             return;
 
         case general_purpose_register::r12:
-            vmcs->save_state()->r12 = val;
+            vcpu->set_r12(val);
             return;
 
         case general_purpose_register::r13:
-            vmcs->save_state()->r13 = val;
+            vcpu->set_r13(val);
             return;
 
         case general_purpose_register::r14:
-            vmcs->save_state()->r14 = val;
+            vcpu->set_r14(val);
             return;
 
         default:
-            vmcs->save_state()->r15 = val;
+            vcpu->set_r15(val);
             return;
     }
 }
@@ -404,9 +408,9 @@ emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs, uintptr_t val)
 // -----------------------------------------------------------------------------
 
 static bool
-handle_nmi(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+handle_nmi(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 {
-    bfignored(vmcs);
+    bfignored(vcpu);
     using namespace ::intel_x64::vmcs;
     using namespace primary_processor_based_vm_execution_controls;
 
@@ -415,9 +419,9 @@ handle_nmi(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 }
 
 static bool
-handle_nmi_window(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+handle_nmi_window(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 {
-    bfignored(vmcs);
+    bfignored(vcpu);
     using namespace ::intel_x64::vmcs;
     using namespace primary_processor_based_vm_execution_controls;
 
@@ -428,57 +432,57 @@ handle_nmi_window(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 }
 
 static bool
-handle_invd(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+handle_invd(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 {
     ::x64::cache::wbinvd();
-    return advance(vmcs);
+    return advance(vcpu);
 }
 
 static bool
-handle_rdmsr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+handle_rdmsr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 {
     auto val =
         emulate_rdmsr(
-            gsl::narrow_cast<::x64::msrs::field_type>(vmcs->save_state()->rcx)
+            gsl::narrow_cast<::x64::msrs::field_type>(vcpu->rcx())
         );
 
-    vmcs->save_state()->rax = ((val >> 0x00) & 0x00000000FFFFFFFF);
-    vmcs->save_state()->rdx = ((val >> 0x20) & 0x00000000FFFFFFFF);
+    vcpu->set_rax(((val >> 0x00) & 0x00000000FFFFFFFF));
+    vcpu->set_rdx(((val >> 0x20) & 0x00000000FFFFFFFF));
 
-    return advance(vmcs);
+    return advance(vcpu);
 }
 
 static bool
-handle_wrmsr(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+handle_wrmsr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 {
     auto val = 0ULL;
 
-    val |= ((vmcs->save_state()->rax & 0x00000000FFFFFFFF) << 0x00);
-    val |= ((vmcs->save_state()->rdx & 0x00000000FFFFFFFF) << 0x20);
+    val |= ((vcpu->rax() & 0x00000000FFFFFFFF) << 0x00);
+    val |= ((vcpu->rdx() & 0x00000000FFFFFFFF) << 0x20);
 
     emulate_wrmsr(
-        gsl::narrow_cast<::x64::msrs::field_type>(vmcs->save_state()->rcx),
+        gsl::narrow_cast<::x64::msrs::field_type>(vcpu->rcx()),
         val
     );
 
-    return advance(vmcs);
+    return advance(vcpu);
 }
 
 static bool
-handle_wrcr4(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+handle_wrcr4(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 {
     using namespace ::intel_x64::vmcs;
     using namespace exit_qualification::control_register_access;
 
     switch (control_register_number::get()) {
         case 4: {
-            auto val = emulate_rdgpr(vmcs);
+            auto val = emulate_rdgpr(vcpu);
             cr4_read_shadow::set(val);
 
             val |= ::intel_x64::cr4::vmx_enable_bit::mask;
             guest_cr4::set(val);
 
-            return advance(vmcs);
+            return advance(vcpu);
         }
 
         default:
@@ -498,9 +502,9 @@ namespace intel_x64
 {
 
 exit_handler::exit_handler(
-    gsl::not_null<vmcs *> vmcs
+    gsl::not_null<vcpu *> vcpu
 ) :
-    m_vmcs{vmcs},
+    m_vcpu{vcpu},
     m_stack{std::make_unique<gsl::byte[]>(STACK_SIZE * 2)}
 {
     using namespace bfvmm::x64;
@@ -509,19 +513,17 @@ exit_handler::exit_handler(
 
     bfn::call_once(g_once_flag, setup);
 
-    m_vmcs->load();
-    m_vmcs->save_state()->exit_handler_ptr = reinterpret_cast<uintptr_t>(this);
+    vcpu->load();
 
-    m_host_gdt.set(1, nullptr, 0xFFFFFFFF, ring0_cs_descriptor);
-    m_host_gdt.set(2, nullptr, 0xFFFFFFFF, ring0_ss_descriptor);
-    m_host_gdt.set(3, nullptr, 0xFFFFFFFF, ring0_fs_descriptor);
-    m_host_gdt.set(4, nullptr, 0xFFFFFFFF, ring0_gs_descriptor);
+    m_host_gdt.set(2, nullptr, 0xFFFFFFFF, ring0_cs_descriptor);
+    m_host_gdt.set(3, nullptr, 0xFFFFFFFF, ring0_ds_descriptor);
+    m_host_gdt.set(4, nullptr, 0xFFFFFFFF, ring0_ss_descriptor);
     m_host_gdt.set(5, &m_host_tss, sizeof(m_host_tss), ring0_tr_descriptor);
 
     this->write_host_state();
     this->write_control_state();
 
-    if (vcpuid::is_hvm_vcpu(m_vmcs->save_state()->vcpuid)) {
+    if (vcpuid::is_host_vm_vcpu(vcpu->id())) {
         this->write_guest_state();
     }
 
@@ -565,7 +567,12 @@ void
 exit_handler::add_handler(
     ::intel_x64::vmcs::value_type reason,
     const handler_delegate_t &d)
-{ m_exit_handlers.at(reason).push_front(d); }
+{ m_exit_handlers_array.at(reason).push_front(d); }
+
+void
+exit_handler::add_exit_handler(
+    const handler_delegate_t &d)
+{ m_exit_handlers.push_front(d); }
 
 void
 exit_handler::add_init_handler(
@@ -582,20 +589,20 @@ exit_handler::write_host_state()
 {
     using namespace ::intel_x64::vmcs;
 
-    host_cs_selector::set(1 << 3);
-    host_ss_selector::set(2 << 3);
+    host_cs_selector::set(2 << 3);
+    host_ss_selector::set(4 << 3);
     host_fs_selector::set(3 << 3);
-    host_gs_selector::set(4 << 3);
+    host_gs_selector::set(3 << 3);
     host_tr_selector::set(5 << 3);
 
     host_ia32_pat::set(g_ia32_pat_msr);
     host_ia32_efer::set(g_ia32_efer_msr);
 
-    host_cr0::set(g_cr0);
-    host_cr3::set(g_cr3);
-    host_cr4::set(g_cr4);
+    host_cr0::set(g_cr0_reg);
+    host_cr3::set(g_cr3_reg);
+    host_cr4::set(g_cr4_reg);
 
-    host_gs_base::set(reinterpret_cast<uintptr_t>(m_vmcs->save_state()));
+    host_gs_base::set(reinterpret_cast<uintptr_t>(m_vcpu->save_state().get()));
     host_tr_base::set(m_host_gdt.base(5));
 
     host_gdtr_base::set(m_host_gdt.base());
@@ -770,14 +777,19 @@ exit_handler::handle(
     using namespace ::intel_x64::vmcs;
 
     guard_exceptions([&]() {
+
+        for (const auto &d : exit_handler->m_exit_handlers) {
+            d(exit_handler->m_vcpu);
+        }
+
         const auto &handlers =
-            exit_handler->m_exit_handlers.at(
+            exit_handler->m_exit_handlers_array.at(
                 exit_reason::basic_exit_reason::get()
             );
 
         for (const auto &d : handlers) {
-            if (d(exit_handler->m_vmcs)) {
-                exit_handler->m_vmcs->resume();
+            if (d(exit_handler->m_vcpu)) {
+                exit_handler->m_vcpu->run();
             }
         }
 
@@ -798,54 +810,96 @@ exit_handler::handle(
         }
     });
 
-    halt(exit_handler->m_vmcs);
+    halt(exit_handler->m_vcpu);
 }
 
 bool
-exit_handler::handle_cpuid(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+exit_handler::handle_cpuid(
+    gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 {
     using namespace ::x64::cpuid;
 
-    if (vmcs->save_state()->rax == 0xBF10) {
+    /// Ack
+    ///
+    /// This can be used by an application to ack the existence of the
+    /// hypervisor. This is useful because vmcall only exists if the hypervisor
+    /// is running while cpuid can be run from any ring, and always exists
+    /// which means it can be used to ack safely from any application.
+    ///
+    if (vcpu->rax() == 0xBF00) {
+        vcpu->set_rax(0xBF01);
+        return advance(vcpu);
+    }
+
+    /// Init
+    ///
+    /// Some initialization is required after the hypervisor has started. For
+    /// example, any memory mapped resources such as ACPI or VT-d need to be
+    /// initalized using the VMM's CR3, and not the hosts.
+    ///
+    if (vcpu->rax() == 0xBF10) {
         for (const auto &d : m_init_handlers) {
-            d(vmcs);
+            d(vcpu);
         }
 
-        return advance(vmcs);
+        return advance(vcpu);
     }
 
-    if (vmcs->save_state()->rax == 0xBF20) {
+    /// Fini
+    ///
+    /// Some teardown logic is required before the hypervisor stops running.
+    /// These handlers can be used in these scenarios.
+    ///
+    if (vcpu->rax() == 0xBF20) {
         for (const auto &d : m_fini_handlers) {
-            d(vmcs);
+            d(vcpu);
         }
 
-        return advance(vmcs);
+        return advance(vcpu);
     }
 
-    if (vmcs->save_state()->rax == 0xBF11) {
+    /// Say Hi
+    ///
+    /// If the vCPU is a host vCPU and not a guest vCPU, we should say hi
+    /// so that the user of Bareflank has a simple, reliable way to know
+    /// that the hypervisor is running.
+    ///
+    if (vcpu->rax() == 0xBF11) {
         bfdebug_info(0, "host os is" bfcolor_green " now " bfcolor_end "in a vm");
-        return advance(vmcs);
+        return advance(vcpu);
     }
 
-    if (vmcs->save_state()->rax == 0xBF21) {
+    /// Say Goobye
+    ///
+    /// The most reliable method for turning off the hypervisor is from the
+    /// exit handler as it ensures that all of the destructors are executed
+    /// after a promote, and not during. Also, say goodbye before we promote
+    /// and turn off the hypervisor.
+    ///
+    if (vcpu->rax() == 0xBF21) {
         bfdebug_info(0, "host os is" bfcolor_red " not " bfcolor_end "in a vm");
-        vmcs->promote();
+        vcpu->promote();
     }
 
+    /// Emulate
+    ///
+    /// Emulate a normal cpuid instruction. If we get here, which is the likely
+    /// case, emulate the cpuid instruction.
+    ///
     auto ret =
         ::x64::cpuid::get(
-            gsl::narrow_cast<field_type>(vmcs->save_state()->rax),
-            gsl::narrow_cast<field_type>(vmcs->save_state()->rbx),
-            gsl::narrow_cast<field_type>(vmcs->save_state()->rcx),
-            gsl::narrow_cast<field_type>(vmcs->save_state()->rdx)
+            gsl::narrow_cast<field_type>(vcpu->rax()),
+            gsl::narrow_cast<field_type>(vcpu->rbx()),
+            gsl::narrow_cast<field_type>(vcpu->rcx()),
+            gsl::narrow_cast<field_type>(vcpu->rdx())
         );
 
-    vmcs->save_state()->rax = ret.rax;
-    vmcs->save_state()->rbx = ret.rbx;
-    vmcs->save_state()->rcx = ret.rcx;
-    vmcs->save_state()->rdx = ret.rdx;
+    vcpu->set_rax(ret.rax);
+    vcpu->set_rbx(ret.rbx);
+    vcpu->set_rcx(ret.rcx);
+    vcpu->set_rdx(ret.rdx);
 
-    return advance(vmcs);
+    return advance(vcpu);
 }
 
 }
