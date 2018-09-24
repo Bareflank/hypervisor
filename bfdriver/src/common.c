@@ -48,6 +48,8 @@ uint64_t g_tls_size = 0;
 uint64_t g_stack_size = 0;
 uint64_t g_stack_top = 0;
 
+void *g_rsdp = 0;
+
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -80,6 +82,13 @@ private_setup_tls(void)
     }
 
     platform_memset(g_tls, 0, g_tls_size);
+    return BF_SUCCESS;
+}
+
+int64_t
+private_setup_rsdp(void)
+{
+    g_rsdp = platform_get_rsdp();
     return BF_SUCCESS;
 }
 
@@ -217,6 +226,8 @@ common_reset(void)
     g_tls = 0;
     g_stack = 0;
     g_stack_top = 0;
+
+    g_rsdp = 0;
 }
 
 int64_t
@@ -318,12 +329,22 @@ common_load_vmm(void)
         goto failure;
     }
 
+    ret = private_setup_rsdp();
+    if (ret != BF_SUCCESS) {
+        goto failure;
+    }
+
     ret = bfelf_load(g_modules, (uint64_t)g_num_modules,(void **)&_start_func, &g_info, &g_loader);
     if (ret != BF_SUCCESS) {
         goto failure;
     }
 
     ret = platform_call_vmm_on_core(0, BF_REQUEST_INIT, 0, 0);
+    if (ret != BF_SUCCESS) {
+        goto failure;
+    }
+
+    ret = platform_call_vmm_on_core(0, BF_REQUEST_SET_RSDP,  (uint64_t)g_rsdp, 0);
     if (ret != BF_SUCCESS) {
         goto failure;
     }

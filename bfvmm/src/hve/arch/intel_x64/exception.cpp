@@ -24,7 +24,7 @@
 #include <arch/intel_x64/crs.h>
 #include <arch/intel_x64/vmcs/32bit_control_fields.h>
 #include <arch/intel_x64/vmcs/32bit_guest_state_fields.h>
-#include <hve/arch/intel_x64/event/exception.h>
+#include <hve/arch/intel_x64/exception.h>
 
 extern "C" void unlock_write(void);
 

@@ -173,6 +173,7 @@ struct crt_info_t {
 #define BF_REQUEST_VMM_FINI 3
 #define BF_REQUEST_ADD_MDL 4
 #define BF_REQUEST_GET_DRR 5
+#define BF_REQUEST_SET_RSDP 6
 #define BF_REQUEST_END 0xFFFF
 
 /* @endcond */

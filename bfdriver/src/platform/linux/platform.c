@@ -169,3 +169,7 @@ platform_call_vmm_on_core(
 
     return common_call_vmm(cpuid, request, arg1, arg2);
 }
+
+void *
+platform_get_rsdp(void)
+{ return 0; }

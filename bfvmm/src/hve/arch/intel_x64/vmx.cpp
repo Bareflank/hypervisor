@@ -20,7 +20,7 @@
 #include <bfdebug.h>
 #include <bfexception.h>
 
-#include <hve/arch/intel_x64/vmx/vmx.h>
+#include <hve/arch/intel_x64/vmx.h>
 
 #include <intrinsics.h>
 #include <memory_manager/memory_manager.h>

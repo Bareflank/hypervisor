@@ -20,7 +20,7 @@
 #include <hippomocks.h>
 #include <catch/catch.hpp>
 #include <hve/arch/x64/idt.h>
-#include <hve/arch/intel_x64/event/nmi.h>
+#include <hve/arch/intel_x64/nmi.h>
 #include <arch/intel_x64/vmcs/32bit_control_fields.h>
 #include <test/support.h>
 

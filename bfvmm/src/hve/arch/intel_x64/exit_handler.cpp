@@ -32,10 +32,10 @@
 #include <bferrorcodes.h>
 #include <bfthreadcontext.h>
 
-#include <hve/arch/intel_x64/check/check.h>
-#include <hve/arch/intel_x64/event/exception.h>
-#include <hve/arch/intel_x64/event/nmi.h>
-#include <hve/arch/intel_x64/exit_handler/exit_handler.h>
+#include <hve/arch/intel_x64/check.h>
+#include <hve/arch/intel_x64/exception.h>
+#include <hve/arch/intel_x64/nmi.h>
+#include <hve/arch/intel_x64/exit_handler.h>
 
 #include <memory_manager/arch/x64/cr3.h>
 #include <memory_manager/memory_manager.h>
@@ -428,37 +428,6 @@ handle_nmi_window(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 }
 
 static bool
-handle_cpuid(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
-{
-    using namespace ::x64::cpuid;
-
-    if (vmcs->save_state()->rax == 0xBF01) {
-        bfdebug_info(0, "host os is" bfcolor_green " now " bfcolor_end "in a vm");
-        return advance(vmcs);
-    }
-
-    if (vmcs->save_state()->rax == 0xBF00) {
-        bfdebug_info(0, "host os is" bfcolor_red " not " bfcolor_end "in a vm");
-        vmcs->promote();
-    }
-
-    auto ret =
-        ::x64::cpuid::get(
-            gsl::narrow_cast<field_type>(vmcs->save_state()->rax),
-            gsl::narrow_cast<field_type>(vmcs->save_state()->rbx),
-            gsl::narrow_cast<field_type>(vmcs->save_state()->rcx),
-            gsl::narrow_cast<field_type>(vmcs->save_state()->rdx)
-        );
-
-    vmcs->save_state()->rax = ret.rax;
-    vmcs->save_state()->rbx = ret.rbx;
-    vmcs->save_state()->rcx = ret.rcx;
-    vmcs->save_state()->rdx = ret.rdx;
-
-    return advance(vmcs);
-}
-
-static bool
 handle_invd(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
 {
     ::x64::cache::wbinvd();
@@ -567,11 +536,6 @@ exit_handler::exit_handler(
     );
 
     this->add_handler(
-        exit_reason::basic_exit_reason::cpuid,
-        handler_delegate_t::create<handle_cpuid>()
-    );
-
-    this->add_handler(
         exit_reason::basic_exit_reason::invd,
         handler_delegate_t::create<handle_invd>()
     );
@@ -590,13 +554,28 @@ exit_handler::exit_handler(
         exit_reason::basic_exit_reason::control_register_accesses,
         handler_delegate_t::create<handle_wrcr4>()
     );
+
+    this->add_handler(
+        exit_reason::basic_exit_reason::cpuid,
+        handler_delegate_t::create<exit_handler, &exit_handler::handle_cpuid>(this)
+    );
 }
 
 void
 exit_handler::add_handler(
     ::intel_x64::vmcs::value_type reason,
     const handler_delegate_t &d)
-{ m_handlers.at(reason).push_front(d); }
+{ m_exit_handlers.at(reason).push_front(d); }
+
+void
+exit_handler::add_init_handler(
+    const handler_delegate_t &d)
+{ m_init_handlers.push_front(d); }
+
+void
+exit_handler::add_fini_handler(
+    const handler_delegate_t &d)
+{ m_fini_handlers.push_front(d); }
 
 void
 exit_handler::write_host_state()
@@ -792,7 +771,7 @@ exit_handler::handle(
 
     guard_exceptions([&]() {
         const auto &handlers =
-            exit_handler->m_handlers.at(
+            exit_handler->m_exit_handlers.at(
                 exit_reason::basic_exit_reason::get()
             );
 
@@ -820,6 +799,53 @@ exit_handler::handle(
     });
 
     halt(exit_handler->m_vmcs);
+}
+
+bool
+exit_handler::handle_cpuid(gsl::not_null<bfvmm::intel_x64::vmcs *> vmcs)
+{
+    using namespace ::x64::cpuid;
+
+    if (vmcs->save_state()->rax == 0xBF10) {
+        for (const auto &d : m_init_handlers) {
+            d(vmcs);
+        }
+
+        return advance(vmcs);
+    }
+
+    if (vmcs->save_state()->rax == 0xBF20) {
+        for (const auto &d : m_fini_handlers) {
+            d(vmcs);
+        }
+
+        return advance(vmcs);
+    }
+
+    if (vmcs->save_state()->rax == 0xBF11) {
+        bfdebug_info(0, "host os is" bfcolor_green " now " bfcolor_end "in a vm");
+        return advance(vmcs);
+    }
+
+    if (vmcs->save_state()->rax == 0xBF21) {
+        bfdebug_info(0, "host os is" bfcolor_red " not " bfcolor_end "in a vm");
+        vmcs->promote();
+    }
+
+    auto ret =
+        ::x64::cpuid::get(
+            gsl::narrow_cast<field_type>(vmcs->save_state()->rax),
+            gsl::narrow_cast<field_type>(vmcs->save_state()->rbx),
+            gsl::narrow_cast<field_type>(vmcs->save_state()->rcx),
+            gsl::narrow_cast<field_type>(vmcs->save_state()->rdx)
+        );
+
+    vmcs->save_state()->rax = ret.rax;
+    vmcs->save_state()->rbx = ret.rbx;
+    vmcs->save_state()->rcx = ret.rcx;
+    vmcs->save_state()->rdx = ret.rdx;
+
+    return advance(vmcs);
 }
 
 }
