@@ -32,6 +32,5 @@
 #include <arch/intel_x64/vtd/root_entry.h>
 #include <arch/intel_x64/vtd/second_level_paging_entries.h>
 #include <arch/intel_x64/vtd/iommu.h>
-#include <bfvmm/hve/arch/intel_x64/vtd/phys_iommu.h>
 
 #endif

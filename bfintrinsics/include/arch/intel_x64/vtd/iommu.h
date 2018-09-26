@@ -24,7 +24,6 @@
 #include <bfgsl.h>
 #include <bfbitmanip.h>
 #include <bfdebug.h>
-#include "../../../../../bfvmm/include/hve/arch/intel_x64/vtd/phys_iommu.h"
 
 // *INDENT-OFF*
 
@@ -36,6 +35,88 @@ namespace vtd
 namespace iommu
 {
 
+///
+/// The base virtual address of the iommu
+/// This must be set prior to calling any iommu intrinsics
+///
+inline uintptr_t base_addr = 0;
+
+/// Read a 32-bit register at the offset @param offset
+///
+/// @expects
+/// @ensures
+///
+/// @param offset the register's offset from the phys_iommu base address
+///
+/// @return Returns the register's value
+///
+inline uint32_t read_32(uint32_t offset)
+{ return *reinterpret_cast<uint32_t *>(base_addr + offset); }
+
+/// Read a 64-bit register at the offset @param offset
+///
+/// @expects
+/// @ensures
+///
+/// @param offset the register's offset from the phys_iommu base address
+///
+/// @return Returns the register's value
+///
+inline uint64_t read_64(uint64_t offset)
+{ return *reinterpret_cast<uint64_t *>(base_addr + offset); }
+
+/// Write the value @param val to a 32-bit register at the offset
+/// @param offset
+///
+/// @expects
+/// @ensures
+///
+/// @param offset the register's offset from the phys_iommu base address
+/// @param val the value to be written
+///
+inline void write_32(uint32_t offset, uint32_t val)
+{ *reinterpret_cast<uint32_t *>(base_addr + offset) = val; }
+
+/// Write the value @param val to a 32-bit register at the offset
+/// @param offset while preserving the current value of all bits described
+/// by @param mask
+///
+/// @expects
+/// @ensures
+///
+/// @param offset the register's offset from the phys_iommu base address
+/// @param val the value to be written
+/// @param mask a bitmask of all bits to be preserved during the write
+///
+inline void write_32_preserved(uint32_t offset, uint32_t val, uint32_t mask)
+{ write_32(offset, (read_32(offset) & mask) | (val & ~mask )); }
+
+/// Write the value @param val to a 64-bit register at the offset
+/// @param offset
+///
+/// @expects
+/// @ensures
+///
+/// @param offset the register's offset from the phys_iommu base address
+/// @param val the value to be written
+///
+inline void write_64(uint64_t offset, uint64_t val)
+{ *reinterpret_cast<uint64_t *>(base_addr + offset) = val; }
+
+/// Write the value @param val to a 64-bit register at the offset
+/// @param offset while preserving the current value of all bits described
+/// by @param mask
+///
+/// @expects
+/// @ensures
+///
+/// @param offset the register's offset from the phys_iommu base address
+/// @param val the value to be written
+/// @param mask a bitmask of all bits to be preserved during the write
+///
+inline void write_64_preserved(uint64_t offset, uint64_t val, uint64_t mask)
+{ write_64(offset, (read_64(offset) & mask) | (val & ~mask )); }
+
 namespace ver_reg
 {
 	constexpr const auto name = "version_register";
@@ -43,8 +124,8 @@ namespace ver_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
 	namespace min
 	{
@@ -52,8 +133,8 @@ namespace ver_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "minor_version_number";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &ver_reg) noexcept
 		{ return get_bits(ver_reg, mask) >> from; }
@@ -68,8 +149,8 @@ namespace ver_reg
 		constexpr const auto from = 4ULL;
 		constexpr const auto name = "major_version_number";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &ver_reg) noexcept
 		{ return get_bits(ver_reg, mask) >> from; }
@@ -86,9 +167,9 @@ namespace ver_reg
 		max::dump(level, ver_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -100,8 +181,8 @@ namespace cap_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
 	namespace nd
 	{
@@ -109,8 +190,8 @@ namespace cap_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "number_of_domains_supported";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &cap_reg) noexcept
 		{ return get_bits(cap_reg, mask) >> from; }
@@ -125,14 +206,14 @@ namespace cap_reg
 		constexpr const auto from = 3ULL;
 		constexpr const auto name = "advanced_fault_logging";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &cap_reg) noexcept
 		{ return is_bit_set(cap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &cap_reg) noexcept
 		{ return !is_bit_set(cap_reg, from); }
@@ -147,14 +228,14 @@ namespace cap_reg
 		constexpr const auto from = 4ULL;
 		constexpr const auto name = "required_write_buffer_flushing";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &cap_reg) noexcept
 		{ return is_bit_set(cap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &cap_reg) noexcept
 		{ return !is_bit_set(cap_reg, from); }
@@ -169,14 +250,14 @@ namespace cap_reg
 		constexpr const auto from = 5ULL;
 		constexpr const auto name = "protected_low_memory_region";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &cap_reg) noexcept
 		{ return is_bit_set(cap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &cap_reg) noexcept
 		{ return !is_bit_set(cap_reg, from); }
@@ -191,14 +272,14 @@ namespace cap_reg
 		constexpr const auto from = 6ULL;
 		constexpr const auto name = "protected_high_memory_region";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &cap_reg) noexcept
 		{ return is_bit_set(cap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &cap_reg) noexcept
 		{ return !is_bit_set(cap_reg, from); }
@@ -213,14 +294,14 @@ namespace cap_reg
 		constexpr const auto from = 7ULL;
 		constexpr const auto name = "caching_mode";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &cap_reg) noexcept
 		{ return is_bit_set(cap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &cap_reg) noexcept
 		{ return !is_bit_set(cap_reg, from); }
@@ -235,8 +316,8 @@ namespace cap_reg
 		constexpr const auto from = 8ULL;
 		constexpr const auto name = "supported_adjusted_guest_address_widths";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &cap_reg) noexcept
 		{ return get_bits(cap_reg, mask) >> from; }
@@ -251,8 +332,8 @@ namespace cap_reg
 		constexpr const auto from = 16ULL;
 		constexpr const auto name = "maximum_guest_address_width";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &cap_reg) noexcept
 		{ return get_bits(cap_reg, mask) >> from; }
@@ -267,14 +348,14 @@ namespace cap_reg
 		constexpr const auto from = 22ULL;
 		constexpr const auto name = "zero_length_read";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &cap_reg) noexcept
 		{ return is_bit_set(cap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &cap_reg) noexcept
 		{ return !is_bit_set(cap_reg, from); }
@@ -289,8 +370,8 @@ namespace cap_reg
 		constexpr const auto from = 24ULL;
 		constexpr const auto name = "fault_recording_register_offset";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &cap_reg) noexcept
 		{ return get_bits(cap_reg, mask) >> from; }
@@ -305,8 +386,8 @@ namespace cap_reg
 		constexpr const auto from = 34ULL;
 		constexpr const auto name = "second_level_large_page_support";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &cap_reg) noexcept
 		{ return get_bits(cap_reg, mask) >> from; }
@@ -321,14 +402,14 @@ namespace cap_reg
 		constexpr const auto from = 39ULL;
 		constexpr const auto name = "page_selective_invalidation";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &cap_reg) noexcept
 		{ return is_bit_set(cap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &cap_reg) noexcept
 		{ return !is_bit_set(cap_reg, from); }
@@ -343,8 +424,8 @@ namespace cap_reg
 		constexpr const auto from = 40ULL;
 		constexpr const auto name = "number_of_fault_recording_registers";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &cap_reg) noexcept
 		{ return get_bits(cap_reg, mask) >> from; }
@@ -359,8 +440,8 @@ namespace cap_reg
 		constexpr const auto from = 48ULL;
 		constexpr const auto name = "maximum_address_value_mask";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &cap_reg) noexcept
 		{ return get_bits(cap_reg, mask) >> from; }
@@ -375,14 +456,14 @@ namespace cap_reg
 		constexpr const auto from = 54ULL;
 		constexpr const auto name = "write_draining";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &cap_reg) noexcept
 		{ return is_bit_set(cap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &cap_reg) noexcept
 		{ return !is_bit_set(cap_reg, from); }
@@ -397,14 +478,14 @@ namespace cap_reg
 		constexpr const auto from = 55ULL;
 		constexpr const auto name = "read_draining";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &cap_reg) noexcept
 		{ return is_bit_set(cap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &cap_reg) noexcept
 		{ return !is_bit_set(cap_reg, from); }
@@ -419,14 +500,14 @@ namespace cap_reg
 		constexpr const auto from = 56ULL;
 		constexpr const auto name = "first_level_1_gbyte_page_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &cap_reg) noexcept
 		{ return is_bit_set(cap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &cap_reg) noexcept
 		{ return !is_bit_set(cap_reg, from); }
@@ -441,14 +522,14 @@ namespace cap_reg
 		constexpr const auto from = 59ULL;
 		constexpr const auto name = "posted_interrupts_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &cap_reg) noexcept
 		{ return is_bit_set(cap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &cap_reg) noexcept
 		{ return !is_bit_set(cap_reg, from); }
@@ -463,14 +544,14 @@ namespace cap_reg
 		constexpr const auto from = 60ULL;
 		constexpr const auto name = "level_5_paging_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &cap_reg) noexcept
 		{ return is_bit_set(cap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &cap_reg) noexcept
 		{ return !is_bit_set(cap_reg, from); }
@@ -504,9 +585,9 @@ namespace cap_reg
 		l5p::dump(level, cap_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -518,8 +599,8 @@ namespace ecap_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
 	namespace c
 	{
@@ -527,14 +608,14 @@ namespace ecap_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "page_walk_coherency";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -549,14 +630,14 @@ namespace ecap_reg
 		constexpr const auto from = 1ULL;
 		constexpr const auto name = "queued_invalidation_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -571,14 +652,14 @@ namespace ecap_reg
 		constexpr const auto from = 2ULL;
 		constexpr const auto name = "device_tlb_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -593,14 +674,14 @@ namespace ecap_reg
 		constexpr const auto from = 3ULL;
 		constexpr const auto name = "interrupt_remapping_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -615,14 +696,14 @@ namespace ecap_reg
 		constexpr const auto from = 4ULL;
 		constexpr const auto name = "extended_interrupt_mode";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -637,14 +718,14 @@ namespace ecap_reg
 		constexpr const auto from = 6ULL;
 		constexpr const auto name = "pass_through";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -659,14 +740,14 @@ namespace ecap_reg
 		constexpr const auto from = 7ULL;
 		constexpr const auto name = "snoop_control";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -681,8 +762,8 @@ namespace ecap_reg
 		constexpr const auto from = 8ULL;
 		constexpr const auto name = "iotlb_register_offset";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &ecap_reg) noexcept
 		{ return get_bits(ecap_reg, mask) >> from; }
@@ -697,8 +778,8 @@ namespace ecap_reg
 		constexpr const auto from = 20ULL;
 		constexpr const auto name = "maximum_handle_mask_value";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &ecap_reg) noexcept
 		{ return get_bits(ecap_reg, mask) >> from; }
@@ -713,14 +794,14 @@ namespace ecap_reg
 		constexpr const auto from = 24ULL;
 		constexpr const auto name = "extended_context_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -735,14 +816,14 @@ namespace ecap_reg
 		constexpr const auto from = 25ULL;
 		constexpr const auto name = "memory_type_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -757,14 +838,14 @@ namespace ecap_reg
 		constexpr const auto from = 26ULL;
 		constexpr const auto name = "nested_translation_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -779,14 +860,14 @@ namespace ecap_reg
 		constexpr const auto from = 27ULL;
 		constexpr const auto name = "deferred_invalidate_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -801,14 +882,14 @@ namespace ecap_reg
 		constexpr const auto from = 29ULL;
 		constexpr const auto name = "page_request_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -823,14 +904,14 @@ namespace ecap_reg
 		constexpr const auto from = 30ULL;
 		constexpr const auto name = "execute_request_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -845,14 +926,14 @@ namespace ecap_reg
 		constexpr const auto from = 31ULL;
 		constexpr const auto name = "supervisor_request_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -867,14 +948,14 @@ namespace ecap_reg
 		constexpr const auto from = 33ULL;
 		constexpr const auto name = "no_write_flag_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -889,14 +970,14 @@ namespace ecap_reg
 		constexpr const auto from = 34ULL;
 		constexpr const auto name = "extended_accessed_flag_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -911,8 +992,8 @@ namespace ecap_reg
 		constexpr const auto from = 35ULL;
 		constexpr const auto name = "pasid_size_supported";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &ecap_reg) noexcept
 		{ return get_bits(ecap_reg, mask) >> from; }
@@ -927,14 +1008,14 @@ namespace ecap_reg
 		constexpr const auto from = 40ULL;
 		constexpr const auto name = "process_address_space_id_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -949,14 +1030,14 @@ namespace ecap_reg
 		constexpr const auto from = 41ULL;
 		constexpr const auto name = "device_tlb_invalidation_throttle";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -971,14 +1052,14 @@ namespace ecap_reg
 		constexpr const auto from = 42ULL;
 		constexpr const auto name = "page_request_drain_support";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ecap_reg) noexcept
 		{ return is_bit_set(ecap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ecap_reg) noexcept
 		{ return !is_bit_set(ecap_reg, from); }
@@ -1015,9 +1096,9 @@ namespace ecap_reg
 		pds::dump(level, ecap_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -1029,8 +1110,8 @@ namespace gcmd_reg
 
 	using value_type = uint32_t;
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace cfi
 	{
@@ -1166,8 +1247,8 @@ namespace gsts_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
 	namespace cfis
 	{
@@ -1175,14 +1256,14 @@ namespace gsts_reg
 		constexpr const auto from = 23ULL;
 		constexpr const auto name = "compatibility_format_interrupt_status";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &gsts_reg) noexcept
 		{ return is_bit_set(gsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &gsts_reg) noexcept
 		{ return !is_bit_set(gsts_reg, from); }
@@ -1197,14 +1278,14 @@ namespace gsts_reg
 		constexpr const auto from = 24ULL;
 		constexpr const auto name = "interrupt_remapping_table_pointer_status";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &gsts_reg) noexcept
 		{ return is_bit_set(gsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &gsts_reg) noexcept
 		{ return !is_bit_set(gsts_reg, from); }
@@ -1219,14 +1300,14 @@ namespace gsts_reg
 		constexpr const auto from = 25ULL;
 		constexpr const auto name = "interrupt_remapping_enable_status";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &gsts_reg) noexcept
 		{ return is_bit_set(gsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &gsts_reg) noexcept
 		{ return !is_bit_set(gsts_reg, from); }
@@ -1241,14 +1322,14 @@ namespace gsts_reg
 		constexpr const auto from = 26ULL;
 		constexpr const auto name = "queued_invalidation_enable_status";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &gsts_reg) noexcept
 		{ return is_bit_set(gsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &gsts_reg) noexcept
 		{ return !is_bit_set(gsts_reg, from); }
@@ -1263,14 +1344,14 @@ namespace gsts_reg
 		constexpr const auto from = 27ULL;
 		constexpr const auto name = "write_buffer_flush_status";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &gsts_reg) noexcept
 		{ return is_bit_set(gsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &gsts_reg) noexcept
 		{ return !is_bit_set(gsts_reg, from); }
@@ -1285,14 +1366,14 @@ namespace gsts_reg
 		constexpr const auto from = 28ULL;
 		constexpr const auto name = "advanced_fault_logging_status";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &gsts_reg) noexcept
 		{ return is_bit_set(gsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &gsts_reg) noexcept
 		{ return !is_bit_set(gsts_reg, from); }
@@ -1307,14 +1388,14 @@ namespace gsts_reg
 		constexpr const auto from = 29ULL;
 		constexpr const auto name = "fault_log_status";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &gsts_reg) noexcept
 		{ return is_bit_set(gsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &gsts_reg) noexcept
 		{ return !is_bit_set(gsts_reg, from); }
@@ -1329,14 +1410,14 @@ namespace gsts_reg
 		constexpr const auto from = 30ULL;
 		constexpr const auto name = "root_table_pointer_status";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &gsts_reg) noexcept
 		{ return is_bit_set(gsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &gsts_reg) noexcept
 		{ return !is_bit_set(gsts_reg, from); }
@@ -1351,14 +1432,14 @@ namespace gsts_reg
 		constexpr const auto from = 31ULL;
 		constexpr const auto name = "translation_enable_status";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &gsts_reg) noexcept
 		{ return is_bit_set(gsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &gsts_reg) noexcept
 		{ return !is_bit_set(gsts_reg, from); }
@@ -1382,9 +1463,9 @@ namespace gsts_reg
 		tes::dump(level, gsts_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -1396,11 +1477,11 @@ namespace rtaddr_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_64(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_64(offset, val); }
 
 	namespace rtt
 	{
@@ -1408,26 +1489,26 @@ namespace rtaddr_reg
 		constexpr const auto from = 11ULL;
 		constexpr const auto name = "root_table_type";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &rtaddr_reg) noexcept
 		{ return is_bit_set(rtaddr_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &rtaddr_reg) noexcept
 		{ return !is_bit_set(rtaddr_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &rtaddr_reg) noexcept
 		{ rtaddr_reg = set_bit(rtaddr_reg, from); }
 
-		inline void disable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, clear_bit(get(iommu), from)); }
+		inline void disable() noexcept
+		{ set(clear_bit(get(), from)); }
 
 		inline void disable(value_type &rtaddr_reg) noexcept
 		{ rtaddr_reg = clear_bit(rtaddr_reg, from); }
@@ -1442,14 +1523,14 @@ namespace rtaddr_reg
 		constexpr const auto from = 12ULL;
 		constexpr const auto name = "root_table_address";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &rtaddr_reg) noexcept
 		{ return get_bits(rtaddr_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &rtaddr_reg, uint64_t val) noexcept
 		{ rtaddr_reg = set_bits(rtaddr_reg, mask, val << from); }
@@ -1466,9 +1547,9 @@ namespace rtaddr_reg
 		rta::dump(level, rtaddr_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -1480,11 +1561,11 @@ namespace ccmd_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_64(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_64(offset, val); }
 
 	namespace did
 	{
@@ -1492,14 +1573,14 @@ namespace ccmd_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "domain_id";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &ccmd_reg) noexcept
 		{ return get_bits(ccmd_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &ccmd_reg, uint64_t val) noexcept
 		{ ccmd_reg = set_bits(ccmd_reg, mask, val << from); }
@@ -1536,8 +1617,8 @@ namespace ccmd_reg
 		constexpr const auto from = 59ULL;
 		constexpr const auto name = "context_actual_invalidation_granularity";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &ccmd_reg) noexcept
 		{ return get_bits(ccmd_reg, mask) >> from; }
@@ -1552,14 +1633,14 @@ namespace ccmd_reg
 		constexpr const auto from = 61ULL;
 		constexpr const auto name = "context_invalidation_request_granularity";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &ccmd_reg) noexcept
 		{ return get_bits(ccmd_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &ccmd_reg, uint64_t val) noexcept
 		{ ccmd_reg = set_bits(ccmd_reg, mask, val << from); }
@@ -1574,26 +1655,26 @@ namespace ccmd_reg
 		constexpr const auto from = 63ULL;
 		constexpr const auto name = "invalidate_context_cache";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ccmd_reg) noexcept
 		{ return is_bit_set(ccmd_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ccmd_reg) noexcept
 		{ return !is_bit_set(ccmd_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &ccmd_reg) noexcept
 		{ ccmd_reg = set_bit(ccmd_reg, from); }
 
-		inline void disable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, clear_bit(get(iommu), from)); }
+		inline void disable() noexcept
+		{ set( clear_bit(get(), from)); }
 
 		inline void disable(value_type &ccmd_reg) noexcept
 		{ ccmd_reg = clear_bit(ccmd_reg, from); }
@@ -1612,9 +1693,9 @@ namespace ccmd_reg
 		icc::dump(level, ccmd_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -1626,11 +1707,11 @@ namespace fsts_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace pfo
 	{
@@ -1638,20 +1719,20 @@ namespace fsts_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "primary_fault_overflow";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &fsts_reg) noexcept
 		{ return is_bit_set(fsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &fsts_reg) noexcept
 		{ return !is_bit_set(fsts_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &fsts_reg) noexcept
 		{ fsts_reg = set_bit(fsts_reg, from); }
@@ -1666,14 +1747,14 @@ namespace fsts_reg
 		constexpr const auto from = 1ULL;
 		constexpr const auto name = "primary_pending_fault";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &fsts_reg) noexcept
 		{ return is_bit_set(fsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &fsts_reg) noexcept
 		{ return !is_bit_set(fsts_reg, from); }
@@ -1688,20 +1769,20 @@ namespace fsts_reg
 		constexpr const auto from = 2ULL;
 		constexpr const auto name = "advanced_fault_overflow";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &fsts_reg) noexcept
 		{ return is_bit_set(fsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &fsts_reg) noexcept
 		{ return !is_bit_set(fsts_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &fsts_reg) noexcept
 		{ fsts_reg = set_bit(fsts_reg, from); }
@@ -1716,20 +1797,20 @@ namespace fsts_reg
 		constexpr const auto from = 3ULL;
 		constexpr const auto name = "advanced_pending_fault";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &fsts_reg) noexcept
 		{ return is_bit_set(fsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &fsts_reg) noexcept
 		{ return !is_bit_set(fsts_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &fsts_reg) noexcept
 		{ fsts_reg = set_bit(fsts_reg, from); }
@@ -1744,20 +1825,20 @@ namespace fsts_reg
 		constexpr const auto from = 4ULL;
 		constexpr const auto name = "invalidation_queue_error";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &fsts_reg) noexcept
 		{ return is_bit_set(fsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &fsts_reg) noexcept
 		{ return !is_bit_set(fsts_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &fsts_reg) noexcept
 		{ fsts_reg = set_bit(fsts_reg, from); }
@@ -1772,20 +1853,20 @@ namespace fsts_reg
 		constexpr const auto from = 5ULL;
 		constexpr const auto name = "invalidation_completion_error";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &fsts_reg) noexcept
 		{ return is_bit_set(fsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &fsts_reg) noexcept
 		{ return !is_bit_set(fsts_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &fsts_reg) noexcept
 		{ fsts_reg = set_bit(fsts_reg, from); }
@@ -1800,20 +1881,20 @@ namespace fsts_reg
 		constexpr const auto from = 6ULL;
 		constexpr const auto name = "invalidation_time_out_error";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &fsts_reg) noexcept
 		{ return is_bit_set(fsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &fsts_reg) noexcept
 		{ return !is_bit_set(fsts_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &fsts_reg) noexcept
 		{ fsts_reg = set_bit(fsts_reg, from); }
@@ -1828,20 +1909,20 @@ namespace fsts_reg
 		constexpr const auto from = 7ULL;
 		constexpr const auto name = "page_request_overflow";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &fsts_reg) noexcept
 		{ return is_bit_set(fsts_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &fsts_reg) noexcept
 		{ return !is_bit_set(fsts_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &fsts_reg) noexcept
 		{ fsts_reg = set_bit(fsts_reg, from); }
@@ -1856,8 +1937,8 @@ namespace fsts_reg
 		constexpr const auto from = 8ULL;
 		constexpr const auto name = "fault_record_index";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &fsts_reg) noexcept
 		{ return get_bits(fsts_reg, mask) >> from; }
@@ -1881,9 +1962,9 @@ namespace fsts_reg
 		fri::dump(level, fsts_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -1896,11 +1977,11 @@ namespace fectl_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32_preserved(offset, val, preserved_mask); }
+	inline auto set(value_type val) noexcept
+	{ return write_32_preserved(offset, val, preserved_mask); }
 
 	namespace ip
 	{
@@ -1908,14 +1989,14 @@ namespace fectl_reg
 		constexpr const auto from = 30ULL;
 		constexpr const auto name = "interrupt_pending";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &fectl_reg) noexcept
 		{ return is_bit_set(fectl_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &fectl_reg) noexcept
 		{ return !is_bit_set(fectl_reg, from); }
@@ -1930,26 +2011,26 @@ namespace fectl_reg
 		constexpr const auto from = 31ULL;
 		constexpr const auto name = "interrupt_mask";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &fectl_reg) noexcept
 		{ return is_bit_set(fectl_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &fectl_reg) noexcept
 		{ return !is_bit_set(fectl_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &fectl_reg) noexcept
 		{ fectl_reg = set_bit(fectl_reg, from); }
 
-		inline void disable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, clear_bit(get(iommu), from)); }
+		inline void disable() noexcept
+		{ set(clear_bit(get(), from)); }
 
 		inline void disable(value_type &fectl_reg) noexcept
 		{ fectl_reg = clear_bit(fectl_reg, from); }
@@ -1966,9 +2047,9 @@ namespace fectl_reg
 		im::dump(level, fectl_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -1980,11 +2061,11 @@ namespace fedata_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace imd
 	{
@@ -1992,14 +2073,14 @@ namespace fedata_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "interrupt_message_data";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &fedata_reg) noexcept
 		{ return get_bits(fedata_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &fedata_reg, uint64_t val) noexcept
 		{ fedata_reg = set_bits(fedata_reg, mask, val << from); }
@@ -2014,14 +2095,14 @@ namespace fedata_reg
 		constexpr const auto from = 16ULL;
 		constexpr const auto name = "extended_interrupt_message_data";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &fedata_reg) noexcept
 		{ return get_bits(fedata_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &fedata_reg, uint64_t val) noexcept
 		{ fedata_reg = set_bits(fedata_reg, mask, val << from); }
@@ -2038,9 +2119,9 @@ namespace fedata_reg
 		eimd::dump(level, fedata_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2052,11 +2133,11 @@ namespace feaddr_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace ma
 	{
@@ -2064,14 +2145,14 @@ namespace feaddr_reg
 		constexpr const auto from = 2ULL;
 		constexpr const auto name = "message_address";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &feaddr_reg) noexcept
 		{ return get_bits(feaddr_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &feaddr_reg, uint64_t val) noexcept
 		{ feaddr_reg = set_bits(feaddr_reg, mask, val << from); }
@@ -2087,9 +2168,9 @@ namespace feaddr_reg
 		ma::dump(level, feaddr_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2101,11 +2182,11 @@ namespace feuaddr_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace mua
 	{
@@ -2113,14 +2194,14 @@ namespace feuaddr_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "message_upper_address";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &feuaddr_reg) noexcept
 		{ return get_bits(feuaddr_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &feuaddr_reg, uint64_t val) noexcept
 		{ feuaddr_reg = set_bits(feuaddr_reg, mask, val << from); }
@@ -2136,9 +2217,9 @@ namespace feuaddr_reg
 		mua::dump(level, feuaddr_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2150,11 +2231,11 @@ namespace aflog_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_64(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_64(offset, val); }
 
 	namespace fls
 	{
@@ -2162,14 +2243,14 @@ namespace aflog_reg
 		constexpr const auto from = 9ULL;
 		constexpr const auto name = "fault_log_size";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &aflog_reg) noexcept
 		{ return get_bits(aflog_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &aflog_reg, uint64_t val) noexcept
 		{ aflog_reg = set_bits(aflog_reg, mask, val << from); }
@@ -2184,14 +2265,14 @@ namespace aflog_reg
 		constexpr const auto from = 12ULL;
 		constexpr const auto name = "fault_log_address";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &aflog_reg) noexcept
 		{ return get_bits(aflog_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &aflog_reg, uint64_t val) noexcept
 		{ aflog_reg = set_bits(aflog_reg, mask, val << from); }
@@ -2208,9 +2289,9 @@ namespace aflog_reg
 		fla::dump(level, aflog_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2223,11 +2304,11 @@ namespace pmen_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32_preserved(offset, val, preserved_mask); }
+	inline auto set(value_type val) noexcept
+	{ return write_32_preserved(offset, val, preserved_mask); }
 
 	namespace prs
 	{
@@ -2235,14 +2316,14 @@ namespace pmen_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "protected_region_status";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &pmen_reg) noexcept
 		{ return is_bit_set(pmen_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &pmen_reg) noexcept
 		{ return !is_bit_set(pmen_reg, from); }
@@ -2257,26 +2338,26 @@ namespace pmen_reg
 		constexpr const auto from = 31ULL;
 		constexpr const auto name = "enable_protected_memory";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &pmen_reg) noexcept
 		{ return is_bit_set(pmen_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &pmen_reg) noexcept
 		{ return !is_bit_set(pmen_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &pmen_reg) noexcept
 		{ pmen_reg = set_bit(pmen_reg, from); }
 
-		inline void disable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, clear_bit(get(iommu), from)); }
+		inline void disable() noexcept
+		{ set(clear_bit(get(), from)); }
 
 		inline void disable(value_type &pmen_reg) noexcept
 		{ pmen_reg = clear_bit(pmen_reg, from); }
@@ -2293,9 +2374,9 @@ namespace pmen_reg
 		epm::dump(level, pmen_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2307,11 +2388,11 @@ namespace plmbase_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace plmb
 	{
@@ -2319,14 +2400,14 @@ namespace plmbase_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "protected_low_memory_base";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &plmbase_reg) noexcept
 		{ return get_bits(plmbase_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &plmbase_reg, uint64_t val) noexcept
 		{ plmbase_reg = set_bits(plmbase_reg, mask, val << from); }
@@ -2342,9 +2423,9 @@ namespace plmbase_reg
 		plmb::dump(level, plmbase_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2356,11 +2437,11 @@ namespace plmlimit_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace plml
 	{
@@ -2368,14 +2449,14 @@ namespace plmlimit_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "protected_low_memory_limit";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &plmlimit_reg) noexcept
 		{ return get_bits(plmlimit_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &plmlimit_reg, uint64_t val) noexcept
 		{ plmlimit_reg = set_bits(plmlimit_reg, mask, val << from); }
@@ -2391,9 +2472,9 @@ namespace plmlimit_reg
 		plml::dump(level, plmlimit_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2405,11 +2486,11 @@ namespace pmhbase_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_64(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_64(offset, val); }
 
 	namespace phmb
 	{
@@ -2417,14 +2498,14 @@ namespace pmhbase_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "protected_high_memory_base";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &pmhbase_reg) noexcept
 		{ return get_bits(pmhbase_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &pmhbase_reg, uint64_t val) noexcept
 		{ pmhbase_reg = set_bits(pmhbase_reg, mask, val << from); }
@@ -2440,9 +2521,9 @@ namespace pmhbase_reg
 		phmb::dump(level, pmhbase_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2454,11 +2535,11 @@ namespace phmlimit_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_64(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_64(offset, val); }
 
 	namespace phml
 	{
@@ -2466,14 +2547,14 @@ namespace phmlimit_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "protected_high_memory_limit";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &phmlimit_reg) noexcept
 		{ return get_bits(phmlimit_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &phmlimit_reg, uint64_t val) noexcept
 		{ phmlimit_reg = set_bits(phmlimit_reg, mask, val << from); }
@@ -2489,9 +2570,9 @@ namespace phmlimit_reg
 		phml::dump(level, phmlimit_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2503,8 +2584,8 @@ namespace iqh_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
 	namespace qh
 	{
@@ -2512,8 +2593,8 @@ namespace iqh_reg
 		constexpr const auto from = 4ULL;
 		constexpr const auto name = "queue_head";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &iqh_reg) noexcept
 		{ return get_bits(iqh_reg, mask) >> from; }
@@ -2529,9 +2610,9 @@ namespace iqh_reg
 		qh::dump(level, iqh_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2543,8 +2624,8 @@ namespace iqt_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
 	namespace qt
 	{
@@ -2552,8 +2633,8 @@ namespace iqt_reg
 		constexpr const auto from = 4ULL;
 		constexpr const auto name = "queue_tail";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &iqt_reg) noexcept
 		{ return get_bits(iqt_reg, mask) >> from; }
@@ -2569,9 +2650,9 @@ namespace iqt_reg
 		qt::dump(level, iqt_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2583,11 +2664,11 @@ namespace iqa_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_64(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_64(offset, val); }
 
 	namespace qs
 	{
@@ -2595,14 +2676,14 @@ namespace iqa_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "queue_size";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &iqa_reg) noexcept
 		{ return get_bits(iqa_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &iqa_reg, uint64_t val) noexcept
 		{ iqa_reg = set_bits(iqa_reg, mask, val << from); }
@@ -2617,14 +2698,14 @@ namespace iqa_reg
 		constexpr const auto from = 12ULL;
 		constexpr const auto name = "invalidation_queue_base_address";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &iqa_reg) noexcept
 		{ return get_bits(iqa_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &iqa_reg, uint64_t val) noexcept
 		{ iqa_reg = set_bits(iqa_reg, mask, val << from); }
@@ -2641,9 +2722,9 @@ namespace iqa_reg
 		iqa::dump(level, iqa_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2655,11 +2736,11 @@ namespace ics_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace iwc
 	{
@@ -2667,20 +2748,20 @@ namespace ics_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "invalidation_wait_descriptor_complete";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &ics_reg) noexcept
 		{ return is_bit_set(ics_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &ics_reg) noexcept
 		{ return !is_bit_set(ics_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &ics_reg) noexcept
 		{ ics_reg = set_bit(ics_reg, from); }
@@ -2696,9 +2777,9 @@ namespace ics_reg
 		iwc::dump(level, ics_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2711,11 +2792,11 @@ namespace iectl_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32_preserved(offset, val, preserved_mask); }
+	inline auto set(value_type val) noexcept
+	{ return write_32_preserved(offset, val, preserved_mask); }
 
 	namespace ip
 	{
@@ -2723,14 +2804,14 @@ namespace iectl_reg
 		constexpr const auto from = 30ULL;
 		constexpr const auto name = "interrupt_pending";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &iectl_reg) noexcept
 		{ return is_bit_set(iectl_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &iectl_reg) noexcept
 		{ return !is_bit_set(iectl_reg, from); }
@@ -2745,26 +2826,26 @@ namespace iectl_reg
 		constexpr const auto from = 31ULL;
 		constexpr const auto name = "interrupt_mask";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &iectl_reg) noexcept
 		{ return is_bit_set(iectl_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &iectl_reg) noexcept
 		{ return !is_bit_set(iectl_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &iectl_reg) noexcept
 		{ iectl_reg = set_bit(iectl_reg, from); }
 
-		inline void disable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, clear_bit(get(iommu), from)); }
+		inline void disable() noexcept
+		{ set(clear_bit(get(), from)); }
 
 		inline void disable(value_type &iectl_reg) noexcept
 		{ iectl_reg = clear_bit(iectl_reg, from); }
@@ -2781,9 +2862,9 @@ namespace iectl_reg
 		im::dump(level, iectl_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2795,11 +2876,11 @@ namespace iedata_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace imd
 	{
@@ -2807,14 +2888,14 @@ namespace iedata_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "interrupt_message_data";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &iedata_reg) noexcept
 		{ return get_bits(iedata_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &iedata_reg, uint64_t val) noexcept
 		{ iedata_reg = set_bits(iedata_reg, mask, val << from); }
@@ -2829,14 +2910,14 @@ namespace iedata_reg
 		constexpr const auto from = 16ULL;
 		constexpr const auto name = "extended_interrupt_message_data";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &iedata_reg) noexcept
 		{ return get_bits(iedata_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &iedata_reg, uint64_t val) noexcept
 		{ iedata_reg = set_bits(iedata_reg, mask, val << from); }
@@ -2853,9 +2934,9 @@ namespace iedata_reg
 		eimd::dump(level, iedata_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2867,11 +2948,11 @@ namespace ieaddr_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace ma
 	{
@@ -2879,14 +2960,14 @@ namespace ieaddr_reg
 		constexpr const auto from = 2ULL;
 		constexpr const auto name = "message_address";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &ieaddr_reg) noexcept
 		{ return get_bits(ieaddr_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &ieaddr_reg, uint64_t val) noexcept
 		{ ieaddr_reg = set_bits(ieaddr_reg, mask, val << from); }
@@ -2902,9 +2983,9 @@ namespace ieaddr_reg
 		ma::dump(level, ieaddr_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2916,11 +2997,11 @@ namespace ieuaddr_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace mua
 	{
@@ -2928,14 +3009,14 @@ namespace ieuaddr_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "message_upper_address";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &ieuaddr_reg) noexcept
 		{ return get_bits(ieuaddr_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &ieuaddr_reg, uint64_t val) noexcept
 		{ ieuaddr_reg = set_bits(ieuaddr_reg, mask, val << from); }
@@ -2951,9 +3032,9 @@ namespace ieuaddr_reg
 		mua::dump(level, ieuaddr_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -2965,11 +3046,11 @@ namespace irta_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_64(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_64(offset, val); }
 
 	namespace s
 	{
@@ -2977,14 +3058,14 @@ namespace irta_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "size";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &irta_reg) noexcept
 		{ return get_bits(irta_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &irta_reg, uint64_t val) noexcept
 		{ irta_reg = set_bits(irta_reg, mask, val << from); }
@@ -2999,26 +3080,26 @@ namespace irta_reg
 		constexpr const auto from = 11ULL;
 		constexpr const auto name = "extended_interrupt_mode_enable";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &irta_reg) noexcept
 		{ return is_bit_set(irta_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &irta_reg) noexcept
 		{ return !is_bit_set(irta_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &irta_reg) noexcept
 		{ irta_reg = set_bit(irta_reg, from); }
 
-		inline void disable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, clear_bit(get(iommu), from)); }
+		inline void disable() noexcept
+		{ set(clear_bit(get(), from)); }
 
 		inline void disable(value_type &irta_reg) noexcept
 		{ irta_reg = clear_bit(irta_reg, from); }
@@ -3033,14 +3114,14 @@ namespace irta_reg
 		constexpr const auto from = 12ULL;
 		constexpr const auto name = "interrupt_remapping_table_address";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &irta_reg) noexcept
 		{ return get_bits(irta_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &irta_reg, uint64_t val) noexcept
 		{ irta_reg = set_bits(irta_reg, mask, val << from); }
@@ -3058,9 +3139,9 @@ namespace irta_reg
 		irta::dump(level, irta_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -3072,11 +3153,11 @@ namespace pqh_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_64(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_64(offset, val); }
 
 	namespace pqh
 	{
@@ -3084,14 +3165,14 @@ namespace pqh_reg
 		constexpr const auto from = 4ULL;
 		constexpr const auto name = "page_queue_head";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &pqh_reg) noexcept
 		{ return get_bits(pqh_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &pqh_reg, uint64_t val) noexcept
 		{ pqh_reg = set_bits(pqh_reg, mask, val << from); }
@@ -3107,9 +3188,9 @@ namespace pqh_reg
 		pqh::dump(level, pqh_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -3121,11 +3202,11 @@ namespace pqt_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_64(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_64(offset, val); }
 
 	namespace pqt
 	{
@@ -3133,14 +3214,14 @@ namespace pqt_reg
 		constexpr const auto from = 4ULL;
 		constexpr const auto name = "page_queue_tail";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &pqt_reg) noexcept
 		{ return get_bits(pqt_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &pqt_reg, uint64_t val) noexcept
 		{ pqt_reg = set_bits(pqt_reg, mask, val << from); }
@@ -3156,9 +3237,9 @@ namespace pqt_reg
 		pqt::dump(level, pqt_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -3170,11 +3251,11 @@ namespace pqa_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_64(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_64(offset, val); }
 
 	namespace pqs
 	{
@@ -3182,14 +3263,14 @@ namespace pqa_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "page_queue_size";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &pqa_reg) noexcept
 		{ return get_bits(pqa_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &pqa_reg, uint64_t val) noexcept
 		{ pqa_reg = set_bits(pqa_reg, mask, val << from); }
@@ -3204,14 +3285,14 @@ namespace pqa_reg
 		constexpr const auto from = 12ULL;
 		constexpr const auto name = "page_request_queue_base_address";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &pqa_reg) noexcept
 		{ return get_bits(pqa_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_64(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_64(offset), mask, val << from)); }
 
 		inline void set(value_type &pqa_reg, uint64_t val) noexcept
 		{ pqa_reg = set_bits(pqa_reg, mask, val << from); }
@@ -3228,9 +3309,9 @@ namespace pqa_reg
 		pqa::dump(level, pqa_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -3242,11 +3323,11 @@ namespace prs_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace ppr
 	{
@@ -3254,20 +3335,20 @@ namespace prs_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "pending_page_request";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &prs_reg) noexcept
 		{ return is_bit_set(prs_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &prs_reg) noexcept
 		{ return !is_bit_set(prs_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &prs_reg) noexcept
 		{ prs_reg = set_bit(prs_reg, from); }
@@ -3283,9 +3364,9 @@ namespace prs_reg
 		ppr::dump(level, prs_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -3298,11 +3379,11 @@ namespace pectl_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32_preserved(offset, val, preserved_mask); }
+	inline auto set(value_type val) noexcept
+	{ return write_32_preserved(offset, val, preserved_mask); }
 
 	namespace ip
 	{
@@ -3310,14 +3391,14 @@ namespace pectl_reg
 		constexpr const auto from = 30ULL;
 		constexpr const auto name = "interrupt_pending";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &pectl_reg) noexcept
 		{ return is_bit_set(pectl_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &pectl_reg) noexcept
 		{ return !is_bit_set(pectl_reg, from); }
@@ -3332,26 +3413,26 @@ namespace pectl_reg
 		constexpr const auto from = 31ULL;
 		constexpr const auto name = "interrupt_mask";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &pectl_reg) noexcept
 		{ return is_bit_set(pectl_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &pectl_reg) noexcept
 		{ return !is_bit_set(pectl_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &pectl_reg) noexcept
 		{ pectl_reg = set_bit(pectl_reg, from); }
 
-		inline void disable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, clear_bit(get(iommu), from)); }
+		inline void disable() noexcept
+		{ set(clear_bit(get(), from)); }
 
 		inline void disable(value_type &pectl_reg) noexcept
 		{ pectl_reg = clear_bit(pectl_reg, from); }
@@ -3368,9 +3449,9 @@ namespace pectl_reg
 		im::dump(level, pectl_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -3382,11 +3463,11 @@ namespace pedata_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace imd
 	{
@@ -3394,14 +3475,14 @@ namespace pedata_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "interrupt_message_data";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &pedata_reg) noexcept
 		{ return get_bits(pedata_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &pedata_reg, uint64_t val) noexcept
 		{ pedata_reg = set_bits(pedata_reg, mask, val << from); }
@@ -3416,14 +3497,14 @@ namespace pedata_reg
 		constexpr const auto from = 16ULL;
 		constexpr const auto name = "extended_interrupt_message_data";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &pedata_reg) noexcept
 		{ return get_bits(pedata_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &pedata_reg, uint64_t val) noexcept
 		{ pedata_reg = set_bits(pedata_reg, mask, val << from); }
@@ -3440,9 +3521,9 @@ namespace pedata_reg
 		interrupt_message_data::dump(level, pedata_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -3454,11 +3535,11 @@ namespace peaddr_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace ma
 	{
@@ -3466,14 +3547,14 @@ namespace peaddr_reg
 		constexpr const auto from = 2ULL;
 		constexpr const auto name = "message_address";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &peaddr_reg) noexcept
 		{ return get_bits(peaddr_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &peaddr_reg, uint64_t val) noexcept
 		{ peaddr_reg = set_bits(peaddr_reg, mask, val << from); }
@@ -3489,9 +3570,9 @@ namespace peaddr_reg
 		ma::dump(level, peaddr_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -3503,11 +3584,11 @@ namespace peuaddr_reg
 
 	using value_type = uint32_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_32(offset); }
+	inline auto get() noexcept
+	{ return read_32(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_32(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_32(offset, val); }
 
 	namespace mua
 	{
@@ -3515,14 +3596,14 @@ namespace peuaddr_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "message_upper_address";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_32(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_32(offset), mask) >> from; }
 
 		inline auto get(const value_type &peuaddr_reg) noexcept
 		{ return get_bits(peuaddr_reg, mask) >> from; }
 
-		inline void set(const gsl::not_null<phys_iommu *> iommu, uint64_t val) noexcept
-		{ set(iommu, set_bits(iommu->read_32(offset), mask, val << from)); }
+		inline void set(uint64_t val) noexcept
+		{ set(set_bits(read_32(offset), mask, val << from)); }
 
 		inline void set(value_type &peuaddr_reg, uint64_t val) noexcept
 		{ peuaddr_reg = set_bits(peuaddr_reg, mask, val << from); }
@@ -3538,9 +3619,9 @@ namespace peuaddr_reg
 		mua::dump(level, peuaddr_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -3552,8 +3633,8 @@ namespace mtrrcap_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
 	namespace vcnt
 	{
@@ -3561,8 +3642,8 @@ namespace mtrrcap_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "variable_mtrr_countr";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &mtrrcap_reg) noexcept
 		{ return get_bits(mtrrcap_reg, mask) >> from; }
@@ -3577,14 +3658,14 @@ namespace mtrrcap_reg
 		constexpr const auto from = 8ULL;
 		constexpr const auto name = "fixed_range_mtrrs_supported";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &mtrrcap_reg) noexcept
 		{ return is_bit_set(mtrrcap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &mtrrcap_reg) noexcept
 		{ return !is_bit_set(mtrrcap_reg, from); }
@@ -3599,14 +3680,14 @@ namespace mtrrcap_reg
 		constexpr const auto from = 10ULL;
 		constexpr const auto name = "write_combining";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &mtrrcap_reg) noexcept
 		{ return is_bit_set(mtrrcap_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &mtrrcap_reg) noexcept
 		{ return !is_bit_set(mtrrcap_reg, from); }
@@ -3624,9 +3705,9 @@ namespace mtrrcap_reg
 		wc::dump(level, mtrrcap_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }
@@ -3638,11 +3719,11 @@ namespace mtrrdef_reg
 
 	using value_type = uint64_t;
 
-	inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-	{ return iommu->read_64(offset); }
+	inline auto get() noexcept
+	{ return read_64(offset); }
 
-	inline auto set(const gsl::not_null<phys_iommu *> iommu, value_type val) noexcept
-	{ return iommu->write_64(offset, val); }
+	inline auto set(value_type val) noexcept
+	{ return write_64(offset, val); }
 
 	namespace type
 	{
@@ -3650,8 +3731,8 @@ namespace mtrrdef_reg
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "default_memory_type";
 
-		inline auto get(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return get_bits(iommu->read_64(offset), mask) >> from; }
+		inline auto get() noexcept
+		{ return get_bits(read_64(offset), mask) >> from; }
 
 		inline auto get(const value_type &mtrrdef_reg) noexcept
 		{ return get_bits(mtrrdef_reg, mask) >> from; }
@@ -3666,26 +3747,26 @@ namespace mtrrdef_reg
 		constexpr const auto from = 10ULL;
 		constexpr const auto name = "fixed_range_mtrr_enable";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &mtrrdef_reg) noexcept
 		{ return is_bit_set(mtrrdef_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &mtrrdef_reg) noexcept
 		{ return !is_bit_set(mtrrdef_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &mtrrdef_reg) noexcept
 		{ mtrrdef_reg = set_bit(mtrrdef_reg, from); }
 
-		inline void disable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, clear_bit(get(iommu), from)); }
+		inline void disable() noexcept
+		{ set(clear_bit(get(), from)); }
 
 		inline void disable(value_type &mtrrdef_reg) noexcept
 		{ mtrrdef_reg = clear_bit(mtrrdef_reg, from); }
@@ -3700,26 +3781,26 @@ namespace mtrrdef_reg
 		constexpr const auto from = 11ULL;
 		constexpr const auto name = "mtrr_enable";
 
-		inline auto is_enabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return is_bit_set(get(iommu), from); }
+		inline auto is_enabled() noexcept
+		{ return is_bit_set(get(), from); }
 
 		inline auto is_enabled(const value_type &mtrrdef_reg) noexcept
 		{ return is_bit_set(mtrrdef_reg, from); }
 
-		inline auto is_disabled(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ return !is_bit_set(get(iommu), from); }
+		inline auto is_disabled() noexcept
+		{ return !is_bit_set(get(), from); }
 
 		inline auto is_disabled(const value_type &mtrrdef_reg) noexcept
 		{ return !is_bit_set(mtrrdef_reg, from); }
 
-		inline void enable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, set_bit(get(iommu), from)); }
+		inline void enable() noexcept
+		{ set(set_bit(get(), from)); }
 
 		inline void enable(value_type &mtrrdef_reg) noexcept
 		{ mtrrdef_reg = set_bit(mtrrdef_reg, from); }
 
-		inline void disable(const gsl::not_null<phys_iommu *> iommu) noexcept
-		{ set(iommu, clear_bit(get(iommu), from)); }
+		inline void disable() noexcept
+		{ set(clear_bit(get(), from)); }
 
 		inline void disable(value_type &mtrrdef_reg) noexcept
 		{ mtrrdef_reg = clear_bit(mtrrdef_reg, from); }
@@ -3737,9 +3818,9 @@ namespace mtrrdef_reg
 		e::dump(level, mtrrdef_reg, msg);
 	}
 
-	inline void dump(int level, const gsl::not_null<phys_iommu *> iommu, std::string *msg = nullptr)
+	inline void dump(int level, std::string *msg = nullptr)
 	{
-		auto reg_val = get(iommu);
+		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
 }

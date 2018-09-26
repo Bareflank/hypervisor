@@ -25,6 +25,7 @@
 
 #include <bfdebug.h>
 #include <bfplatform.h>
+#include <common.h>
 
 #define BF_TAG 'BFLK'
 #define BF_NX_TAG 'BFNX'
