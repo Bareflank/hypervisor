@@ -26,6 +26,9 @@
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
+extern "C" int64_t private_setup_rsdp(void);
+extern "C" int64_t private_add_modules_mdl(void);
+
 TEST_CASE("common_load_vmm: success")
 {
     binaries_info info{&g_file, g_filenames_success, false};
@@ -112,6 +115,21 @@ TEST_CASE("common_load_vmm: alloc tss fails")
     CHECK(common_fini() == BF_SUCCESS);
 }
 
+TEST_CASE("common_load_vmm: rsdp fails")
+{
+    binaries_info info{&g_file, g_filenames_success, false};
+
+    for (const auto &binary : info.binaries()) {
+        REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
+    }
+
+    MockRepository mocks;
+    mocks.ExpectCallFunc(private_setup_rsdp).Return(-1);
+
+    CHECK(common_load_vmm() == -1);
+    CHECK(common_fini() == BF_SUCCESS);
+}
+
 TEST_CASE("common_load_vmm: missing symbols")
 {
     auto filenames = g_filenames_success;
@@ -145,6 +163,18 @@ TEST_CASE("common_load_vmm: init fails")
     CHECK(common_fini() == BF_SUCCESS);
 }
 
+TEST_CASE("common_load_vmm: set rsdp fails")
+{
+    binaries_info info{&g_file, g_filenames_set_rsdp_fails, false};
+
+    for (const auto &binary : info.binaries()) {
+        REQUIRE(common_add_module(binary.file, binary.file_size) == BF_SUCCESS);
+    }
+
+    CHECK(common_load_vmm() == ENTRY_ERROR_UNKNOWN);
+    CHECK(common_fini() == BF_SUCCESS);
+}
+
 TEST_CASE("common_load_vmm: add modules mdl fails")
 {
     binaries_info info{&g_file, g_filenames_add_mdl_fails, false};
@@ -156,8 +186,6 @@ TEST_CASE("common_load_vmm: add modules mdl fails")
     CHECK(common_load_vmm() == ENTRY_ERROR_UNKNOWN);
     CHECK(common_fini() == BF_SUCCESS);
 }
-
-extern "C" int64_t private_add_modules_mdl(void);
 
 TEST_CASE("common_load_vmm: add tss mdl fails")
 {

@@ -25,6 +25,7 @@ extern std::vector<std::string> g_filenames_init_fails;
 extern std::vector<std::string> g_filenames_fini_fails;
 extern std::vector<std::string> g_filenames_add_mdl_fails;
 extern std::vector<std::string> g_filenames_get_drr_fails;
+extern std::vector<std::string> g_filenames_set_rsdp_fails;
 extern std::vector<std::string> g_filenames_vmm_init_fails;
 extern std::vector<std::string> g_filenames_vmm_fini_fails;
 

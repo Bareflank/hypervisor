@@ -20,6 +20,9 @@
 #define INTRINSICS_H
 
 #include <bfarch.h>
+#include <stdint.h>
+
+inline uintptr_t g_rsdp = 0;
 
 #ifdef BF_X64
 #include <arch/x64/cache.h>

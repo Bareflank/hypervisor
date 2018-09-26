@@ -21,7 +21,7 @@
 #define NMI_INTEL_X64_H
 
 #include <bfexports.h>
-#include "../../x64/idt.h"
+#include "../x64/idt.h"
 
 /// _handle_nmi
 ///

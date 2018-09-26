@@ -48,6 +48,12 @@
 #define REQUEST_GET_DRR_RETURN ENTRY_ERROR_UNKNOWN
 #endif
 
+#ifndef REQUEST_SET_RSDP_FAILS
+#define REQUEST_SET_RSDP_RETURN ENTRY_SUCCESS
+#else
+#define REQUEST_SET_RSDP_RETURN ENTRY_ERROR_UNKNOWN
+#endif
+
 #ifndef REQUEST_VMM_INIT_FAILS
 #define REQUEST_VMM_INIT_RETURN ENTRY_SUCCESS
 #else
@@ -121,6 +127,9 @@ bfmain(uintptr_t request, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 
         case BF_REQUEST_VMM_FINI:
             return REQUEST_VMM_FINI_RETURN;
+
+        case BF_REQUEST_SET_RSDP:
+            return REQUEST_SET_RSDP_RETURN;
 
         default:
             break;

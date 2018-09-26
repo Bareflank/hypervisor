@@ -22,8 +22,8 @@
 #include <bftypes.h>
 #include <bfvcpuid.h>
 
-#include "../save_state.h"
-#include "../check/check.h"
+#include "save_state.h"
+#include "check.h"
 
 // -----------------------------------------------------------------------------
 // Exports

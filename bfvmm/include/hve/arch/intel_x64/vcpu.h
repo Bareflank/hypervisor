@@ -19,10 +19,10 @@
 #ifndef VCPU_INTEL_X64_H
 #define VCPU_INTEL_X64_H
 
-#include "../exit_handler/exit_handler.h"
-#include "../vmx/vmx.h"
-#include "../vmcs/vmcs.h"
-#include "../../../../vcpu/vcpu.h"
+#include "exit_handler.h"
+#include "vmx.h"
+#include "vmcs.h"
+#include "../../../vcpu/vcpu.h"
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -111,8 +111,10 @@ public:
         m_vmcs->load();
         m_vmcs->launch();
 
+        ::x64::cpuid::get(0xBF10, 0, 0, 0);
+
         if (this->is_host_vm_vcpu()) {
-            ::x64::cpuid::get(0xBF01, 0, 0, 0);
+            ::x64::cpuid::get(0xBF11, 0, 0, 0);
         }
     }
 
@@ -129,8 +131,10 @@ public:
     {
         bfignored(obj);
 
+        ::x64::cpuid::get(0xBF20, 0, 0, 0);
+
         if (this->is_host_vm_vcpu()) {
-            ::x64::cpuid::get(0xBF00, 0, 0, 0);
+            ::x64::cpuid::get(0xBF21, 0, 0, 0);
         }
     }
 

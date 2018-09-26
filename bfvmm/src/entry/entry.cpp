@@ -36,6 +36,8 @@
 #include <debug/debug_ring/debug_ring.h>
 #include <memory_manager/memory_manager.h>
 
+#include <intrinsics.h>
+
 extern "C" int64_t
 private_init(void)
 { return ENTRY_SUCCESS; }
@@ -55,6 +57,13 @@ private_add_md(struct memory_descriptor *md) noexcept
 
         g_mm->add_md(virt, phys, type);
     });
+}
+
+extern "C" int64_t
+private_set_rsdp(uintptr_t rsdp) noexcept
+{
+    g_rsdp = rsdp;
+    return ENTRY_SUCCESS;
 }
 
 bfobject *
@@ -116,6 +125,9 @@ bfmain(uintptr_t request, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 
         case BF_REQUEST_ADD_MDL:
             return private_add_md(reinterpret_cast<memory_descriptor *>(arg1));
+
+        case BF_REQUEST_SET_RSDP:
+            return private_set_rsdp(arg1);
 
         case BF_REQUEST_GET_DRR:
             return get_drr(arg1, reinterpret_cast<debug_ring_resources_t **>(arg2));

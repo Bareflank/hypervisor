@@ -63,10 +63,10 @@ setup_idt_x64()
 
 #ifdef BF_INTEL_X64
 
-#include "../hve/arch/intel_x64/vmx/vmx.h"
-#include "../hve/arch/intel_x64/vmcs/vmcs.h"
-#include "../hve/arch/intel_x64/check/check.h"
-#include "../hve/arch/intel_x64/exit_handler/exit_handler.h"
+#include "../hve/arch/intel_x64/vmx.h"
+#include "../hve/arch/intel_x64/vmcs.h"
+#include "../hve/arch/intel_x64/check.h"
+#include "../hve/arch/intel_x64/exit_handler.h"
 
 bfvmm::intel_x64::save_state_t g_save_state{};
 

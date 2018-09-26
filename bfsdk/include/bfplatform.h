@@ -157,6 +157,19 @@ int64_t platform_num_cpus(void);
 int64_t platform_call_vmm_on_core(
     uint64_t cpuid, uint64_t request, uintptr_t arg1, uintptr_t arg2);
 
+/**
+ * Get RSDP
+ *
+ * Returns the address of the Root System Description Pointer for ACPI.
+ * If ACPI is not supported, return 0.
+ *
+ * @expects none
+ * @ensures none
+ *
+ * @return returns the RSDP or 0 if ACPI is not supported
+ */
+void *platform_get_rsdp(void);
+
 #ifdef __cplusplus
 }
 #endif

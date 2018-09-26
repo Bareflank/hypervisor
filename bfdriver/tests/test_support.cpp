@@ -92,6 +92,18 @@ std::vector<std::string> g_filenames_get_drr_fails = {
     VMM_PREFIX_PATH + "/bin/dummy_main_get_drr_fails_shared"_s,
 };
 
+std::vector<std::string> g_filenames_set_rsdp_fails = {
+    VMM_PREFIX_PATH + "/lib/libdummy_lib1_shared.so"_s,
+    VMM_PREFIX_PATH + "/lib/libdummy_lib2_shared.so"_s,
+    VMM_PREFIX_PATH + "/lib/libc.so"_s,
+    VMM_PREFIX_PATH + "/lib/libc++.so.1.0"_s,
+    VMM_PREFIX_PATH + "/lib/libc++abi.so"_s,
+    VMM_PREFIX_PATH + "/lib/libbfpthread_shared.so"_s,
+    VMM_PREFIX_PATH + "/lib/libbfsyscall_shared.so"_s,
+    VMM_PREFIX_PATH + "/lib/libbfunwind_shared.so"_s,
+    VMM_PREFIX_PATH + "/bin/dummy_main_set_rsdp_fails_shared"_s,
+};
+
 std::vector<std::string> g_filenames_vmm_init_fails = {
     VMM_PREFIX_PATH + "/lib/libdummy_lib1_shared.so"_s,
     VMM_PREFIX_PATH + "/lib/libdummy_lib2_shared.so"_s,

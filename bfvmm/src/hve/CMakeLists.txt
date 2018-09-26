@@ -18,24 +18,24 @@
 
 if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
     list(APPEND SOURCES
-        arch/intel_x64/check/check_vmcs_control_fields.cpp
-        arch/intel_x64/check/check_vmcs_guest_fields.cpp
-        arch/intel_x64/check/check_vmcs_host_fields.cpp
-        arch/intel_x64/event/exception.cpp
-        arch/intel_x64/event/nmi.cpp
-        arch/intel_x64/exit_handler/exit_handler.cpp
-        arch/intel_x64/vmcs/vmcs.cpp
-        arch/intel_x64/vmx/vmx.cpp
+        arch/intel_x64/check_vmcs_control_fields.cpp
+        arch/intel_x64/check_vmcs_guest_fields.cpp
+        arch/intel_x64/check_vmcs_host_fields.cpp
+        arch/intel_x64/exception.cpp
+        arch/intel_x64/nmi.cpp
+        arch/intel_x64/exit_handler.cpp
+        arch/intel_x64/vmcs.cpp
+        arch/intel_x64/vmx.cpp
     )
 
     if(NOT WIN32 AND NOT ENABLE_MOCKING)
         list(APPEND SOURCES
-            arch/intel_x64/event/exception.asm
-            arch/intel_x64/event/nmi.asm
-            arch/intel_x64/exit_handler/exit_handler_entry.asm
-            arch/intel_x64/vmcs/vmcs_launch.asm
-            arch/intel_x64/vmcs/vmcs_promote.asm
-            arch/intel_x64/vmcs/vmcs_resume.asm
+            arch/intel_x64/exception.asm
+            arch/intel_x64/nmi.asm
+            arch/intel_x64/exit_handler_entry.asm
+            arch/intel_x64/vmcs_launch.asm
+            arch/intel_x64/vmcs_promote.asm
+            arch/intel_x64/vmcs_resume.asm
         )
     endif()
 elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")

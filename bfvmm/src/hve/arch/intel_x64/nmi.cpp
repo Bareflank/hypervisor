@@ -19,7 +19,7 @@
 
 #include <arch/intel_x64/vmcs/32bit_control_fields.h>
 #include <arch/intel_x64/vmcs/32bit_guest_state_fields.h>
-#include <hve/arch/intel_x64/event/nmi.h>
+#include <hve/arch/intel_x64/nmi.h>
 
 void set_nmi_handler(
     bfvmm::x64::idt *idt,

@@ -20,7 +20,7 @@
 #ifndef EXCEPTION_INTEL_X64_H
 #define EXCEPTION_INTEL_X64_H
 
-#include "../../x64/idt.h"
+#include "../x64/idt.h"
 
 // *INDENT-OFF*
 

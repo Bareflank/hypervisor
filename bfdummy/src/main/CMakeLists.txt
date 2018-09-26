@@ -64,6 +64,13 @@ add_vmm_executable(dummy_main_get_drr_fails
     NOVMMLIBS
 )
 
+add_vmm_executable(dummy_main_set_rsdp_fails
+    SOURCES dummy_main.cpp
+    LIBRARIES ${LIBRARIES}
+    DEFINES REQUEST_SET_RSDP_FAILS
+    NOVMMLIBS
+)
+
 add_vmm_executable(dummy_main_vmm_init_fails
     SOURCES dummy_main.cpp
     LIBRARIES ${LIBRARIES}

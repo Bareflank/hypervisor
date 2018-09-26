@@ -145,3 +145,7 @@ platform_call_vmm_on_core(
     KeRevertToUserAffinityThreadEx(old);
     return ret;
 }
+
+void *
+platform_get_rsdp(void)
+{ return 0; }

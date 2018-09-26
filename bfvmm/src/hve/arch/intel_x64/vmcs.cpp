@@ -24,7 +24,7 @@
 #include <memory_manager/memory_manager.h>
 #include <memory_manager/arch/x64/unique_map.h>
 
-#include <hve/arch/intel_x64/vmcs/vmcs.h>
+#include <hve/arch/intel_x64/vmcs.h>
 
 #include <intrinsics.h>
 
