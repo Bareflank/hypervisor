@@ -36,25 +36,26 @@ namespace rte
 {
 	constexpr const auto name = "rte";
 
-	using value_type = uint64_t;
+	using value_type = struct value_type { uint64_t data[2]{0}; };
 
 	namespace present
 	{
 		constexpr const auto mask = 0x1ULL;
+		constexpr const auto index = 0ULL;
 		constexpr const auto from = 0ULL;
 		constexpr const auto name = "present";
 
 		inline auto is_enabled(const value_type &rte) noexcept
-		{ return is_bit_set(rte, from); }
+		{ return is_bit_set(rte.data[index], from); }
 
 		inline auto is_disabled(const value_type &rte) noexcept
-		{ return !is_bit_set(rte, from); }
+		{ return !is_bit_set(rte.data[index], from); }
 
 		inline void enable(value_type &rte) noexcept
-		{ rte = set_bit(rte, from); }
+		{ rte.data[index] = set_bit(rte.data[index], from); }
 
 		inline void disable(value_type &rte) noexcept
-		{ rte = clear_bit(rte, from); }
+		{ rte.data[index] = clear_bit(rte.data[index], from); }
 
 		inline void dump(int level, const value_type &rte, std::string *msg = nullptr)
 		{ bfdebug_subbool(level, name, is_enabled(rte), msg); }
@@ -63,14 +64,15 @@ namespace rte
 	namespace context_table_pointer
 	{
 		constexpr const auto mask = 0xFFFFFFFFF000ULL;
+		constexpr const auto index = 0ULL;
 		constexpr const auto from = 12ULL;
 		constexpr const auto name = "context_table_pointer";
 
 		inline auto get(const value_type &rte) noexcept
-		{ return get_bits(rte, mask) >> from; }
+		{ return get_bits(rte.data[index], mask) >> from; }
 
 		inline void set(value_type &rte, uint64_t val) noexcept
-		{ rte = set_bits(rte, mask, val << from); }
+		{ rte.data[index] = set_bits(rte.data[index], mask, val << from); }
 
 		inline void dump(int level, const value_type &rte, std::string *msg = nullptr)
 		{ bfdebug_subnhex(level, name, get(rte), msg); }
@@ -78,7 +80,8 @@ namespace rte
 
 	inline void dump(int level, const value_type &rte, std::string *msg = nullptr)
 	{
-		bfdebug_nhex(level, "rte", rte, msg);
+		bfdebug_nhex(level, "rte[63:0]", rte.data[0], msg);
+		bfdebug_nhex(level, "rte[127:64]", rte.data[1], msg);
 
 		present::dump(level, rte, msg);
 		context_table_pointer::dump(level, rte, msg);

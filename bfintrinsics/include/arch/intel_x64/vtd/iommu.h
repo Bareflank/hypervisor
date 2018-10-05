@@ -1107,8 +1107,12 @@ namespace gcmd_reg
 {
 	constexpr const auto name = "global_command_register";
 	constexpr const auto offset = 0x018;
+	constexpr const auto wo_bits = 0x96FFFFFFULL;
 
 	using value_type = uint32_t;
+
+	inline value_type get() noexcept
+	{ return read_32(offset) & wo_bits; }
 
 	inline auto set(value_type val) noexcept
 	{ return write_32(offset, val); }
@@ -1122,9 +1126,22 @@ namespace gcmd_reg
 		inline void enable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = set_bit(gcmd_reg, from); }
 
+		inline void enable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            enable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
+
 		inline void disable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = clear_bit(gcmd_reg, from); }
 
+		inline void disable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            disable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
 	}
 
 	namespace sirtp
@@ -1136,9 +1153,22 @@ namespace gcmd_reg
 		inline void enable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = set_bit(gcmd_reg, from); }
 
+		inline void enable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            enable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
+
 		inline void disable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = clear_bit(gcmd_reg, from); }
 
+		inline void disable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            disable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
 	}
 
 	namespace ire
@@ -1150,9 +1180,22 @@ namespace gcmd_reg
 		inline void enable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = set_bit(gcmd_reg, from); }
 
+		inline void enable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            enable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
+
 		inline void disable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = clear_bit(gcmd_reg, from); }
 
+		inline void disable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            disable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
 	}
 
 	namespace qie
@@ -1164,9 +1207,22 @@ namespace gcmd_reg
 		inline void enable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = set_bit(gcmd_reg, from); }
 
+		inline void enable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            enable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
+
 		inline void disable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = clear_bit(gcmd_reg, from); }
 
+		inline void disable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            disable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
 	}
 
 	namespace wbf
@@ -1178,9 +1234,22 @@ namespace gcmd_reg
 		inline void enable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = set_bit(gcmd_reg, from); }
 
+		inline void enable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            enable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
+
 		inline void disable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = clear_bit(gcmd_reg, from); }
 
+		inline void disable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            disable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
 	}
 
 	namespace eafl
@@ -1192,9 +1261,22 @@ namespace gcmd_reg
 		inline void enable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = set_bit(gcmd_reg, from); }
 
+		inline void enable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            enable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
+
 		inline void disable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = clear_bit(gcmd_reg, from); }
 
+		inline void disable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            disable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
 	}
 
 	namespace sfl
@@ -1206,9 +1288,22 @@ namespace gcmd_reg
 		inline void enable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = set_bit(gcmd_reg, from); }
 
+		inline void enable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            enable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
+
 		inline void disable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = clear_bit(gcmd_reg, from); }
 
+		inline void disable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            disable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
 	}
 
 	namespace srtp
@@ -1220,9 +1315,22 @@ namespace gcmd_reg
 		inline void enable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = set_bit(gcmd_reg, from); }
 
+		inline void enable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            enable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
+
 		inline void disable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = clear_bit(gcmd_reg, from); }
 
+		inline void disable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            disable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
 	}
 
 	namespace te
@@ -1234,9 +1342,22 @@ namespace gcmd_reg
 		inline void enable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = set_bit(gcmd_reg, from); }
 
+		inline void enable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            enable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
+
 		inline void disable(value_type &gcmd_reg) noexcept
 		{ gcmd_reg = clear_bit(gcmd_reg, from); }
 
+		inline void disable() noexcept
+		{
+            auto gcmd_reg_val = gcmd_reg::get();
+            disable(gcmd_reg_val);
+            gcmd_reg::set(gcmd_reg_val);
+        }
 	}
 }
 
@@ -2224,6 +2345,222 @@ namespace feuaddr_reg
 	}
 }
 
+// DON'T CHECK ME IN!!! The FRR intrinsics are for debuging
+namespace frr
+{
+	constexpr const auto name = "fault_recording_register";
+	constexpr const auto offset = 0x400; // <-- Needs to be looked up at runtime
+
+	using value_type = struct value_type { uint64_t data[2]{0}; };
+
+	inline auto get() noexcept
+    {
+        value_type val = {0};
+        val.data[0] = read_64(offset);
+        val.data[1] = read_64(offset + sizeof(uint64_t));
+        return val;
+    }
+
+    namespace fi
+    {
+		constexpr const auto mask = 0xFFFFFFFFFFFFF000ULL;
+		constexpr const auto index = 0ULL;
+		constexpr const auto from = 12ULL;
+		constexpr const auto name = "fault_info";
+
+		inline auto get(const value_type &frr) noexcept
+		{ return get_bits(frr.data[index], mask) >> from; }
+
+		inline void set(value_type &frr, uint64_t val) noexcept
+		{ frr.data[index] = set_bits(frr.data[index], mask, val << from); }
+
+		inline void dump(int level, const value_type &frr, std::string *msg = nullptr)
+		{ bfdebug_subnhex(level, name, get(frr), msg); }
+    }
+
+    namespace sid
+    {
+		constexpr const auto mask = 0xF000ULL;
+		constexpr const auto index = 1ULL;
+		constexpr const auto from = 0;
+		constexpr const auto name = "source_identifier";
+
+		inline auto get(const value_type &frr) noexcept
+		{ return get_bits(frr.data[index], mask) >> from; }
+
+		inline void set(value_type &frr, uint64_t val) noexcept
+		{ frr.data[index] = set_bits(frr.data[index], mask, val << from); }
+
+		inline void dump(int level, const value_type &frr, std::string *msg = nullptr)
+		{ bfdebug_subnhex(level, name, get(frr), msg); }
+    }
+
+    namespace priv
+    {
+		constexpr const auto mask = 0x20000000ULL;
+		constexpr const auto index = 1ULL;
+		constexpr const auto from = 29;
+		constexpr const auto name = "priviledge_mode_request";
+
+		inline auto is_enabled(const value_type &frr) noexcept
+		{ return is_bit_set(frr.data[index], from); }
+
+		inline auto is_disabled(const value_type &frr) noexcept
+		{ return !is_bit_set(frr.data[index], from); }
+
+		inline void dump(int level, const value_type &frr, std::string *msg = nullptr)
+		{ bfdebug_subbool(level, name, is_enabled(frr), msg); }
+    }
+
+    namespace exe
+    {
+		constexpr const auto mask = 0x40000000ULL;
+		constexpr const auto index = 1ULL;
+		constexpr const auto from = 30;
+		constexpr const auto name = "execute_permission_requested";
+
+		inline auto is_enabled(const value_type &frr) noexcept
+		{ return is_bit_set(frr.data[index], from); }
+
+		inline auto is_disabled(const value_type &frr) noexcept
+		{ return !is_bit_set(frr.data[index], from); }
+
+		inline void dump(int level, const value_type &frr, std::string *msg = nullptr)
+		{ bfdebug_subbool(level, name, is_enabled(frr), msg); }
+    }
+
+    namespace pp
+    {
+		constexpr const auto mask = 0x80000000ULL;
+		constexpr const auto index = 1ULL;
+		constexpr const auto from = 31;
+		constexpr const auto name = "pasid_present";
+
+		inline auto is_enabled(const value_type &frr) noexcept
+		{ return is_bit_set(frr.data[index], from); }
+
+		inline auto is_disabled(const value_type &frr) noexcept
+		{ return !is_bit_set(frr.data[index], from); }
+
+		inline void dump(int level, const value_type &frr, std::string *msg = nullptr)
+		{ bfdebug_subbool(level, name, is_enabled(frr), msg); }
+    }
+
+    namespace fr
+    {
+		constexpr const auto mask = 0xFF0000000ULL;
+		constexpr const auto index = 1ULL;
+		constexpr const auto from = 32;
+		constexpr const auto name = "fault_reason";
+
+		inline auto get(const value_type &frr) noexcept
+		{ return get_bits(frr.data[index], mask) >> from; }
+
+		inline void set(value_type &frr, uint64_t val) noexcept
+		{ frr.data[index] = set_bits(frr.data[index], mask, val << from); }
+
+		inline void dump(int level, const value_type &frr, std::string *msg = nullptr)
+		{ bfdebug_subnhex(level, name, get(frr), msg); }
+    }
+
+    namespace pv
+    {
+		constexpr const auto mask = 0xFFFFF0000000000ULL;
+		constexpr const auto index = 1ULL;
+		constexpr const auto from = 40;
+		constexpr const auto name = "pasid_value";
+
+		inline auto get(const value_type &frr) noexcept
+		{ return get_bits(frr.data[index], mask) >> from; }
+
+		inline void set(value_type &frr, uint64_t val) noexcept
+		{ frr.data[index] = set_bits(frr.data[index], mask, val << from); }
+
+		inline void dump(int level, const value_type &frr, std::string *msg = nullptr)
+		{ bfdebug_subnhex(level, name, get(frr), msg); }
+    }
+
+    namespace at
+    {
+		constexpr const auto mask = 0x3000000000000000ULL;
+		constexpr const auto index = 1ULL;
+		constexpr const auto from = 60;
+		constexpr const auto name = "address_type";
+
+		inline auto get(const value_type &frr) noexcept
+		{ return get_bits(frr.data[index], mask) >> from; }
+
+		inline void set(value_type &frr, uint64_t val) noexcept
+		{ frr.data[index] = set_bits(frr.data[index], mask, val << from); }
+
+		inline void dump(int level, const value_type &frr, std::string *msg = nullptr)
+		{ bfdebug_subnhex(level, name, get(frr), msg); }
+    }
+
+    namespace t
+    {
+		constexpr const auto mask = 0x4000000000000000ULL;
+		constexpr const auto index = 1ULL;
+		constexpr const auto from = 62;
+		constexpr const auto name = "type";
+
+		inline auto is_enabled(const value_type &frr) noexcept
+		{ return is_bit_set(frr.data[index], from); }
+
+		inline auto is_disabled(const value_type &frr) noexcept
+		{ return !is_bit_set(frr.data[index], from); }
+
+		inline void dump(int level, const value_type &frr, std::string *msg = nullptr)
+		{ bfdebug_subbool(level, name, is_enabled(frr), msg); }
+    }
+
+    namespace f
+    {
+		constexpr const auto mask = 0x8000000000000000ULL;
+		constexpr const auto index = 1ULL;
+		constexpr const auto from = 63;
+		constexpr const auto name = "fault";
+
+		inline auto is_enabled(const value_type &frr) noexcept
+		{ return is_bit_set(frr.data[index], from); }
+
+		inline auto is_disabled(const value_type &frr) noexcept
+		{ return !is_bit_set(frr.data[index], from); }
+
+		inline void enable(value_type &frr) noexcept
+		{ frr.data[index] = set_bit(frr.data[index], from); }
+
+		inline void disable(value_type &frr) noexcept
+		{ frr.data[index] = clear_bit(frr.data[index], from); }
+
+		inline void dump(int level, const value_type &frr, std::string *msg = nullptr)
+		{ bfdebug_subbool(level, name, is_enabled(frr), msg); }
+    }
+
+    inline void dump(int level, const value_type &frr, std::string *msg = nullptr)
+    {
+		bfdebug_nhex(level, "fault_recording_record[63:0]", frr.data[0], msg);
+		bfdebug_nhex(level, "fault_recording_record[127:64]", frr.data[1], msg);
+
+		fi::dump(level, frr, msg);
+		sid::dump(level, frr, msg);
+		priv::dump(level, frr, msg);
+		exe::dump(level, frr, msg);
+		pp::dump(level, frr, msg);
+		fr::dump(level, frr, msg);
+		pv::dump(level, frr, msg);
+		at::dump(level, frr, msg);
+		t::dump(level, frr, msg);
+		f::dump(level, frr, msg);
+    }
+
+    inline void dump(int level, std::string *msg = nullptr)
+    {
+		auto reg_val = get();
+		dump(level, reg_val, msg);
+    }
+}
+
 namespace aflog_reg
 {
 	constexpr const auto name = "advanced_fault_log_register";
@@ -2232,7 +2569,7 @@ namespace aflog_reg
 	using value_type = uint64_t;
 
 	inline auto get() noexcept
-	{ return read_64(offset); }
+    { return read_64(offset); }
 
 	inline auto set(value_type val) noexcept
 	{ return write_64(offset, val); }
@@ -3823,6 +4160,45 @@ namespace mtrrdef_reg
 		auto reg_val = get();
 		dump(level, reg_val, msg);
 	}
+}
+
+inline void dump(int level, std::string *msg = nullptr)
+{
+    ver_reg::dump(level, msg);
+    cap_reg::dump(level, msg);
+    ecap_reg::dump(level, msg);
+    gsts_reg::dump(level, msg);
+    rtaddr_reg::dump(level, msg);
+    ccmd_reg::dump(level, msg);
+    fsts_reg::dump(level, msg);
+    fectl_reg::dump(level, msg);
+    fedata_reg::dump(level, msg);
+    feaddr_reg::dump(level, msg);
+    feuaddr_reg::dump(level, msg);
+    aflog_reg::dump(level, msg);
+    pmen_reg::dump(level, msg);
+    plmbase_reg::dump(level, msg);
+    plmlimit_reg::dump(level, msg);
+    pmhbase_reg::dump(level, msg);
+    phmlimit_reg::dump(level, msg);
+    iqh_reg::dump(level, msg);
+    iqt_reg::dump(level, msg);
+    iqa_reg::dump(level, msg);
+    ics_reg::dump(level, msg);
+    iectl_reg::dump(level, msg);
+    iedata_reg::dump(level, msg);
+    ieaddr_reg::dump(level, msg);
+    ieuaddr_reg::dump(level, msg);
+    irta_reg::dump(level, msg);
+    pqh_reg::dump(level, msg);
+    pqt_reg::dump(level, msg);
+    pqa_reg::dump(level, msg);
+    pectl_reg::dump(level, msg);
+    pedata_reg::dump(level, msg);
+    peaddr_reg::dump(level, msg);
+    peuaddr_reg::dump(level, msg);
+    mtrrcap_reg::dump(level, msg);
+    mtrrdef_reg::dump(level, msg);
 }
 
 }
