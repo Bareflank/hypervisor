@@ -16955,6 +16955,36 @@ namespace ia32_gs_base
     { bfdebug_nhex(level, name, get(), msg); }
 }
 
+namespace platform_info
+{
+    constexpr const auto addr = 0x000000CEU;
+    constexpr const auto name = "platform_info";
+
+    inline auto get() noexcept
+    { return _read_msr(addr); }
+
+    namespace max_nonturbo_ratio
+    {
+        constexpr const auto mask = 0x0000FF00U;
+        constexpr const auto from = 8;
+        constexpr const auto name = "max_non_turbo_ratio";
+
+        inline auto get() noexcept
+        { return get_bits(_read_msr(addr), mask) >> from; }
+
+        inline auto get(value_type msr) noexcept
+        { return get_bits(msr, mask) >> from; }
+
+        inline void dump(int level, value_type msr, std::string *msg = nullptr)
+        {bfdebug_nhex(level, name, msr, msg); }
+    }
+
+    inline void dump(int level, value_type msr, std::string *msg = nullptr)
+    {
+        max_nonturbo_ratio::dump(level, msr);
+    }
+}
+
 }
 }
 
