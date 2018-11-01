@@ -43,6 +43,7 @@ inline uintptr_t g_rsdp = 0;
 #ifdef BF_INTEL_X64
 #include <arch/intel_x64/apic/lapic.h>
 #include <arch/intel_x64/apic/x2apic.h>
+#include <arch/intel_x64/barrier.h>
 #include <arch/intel_x64/bit.h>
 #include <arch/intel_x64/cpuid.h>
 #include <arch/intel_x64/crs.h>

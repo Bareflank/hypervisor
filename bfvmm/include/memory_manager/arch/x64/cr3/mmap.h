@@ -327,8 +327,9 @@ public:
     /// @ensures
     ///
     /// @param virt_addr the virtual address to unmap
+    /// @return the from for the address that was unmapped
     ///
-    void
+    uintptr_t
     unmap(void *virt_addr)
     {
         using namespace ::x64;
@@ -338,28 +339,30 @@ public:
         auto &pdpte = m_pdpt.virt_addr.at(pdpt::index(virt_addr));
 
         if (pdpte == 0) {
-            return;
+            return ::intel_x64::ept::pdpt::from;
         }
 
         if (pdpt::entry::ps::is_enabled(pdpte)) {
             pdpte = 0;
-            return;
+            return ::intel_x64::ept::pdpt::from;
         }
 
         this->map_pd(pdpt::index(virt_addr));
         auto &pde = m_pd.virt_addr.at(pd::index(virt_addr));
 
         if (pde == 0) {
-            return;
+            return ::intel_x64::ept::pd::from;
         }
 
         if (pd::entry::ps::is_enabled(pde)) {
             pde = 0;
-            return;
+            return ::intel_x64::ept::pd::from;
         }
 
         this->map_pt(pd::index(virt_addr));
         m_pt.virt_addr.at(pt::index(virt_addr)) = 0;
+
+        return ::intel_x64::ept::pt::from;
     }
 
     /// Unmap Virtual Address
