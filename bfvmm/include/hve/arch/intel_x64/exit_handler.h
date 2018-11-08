@@ -264,8 +264,8 @@ private:
 private:
 
     vcpu *m_vcpu;
-    std::unique_ptr<gsl::byte[]> m_stack;
     std::unique_ptr<gsl::byte[]> m_ist1;
+    std::unique_ptr<gsl::byte[]> m_stack;
 
     std::list<init_handler_delegate_t> m_exit_handlers;
     std::list<init_handler_delegate_t> m_init_handlers;

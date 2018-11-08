@@ -255,20 +255,24 @@ bfitoa(size_t value, char *str, size_t base)
 /* Helpers (Private)                                                          */
 /* ---------------------------------------------------------------------------*/
 
-inline void
+inline std::size_t
 __bfdebug_core(gsl::not_null<std::string *> msg)
 {
+    std::size_t digits = 1;
+
     *msg += bfcolor_cyan;
     *msg += "[";
     *msg += bfcolor_yellow;
 #ifdef VMM
-    *msg += std::to_string(thread_context_cpuid());
+    digits = bfn::to_string(*msg, thread_context_cpuid(), 16, false);
 #else
     *msg += '0';
 #endif
     *msg += bfcolor_cyan;
     *msg += "] ";
     *msg += bfcolor_end;
+
+    return digits;
 }
 
 inline void
@@ -281,10 +285,10 @@ __bfdebug_type(gsl::not_null<std::string *> msg, cstr_t color, cstr_t type)
 }
 
 inline void
-__bfdebug_jtfy(gsl::not_null<std::string *> msg, uint64_t width, cstr_t title, cstr_t indent)
+__bfdebug_jtfy(gsl::not_null<std::string *> msg, int64_t width, cstr_t title, cstr_t indent)
 {
     if (title != nullptr) {
-        auto len = width - strlen(title);
+        int64_t len = width - strlen(title);
 
         if (indent != nullptr) {
             len -= strlen(indent);
@@ -292,10 +296,15 @@ __bfdebug_jtfy(gsl::not_null<std::string *> msg, uint64_t width, cstr_t title, c
         }
 
         *msg += title;
-        *msg += std::string(len, ' ');
+
+        for (int64_t i = 0; i < len; i++) {
+            *msg += ' ';
+        }
     }
     else {
-        *msg += std::string(width, ' ');
+        for (int64_t i = 0; i < width; i++) {
+            *msg += ' ';
+        }
     }
 }
 
@@ -379,7 +388,7 @@ __bfdebug_info_core(cstr_t color, cstr_t type, cstr_t title, gsl::not_null<std::
     __bfdebug_type(msg, color, type);
 
     if (title != nullptr) {
-        *msg += std::string(title);
+        *msg += title;
     }
 
     *msg += '\n';
@@ -470,10 +479,13 @@ __bfdebug_lnbr(cstr_t color, cstr_t type, std::string *msg = nullptr)
 inline void
 __bfdebug_brk1_core(cstr_t color, cstr_t type, gsl::not_null<std::string *> msg)
 {
-    __bfdebug_core(msg);
+    auto digits = __bfdebug_core(msg);
     __bfdebug_type(msg, color, type);
 
-    *msg += "======================================================================";
+    for (auto i = 0; i < 70 - digits; i++) {
+        *msg += '=';
+    }
+
     *msg += '\n';
 }
 
@@ -526,10 +538,13 @@ __bfdebug_brk1(cstr_t color, cstr_t type, std::string *msg = nullptr)
 inline void
 __bfdebug_brk2_core(cstr_t color, cstr_t type, gsl::not_null<std::string *> msg)
 {
-    __bfdebug_core(msg);
+    auto digits = __bfdebug_core(msg);
     __bfdebug_type(msg, color, type);
 
-    *msg += "----------------------------------------------------------------------";
+    for (auto i = 0; i < 70 - digits; i++) {
+        *msg += '-';
+    }
+
     *msg += '\n';
 }
 
@@ -582,10 +597,13 @@ __bfdebug_brk2(cstr_t color, cstr_t type, std::string *msg = nullptr)
 inline void
 __bfdebug_brk3_core(cstr_t color, cstr_t type, gsl::not_null<std::string *> msg)
 {
-    __bfdebug_core(msg);
+    auto digits = __bfdebug_core(msg);
     __bfdebug_type(msg, color, type);
 
-    *msg += "......................................................................";
+    for (auto i = 0; i < 70 - digits; i++) {
+        *msg += '.';
+    }
+
     *msg += '\n';
 }
 
@@ -639,11 +657,11 @@ inline void
 __bfdebug_nhex_core(
     cstr_t color, cstr_t type, cstr_t indent, cstr_t title, uint64_t nhex, gsl::not_null<std::string *> msg)
 {
-    __bfdebug_core(msg);
+    auto digits = __bfdebug_core(msg);
     __bfdebug_type(msg, color, type);
-    __bfdebug_jtfy(msg, 52, title, indent);
+    __bfdebug_jtfy(msg, 52 - digits, title, indent);
 
-    *msg += bfn::to_string(nhex, 16);
+    bfn::to_string(*msg, nhex, 16);
     *msg += '\n';
 }
 
@@ -699,12 +717,11 @@ inline void
 __bfdebug_ndec_core(
     cstr_t color, cstr_t type, cstr_t indent, cstr_t title, uint64_t ndec, gsl::not_null<std::string *> msg)
 {
-    auto str = bfn::to_string(ndec, 10);
-    __bfdebug_core(msg);
+    auto digits = __bfdebug_core(msg);
     __bfdebug_type(msg, color, type);
-    __bfdebug_jtfy(msg, 70 - str.length(), title, indent);
+    __bfdebug_jtfy(msg, 70 - digits - bfn::digits(ndec), title, indent);
 
-    *msg += str;
+    bfn::to_string(*msg, ndec);
     *msg += '\n';
 }
 
@@ -756,9 +773,10 @@ __bfdebug_bool_core(
     cstr_t color, cstr_t type, cstr_t indent, cstr_t title, bool val, gsl::not_null<std::string *> msg)
 {
     auto str = val ? "true" : "false";
-    __bfdebug_core(msg);
+
+    auto digits = __bfdebug_core(msg);
     __bfdebug_type(msg, color, type);
-    __bfdebug_jtfy(msg, 70 - strlen(str), title, indent);
+    __bfdebug_jtfy(msg, 70 - strlen(str) - digits, title, indent);
 
     *msg += str;
     *msg += '\n';
@@ -811,10 +829,11 @@ inline void
 __bfdebug_text_core(
     cstr_t color, cstr_t type, cstr_t indent, cstr_t title, cstr_t text, gsl::not_null<std::string *> msg)
 {
-    auto str = text == nullptr ? std::string{} : std::string{text};
-    __bfdebug_core(msg);
+    auto str = text == nullptr ? "" : text;
+
+    auto digits = __bfdebug_core(msg);
     __bfdebug_type(msg, color, type);
-    __bfdebug_jtfy(msg, 70 - str.length(), title, indent);
+    __bfdebug_jtfy(msg, 70 - strlen(str) - digits, title, indent);
 
     *msg += str;
     *msg += '\n';
@@ -867,9 +886,9 @@ inline void
 __bfdebug_pass_core(
     cstr_t color, cstr_t type, cstr_t indent, cstr_t title, gsl::not_null<std::string *> msg)
 {
-    __bfdebug_core(msg);
+    auto digits = __bfdebug_core(msg);
     __bfdebug_type(msg, color, type);
-    __bfdebug_jtfy(msg, 66, title, indent);
+    __bfdebug_jtfy(msg, 66 - digits, title, indent);
 
     *msg += bfcolor_green "pass" bfcolor_end;
     *msg += '\n';
@@ -922,9 +941,9 @@ inline void
 __bfdebug_fail_core(
     cstr_t color, cstr_t type, cstr_t indent, cstr_t title, gsl::not_null<std::string *> msg)
 {
-    __bfdebug_core(msg);
+    auto digits = __bfdebug_core(msg);
     __bfdebug_type(msg, color, type);
-    __bfdebug_jtfy(msg, 66, title, indent);
+    __bfdebug_jtfy(msg, 66 - digits, title, indent);
 
     *msg += bfcolor_red "fail  <----" bfcolor_end;
     *msg += '\n';
