@@ -505,6 +505,7 @@ exit_handler::exit_handler(
     gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu},
+    m_ist1{std::make_unique<gsl::byte[]>(STACK_SIZE * 2)},
     m_stack{std::make_unique<gsl::byte[]>(STACK_SIZE * 2)}
 {
     using namespace bfvmm::x64;
@@ -608,13 +609,12 @@ exit_handler::write_host_state()
     host_gdtr_base::set(m_host_gdt.base());
     host_idtr_base::set(m_host_idt.base());
 
-    m_ist1 = std::make_unique<gsl::byte[]>(STACK_SIZE << 1U);
-    m_host_tss.ist1 = setup_stack(m_ist1.get());
-    set_default_esrs(&m_host_idt, 8);
-    set_nmi_handler(&m_host_idt, 8);
-
     host_rip::set(exit_handler_entry);
-    host_rsp::set(setup_stack(m_stack.get()));
+    host_rsp::set(setup_stack(m_stack.get(), m_vcpu->id()));
+
+    set_nmi_handler(&m_host_idt, 8);
+    set_default_esrs(&m_host_idt, 8);
+    m_host_tss.ist1 = setup_stack(m_ist1.get(), m_vcpu->id());
 }
 
 void

@@ -90,7 +90,7 @@ struct thread_context_t {
  * @return the stack pointer (in interger form)
  */
 static inline uint64_t
-setup_stack(void *stack)
+setup_stack(void *stack, uint64_t cpuid)
 {
     struct thread_context_t *tc;
     uint64_t stack_int = bfrcast(uint64_t, stack);
@@ -100,7 +100,7 @@ setup_stack(void *stack)
     stack_int = stack_top - sizeof(struct thread_context_t) - 1;
 
     tc = bfrcast(struct thread_context_t *, stack_top - sizeof(struct thread_context_t));
-    tc->cpuid = thread_context_cpuid();
+    tc->cpuid = cpuid;
     tc->tlsptr = thread_context_tlsptr();
 
     return stack_int;
