@@ -1834,7 +1834,8 @@ private_load_binary(struct bfelf_binary_t *binary)
 {
     int64_t i = 0;
     int64_t ret = 0;
-    int64_t exec_size, num_segments = 0;
+    int64_t num_segments = 0;
+    uint64_t exec_size = 0;
 
     /*
      * Note:
