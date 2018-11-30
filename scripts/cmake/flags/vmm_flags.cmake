@@ -36,7 +36,7 @@ list(APPEND BFFLAGS_VMM
     -fstack-protector-strong
     -DVMM
     -D${OSTYPE}
-    -D${ABITYPE}
+    -DSYSV
     -DGSL_THROW_ON_CONTRACT_VIOLATION
     -DMALLOC_PROVIDED
     -DCLOCK_MONOTONIC

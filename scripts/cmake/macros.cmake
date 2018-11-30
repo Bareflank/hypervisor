@@ -1026,8 +1026,7 @@ macro(enable_asm PREFIX)
 
         if(PREFIX STREQUAL "vmm")
             set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
-        endif()
-        if(PREFIX STREQUAL "userspace")
+        else()
             if(HOST_FORMAT_TYPE STREQUAL "pe")
                 set(CMAKE_ASM_NASM_OBJECT_FORMAT "win64")
             endif()
@@ -1038,7 +1037,12 @@ macro(enable_asm PREFIX)
 
         enable_language(ASM_NASM)
 
-        set(CMAKE_ASM_NASM_FLAGS "-d ${PREFIX} -d ${OSTYPE} -d ${ABITYPE}")
+        if(PREFIX STREQUAL "vmm")
+            set(CMAKE_ASM_NASM_FLAGS "-d ${PREFIX} -d ${OSTYPE} -d SYSV")
+        else()
+            set(CMAKE_ASM_NASM_FLAGS "-d ${PREFIX} -d ${OSTYPE} -d ${ABITYPE}")
+        endif()
+
         set(CMAKE_ASM_NASM_CREATE_SHARED_LIBRARY TRUE)
         set(CMAKE_ASM_NASM_CREATE_STATIC_LIBRARY TRUE)
     endif()
