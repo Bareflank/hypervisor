@@ -178,8 +178,13 @@
  *    - 0x02E8U  // COM4
  *    - 0xE000U
  *    - 0xE010U
+ *    - 0xEFF0U  // Windows COM4
+ *    - 0xEFF8U  // Windows COM5
  *
- * On aarch64, the value is the serial peripheral's physical base address.
+ * On aarch64, the value is the serial peripheral's physical base address. On
+ * Windows, you might need to check Device Manager to see what ports Windows
+ * gave the serial ports are they can change (i.e. the port numbers that you
+ * get from Windows might be different than BIOS or Linux)
  *
  * Note: See bfvmm/serial/serial_ns16550a.h
  */

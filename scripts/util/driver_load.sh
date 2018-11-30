@@ -23,17 +23,41 @@
 # $1 == CMAKE_SOURCE_DIR
 
 certmgr_10_0_00000_0="/cygdrive/c/Program Files (x86)/Windows Kits/10/bin/x64/certmgr"
+certmgr_10_0_17763_0="/cygdrive/c/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x64/certmgr"
 certmgr_10_0_17134_0="/cygdrive/c/Program Files (x86)/Windows Kits/10/bin/10.0.17134.0/x64/certmgr"
+certmgr_10_0_16299_0="/cygdrive/c/Program Files (x86)/Windows Kits/10/bin/10.0.16299.0/x64/certmgr"
+certmgr_10_0_15063_0="/cygdrive/c/Program Files (x86)/Windows Kits/10/bin/10.0.15063.0/x64/certmgr"
+certmgr_10_0_14393_0="/cygdrive/c/Program Files (x86)/Windows Kits/10/bin/10.0.14393.0/x64/certmgr"
 
 find_certmgr() {
+
+    if [[ -f $certmgr_10_0_00000_0 ]]; then
+        certmgr=$certmgr_10_0_00000_0
+        return
+    fi
+
+    if [[ -f $certmgr_10_0_17763_0 ]]; then
+        certmgr=$certmgr_10_0_17763_0
+        return
+    fi
 
     if [[ -f $certmgr_10_0_17134_0 ]]; then
         certmgr=$certmgr_10_0_17134_0
         return
     fi
 
-    if [[ -f $certmgr_10_0_00000_0 ]]; then
-        certmgr=$certmgr_10_0_00000_0
+    if [[ -f $certmgr_10_0_16299_0 ]]; then
+        certmgr=$certmgr_10_0_16299_0
+        return
+    fi
+
+    if [[ -f $certmgr_10_0_15063_0 ]]; then
+        certmgr=$certmgr_10_0_15063_0
+        return
+    fi
+
+    if [[ -f $certmgr_10_0_14393_0 ]]; then
+        certmgr=$certmgr_10_0_14393_0
         return
     fi
 
