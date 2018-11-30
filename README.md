@@ -84,6 +84,9 @@ Bareflank Hypervisor
 
 ## Additional Videos
 
+Checkout our [YouTube Channel](https://www.youtube.com/channel/UCH-7Pw96K5V1RHAPn5-cmYA) for more great content as well as 
+the following videos at [CppCon](https://www.youtube.com/user/CppCon) below:
+
 [![CppCon 2017](https://i.imgur.com/bLnrVon.png)](https://www.youtube.com/watch?v=KdJhQuycD78)
 [![CppCon 2016](https://i.imgur.com/MLoOLmM.png)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
 
