@@ -51,6 +51,8 @@ vmcs::vmcs(vcpuid::type vcpuid) :
     m_vmcs_region{make_page<uint32_t>()},
     m_vmcs_region_phys{g_mm->virtptr_to_physint(m_vmcs_region.get())}
 {
+    this->clear();
+
     gsl::span<uint32_t> id{m_vmcs_region.get(), 1024};
     id[0] = gsl::narrow<uint32_t>(::intel_x64::msrs::ia32_vmx_basic::revision_id::get());
 
@@ -68,17 +70,20 @@ vmcs::vmcs(vcpuid::type vcpuid) :
 void
 vmcs::launch()
 {
-    auto ___ = gsl::on_failure([&] {
-        ::intel_x64::vmcs::debug::dump(0);
-        check::all();
-    });
-
-    if (vcpuid::is_host_vm_vcpu(m_save_state->vcpuid)) {
-        ::intel_x64::vm::launch_demote();
+    try {
+        if (vcpuid::is_host_vm_vcpu(m_save_state->vcpuid)) {
+            ::intel_x64::vm::launch_demote();
+        }
+        else {
+            vmcs_launch(m_save_state.get());
+            throw std::runtime_error("vmcs launch failed");
+        }
     }
-    else {
-        vmcs_launch(m_save_state.get());
-        throw std::runtime_error("vmcs launch failed");
+    catch(...) {
+        auto e = std::current_exception();
+
+        this->check();
+        std::rethrow_exception(e);
     }
 }
 
@@ -98,7 +103,36 @@ vmcs::resume()
 
 void
 vmcs::load()
-{ ::intel_x64::vm::load(&m_vmcs_region_phys); }
+{
+    ::intel_x64::vm::load(&m_vmcs_region_phys);
+}
+
+void
+vmcs::clear()
+{
+    ::intel_x64::vm::clear(&m_vmcs_region_phys);
+}
+
+bool
+vmcs::check() const noexcept
+{
+    try {
+        check::all();
+    }
+    catch(std::exception &e) {
+        bfdebug_transaction(0, [&](std::string * msg) {
+            bferror_lnbr(0, msg);
+            bferror_brk1(0, msg);
+            bferror_info(0, typeid(e).name(), msg);
+            bferror_brk1(0, msg);
+            bferror_info(0, e.what(), msg);
+        });
+
+        return false;
+    }
+
+    return true;
+}
 
 }
 }
