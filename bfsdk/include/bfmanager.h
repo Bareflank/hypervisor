@@ -144,6 +144,7 @@ public:
     /// @ensures none
     ///
     /// @param id the T to get
+    /// @param err the error to display
     /// @return returns a pointer to the T associated with tid
     ///
     gsl::not_null<T *> get(tid id, const char *err = nullptr)
@@ -168,13 +169,12 @@ public:
     /// @ensures none
     ///
     /// @param id the T to get
+    /// @param err the error to display
     /// @return returns a pointer to the T associated with tid
     ///
     template<typename U>
     gsl::not_null<U> get(tid id, const char *err = nullptr)
-    {
-        return dynamic_cast<U>(get(id, err).get());
-    }
+    { return dynamic_cast<U>(get(id, err).get()); }
 
 private:
 

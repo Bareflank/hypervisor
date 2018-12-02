@@ -39,19 +39,19 @@ constexpr const auto blocks_per_page = 512;
 
 TEST_CASE("basic allocator of 0 size")
 {
-    basic_object_allocator pool{0, 0};
+    object_allocator pool{0, 0};
 }
 
 TEST_CASE("basic allocator size")
 {
-    basic_object_allocator pool{sizeof(uint64_t), 0};
+    object_allocator pool{sizeof(uint64_t), 0};
     CHECK(pool.size(nullptr) == sizeof(uint64_t));
 }
 
 TEST_CASE("construction: limited")
 {
     {
-        object_allocator<uint64_t, 1> pool{};
+        object_allocator pool{sizeof(uint64_t), 1};
 
         CHECK(pool.page_stack_size() == 1);
         CHECK(pool.objt_stack_size() == 3);
@@ -71,17 +71,17 @@ TEST_CASE("construction: limited out of memory")
     });
 
     {
-        object_allocator<uint64_t, 1> pool1{};
-        object_allocator<uint64_t, 0> pool2{};
+        object_allocator pool1{sizeof(uint64_t), 1};
+        object_allocator pool2{sizeof(uint64_t), 0};
 
-        CHECK_THROWS(pool2.allocate(1));
+        CHECK_THROWS(pool2.allocate());
     }
 }
 
 TEST_CASE("construction: unlimited")
 {
     {
-        object_allocator<uint64_t> pool{};
+        object_allocator pool{sizeof(uint64_t)};
 
         CHECK(pool.page_stack_size() == 0);
         CHECK(pool.objt_stack_size() == 0);
@@ -96,9 +96,9 @@ TEST_CASE("construction: unlimited")
 TEST_CASE("allocate: single allocation")
 {
     {
-        object_allocator<uint64_t> pool{};
+        object_allocator pool{sizeof(uint64_t)};
 
-        auto ptr = pool.allocate(1);
+        auto ptr = pool.allocate();
         CHECK_NOTHROW(ptr);
 
         CHECK(pool.page_stack_size() == 1);
@@ -107,7 +107,7 @@ TEST_CASE("allocate: single allocation")
         CHECK(pool.num_free() == blocks_per_page - 1);
         CHECK(pool.num_used() == 1);
 
-        pool.deallocate(ptr, 1);
+        pool.deallocate(ptr);
     }
 
     CHECK(g_allocated_pages.empty());
@@ -116,9 +116,9 @@ TEST_CASE("allocate: single allocation")
 TEST_CASE("allocate: single allocation without free")
 {
     {
-        object_allocator<uint64_t> pool{};
+        object_allocator pool{sizeof(uint64_t)};
 
-        CHECK_NOTHROW(pool.allocate(1));
+        CHECK_NOTHROW(pool.allocate());
 
         CHECK(pool.page_stack_size() == 1);
         CHECK(pool.objt_stack_size() == 3);
@@ -137,33 +137,13 @@ TEST_CASE("allocate: single allocation without free")
     g_allocated_pages.clear();
 }
 
-TEST_CASE("allocate: single allocation n != 1")
-{
-    {
-        object_allocator<uint64_t> pool{};
-
-        auto ptr = pool.allocate(10);
-        CHECK_NOTHROW(ptr);
-
-        CHECK(pool.page_stack_size() == 0);
-        CHECK(pool.objt_stack_size() == 0);
-        CHECK(pool.num_page() == 0);
-        CHECK(pool.num_free() == 0);
-        CHECK(pool.num_used() == 0);
-
-        pool.deallocate(ptr, 10);
-    }
-
-    CHECK(g_allocated_pages.empty());
-}
-
 TEST_CASE("allocate: multiple allocations")
 {
     {
-        object_allocator<uint64_t> pool{};
+        object_allocator pool{sizeof(uint64_t)};
 
         for (auto i = 0; i < blocks_per_page * 4; i++) {
-            pool.allocate(1);
+            pool.allocate();
         }
 
         CHECK(pool.page_stack_size() == 1);
@@ -192,10 +172,10 @@ TEST_CASE("allocate: multiple allocations with odd sized T")
             uint64_t val3;
         };
 
-        object_allocator<test> pool{};
+        object_allocator pool{sizeof(test)};
 
         for (auto i = 0U; i < 0x1000U / sizeof(test); i++) {
-            CHECK_NOTHROW(pool.allocate(1));
+            CHECK_NOTHROW(pool.allocate());
         }
 
         CHECK(pool.page_stack_size() == 1);
@@ -204,7 +184,7 @@ TEST_CASE("allocate: multiple allocations with odd sized T")
         CHECK(pool.num_free() == 0);
         CHECK(pool.num_used() == 0x1000U / sizeof(test));
 
-        CHECK_NOTHROW(pool.allocate(1));
+        CHECK_NOTHROW(pool.allocate());
 
         CHECK(pool.page_stack_size() == 1);
         CHECK(pool.objt_stack_size() == 2);
@@ -226,10 +206,10 @@ TEST_CASE("allocate: multiple allocations with odd sized T")
 TEST_CASE("allocate: over limit")
 {
     {
-        object_allocator<uint64_t, 1> pool{};
+        object_allocator pool{sizeof(uint64_t), 1};
 
         for (auto i = 0; i < blocks_per_page; i++) {
-            pool.allocate(1);
+            pool.allocate();
         }
 
         CHECK(pool.page_stack_size() == 1);
@@ -238,7 +218,7 @@ TEST_CASE("allocate: over limit")
         CHECK(pool.num_free() == 0);
         CHECK(pool.num_used() == blocks_per_page);
 
-        CHECK_THROWS(pool.allocate(1));
+        CHECK_THROWS(pool.allocate());
     }
 
     CHECK(!g_allocated_pages.empty());
@@ -255,9 +235,9 @@ TEST_CASE("deallocate: deallocate without allocate")
 {
     {
         uint64_t nothing = 0;
-        object_allocator<uint64_t> pool{};
+        object_allocator pool{sizeof(uint64_t)};
 
-        CHECK_NOTHROW(pool.deallocate(&nothing, 1));
+        CHECK_NOTHROW(pool.deallocate(&nothing));
     }
 
     CHECK(g_allocated_pages.empty());
@@ -266,9 +246,9 @@ TEST_CASE("deallocate: deallocate without allocate")
 TEST_CASE("deallocate: deallocate single allocation")
 {
     {
-        object_allocator<uint64_t> pool{};
+        object_allocator pool{sizeof(uint64_t)};
 
-        auto alloc = pool.allocate(1);
+        auto alloc = pool.allocate();
 
         CHECK(pool.page_stack_size() == 1);
         CHECK(pool.objt_stack_size() == 3);
@@ -276,7 +256,7 @@ TEST_CASE("deallocate: deallocate single allocation")
         CHECK(pool.num_free() == blocks_per_page - 1);
         CHECK(pool.num_used() == 1);
 
-        CHECK_NOTHROW(pool.deallocate(alloc, 1));
+        CHECK_NOTHROW(pool.deallocate(alloc));
 
         CHECK(pool.page_stack_size() == 1);
         CHECK(pool.objt_stack_size() == 3);
@@ -291,11 +271,11 @@ TEST_CASE("deallocate: deallocate single allocation")
 TEST_CASE("deallocate: deallocate multiple allocations")
 {
     {
-        std::list<uint64_t *> v{};
-        object_allocator<uint64_t> pool{};
+        std::list<void *> v{};
+        object_allocator pool{sizeof(uint64_t)};
 
         for (auto i = 0; i < blocks_per_page * 4; i++) {
-            v.push_back(pool.allocate(1));
+            v.push_back(pool.allocate());
         }
 
         CHECK(pool.page_stack_size() == 1);
@@ -305,7 +285,7 @@ TEST_CASE("deallocate: deallocate multiple allocations")
         CHECK(pool.num_used() == blocks_per_page * 4);
 
         for (auto elem : v) {
-            pool.deallocate(elem, 1);
+            pool.deallocate(elem);
         }
 
         CHECK(pool.page_stack_size() == 1);
@@ -321,9 +301,9 @@ TEST_CASE("deallocate: deallocate multiple allocations")
 TEST_CASE("max_size: can allocate max_size")
 {
     {
-        object_allocator<__oa_page> pool{};
+        object_allocator pool{sizeof(__oa_page)};
 
-        CHECK_NOTHROW(pool.allocate(1));
+        CHECK_NOTHROW(pool.allocate());
 
         CHECK(pool.page_stack_size() == 1);
         CHECK(pool.objt_stack_size() == 1);
@@ -345,11 +325,11 @@ TEST_CASE("max_size: can allocate max_size")
 TEST_CASE("max_size: can allocate max_size more than once")
 {
     {
-        object_allocator<__oa_page> pool{};
+        object_allocator pool{sizeof(__oa_page)};
 
-        CHECK_NOTHROW(pool.allocate(1));
-        CHECK_NOTHROW(pool.allocate(1));
-        CHECK_NOTHROW(pool.allocate(1));
+        CHECK_NOTHROW(pool.allocate());
+        CHECK_NOTHROW(pool.allocate());
+        CHECK_NOTHROW(pool.allocate());
 
         CHECK(pool.page_stack_size() == 1);
         CHECK(pool.objt_stack_size() == 1);
@@ -368,104 +348,16 @@ TEST_CASE("max_size: can allocate max_size more than once")
     g_allocated_pages.clear();
 }
 
-TEST_CASE("operators: unlimited are not equal")
-{
-    {
-        object_allocator<uint64_t> pool1{};
-        object_allocator<uint64_t> pool2{};
-
-        CHECK(pool1 != pool2);
-        CHECK(!(pool1 == pool2));
-    }
-
-    CHECK(g_allocated_pages.empty());
-}
-
-TEST_CASE("operators: limited are not equal")
-{
-    {
-        object_allocator<uint64_t, 1> pool1{};
-        object_allocator<uint64_t, 1> pool2{};
-
-        CHECK(pool1 != pool2);
-        CHECK(!(pool1 == pool2));
-    }
-
-    CHECK(g_allocated_pages.empty());
-}
-
-TEST_CASE("operators: move unlimited")
-{
-    {
-        object_allocator<uint64_t> pool1{};
-        object_allocator<uint64_t> pool2{};
-
-        pool1 = std::move(pool2);
-
-        CHECK(pool1.page_stack_size() == 0);
-        CHECK(pool1.objt_stack_size() == 0);
-        CHECK(pool1.num_page() == 0);
-        CHECK(pool1.num_free() == 0);
-        CHECK(pool1.num_used() == 0);
-    }
-
-    CHECK(g_allocated_pages.empty());
-}
-
-TEST_CASE("operators: move unlimited with allocations")
-{
-    {
-        object_allocator<uint64_t> pool1{};
-        object_allocator<uint64_t> pool2{};
-
-        pool1.allocate(1);
-        pool1 = std::move(pool2);
-
-        CHECK(pool1.page_stack_size() == 0);
-        CHECK(pool1.objt_stack_size() == 0);
-        CHECK(pool1.num_page() == 0);
-        CHECK(pool1.num_free() == 0);
-        CHECK(pool1.num_used() == 0);
-    }
-
-    CHECK(!g_allocated_pages.empty());
-
-    auto pages = g_allocated_pages;
-    for (const auto &ptr : pages) {
-        free_page(ptr);
-    }
-
-    g_allocated_pages.clear();
-}
-
-TEST_CASE("operators: move limited")
-{
-    {
-        object_allocator<uint64_t, 1> pool1{};
-        object_allocator<uint64_t, 1> pool2{};
-
-        pool1 = std::move(pool2);
-
-        CHECK(pool1.page_stack_size() == 1);
-        CHECK(pool1.objt_stack_size() == 3);
-        CHECK(pool1.num_page() == 1);
-        CHECK(pool1.num_free() == blocks_per_page);
-        CHECK(pool1.num_used() == 0);
-    }
-
-    CHECK(g_allocated_pages.empty());
-}
-
 TEST_CASE("allocate: contains")
 {
     {
         uint64_t test;
-        object_allocator<uint64_t> pool{};
+        object_allocator pool{sizeof(uint64_t)};
 
-        auto ptr1 = pool.allocate(1);
-        auto ptr2 = pool.allocate(1);
-        auto ptr3 = pool.allocate(1);
-        auto ptr4 = pool.allocate(1);
+        auto ptr1 = pool.allocate();
+        auto ptr2 = pool.allocate();
+        auto ptr3 = pool.allocate();
+        auto ptr4 = pool.allocate();
 
         CHECK(pool.contains(ptr1));
         CHECK(pool.contains(ptr2));
@@ -474,124 +366,11 @@ TEST_CASE("allocate: contains")
 
         CHECK(!pool.contains(&test));
 
-        pool.deallocate(ptr1, 1);
-        pool.deallocate(ptr2, 1);
-        pool.deallocate(ptr3, 1);
-        pool.deallocate(ptr4, 1);
+        pool.deallocate(ptr1);
+        pool.deallocate(ptr2);
+        pool.deallocate(ptr3);
+        pool.deallocate(ptr4);
     }
 
     CHECK(g_allocated_pages.empty());
-}
-
-// -----------------------------------------------------------------------------
-// Benchmarks
-// -----------------------------------------------------------------------------
-
-#include <bfbenchmark.h>
-
-constexpr const auto NUM_ITERATIONS = 0x100U;
-
-TEST_CASE("base line")
-{
-    bfdebug_lnbr(0);
-    bfdebug_info(0, "base line");
-    bfdebug_brk2(0);
-    {
-        clear_memory_stats();
-        std::queue<uint64_t, std::list<uint64_t>> d;
-
-        auto results1 = benchmark([&] {
-            for (auto i = 0U; i < NUM_ITERATIONS; i++)
-            { d.push(i); }
-        });
-
-        auto results2 = benchmark([&] {
-            for (auto i = 0U; i < NUM_ITERATIONS; i++)
-            { d.pop(); }
-        });
-
-        auto results3 = benchmark([&] {
-            for (auto i = 0U; i < NUM_ITERATIONS; i++)
-            { d.push(i); }
-        });
-
-        print_memory_stats();
-        clear_memory_stats();
-
-        bfdebug_ndec(0, "push #1", results1);
-        bfdebug_ndec(0, "pop #1", results2);
-        bfdebug_ndec(0, "push #2", results3);
-    }
-}
-
-TEST_CASE("unlimited queue")
-{
-    bfdebug_lnbr(0);
-    bfdebug_info(0, "unlimited queue");
-    bfdebug_brk2(0);
-    {
-        clear_memory_stats();
-        std::queue<uint64_t, std::list<uint64_t, object_allocator<uint64_t>>> d;
-
-        auto results1 = benchmark([&] {
-            for (auto i = 0U; i < NUM_ITERATIONS; i++)
-            { d.push(i); }
-        });
-
-        auto results2 = benchmark([&] {
-            for (auto i = 0U; i < NUM_ITERATIONS; i++)
-            { d.pop(); }
-        });
-
-        auto results3 = benchmark([&] {
-            for (auto i = 0U; i < NUM_ITERATIONS; i++)
-            { d.push(i); }
-        });
-
-        print_memory_stats();
-        clear_memory_stats();
-
-        bfdebug_ndec(0, "push #1", results1);
-        bfdebug_ndec(0, "pop #1", results2);
-        bfdebug_ndec(0, "push #2", results3);
-    }
-}
-
-TEST_CASE("limited queue")
-{
-    bfdebug_lnbr(0);
-    bfdebug_info(0, "limited queue");
-    bfdebug_brk2(0);
-    {
-        struct list_element {
-            uint64_t data;
-            uint64_t next;
-            uint64_t prev;
-        };
-
-#ifndef _MSC_VER
-        constexpr const auto num = 0x1000 / sizeof(list_element);
-#else
-        constexpr const auto num = 0x1000 / sizeof(list_element) - 1;
-#endif
-
-        std::queue<uint64_t, std::list<uint64_t, object_allocator<uint64_t, 1>>> d;
-
-        bfdebug_ndec(0, "push #1", benchmark([&] {
-            for (auto i = 0U; i < num; i++)
-            { d.push(i); }
-        }));
-        CHECK_THROWS(d.push(42));
-
-        bfdebug_ndec(0, "pop #1", benchmark([&] {
-            for (auto i = 0U; i < num; i++)
-            { d.pop(); }
-        }));
-
-        bfdebug_ndec(0, "push #2", benchmark([&] {
-            for (auto i = 0U; i < num; i++)
-            { d.push(i); }
-        }));
-        CHECK_THROWS(d.push(42));
-    }
 }

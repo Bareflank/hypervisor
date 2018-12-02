@@ -131,6 +131,8 @@ public:
     /// @expects none
     /// @ensures none
     ///
+    /// @return always returns true
+    ///
     VIRTUAL bool advance();
 
     /// Add Handler vCPU
@@ -139,6 +141,9 @@ public:
     ///
     /// @expects none
     /// @ensures none
+    ///
+    /// @param reason The exit reason for the handler being registered
+    /// @param d The delegate being registered
     ///
     VIRTUAL void add_handler(
         ::intel_x64::vmcs::value_type reason,
@@ -161,6 +166,8 @@ public:
         const handler_delegate_t &d);
 
 public:
+
+    /// @cond
 
     VIRTUAL uint64_t rax() const;
     VIRTUAL void set_rax(uint64_t val);
@@ -214,6 +221,8 @@ public:
     VIRTUAL void set_rsp(uint64_t val);
 
     VIRTUAL gsl::not_null<save_state_t *> save_state() const;
+
+    /// @endcond
 
 private:
 

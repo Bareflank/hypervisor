@@ -49,13 +49,6 @@ before_script:
   # Update GCC
   #
   - |
-    if [[ -f "/usr/bin/gcc-6" ]]; then
-      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100
-      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 100
-      sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-6 100
-    fi
-
-  - |
     if [[ -f "/usr/bin/gcc-7" ]]; then
       sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100
       sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 100
@@ -319,26 +312,6 @@ matrix:
       - TEST="Clang 6.0 (Shared Libraries)"
     script:
       - export CLANG_BIN=clang-6.0
-      - cmake -DCONFIG=travis_shared ..
-      - make -j3
-
-  #
-  # GCC 6
-  #
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-6.0
-        packages:
-          - gcc-6
-          - g++-6
-          - clang-6.0
-          - nasm
-    env:
-      - TEST="GCC 6"
-    script:
       - cmake -DCONFIG=travis_shared ..
       - make -j3
 
