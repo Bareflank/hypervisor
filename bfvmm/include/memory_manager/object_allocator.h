@@ -91,11 +91,7 @@ void __oa_free(S *ptr)
     free_page(ptr);
 }
 
-// -----------------------------------------------------------------------------
-// Basic Allocator Definition
-// -----------------------------------------------------------------------------
-
-/// Basic Object Allocator
+/// Object Allocator
 ///
 /// The goals of this allocator includes:
 /// - O(1) allocation time
@@ -132,17 +128,6 @@ void __oa_free(S *ptr)
 /// use by the page pool, and does not include pages allocated for the
 /// allocator's internal stacks.
 ///
-/// Windows:
-/// A note about MSVC's implementation of the STL containers. Windows assumes
-/// the allocators are not stateful (this is a stateful allocator). Since
-/// Windows doesn't adhere to the C++11 spec, it assumes allocators of the
-/// same type can deallocate even if they are not equal. As a result,
-/// containers like std::list allocate without deallocating, and then attempt
-/// to deallocate with a new allocator at a later time. For this reason, the
-/// destructor does not cleanup memory if the allocator is still holding onto
-/// objects in the used list. This object allocator should not be used with
-/// Windows MSVC as a result as it will leak memory.
-///
 /// Limitations:
 /// - The largest allocation that can take place is a page. Any
 ///   allocation larger than this should use the buddy allocator
@@ -150,36 +135,7 @@ void __oa_free(S *ptr)
 ///   validity of the provided pointer. If the pointer provided was not
 ///   previously allocated using the same allocator, corruption is likely.
 ///
-/// TODO:
-/// - For this allocator to be used by the SLAB allocator, the SLAB will have
-///   to know what the size of the allocation was based on the address alone.
-///   To overcome this issue, the maximum allocation should be a page - 64
-///   bytes. The last 64 bytes should be used to store the size of the
-///   allocations in that page, plus some reserved bytes for future use.
-///   This way, the SLAB can mask off the address to calculate the location of
-///   the size of this object without having to do a lookup. The size function
-///   should be implemented as a static function that can get the size of an
-///   object given any address (likely unsafe, but effective).
-///
-/// Performance Notes:
-/// - Like most allocators, if the object size is small, the overhead of
-///   managing this memory is large and vice versa. That being said,
-///   the internal fragmentation seen by this allocator is smaller than that
-///   of GCC's allocator. Plus, this allocator only allocates a page at a time
-///   which means all allocations are aligned, and better suited to pair with
-///   a buddy allocator than the default implementation.
-/// - When compared to GCC's default allocators for std::list, this allocator
-///   outperforms with respect to both allocations, and deallocations with both
-///   the limited and unlimited versions. Note that the unit tests use a
-///   std::map to ensure memory is not leaked, resulting in additional overhead
-///   not seen by the default allocators. A traditional malloc / free version
-///   is provided that can be uncommented if needed. Note that GCC's
-///   implementation does have a different set of goals including thread-safety.
-/// - When compared to Windows, this allocator is significantly better than
-///   the default implementation. It should be noted that Windows leaks
-///   memory.
-///
-class basic_object_allocator
+class object_allocator
 {
 public:
 
@@ -197,7 +153,7 @@ public:
     /// @param max_pages the max number of pages that may be used. 0 for
     ///     unlimited
     ///
-    basic_object_allocator(size_type size, size_type max_pages) noexcept :
+    object_allocator(size_type size, size_type max_pages = 0) noexcept :
         m_size(size),
         m_max_pages(max_pages)
     {
@@ -220,65 +176,14 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    ~basic_object_allocator() noexcept
+    ~object_allocator() noexcept
     {
         if (m_used_stack_top != nullptr) {
-            bfalert_nhex(OBJECT_ALLOCATOR_DEBUG, "basic_object_allocator leaked memory", num_used());
+            bfalert_nhex(OBJECT_ALLOCATOR_DEBUG, "object_allocator leaked memory", num_used());
             return;
         }
 
         cleanup();
-    }
-
-    /// Move Constructor
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param other the allocator to move from
-    ///
-    basic_object_allocator(basic_object_allocator &&other) noexcept
-    { *this = std::move(other); }
-
-    /// Move Operator
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param other the allocator to move from
-    /// @return this
-    ///
-    basic_object_allocator &operator=(basic_object_allocator &&other) noexcept
-    {
-        if (GSL_UNLIKELY(this != &other)) {
-
-            if (m_used_stack_top != nullptr) {
-                bfalert_nhex(OBJECT_ALLOCATOR_DEBUG, "basic_object_allocator leaked memory", num_used());
-            }
-            else {
-                cleanup();
-            }
-
-            m_free_stack_top = other.m_free_stack_top;
-            m_used_stack_top = other.m_used_stack_top;
-            m_page_stack_top = other.m_page_stack_top;
-            m_objt_stack_top = other.m_objt_stack_top;
-
-            m_size = other.m_size;
-            m_max_pages = other.m_max_pages;
-            m_pages_consumed = other.m_pages_consumed;
-
-            other.m_free_stack_top = nullptr;
-            other.m_used_stack_top = nullptr;
-            other.m_page_stack_top = nullptr;
-            other.m_objt_stack_top = nullptr;
-
-            other.m_size = 0;
-            other.m_max_pages = 0;
-            other.m_pages_consumed = 0;
-        }
-
-        return *this;
     }
 
     /// Allocate Object
@@ -588,7 +493,7 @@ private:
     {
         guard_exceptions([&]() {
 
-            bfdebug_ndec(OBJECT_ALLOCATOR_DEBUG, "basic_object_allocator: pages used", num_page());
+            bfdebug_ndec(OBJECT_ALLOCATOR_DEBUG, "object_allocator: pages used", num_page());
 
             while (m_page_stack_top != nullptr) {
                 if (m_page_stack_top->index != 0) {
@@ -630,273 +535,13 @@ public:
 
     /// @cond
 
-    basic_object_allocator(const basic_object_allocator &) = delete;
-    basic_object_allocator &operator=(const basic_object_allocator &) = delete;
+    object_allocator(object_allocator &&) noexcept = delete;
+    object_allocator &operator=(object_allocator &&) noexcept = delete;
+
+    object_allocator(const object_allocator &) = delete;
+    object_allocator &operator=(const object_allocator &) = delete;
 
     /// @endcond
 };
-
-// -----------------------------------------------------------------------------
-// Allocator Definition
-// -----------------------------------------------------------------------------
-
-/// Object Allocator
-///
-/// This is a C++ Allocator wrapper for the basic_object_allocator that conforms
-/// to the allocator concept defined here:
-/// http://en.cppreference.com/w/cpp/concept/Allocator
-///
-/// Note that rebind allows a std container to create a new allocator based on
-/// the one provided as is needed. For example, std containers will not only
-/// have to allocate T, but they will also have to allocate nodes. In some
-/// cases, the implementation will embed T in the node resulting in only a
-/// single allocation for each T, that is large than T (consisting of the
-/// extra overhead needed by the container). For this reason, max_pages should
-/// be chosen to not only account for sizeof(T) but also a potential
-/// sizeof(node<T>).
-///
-/// There are a couple of limitations with this wrapper. The copy constructor
-/// is not supported as the allocator is stateful, and thus two of the same
-/// allocators cannot exist. Also, 'n' is not supported for the allocation and
-/// deallocation functions, or in other words, n must always equal 1. For this
-/// reason, this allocator should not be used with containers like std::deque
-/// which rely on n != 1 to increase efficiency of the standard use cases.
-///
-template<typename T, std::size_t max_pages = 0>
-class object_allocator
-{
-    static_assert(BAREFLANK_PAGE_SIZE >= sizeof(T), "T is too large");
-
-public:
-
-    using value_type = T;                                               ///< Alloc::value_type
-    using pointer = T *;                                                ///< Alloc::pointer
-    using const_pointer = const T *;                                    ///< Alloc::const_pointer
-    using reference = T &;                                              ///< Alloc::reference
-    using const_reference = const T &;                                  ///< Alloc::const_reference
-    using size_type = std::size_t;                                      ///< Alloc::size_type
-    using propagate_on_container_copy_assignment = std::false_type;     ///< Copy not supported
-    using propagate_on_container_move_assignment = std::true_type;      ///< Move supported
-    using propagate_on_container_swap = std::true_type;                 ///< Swap supported
-    using is_always_equal = std::false_type;                            ///< Not always equal
-
-    /// Rebind
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    template<typename U> struct rebind {
-        using other = object_allocator<U, max_pages>;                   ///< Rebind
-    };
-
-public:
-
-    /// Default Constructor
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    object_allocator() noexcept :
-        m_d {sizeof(T), max_pages}
-    { }
-
-    /// Destructor
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    ~object_allocator() noexcept
-    { }
-
-    /// Move Constructor
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param other the allocator to move from
-    ///
-    object_allocator(object_allocator &&other) noexcept :
-        m_d {std::move(other.m_d)}
-    { }
-
-    /// Move Operator
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param other the allocator to move from
-    /// @return this
-    ///
-    object_allocator &operator=(object_allocator &&other) noexcept
-    {
-        m_d = std::move(other.m_d);
-        return *this;
-    }
-
-    /// Rebind Constructor
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param other not supported
-    ///
-    template <typename U>
-    object_allocator(const object_allocator<U, max_pages> &other) noexcept :
-        m_d {sizeof(T), max_pages}
-    { bfignored(other); }
-
-    /// Copy Constructor (not supported)
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param other not supported
-    ///
-    object_allocator(const object_allocator &other) noexcept :
-        m_d {sizeof(T), max_pages}
-    { bfignored(other); }
-
-    /// Copy Operator (not supported)
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param other not supported
-    /// @return this
-    ///
-    object_allocator &operator=(const object_allocator &other) noexcept
-    { bfignored(other); }
-
-    /// Allocate
-    ///
-    /// Allocates an object. If n != 1, the allocator has no other option
-    /// than to allocate n * 0x1000 to prevent external fragmentation. The
-    /// internal fragmentation would be horrible in this case so it's not
-    /// supported. For this reason, stick to STL containers that perform
-    /// single allocations.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param n not supported
-    /// @return an allocated object. Throws otherwise
-    ///
-    pointer allocate(size_type n)
-    {
-        if (n != 1) {
-            return reinterpret_cast<pointer>(alloc_page());
-        }
-
-        return static_cast<pointer>(m_d.allocate());
-    }
-
-    /// Deallocate Object
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param n not supported
-    /// @param p a pointer to a previously allocated object to be deallocated
-    ///
-    void deallocate(pointer p, size_type n)
-    {
-        if (n != 1) {
-            return free_page(p);
-        }
-
-        m_d.deallocate(p);
-    }
-
-    /// Contains
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param p to lookup
-    /// @return true if the allocator contains p, false otherwise
-    ///
-    bool contains(pointer p) const noexcept
-    { return m_d.contains(p); }
-
-    /// Construct
-    ///
-    /// Constructs each object. In C++11, this was supposed to be optional
-    /// but not all compilers provide this function, we do to ensure
-    /// compatibility.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param p the location of the new object
-    /// @param args the arguments for the new object to be constructed with.
-    ///
-    template <typename U, typename... Args>
-    void construct(U *p, Args &&... args)
-    { ::new (reinterpret_cast<void *>(p)) U(std::forward<Args>(args)...); }
-
-    /// Destory
-    ///
-    /// Destroys each object. In C++11, this was supposed to be optional
-    /// but not all compilers provide this function, we do to ensure
-    /// compatibility.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param p the location of the new object
-    ///
-    template <typename U>
-    void destroy(U *p)
-    { p->~U(); }
-
-public:
-
-    /// @cond
-
-    auto page_stack_size() noexcept
-    { return m_d.page_stack_size(); }
-
-    auto objt_stack_size() noexcept
-    { return m_d.objt_stack_size(); }
-
-    auto num_page() noexcept
-    { return m_d.num_page(); }
-
-    auto num_free() noexcept
-    { return m_d.num_free(); }
-
-    auto num_used() noexcept
-    { return m_d.num_used(); }
-
-    /// @endcond
-
-private:
-
-    basic_object_allocator m_d;
-
-private:
-
-    /// @cond
-
-    template <typename T1, typename T2, std::size_t MP>
-    friend bool operator==(const object_allocator<T1, MP> &lhs, const object_allocator<T2, MP> &rhs);
-
-    template <typename T1, typename T2, std::size_t MP>
-    friend bool operator!=(const object_allocator<T1, MP> &lhs, const object_allocator<T2, MP> &rhs);
-
-    /// @endcond
-};
-
-/// @cond
-
-template <typename T1, typename T2, std::size_t MP>
-bool operator==(const object_allocator<T1, MP> &, const object_allocator<T2, MP> &)
-{ return false; }
-
-template <typename T1, typename T2, std::size_t MP>
-bool operator!=(const object_allocator<T1, MP> &, const object_allocator<T2, MP> &)
-{ return true; }
-
-/// @endcond
 
 #endif

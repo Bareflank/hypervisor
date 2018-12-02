@@ -44,16 +44,6 @@ TEST_CASE("base 16")
     CHECK(bfn::to_string(static_cast<unsigned long long>(10), 16) == "0x000000000000000a");
 }
 
-TEST_CASE("base 8")
-{
-    CHECK(bfn::to_string(static_cast<int>(10), 8) == "012");
-    CHECK(bfn::to_string(static_cast<long>(10), 8) == "012");
-    CHECK(bfn::to_string(static_cast<long long>(10), 8) == "012");
-    CHECK(bfn::to_string(static_cast<unsigned>(10), 8) == "012");
-    CHECK(bfn::to_string(static_cast<unsigned long>(10), 8) == "012");
-    CHECK(bfn::to_string(static_cast<unsigned long long>(10), 8) == "012");
-}
-
 TEST_CASE("split")
 {
     std::vector<std::string> empty = {""};
