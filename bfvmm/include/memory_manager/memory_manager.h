@@ -422,15 +422,15 @@ private:
     buddy_allocator g_huge_pool;
     buddy_allocator g_mem_map_pool;
 
-    basic_object_allocator slab010;
-    basic_object_allocator slab020;
-    basic_object_allocator slab030;
-    basic_object_allocator slab040;
-    basic_object_allocator slab080;
-    basic_object_allocator slab100;
-    basic_object_allocator slab200;
-    basic_object_allocator slab400;
-    basic_object_allocator slab800;
+    object_allocator slab010;
+    object_allocator slab020;
+    object_allocator slab030;
+    object_allocator slab040;
+    object_allocator slab080;
+    object_allocator slab100;
+    object_allocator slab200;
+    object_allocator slab400;
+    object_allocator slab800;
 
 public:
 

@@ -79,7 +79,7 @@ vmcs::launch()
             throw std::runtime_error("vmcs launch failed");
         }
     }
-    catch(...) {
+    catch (...) {
         auto e = std::current_exception();
 
         this->check();
@@ -119,7 +119,7 @@ vmcs::check() const noexcept
     try {
         check::all();
     }
-    catch(std::exception &e) {
+    catch (std::exception &e) {
         bfdebug_transaction(0, [&](std::string * msg) {
             bferror_lnbr(0, msg);
             bferror_brk1(0, msg);

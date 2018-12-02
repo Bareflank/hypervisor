@@ -43,13 +43,26 @@ inline auto operator""_s(const char *str, std::size_t len)
 namespace bfn
 {
 
+/// Digits
+///
+/// Returns the number of digits in a number given the number and its
+/// base. This can be used to figure out the size of the character
+/// arracy that is needed to store a given number.
+///
+/// @expects none
+/// @ensures none
+///
+/// @param val the value to convert to digits
+/// @param base the base for conversion
+/// @return the total number of digits in val given base
+///
 inline int
 digits(std::size_t val, const int base = 10)
 {
     std::array<char, 32> buf;
     std::size_t digits = 0;
 
-    switch(base) {
+    switch (base) {
         case 16: {
             return snprintf(buf.data(), buf.size(), "%" PRIx64, val);
         }
@@ -72,6 +85,7 @@ digits(std::size_t val, const int base = 10)
 /// @param val the value to convert
 /// @param base the base for conversion.
 /// @param pad if padding should be used
+/// @return the total number of digits of val given base
 ///
 inline int
 to_string(std::string &str, std::size_t val, const int base = 10, bool pad = true)
@@ -79,7 +93,7 @@ to_string(std::string &str, std::size_t val, const int base = 10, bool pad = tru
     std::array<char, 32> buf;
     std::size_t len, digits = 0;
 
-    switch(base) {
+    switch (base) {
         case 16: {
             len = snprintf(buf.data(), buf.size(), "%" PRIx64, val);
             digits = len + 2;
