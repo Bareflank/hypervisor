@@ -47,7 +47,7 @@ for:
   build_script:
     - mkdir build_msbuild
     - cd build_msbuild
-    - cmake -G "Visual Studio 15 2017 Win64" -DENABLE_BUILD_VMM=OFF -DENABLE_BUILD_USERSPACE=OFF -DENABLE_BUILD_TEST=ON ..
+    - cmake -G "Visual Studio 15 2017 Win64" -DENABLE_BUILD_VMM=OFF -DENABLE_BUILD_TEST=ON ..
     - msbuild /m:3 hypervisor.sln
     - cmake --build . --target unittest
 

@@ -22,6 +22,10 @@ project(bfintrinsics C CXX)
 include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project()
 
+list(APPEND SOURCES
+    null.cpp
+)
+
 if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
     list(APPEND SOURCES
         arch/x64/cache.asm
