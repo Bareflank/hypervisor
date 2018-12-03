@@ -97,7 +97,7 @@ supported platforms and their dependencies:
 
 #### Arch Linux:
 ```
-sudo pacman -S linux-headers nasm cmake base-devel clang
+sudo pacman -S git base-devel linux-headers nasm clang cmake
 ```
 
 #### Ubuntu 17.10 (or Higher):
