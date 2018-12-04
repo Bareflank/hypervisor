@@ -68,7 +68,7 @@ In the future, we would also like to support:
 
 ## Motivation
 
-Most people think that hypervisors are meant to virtualize servers and provide a means to run Windows on a Mac, but there is a whole field of research where hypervisors without guest virtual machines. Since a hypervisor is capable of controlling the host OS running underneath it (so-called "ring -1"), host-only hypervisors support introspection, reverse engineering, anti-virus, containerization, diversity, and even architectural research like [MoRE](https://github.com/ainfosec/MoRE). All of these use cases start the same way, by spending months standing up the hypervisor itself before you can start working on your actual project. Existing open source hypervisors are burdened with legacy support and unnecessary complexity that make them painful to work with when conducting hypervisor research.
+Most people think that hypervisors are meant to virtualize servers and provide a means to run Windows on a Mac, but there is a whole field of research where hypervisors are used without guest virtual machines. Since a hypervisor is capable of controlling the host OS running underneath it (so-called "ring -1"), host-only hypervisors support introspection, reverse engineering, anti-virus, containerization, diversity, and even architectural research like [MoRE](https://github.com/ainfosec/MoRE). All of these use cases start the same way, by spending months standing up the hypervisor itself before you can start working on your actual project. Existing open source hypervisors are burdened with legacy support and unnecessary complexity that make them painful to work with when conducting hypervisor research.
 
 ## Links
 
@@ -77,7 +77,7 @@ Most people think that hypervisors are meant to virtualize servers and provide a
 
 ## Demo
 
-Checkout the latest demo for how to compile, use the Bareflank Hypervisor on Ubuntu 18.04:
+Checkout the latest demo for how to compile and use the Bareflank Hypervisor on Ubuntu 18.04:
 
 [![Bareflank Demonstration Video](http://img.youtube.com/vi/fNLXxtdkhLg/maxresdefault.jpg)](https://www.youtube.com/watch?v=fNLXxtdkhLg)
 
