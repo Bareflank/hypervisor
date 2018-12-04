@@ -636,6 +636,17 @@ set(GSL_URL_MD5 "0cc95192658d10e43162ef7b2892e37a"
     "GSL URL MD5 hash"
 )
 
+set(ARGS_URL "https://github.com/Taywee/args/archive/6.2.0.zip"
+    CACHE INTERNAL FORCE
+    "args URL"
+)
+
+set(ARGS_URL_MD5 "a6f333c531c5dfcc47d9e27fd7bec9b7"
+    CACHE INTERNAL FORCE
+    "args URL MD5 hash"
+)
+
+
 set(JSON_URL "https://github.com/nlohmann/json/archive/v3.1.2.zip"
     CACHE INTERNAL FORCE
     "JSON URL"
