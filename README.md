@@ -77,10 +77,9 @@ Most people think that hypervisors are meant to virtualize servers and provide a
 
 ## Demo
 
-Checkout the latest demo for how to compile, use and extend the
-Bareflank Hypervisor
+Checkout the latest demo for how to compile, use the Bareflank Hypervisor on Ubuntu 18.04:
 
-[![Bareflank Demonstration Video](http://img.youtube.com/vi/YgQdECPzDkQ/0.jpg)](https://www.youtube.com/watch?v=YgQdECPzDkQ)
+[![Bareflank Demonstration Video](http://img.youtube.com/vi/fNLXxtdkhLg/0.jpg)](https://www.youtube.com/watch?v=fNLXxtdkhLg)
 
 ## Additional Videos
 
