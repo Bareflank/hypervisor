@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 cmake_minimum_required(VERSION 3.6)
-project(bfruntime C CXX)
+project(bfm C CXX)
 
 list(APPEND BFM_CXX_FLAGS
     -DBFM_VMM_BIN_PATH=${BFM_VMM_BIN_PATH}
