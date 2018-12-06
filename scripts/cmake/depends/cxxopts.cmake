@@ -17,20 +17,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 if(ENABLE_BUILD_USERSPACE)
-    message(STATUS "Including dependency: args")
+    message(STATUS "Including dependency: cxxopts")
 
     download_dependency(
-        args
-        URL         ${ARGS_URL}
-        URL_MD5     ${ARGS_URL_MD5}
+        cxxopts
+        URL         ${CXXOPTS_URL}
+        URL_MD5     ${CXXOPTS_URL_MD5}
     )
 endif()
 
 if(ENABLE_BUILD_USERSPACE)
     add_dependency(
-        args userspace
-        CONFIGURE_COMMAND   cmake -E copy_directory ${CACHE_DIR}/args .
-        BUILD_COMMAND       echo done
-        INSTALL_COMMAND     make install DESTDIR=${USERSPACE_PREFIX_PATH}
+        cxxopts userspace
     )
 endif()
