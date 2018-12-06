@@ -130,13 +130,14 @@ to_string(std::string &str, std::size_t val, const int base = 10, bool pad = tru
 ///
 /// @param val the value to convert
 /// @param base the base for conversion.
+/// @param pad if padding should be used
 /// @return string version of val converted to the provided base
 ///
 inline std::string
-to_string(std::size_t val, const int base = 10)
+to_string(std::size_t val, const int base = 10, bool pad = false)
 {
     std::string str;
-    to_string(str, val, base);
+    to_string(str, val, base, pad);
 
     return str;
 }
