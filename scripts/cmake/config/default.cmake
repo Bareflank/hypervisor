@@ -636,14 +636,14 @@ set(GSL_URL_MD5 "0cc95192658d10e43162ef7b2892e37a"
     "GSL URL MD5 hash"
 )
 
-set(ARGS_URL "https://github.com/Taywee/args/archive/6.2.0.zip"
+set(CXXOPTS_URL "https://github.com/jarro2783/cxxopts/archive/v2.1.1.zip"
     CACHE INTERNAL FORCE
-    "args URL"
+    "cxxopts URL"
 )
 
-set(ARGS_URL_MD5 "a6f333c531c5dfcc47d9e27fd7bec9b7"
+set(CXXOPTS_URL_MD5 "474adf4a53d41549a84bacbe496c035a"
     CACHE INTERNAL FORCE
-    "args URL MD5 hash"
+    "cxxopts URL MD5 hash"
 )
 
 

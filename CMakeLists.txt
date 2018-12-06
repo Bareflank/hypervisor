@@ -52,7 +52,7 @@ include(scripts/cmake/targets.cmake)
 # ------------------------------------------------------------------------------
 
 include_dependency(SOURCE_DEPENDS_DIR gsl)
-include_dependency(SOURCE_DEPENDS_DIR args)
+include_dependency(SOURCE_DEPENDS_DIR cxxopts)
 include_dependency(SOURCE_DEPENDS_DIR json)
 include_dependency(SOURCE_DEPENDS_DIR astyle)
 include_dependency(SOURCE_DEPENDS_DIR clang_tidy)
@@ -229,7 +229,7 @@ if(ENABLE_BUILD_USERSPACE)
         bfm userspace
         DEPENDS gsl
         DEPENDS json
-        DEPENDS args
+        DEPENDS cxxopts
     )
 endif()
 
