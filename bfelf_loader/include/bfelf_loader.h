@@ -234,6 +234,7 @@ struct bfelf_file_t {
     const struct bfelf_ehdr *ehdr;
     const struct bfelf_phdr *phdrtab;
     const struct bfelf_shdr *shdrtab;
+    const struct bfelf_shdr *notes;
 
     bfelf64_addr dynoff;
 
@@ -1373,6 +1374,11 @@ bfelf_file_init(const char *file, uint64_t filesz, struct bfelf_file_t *ef)
             ef->fini_arraysz = shdr->sh_size;
             continue;
         }
+
+        if (private_strcmp(name, ".notes") == BFELF_SUCCESS) {
+            ef->notes = shdr;
+            continue;
+        }
     }
 
     /*
@@ -2028,14 +2034,6 @@ bfelf_load(
         return bfinvalid_argument("num_binaries == 0 || num_binaries >= MAX_NUM_MODULES");
     }
 
-    if (entry == nullptr) {
-        return bfinvalid_argument("entry == nullptr");
-    }
-
-    if (crt_info == nullptr) {
-        return bfinvalid_argument("crt_info == nullptr");
-    }
-
     if (loader == nullptr) {
         return bfinvalid_argument("loader == nullptr");
     }
@@ -2052,11 +2050,15 @@ bfelf_load(
         return ret;
     }
 
-    ret = private_crt_info(binaries, num_binaries, crt_info);
-    bfignored(ret);
+    if (crt_info != nullptr) {
+        ret = private_crt_info(binaries, num_binaries, crt_info);
+        bfignored(ret);
+    }
 
-    ret = bfelf_file_get_entry(&binaries[num_binaries - 1].ef, entry);
-    bfignored(ret);
+    if (entry != nullptr) {
+        ret = bfelf_file_get_entry(&binaries[num_binaries - 1].ef, entry);
+        bfignored(ret);
+    }
 
     return BF_SUCCESS;
 }
