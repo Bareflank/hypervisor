@@ -292,8 +292,44 @@ namespace lapic
 inline auto is_present() noexcept
 { return ::intel_x64::cpuid::feature_information::edx::apic::is_enabled(); }
 
+using value_t = uint32_t;
+
+inline void dump_delivery_status(int lev, value_t val, std::string *msg)
+{
+    const auto name = "delivery_status";
+    const auto idle = 0;
+    const auto pending = 1;
+
+    if (val == idle) {
+        bfdebug_subtext(lev, name, "idle", msg);
+        return;
+    }
+    if (val == pending) {
+        bfdebug_subtext(lev, name, "send_pending", msg);
+        return;
+    }
 }
 
+inline void dump_lvt_delivery_mode(int lev, value_t val, std::string *msg)
+{
+    const auto name = "delivery_mode";
+
+    switch (val) {
+        case 0: bfdebug_subtext(lev, name, "fixed", msg); break;
+        case 2: bfdebug_subtext(lev, name, "smi", msg); break;
+        case 4: bfdebug_subtext(lev, name, "nmi", msg); break;
+        case 5: bfdebug_subtext(lev, name, "init", msg); break;
+        case 7: bfdebug_subtext(lev, name, "extint", msg); break;
+
+        default:
+            bfalert_subtext(lev, name, "unknown", msg);
+            bfalert_subnhex(lev, "value", val, msg);
+            throw std::invalid_argument(
+                "unknown delivery_mode: " + std::to_string(val));
+    }
+}
+
+}
 }
 // *INDENT-ON*
 
