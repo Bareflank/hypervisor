@@ -118,6 +118,14 @@ default_esr(uint64_t vector, uint64_t ec, bool ec_valid, uint64_t *regs) noexcep
         bferror_subnhex(0, "cr4   ", ::intel_x64::cr4::get(), msg);
     });
 
+    /// TODO:
+    ///
+    /// We need to get a pointer to the vCPU so that we can execute it's
+    /// halt instruction. Once we have that, we will be able to delete the
+    /// above code as it is not needed, and we will also be able to resume
+    /// to a parent vCPU as a result (meaning that a hypervisor crash for
+    /// a guest will not bring the entire system down).
+    ///
     ::x64::pm::halt();
 }
 
