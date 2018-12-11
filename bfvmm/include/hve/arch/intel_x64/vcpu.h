@@ -124,17 +124,6 @@ public:
     ///
     VIRTUAL void promote();
 
-    /// Advance vCPU
-    ///
-    /// Advances the vCPU.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @return always returns true
-    ///
-    VIRTUAL bool advance();
-
     /// Add Handler vCPU
     ///
     /// Adds an exit handler to the vCPU
@@ -164,6 +153,38 @@ public:
     ///
     VIRTUAL void add_exit_handler(
         const handler_delegate_t &d);
+
+    /// Dump State
+    ///
+    /// Outputs the state of the vCPU with a custom header
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param str a custom header to add to the dump output
+    ///
+    VIRTUAL void dump(const char *str);
+
+    /// Halt the vCPU
+    ///
+    /// Halts the vCPU. The default action is to freeze the physical core
+    /// resulting in a hang, but this function can be overrided to provide
+    /// a safer action if possible.
+    ///
+    /// @param str the reason for the halt
+    ///
+    virtual void halt(const std::string &str = {});
+
+    /// Advance vCPU
+    ///
+    /// Advances the vCPU.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return always returns true
+    ///
+    VIRTUAL bool advance();
 
 public:
 

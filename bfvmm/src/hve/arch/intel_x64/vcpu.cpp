@@ -90,10 +90,6 @@ void
 vcpu::promote()
 { m_vmcs->promote(); }
 
-bool
-vcpu::advance()
-{ return ::advance(this); }
-
 void
 vcpu::add_handler(
     ::intel_x64::vmcs::value_type reason,
@@ -104,6 +100,72 @@ void
 vcpu::add_exit_handler(
     const handler_delegate_t &d)
 { m_exit_handler->add_exit_handler(d); }
+
+void
+vcpu::dump(const char *str)
+{
+    using namespace ::intel_x64::vmcs;
+
+    bfdebug_transaction(0, [&](std::string * msg) {
+
+        bferror_lnbr(0, msg);
+        bferror_info(0, str, msg);
+        bferror_brk1(0, msg);
+
+        bferror_lnbr(0, msg);
+        bferror_info(0, "general purpose registers", msg);
+        bferror_subnhex(0, "rax", this->rax(), msg);
+        bferror_subnhex(0, "rbx", this->rbx(), msg);
+        bferror_subnhex(0, "rcx", this->rcx(), msg);
+        bferror_subnhex(0, "rdx", this->rdx(), msg);
+        bferror_subnhex(0, "rbp", this->rbp(), msg);
+        bferror_subnhex(0, "rsi", this->rsi(), msg);
+        bferror_subnhex(0, "rdi", this->rdi(), msg);
+        bferror_subnhex(0, "r08", this->r08(), msg);
+        bferror_subnhex(0, "r09", this->r09(), msg);
+        bferror_subnhex(0, "r10", this->r10(), msg);
+        bferror_subnhex(0, "r11", this->r11(), msg);
+        bferror_subnhex(0, "r12", this->r12(), msg);
+        bferror_subnhex(0, "r13", this->r13(), msg);
+        bferror_subnhex(0, "r14", this->r14(), msg);
+        bferror_subnhex(0, "r15", this->r15(), msg);
+        bferror_subnhex(0, "rip", this->rip(), msg);
+        bferror_subnhex(0, "rsp", this->rsp(), msg);
+
+        bferror_lnbr(0, msg);
+        bferror_info(0, "control registers", msg);
+        bferror_subnhex(0, "cr0", guest_cr0::get(), msg);
+        bferror_subnhex(0, "cr2", ::intel_x64::cr2::get(), msg);
+        bferror_subnhex(0, "cr3", guest_cr3::get(), msg);
+        bferror_subnhex(0, "cr4", guest_cr4::get(), msg);
+
+        bferror_lnbr(0, msg);
+        bferror_info(0, "addressing", msg);
+        bferror_subnhex(0, "linear address", guest_linear_address::get(), msg);
+        bferror_subnhex(0, "physical address", guest_physical_address::get(), msg);
+
+        bferror_lnbr(0, msg);
+        bferror_info(0, "exit info", msg);
+        bferror_subnhex(0, "exit reason", exit_reason::get(), msg);
+        bferror_subnhex(0, "exit qualification", exit_qualification::get(), msg);
+    });
+}
+
+void
+vcpu::halt(const std::string &str)
+{
+    this->dump(("halting vcpu: " + str).c_str());
+    ::x64::pm::stop();
+}
+
+bool
+vcpu::advance()
+{
+    using namespace ::intel_x64::vmcs;
+
+    this->set_rip(this->rip() + vm_exit_instruction_length::get());
+    return true;
+}
 
 uint64_t
 vcpu::rax() const
