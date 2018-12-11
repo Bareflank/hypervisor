@@ -120,56 +120,6 @@ setup()
 // Helpers
 // -----------------------------------------------------------------------------
 
-void
-halt(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu) noexcept
-{
-    using namespace ::intel_x64::vmcs;
-
-    bferror_lnbr(0);
-    bferror_info(0, "halting vcpu");
-    bferror_brk1(0);
-
-    bferror_subnhex(0, "rax", vcpu->rax());
-    bferror_subnhex(0, "rbx", vcpu->rbx());
-    bferror_subnhex(0, "rcx", vcpu->rcx());
-    bferror_subnhex(0, "rdx", vcpu->rdx());
-    bferror_subnhex(0, "rbp", vcpu->rbp());
-    bferror_subnhex(0, "rsi", vcpu->rsi());
-    bferror_subnhex(0, "rdi", vcpu->rdi());
-    bferror_subnhex(0, "r08", vcpu->r08());
-    bferror_subnhex(0, "r09", vcpu->r09());
-    bferror_subnhex(0, "r10", vcpu->r10());
-    bferror_subnhex(0, "r11", vcpu->r11());
-    bferror_subnhex(0, "r12", vcpu->r12());
-    bferror_subnhex(0, "r13", vcpu->r13());
-    bferror_subnhex(0, "r14", vcpu->r14());
-    bferror_subnhex(0, "r15", vcpu->r15());
-    bferror_subnhex(0, "rip", vcpu->rip());
-    bferror_subnhex(0, "rsp", vcpu->rsp());
-
-    bferror_subnhex(0, "cr0", guest_cr0::get());
-    bferror_subnhex(0, "cr2", ::intel_x64::cr2::get());
-    bferror_subnhex(0, "cr3", guest_cr3::get());
-    bferror_subnhex(0, "cr4", guest_cr4::get());
-
-    bferror_subnhex(0, "linear address", guest_linear_address::get());
-    bferror_subnhex(0, "physical address", guest_physical_address::get());
-
-    bferror_subnhex(0, "exit reason", exit_reason::get());
-    bferror_subnhex(0, "exit qualification", exit_qualification::get());
-
-    ::x64::pm::stop();
-}
-
-bool
-advance(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu) noexcept
-{
-    using namespace ::intel_x64::vmcs;
-
-    vcpu->set_rip(vcpu->rip() + vm_exit_instruction_length::get());
-    return true;
-}
-
 ::x64::msrs::value_type
 emulate_rdmsr(::x64::msrs::field_type msr)
 {
@@ -435,7 +385,7 @@ static bool
 handle_invd(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 {
     ::x64::cache::wbinvd();
-    return advance(vcpu);
+    return vcpu->advance();
 }
 
 static bool
@@ -449,7 +399,7 @@ handle_rdmsr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
     vcpu->set_rax(((val >> 0x00) & 0x00000000FFFFFFFF));
     vcpu->set_rdx(((val >> 0x20) & 0x00000000FFFFFFFF));
 
-    return advance(vcpu);
+    return vcpu->advance();
 }
 
 static bool
@@ -465,7 +415,7 @@ handle_wrmsr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
         val
     );
 
-    return advance(vcpu);
+    return vcpu->advance();
 }
 
 static bool
@@ -482,7 +432,7 @@ handle_wrcr4(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
             val |= ::intel_x64::cr4::vmx_enable_bit::mask;
             guest_cr4::set(val);
 
-            return advance(vcpu);
+            return vcpu->advance();
         }
 
         default:
@@ -810,7 +760,7 @@ exit_handler::handle(
         }
     });
 
-    halt(exit_handler->m_vcpu);
+    exit_handler->m_vcpu->halt();
 }
 
 bool
@@ -828,7 +778,7 @@ exit_handler::handle_cpuid(
     ///
     if (vcpu->rax() == 0xBF00) {
         vcpu->set_rax(0xBF01);
-        return advance(vcpu);
+        return vcpu->advance();
     }
 
     /// Init
@@ -842,7 +792,7 @@ exit_handler::handle_cpuid(
             d(vcpu);
         }
 
-        return advance(vcpu);
+        return vcpu->advance();
     }
 
     /// Fini
@@ -855,7 +805,7 @@ exit_handler::handle_cpuid(
             d(vcpu);
         }
 
-        return advance(vcpu);
+        return vcpu->advance();
     }
 
     /// Say Hi
@@ -866,7 +816,7 @@ exit_handler::handle_cpuid(
     ///
     if (vcpu->rax() == 0xBF11) {
         bfdebug_info(0, "host os is" bfcolor_green " now " bfcolor_end "in a vm");
-        return advance(vcpu);
+        return vcpu->advance();
     }
 
     /// Say Goobye
@@ -899,7 +849,7 @@ exit_handler::handle_cpuid(
     vcpu->set_rcx(ret.rcx);
     vcpu->set_rdx(ret.rdx);
 
-    return advance(vcpu);
+    return vcpu->advance();
 }
 
 }
