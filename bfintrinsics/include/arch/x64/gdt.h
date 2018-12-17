@@ -84,8 +84,9 @@ namespace access_rights
     }
 
     constexpr const auto ring0_cs_descriptor = 0x0000A09BU;
-    constexpr const auto ring0_ds_descriptor = 0x00008093U;
     constexpr const auto ring0_ss_descriptor = 0x0000C093U;
+    constexpr const auto ring0_fs_descriptor = 0x00008093U;
+    constexpr const auto ring0_gs_descriptor = 0x00008093U;
     constexpr const auto ring0_tr_descriptor = 0x0000008BU;
 
     constexpr const auto unusable = 0x00010000U;

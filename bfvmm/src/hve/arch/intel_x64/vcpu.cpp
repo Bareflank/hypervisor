@@ -43,6 +43,9 @@ vcpu::vcpu(vcpuid::type id) :
         hlt_delegate_t::create<intel_x64::vcpu, &intel_x64::vcpu::hlt_delegate>(this)
     );
 
+    m_vmcs->save_state()->vcpu_ptr =
+        reinterpret_cast<uintptr_t>(this);
+
     m_vmcs->save_state()->exit_handler_ptr =
         reinterpret_cast<uintptr_t>(m_exit_handler.get());
 }

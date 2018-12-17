@@ -462,19 +462,19 @@ exit_handler::exit_handler(
     using namespace ::intel_x64::vmcs;
     using namespace ::x64::access_rights;
 
+    vcpu->load();
     bfn::call_once(g_once_flag, setup);
 
-    vcpu->load();
-
-    m_host_gdt.set(2, nullptr, 0xFFFFFFFF, ring0_cs_descriptor);
-    m_host_gdt.set(3, nullptr, 0xFFFFFFFF, ring0_ds_descriptor);
-    m_host_gdt.set(4, nullptr, 0xFFFFFFFF, ring0_ss_descriptor);
+    m_host_gdt.set(1, nullptr, 0xFFFFFFFF, ring0_cs_descriptor);
+    m_host_gdt.set(2, nullptr, 0xFFFFFFFF, ring0_ss_descriptor);
+    m_host_gdt.set(3, nullptr, 0xFFFFFFFF, ring0_fs_descriptor);
+    m_host_gdt.set(4, nullptr, 0xFFFFFFFF, ring0_gs_descriptor);
     m_host_gdt.set(5, &m_host_tss, sizeof(m_host_tss), ring0_tr_descriptor);
 
     this->write_host_state();
     this->write_control_state();
 
-    if (vcpuid::is_host_vm_vcpu(vcpu->id())) {
+     if (vcpuid::is_host_vm_vcpu(vcpu->id())) {
         this->write_guest_state();
     }
 
@@ -540,10 +540,10 @@ exit_handler::write_host_state()
 {
     using namespace ::intel_x64::vmcs;
 
-    host_cs_selector::set(2 << 3);
-    host_ss_selector::set(4 << 3);
+    host_cs_selector::set(1 << 3);
+    host_ss_selector::set(2 << 3);
     host_fs_selector::set(3 << 3);
-    host_gs_selector::set(3 << 3);
+    host_gs_selector::set(4 << 3);
     host_tr_selector::set(5 << 3);
 
     host_ia32_pat::set(g_ia32_pat_msr);
@@ -559,12 +559,12 @@ exit_handler::write_host_state()
     host_gdtr_base::set(m_host_gdt.base());
     host_idtr_base::set(m_host_idt.base());
 
+    m_host_tss.ist1 = setup_stack(m_ist1.get(), m_vcpu->id());
+    set_default_esrs(&m_host_idt, 8);
+    set_nmi_handler(&m_host_idt, 8);
+
     host_rip::set(exit_handler_entry);
     host_rsp::set(setup_stack(m_stack.get(), m_vcpu->id()));
-
-    set_nmi_handler(&m_host_idt, 8);
-    set_default_esrs(&m_host_idt, 8);
-    m_host_tss.ist1 = setup_stack(m_ist1.get(), m_vcpu->id());
 }
 
 void
