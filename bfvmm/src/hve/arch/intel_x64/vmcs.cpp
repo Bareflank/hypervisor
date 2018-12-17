@@ -47,6 +47,7 @@ namespace intel_x64
 {
 
 vmcs::vmcs(vcpuid::type vcpuid) :
+    m_vcpuid{vcpuid},
     m_save_state{std::make_unique<save_state_t>()},
     m_vmcs_region{make_page<uint32_t>()},
     m_vmcs_region_phys{g_mm->virtptr_to_physint(m_vmcs_region.get())}
@@ -55,8 +56,6 @@ vmcs::vmcs(vcpuid::type vcpuid) :
 
     gsl::span<uint32_t> id{m_vmcs_region.get(), 1024};
     id[0] = gsl::narrow<uint32_t>(::intel_x64::msrs::ia32_vmx_basic::revision_id::get());
-
-    m_save_state->vcpuid = vcpuid;
 
     bfdebug_transaction(1, [&](std::string * msg) {
         bfdebug_pass(1, "vmcs region", msg);
@@ -71,7 +70,7 @@ void
 vmcs::launch()
 {
     try {
-        if (vcpuid::is_host_vm_vcpu(m_save_state->vcpuid)) {
+        if (vcpuid::is_host_vm_vcpu(m_vcpuid)) {
             ::intel_x64::vm::launch_demote();
         }
         else {
