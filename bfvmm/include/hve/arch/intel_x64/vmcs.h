@@ -205,15 +205,10 @@ public:
     VIRTUAL save_state_t *save_state() const
     { return m_save_state.get(); }
 
-protected:
-
-    /// @cond
-
-    std::unique_ptr<save_state_t> m_save_state;
-
-    /// @endcond
-
 private:
+
+    vcpuid::type m_vcpuid;
+    std::unique_ptr<save_state_t> m_save_state;
 
     page_ptr<uint32_t> m_vmcs_region;
     uintptr_t m_vmcs_region_phys;
