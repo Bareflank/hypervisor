@@ -172,24 +172,54 @@ make distclean
 ```
 
 ## UEFI:
-A UEFI application version of Bareflank may be compiled on either Linux or 
-Cygwin (Visual Studio is currently not supported). To compile for UEFI, add the 
-following to CMake when configuring:
+A UEFI application version of Bareflank may be compiled on Linux and used to boot
+both Linux and Windows if you also include the Extended APIs. To compile for UEFI, 
+add the following to CMake when configuring:
 ```
 -DENABLE_BUILD_EFI=ON
 ```
 It should be noted that unit tests must be disabled, and static builds are currently
 required (the example config provides an example of how to configure Bareflank as 
-needed for more complex builds). The resulting UEFI application can be found here:
+needed for more complex builds). 
+
+To boot Windows or Linux with the Extended APIs you will need to provide your own 
+extension that enables EPT. To see an example of this type of extension, please 
+see the following integration test:
+```
+https://github.com/Bareflank/extended_apis/blob/master/bfvmm/integration/arch/intel_x64/efi/test_efi.cpp
+```
+Once you have your own extension, the example config is required to tell the build 
+system which VMM and target to use. The example config can be found here:
+```
+https://github.com/Bareflank/hypervisor/blob/master/scripts/cmake/config/example_config.cmake
+```
+Our front page video on YouTube explains how to use this config, and the instructions 
+are also in the config itself. To enable EFI, turn on the build Extended APIs and EFI
+flags. You will also need to set the following:
+```
+set(OVERRIDE_VMM <name>)
+set(OVERRIDE_VMM_TARGET <name>)
+```
+If for example you are using the integration test listed above, these setting would
+be as follows:
+```
+set(OVERRIDE_VMM eapis_integration_intel_x64_efi_test_efi)
+set(OVERRIDE_VMM_TARGET eapis_integration)
+```
+The first variable defines the VMM's name and the second variable defines the target 
+that builds this VMM (which tells the buid system what dependency EFI has). From 
+there build as normal. 
+
+The resulting UEFI application can be found here:
 ```
 build/prefixes/x86_64-efi-pe/bin/bareflank.efi
 ```
 Place this binary in your EFI partition (e.g., on Ubuntu this is 
 /boot/efi/EFI/BOOT/bareflank.efi) and execute it like any other EFI application. 
-Once Bareflank is running, if you wish to boot Windows or Linux, the Extended APIs 
-are needed (as additional emulation is needed to succesfully boot an OS). Also
-note that utilities like "make dump" do not work when using EFI as the driver 
-doesn't have access to the debug ring. 
+Once Bareflank is running, you can start Windows or Linux if you included the 
+above. Also note that utilities like "make dump" do not work when using EFI as 
+the driver doesn't have access to the debug ring. You can however use 
+"make ack" if you are using the Extended APIs to get the hypervisor to say "hi". 
 
 ## Serial Instructions
 
