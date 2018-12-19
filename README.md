@@ -173,8 +173,11 @@ make distclean
 
 ## UEFI:
 A UEFI application version of Bareflank may be compiled on Linux and used to boot
-both Linux and Windows if you also include the Extended APIs. To compile for UEFI, 
-add the following to CMake when configuring:
+both Linux and Windows if you also include the Extended APIs. The followinging 
+describes how to build and execute Bareflank with EFI. For additional information,
+please see the following YouTube [video](https://www.youtube.com/watch?v=FuEyjDqA53M&t=4s)
+
+To compile for UEFI, add the following to CMake when configuring:
 ```
 -DENABLE_BUILD_EFI=ON
 ```
