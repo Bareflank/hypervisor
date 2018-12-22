@@ -20,6 +20,10 @@
 
 #include <bftypes.h>
 
+extern "C" void
+unlock_write(void)
+{ }
+
 extern "C" uint64_t
 unsafe_write_cstr(const char *cstr, size_t len)
 { bfignored(cstr); bfignored(len); return 0; }

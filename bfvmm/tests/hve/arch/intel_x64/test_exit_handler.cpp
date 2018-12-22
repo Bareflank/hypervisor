@@ -51,8 +51,13 @@ setup_vcpu(MockRepository &mocks, ::intel_x64::vmcs::value_type reason)
 
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::load);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::promote);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::advance);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_handler);
+    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::halt);
+
+    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::advance).Do([&] {
+        g_save_state.rip = 42;
+        return true;
+    });
 
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::rax).Do([&] { return g_save_state.rax; });
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::rbx).Do([&] { return g_save_state.rbx; });
@@ -108,22 +113,6 @@ TEST_CASE("quiet")
     auto &&vcpu = setup_vcpu(mocks, 0x0);
 
     test_handler(vcpu);
-}
-
-TEST_CASE("exit_handler: halt")
-{
-    MockRepository mocks;
-    auto &&vcpu = setup_vcpu(mocks, 0x0);
-
-    CHECK_NOTHROW(halt(vcpu));
-}
-
-TEST_CASE("exit_handler: advance")
-{
-    MockRepository mocks;
-    auto &&vcpu = setup_vcpu(mocks, 0x0);
-
-    CHECK_NOTHROW(advance(vcpu));
 }
 
 TEST_CASE("exit_handler: construct / destruct")
