@@ -17,17 +17,24 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <hippomocks.h>
 #include <catch/catch.hpp>
-#include <hve/arch/x64/idt.h>
-#include <hve/arch/intel_x64/exception.h>
-#include <arch/intel_x64/vmcs/32bit_control_fields.h>
+#include <hippomocks.h>
+
 #include <test/support.h>
 
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
 uint64_t reg_data[38] = {0};
-uint64_t *reg = &reg_data[0];
+uint64_t *regs = &reg_data[0];
+
+auto
+setup_vcpu(MockRepository &mocks)
+{
+    auto vcpu = mocks.Mock<bfvmm::intel_x64::vcpu>();
+    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::halt);
+
+    return vcpu;
+}
 
 TEST_CASE("vector_to_str")
 {
@@ -54,15 +61,31 @@ TEST_CASE("vector_to_str")
     CHECK(strcmp(vector_to_str(0x16U), "undefined") == 0);
 }
 
+bool
+ec_valid(int vector)
+{
+    switch (vector) {
+        case 8:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 17:
+            return true;
+
+        default:
+            return false;
+    };
+}
+
 TEST_CASE("default_esr")
 {
-    g_cr2 = 0U;
-    auto ec = 0U;
-    auto ec_valid = true;
+    MockRepository mocks;
+    auto vcpu = setup_vcpu(mocks);
 
     for (auto i = 0U; i < 32U; ++i) {
-        default_esr(i, ec, ec_valid, reg);
-        CHECK(::intel_x64::vmcs::vm_entry_interruption_information::valid_bit::is_disabled());
+        default_esr(i, 0, ec_valid(i), regs, vcpu);
     }
 }
 

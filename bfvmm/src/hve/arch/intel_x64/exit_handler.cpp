@@ -474,7 +474,7 @@ exit_handler::exit_handler(
     this->write_host_state();
     this->write_control_state();
 
-     if (vcpuid::is_host_vm_vcpu(vcpu->id())) {
+    if (vcpuid::is_host_vm_vcpu(vcpu->id())) {
         this->write_guest_state();
     }
 
