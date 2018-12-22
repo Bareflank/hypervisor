@@ -36,9 +36,6 @@
 #include <exception>
 #include <type_traits>
 
-#include <cxxabi.h>
-#include <typeinfo>
-
 #ifdef _MSC_VER
 #define bfcolor_black ""
 #define bfcolor_red ""
@@ -101,6 +98,22 @@ view_as_pointer(const T val)
 extern "C" uint64_t
 unsafe_write_cstr(const char *cstr, size_t len);
 
+#include <typeinfo>
+
+#ifdef _MSC_VER
+
+template<typename T>
+std::string type_name()
+{ return typeid(T).name(); }
+
+template<typename T>
+std::string type_name(const T &t)
+{ return typeid(t).name(); }
+
+#else
+
+#include <cxxabi.h>
+
 template<typename T>
 std::string type_name()
 {
@@ -134,6 +147,8 @@ std::string type_name(const T &t)
 
     return name;
 }
+
+#endif
 
 /* ---------------------------------------------------------------------------*/
 /* Low Level Debugging                                                        */
