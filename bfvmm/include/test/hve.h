@@ -66,6 +66,7 @@ setup_idt_x64()
 #include "../hve/arch/intel_x64/vmx.h"
 #include "../hve/arch/intel_x64/vmcs.h"
 #include "../hve/arch/intel_x64/check.h"
+#include "../hve/arch/intel_x64/exception.h"
 #include "../hve/arch/intel_x64/exit_handler.h"
 #include "../hve/arch/intel_x64/vcpu.h"
 
