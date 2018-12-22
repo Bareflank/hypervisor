@@ -64,6 +64,10 @@ run_clang_tidy_script() {
         checks="$checks,-clang-analyzer-core.StackAddressEscape"
     fi
 
+    # This test is really buggy an trips on structed bindings, falsely
+    # stating that the variables are not read
+    checks="$checks,-clang-analyzer-deadcode.DeadStores"
+
     run-clang-tidy-6.0.py \
         -clang-tidy-binary clang-tidy-6.0 \
         -header-filter="*.h" \
