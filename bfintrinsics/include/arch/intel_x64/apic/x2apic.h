@@ -28,27 +28,6 @@
 #include <arch/intel_x64/cpuid.h>
 #include <arch/intel_x64/apic/lapic.h>
 
-// -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_INTRINSICS
-#ifdef SHARED_INTRINSICS
-#define EXPORT_INTRINSICS EXPORT_SYM
-#else
-#define EXPORT_INTRINSICS IMPORT_SYM
-#endif
-#else
-#define EXPORT_INTRINSICS
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
 // *INDENT-OFF*
 
 namespace intel_x64

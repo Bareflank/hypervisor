@@ -33,13 +33,6 @@ else()
     message(FATAL_ERROR "Unsupported archiecture")
 endif()
 
-add_shared_library(
-    bfvmm_memory_manager
-    SOURCES ${SOURCES}
-    DEFINES SHARED_MEMORY_MANAGER
-    DEFINES SHARED_INTRINSICS
-)
-
 add_static_library(
     bfvmm_memory_manager
     SOURCES ${SOURCES}

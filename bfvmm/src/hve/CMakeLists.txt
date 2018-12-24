@@ -73,15 +73,6 @@ else()
     message(FATAL_ERROR "Unsupported archiecture")
 endif()
 
-add_shared_library(
-    bfvmm_hve
-    SOURCES ${SOURCES}
-    DEFINES SHARED_HVE
-    DEFINES SHARED_VCPU
-    DEFINES SHARED_MEMORY_MANAGER
-    DEFINES SHARED_INTRINSICS
-)
-
 add_static_library(
     bfvmm_hve
     SOURCES ${SOURCES}

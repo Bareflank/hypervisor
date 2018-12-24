@@ -23,22 +23,6 @@
 #define MICROCODE_INTEL_X64_H
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
@@ -61,7 +45,7 @@ class vcpu;
 ///   own microcode from the VMM's point of view. This way, you can package
 ///   your own microcode, or vmcall to load microcode as needed.
 ///
-class EXPORT_HVE microcode_handler
+class microcode_handler
 {
 public:
 

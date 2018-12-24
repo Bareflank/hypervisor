@@ -30,22 +30,6 @@
 #include "../exit_handler.h"
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-// -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
 
@@ -65,7 +49,7 @@ class vcpu;
 /// Provides an interface for registering handlers for wrmsr exits
 /// Handlers can be registered a specific MSR address.
 ///
-class EXPORT_HVE wrmsr_handler
+class wrmsr_handler
 {
 public:
 

@@ -26,27 +26,6 @@
 #include <bfconstants.h>
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_DEBUG
-#ifdef SHARED_DEBUG
-#define EXPORT_DEBUG EXPORT_SYM
-#else
-#define EXPORT_DEBUG IMPORT_SYM
-#endif
-#else
-#define EXPORT_DEBUG
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Definition
 // -----------------------------------------------------------------------------
 
@@ -55,7 +34,7 @@ namespace bfvmm
 
 /// Serial Port (NatSemi 16550A and compatible)
 ///
-class EXPORT_DEBUG serial_ns16550a
+class serial_ns16550a
 {
 public:
 
@@ -258,11 +237,6 @@ public:
 
     /// @endcond
 };
-
 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

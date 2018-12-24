@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <bfexports.h>
 #include <vcpu/vcpu_factory.h>
 #include <hve/arch/intel_x64/vcpu.h>
 

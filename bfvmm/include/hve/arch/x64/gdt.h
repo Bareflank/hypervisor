@@ -33,33 +33,10 @@
 #include <intrinsics.h>
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Global Descriptor Table
 // -----------------------------------------------------------------------------
 
-namespace bfvmm
-{
-namespace x64
+namespace bfvmm::x64
 {
 
 /// Global Descriptor Table
@@ -113,7 +90,7 @@ namespace x64
 /// The solution is to mark the host OS's TSS descriptor as not busy
 /// manually before loading it.
 ///
-class EXPORT_HVE gdt
+class gdt
 {
 public:
 
@@ -490,12 +467,6 @@ public:
 
     /// @endcond
 };
-
 }
-}
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

@@ -25,35 +25,17 @@
 #include <cstdint>
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
-namespace bfvmm
-{
-namespace x64
+namespace bfvmm::x64
 {
 
 #pragma pack(push, 1)
 
 /* @cond */
 
-struct EXPORT_HVE tss {
+struct tss {
     uint32_t reserved1{0};
     uint64_t rsp0{0};
     uint64_t rsp1{0};
@@ -81,7 +63,6 @@ static_assert(sizeof(tss) == 0x1000, "TSS is not a page in size");
 
 #pragma pack(pop)
 
-}
 }
 
 #endif

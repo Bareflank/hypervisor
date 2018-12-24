@@ -16,14 +16,10 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-add_library(dummy_lib1 STATIC dummy_lib1.cpp)
-add_library(dummy_lib2 STATIC dummy_lib2.cpp)
+cmake_minimum_required(VERSION 3.6)
+project(bfsdk C CXX)
 
-set_target_properties(dummy_lib1 PROPERTIES LINKER_LANGUAGE C)
-set_target_properties(dummy_lib2 PROPERTIES LINKER_LANGUAGE C)
-
-target_compile_definitions(dummy_lib1 INTERFACE STATIC_DUMMY)
-target_compile_definitions(dummy_lib2 INTERFACE STATIC_DUMMY)
-
-install(TARGETS dummy_lib1 DESTINATION lib)
-install(TARGETS dummy_lib2 DESTINATION lib)
+include(${SOURCE_CMAKE_DIR}/project.cmake)
+init_project(
+    INCLUDES ${CMAKE_CURRENT_LIST_DIR}/../include
+)
