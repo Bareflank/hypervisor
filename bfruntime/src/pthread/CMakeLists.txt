@@ -22,12 +22,6 @@ project(bfpthread C CXX)
 include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project()
 
-add_shared_library(
-    bfpthread
-    SOURCES pthread.cpp threadcontext.asm
-    DEFINES SHARED_PTHREAD
-)
-
 add_static_library(
     bfpthread
     SOURCES pthread.cpp threadcontext.asm

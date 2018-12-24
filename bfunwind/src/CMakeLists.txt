@@ -32,12 +32,6 @@ list(APPEND SOURCES
     registers_intel_x64.asm
 )
 
-add_shared_library(
-    bfunwind
-    SOURCES ${SOURCES}
-    DEFINES SHARED_SYSCALL
-)
-
 add_static_library(
     bfunwind
     SOURCES ${SOURCES}

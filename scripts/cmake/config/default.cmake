@@ -337,19 +337,7 @@ add_config(
 # VMM Library Type
 # ------------------------------------------------------------------------------
 
-add_config(
-    CONFIG_NAME BUILD_SHARED_LIBS
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ON
-    DESCRIPTION "Build VMM components as shared libraries"
-)
-
-add_config(
-    CONFIG_NAME BUILD_STATIC_LIBS
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL OFF
-    DESCRIPTION "Build VMM components as static libraries"
-)
+set(BUILD_STATIC_LIBS ON CACHE INTERNAL "")
 
 # ------------------------------------------------------------------------------
 # Prefixes

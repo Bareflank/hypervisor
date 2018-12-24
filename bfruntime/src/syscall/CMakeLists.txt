@@ -22,12 +22,6 @@ project(bfsyscall C CXX)
 include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project()
 
-add_shared_library(
-    bfsyscall
-    SOURCES syscall.cpp
-    DEFINES SHARED_SYSCALL
-)
-
 add_static_library(
     bfsyscall
     SOURCES syscall.cpp

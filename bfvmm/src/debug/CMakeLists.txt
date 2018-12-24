@@ -44,13 +44,6 @@ if(NOT ENABLE_MOCKING)
     )
 endif()
 
-add_shared_library(
-    bfvmm_debug
-    SOURCES ${SOURCES}
-    DEFINES SHARED_DEBUG
-    DEFINES SHARED_INTRINSICS
-)
-
 add_static_library(
     bfvmm_debug
     SOURCES ${SOURCES}

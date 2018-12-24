@@ -20,15 +20,6 @@ list(APPEND SOURCES
     vcpu.cpp
 )
 
-add_shared_library(
-    bfvmm_vcpu
-    SOURCES ${SOURCES}
-    DEFINES SHARED_VCPU
-    DEFINES SHARED_HVE
-    DEFINES SHARED_MEMORY_MANAGER
-    DEFINES SHARED_INTRINSICS
-)
-
 add_static_library(
     bfvmm_vcpu
     SOURCES ${SOURCES}

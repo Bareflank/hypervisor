@@ -1147,48 +1147,6 @@ macro(invalid_config MSG)
     set(BUILD_VALIDATOR_ERROR ON)
 endmacro(invalid_config)
 
-# ------------------------------------------------------------------------------
-# add_xxx_library
-# ------------------------------------------------------------------------------
-
-# Add Shared Library
-#
-# Creates a shared library, sets the appropriate defintions and dependencies
-# and installs the library into the prefix
-#
-# @param NAME The name of the library. "_shared" is added for you
-# @param ALWAYS Always compile this library regardless of BUILD_SHARED_LIBS
-# @param SOURCES The source files for the library
-# @param DEFINES The definitions to add to the library
-# @param DEPENDS The dependency for the library. "_shared" is added for you
-#
-function(add_shared_library NAME)
-    set(options ALWAYS)
-    set(multiVal SOURCES DEFINES DEPENDS)
-    cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
-
-    if(NOT ARG_SOURCES)
-        return()
-    endif()
-
-    if(BUILD_SHARED_LIBS OR ARG_ALWAYS)
-        if(NOT ARG_SOURCES)
-            message(FATAL_ERROR "SOURCES must be defined when creating a library")
-        endif()
-
-        set(DEPENDS "")
-        foreach(d ${ARG_DEPENDS})
-            list(APPEND DEPENDS "${d}_shared")
-        endforeach(d)
-
-        add_library(${NAME}_shared SHARED ${ARG_SOURCES})
-        set_target_properties(${NAME}_shared PROPERTIES LINKER_LANGUAGE C)
-        target_compile_definitions(${NAME}_shared PRIVATE ${ARG_DEFINES})
-        target_link_libraries(${NAME}_shared ${DEPENDS})
-        install(TARGETS ${NAME}_shared DESTINATION lib)
-    endif()
-endfunction(add_shared_library)
-
 # Add Static Library
 #
 # Creates a static library, sets the appropriate defintions and dependencies

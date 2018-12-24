@@ -15,17 +15,3 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-
-add_shared_library(
-    dummy_lib1
-    SOURCES dummy_lib1.cpp
-    DEFINES SHARED_DUMMY
-    ALWAYS
-)
-
-add_shared_library(
-    dummy_lib2
-    SOURCES dummy_lib2.cpp
-    DEFINES SHARED_DUMMY
-    ALWAYS
-)
