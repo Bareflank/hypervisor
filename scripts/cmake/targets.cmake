@@ -300,3 +300,12 @@ if(ENABLE_FORMAT)
         COMMENT "Format all files"
     )
 endif()
+
+# ------------------------------------------------------------------------------
+# Git
+# ------------------------------------------------------------------------------
+
+add_custom_target(git-init
+    COMMAND git config core.hooksPath .githooks
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
