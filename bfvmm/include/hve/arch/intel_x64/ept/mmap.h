@@ -32,27 +32,6 @@
 #include "../../../../memory_manager/memory_manager.h"
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Definition
 // -----------------------------------------------------------------------------
 
@@ -66,7 +45,7 @@ namespace bfvmm::intel_x64::ept
 /// information on how EPT page tables work, please see the Intel SDM. This
 /// implementation attempts to map directly to the SDM text.
 ///
-class EXPORT_HVE mmap
+class mmap
 {
 
 public:

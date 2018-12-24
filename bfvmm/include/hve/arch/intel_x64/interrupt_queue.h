@@ -25,22 +25,6 @@
 #include <queue>
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
@@ -51,7 +35,7 @@ namespace bfvmm::intel_x64
 ///
 /// Simple queue designed to work with external interrupts.
 ///
-class EXPORT_HVE interrupt_queue
+class interrupt_queue
 {
 public:
 

@@ -32,27 +32,6 @@
 #include "object_allocator.h"
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_MEMORY_MANAGER
-#ifdef SHARED_MEMORY_MANAGER
-#define EXPORT_MEMORY_MANAGER EXPORT_SYM
-#else
-#define EXPORT_MEMORY_MANAGER IMPORT_SYM
-#endif
-#else
-#define EXPORT_MEMORY_MANAGER
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
@@ -97,7 +76,7 @@ namespace bfvmm
 ///     class to inherit that provides shared APIs for both ARM and Intel. For
 ///     now the memory manager is Intel specific
 ///
-class EXPORT_MEMORY_MANAGER memory_manager
+class memory_manager
 {
 public:
 
@@ -501,9 +480,5 @@ page_ptr<T> make_page()
 template<typename T>
 page_ptr<T> make_nullptr_page()
 { return page_ptr<T>(nullptr, free_page); }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

@@ -156,7 +156,7 @@ private_phase2(_Unwind_Context *context)
     }
 }
 
-extern "C" EXPORT_SYM _Unwind_Reason_Code
+extern "C" _Unwind_Reason_Code
 _Unwind_RaiseException(_Unwind_Exception *exception_object)
 {
     auto ret = _URC_END_OF_STACK;
@@ -186,7 +186,7 @@ _Unwind_RaiseException(_Unwind_Exception *exception_object)
     return _URC_FATAL_PHASE2_ERROR;
 }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 _Unwind_Resume(_Unwind_Exception *exception_object)
 {
     auto registers = registers_intel_x64_t();
@@ -198,7 +198,7 @@ _Unwind_Resume(_Unwind_Exception *exception_object)
     private_phase2(&context);
 }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 _Unwind_DeleteException(_Unwind_Exception *exception_object)
 {
     if (exception_object->exception_cleanup != nullptr) {
@@ -206,45 +206,45 @@ _Unwind_DeleteException(_Unwind_Exception *exception_object)
     }
 }
 
-extern "C" EXPORT_SYM uintptr_t
+extern "C" uintptr_t
 _Unwind_GetGR(_Unwind_Context *context, int index)
 {
     return context->state->get(static_cast<uint64_t>(index));
 }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 _Unwind_SetGR(_Unwind_Context *context, int index, uintptr_t value)
 {
     context->state->set(static_cast<uint64_t>(index), value);
     context->state->commit();
 }
 
-extern "C" EXPORT_SYM uintptr_t
+extern "C" uintptr_t
 _Unwind_GetIP(_Unwind_Context *context)
 {
     return context->state->get_ip();
 }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 _Unwind_SetIP(_Unwind_Context *context, uintptr_t value)
 {
     context->state->set_ip(value);
     context->state->commit();
 }
 
-extern "C" EXPORT_SYM uintptr_t
+extern "C" uintptr_t
 _Unwind_GetLanguageSpecificData(_Unwind_Context *context)
 {
     return context->fde.lsda();
 }
 
-extern "C" EXPORT_SYM uintptr_t
+extern "C" uintptr_t
 _Unwind_GetRegionStart(_Unwind_Context *context)
 {
     return context->fde.pc_begin();
 }
 
-extern "C" EXPORT_SYM uintptr_t
+extern "C" uintptr_t
 _Unwind_GetIPInfo(_Unwind_Context *context, int *ip_before_insn)
 {
     if (ip_before_insn == nullptr) {

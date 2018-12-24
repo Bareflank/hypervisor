@@ -80,10 +80,13 @@
 
 #include <dummy_libs.h>
 
+int g_errno;
+int *__errno() { return &g_errno; }
+
 derived1 g_derived1;
 derived2 g_derived2;
 
-EXPORT_SYM int global_var = 0;
+int global_var = 0;
 
 int
 main(int argc, char *argv[])
@@ -148,7 +151,7 @@ bfmain(uintptr_t request, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 int g_cursor = 0;
 char g_memory[0x100000] = {};
 
-extern "C" EXPORT_SYM int
+extern "C" int
 write(int file, const void *buffer, size_t count)
 {
     bfignored(file);
@@ -158,7 +161,7 @@ write(int file, const void *buffer, size_t count)
     return 0;
 }
 
-extern "C" EXPORT_SYM uint64_t
+extern "C" uint64_t
 unsafe_write_cstr(const char *cstr, size_t len)
 {
     bfignored(cstr);
@@ -167,7 +170,7 @@ unsafe_write_cstr(const char *cstr, size_t len)
     return 0;
 }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 _malloc_r(struct _reent *ent, size_t size)
 {
     bfignored(ent);
@@ -178,14 +181,14 @@ _malloc_r(struct _reent *ent, size_t size)
     return addr;
 }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 _free_r(struct _reent *ent, void *ptr)
 {
     bfignored(ent);
     bfignored(ptr);
 }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 _calloc_r(struct _reent *ent, size_t nmemb, size_t size)
 {
     bfignored(ent);
@@ -197,7 +200,7 @@ _calloc_r(struct _reent *ent, size_t nmemb, size_t size)
     return nullptr;
 }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 _realloc_r(struct _reent *ent, void *ptr, size_t size)
 {
     bfignored(ent);
@@ -207,14 +210,14 @@ _realloc_r(struct _reent *ent, void *ptr, size_t size)
     return nullptr;
 }
 
-extern "C" EXPORT_SYM uint64_t *
+extern "C" uint64_t *
 thread_context_tlsptr(void)
 {
     static uint64_t s_tls[0x1000] = {};
     return s_tls;
 }
 
-extern "C" EXPORT_SYM uint64_t
+extern "C" uint64_t
 thread_context_cpuid(void)
 {
     return 0;

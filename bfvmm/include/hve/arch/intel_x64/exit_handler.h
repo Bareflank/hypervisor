@@ -36,27 +36,6 @@
 #include "../x64/tss.h"
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Handler Types
 // -----------------------------------------------------------------------------
 
@@ -108,7 +87,7 @@ namespace bfvmm::intel_x64
 /// can subclass this class, and overload the handlers that are needed. The
 /// basics are provided with this class to ease development.
 ///
-class EXPORT_HVE exit_handler
+class exit_handler
 {
 public:
 
@@ -194,9 +173,5 @@ private:
 }
 
 using exit_handler_t = bfvmm::intel_x64::exit_handler;
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

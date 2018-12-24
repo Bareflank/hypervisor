@@ -34,7 +34,6 @@ list(APPEND BFFLAGS_EFI
     -mno-red-zone
     -mno-avx
     # -maccumulate-outgoing-args
-    -fpic
     -g
     -O2
     -Wall

@@ -33,27 +33,6 @@
 #include "../../../memory_manager.h"
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_MEMORY_MANAGER
-#ifdef SHARED_MEMORY_MANAGER
-#define EXPORT_MEMORY_MANAGER EXPORT_SYM
-#else
-#define EXPORT_MEMORY_MANAGER IMPORT_SYM
-#endif
-#else
-#define EXPORT_MEMORY_MANAGER
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Definition
 // -----------------------------------------------------------------------------
 
@@ -85,7 +64,7 @@ namespace bfvmm::x64::cr3
 /// addresses. Note that attemps to map an address that is in the unmap queue
 /// should remove the map from the unmap queue and do nothing else.
 ///
-class EXPORT_MEMORY_MANAGER mmap
+class mmap
 {
 
 public:

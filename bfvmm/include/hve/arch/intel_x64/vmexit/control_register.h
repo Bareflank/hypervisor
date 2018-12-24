@@ -31,22 +31,6 @@
 #include <intrinsics.h>
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
@@ -61,7 +45,7 @@ class vcpu;
 /// access. Users may supply handlers and specify shadow values (for CR0 and
 /// CR4).
 ///
-class EXPORT_HVE control_register_handler
+class control_register_handler
 {
 public:
 

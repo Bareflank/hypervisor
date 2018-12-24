@@ -104,13 +104,11 @@ if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
         COMMAND eval "${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/tmp"
         COMMAND eval "${CMAKE_COMMAND} -E copy_if_different ${VMM_PREFIX_PATH}/lib/libc.a ${CMAKE_BINARY_DIR}/tmp"
         COMMAND eval "${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/tmp ${AR_FOR_TARGET} x libc.a"
-        COMMAND eval "${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/tmp ${LD_FOR_TARGET} -shared -o ${VMM_PREFIX_PATH}/lib/libc.so ${CMAKE_BINARY_DIR}/tmp/*.o ${LD_FLAGS}"
         COMMAND eval "${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/tmp"
 
         COMMAND eval "${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/tmp"
         COMMAND eval "${CMAKE_COMMAND} -E copy_if_different ${VMM_PREFIX_PATH}/lib/libm.a ${CMAKE_BINARY_DIR}/tmp"
         COMMAND eval "${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/tmp ${AR_FOR_TARGET} x libm.a"
-        COMMAND eval "${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/tmp ${LD_FOR_TARGET} -shared -o ${VMM_PREFIX_PATH}/lib/libm.so ${CMAKE_BINARY_DIR}/tmp/*.o ${LD_FLAGS}"
         COMMAND eval "${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/tmp"
 
         COMMAND eval "${CMAKE_COMMAND} -E remove_directory ${PREFIXES_DIR}/share"

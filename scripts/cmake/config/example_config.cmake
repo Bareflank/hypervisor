@@ -118,15 +118,16 @@ else()
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI)
-    set(BUILD_SHARED_LIBS ON)
-    set(BUILD_STATIC_LIBS OFF)
-else()
-    set(BUILD_SHARED_LIBS OFF)
-    set(BUILD_STATIC_LIBS ON)
-endif()
-
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/cache)
+
+# Cache
+#
+# THe build system maintains it's own cache of all external dependencies to
+# eliminate the need to download these dependencies multiple times. The default
+# location is in the build folder, but if you plan to do more than one build,
+# moving this cache outside of the build folder will speed up build times, and
+# prevent needless downloading.
+#
 set(CACHE_DIR ${CMAKE_CURRENT_LIST_DIR}/cache)
 
 if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI)

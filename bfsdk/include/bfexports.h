@@ -24,14 +24,6 @@
 #define BFEXPORTS_H
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-#define IMPORT_SYM __declspec(dllimport)
-#define EXPORT_SYM __declspec(dllexport)
-#else
-#define IMPORT_SYM
-#define EXPORT_SYM __attribute__ ((visibility ("default")))
-#endif
-
-#if defined(_WIN32) || defined(__CYGWIN__)
 #define WEAK_SYM
 #else
 #define WEAK_SYM __attribute__((weak))
