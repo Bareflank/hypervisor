@@ -27,22 +27,6 @@
 #include <bfbitmanip.h>
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_INTRINSICS
-#ifdef SHARED_INTRINSICS
-#define EXPORT_INTRINSICS EXPORT_SYM
-#else
-#define EXPORT_INTRINSICS IMPORT_SYM
-#endif
-#else
-#define EXPORT_INTRINSICS
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 

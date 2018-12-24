@@ -55,7 +55,7 @@
 
 #define MAX_THREAD_SPECIFIC_DATA 512
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_cond_broadcast(pthread_cond_t *__cond)
 {
     if (__cond == nullptr) {
@@ -66,14 +66,14 @@ pthread_cond_broadcast(pthread_cond_t *__cond)
     return 0;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_cond_destroy(pthread_cond_t * /*unused*/)
 {
     UNHANDLED();
     return -ENOSYS;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_cond_init(pthread_cond_t *__cond, const pthread_condattr_t *__attr)
 {
     if (__attr != nullptr) {
@@ -88,14 +88,14 @@ pthread_cond_init(pthread_cond_t *__cond, const pthread_condattr_t *__attr)
     return 0;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_cond_signal(pthread_cond_t * /*unused*/)
 {
     UNHANDLED();
     return -ENOSYS;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_cond_timedwait(
     pthread_cond_t * /*unused*/,
     pthread_mutex_t * /*unused*/,
@@ -105,7 +105,7 @@ pthread_cond_timedwait(
     return -ENOSYS;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_cond_wait(pthread_cond_t *__cond, pthread_mutex_t *__mutex)
 {
     if (__cond == nullptr || __mutex == nullptr) {
@@ -120,21 +120,21 @@ pthread_cond_wait(pthread_cond_t *__cond, pthread_mutex_t *__mutex)
     return 0;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_detach(pthread_t /*unused*/)
 {
     UNHANDLED();
     return -ENOSYS;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_equal(pthread_t /*unused*/, pthread_t /*unused*/)
 {
     UNHANDLED();
     return -ENOSYS;
 }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 pthread_getspecific(pthread_key_t __key)
 {
     if (__key > MAX_THREAD_SPECIFIC_DATA) {
@@ -144,14 +144,14 @@ pthread_getspecific(pthread_key_t __key)
     return reinterpret_cast<void *>(thread_context_tlsptr()[__key]);
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_join(pthread_t /*unused*/, void ** /*unused*/)
 {
     UNHANDLED();
     return -ENOSYS;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_key_create(pthread_key_t *__key, void (*__destructor)(void *))
 {
     static int64_t g_keys = 0;
@@ -177,20 +177,20 @@ pthread_key_create(pthread_key_t *__key, void (*__destructor)(void *))
     return 0;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_key_delete(pthread_key_t /*unused*/)
 {
     UNHANDLED();
     return -ENOSYS;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_mutex_destroy(pthread_mutex_t * /*unused*/)
 {
     return 0;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_mutex_init(pthread_mutex_t *__mutex, const pthread_mutexattr_t *__attr)
 {
     if (__attr != nullptr) {
@@ -205,7 +205,7 @@ pthread_mutex_init(pthread_mutex_t *__mutex, const pthread_mutexattr_t *__attr)
     return 0;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_mutex_lock(pthread_mutex_t *__mutex)
 {
     if (__mutex == nullptr) {
@@ -218,14 +218,14 @@ pthread_mutex_lock(pthread_mutex_t *__mutex)
     return 0;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_mutex_trylock(pthread_mutex_t * /*unused*/)
 {
     UNHANDLED();
     return -ENOSYS;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_mutex_unlock(pthread_mutex_t *__mutex)
 {
     if (__mutex == nullptr) {
@@ -236,28 +236,28 @@ pthread_mutex_unlock(pthread_mutex_t *__mutex)
     return 0;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_mutexattr_destroy(pthread_mutexattr_t * /*unused*/)
 {
     UNHANDLED();
     return -ENOSYS;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_mutexattr_init(pthread_mutexattr_t * /*unused*/)
 {
     UNHANDLED();
     return -ENOSYS;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_mutexattr_settype(pthread_mutexattr_t * /*unused*/, int /*unused*/)
 {
     UNHANDLED();
     return -ENOSYS;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_once(pthread_once_t *__once_control, void (*__init_routine)())
 {
     if (__once_control == nullptr ||
@@ -273,14 +273,14 @@ pthread_once(pthread_once_t *__once_control, void (*__init_routine)())
     return 0;
 }
 
-extern "C" EXPORT_SYM pthread_t
+extern "C" pthread_t
 pthread_self(void)
 {
     UNHANDLED();
     return 1;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 pthread_setspecific(pthread_key_t __key, const void *__value)
 {
     if (__key > MAX_THREAD_SPECIFIC_DATA) {
@@ -294,10 +294,10 @@ pthread_setspecific(pthread_key_t __key, const void *__value)
 extern "C" uint64_t *_thread_context_tlsptr(void);
 extern "C" uint64_t _thread_context_cpuid(void);
 
-extern "C" EXPORT_SYM uint64_t *
+extern "C" uint64_t *
 WEAK_SYM thread_context_tlsptr(void)
 { return _thread_context_tlsptr(); }
 
-extern "C" EXPORT_SYM uint64_t
+extern "C" uint64_t
 WEAK_SYM thread_context_cpuid(void)
 { return _thread_context_cpuid(); }

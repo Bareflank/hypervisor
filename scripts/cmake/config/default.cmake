@@ -199,7 +199,6 @@ set(BUILD_BFRUNTIME_DIR ${CMAKE_BINARY_DIR}/bfruntime
 )
 
 set(BUILD_BFSDK_DIR ${CMAKE_BINARY_DIR}/bfsdk
-    CACHE INTERNAL
     "bfsdk build dir"
 )
 
@@ -314,7 +313,7 @@ set(CMAKE_BUILD_TYPE "Release"
     "Defines the build type"
 )
 
-set(CMAKE_VERBOSE_MAKEFILE OFF
+set(CMAKE_VERBOSE_MAKEFILE ON
     CACHE INTERNAL
     "Enables verbose output"
 )
@@ -334,24 +333,6 @@ add_config(
     DESCRIPTION "Defines the install output"
     OPTIONS ALWAYS LAZY NEVER
     ADVANCED
-)
-
-# ------------------------------------------------------------------------------
-# VMM Library Type
-# ------------------------------------------------------------------------------
-
-add_config(
-    CONFIG_NAME BUILD_SHARED_LIBS
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL ON
-    DESCRIPTION "Build VMM components as shared libraries"
-)
-
-add_config(
-    CONFIG_NAME BUILD_STATIC_LIBS
-    CONFIG_TYPE BOOL
-    DEFAULT_VAL OFF
-    DESCRIPTION "Build VMM components as static libraries"
 )
 
 # ------------------------------------------------------------------------------

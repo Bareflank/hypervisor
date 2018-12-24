@@ -116,16 +116,6 @@ else()
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Shared vs Static Builds
-#
-if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI)
-    set(BUILD_SHARED_LIBS ON)
-    set(BUILD_STATIC_LIBS OFF)
-else()
-    set(BUILD_SHARED_LIBS OFF)
-    set(BUILD_STATIC_LIBS ON)
-endif()
-
 # Cache
 #
 # THe build system maintains it's own cache of all external dependencies to
