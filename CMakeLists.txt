@@ -76,7 +76,7 @@ if(ENABLE_BUILD_VMM)
     )
 
     add_subproject(
-        bfsdk none
+        bfutil none
         NOBUILD
     )
 endif()
@@ -162,7 +162,7 @@ endif()
 
 if(ENABLE_BUILD_TEST)
     add_subproject(
-        bfsdk test
+        bfutil test
         DEPENDS gsl
         DEPENDS json
         DEPENDS catch
@@ -184,13 +184,13 @@ if(ENABLE_BUILD_TEST AND NOT WIN32)
 
     add_subproject(
         bfelf_loader test
-        DEPENDS bfsdk
+        DEPENDS bfutil
         NOINSTALL
     )
 
     add_subproject(
         bfdriver test
-        DEPENDS bfsdk
+        DEPENDS bfutil
         NOINSTALL
     )
 endif()
@@ -198,19 +198,19 @@ endif()
 if(ENABLE_BUILD_TEST)
     add_subproject(
         bfm test
-        DEPENDS bfsdk
+        DEPENDS bfutil
         NOINSTALL
     )
 
     add_subproject(
         bfruntime test
-        DEPENDS bfsdk
+        DEPENDS bfutil
         NOINSTALL
     )
 
     add_subproject(
         bfvmm test
-        DEPENDS bfsdk
+        DEPENDS bfutil
     )
 endif()
 

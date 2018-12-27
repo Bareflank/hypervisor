@@ -136,7 +136,7 @@ set(SOURCE_BFRUNTIME_DIR ${CMAKE_SOURCE_DIR}/bfruntime
     "bfruntime source dir"
 )
 
-set(SOURCE_BFSDK_DIR ${CMAKE_SOURCE_DIR}/bfsdk
+set(SOURCE_BFSDK_DIR ${CMAKE_SOURCE_DIR}/bfutil
     CACHE INTERNAL
     "bfsdk source dir"
 )
@@ -195,7 +195,7 @@ set(BUILD_BFRUNTIME_DIR ${CMAKE_BINARY_DIR}/bfruntime
     "bfruntime build dir"
 )
 
-set(BUILD_BFSDK_DIR ${CMAKE_BINARY_DIR}/bfsdk
+set(BUILD_BFSDK_DIR ${CMAKE_BINARY_DIR}/bfutil
     CACHE INTERNAL
     "bfsdk build dir"
 )
