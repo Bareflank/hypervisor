@@ -77,6 +77,9 @@
 
 #include <dummy_libs.h>
 
+int g_errno;
+int *__errno() { return &g_errno; }
+
 derived1 g_derived1;
 derived2 g_derived2;
 

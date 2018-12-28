@@ -27,3 +27,7 @@ add_static_library(
     SOURCES syscall.cpp
     DEFINES STATIC_SYSCALL
 )
+
+#add_library(bfsyscall_shared SHARED syscall.cpp)
+#target_compile_definitions(bfsyscall_shared INTERFACE SHARED_SYSCALL)
+#install(TARGETS bfsyscall_shared DESTINATION lib)

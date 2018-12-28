@@ -121,25 +121,6 @@ else()
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Shared vs Static Builds
-#
-# By default shared libraries are built, and shared libraries must be enabled
-# if unit testing is enabled. The library type only applies to the VMM. When
-# building using static libraries, the main executables are linked against all
-# of the VMM libraries resulting in a single binary that's as small as it's
-# going to get. This is the ideal build type but requires open sourcing your
-# object files due to the LGPL restriction. If this is not acceptable, please
-# contact AIS, Inc at quinnr@ainfosec.com. Finally, both binary types can be
-# built simultaniously.
-#
-if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI)
-    set(BUILD_SHARED_LIBS ON)
-    set(BUILD_STATIC_LIBS OFF)
-else()
-    set(BUILD_SHARED_LIBS OFF)
-    set(BUILD_STATIC_LIBS ON)
-endif()
-
 # Cache
 #
 # THe build system maintains it's own cache of all external dependencies to

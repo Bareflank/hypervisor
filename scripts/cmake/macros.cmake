@@ -1085,8 +1085,6 @@ macro(init_project)
     if(PREFIX STREQUAL "test")
         set(ENABLE_MOCKING ON)
         set(CMAKE_BUILD_TYPE "Debug")
-        set(BUILD_STATIC_LIBS ON)
-        set(BUILD_SHARED_LIBS OFF)
     endif()
 
     enable_asm(${PREFIX})
@@ -1099,7 +1097,7 @@ macro(init_project)
 
     include_directories(SYSTEM
         ${ARG_INCLUDES}
-        ${SOURCE_BFSDK_DIR}/include
+        ${SOURCE_BFUTIL_DIR}/include
         ${SOURCE_BFELF_LOADER_DIR}/include
         ${SOURCE_BFINTRINSICS_DIR}/include
         ${CMAKE_CURRENT_LIST_DIR}
@@ -1166,34 +1164,19 @@ function(add_static_library NAME)
         return()
     endif()
 
-    if(BUILD_STATIC_LIBS OR ARG_ALWAYS)
-        if(NOT ARG_SOURCES)
-            message(FATAL_ERROR "SOURCES must be defined when creating a library")
-        endif()
-
-        add_library(${NAME}_static STATIC ${ARG_SOURCES})
-        set_target_properties(${NAME}_static PROPERTIES LINKER_LANGUAGE C)
-        target_compile_definitions(${NAME}_static PRIVATE ${ARG_DEFINES})
-        install(TARGETS ${NAME}_static DESTINATION lib)
+    if(NOT ARG_SOURCES)
+        message(FATAL_ERROR "SOURCES must be defined when creating a library")
     endif()
+
+    add_library(${NAME} STATIC ${ARG_SOURCES})
+    set_target_properties(${NAME} PROPERTIES LINKER_LANGUAGE C)
+    target_compile_definitions(${NAME} PRIVATE ${ARG_DEFINES})
+    install(TARGETS ${NAME} DESTINATION lib)
 endfunction(add_static_library)
 
 # ------------------------------------------------------------------------------
 # target_link_xxx_libraries
 # ------------------------------------------------------------------------------
-
-# Target Link Shared Libraries
-#
-# This function is similar to target_link_libraries, but adds _shared
-# to the library name before adding the library to the target
-#
-# @param NAME The name of the target.
-#
-function(target_link_shared_libraries NAME)
-    foreach(l ${ARGN})
-        target_link_libraries(${NAME} ${l}_shared)
-    endforeach(l)
-endfunction(target_link_shared_libraries)
 
 # Target Link Static Libraries
 #
@@ -1204,7 +1187,7 @@ endfunction(target_link_shared_libraries)
 #
 function(target_link_static_libraries NAME)
     foreach(l ${ARGN})
-        target_link_libraries(${NAME} ${l}_static)
+        target_link_libraries(${NAME} ${l})
     endforeach(l)
 endfunction(target_link_static_libraries)
 
@@ -1238,83 +1221,42 @@ function(add_vmm_executable NAME)
         set(ARG_SOURCES ${CMAKE_BINARY_DIR}/null.cpp)
     endif()
 
-    if(BUILD_SHARED_LIBS)
-        add_executable(${NAME}_shared ${ARG_SOURCES})
-        target_compile_definitions(${NAME}_shared PRIVATE ${ARG_DEFINES})
+    add_executable(${NAME} ${ARG_SOURCES})
+    target_compile_definitions(${NAME} PRIVATE ${ARG_DEFINES})
 
-        set(LIBRARIES "")
-        foreach(d ${ARG_LIBRARIES})
-            list(APPEND LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/lib${d}_shared.so")
-        endforeach(d)
+    set(LIBRARIES "")
+    foreach(d ${ARG_LIBRARIES})
+        list(APPEND LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/lib${d}.a")
+    endforeach(d)
 
-        foreach(d ${ARG_EXT_LIBRARIES})
-            list(APPEND LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/lib${d}.so")
-        endforeach(d)
+    foreach(d ${ARG_EXT_LIBRARIES})
+        list(APPEND LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/lib${d}.a")
+    endforeach(d)
 
-        if(NOT ARG_NOVMMLIBS)
-            list(APPEND LIBRARIES
-                --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_entry_static.a --no-whole-archive
-                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_vcpu_shared.so
-                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_hve_shared.so
-                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_memory_manager_shared.so
-                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_debug_shared.so
-                ${CMAKE_INSTALL_PREFIX}/lib/libbfintrinsics_shared.so
-            )
-        endif()
-
+    if(NOT ARG_NOVMMLIBS)
         list(APPEND LIBRARIES
-            ${CMAKE_INSTALL_PREFIX}/lib/libc++.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libc++abi.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libbfpthread_shared.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libbfunwind_shared.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libc.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libm.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall_shared.so
-            --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
+            --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_entry.a --no-whole-archive
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_vcpu.a
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_hve.a
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_memory_manager.a
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_debug.a
+            ${CMAKE_INSTALL_PREFIX}/lib/libbfintrinsics.a
         )
-
-        target_link_libraries(${NAME}_shared ${LIBRARIES})
-        install(TARGETS ${NAME}_shared DESTINATION bin)
     endif()
 
-    if(BUILD_STATIC_LIBS)
-        add_executable(${NAME}_static ${ARG_SOURCES})
-        target_compile_definitions(${NAME}_static PRIVATE ${ARG_DEFINES})
+    list(APPEND LIBRARIES
+        ${CMAKE_INSTALL_PREFIX}/lib/libc++.a
+        ${CMAKE_INSTALL_PREFIX}/lib/libc++abi.a
+        ${CMAKE_INSTALL_PREFIX}/lib/libbfpthread.a
+        ${CMAKE_INSTALL_PREFIX}/lib/libbfunwind.a
+        ${CMAKE_INSTALL_PREFIX}/lib/libc.a
+        ${CMAKE_INSTALL_PREFIX}/lib/libm.a
+        ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall.a
+        --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt.a --no-whole-archive
+    )
 
-        set(LIBRARIES "")
-        foreach(d ${ARG_LIBRARIES})
-            list(APPEND LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/lib${d}_static.a")
-        endforeach(d)
-
-        foreach(d ${ARG_EXT_LIBRARIES})
-            list(APPEND LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/lib${d}.a")
-        endforeach(d)
-
-        if(NOT ARG_NOVMMLIBS)
-            list(APPEND LIBRARIES
-                --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_entry_static.a --no-whole-archive
-                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_vcpu_static.a
-                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_hve_static.a
-                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_memory_manager_static.a
-                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_debug_static.a
-                ${CMAKE_INSTALL_PREFIX}/lib/libbfintrinsics_static.a
-            )
-        endif()
-
-        list(APPEND LIBRARIES
-            ${CMAKE_INSTALL_PREFIX}/lib/libc++.a
-            ${CMAKE_INSTALL_PREFIX}/lib/libc++abi.a
-            ${CMAKE_INSTALL_PREFIX}/lib/libbfpthread_static.a
-            ${CMAKE_INSTALL_PREFIX}/lib/libbfunwind_static.a
-            ${CMAKE_INSTALL_PREFIX}/lib/libc.a
-            ${CMAKE_INSTALL_PREFIX}/lib/libm.a
-            ${CMAKE_INSTALL_PREFIX}/lib/libbfsyscall_static.a
-            --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfcrt_static.a --no-whole-archive
-        )
-
-        target_link_libraries(${NAME}_static ${LIBRARIES})
-        install(TARGETS ${NAME}_static DESTINATION bin)
-    endif()
+    target_link_libraries(${NAME} ${LIBRARIES})
+    install(TARGETS ${NAME} DESTINATION bin)
 
 endfunction(add_vmm_executable)
 
@@ -1338,12 +1280,7 @@ macro(set_bfm_vmm NAME)
     cmake_parse_arguments(ARG "${options}" "${oneVal}" "" ${ARGN})
 
     if(NOT ARG_DEFAULT OR (ARG_DEFAULT AND NOT BFM_VMM))
-        if(BUILD_SHARED_LIBS)
-            set(BFM_VMM "${NAME}_shared")
-        endif()
-        if(BUILD_STATIC_LIBS)
-            set(BFM_VMM "${NAME}_static")
-        endif()
+        set(BFM_VMM "${NAME}")
     endif()
 
     if(NOT ARG_DEFAULT OR (ARG_DEFAULT AND NOT BFM_VMM_TARGET))
@@ -1377,11 +1314,6 @@ function(do_test FILENAME)
     set(multiVal DEFINES DEPENDS SOURCES CMD_LINE_ARGS)
     cmake_parse_arguments(ARG "" "" "${multiVal}" ${ARGN})
 
-    set(DEPENDS "")
-    foreach(d ${ARG_DEPENDS})
-        list(APPEND DEPENDS "${d}_static")
-    endforeach(d)
-
     if(NOT ARG_SOURCES)
         set(ARG_SOURCES "${FILENAME}.cpp")
     endif()
@@ -1389,7 +1321,7 @@ function(do_test FILENAME)
     string(REPLACE "test_" "" NAME "${FILENAME}")
 
     add_executable(test_${NAME} ${ARG_SOURCES})
-    target_link_libraries(test_${NAME} ${DEPENDS} test_catch)
+    target_link_libraries(test_${NAME} ${ARG_DEPENDS} test_catch)
     target_compile_definitions(test_${NAME} PRIVATE ${ARG_DEFINES})
     add_test(test_${NAME} test_${NAME} ${ARG_CMD_LINE_ARGS})
     if(CYGWIN OR WIN32)

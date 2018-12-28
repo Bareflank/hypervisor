@@ -16,8 +16,5 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-set(BUILD_SHARED_LIBS OFF)
-set(BUILD_STATIC_LIBS ON)
-
 set(CMAKE_BUILD_TYPE Release)
 set(ENABLE_COMPILER_WARNINGS ON)

@@ -27,3 +27,7 @@ add_static_library(
     SOURCES pthread.cpp threadcontext.asm
     DEFINES STATIC_PTHREAD
 )
+
+#add_library(bfpthread_shared SHARED pthread.cpp threadcontext.asm)
+#target_compile_definitions(bfpthread_shared INTERFACE SHARED_PTHREAD)
+#install(TARGETS bfpthread_shared DESTINATION lib)

@@ -136,9 +136,9 @@ set(SOURCE_BFRUNTIME_DIR ${CMAKE_SOURCE_DIR}/bfruntime
     "bfruntime source dir"
 )
 
-set(SOURCE_BFSDK_DIR ${CMAKE_SOURCE_DIR}/bfutil
+set(SOURCE_BFUTIL_DIR ${CMAKE_SOURCE_DIR}/bfutil
     CACHE INTERNAL
-    "bfsdk source dir"
+    "bfutil source dir"
 )
 
 set(SOURCE_BFUNWIND_DIR ${CMAKE_SOURCE_DIR}/bfunwind
@@ -195,9 +195,9 @@ set(BUILD_BFRUNTIME_DIR ${CMAKE_BINARY_DIR}/bfruntime
     "bfruntime build dir"
 )
 
-set(BUILD_BFSDK_DIR ${CMAKE_BINARY_DIR}/bfutil
+set(BUILD_BFUTIL_DIR ${CMAKE_BINARY_DIR}/bfutil
     CACHE INTERNAL
-    "bfsdk build dir"
+    "bfutil build dir"
 )
 
 set(BUILD_BFUNWIND_DIR ${CMAKE_BINARY_DIR}/bfunwind
@@ -311,7 +311,7 @@ set(CMAKE_BUILD_TYPE "Release"
     "Defines the build type"
 )
 
-set(CMAKE_VERBOSE_MAKEFILE OFF
+set(CMAKE_VERBOSE_MAKEFILE ON
     CACHE INTERNAL
     "Enables verbose output"
 )
@@ -337,7 +337,7 @@ add_config(
 # VMM Library Type
 # ------------------------------------------------------------------------------
 
-set(BUILD_STATIC_LIBS ON CACHE INTERNAL "")
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
 
 # ------------------------------------------------------------------------------
 # Prefixes

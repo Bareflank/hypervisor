@@ -55,9 +55,9 @@ string(CONCAT LD_FLAGS
     "-nostdlib "
 )
 
-if(EXISTS "${CMAKE_INSTALL_PREFIX}/lib/libbfdso_static.a")
+if(EXISTS "${CMAKE_INSTALL_PREFIX}/lib/libbfdso.a")
     string(CONCAT LD_FLAGS
-        "--whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfdso_static.a --no-whole-archive "
+        "--whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfdso.a --no-whole-archive "
     )
 endif()
 
@@ -77,13 +77,13 @@ set(CMAKE_CXX_LINK_EXECUTABLE
     "${LD_BIN} ${LD_FLAGS} -pie <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
 )
 
-set(CMAKE_C_CREATE_SHARED_LIBRARY
-    "${LD_BIN} ${LD_FLAGS} -shared <OBJECTS> -o <TARGET>"
-)
-
-set(CMAKE_CXX_CREATE_SHARED_LIBRARY
-    "${LD_BIN} ${LD_FLAGS} -shared <OBJECTS> -o <TARGET>"
-)
+#set(CMAKE_C_CREATE_SHARED_LIBRARY
+#    "${LD_BIN} ${LD_FLAGS} -shared <OBJECTS> -o <TARGET>"
+#)
+#
+#set(CMAKE_CXX_CREATE_SHARED_LIBRARY
+#    "${LD_BIN} ${LD_FLAGS} -shared <OBJECTS> -o <TARGET>"
+#)
 
 set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)

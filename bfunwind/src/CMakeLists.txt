@@ -38,4 +38,8 @@ add_static_library(
     DEFINES STATIC_SYSCALL
 )
 
+#add_library(bfunwind_shared SHARED ${SOURCES})
+#target_compile_definitions(bfunwind_shared INTERFACE SHARED_SYSCALL)
+#
+#install(TARGETS bfunwind_shared DESTINATION lib)
 install(FILES ../include/ia64_cxx_abi.h DESTINATION include RENAME unwind.h)

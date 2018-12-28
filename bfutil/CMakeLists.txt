@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 cmake_minimum_required(VERSION 3.6)
-project(bvk::util C CXX)
+project(bfutil C CXX)
 
 include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project(
