@@ -20,31 +20,8 @@
 #define SERIAL_PORT_PL011_H
 
 #include <memory>
-
 #include <bfconstants.h>
-
 #include <intrinsics.h>
-
-// -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_DEBUG
-#ifdef SHARED_DEBUG
-#define EXPORT_DEBUG EXPORT_SYM
-#else
-#define EXPORT_DEBUG IMPORT_SYM
-#endif
-#else
-#define EXPORT_DEBUG
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
 
 // -----------------------------------------------------------------------------
 // Definition
@@ -61,7 +38,7 @@ namespace bfvmm
 /// Note that by default, a FIFO is used / required, and interrupts are
 /// disabled.
 ///
-class EXPORT_DEBUG serial_pl011
+class serial_pl011
 {
 public:
 
@@ -390,11 +367,6 @@ public:
 
     /// @endcond
 };
-
 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

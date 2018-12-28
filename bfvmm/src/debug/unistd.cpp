@@ -26,7 +26,7 @@
 #include <mutex>
 std::mutex g_write_mutex;
 
-extern "C" EXPORT_SYM void
+extern "C" void
 unlock_write(void)
 { g_write_mutex.unlock(); }
 
@@ -37,7 +37,7 @@ g_debug_ring() noexcept
     return &dr;
 }
 
-extern "C" EXPORT_SYM uint64_t
+extern "C" uint64_t
 write_str(const std::string &str)
 {
     try {
@@ -56,7 +56,7 @@ write_str(const std::string &str)
     return str.length();
 }
 
-extern "C" EXPORT_SYM uint64_t
+extern "C" uint64_t
 unsafe_write_cstr(const char *cstr, size_t len)
 {
     try {
@@ -73,7 +73,7 @@ unsafe_write_cstr(const char *cstr, size_t len)
     return len;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 write(int __fd, const void *__buf, size_t __nbyte)
 {
     if (__buf == nullptr || __nbyte == 0) {

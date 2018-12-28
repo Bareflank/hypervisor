@@ -30,27 +30,6 @@
 #include <intrinsics.h>
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Interrupt Descriptor Table
 // -----------------------------------------------------------------------------
 
@@ -62,7 +41,7 @@ namespace x64
 /// Interrupt Descriptor Table
 ///
 ///
-class EXPORT_HVE idt
+class idt
 {
 public:
 
@@ -340,9 +319,5 @@ public:
 
 }
 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

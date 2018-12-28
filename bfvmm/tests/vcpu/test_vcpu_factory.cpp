@@ -18,6 +18,7 @@
 
 #include <catch/catch.hpp>
 #include <vcpu/vcpu_factory.h>
+#include <bfexports.h>
 
 namespace bfvmm
 {

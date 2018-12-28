@@ -28,35 +28,11 @@
 #include "../../../memory_manager/memory_manager.h"
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
-namespace bfvmm
+namespace bfvmm::intel_x64
 {
-namespace intel_x64
-{
-
 /// Intel x86_64 VMCS
 ///
 /// The following provides the basic VMCS implementation as defined by the
@@ -74,7 +50,7 @@ namespace intel_x64
 /// for more details. Pro tip: auto-complete works great with the VMCS
 /// namespace logic.
 ///
-class EXPORT_HVE vmcs
+class vmcs
 {
 public:
 
@@ -225,14 +201,8 @@ public:
 
     /// @endcond
 };
-
-}
 }
 
 using vmcs_t = bfvmm::intel_x64::vmcs;
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

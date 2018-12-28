@@ -23,26 +23,6 @@
 #include <stdint.h>
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_DUMMY
-#ifdef SHARED_DUMMY
-#define EXPORT_DUMMY EXPORT_SYM
-#else
-#define EXPORT_DUMMY IMPORT_SYM
-#endif
-#else
-#define EXPORT_DUMMY
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
@@ -50,7 +30,7 @@
 
 extern int global_var;
 
-class EXPORT_DUMMY base
+class base
 {
 public:
     base() noexcept = default;
@@ -63,7 +43,7 @@ public:
     }
 };
 
-class EXPORT_DUMMY derived1 : public base
+class derived1 : public base
 {
 public:
     derived1() noexcept;
@@ -76,7 +56,7 @@ private:
     int m_member{1000};
 };
 
-class EXPORT_DUMMY derived2 : public base
+class derived2 : public base
 {
 public:
     derived2() noexcept;

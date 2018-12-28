@@ -27,27 +27,6 @@
 #include "../../../memory_manager/arch/x64/cr3.h"
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Defintion
 // -----------------------------------------------------------------------------
 
@@ -59,7 +38,7 @@ namespace bfvmm::intel_x64
 /// This class provides the base implementation for an Intel based vCPU. For
 /// more information on how a vCPU works, please @see bfvmm::vcpu
 ///
-class EXPORT_HVE vcpu : public bfvmm::vcpu
+class vcpu : public bfvmm::vcpu
 {
 
 public:
@@ -330,7 +309,6 @@ private:
     std::unique_ptr<vmcs> m_vmcs;
     std::unique_ptr<vmx> m_vmx;
 };
-
 }
 
 using vcpu_t = bfvmm::intel_x64::vcpu;
@@ -347,9 +325,5 @@ using vcpu_t = bfvmm::intel_x64::vcpu;
 ///
 #define get_vcpu(a) \
     g_vcm->get<bfvmm::intel_x64::vcpu *>(a, __FILE__ ": invalid vcpuid")
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

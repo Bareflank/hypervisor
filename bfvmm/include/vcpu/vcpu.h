@@ -30,27 +30,6 @@
 #include <bfdelegate.h>
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_VCPU
-#ifdef SHARED_VCPU
-#define EXPORT_VCPU EXPORT_SYM
-#else
-#define EXPORT_VCPU IMPORT_SYM
-#endif
-#else
-#define EXPORT_VCPU
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
@@ -104,7 +83,7 @@ namespace bfvmm
 /// Also note that the vCPU is a base class. The vcpu_factory really should
 /// be creating architectural vCPUs as this class doesn't do much.
 ///
-class EXPORT_VCPU vcpu
+class vcpu
 {
 public:
 
@@ -360,11 +339,6 @@ public:
 
     /// @endcond
 };
-
 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

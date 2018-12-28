@@ -23,27 +23,6 @@
 #include "vcpu.h"
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_VCPU
-#ifdef SHARED_VCPU
-#define EXPORT_VCPU EXPORT_SYM
-#else
-#define EXPORT_VCPU IMPORT_SYM
-#endif
-#else
-#define EXPORT_VCPU
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
@@ -67,7 +46,7 @@ namespace bfvmm
 /// <br>
 /// <a href="https://github.com/Bareflank/hypervisor_example_cpuidcount">Bareflank Hypervisor CPUID Example</a>
 ///
-class EXPORT_VCPU vcpu_factory
+class vcpu_factory
 {
 public:
 
@@ -109,11 +88,6 @@ public:
 
     /// @endcond
 };
-
 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

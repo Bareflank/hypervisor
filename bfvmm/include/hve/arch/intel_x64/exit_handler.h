@@ -33,27 +33,6 @@
 #include "../x64/tss.h"
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Handler Types
 // -----------------------------------------------------------------------------
 
@@ -81,9 +60,7 @@ void emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu, uintptr_t val);
 // Exit Handler
 // -----------------------------------------------------------------------------
 
-namespace bfvmm
-{
-namespace intel_x64
+namespace bfvmm::intel_x64
 {
 
 /// Exit Handler
@@ -100,7 +77,7 @@ namespace intel_x64
 /// can subclass this class, and overload the handlers that are needed. The
 /// basics are provided with this class to ease development.
 ///
-class EXPORT_HVE exit_handler
+class exit_handler
 {
 public:
 
@@ -281,14 +258,8 @@ public:
 
     /// @endcond
 };
-
-}
 }
 
 using exit_handler_t = bfvmm::intel_x64::exit_handler;
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

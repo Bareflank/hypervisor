@@ -23,33 +23,10 @@
 #include "../../../memory_manager/memory_manager.h"
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
-namespace bfvmm
-{
-namespace intel_x64
+namespace bfvmm::intel_x64
 {
 
 /// VMXON (Intel x86_64)
@@ -60,7 +37,7 @@ namespace intel_x64
 ///
 /// This class is managed by vcpu_intel_x64
 ///
-class EXPORT_HVE vmx
+class vmx
 {
 public:
 
@@ -113,12 +90,6 @@ public:
 
     /// @endcond
 };
-
 }
-}
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

@@ -19,7 +19,7 @@
 #include <bfexports.h>
 #include <dummy_libs.h>
 
-EXPORT_SYM extern "C" int
+extern "C" int
 lib1_foo()
 { return 1; }
 
