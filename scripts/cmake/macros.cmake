@@ -1106,7 +1106,6 @@ macro(init_project)
     include_directories(SYSTEM
         ${ARG_INCLUDES}
         ${SOURCE_BFSDK_DIR}/include
-        ${SOURCE_BFELF_LOADER_DIR}/include
         ${SOURCE_BFINTRINSICS_DIR}/include
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/include

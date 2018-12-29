@@ -119,11 +119,6 @@ set(SOURCE_BFDUMMY_DIR ${CMAKE_SOURCE_DIR}/bfdummy
     "bfdummy source dir"
 )
 
-set(SOURCE_BFELF_LOADER_DIR ${CMAKE_SOURCE_DIR}/bfelf_loader
-    CACHE INTERNAL
-    "bfelf_loader source dir"
-)
-
 set(SOURCE_BFINTRINSICS_DIR ${CMAKE_SOURCE_DIR}/bfintrinsics
     CACHE INTERNAL
     "bfintrinsics source dir"
@@ -176,11 +171,6 @@ set(BUILD_BFDUMMY_DIR ${CMAKE_BINARY_DIR}/bfdummy
 set(BUILD_BFDUMMY_MAIN_DIR ${CMAKE_BINARY_DIR}/bfdummy_main
     CACHE INTERNAL
     "bfdummy main build dir"
-)
-
-set(BUILD_BFELF_LOADER_DIR ${CMAKE_BINARY_DIR}/bfelf_loader
-    CACHE INTERNAL
-    "bfelf_loader build dir"
 )
 
 set(BUILD_BFINTRINSICS_DIR ${CMAKE_BINARY_DIR}/bfintrinsics

@@ -67,11 +67,11 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <IncludePath>..\..\..\..\bfsdk\include;..\..\..\..\bfelf_loader\include;..\..\..\include;.;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\..\bfsdk\include;..\..\..\include;.;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <IncludePath>..\..\..\..\bfsdk\include;..\..\..\..\bfelf_loader\include;..\..\..\include;.;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\..\bfsdk\include;..\..\..\include;.;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

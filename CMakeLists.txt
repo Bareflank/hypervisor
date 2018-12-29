@@ -19,8 +19,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.10)
 project(hypervisor)
+
+# ------------------------------------------------------------------------------
+# Modules
+# ------------------------------------------------------------------------------
+
+include(ProcessorCount)
+include(ExternalProject)
 
 # ------------------------------------------------------------------------------
 # Config
@@ -30,9 +37,19 @@ include(${CMAKE_CURRENT_LIST_DIR}/scripts/cmake/config/default.cmake)
 include_external_config()
 
 # ------------------------------------------------------------------------------
-# Project File
+# Testing
 # ------------------------------------------------------------------------------
 
+if(ENABLE_BUILD_TEST)
+    include(CTest)
+    enable_testing(true)
+endif()
+
+# ------------------------------------------------------------------------------
+# Macros
+# ------------------------------------------------------------------------------
+
+include(${SOURCE_CMAKE_DIR}/macros.cmake)
 add_project_include(${SOURCE_CMAKE_DIR}/macros.cmake)
 
 # ------------------------------------------------------------------------------
@@ -48,7 +65,7 @@ message(STATUS "    target: ${BFM_VMM_TARGET}")
 # Targets
 # ------------------------------------------------------------------------------
 
-include(scripts/cmake/targets.cmake)
+include(${SOURCE_CMAKE_DIR}/targets.cmake)
 
 # ------------------------------------------------------------------------------
 # General Dependencies
@@ -72,22 +89,13 @@ if(ENABLE_BUILD_VMM)
         bfdriver none
         NOBUILD
     )
-
-    add_subproject(
-        bfelf_loader none
-        NOBUILD
-    )
-
-    add_subproject(
-        bfsdk none
-        NOBUILD
-    )
 endif()
 
 # ------------------------------------------------------------------------------
 # VMM Components
 # ------------------------------------------------------------------------------
 
+add_subproject(bfsdk vmm SOURCE_DIR ${SOURCE_BFSDK_DIR})
 include_dependency(SOURCE_DEPENDS_DIR binutils)
 
 if(NOT WIN32)
@@ -178,31 +186,6 @@ if(ENABLE_BUILD_TEST)
     )
 endif()
 
-if(ENABLE_BUILD_TEST AND NOT WIN32)
-    add_subproject(
-        bfdummy vmm
-        DEPENDS bfunwind
-    )
-
-    add_subproject(
-        bfdummy_main vmm
-        SOURCE_DIR ${SOURCE_BFDUMMY_DIR}/src/main
-        DEPENDS bfdummy
-    )
-
-    add_subproject(
-        bfelf_loader test
-        DEPENDS bfsdk
-        NOINSTALL
-    )
-
-    add_subproject(
-        bfdriver test
-        DEPENDS bfsdk
-        NOINSTALL
-    )
-endif()
-
 if(ENABLE_BUILD_TEST)
     add_subproject(
         bfm test
@@ -254,6 +237,60 @@ include(examples/cpuidcount/CMakeLists.txt)
 include(examples/hook/CMakeLists.txt)
 include(examples/rdtsc/CMakeLists.txt)
 include(examples/vpid/CMakeLists.txt)
+
+# ------------------------------------------------------------------------------
+# External Components
+# ------------------------------------------------------------------------------
+
+include_external_extensions()
+
+# ------------------------------------------------------------------------------
+# EFI Components
+# ------------------------------------------------------------------------------
+
+if(ENABLE_BUILD_EFI AND NOT WIN32)
+    include_dependency(SOURCE_DEPENDS_DIR gnuefi)
+
+    add_subproject(
+        efi efi
+        DEPENDS gnuefi ${BFM_VMM_TARGET}
+        SOURCE_DIR ${SOURCE_BFDRIVER_DIR}/src/platform/efi
+    )
+endif()
+
+# ------------------------------------------------------------------------------
+# Force Rebuild
+# ------------------------------------------------------------------------------
+
+get_property(FORCE_REBUILD GLOBAL PROPERTY "FORCE_REBUILD")
+
+if(FORCE_REBUILD STREQUAL "ON")
+    set_property(GLOBAL PROPERTY "FORCE_REBUILD" "OFF")
+    file(REMOVE_RECURSE ${DEPENDS_DIR})
+    file(REMOVE_RECURSE ${PREFIXES_DIR})
+    message(FATAL_ERROR "${Yellow}dependencies updated, rebuild is required. Rerun cmake${ColorReset}")
+endif()
+
+
+if(ENABLE_BUILD_TEST AND NOT WIN32)
+    add_subproject(
+        bfdummy vmm
+        DEPENDS bfunwind
+    )
+
+    add_subproject(
+        bfdummy_main vmm
+        SOURCE_DIR ${SOURCE_BFDUMMY_DIR}/src/main
+        DEPENDS bfdummy
+    )
+
+    add_subproject(
+        bfdriver test
+        DEPENDS bfsdk
+        NOINSTALL
+    )
+endif()
+
 
 # ------------------------------------------------------------------------------
 # External Components
