@@ -1,0 +1,53 @@
+CMake Buildsystem
+-----------------
+
+### Overview
+
+This repo is a "superbuild" of many cmake sub-projects. The main "driver" of
+the superbuild is the top-level CMakeLists.txt. It uses helper macros defined
+in scripts/cmake/macros.cmake and ExternalProject_Add to create targets for the
+build. From a CMake perspective, all the top-level targets are custom
+targets. The sub-projects themselves may define any type of target
+as needed.
+
+### Subprojects
+
+Subprojects are simply CMake project()s. They can be built under different
+"prefixes", which is basically another way of saying "build requirements".
+Bareflank defines three prefixes: vmm, test, and userspace. The vmm has its own
+toolchain at scripts/cmake/toolchain/clang_x86_64_vmm.cmake, whereas test and
+userspace technically use the same toolchain, i.e. the host's, but have
+different compile options. Each prefix has its own set of compile options,
+include directories, etc. that every project built under the prefix uses.
+Each prefix specifies its build requirements with an INTERFACE library:
+
+    bfroot_vmm
+    bfroot_test
+    bfroot_userspace
+
+defined in bfroot/CMakeLists.txt. Downstream targets simply link against the
+prefix's root library to inherit the necessary build requirements. Of course
+the downstream target itself can define *its* build requirements as needed.
+
+Using this target-based approach delegates the problem of handling build
+requirements to CMake. However due to the superbuild design, there is one
+CMake feature that is needed in order for requirement propagation to work:
+target exports.
+
+### Exports
+
+A CMake project defines a set of targets that by default are "private" to the
+project - external CMake projects don't know what targets it defines. Since
+Bareflank components are built as separate CMake projects, there has to be a
+way for a project to communicate its set of targets to external projects.
+Bareflank uses CMake's export functionality solve this problem.
+
+Each Bareflank sub-project() defines an _export_set_ with a call to
+install(EXPORT <export>). In order to export a target Bareflank appends 'EXPORT
+<export>' to the install(TARGET) command. When 'make install' is run, CMake
+generates an "export file" to ${EXPORT_DIR}/<project>-<prefix>.cmake that
+contains an entry for each exported target. The entry encodes the target's
+build requirements and the name by which the target can be referenced in
+external projects. Each Bareflank project is exported with the name
+<prefix>::<project>. The '<prefix>::' prefix is a namespace used to
+prevent collisions among target names.
