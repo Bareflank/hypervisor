@@ -17,10 +17,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 cmake_minimum_required(VERSION 3.6)
-project(bfsdk_test C CXX)
+project(bfutil_test C CXX)
 
 include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
+init_project(NAME bfutil_test)
 
 add_library(test_catch STATIC test_catch.cpp)
 install(TARGETS test_catch DESTINATION lib)
@@ -44,3 +44,29 @@ do_test(test_string)
 do_test(test_types)
 do_test(test_upperlower)
 do_test(test_vector)
+
+#add_static_library(
+#    test_support
+#    SOURCES test_real_elf.cpp test_fake_elf.cpp
+#    ALWAYS
+#)
+#
+#do_test(test_binary DEPENDS test_support)
+#do_test(test_file_get_entry DEPENDS test_support)
+#do_test(test_file_get_load_instr DEPENDS test_support)
+#do_test(test_file_get_needed DEPENDS test_support)
+#do_test(test_file_get_num_load_instrs DEPENDS test_support)
+#do_test(test_file_get_num_needed DEPENDS test_support)
+#do_test(test_file_get_pic_pie DEPENDS test_support)
+#do_test(test_file_get_section_info DEPENDS test_support)
+#do_test(test_file_get_total_size DEPENDS test_support)
+#do_test(test_file_init DEPENDS test_support)
+#do_test(test_helpers DEPENDS test_support)
+#do_test(test_load DEPENDS test_support)
+#do_test(test_loader_add DEPENDS test_support)
+#do_test(test_loader_relocate DEPENDS test_support)
+#do_test(test_loader_resolve_symbol DEPENDS test_support)
+#do_test(test_read_binary_and_get_needed_list DEPENDS test_support)
+#do_test(test_real DEPENDS test_support)
+#do_test(test_set_args DEPENDS test_support)
+#do_test(test_set_integer_args DEPENDS test_support)

@@ -16,18 +16,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.10)
 project(bfsyscall C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
-
-add_static_library(
-    bfsyscall
-    SOURCES syscall.cpp
-    DEFINES STATIC_SYSCALL
-)
-
-#add_library(bfsyscall_shared SHARED syscall.cpp)
-#target_compile_definitions(bfsyscall_shared INTERFACE SHARED_SYSCALL)
-#install(TARGETS bfsyscall_shared DESTINATION lib)
+init_project(bfsyscall)
+target_sources(bfsyscall PRIVATE syscall.cpp)
+fini_project(bfsyscall)

@@ -16,14 +16,6 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-include(ProcessorCount)
-include(ExternalProject)
-
-if(ENABLE_BUILD_TEST)
-    include(CTest)
-    enable_testing(true)
-endif()
-
 # ------------------------------------------------------------------------------
 # colors
 # ------------------------------------------------------------------------------
@@ -49,122 +41,17 @@ if(NOT WIN32)
 endif()
 
 # ------------------------------------------------------------------------------
-# add_config
-# ------------------------------------------------------------------------------
-
-# Add Config
-#
-# Add a configurable varibale to the CMake build. This function ensures each
-# variable is properly set, and ensures it's properly visible in ccmake.
-#
-# @param ADVANCED Only show this variable in the advanced mode for ccmake
-# @param SKIP_VALIDATION do not validate that the varibale is properly set
-# @param CONFIG_NAME The name of the variable
-# @param CONFIG_TYPE The variable's type: STRING, PATH, FILEPATH, BOOL
-# @param DEFAULT_VAL The default value for the variable
-# @param DESCRIPTION A description of the variable
-# @param OPTIONS Possible values for the the variable. Only applies to STRING
-#    type variables.
-#
-macro(add_config)
-    set(options ADVANCED SKIP_VALIDATION)
-    set(oneVal CONFIG_NAME CONFIG_TYPE DEFAULT_VAL DESCRIPTION)
-    set(multiVal OPTIONS)
-    cmake_parse_arguments(ARG "${options}" "${oneVal}" "${multiVal}" ${ARGN})
-
-    if(ARG_CONFIG_TYPE STREQUAL "BOOL" AND NOT ARG_DEFAULT_VAL)
-        set(ARG_DEFAULT_VAL OFF)
-    endif()
-
-    if(NOT DEFINED ${ARG_CONFIG_NAME})
-        set(${ARG_CONFIG_NAME} ${ARG_DEFAULT_VAL} CACHE ${ARG_CONFIG_TYPE} ${ARG_DESCRIPTION})
-    else()
-        set(${ARG_CONFIG_NAME} ${${ARG_CONFIG_NAME}} CACHE ${ARG_CONFIG_TYPE} ${ARG_DESCRIPTION})
-    endif()
-
-    if(ARG_OPTIONS AND ARG_CONFIG_TYPE STREQUAL "STRING")
-        set_property(CACHE ${ARG_CONFIG_NAME} PROPERTY STRINGS ${ARG_OPTIONS})
-    endif()
-
-    if(NOT ARG_SKIP_VALIDATION)
-        if(ARG_OPTIONS AND ARG_CONFIG_TYPE STREQUAL "STRING")
-            if(NOT ARG_DEFAULT_VAL IN_LIST ARG_OPTIONS)
-                message(FATAL_ERROR "${ARG_CONFIG_NAME} invalid option \'${ARG_DEFAULT_VAL}\'")
-            endif()
-        endif()
-
-        if(ARG_CONFIG_TYPE STREQUAL "PATH")
-            if(NOT EXISTS "${ARG_DEFAULT_VAL}")
-                message(FATAL_ERROR "${ARG_CONFIG_NAME} path not found: ${ARG_DEFAULT_VAL}")
-            endif()
-        endif()
-
-        if(ARG_CONFIG_TYPE STREQUAL "FILEPATH")
-            if(NOT EXISTS "${ARG_DEFAULT_VAL}")
-                message(FATAL_ERROR "${ARG_CONFIG_NAME} file not found: ${ARG_DEFAULT_VAL}")
-            endif()
-        endif()
-
-        if(ARG_CONFIG_TYPE STREQUAL "BOOL")
-            if(NOT ARG_DEFAULT_VAL STREQUAL ON AND NOT ARG_DEFAULT_VAL STREQUAL OFF)
-                message(FATAL_ERROR "${ARG_CONFIG_NAME} must be set to ON or OFF")
-            endif()
-        endif()
-    endif()
-
-    if(ARG_ADVANCED)
-        mark_as_advanced(${ARG_CONFIG_NAME})
-    endif()
-endmacro(add_config)
-
-# ------------------------------------------------------------------------------
 # Macro File List
 # ------------------------------------------------------------------------------
 
-# Private
-#
 macro(add_project_include FILE)
     set(PROJECT_INCLUDE_LIST "${PROJECT_INCLUDE_LIST}|${FILE}")
 endmacro(add_project_include)
 
 # ------------------------------------------------------------------------------
-# include_external_config
-# ------------------------------------------------------------------------------
-
-# Private
-#
-macro(include_external_config)
-    if(CONFIG)
-        foreach(c ${CONFIG})
-            if(EXISTS "${SOURCE_CONFIG_DIR}/${c}.cmake")
-                message(STATUS "Config: ${SOURCE_CONFIG_DIR}/${c}.cmake")
-                include(${SOURCE_CONFIG_DIR}/${c}.cmake)
-                continue()
-            endif()
-            if(NOT IS_ABSOLUTE "${c}")
-                get_filename_component(c "${BUILD_ROOT_DIR}/${c}" ABSOLUTE)
-            endif()
-            if(EXISTS "${c}")
-                message(STATUS "Config: ${c}")
-                include(${c})
-                continue()
-            endif()
-
-            message(FATAL_ERROR "File not found: ${c}")
-        endforeach(c)
-    elseif(EXISTS "${CMAKE_SOURCE_DIR}/../config.cmake")
-        get_filename_component(CONFIG "${CMAKE_SOURCE_DIR}/../config.cmake" ABSOLUTE)
-        message(STATUS "Config: ${CONFIG}")
-        include(${CONFIG})
-    endif()
-endmacro(include_external_config)
-
-# ------------------------------------------------------------------------------
 # include_external_extensions
 # ------------------------------------------------------------------------------
 
-# Private
-#
 macro(include_external_extensions)
     foreach(e ${EXTENSION})
         if(NOT IS_ABSOLUTE "${e}")
@@ -869,11 +756,11 @@ function(add_subproject NAME PREFIX)
         set(TOOLCHAIN ${ARG_TOOLCHAIN})
     endif()
 
-    generate_flags(
-        ${PREFIX}
-        C_FLAGS ${ARG_C_FLAGS}
-        CXX_FLAGS ${ARG_CXX_FLAGS}
-    )
+    #    generate_flags(
+    #        ${PREFIX}
+    #        C_FLAGS ${ARG_C_FLAGS}
+    #        CXX_FLAGS ${ARG_CXX_FLAGS}
+    #    )
 
     if(PREFIX STREQUAL "vmm")
         set(PREFIX ${VMM_PREFIX})
@@ -887,7 +774,7 @@ function(add_subproject NAME PREFIX)
         message(FATAL_ERROR "Invalid prefix: ${PREFIX}")
     endif()
 
-    set(DEPENDS "")
+    set(DEPENDS "bfroot")
     foreach(d ${ARG_DEPENDS})
         if(d MATCHES ${VMM_PREFIX})
             list(APPEND DEPENDS "${d}")
@@ -919,11 +806,10 @@ function(add_subproject NAME PREFIX)
         -DCMAKE_INSTALL_MESSAGE=${CMAKE_INSTALL_MESSAGE}
         -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
         -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN}
-        -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
-        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
         -DPROJECT_INCLUDE_LIST=${PROJECT_INCLUDE_LIST}
         -DBFM_VMM=${BFM_VMM}
         -DEFI_EXTENSION_SOURCES=${EFI_EXTENSION_SOURCES}
+        -DCMAKE_PROJECT_${NAME}_INCLUDE=${SOURCE_CMAKE_DIR}/project.cmake
     )
 
     if(NOT WIN32 AND NOT CMAKE_GENERATOR STREQUAL "Ninja")
@@ -962,6 +848,9 @@ function(add_subproject NAME PREFIX)
         COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}/src
         DEPENDEES configure
     )
+
+    add_project_include(${EXPORT_DIR}/${NAME}.cmake)
+
 endfunction(add_subproject)
 
 # ------------------------------------------------------------------------------
@@ -1043,7 +932,6 @@ macro(enable_asm PREFIX)
             set(CMAKE_ASM_NASM_FLAGS "-d ${PREFIX} -d ${OSTYPE} -d ${ABITYPE}")
         endif()
 
-        set(CMAKE_ASM_NASM_CREATE_SHARED_LIBRARY TRUE)
         set(CMAKE_ASM_NASM_CREATE_STATIC_LIBRARY TRUE)
     endif()
     if(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
@@ -1053,17 +941,15 @@ endmacro(enable_asm)
 
 # Init Project
 #
-# Initializes a sub project or extension. This function should be used right
-# after running project(), and enables ASM, sets up include and library
-# folders and addition flags.
+# Initializes a subproject or extension.
 #
-# @param C_FLAGS Additonal flags to add to CMAKE_C_FLAGS
-# @param CXX_FLAGS Additonal flags to add to CMAKE_CXX_FLAGS
-# @param INCLUDES Additional includes
+# @param TARGET the name of the project target to create
+# @param INTERFACE make TARGET an interface library
 #
-macro(init_project)
-    set(multiVal C_FLAGS CXX_FLAGS INCLUDES)
-    cmake_parse_arguments(ARG "" "" "${multiVal}" ${ARGN})
+macro(init_project TARGET)
+    set(options INTERFACE)
+    set(oneVal SRC)
+    cmake_parse_arguments(ARG "${options}" "${oneVal}" "" ${ARGN})
 
     if(CMAKE_INSTALL_PREFIX STREQUAL "${VMM_PREFIX_PATH}")
         set(PREFIX "vmm")
@@ -1076,7 +962,29 @@ macro(init_project)
     else()
         message(FATAL_ERROR "Invalid prefix: ${CMAKE_INSTALL_PREFIX}")
     endif()
-    message(STATUS "Prefix: ${CMAKE_INSTALL_PREFIX}")
+    message(STATUS "Project: ${TARGET} @ prefix: ${CMAKE_INSTALL_PREFIX}")
+
+    set(CMAKE_C_EXTENSIONS OFF)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    enable_asm(${PREFIX})
+
+    if(${ARG_INTERFACE})
+        add_library(${TARGET} INTERFACE)
+        target_link_libraries(${TARGET} INTERFACE bfroot_${PREFIX})
+        target_include_directories(${TARGET} SYSTEM INTERFACE
+            $<INSTALL_INTERFACE:include>
+        )
+    else()
+        add_library(${TARGET} ${ARG_SOURCE})
+        set_target_properties(${TARGET} PROPERTIES LINKER_LANGUAGE C)
+        target_link_libraries(${TARGET} PUBLIC bfroot_${PREFIX})
+        target_include_directories(${TARGET} SYSTEM PUBLIC
+            $<INSTALL_INTERFACE:include>
+        )
+        target_link_directories(${TARGET} PUBLIC
+            $<INSTALL_INTERFACE:lib>
+        )
+    endif()
 
     if(PREFIX STREQUAL "vmm")
         set(CMAKE_SKIP_RPATH TRUE)
@@ -1087,38 +995,21 @@ macro(init_project)
         set(CMAKE_BUILD_TYPE "Debug")
     endif()
 
-    enable_asm(${PREFIX})
-
-    list(APPEND CMAKE_C_FLAGS ${ARG_C_FLAGS})
-    list(APPEND CMAKE_CXX_FLAGS ${ARG_CXX_FLAGS})
-
-    string(REPLACE ";" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-
-    include_directories(SYSTEM
-        ${ARG_INCLUDES}
-        ${SOURCE_BFUTIL_DIR}/include
-        ${SOURCE_BFELF_LOADER_DIR}/include
-        ${SOURCE_BFINTRINSICS_DIR}/include
-        ${CMAKE_CURRENT_LIST_DIR}
-        ${CMAKE_CURRENT_LIST_DIR}/include
-    )
-
-    if(NOT PREFIX STREQUAL "vmm")
-        include_directories(
-            SYSTEM ${CMAKE_INSTALL_PREFIX}/include
-        )
-    endif()
-
-    link_directories(
-        ${CMAKE_INSTALL_PREFIX}/lib
-    )
-
     get_cmake_property(_vars CACHE_VARIABLES)
     foreach (_var ${_vars})
         set(${_var} ${${_var}})
     endforeach()
 endmacro(init_project)
+
+# Fini Project
+#
+# @param TARGET the name of the target associated with this project
+#
+macro(fini_project)
+    set(TGT ${CMAKE_PROJECT_NAME})
+    install(TARGETS ${TGT} DESTINATION lib EXPORT ${TGT})
+    install(EXPORT ${TGT} DESTINATION "${EXPORT_DIR}")
+endmacro(fini_project)
 
 # ------------------------------------------------------------------------------
 # validate_build / invalid_config
@@ -1259,38 +1150,6 @@ function(add_vmm_executable NAME)
     install(TARGETS ${NAME} DESTINATION bin)
 
 endfunction(add_vmm_executable)
-
-# ------------------------------------------------------------------------------
-# set_bfm_vmm
-# ------------------------------------------------------------------------------
-
-# Set BFM VMM
-#
-# Sets the VMM that BFM will use when running "make load" or "make quick". This
-# does not hard code the VMM into BFM. BFM must either be given the VMM to
-# load, or an enviroment variable must be set.
-#
-# @param NAME The name of the VMM to load
-# @param DEFAULT If the VMM has not yet been set, this default value will be
-#     used instead. This should not be used by extensions
-#
-macro(set_bfm_vmm NAME)
-    set(options DEFAULT)
-    set(oneVal TARGET)
-    cmake_parse_arguments(ARG "${options}" "${oneVal}" "" ${ARGN})
-
-    if(NOT ARG_DEFAULT OR (ARG_DEFAULT AND NOT BFM_VMM))
-        set(BFM_VMM "${NAME}")
-    endif()
-
-    if(NOT ARG_DEFAULT OR (ARG_DEFAULT AND NOT BFM_VMM_TARGET))
-        if(ARG_TARGET)
-            set(BFM_VMM_TARGET "${ARG_TARGET}_${VMM_PREFIX}")
-        else()
-            set(BFM_VMM_TARGET "${NAME}_main_${VMM_PREFIX}")
-        endif()
-    endif()
-endmacro(set_bfm_vmm)
 
 # ------------------------------------------------------------------------------
 # do_test

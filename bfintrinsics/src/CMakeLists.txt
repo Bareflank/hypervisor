@@ -20,14 +20,14 @@ cmake_minimum_required(VERSION 3.6)
 project(bfintrinsics C CXX)
 
 include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
+init_project(bfintrinsics)
 
 list(APPEND SOURCES
     null.cpp
 )
 
 if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    list(APPEND SOURCES
+    target_sources(bfintrinsics PRIVATE
         arch/x64/cache.asm
         arch/x64/cpuid.asm
         arch/x64/gdt.asm
@@ -46,15 +46,6 @@ if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
         arch/intel_x64/pause.asm
         arch/intel_x64/vmx.asm
     )
-elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
-    message(WARNING "Unimplemented")
-else()
-    message(FATAL_ERROR "Unsupported archiecture")
 endif()
 
-add_static_library(
-    bfintrinsics
-    SOURCES ${SOURCES}
-    DEFINES STATIC_INTRINSICS
-    ALWAYS
-)
+install(TARGETS bfintrinsics DESTINATION lib EXPORT bfintrinsics)

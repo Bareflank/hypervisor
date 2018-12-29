@@ -16,33 +16,17 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.10)
 project(bfcrt C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project(
-    TIDY_EXCLUSIONS -cert-err34-c,-misc-misplaced-widening-cast
-    CXX_FLAGS -Wno-main
-)
-
-list(APPEND SOURCES
+init_project(bfcrt)
+set(ARCH ${BUILD_TARGET_ARCH})
+set(NOT_WIN32 $<NOT:$<BOOL:${WIN32}>>)
+target_link_libraries(bfcrt PUBLIC bfutil)
+target_compile_options(bfcrt PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-main>)
+target_sources(bfcrt PRIVATE
     crt.cpp
+    $<$<AND:$<STREQUAL:${ARCH},x86_64>,${NOT_WIN32}>:start_x64.asm>
+    $<$<STREQUAL:${BUILD_TARGET_ARCH},aarch64>:start_x64.S>
 )
-
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64" AND NOT WIN32)
-    list(APPEND SOURCES
-        start_x64.asm
-    )
-endif()
-
-if(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
-    list(APPEND SOURCES
-        start_aarch64.S
-    )
-endif()
-
-add_static_library(
-    bfcrt
-    SOURCES ${SOURCES}
-    ALWAYS
-)
+fini_project()

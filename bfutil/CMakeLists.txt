@@ -16,10 +16,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.10)
 project(bfutil C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project(
-    INCLUDES ${CMAKE_CURRENT_LIST_DIR}/../include
-)
+init_project(bfutil INTERFACE)
+install(DIRECTORY include/ DESTINATION include)
+fini_project()
