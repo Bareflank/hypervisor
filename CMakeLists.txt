@@ -273,59 +273,6 @@ if(FORCE_REBUILD STREQUAL "ON")
 endif()
 
 
-if(ENABLE_BUILD_TEST AND NOT WIN32)
-    add_subproject(
-        bfdummy vmm
-        DEPENDS bfunwind
-    )
-
-    add_subproject(
-        bfdummy_main vmm
-        SOURCE_DIR ${SOURCE_BFDUMMY_DIR}/src/main
-        DEPENDS bfdummy
-    )
-
-    add_subproject(
-        bfdriver test
-        DEPENDS bfsdk
-        NOINSTALL
-    )
-endif()
-
-
-# ------------------------------------------------------------------------------
-# External Components
-# ------------------------------------------------------------------------------
-
-include_external_extensions()
-
-# ------------------------------------------------------------------------------
-# EFI Components
-# ------------------------------------------------------------------------------
-
-if(ENABLE_BUILD_EFI AND NOT WIN32)
-    include_dependency(SOURCE_DEPENDS_DIR gnuefi)
-
-    add_subproject(
-        efi efi
-        DEPENDS gnuefi ${BFM_VMM_TARGET}
-        SOURCE_DIR ${SOURCE_BFDRIVER_DIR}/src/platform/efi
-    )
-endif()
-
-# ------------------------------------------------------------------------------
-# Force Rebuild
-# ------------------------------------------------------------------------------
-
-get_property(FORCE_REBUILD GLOBAL PROPERTY "FORCE_REBUILD")
-
-if(FORCE_REBUILD STREQUAL "ON")
-    set_property(GLOBAL PROPERTY "FORCE_REBUILD" "OFF")
-    file(REMOVE_RECURSE ${DEPENDS_DIR})
-    file(REMOVE_RECURSE ${PREFIXES_DIR})
-    message(FATAL_ERROR "${Yellow}dependencies updated, rebuild is required. Rerun cmake${ColorReset}")
-endif()
-
 # TODO:
 #
 # Detect if the flags have changed, delete the depends and prefixes, and then

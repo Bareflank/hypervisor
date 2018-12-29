@@ -267,6 +267,11 @@ set(PREFIXES_DIR ${CMAKE_BINARY_DIR}/prefixes
     "Prefixes directory"
 )
 
+set(EXPORT_DIR ${CMAKE_BINARY_DIR}/export
+    CACHE INTERNAL
+    "Target export directory"
+)
+
 # ------------------------------------------------------------------------------
 # Target Properties
 # ------------------------------------------------------------------------------
@@ -324,6 +329,12 @@ add_config(
     OPTIONS ALWAYS LAZY NEVER
     ADVANCED
 )
+
+# ------------------------------------------------------------------------------
+# VMM Library Type
+# ------------------------------------------------------------------------------
+
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
 
 # ------------------------------------------------------------------------------
 # Prefixes
