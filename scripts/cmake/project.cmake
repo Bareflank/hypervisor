@@ -20,3 +20,8 @@ string(REPLACE "|" ";" PROJECT_INCLUDE_LIST "${PROJECT_INCLUDE_LIST}")
 foreach(file ${PROJECT_INCLUDE_LIST})
     include(${file})
 endforeach(file)
+
+string(REPLACE "|" ";" PACKAGE_LIST "${PACKAGE_LIST}")
+foreach(pkg ${PACKAGE_LIST})
+    find_package(${pkg})
+endforeach(pkg)

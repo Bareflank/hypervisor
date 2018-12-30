@@ -16,36 +16,30 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.10)
 project(bfintrinsics C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project(bfintrinsics)
-
-list(APPEND SOURCES
-    null.cpp
+target_link_libraries(bfintrinsics PUBLIC bfunwind)
+set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
+target_sources(bfintrinsics PRIVATE
+    $<${X64}:arch/x64/cache.asm>
+    $<${X64}:arch/x64/cpuid.asm>
+    $<${X64}:arch/x64/gdt.asm>
+    $<${X64}:arch/x64/idt.asm>
+    $<${X64}:arch/x64/msrs.asm>
+    $<${X64}:arch/x64/pm.asm>
+    $<${X64}:arch/x64/portio.asm>
+    $<${X64}:arch/x64/rdtsc.asm>
+    $<${X64}:arch/x64/rflags.asm>
+    $<${X64}:arch/x64/srs.asm>
+    $<${X64}:arch/x64/tlb.asm>
+    $<${X64}:arch/intel_x64/barrier.asm>
+    $<${X64}:arch/intel_x64/bit.asm>
+    $<${X64}:arch/intel_x64/crs.asm>
+    $<${X64}:arch/intel_x64/drs.asm>
+    $<${X64}:arch/intel_x64/pause.asm>
+    $<${X64}:arch/intel_x64/vmx.asm>
 )
-
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    target_sources(bfintrinsics PRIVATE
-        arch/x64/cache.asm
-        arch/x64/cpuid.asm
-        arch/x64/gdt.asm
-        arch/x64/idt.asm
-        arch/x64/msrs.asm
-        arch/x64/pm.asm
-        arch/x64/portio.asm
-        arch/x64/rdtsc.asm
-        arch/x64/rflags.asm
-        arch/x64/srs.asm
-        arch/x64/tlb.asm
-        arch/intel_x64/barrier.asm
-        arch/intel_x64/bit.asm
-        arch/intel_x64/crs.asm
-        arch/intel_x64/drs.asm
-        arch/intel_x64/pause.asm
-        arch/intel_x64/vmx.asm
-    )
-endif()
-
-install(TARGETS bfintrinsics DESTINATION lib EXPORT bfintrinsics)
+install(DIRECTORY ../include/ DESTINATION include)
+fini_project()

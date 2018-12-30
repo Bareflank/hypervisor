@@ -774,7 +774,6 @@ function(add_subproject NAME PREFIX)
         message(FATAL_ERROR "Invalid prefix: ${PREFIX}")
     endif()
 
-    set(DEPENDS "bfroot")
     foreach(d ${ARG_DEPENDS})
         if(d MATCHES ${VMM_PREFIX})
             list(APPEND DEPENDS "${d}")
@@ -807,9 +806,11 @@ function(add_subproject NAME PREFIX)
         -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
         -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN}
         -DPROJECT_INCLUDE_LIST=${PROJECT_INCLUDE_LIST}
+        -DPACKAGE_LIST=${PACKAGE_LIST}
         -DBFM_VMM=${BFM_VMM}
         -DEFI_EXTENSION_SOURCES=${EFI_EXTENSION_SOURCES}
         -DCMAKE_PROJECT_${NAME}_INCLUDE=${SOURCE_CMAKE_DIR}/project.cmake
+        -DCMAKE_PREFIX_PATH=${EXPORT_DIR}
     )
 
     if(NOT WIN32 AND NOT CMAKE_GENERATOR STREQUAL "Ninja")
@@ -849,7 +850,10 @@ function(add_subproject NAME PREFIX)
         DEPENDEES configure
     )
 
-    add_project_include(${EXPORT_DIR}/${NAME}.cmake)
+    # This must come *after* ExternalProject_Add, otherwise find_package
+    # will fail since it hasn't been installed yet
+    #
+    set(PACKAGE_LIST "${PACKAGE_LIST}|${NAME}" PARENT_SCOPE)
 
 endfunction(add_subproject)
 
@@ -948,7 +952,6 @@ endmacro(enable_asm)
 #
 macro(init_project TARGET)
     set(options INTERFACE)
-    set(oneVal SRC)
     cmake_parse_arguments(ARG "${options}" "${oneVal}" "" ${ARGN})
 
     if(CMAKE_INSTALL_PREFIX STREQUAL "${VMM_PREFIX_PATH}")
@@ -970,20 +973,9 @@ macro(init_project TARGET)
 
     if(${ARG_INTERFACE})
         add_library(${TARGET} INTERFACE)
-        target_link_libraries(${TARGET} INTERFACE bfroot_${PREFIX})
-        target_include_directories(${TARGET} SYSTEM INTERFACE
-            $<INSTALL_INTERFACE:include>
-        )
     else()
-        add_library(${TARGET} ${ARG_SOURCE})
+        add_library(${TARGET})
         set_target_properties(${TARGET} PROPERTIES LINKER_LANGUAGE C)
-        target_link_libraries(${TARGET} PUBLIC bfroot_${PREFIX})
-        target_include_directories(${TARGET} SYSTEM PUBLIC
-            $<INSTALL_INTERFACE:include>
-        )
-        target_link_directories(${TARGET} PUBLIC
-            $<INSTALL_INTERFACE:lib>
-        )
     endif()
 
     if(PREFIX STREQUAL "vmm")
@@ -1006,9 +998,14 @@ endmacro(init_project)
 # @param TARGET the name of the target associated with this project
 #
 macro(fini_project)
-    set(TGT ${CMAKE_PROJECT_NAME})
-    install(TARGETS ${TGT} DESTINATION lib EXPORT ${TGT})
-    install(EXPORT ${TGT} DESTINATION "${EXPORT_DIR}")
+    set(PROJ ${CMAKE_PROJECT_NAME})
+    install(TARGETS ${PROJ} DESTINATION lib EXPORT ${PROJ}-targets)
+    install(EXPORT ${PROJ}-targets DESTINATION ${EXPORT_DIR})
+    configure_file(
+        ${SOURCE_CMAKE_DIR}/target-config.cmake.in
+        ${EXPORT_DIR}/${PROJ}-config.cmake
+        @ONLY
+    )
 endmacro(fini_project)
 
 # ------------------------------------------------------------------------------

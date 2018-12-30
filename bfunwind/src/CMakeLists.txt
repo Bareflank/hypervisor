@@ -20,19 +20,22 @@ cmake_minimum_required(VERSION 3.10)
 project(bfunwind C CXX)
 
 init_project(bfunwind)
+
+set(C $<COMPILE_LANGUAGE:C>)
+set(CXX $<COMPILE_LANGUAGE:CXX>)
+set(C_OR_CXX $<OR:${CXX},${C}>)
+set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>>)
+set(NEED_INCLUDE $<AND:${C_OR_CXX},${BUILD}>)
+
+target_link_libraries(bfunwind PUBLIC bfpthread bfsyscall bfcrt)
+target_include_directories(bfunwind PUBLIC
+    $<${NEED_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../include>
+)
 target_sources(bfunwind PRIVATE
     dwarf4.cpp
     eh_frame.cpp
     ia64_cxx_abi.cpp
     registers_intel_x64.asm
 )
-target_include_directories(bfunwind SYSTEM PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>
-)
-target_link_libraries(bfunwind PUBLIC
-    bfcrt
-    bfpthread
-    bfsyscall
-)
 install(FILES ../include/ia64_cxx_abi.h DESTINATION include RENAME unwind.h)
-fini_project(bfunwind)
+fini_project()

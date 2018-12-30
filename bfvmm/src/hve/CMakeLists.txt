@@ -16,46 +16,31 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    list(APPEND SOURCES
-        arch/intel_x64/check_vmcs_control_fields.cpp
-        arch/intel_x64/check_vmcs_guest_fields.cpp
-        arch/intel_x64/check_vmcs_host_fields.cpp
-        arch/intel_x64/exception.cpp
-        arch/intel_x64/nmi.cpp
-        arch/intel_x64/exit_handler.cpp
-        arch/intel_x64/vcpu.cpp
-        arch/intel_x64/vmcs.cpp
-        arch/intel_x64/vmx.cpp
-    )
+add_library(bfvmm_hve)
+target_link_libraries(bfvmm_hve PUBLIC bfvmm)
 
-    if(NOT WIN32 AND NOT ENABLE_MOCKING)
-        list(APPEND SOURCES
-            arch/intel_x64/exception.asm
-            arch/intel_x64/nmi.asm
-            arch/intel_x64/exit_handler_entry.asm
-            arch/intel_x64/vmcs_launch.asm
-            arch/intel_x64/vmcs_promote.asm
-            arch/intel_x64/vmcs_resume.asm
-        )
-    endif()
-elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
-    message(WARNING "Unimplemented")
-else()
-    message(FATAL_ERROR "Unsupported archiecture")
-endif()
+set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
+set(WIN $<BOOL:${WIN32}>)
+set(MOCK $<BOOL:${ENABLE_MOCKING}>)
+set(NEED_ASM $<AND:$<NOT:${WIN}>,$<NOT:${MOCK}>>)
 
-add_static_library(
-    bfvmm_hve
-    SOURCES ${SOURCES}
-    DEFINES STATIC_HVE
-    DEFINES STATIC_VCPU
-    DEFINES STATIC_MEMORY_MANAGER
-    DEFINES STATIC_INTRINSICS
+target_sources(bfvmm_hve PRIVATE
+    $<${X64}:arch/intel_x64/check_vmcs_control_fields.cpp>
+    $<${X64}:arch/intel_x64/check_vmcs_guest_fields.cpp>
+    $<${X64}:arch/intel_x64/check_vmcs_host_fields.cpp>
+    $<${X64}:arch/intel_x64/exception.cpp>
+    $<${X64}:arch/intel_x64/nmi.cpp>
+    $<${X64}:arch/intel_x64/exit_handler.cpp>
+    $<${X64}:arch/intel_x64/vcpu.cpp>
+    $<${X64}:arch/intel_x64/vmcs.cpp>
+    $<${X64}:arch/intel_x64/vmx.cpp>
+    $<$<AND:${X64},${NEED_ASM}>:arch/intel_x64/exception.asm>
+    $<$<AND:${X64},${NEED_ASM}>:arch/intel_x64/nmi.asm>
+    $<$<AND:${X64},${NEED_ASM}>:arch/intel_x64/exit_handler_entry.asm>
+    $<$<AND:${X64},${NEED_ASM}>:arch/intel_x64/vmcs_launch.asm>
+    $<$<AND:${X64},${NEED_ASM}>:arch/intel_x64/vmcs_promote.asm>
+    $<$<AND:${X64},${NEED_ASM}>:arch/intel_x64/vmcs_resume.asm>
 )
 
-# ------------------------------------------------------------------------------
-# Install
-# ------------------------------------------------------------------------------
-
+install(TARGETS bfvmm_hve DESTINATION lib EXPORT bfvmm)
 install(DIRECTORY ../../include/hve/ DESTINATION include/bfvmm/hve)

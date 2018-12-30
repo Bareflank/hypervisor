@@ -16,12 +16,10 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-list(APPEND SOURCES
-    entry.cpp
+add_library(bfvmm_entry)
+target_sources(bfvmm_entry PRIVATE entry.cpp)
+target_link_libraries(bfvmm_entry PUBLIC bfvmm)
+target_link_options(bfvmm_entry INTERFACE
+    "--whole-archive ${VMM_PREFIX_PATH}/lib/libbfvmm_entry.a --no-whole-archive"
 )
-
-add_static_library(
-    bfvmm_entry
-    SOURCES ${SOURCES}
-    ALWAYS
-)
+install(TARGETS bfvmm_entry DESTINATION lib EXPORT bfvmm)

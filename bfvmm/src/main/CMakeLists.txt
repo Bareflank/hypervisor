@@ -16,23 +16,19 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-cmake_minimum_required(VERSION 3.6)
-project(bfvmm_main C CXX)
+add_executable(vmm)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
+target_link_libraries(vmm PUBLIC bfvmm_entry bfvmm_vcpu bfvmm_hve)
+target_link_libraries(vmm PUBLIC bfvmm_memory_manager bfvmm_debug)
+target_link_libraries(vmm PUBLIC bfintrinsics)
 
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    list(APPEND SOURCES
-        arch/intel_x64/vcpu_factory.cpp
-    )
-elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
-    message(WARNING "Unimplemented")
-else()
-    message(FATAL_ERROR "Unsupported archiecture")
-endif()
+target_link_libraries(vmm PUBLIC ${VMM_PREFIX_PATH}/lib/libc++.a)
+target_link_libraries(vmm PUBLIC ${VMM_PREFIX_PATH}/lib/libc++abi.a)
+target_link_libraries(vmm PUBLIC bfpthread bfunwind)
+target_link_libraries(vmm PUBLIC ${VMM_PREFIX_PATH}/lib/libm.a)
+target_link_libraries(vmm PUBLIC ${VMM_PREFIX_PATH}/lib/libc.a)
+target_link_libraries(vmm PUBLIC bfsyscall bfcrt)
 
-add_vmm_executable(
-    bfvmm
-    SOURCES ${SOURCES}
-)
+set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
+target_sources(vmm PRIVATE $<${X64}:arch/intel_x64/vcpu_factory.cpp>)
+install(TARGETS vmm DESTINATION bin EXPORT bfvmm)

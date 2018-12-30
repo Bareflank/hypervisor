@@ -16,12 +16,20 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.10)
 project(bfvmm C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project(
-    INCLUDES ${CMAKE_CURRENT_LIST_DIR}/../include
+init_project(bfvmm INTERFACE)
+target_link_libraries(bfvmm INTERFACE bfutil)
+
+set(C $<COMPILE_LANGUAGE:C>)
+set(CXX $<COMPILE_LANGUAGE:CXX>)
+set(C_OR_CXX $<OR:${CXX},${C}>)
+set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>>)
+set(NEED_INCLUDE $<AND:${C_OR_CXX},${BUILD}>)
+
+target_include_directories(bfvmm SYSTEM INTERFACE
+    $<${NEED_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../include>
 )
 
 add_subdirectory(debug)
@@ -29,3 +37,6 @@ add_subdirectory(memory_manager)
 add_subdirectory(hve)
 add_subdirectory(vcpu)
 add_subdirectory(entry)
+add_subdirectory(main)
+
+fini_project()

@@ -16,43 +16,20 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
+add_library(bfvmm_debug)
+target_link_libraries(bfvmm_debug PUBLIC bfvmm)
 
-list(APPEND SOURCES
+set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
+set(ARM $<STREQUAL:${BUILD_TARGET_ARCH},aarch64>)
+set(NOT_MOCKING $<NOT:$<BOOL:${ENABLE_MOCKING}>>)
+
+target_sources(bfvmm_debug PRIVATE
     debug_ring/debug_ring.cpp
     serial/serial_ns16550a.cpp
-    # serial/serial_pl011.cpp
+    $<${X64}:arch/x64/serial_ns16550a.cpp>
+    $<${ARM}:arch/aarch64/serial_ns16550a.cpp>
+    $<${NOT_MOCKING}:unistd.cpp>
 )
 
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    list(APPEND SOURCES
-        arch/x64/serial_ns16550a.cpp
-    )
-endif()
-
-if(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
-    list(APPEND SOURCES
-        arch/aarch64/serial_ns16550a.cpp
-    )
-endif()
-
-if(NOT ENABLE_MOCKING)
-    list(APPEND SOURCES
-        unistd.cpp
-    )
-endif()
-
-add_static_library(
-    bfvmm_debug
-    SOURCES ${SOURCES}
-    DEFINES STATIC_DEBUG
-    DEFINES STATIC_INTRINSICS
-)
-
-# ------------------------------------------------------------------------------
-# Install
-# ------------------------------------------------------------------------------
-
+install(TARGETS bfvmm_debug DESTINATION lib EXPORT bfvmm)
 install(DIRECTORY ../../include/debug/ DESTINATION include/bfvmm/debug)

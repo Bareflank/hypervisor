@@ -16,29 +16,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-list(APPEND SOURCES
+add_library(bfvmm_memory_manager)
+target_link_libraries(bfvmm_memory_manager PUBLIC bfvmm)
+
+set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
+target_sources(bfvmm_memory_manager PRIVATE
     memory_manager.cpp
+    $<${X64}:arch/x64/cr3/helpers.cpp>
 )
 
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    list(APPEND SOURCES
-        arch/x64/cr3/helpers.cpp
-    )
-elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
-    message(WARNING "Unimplemented")
-else()
-    message(FATAL_ERROR "Unsupported archiecture")
-endif()
-
-add_static_library(
-    bfvmm_memory_manager
-    SOURCES ${SOURCES}
-    DEFINES STATIC_MEMORY_MANAGER
-    DEFINES STATIC_INTRINSICS
-)
-
-# ------------------------------------------------------------------------------
-# Install
-# ------------------------------------------------------------------------------
-
+install(TARGETS bfvmm_memory_manager DESTINATION lib EXPORT bfvmm)
 install(DIRECTORY ../../include/memory_manager/ DESTINATION include/bfvmm/memory_manager)

@@ -16,21 +16,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-list(APPEND SOURCES
-    vcpu.cpp
-)
+add_library(bfvmm_vcpu)
+target_sources(bfvmm_vcpu PRIVATE vcpu.cpp)
+target_link_libraries(bfvmm_vcpu PUBLIC bfvmm)
 
-add_static_library(
-    bfvmm_vcpu
-    SOURCES ${SOURCES}
-    DEFINES STATIC_VCPU
-    DEFINES STATIC_HVE
-    DEFINES STATIC_MEMORY_MANAGER
-    DEFINES STATIC_INTRINSICS
-)
-
-# ------------------------------------------------------------------------------
-# Install
-# ------------------------------------------------------------------------------
-
+install(TARGETS bfvmm_vcpu DESTINATION lib EXPORT bfvmm)
 install(DIRECTORY ../../include/vcpu/ DESTINATION include/bfvmm/vcpu)

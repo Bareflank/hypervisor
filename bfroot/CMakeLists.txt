@@ -19,8 +19,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(bfroot C CXX)
 
-# NOTE: If this file is updated to reference a CMake variable be sure to define
-# it in the call to ExternalProject_Add in the top-level CMakeLists.txt.
+# NOTE: If this file is updated to reference an external CMake variable be sure
+# to define it in the call to ExternalProject_Add in the super-build's
+# CMakeLists.txt.
 
 # ------------------------------------------------------------------------------
 # Helper generator expressions
@@ -28,32 +29,30 @@ project(bfroot C CXX)
 
 set(C $<COMPILE_LANGUAGE:C>)
 set(CXX $<COMPILE_LANGUAGE:CXX>)
-set(C_OR_CXX $<OR:${CXX},${C}>)
+set(C_OR_CXX $<OR:${C},${CXX}>)
 set(COMP_IS_MSVC $<CXX_COMPILER_ID:MSVC>)
 set(COMP_IS_CLANG $<CXX_COMPILER_ID:Clang>)
 set(C_OR_CXX_AND_MSVC $<AND:${C_OR_CXX},${COMP_IS_MSVC}>)
 set(C_OR_CXX_AND_CLANG $<AND:${C_OR_CXX},${COMP_IS_CLANG}>)
-set(ARCH_IS_X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
+set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 
 # ------------------------------------------------------------------------------
 # Root target interface
 # ------------------------------------------------------------------------------
 
-add_library(bfroot INTERFACE)
+add_library(bfroot_${VMM_PREFIX} INTERFACE)
 
-target_compile_definitions(bfroot INTERFACE
+target_compile_definitions(bfroot_${VMM_PREFIX} INTERFACE
     $<${C_OR_CXX}:GSL_THROW_ON_CONTRACT_VIOLATION>
     $<${C_OR_CXX}:${OSTYPE}>
     $<${C_OR_CXX}:${ABITYPE}>
 )
-target_compile_features(bfroot INTERFACE
-    $<$<COMPILE_FEATURES:c_std_11>:c_std_11>
-    $<$<COMPILE_FEATURES:cxx_std_17>:cxx_std_17>
-)
-target_compile_options(bfroot INTERFACE
-    $<$<AND:${ARCH_IS_X64},${C_OR_CXX}>:-msse>
-    $<$<AND:${ARCH_IS_X64},${C_OR_CXX}>:-msse2>
-    $<$<AND:${ARCH_IS_X64},${C_OR_CXX}>:-msse3>
+target_compile_options(bfroot_${VMM_PREFIX} INTERFACE
+    $<$<AND:${X64},${C_OR_CXX}>:-msse>
+    $<$<AND:${X64},${C_OR_CXX}>:-msse2>
+    $<$<AND:${X64},${C_OR_CXX}>:-msse3>
+    $<${C}:-std=c11>
+    $<${CXX}:-std=c++17>
 )
 
 # ------------------------------------------------------------------------------
@@ -62,7 +61,7 @@ target_compile_options(bfroot INTERFACE
 
 if(ENABLE_BUILD_VMM)
     add_library(bfroot_vmm INTERFACE)
-    target_link_libraries(bfroot_vmm INTERFACE bfroot)
+    target_link_libraries(bfroot_vmm INTERFACE bfroot_${VMM_PREFIX})
     target_compile_options(bfroot_vmm INTERFACE
         $<${C_OR_CXX}:--target=${BUILD_TARGET_ARCH}-vmm-elf>
         $<${C_OR_CXX}:--sysroot=${VMM_PREFIX_PATH}>
@@ -77,6 +76,7 @@ if(ENABLE_BUILD_VMM)
     )
     execute_process(COMMAND
         ${CMAKE_COMMAND} -E make_directory ${VMM_PREFIX_PATH}/include/c++/v1
+        ${CMAKE_COMMAND} -E make_directory ${VMM_PREFIX_PATH}/lib
     )
     target_include_directories(bfroot_vmm SYSTEM INTERFACE
         $<${C_OR_CXX}:${VMM_PREFIX_PATH}/include/c++/v1>
@@ -95,7 +95,7 @@ if(ENABLE_BUILD_VMM)
         $<${C_OR_CXX}:__ELF__>
         $<$<AND:${C_OR_CXX},$<BOOL:${ENABLE_BUILD_EFI}>>:ENABLE_BUILD_EFI>
     )
-    install(TARGETS bfroot_vmm DESTINATION ${EXPORT_DIR} EXPORT bfroot)
+    install(TARGETS bfroot_vmm DESTINATION ${EXPORT_DIR} EXPORT bfroot-targets)
 endif()
 
 # ------------------------------------------------------------------------------
@@ -104,7 +104,7 @@ endif()
 
 if(ENABLE_BUILD_TEST)
     add_library(bfroot_test INTERFACE)
-    target_link_libraries(bfroot_test INTERFACE bfroot)
+    target_link_libraries(bfroot_test INTERFACE bfroot_${VMM_PREFIX})
     target_compile_options(bfroot_test INTERFACE
         $<${C_OR_CXX_AND_CLANG}:-fpic>
         $<${C_OR_CXX_AND_CLANG}:-fno-stack-protector>
@@ -129,7 +129,14 @@ if(ENABLE_BUILD_TEST)
         $<${C_OR_CXX_AND_MSVC}:_CRT_SECURE_NO_WARNINGS>
         $<${C_OR_CXX_AND_MSVC}:NOMINMAX>
     )
-    install(TARGETS bfroot_test DESTINATION ${EXPORT_DIR} EXPORT bfroot)
+    target_include_directories(bfroot_test SYSTEM INTERFACE
+        $<${C_OR_CXX}:${TEST_PREFIX_PATH}/include/c++/v1>
+        $<${C_OR_CXX}:${TEST_PREFIX_PATH}/include>
+    )
+    target_link_directories(bfroot_test INTERFACE
+        $<${C_OR_CXX}:${TEST_PREFIX_PATH}/lib>
+    )
+    install(TARGETS bfroot_test DESTINATION ${EXPORT_DIR} EXPORT bfroot-targets)
 endif()
 
 # ------------------------------------------------------------------------------
@@ -138,7 +145,7 @@ endif()
 
 if(ENABLE_BUILD_USERSPACE)
     add_library(bfroot_userspace INTERFACE)
-    target_link_libraries(bfroot_userspace INTERFACE bfroot)
+    target_link_libraries(bfroot_userspace INTERFACE bfroot_${VMM_PREFIX})
     target_compile_options(bfroot_userspace INTERFACE
         $<${C_OR_CXX_AND_CLANG}:-fpic>
         $<${C_OR_CXX_AND_CLANG}:-fstack-protector-strong>
@@ -157,12 +164,25 @@ if(ENABLE_BUILD_USERSPACE)
         $<${C_OR_CXX_AND_MSVC}:_CRT_SECURE_NO_WARNINGS>
         $<${C_OR_CXX_AND_MSVC}:NOMINMAX>
     )
-    install(TARGETS bfroot_userspace DESTINATION ${EXPORT_DIR} EXPORT bfroot)
+    target_include_directories(bfroot_userspace SYSTEM INTERFACE
+        $<${C_OR_CXX}:${USERSPACE_PREFIX_PATH}/include/c++/v1>
+        $<${C_OR_CXX}:${USERSPACE_PREFIX_PATH}/include>
+    )
+    target_link_directories(bfroot_userspace INTERFACE
+        $<${C_OR_CXX}:${USERSPACE_PREFIX_PATH}/lib>
+    )
+    install(TARGETS bfroot_userspace DESTINATION ${EXPORT_DIR} EXPORT bfroot-targets)
 endif()
 
 # ------------------------------------------------------------------------------
 # Root target exports
 # ------------------------------------------------------------------------------
 
-install(TARGETS bfroot DESTINATION ${EXPORT_DIR} EXPORT bfroot)
-install(EXPORT bfroot  DESTINATION ${EXPORT_DIR})
+install(TARGETS bfroot_${VMM_PREFIX} DESTINATION ${EXPORT_DIR} EXPORT bfroot-targets)
+install(EXPORT bfroot-targets  DESTINATION ${EXPORT_DIR})
+set(PROJ bfroot)
+configure_file(
+    ${SOURCE_CMAKE_DIR}/target-config.cmake.in
+    ${EXPORT_DIR}/${PROJ}-config.cmake
+    @ONLY
+)

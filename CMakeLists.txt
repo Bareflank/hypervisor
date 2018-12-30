@@ -47,10 +47,11 @@ endif()
 # ------------------------------------------------------------------------------
 
 ExternalProject_Add(
-    bfroot
+    bfroot_${VMM_PREFIX}
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/bfroot
     CMAKE_ARGS -DBUILD_TARGET_ARCH=${BUILD_TARGET_ARCH}
                -DOSTYPE=${OSTYPE}
+               -DVMM_PREFIX=${VMM_PREFIX}
                -DVMM_PREFIX_PATH=${VMM_PREFIX_PATH}
                -DENABLE_BUILD_EFI=${ENABLE_BUILD_EFI}
                -DEXPORT_DIR=${EXPORT_DIR}
@@ -61,8 +62,9 @@ ExternalProject_Add(
                -DENABLE_BUILD_VMM=${ENABLE_BUILD_VMM}
                -DENABLE_BUILD_TEST=${ENABLE_BUILD_TEST}
                -DENABLE_BUILD_USERSPACE=${ENABLE_BUILD_USERSPACE}
+               -DSOURCE_CMAKE_DIR=${SOURCE_CMAKE_DIR}
 )
-set(PROJECT_INCLUDE_LIST "${PROJECT_INCLUDE_LIST}|${EXPORT_DIR}/bfroot.cmake")
+set(PACKAGE_LIST "bfroot")
 
 # ------------------------------------------------------------------------------
 # Macros
@@ -111,9 +113,10 @@ endif()
 # VMM Components
 # ------------------------------------------------------------------------------
 
-add_subproject(bfutil vmm SOURCE_DIR ${SOURCE_BFUTIL_DIR})
 include_dependency(SOURCE_DEPENDS_DIR binutils)
+
 if(NOT WIN32)
+    add_subproject(bfutil vmm DEPENDS bfroot SOURCE_DIR ${SOURCE_BFUTIL_DIR})
     if(NOT ENABLE_BUILD_BINUTILS)
         add_subproject(
             bfdso vmm
@@ -138,6 +141,7 @@ if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
         bfcrt vmm
         DEPENDS gsl
         DEPENDS libcxx
+        DEPENDS bfutil
         SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/crt
     )
 
@@ -145,6 +149,7 @@ if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
         bfpthread vmm
         DEPENDS gsl
         DEPENDS libcxx
+        DEPENDS bfcrt
         SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/pthread
     )
 
@@ -152,6 +157,7 @@ if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
         bfsyscall vmm
         DEPENDS gsl
         DEPENDS libcxx
+        DEPENDS bfpthread
         SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/syscall
     )
 
@@ -163,24 +169,10 @@ if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
     )
 endif()
 
-#if(ENABLE_BUILD_VMM)
-#    add_subproject(
-#        bfintrinsics vmm
-#        DEPENDS bfunwind
-#    )
-#
-#    add_subproject(
-#        bfvmm vmm
-#        DEPENDS bfunwind
-#    )
-#
-#    add_subproject(
-#        bfvmm_main vmm
-#        DEPENDS bfvmm
-#        DEPENDS bfintrinsics
-#        SOURCE_DIR ${SOURCE_BFVMM_DIR}/src/main
-#    )
-#endif()
+if(ENABLE_BUILD_VMM)
+    add_subproject(bfintrinsics vmm DEPENDS bfutil)
+    add_subproject(bfvmm vmm DEPENDS bfutil)
+endif()
 
 # ------------------------------------------------------------------------------
 # Unit Tests
