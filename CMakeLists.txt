@@ -106,7 +106,7 @@ include_dependency(SOURCE_DEPENDS_DIR python)
 # ------------------------------------------------------------------------------
 
 if(ENABLE_BUILD_VMM)
-    #    add_subproject(bfdriver none NOBUILD)
+    add_targets(bfdriver none ${SOURCE_BFDRIVER_DIR}/src)
 endif()
 
 # ------------------------------------------------------------------------------
@@ -230,20 +230,20 @@ endif()
 ## Userspace Components
 ## ------------------------------------------------------------------------------
 #
-#if(ENABLE_BUILD_USERSPACE)
-#    add_subproject(
-#        bfintrinsics userspace
-#        DEPENDS gsl
-#        DEPENDS json
-#    )
-#
+if(ENABLE_BUILD_USERSPACE)
+    #    add_subproject(
+    #        bfintrinsics userspace
+    #        DEPENDS gsl
+    #        DEPENDS json
+    #    )
+
 #    add_subproject(
 #        bfm userspace
 #        DEPENDS gsl
 #        DEPENDS json
 #        DEPENDS cxxopts
 #    )
-#endif()
+endif()
 #
 ## ------------------------------------------------------------------------------
 ## External Components

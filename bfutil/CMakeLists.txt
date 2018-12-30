@@ -19,12 +19,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(bfutil C CXX)
 
-get_cmake_property(_vars CACHE_VARIABLES)
-foreach (_var ${_vars})
-    set(${_var} ${${_var}})
-endforeach()
-
-message(STATUS "PKG LIST from bfutil: ${PACKAGE_LIST}")
+#get_cmake_property(_vars CACHE_VARIABLES)
+#foreach (_var ${_vars})
+#    set(${_var} ${${_var}})
+#endforeach()
 
 if(CMAKE_INSTALL_PREFIX STREQUAL "${VMM_PREFIX_PATH}")
     set(PREFIX "vmm")

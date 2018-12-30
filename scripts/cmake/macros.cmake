@@ -756,12 +756,6 @@ function(add_subproject NAME PREFIX)
         set(TOOLCHAIN ${ARG_TOOLCHAIN})
     endif()
 
-    #    generate_flags(
-    #        ${PREFIX}
-    #        C_FLAGS ${ARG_C_FLAGS}
-    #        CXX_FLAGS ${ARG_CXX_FLAGS}
-    #    )
-
     if(PREFIX STREQUAL "vmm")
         set(PREFIX ${VMM_PREFIX})
     elseif(PREFIX STREQUAL "userspace")
