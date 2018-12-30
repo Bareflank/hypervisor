@@ -170,8 +170,8 @@ if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
 endif()
 
 if(ENABLE_BUILD_VMM)
-    add_subproject(bfintrinsics vmm DEPENDS bfutil)
-    add_subproject(bfvmm vmm DEPENDS bfutil)
+    add_subproject(bfintrinsics vmm DEPENDS bfunwind)
+    add_subproject(bfvmm vmm DEPENDS bfintrinsics)
 endif()
 
 # ------------------------------------------------------------------------------

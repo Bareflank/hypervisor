@@ -20,7 +20,7 @@ cmake_minimum_required(VERSION 3.10)
 project(bfintrinsics C CXX)
 
 init_project(bfintrinsics)
-target_link_libraries(bfintrinsics PUBLIC bfunwind)
+target_link_libraries(bfintrinsics PUBLIC bfutil)
 set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 target_sources(bfintrinsics PRIVATE
     $<${X64}:arch/x64/cache.asm>

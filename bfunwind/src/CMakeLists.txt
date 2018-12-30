@@ -27,7 +27,7 @@ set(C_OR_CXX $<OR:${CXX},${C}>)
 set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>>)
 set(NEED_INCLUDE $<AND:${C_OR_CXX},${BUILD}>)
 
-target_link_libraries(bfunwind PUBLIC bfpthread bfsyscall bfcrt)
+target_link_libraries(bfunwind PUBLIC bfutil)
 target_include_directories(bfunwind PUBLIC
     $<${NEED_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../include>
 )

@@ -28,9 +28,6 @@ set(X64_AND_NOT_WIN $<AND:${X64},$<NOT:${WIN}>>)
 
 target_compile_options(bfcrt PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-main>)
 target_link_libraries(bfcrt PUBLIC bfutil)
-target_link_options(bfcrt INTERFACE
-    "SHELL:--whole-archive ${VMM_PREFIX_PATH}/lib/libbfcrt.a --no-whole-archive"
-)
 target_sources(bfcrt PRIVATE
     crt.cpp
     $<${X64_AND_NOT_WIN}:start_x64.asm>

@@ -18,7 +18,7 @@
 
 add_executable(vmm)
 
-target_link_libraries(vmm PUBLIC bfvmm_entry bfvmm_vcpu bfvmm_hve)
+target_link_libraries(vmm PUBLIC bfvmm_entry bfvmm_hve bfvmm_vcpu)
 target_link_libraries(vmm PUBLIC bfvmm_memory_manager bfvmm_debug)
 target_link_libraries(vmm PUBLIC bfintrinsics)
 

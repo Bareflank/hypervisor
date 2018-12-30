@@ -19,7 +19,4 @@
 add_library(bfvmm_entry)
 target_sources(bfvmm_entry PRIVATE entry.cpp)
 target_link_libraries(bfvmm_entry PUBLIC bfvmm)
-target_link_options(bfvmm_entry INTERFACE
-    "--whole-archive ${VMM_PREFIX_PATH}/lib/libbfvmm_entry.a --no-whole-archive"
-)
 install(TARGETS bfvmm_entry DESTINATION lib EXPORT bfvmm)
