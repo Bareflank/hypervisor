@@ -68,10 +68,10 @@ set(ENABLE_EXTENDED_APIS OFF)
 
 # Hyperkernel
 #
-# This option enables the use of the hyperkernel. It assumes the
-# hyperkernel is located in the same directory as this configuration file.
+# This option enables the use of the boxy. It assumes that
+# boxy is located in the same directory as this configuration file.
 #
-set(ENABLE_HYPERKERNEL OFF)
+set(ENABLE_BOXY OFF)
 
 # Enable EFI
 #
@@ -199,10 +199,10 @@ endif()
 # Hyperkernel
 # ------------------------------------------------------------------------------
 
-if(ENABLE_HYPERKERNEL)
-    set_bfm_vmm(hyperkernel_bfvmm)
+if(ENABLE_BOXY)
+    set_bfm_vmm(boxy_bfvmm)
     list(APPEND EXTENSION
-        ${CMAKE_CURRENT_LIST_DIR}/hyperkernel
+        ${CMAKE_CURRENT_LIST_DIR}/boxy
     )
 endif()
 

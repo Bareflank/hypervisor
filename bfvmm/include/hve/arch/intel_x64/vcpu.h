@@ -190,56 +190,133 @@ public:
 
     /// @cond
 
-    VIRTUAL uint64_t rax() const;
-    VIRTUAL void set_rax(uint64_t val);
+    /// vCPU Registers
+    ///
+    /// These functions read/write the register values of the vCPU. Some of
+    /// these functions will touch the save state while others will read/write
+    /// to the VMCS which means that the vCPU must be loaded prior to touching
+    /// those registers. Care should be taken to ensure that loading the vCPU
+    /// is kept at a minimum while at the same time ensuring that the right
+    /// VMCS is being modified.
+    ///
 
-    VIRTUAL uint64_t rbx() const;
-    VIRTUAL void set_rbx(uint64_t val);
+    VIRTUAL uint64_t rax() const noexcept;
+    VIRTUAL void set_rax(uint64_t val) noexcept;
+    VIRTUAL uint64_t rbx() const noexcept;
+    VIRTUAL void set_rbx(uint64_t val) noexcept;
+    VIRTUAL uint64_t rcx() const noexcept;
+    VIRTUAL void set_rcx(uint64_t val) noexcept;
+    VIRTUAL uint64_t rdx() const noexcept;
+    VIRTUAL void set_rdx(uint64_t val) noexcept;
+    VIRTUAL uint64_t rbp() const noexcept;
+    VIRTUAL void set_rbp(uint64_t val) noexcept;
+    VIRTUAL uint64_t rsi() const noexcept;
+    VIRTUAL void set_rsi(uint64_t val) noexcept;
+    VIRTUAL uint64_t rdi() const noexcept;
+    VIRTUAL void set_rdi(uint64_t val) noexcept;
+    VIRTUAL uint64_t r08() const noexcept;
+    VIRTUAL void set_r08(uint64_t val) noexcept;
+    VIRTUAL uint64_t r09() const noexcept;
+    VIRTUAL void set_r09(uint64_t val) noexcept;
+    VIRTUAL uint64_t r10() const noexcept;
+    VIRTUAL void set_r10(uint64_t val) noexcept;
+    VIRTUAL uint64_t r11() const noexcept;
+    VIRTUAL void set_r11(uint64_t val) noexcept;
+    VIRTUAL uint64_t r12() const noexcept;
+    VIRTUAL void set_r12(uint64_t val) noexcept;
+    VIRTUAL uint64_t r13() const noexcept;
+    VIRTUAL void set_r13(uint64_t val) noexcept;
+    VIRTUAL uint64_t r14() const noexcept;
+    VIRTUAL void set_r14(uint64_t val) noexcept;
+    VIRTUAL uint64_t r15() const noexcept;
+    VIRTUAL void set_r15(uint64_t val) noexcept;
+    VIRTUAL uint64_t rip() const noexcept;
+    VIRTUAL void set_rip(uint64_t val) noexcept;
+    VIRTUAL uint64_t rsp() const noexcept;
+    VIRTUAL void set_rsp(uint64_t val) noexcept;
+    VIRTUAL uint64_t gdt_base() const noexcept;
+    VIRTUAL void set_gdt_base(uint64_t val) noexcept;
+    VIRTUAL uint64_t gdt_limit() const noexcept;
+    VIRTUAL void set_gdt_limit(uint64_t val) noexcept;
+    VIRTUAL uint64_t idt_base() const noexcept;
+    VIRTUAL void set_idt_base(uint64_t val) noexcept;
+    VIRTUAL uint64_t idt_limit() const noexcept;
+    VIRTUAL void set_idt_limit(uint64_t val) noexcept;
+    VIRTUAL uint64_t cr0() const noexcept;
+    VIRTUAL void set_cr0(uint64_t val) noexcept;
+    VIRTUAL uint64_t cr3() const noexcept;
+    VIRTUAL void set_cr3(uint64_t val) noexcept;
+    VIRTUAL uint64_t cr4() const noexcept;
+    VIRTUAL void set_cr4(uint64_t val) noexcept;
+    VIRTUAL uint64_t ia32_efer() const noexcept;
+    VIRTUAL void set_ia32_efer(uint64_t val) noexcept;
+    VIRTUAL uint64_t ia32_pat() const noexcept;
+    VIRTUAL void set_ia32_pat(uint64_t val) noexcept;
 
-    VIRTUAL uint64_t rcx() const;
-    VIRTUAL void set_rcx(uint64_t val);
-
-    VIRTUAL uint64_t rdx() const;
-    VIRTUAL void set_rdx(uint64_t val);
-
-    VIRTUAL uint64_t rbp() const;
-    VIRTUAL void set_rbp(uint64_t val);
-
-    VIRTUAL uint64_t rsi() const;
-    VIRTUAL void set_rsi(uint64_t val);
-
-    VIRTUAL uint64_t rdi() const;
-    VIRTUAL void set_rdi(uint64_t val);
-
-    VIRTUAL uint64_t r08() const;
-    VIRTUAL void set_r08(uint64_t val);
-
-    VIRTUAL uint64_t r09() const;
-    VIRTUAL void set_r09(uint64_t val);
-
-    VIRTUAL uint64_t r10() const;
-    VIRTUAL void set_r10(uint64_t val);
-
-    VIRTUAL uint64_t r11() const;
-    VIRTUAL void set_r11(uint64_t val);
-
-    VIRTUAL uint64_t r12() const;
-    VIRTUAL void set_r12(uint64_t val);
-
-    VIRTUAL uint64_t r13() const;
-    VIRTUAL void set_r13(uint64_t val);
-
-    VIRTUAL uint64_t r14() const;
-    VIRTUAL void set_r14(uint64_t val);
-
-    VIRTUAL uint64_t r15() const;
-    VIRTUAL void set_r15(uint64_t val);
-
-    VIRTUAL uint64_t rip() const;
-    VIRTUAL void set_rip(uint64_t val);
-
-    VIRTUAL uint64_t rsp() const;
-    VIRTUAL void set_rsp(uint64_t val);
+    VIRTUAL uint64_t es_selector() const noexcept;
+    VIRTUAL void set_es_selector(uint64_t val) noexcept;
+    VIRTUAL uint64_t es_base() const noexcept;
+    VIRTUAL void set_es_base(uint64_t val) noexcept;
+    VIRTUAL uint64_t es_limit() const noexcept;
+    VIRTUAL void set_es_limit(uint64_t val) noexcept;
+    VIRTUAL uint64_t es_access_rights() const noexcept;
+    VIRTUAL void set_es_access_rights(uint64_t val) noexcept;
+    VIRTUAL uint64_t cs_selector() const noexcept;
+    VIRTUAL void set_cs_selector(uint64_t val) noexcept;
+    VIRTUAL uint64_t cs_base() const noexcept;
+    VIRTUAL void set_cs_base(uint64_t val) noexcept;
+    VIRTUAL uint64_t cs_limit() const noexcept;
+    VIRTUAL void set_cs_limit(uint64_t val) noexcept;
+    VIRTUAL uint64_t cs_access_rights() const noexcept;
+    VIRTUAL void set_cs_access_rights(uint64_t val) noexcept;
+    VIRTUAL uint64_t ss_selector() const noexcept;
+    VIRTUAL void set_ss_selector(uint64_t val) noexcept;
+    VIRTUAL uint64_t ss_base() const noexcept;
+    VIRTUAL void set_ss_base(uint64_t val) noexcept;
+    VIRTUAL uint64_t ss_limit() const noexcept;
+    VIRTUAL void set_ss_limit(uint64_t val) noexcept;
+    VIRTUAL uint64_t ss_access_rights() const noexcept;
+    VIRTUAL void set_ss_access_rights(uint64_t val) noexcept;
+    VIRTUAL uint64_t ds_selector() const noexcept;
+    VIRTUAL void set_ds_selector(uint64_t val) noexcept;
+    VIRTUAL uint64_t ds_base() const noexcept;
+    VIRTUAL void set_ds_base(uint64_t val) noexcept;
+    VIRTUAL uint64_t ds_limit() const noexcept;
+    VIRTUAL void set_ds_limit(uint64_t val) noexcept;
+    VIRTUAL uint64_t ds_access_rights() const noexcept;
+    VIRTUAL void set_ds_access_rights(uint64_t val) noexcept;
+    VIRTUAL uint64_t fs_selector() const noexcept;
+    VIRTUAL void set_fs_selector(uint64_t val) noexcept;
+    VIRTUAL uint64_t fs_base() const noexcept;
+    VIRTUAL void set_fs_base(uint64_t val) noexcept;
+    VIRTUAL uint64_t fs_limit() const noexcept;
+    VIRTUAL void set_fs_limit(uint64_t val) noexcept;
+    VIRTUAL uint64_t fs_access_rights() const noexcept;
+    VIRTUAL void set_fs_access_rights(uint64_t val) noexcept;
+    VIRTUAL uint64_t gs_selector() const noexcept;
+    VIRTUAL void set_gs_selector(uint64_t val) noexcept;
+    VIRTUAL uint64_t gs_base() const noexcept;
+    VIRTUAL void set_gs_base(uint64_t val) noexcept;
+    VIRTUAL uint64_t gs_limit() const noexcept;
+    VIRTUAL void set_gs_limit(uint64_t val) noexcept;
+    VIRTUAL uint64_t gs_access_rights() const noexcept;
+    VIRTUAL void set_gs_access_rights(uint64_t val) noexcept;
+    VIRTUAL uint64_t tr_selector() const noexcept;
+    VIRTUAL void set_tr_selector(uint64_t val) noexcept;
+    VIRTUAL uint64_t tr_base() const noexcept;
+    VIRTUAL void set_tr_base(uint64_t val) noexcept;
+    VIRTUAL uint64_t tr_limit() const noexcept;
+    VIRTUAL void set_tr_limit(uint64_t val) noexcept;
+    VIRTUAL uint64_t tr_access_rights() const noexcept;
+    VIRTUAL void set_tr_access_rights(uint64_t val) noexcept;
+    VIRTUAL uint64_t ldtr_selector() const noexcept;
+    VIRTUAL void set_ldtr_selector(uint64_t val) noexcept;
+    VIRTUAL uint64_t ldtr_base() const noexcept;
+    VIRTUAL void set_ldtr_base(uint64_t val) noexcept;
+    VIRTUAL uint64_t ldtr_limit() const noexcept;
+    VIRTUAL void set_ldtr_limit(uint64_t val) noexcept;
+    VIRTUAL uint64_t ldtr_access_rights() const noexcept;
+    VIRTUAL void set_ldtr_access_rights(uint64_t val) noexcept;
 
     VIRTUAL gsl::not_null<save_state_t *> save_state() const;
 

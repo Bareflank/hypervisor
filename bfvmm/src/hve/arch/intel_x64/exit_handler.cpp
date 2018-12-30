@@ -776,8 +776,8 @@ exit_handler::handle_cpuid(
     /// is running while cpuid can be run from any ring, and always exists
     /// which means it can be used to ack safely from any application.
     ///
-    if (vcpu->rax() == 0xBF00) {
-        vcpu->set_rax(0xBF01);
+    if (vcpu->rax() == 0x4BF00000) {
+        vcpu->set_rax(0x4BF00001);
         return vcpu->advance();
     }
 
@@ -787,7 +787,7 @@ exit_handler::handle_cpuid(
     /// example, any memory mapped resources such as ACPI or VT-d need to be
     /// initalized using the VMM's CR3, and not the hosts.
     ///
-    if (vcpu->rax() == 0xBF10) {
+    if (vcpu->rax() == 0x4BF00010) {
         for (const auto &d : m_init_handlers) {
             d(vcpu);
         }
@@ -800,7 +800,7 @@ exit_handler::handle_cpuid(
     /// Some teardown logic is required before the hypervisor stops running.
     /// These handlers can be used in these scenarios.
     ///
-    if (vcpu->rax() == 0xBF20) {
+    if (vcpu->rax() == 0x4BF00020) {
         for (const auto &d : m_fini_handlers) {
             d(vcpu);
         }
@@ -814,7 +814,7 @@ exit_handler::handle_cpuid(
     /// so that the user of Bareflank has a simple, reliable way to know
     /// that the hypervisor is running.
     ///
-    if (vcpu->rax() == 0xBF11) {
+    if (vcpu->rax() == 0x4BF00011) {
         bfdebug_info(0, "host os is" bfcolor_green " now " bfcolor_end "in a vm");
         return vcpu->advance();
     }
@@ -826,7 +826,7 @@ exit_handler::handle_cpuid(
     /// after a promote, and not during. Also, say goodbye before we promote
     /// and turn off the hypervisor.
     ///
-    if (vcpu->rax() == 0xBF21) {
+    if (vcpu->rax() == 0x4BF00021) {
         bfdebug_info(0, "host os is" bfcolor_red " not " bfcolor_end "in a vm");
         vcpu->promote();
     }

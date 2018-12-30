@@ -114,6 +114,7 @@ void *platform_virt_to_phys(void *virt);
  * @param ptr a pointer to the memory to set
  * @param value the value to set each byte to
  * @param num the number of bytes to set
+ * @return ptr
  */
 void *platform_memset(void *ptr, char value, uint64_t num);
 
@@ -124,10 +125,14 @@ void *platform_memset(void *ptr, char value, uint64_t num);
  * @ensures none
  *
  * @param dst a pointer to the memory to copy to
+ * @param dst_size the max size of the destination
  * @param src a pointer to the memory to copy from
+ * @param src_size the max size of the source
  * @param num the number of bytes to copy
+ * @return dst pointer, nullptr if the function fails
  */
-void *platform_memcpy(void *dst, const void *src, uint64_t num);
+void *platform_memcpy(
+    void *dst, uint64_t dst_size, const void *src, uint64_t src_size, uint64_t num);
 
 /**
  * Get Number of CPUs
@@ -169,6 +174,23 @@ int64_t platform_call_vmm_on_core(
  * @return returns the RSDP or 0 if ACPI is not supported
  */
 void *platform_get_rsdp(void);
+
+/**
+ * Acquire Mutex
+ *
+ * Locks a global mutex that is managed by the platform logic. This can be
+ * used to protect critical regions.
+ */
+void platform_acquire_mutex(void);
+
+/**
+ * Release Mutex
+ *
+ * Unlocks a global mutex that is managed by the platform logic. This can be
+ * used to protect critical regions.
+ */
+void platform_release_mutex(void);
+
 
 #ifdef __cplusplus
 }
