@@ -22,7 +22,7 @@
             "defines": [
                 "VMM",
                 "NATIVE",
-                "ENABLE_BUILD_TEST",
+                "BUILD_TEST",
                 "_HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT"
             ],
             "intelliSenseMode": "clang-x64",
@@ -56,7 +56,7 @@
             "defines": [
                 "VMM",
                 "NATIVE",
-                "ENABLE_BUILD_TEST",
+                "BUILD_TEST",
                 "_HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT"
             ],
             "intelliSenseMode": "clang-x64",
@@ -93,7 +93,7 @@
                 "_UNICODE",
                 "VMM",
                 "NATIVE",
-                "ENABLE_BUILD_TEST",
+                "BUILD_TEST",
                 "_HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT"
             ],
             "intelliSenseMode": "msvc-x64",

@@ -37,7 +37,7 @@ include_external_config()
 # Testing
 # ------------------------------------------------------------------------------
 
-if(ENABLE_BUILD_TEST)
+if(BUILD_TEST)
     include(CTest)
     enable_testing(true)
 endif()
@@ -53,15 +53,15 @@ ExternalProject_Add(
                -DOSTYPE=${OSTYPE}
                -DVMM_PREFIX=${VMM_PREFIX}
                -DVMM_PREFIX_PATH=${VMM_PREFIX_PATH}
-               -DENABLE_BUILD_EFI=${ENABLE_BUILD_EFI}
+               -DBUILD_EFI=${BUILD_EFI}
                -DEXPORT_DIR=${EXPORT_DIR}
                -DABITYPE=${ABITYPE}
                -DENABLE_ASAN=${ENABLE_ASAN}
                -DENABLE_USAN=${ENABLE_USAN}
                -DENABLE_CODECOV=${ENABLE_CODECOV}
-               -DENABLE_BUILD_VMM=${ENABLE_BUILD_VMM}
-               -DENABLE_BUILD_TEST=${ENABLE_BUILD_TEST}
-               -DENABLE_BUILD_USERSPACE=${ENABLE_BUILD_USERSPACE}
+               -DBUILD_VMM=${BUILD_VMM}
+               -DBUILD_TEST=${BUILD_TEST}
+               -DBUILD_USERSPACE=${BUILD_USERSPACE}
                -DSOURCE_CMAKE_DIR=${SOURCE_CMAKE_DIR}
 )
 set(PACKAGE_LIST "bfroot")
@@ -105,7 +105,7 @@ include_dependency(SOURCE_DEPENDS_DIR python)
 # No Build Components
 # ------------------------------------------------------------------------------
 
-if(ENABLE_BUILD_VMM)
+if(BUILD_VMM)
     add_targets(bfdriver none ${SOURCE_BFDRIVER_DIR}/src)
 endif()
 
@@ -117,7 +117,7 @@ include_dependency(SOURCE_DEPENDS_DIR binutils)
 
 if(NOT WIN32)
     add_subproject(bfutil vmm DEPENDS bfroot SOURCE_DIR ${SOURCE_BFUTIL_DIR})
-    if(NOT ENABLE_BUILD_BINUTILS)
+    if(NOT BUILD_BINUTILS)
         add_subproject(
             bfdso vmm
             SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
@@ -136,7 +136,7 @@ include_dependency(SOURCE_DEPENDS_DIR llvm)
 include_dependency(SOURCE_DEPENDS_DIR libcxxabi)
 include_dependency(SOURCE_DEPENDS_DIR libcxx)
 
-if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
+if(BUILD_VMM OR (BUILD_TEST AND NOT WIN32))
     add_subproject(
         bfcrt vmm
         DEPENDS gsl
@@ -169,7 +169,7 @@ if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
     )
 endif()
 
-if(ENABLE_BUILD_VMM)
+if(BUILD_VMM)
     add_subproject(bfintrinsics vmm DEPENDS bfunwind)
     add_subproject(bfvmm vmm DEPENDS bfintrinsics)
 endif()
@@ -178,7 +178,7 @@ endif()
 # Unit Tests
 # ------------------------------------------------------------------------------
 
-#if(ENABLE_BUILD_TEST)
+#if(BUILD_TEST)
 #    add_subproject(
 #        bfutil test
 #        DEPENDS gsl
@@ -188,7 +188,7 @@ endif()
 #    )
 #endif()
 #
-#if(ENABLE_BUILD_TEST AND NOT WIN32)
+#if(BUILD_TEST AND NOT WIN32)
 #    add_subproject(
 #        bfdummy vmm
 #        DEPENDS bfunwind
@@ -207,7 +207,7 @@ endif()
 #    )
 #endif()
 #
-#if(ENABLE_BUILD_TEST)
+#if(BUILD_TEST)
 #    add_subproject(
 #        bfm test
 #        DEPENDS bfutil
@@ -230,7 +230,7 @@ endif()
 ## Userspace Components
 ## ------------------------------------------------------------------------------
 #
-if(ENABLE_BUILD_USERSPACE)
+if(BUILD_USERSPACE)
     #    add_subproject(
     #        bfintrinsics userspace
     #        DEPENDS gsl
@@ -255,7 +255,7 @@ endif()
 ## EFI Components
 ## ------------------------------------------------------------------------------
 #
-#if(ENABLE_BUILD_EFI AND NOT WIN32)
+#if(BUILD_EFI AND NOT WIN32)
 #    include_dependency(SOURCE_DEPENDS_DIR gnuefi)
 #
 #    add_subproject(

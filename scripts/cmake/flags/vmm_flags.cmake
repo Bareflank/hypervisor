@@ -68,8 +68,8 @@ list(APPEND BFFLAGS_VMM_X86_64
     -msse3
 )
 
-if(DEFINED ENABLE_BUILD_EFI)
+if(DEFINED BUILD_EFI)
     list(APPEND BFFLAGS_VMM
-        -DENABLE_BUILD_EFI
+        -DBUILD_EFI
     )
 endif()

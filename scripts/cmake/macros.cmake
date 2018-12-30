@@ -706,19 +706,19 @@ function(add_subproject NAME PREFIX)
     set(multiVal C_FLAGS CXX_FLAGS DEPENDS)
     cmake_parse_arguments(ARG "${options}" "${oneVal}" "${multiVal}" ${ARGN})
 
-    if(PREFIX STREQUAL "vmm" AND NOT ENABLE_BUILD_VMM AND NOT ENABLE_BUILD_TEST)
+    if(PREFIX STREQUAL "vmm" AND NOT BUILD_VMM AND NOT BUILD_TEST)
         return()
     endif()
 
-    if(PREFIX STREQUAL "userspace" AND NOT ENABLE_BUILD_USERSPACE)
+    if(PREFIX STREQUAL "userspace" AND NOT BUILD_USERSPACE)
         return()
     endif()
 
-    if(PREFIX STREQUAL "test" AND NOT ENABLE_BUILD_TEST)
+    if(PREFIX STREQUAL "test" AND NOT BUILD_TEST)
         return()
     endif()
 
-    if(PREFIX STREQUAL "efi" AND NOT ENABLE_BUILD_EFI)
+    if(PREFIX STREQUAL "efi" AND NOT BUILD_EFI)
         return()
     endif()
 
@@ -790,7 +790,7 @@ function(add_subproject NAME PREFIX)
         endif()
     endforeach()
 
-    if(ENABLE_BUILD_TEST)
+    if(BUILD_TEST)
         list(APPEND CMAKE_ARGS -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
     endif()
 

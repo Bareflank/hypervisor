@@ -16,7 +16,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
+if((BUILD_VMM OR BUILD_TEST) AND NOT WIN32)
     message(STATUS "Including dependency: libcxxabi")
 
     download_dependency(

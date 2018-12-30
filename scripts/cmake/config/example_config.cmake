@@ -79,7 +79,7 @@ set(ENABLE_BOXY OFF)
 # this forces static build, disables testing, ASAN, codecov and clang tidy,
 # and requries the VMM be compiled
 #
-set(ENABLE_BUILD_EFI OFF)
+set(BUILD_EFI OFF)
 
 # Examples
 #
@@ -136,13 +136,13 @@ set(CACHE_DIR ${CMAKE_CURRENT_LIST_DIR}/cache)
 # There are several enable bits that can be used to enable additional
 # functionality, or reduce which portions of the hypervisor are built.
 #
-if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI)
-    set(ENABLE_BUILD_TEST ON)
+if(ENABLE_DEVELOPER_MODE AND NOT BUILD_EFI)
+    set(BUILD_TEST ON)
 else()
-    set(ENABLE_BUILD_TEST OFF)
+    set(BUILD_TEST OFF)
 endif()
 
-if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI AND NOT WIN32)
+if(ENABLE_DEVELOPER_MODE AND NOT BUILD_EFI AND NOT WIN32)
     set(ENABLE_ASAN ON)
     set(ENABLE_TIDY ON)
     set(ENABLE_FORMAT ON)

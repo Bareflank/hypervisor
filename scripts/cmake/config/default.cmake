@@ -550,28 +550,28 @@ set(ASTYLE_SCRIPT "${SOURCE_UTIL_DIR}/bareflank_astyle_format.sh"
 # ------------------------------------------------------------------------------
 
 add_config(
-    CONFIG_NAME ENABLE_BUILD_VMM
+    CONFIG_NAME BUILD_VMM
     CONFIG_TYPE BOOL
     DEFAULT_VAL ON
     DESCRIPTION "Build VMM components"
 )
 
 add_config(
-    CONFIG_NAME ENABLE_BUILD_USERSPACE
+    CONFIG_NAME BUILD_USERSPACE
     CONFIG_TYPE BOOL
     DEFAULT_VAL ON
     DESCRIPTION "Build userspace components"
 )
 
 add_config(
-    CONFIG_NAME ENABLE_BUILD_TEST
+    CONFIG_NAME BUILD_TEST
     CONFIG_TYPE BOOL
     DEFAULT_VAL OFF
     DESCRIPTION "Build unit test components"
 )
 
 add_config(
-    CONFIG_NAME ENABLE_BUILD_EFI
+    CONFIG_NAME BUILD_EFI
     CONFIG_TYPE BOOL
     DEFAULT_VAL OFF
     DESCRIPTION "Build efi boot-time loader components"
@@ -600,15 +600,15 @@ add_config(
 # ------------------------------------------------------------------------------
 
 if(NOT DEFINED ENV{LD_BIN})
-    set(ENABLE_BUILD_BINUTILS_DEFAULT ON)
+    set(BUILD_BINUTILS_DEFAULT ON)
 else()
-    set(ENABLE_BUILD_BINUTILS_DEFAULT OFF)
+    set(BUILD_BINUTILS_DEFAULT OFF)
 endif()
 
 add_config(
-    CONFIG_NAME ENABLE_BUILD_BINUTILS
+    CONFIG_NAME BUILD_BINUTILS
     CONFIG_TYPE BOOL
-    DEFAULT_VAL ${ENABLE_BUILD_BINUTILS_DEFAULT}
+    DEFAULT_VAL ${BUILD_BINUTILS_DEFAULT}
     DESCRIPTION "Build VMM components"
 )
 

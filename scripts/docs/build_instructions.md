@@ -122,7 +122,7 @@ to run ```make```).
 ## Developer features
 Some build features that may be particularly useful if you would like to modify
 Bareflank or develop your own extensions include:
-* ENABLE_BUILD_TEST - Enables unit testing support. You can can also turn unit
+* BUILD_TEST - Enables unit testing support. You can can also turn unit
 tests for specific projects on/off using the various UNITTEST_<PROJECT_NAME>
 configurations
 * ENABLE_TIDY - Enable support for clang-tidy static analysis checks

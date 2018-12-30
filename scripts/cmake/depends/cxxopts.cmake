@@ -16,7 +16,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if(ENABLE_BUILD_USERSPACE)
+if(BUILD_USERSPACE)
     message(STATUS "Including dependency: cxxopts")
 
     download_dependency(
@@ -26,7 +26,7 @@ if(ENABLE_BUILD_USERSPACE)
     )
 endif()
 
-if(ENABLE_BUILD_USERSPACE)
+if(BUILD_USERSPACE)
     add_dependency(
         cxxopts userspace
     )

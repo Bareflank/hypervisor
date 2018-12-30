@@ -221,7 +221,7 @@ memory_manager::alloc(size_type size) noexcept
 memory_manager::pointer
 memory_manager::alloc_page() noexcept
 {
-#ifdef ENABLE_BUILD_TEST
+#ifdef BUILD_TEST
     return static_cast<pointer>(g_page_pool.allocate(BAREFLANK_PAGE_SIZE));
 #else
     std::lock_guard<std::mutex> lock(alloc_page_mutex());

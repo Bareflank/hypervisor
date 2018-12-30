@@ -82,7 +82,7 @@ public:
     ///
     void process();
 
-#ifndef ENABLE_BUILD_TEST
+#ifndef BUILD_TEST
 private:
 #endif
 

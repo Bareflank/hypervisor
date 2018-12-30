@@ -27,13 +27,13 @@
 #define NEED_GSL_LITE
 #define NEED_STD_LITE
 
-#ifdef ENABLE_BUILD_TEST
+#ifdef BUILD_TEST
 #define MAIN mock_main
 #else
 #define MAIN main
 #endif
 
-#ifdef ENABLE_BUILD_TEST
+#ifdef BUILD_TEST
 #define GSL_ABORT mock_abort
 extern "C" void mock_abort() noexcept(false);
 #endif

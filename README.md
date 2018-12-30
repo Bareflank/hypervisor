@@ -179,7 +179,7 @@ please see the following YouTube [video](https://www.youtube.com/watch?v=FuEyjDq
 
 To compile for UEFI, add the following to CMake when configuring:
 ```
--DENABLE_BUILD_EFI=ON
+-DBUILD_EFI=ON
 ```
 It should be noted that unit tests must be disabled, and static builds are currently
 required (the example config provides an example of how to configure Bareflank as 

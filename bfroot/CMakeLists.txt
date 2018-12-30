@@ -59,7 +59,7 @@ target_compile_options(bfroot_${VMM_PREFIX} INTERFACE
 # Root vmm target interface
 # ------------------------------------------------------------------------------
 
-if(ENABLE_BUILD_VMM)
+if(BUILD_VMM)
     add_library(bfroot_vmm INTERFACE)
     target_link_libraries(bfroot_vmm INTERFACE bfroot_${VMM_PREFIX})
     target_compile_options(bfroot_vmm INTERFACE
@@ -93,7 +93,7 @@ if(ENABLE_BUILD_VMM)
         $<${C_OR_CXX}:_UNIX98_THREAD_MUTEX_ATTRIBUTES>
         $<${C_OR_CXX}:__SINGLE_THREAD__>
         $<${C_OR_CXX}:__ELF__>
-        $<$<AND:${C_OR_CXX},$<BOOL:${ENABLE_BUILD_EFI}>>:ENABLE_BUILD_EFI>
+        $<$<AND:${C_OR_CXX},$<BOOL:${BUILD_EFI}>>:BUILD_EFI>
     )
     install(TARGETS bfroot_vmm DESTINATION ${EXPORT_DIR} EXPORT bfroot-targets)
 endif()
@@ -102,7 +102,7 @@ endif()
 # Root test target interface
 # ------------------------------------------------------------------------------
 
-if(ENABLE_BUILD_TEST)
+if(BUILD_TEST)
     add_library(bfroot_test INTERFACE)
     target_link_libraries(bfroot_test INTERFACE bfroot_${VMM_PREFIX})
     target_compile_options(bfroot_test INTERFACE
@@ -124,7 +124,7 @@ if(ENABLE_BUILD_TEST)
     )
     target_compile_definitions(bfroot_test INTERFACE
         $<${C_OR_CXX}:NATIVE>
-        $<${C_OR_CXX}:ENABLE_BUILD_TEST>
+        $<${C_OR_CXX}:BUILD_TEST>
         $<${C_OR_CXX_AND_MSVC}:_SCL_SECURE_NO_WARNINGS>
         $<${C_OR_CXX_AND_MSVC}:_CRT_SECURE_NO_WARNINGS>
         $<${C_OR_CXX_AND_MSVC}:NOMINMAX>
@@ -143,7 +143,7 @@ endif()
 # Root userspace target interface
 # ------------------------------------------------------------------------------
 
-if(ENABLE_BUILD_USERSPACE)
+if(BUILD_USERSPACE)
     add_library(bfroot_userspace INTERFACE)
     target_link_libraries(bfroot_userspace INTERFACE bfroot_${VMM_PREFIX})
     target_compile_options(bfroot_userspace INTERFACE
