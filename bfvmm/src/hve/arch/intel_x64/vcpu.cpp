@@ -61,6 +61,16 @@ vcpu::vcpu(vcpuid::type id) :
 void
 vcpu::run_delegate(bfobject *obj)
 {
+    // TODO
+    //
+    // We need to implement a vCPU clear() function that is capable of
+    // setting m_launched back to false and then clearing the VMCS. This
+    // way, the next time this function is executed, a launch takes place
+    // again. This is needed in order to perform a VMCS migration.
+    //
+    // Question: Do we need to re-setup all of the VMCS fields?
+    //
+
     bfignored(obj);
 
     if (m_launched) {
@@ -79,8 +89,8 @@ vcpu::run_delegate(bfobject *obj)
             throw;
         }
 
-        ::x64::cpuid::get(0xBF10, 0, 0, 0);
-        ::x64::cpuid::get(0xBF11, 0, 0, 0);
+        ::x64::cpuid::get(0x4BF00010, 0, 0, 0);
+        ::x64::cpuid::get(0x4BF00011, 0, 0, 0);
     }
 }
 
@@ -89,8 +99,8 @@ vcpu::hlt_delegate(bfobject *obj)
 {
     bfignored(obj);
 
-    ::x64::cpuid::get(0xBF20, 0, 0, 0);
-    ::x64::cpuid::get(0xBF21, 0, 0, 0);
+    ::x64::cpuid::get(0x4BF00020, 0, 0, 0);
+    ::x64::cpuid::get(0x4BF00021, 0, 0, 0);
 }
 
 void
@@ -179,140 +189,469 @@ vcpu::advance()
 }
 
 uint64_t
-vcpu::rax() const
+vcpu::rax() const noexcept
 { return m_vmcs->save_state()->rax; }
 
 void
-vcpu::set_rax(uint64_t val)
+vcpu::set_rax(uint64_t val) noexcept
 { m_vmcs->save_state()->rax = val; }
 
 uint64_t
-vcpu::rbx() const
+vcpu::rbx() const noexcept
 { return m_vmcs->save_state()->rbx; }
 
 void
-vcpu::set_rbx(uint64_t val)
+vcpu::set_rbx(uint64_t val) noexcept
 { m_vmcs->save_state()->rbx = val; }
 
 uint64_t
-vcpu::rcx() const
+vcpu::rcx() const noexcept
 { return m_vmcs->save_state()->rcx; }
 
 void
-vcpu::set_rcx(uint64_t val)
+vcpu::set_rcx(uint64_t val) noexcept
 { m_vmcs->save_state()->rcx = val; }
 
 uint64_t
-vcpu::rdx() const
+vcpu::rdx() const noexcept
 { return m_vmcs->save_state()->rdx; }
 
 void
-vcpu::set_rdx(uint64_t val)
+vcpu::set_rdx(uint64_t val) noexcept
 { m_vmcs->save_state()->rdx = val; }
 
 uint64_t
-vcpu::rbp() const
+vcpu::rbp() const noexcept
 { return m_vmcs->save_state()->rbp; }
 
 void
-vcpu::set_rbp(uint64_t val)
+vcpu::set_rbp(uint64_t val) noexcept
 { m_vmcs->save_state()->rbp = val; }
 
 uint64_t
-vcpu::rsi() const
+vcpu::rsi() const noexcept
 { return m_vmcs->save_state()->rsi; }
 
 void
-vcpu::set_rsi(uint64_t val)
+vcpu::set_rsi(uint64_t val) noexcept
 { m_vmcs->save_state()->rsi = val; }
 
 uint64_t
-vcpu::rdi() const
+vcpu::rdi() const noexcept
 { return m_vmcs->save_state()->rdi; }
 
 void
-vcpu::set_rdi(uint64_t val)
+vcpu::set_rdi(uint64_t val) noexcept
 { m_vmcs->save_state()->rdi = val; }
 
 uint64_t
-vcpu::r08() const
+vcpu::r08() const noexcept
 { return m_vmcs->save_state()->r08; }
 
 void
-vcpu::set_r08(uint64_t val)
+vcpu::set_r08(uint64_t val) noexcept
 { m_vmcs->save_state()->r08 = val; }
 
 uint64_t
-vcpu::r09() const
+vcpu::r09() const noexcept
 { return m_vmcs->save_state()->r09; }
 
 void
-vcpu::set_r09(uint64_t val)
+vcpu::set_r09(uint64_t val) noexcept
 { m_vmcs->save_state()->r09 = val; }
 
 uint64_t
-vcpu::r10() const
+vcpu::r10() const noexcept
 { return m_vmcs->save_state()->r10; }
 
 void
-vcpu::set_r10(uint64_t val)
+vcpu::set_r10(uint64_t val) noexcept
 { m_vmcs->save_state()->r10 = val; }
 
 uint64_t
-vcpu::r11() const
+vcpu::r11() const noexcept
 { return m_vmcs->save_state()->r11; }
 
 void
-vcpu::set_r11(uint64_t val)
+vcpu::set_r11(uint64_t val) noexcept
 { m_vmcs->save_state()->r11 = val; }
 
 uint64_t
-vcpu::r12() const
+vcpu::r12() const noexcept
 { return m_vmcs->save_state()->r12; }
 
 void
-vcpu::set_r12(uint64_t val)
+vcpu::set_r12(uint64_t val) noexcept
 { m_vmcs->save_state()->r12 = val; }
 
 uint64_t
-vcpu::r13() const
+vcpu::r13() const noexcept
 { return m_vmcs->save_state()->r13; }
 
 void
-vcpu::set_r13(uint64_t val)
+vcpu::set_r13(uint64_t val) noexcept
 { m_vmcs->save_state()->r13 = val; }
 
 uint64_t
-vcpu::r14() const
+vcpu::r14() const noexcept
 { return m_vmcs->save_state()->r14; }
 
 void
-vcpu::set_r14(uint64_t val)
+vcpu::set_r14(uint64_t val) noexcept
 { m_vmcs->save_state()->r14 = val; }
 
 uint64_t
-vcpu::r15() const
+vcpu::r15() const noexcept
 { return m_vmcs->save_state()->r15; }
 
 void
-vcpu::set_r15(uint64_t val)
+vcpu::set_r15(uint64_t val) noexcept
 { m_vmcs->save_state()->r15 = val; }
 
 uint64_t
-vcpu::rip() const
+vcpu::rip() const noexcept
 { return m_vmcs->save_state()->rip; }
 
 void
-vcpu::set_rip(uint64_t val)
+vcpu::set_rip(uint64_t val) noexcept
 { m_vmcs->save_state()->rip = val; }
 
 uint64_t
-vcpu::rsp() const
+vcpu::rsp() const noexcept
 { return m_vmcs->save_state()->rsp; }
 
 void
-vcpu::set_rsp(uint64_t val)
+vcpu::set_rsp(uint64_t val) noexcept
 { m_vmcs->save_state()->rsp = val; }
+
+uint64_t
+vcpu::gdt_base() const noexcept
+{ return vmcs_n::guest_gdtr_base::get(); }
+
+void
+vcpu::set_gdt_base(uint64_t val) noexcept
+{ vmcs_n::guest_gdtr_base::set(val); }
+
+uint64_t
+vcpu::gdt_limit() const noexcept
+{ return vmcs_n::guest_gdtr_limit::get(); }
+
+void
+vcpu::set_gdt_limit(uint64_t val) noexcept
+{ vmcs_n::guest_gdtr_limit::set(val); }
+
+uint64_t
+vcpu::idt_base() const noexcept
+{ return vmcs_n::guest_idtr_base::get(); }
+
+void
+vcpu::set_idt_base(uint64_t val) noexcept
+{ vmcs_n::guest_idtr_base::set(val); }
+
+uint64_t
+vcpu::idt_limit() const noexcept
+{ return vmcs_n::guest_idtr_limit::get(); }
+
+void
+vcpu::set_idt_limit(uint64_t val) noexcept
+{ vmcs_n::guest_idtr_limit::set(val); }
+
+uint64_t
+vcpu::cr0() const noexcept
+{ return vmcs_n::guest_cr0::get(); }
+
+void
+vcpu::set_cr0(uint64_t val) noexcept
+{ vmcs_n::guest_cr0::set(val); }
+
+uint64_t
+vcpu::cr3() const noexcept
+{ return vmcs_n::guest_cr3::get(); }
+
+void
+vcpu::set_cr3(uint64_t val) noexcept
+{ vmcs_n::guest_cr3::set(val); }
+
+uint64_t
+vcpu::cr4() const noexcept
+{ return vmcs_n::guest_cr4::get(); }
+
+void
+vcpu::set_cr4(uint64_t val) noexcept
+{ vmcs_n::guest_cr4::set(val); }
+
+uint64_t
+vcpu::ia32_efer() const noexcept
+{ return vmcs_n::guest_ia32_efer::get(); }
+
+void
+vcpu::set_ia32_efer(uint64_t val) noexcept
+{ vmcs_n::guest_ia32_efer::set(val); }
+
+uint64_t
+vcpu::ia32_pat() const noexcept
+{ return vmcs_n::guest_ia32_pat::get(); }
+
+void
+vcpu::set_ia32_pat(uint64_t val) noexcept
+{ vmcs_n::guest_ia32_pat::set(val); }
+
+
+uint64_t
+vcpu::es_selector() const noexcept
+{ return vmcs_n::guest_es_selector::get(); }
+
+void
+vcpu::set_es_selector(uint64_t val) noexcept
+{ vmcs_n::guest_es_selector::set(val); }
+
+uint64_t
+vcpu::es_base() const noexcept
+{ return vmcs_n::guest_es_base::get(); }
+
+void
+vcpu::set_es_base(uint64_t val) noexcept
+{ vmcs_n::guest_es_base::set(val); }
+
+uint64_t
+vcpu::es_limit() const noexcept
+{ return vmcs_n::guest_es_limit::get(); }
+
+void
+vcpu::set_es_limit(uint64_t val) noexcept
+{ vmcs_n::guest_es_limit::set(val); }
+
+uint64_t
+vcpu::es_access_rights() const noexcept
+{ return vmcs_n::guest_es_access_rights::get(); }
+
+void
+vcpu::set_es_access_rights(uint64_t val) noexcept
+{ vmcs_n::guest_es_access_rights::set(val); }
+
+uint64_t
+vcpu::cs_selector() const noexcept
+{ return vmcs_n::guest_cs_selector::get(); }
+
+void
+vcpu::set_cs_selector(uint64_t val) noexcept
+{ vmcs_n::guest_cs_selector::set(val); }
+
+uint64_t
+vcpu::cs_base() const noexcept
+{ return vmcs_n::guest_cs_base::get(); }
+
+void
+vcpu::set_cs_base(uint64_t val) noexcept
+{ vmcs_n::guest_cs_base::set(val); }
+
+uint64_t
+vcpu::cs_limit() const noexcept
+{ return vmcs_n::guest_cs_limit::get(); }
+
+void
+vcpu::set_cs_limit(uint64_t val) noexcept
+{ vmcs_n::guest_cs_limit::set(val); }
+
+uint64_t
+vcpu::cs_access_rights() const noexcept
+{ return vmcs_n::guest_cs_access_rights::get(); }
+
+void
+vcpu::set_cs_access_rights(uint64_t val) noexcept
+{ vmcs_n::guest_cs_access_rights::set(val); }
+
+uint64_t
+vcpu::ss_selector() const noexcept
+{ return vmcs_n::guest_ss_selector::get(); }
+
+void
+vcpu::set_ss_selector(uint64_t val) noexcept
+{ vmcs_n::guest_ss_selector::set(val); }
+
+uint64_t
+vcpu::ss_base() const noexcept
+{ return vmcs_n::guest_ss_base::get(); }
+
+void
+vcpu::set_ss_base(uint64_t val) noexcept
+{ vmcs_n::guest_ss_base::set(val); }
+
+uint64_t
+vcpu::ss_limit() const noexcept
+{ return vmcs_n::guest_ss_limit::get(); }
+
+void
+vcpu::set_ss_limit(uint64_t val) noexcept
+{ vmcs_n::guest_ss_limit::set(val); }
+
+uint64_t
+vcpu::ss_access_rights() const noexcept
+{ return vmcs_n::guest_ss_access_rights::get(); }
+
+void
+vcpu::set_ss_access_rights(uint64_t val) noexcept
+{ vmcs_n::guest_ss_access_rights::set(val); }
+
+uint64_t
+vcpu::ds_selector() const noexcept
+{ return vmcs_n::guest_ds_selector::get(); }
+
+void
+vcpu::set_ds_selector(uint64_t val) noexcept
+{ vmcs_n::guest_ds_selector::set(val); }
+
+uint64_t
+vcpu::ds_base() const noexcept
+{ return vmcs_n::guest_ds_base::get(); }
+
+void
+vcpu::set_ds_base(uint64_t val) noexcept
+{ vmcs_n::guest_ds_base::set(val); }
+
+uint64_t
+vcpu::ds_limit() const noexcept
+{ return vmcs_n::guest_ds_limit::get(); }
+
+void
+vcpu::set_ds_limit(uint64_t val) noexcept
+{ vmcs_n::guest_ds_limit::set(val); }
+
+uint64_t
+vcpu::ds_access_rights() const noexcept
+{ return vmcs_n::guest_ds_access_rights::get(); }
+
+void
+vcpu::set_ds_access_rights(uint64_t val) noexcept
+{ vmcs_n::guest_ds_access_rights::set(val); }
+
+uint64_t
+vcpu::fs_selector() const noexcept
+{ return vmcs_n::guest_fs_selector::get(); }
+
+void
+vcpu::set_fs_selector(uint64_t val) noexcept
+{ vmcs_n::guest_fs_selector::set(val); }
+
+uint64_t
+vcpu::fs_base() const noexcept
+{ return vmcs_n::guest_fs_base::get(); }
+
+void
+vcpu::set_fs_base(uint64_t val) noexcept
+{ vmcs_n::guest_fs_base::set(val); }
+
+uint64_t
+vcpu::fs_limit() const noexcept
+{ return vmcs_n::guest_fs_limit::get(); }
+
+void
+vcpu::set_fs_limit(uint64_t val) noexcept
+{ vmcs_n::guest_fs_limit::set(val); }
+
+uint64_t
+vcpu::fs_access_rights() const noexcept
+{ return vmcs_n::guest_fs_access_rights::get(); }
+
+void
+vcpu::set_fs_access_rights(uint64_t val) noexcept
+{ vmcs_n::guest_fs_access_rights::set(val); }
+
+uint64_t
+vcpu::gs_selector() const noexcept
+{ return vmcs_n::guest_gs_selector::get(); }
+
+void
+vcpu::set_gs_selector(uint64_t val) noexcept
+{ vmcs_n::guest_gs_selector::set(val); }
+
+uint64_t
+vcpu::gs_base() const noexcept
+{ return vmcs_n::guest_gs_base::get(); }
+
+void
+vcpu::set_gs_base(uint64_t val) noexcept
+{ vmcs_n::guest_gs_base::set(val); }
+
+uint64_t
+vcpu::gs_limit() const noexcept
+{ return vmcs_n::guest_gs_limit::get(); }
+
+void
+vcpu::set_gs_limit(uint64_t val) noexcept
+{ vmcs_n::guest_gs_limit::set(val); }
+
+uint64_t
+vcpu::gs_access_rights() const noexcept
+{ return vmcs_n::guest_gs_access_rights::get(); }
+
+void
+vcpu::set_gs_access_rights(uint64_t val) noexcept
+{ vmcs_n::guest_gs_access_rights::set(val); }
+
+uint64_t
+vcpu::tr_selector() const noexcept
+{ return vmcs_n::guest_tr_selector::get(); }
+
+void
+vcpu::set_tr_selector(uint64_t val) noexcept
+{ vmcs_n::guest_tr_selector::set(val); }
+
+uint64_t
+vcpu::tr_base() const noexcept
+{ return vmcs_n::guest_tr_base::get(); }
+
+void
+vcpu::set_tr_base(uint64_t val) noexcept
+{ vmcs_n::guest_tr_base::set(val); }
+
+uint64_t
+vcpu::tr_limit() const noexcept
+{ return vmcs_n::guest_tr_limit::get(); }
+
+void
+vcpu::set_tr_limit(uint64_t val) noexcept
+{ vmcs_n::guest_tr_limit::set(val); }
+
+uint64_t
+vcpu::tr_access_rights() const noexcept
+{ return vmcs_n::guest_tr_access_rights::get(); }
+
+void
+vcpu::set_tr_access_rights(uint64_t val) noexcept
+{ vmcs_n::guest_tr_access_rights::set(val); }
+
+uint64_t
+vcpu::ldtr_selector() const noexcept
+{ return vmcs_n::guest_ldtr_selector::get(); }
+
+void
+vcpu::set_ldtr_selector(uint64_t val) noexcept
+{ vmcs_n::guest_ldtr_selector::set(val); }
+
+uint64_t
+vcpu::ldtr_base() const noexcept
+{ return vmcs_n::guest_ldtr_base::get(); }
+
+void
+vcpu::set_ldtr_base(uint64_t val) noexcept
+{ vmcs_n::guest_ldtr_base::set(val); }
+
+uint64_t
+vcpu::ldtr_limit() const noexcept
+{ return vmcs_n::guest_ldtr_limit::get(); }
+
+void
+vcpu::set_ldtr_limit(uint64_t val) noexcept
+{ vmcs_n::guest_ldtr_limit::set(val); }
+
+uint64_t
+vcpu::ldtr_access_rights() const noexcept
+{ return vmcs_n::guest_ldtr_access_rights::get(); }
+
+void
+vcpu::set_ldtr_access_rights(uint64_t val) noexcept
+{ vmcs_n::guest_ldtr_access_rights::set(val); }
 
 gsl::not_null<save_state_t *>
 vcpu::save_state() const

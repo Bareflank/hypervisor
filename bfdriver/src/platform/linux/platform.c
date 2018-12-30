@@ -138,10 +138,15 @@ platform_memset(void *ptr, char value, uint64_t num)
 }
 
 void *
-platform_memcpy(void *dst, const void *src, uint64_t num)
+platform_memcpy(
+    void *dst, uint64_t dst_size, const void *src, uint64_t src_size, uint64_t num)
 {
-    if (!dst || !src) {
-        return nullptr;
+    if (dst == 0 || src == 0) {
+        return 0;
+    }
+
+    if (num > dst_size || num > src_size) {
+        return 0;
     }
 
     return memcpy(dst, src, num);
