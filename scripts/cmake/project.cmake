@@ -23,5 +23,5 @@ endforeach(file)
 
 string(REPLACE "|" ";" PACKAGE_LIST "${PACKAGE_LIST}")
 foreach(pkg ${PACKAGE_LIST})
-    find_package(${pkg})
+    find_package(${pkg} QUIET)
 endforeach(pkg)

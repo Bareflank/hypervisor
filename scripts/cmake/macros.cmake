@@ -732,6 +732,7 @@ function(add_subproject NAME PREFIX)
         endif()
     endif()
 
+    set(SHORT_PREFIX ${PREFIX})
     if(NOT PREFIX STREQUAL "efi")
         add_targets(${NAME} ${PREFIX} ${SOURCE_DIR})
     endif()
@@ -790,21 +791,18 @@ function(add_subproject NAME PREFIX)
         endif()
     endforeach()
 
-    if(BUILD_TEST)
-        list(APPEND CMAKE_ARGS -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
-    endif()
-
     list(APPEND CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=${PREFIXES_DIR}/${PREFIX}
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=${CMAKE_EXPORT_COMPILE_COMMANDS}
         -DCMAKE_INSTALL_MESSAGE=${CMAKE_INSTALL_MESSAGE}
-        -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
+        -DCMAKE_INSTALL_PREFIX=${PREFIXES_DIR}/${PREFIX}
+        -DCMAKE_PREFIX_PATH=${EXPORT_DIR}
+        -DCMAKE_PROJECT_${NAME}_INCLUDE=${SOURCE_CMAKE_DIR}/project.cmake
         -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN}
+        -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
         -DPROJECT_INCLUDE_LIST=${PROJECT_INCLUDE_LIST}
         -DPACKAGE_LIST=${PACKAGE_LIST}
         -DBFM_VMM=${BFM_VMM}
         -DEFI_EXTENSION_SOURCES=${EFI_EXTENSION_SOURCES}
-        -DCMAKE_PROJECT_${NAME}_INCLUDE=${SOURCE_CMAKE_DIR}/project.cmake
-        -DCMAKE_PREFIX_PATH=${EXPORT_DIR}
     )
 
     if(NOT WIN32 AND NOT CMAKE_GENERATOR STREQUAL "Ninja")
@@ -847,7 +845,7 @@ function(add_subproject NAME PREFIX)
     # This must come *after* ExternalProject_Add, otherwise find_package
     # will fail since it hasn't been installed yet
     #
-    set(PACKAGE_LIST "${PACKAGE_LIST}|${NAME}" PARENT_SCOPE)
+    set(PACKAGE_LIST "${PACKAGE_LIST}|${NAME}-${SHORT_PREFIX}" PARENT_SCOPE)
 
 endfunction(add_subproject)
 
@@ -946,7 +944,7 @@ endmacro(enable_asm)
 #
 macro(init_project TARGET)
     set(options INTERFACE)
-    cmake_parse_arguments(ARG "${options}" "${oneVal}" "" ${ARGN})
+    cmake_parse_arguments(ARG "${options}" "" "" ${ARGN})
 
     if(CMAKE_INSTALL_PREFIX STREQUAL "${VMM_PREFIX_PATH}")
         set(PREFIX "vmm")
@@ -959,7 +957,6 @@ macro(init_project TARGET)
     else()
         message(FATAL_ERROR "Invalid prefix: ${CMAKE_INSTALL_PREFIX}")
     endif()
-    message(STATUS "Project: ${TARGET} @ prefix: ${CMAKE_INSTALL_PREFIX}")
 
     set(CMAKE_C_EXTENSIONS OFF)
     set(CMAKE_CXX_EXTENSIONS OFF)
@@ -968,9 +965,10 @@ macro(init_project TARGET)
     if(${ARG_INTERFACE})
         add_library(${TARGET} INTERFACE)
     else()
-        add_library(${TARGET})
+        add_library(${TARGET} STATIC)
         set_target_properties(${TARGET} PROPERTIES LINKER_LANGUAGE C)
     endif()
+    add_library(${PREFIX}::${TARGET} ALIAS ${TARGET})
 
     if(PREFIX STREQUAL "vmm")
         set(CMAKE_SKIP_RPATH TRUE)
@@ -989,15 +987,16 @@ endmacro(init_project)
 
 # Fini Project
 #
-# @param TARGET the name of the target associated with this project
-#
 macro(fini_project)
-    set(PROJ ${CMAKE_PROJECT_NAME})
-    install(TARGETS ${PROJ} DESTINATION lib EXPORT ${PROJ}-targets)
-    install(EXPORT ${PROJ}-targets DESTINATION ${EXPORT_DIR})
+    set(PROJECT ${CMAKE_PROJECT_NAME})
+    set(EXPORT ${PROJECT}-${PREFIX}-targets)
+
+    install(TARGETS ${PROJECT} DESTINATION lib EXPORT ${EXPORT})
+    install(EXPORT ${EXPORT} DESTINATION ${EXPORT_DIR} NAMESPACE ${PREFIX}::)
+
     configure_file(
-        ${SOURCE_CMAKE_DIR}/target-config.cmake.in
-        ${EXPORT_DIR}/${PROJ}-config.cmake
+        ${SOURCE_CMAKE_DIR}/package.cmake.in
+        ${EXPORT_DIR}/${PROJECT}-${PREFIX}-config.cmake
         @ONLY
     )
 endmacro(fini_project)
