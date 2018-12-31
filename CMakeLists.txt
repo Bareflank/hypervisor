@@ -67,7 +67,7 @@ message(STATUS "    vmm: ${BFM_VMM}")
 message(STATUS "    target: ${BFM_VMM_TARGET}")
 
 # ------------------------------------------------------------------------------
-# General Dependencies
+# External Dependencies
 # ------------------------------------------------------------------------------
 
 include_dependency(SOURCE_DEPENDS_DIR gsl)
@@ -78,6 +78,7 @@ include_dependency(SOURCE_DEPENDS_DIR clang_tidy)
 include_dependency(SOURCE_DEPENDS_DIR catch)
 include_dependency(SOURCE_DEPENDS_DIR hippomocks)
 include_dependency(SOURCE_DEPENDS_DIR python)
+include_dependency(SOURCE_DEPENDS_DIR binutils)
 
 # ------------------------------------------------------------------------------
 # No Build Components
@@ -95,14 +96,13 @@ add_subproject(bfroot vmm SOURCE_DIR ${CMAKE_SOURCE_DIR}/bfroot)
 add_subproject(bfroot test SOURCE_DIR ${CMAKE_SOURCE_DIR}/bfroot)
 add_subproject(bfroot userspace SOURCE_DIR ${CMAKE_SOURCE_DIR}/bfroot)
 
-## ------------------------------------------------------------------------------
-## VMM Components
-## ------------------------------------------------------------------------------
-#
-#include_dependency(SOURCE_DEPENDS_DIR binutils)
-#
+# ------------------------------------------------------------------------------
+# VMM Components
+# ------------------------------------------------------------------------------
+
+add_subproject(bfutil vmm DEPENDS bfroot SOURCE_DIR ${SOURCE_BFUTIL_DIR})
+
 #if(NOT WIN32)
-#    add_subproject(bfutil vmm DEPENDS bfroot SOURCE_DIR ${SOURCE_BFUTIL_DIR})
 #    if(NOT BUILD_BINUTILS)
 #        add_subproject(
 #            bfdso vmm

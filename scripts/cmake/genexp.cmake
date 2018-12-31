@@ -21,6 +21,8 @@
 # When dereferenced, each generator expression below evaluates to
 # either 0 or 1 at build time
 #
+set(WIN $<BOOL:${WIN32}>)
+
 set(VMM $<AND:$<STREQUAL:${PREFIX},vmm>,$<BOOL:${BUILD_VMM}>>)
 set(USR $<AND:$<STREQUAL:${PREFIX},userspace>,$<BOOL:${BUILD_USERSPACE}>>)
 set(TST $<AND:$<STREQUAL:${PREFIX},test>,$<BOOL:${BUILD_TEST}>>)
