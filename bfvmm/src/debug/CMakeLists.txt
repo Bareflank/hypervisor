@@ -17,19 +17,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 add_library(bfvmm_debug)
-target_link_libraries(bfvmm_debug PUBLIC bfvmm)
-
-set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
-set(ARM $<STREQUAL:${BUILD_TARGET_ARCH},aarch64>)
-set(NOT_MOCKING $<NOT:$<BOOL:${ENABLE_MOCKING}>>)
-
+target_link_libraries(bfvmm_debug PUBLIC ${PREFIX}::bfvmm)
 target_sources(bfvmm_debug PRIVATE
     debug_ring/debug_ring.cpp
     serial/serial_ns16550a.cpp
-    $<${X64}:arch/x64/serial_ns16550a.cpp>
-    $<${ARM}:arch/aarch64/serial_ns16550a.cpp>
-    $<${NOT_MOCKING}:unistd.cpp>
+    $<$<STREQUAL:${BUILD_TARGET_ARCH},x86_64>:arch/x64/serial_ns16550a.cpp>
+    $<$<STREQUAL:${BUILD_TARGET_ARCH},aarch64>:arch/aarch64/serial_ns16550a.cpp>
+    $<$<NOT:$<BOOL:${ENABLE_MOCKING}>>:unistd.cpp>
 )
 
-install(TARGETS bfvmm_debug DESTINATION lib EXPORT bfvmm)
+install(TARGETS bfvmm_debug DESTINATION lib EXPORT bfvmm-${PREFIX}-targets)
 install(DIRECTORY ../../include/debug/ DESTINATION include/bfvmm/debug)

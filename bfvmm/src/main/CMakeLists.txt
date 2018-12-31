@@ -18,17 +18,23 @@
 
 add_executable(vmm)
 
-target_link_libraries(vmm PUBLIC bfvmm_entry bfvmm_hve bfvmm_vcpu)
-target_link_libraries(vmm PUBLIC bfvmm_memory_manager bfvmm_debug)
-target_link_libraries(vmm PUBLIC bfintrinsics)
+target_link_libraries(vmm PUBLIC bfvmm_entry)
+target_link_libraries(vmm PUBLIC bfvmm_hve)
+target_link_libraries(vmm PUBLIC bfvmm_vcpu)
+target_link_libraries(vmm PUBLIC bfvmm_memory_manager)
+target_link_libraries(vmm PUBLIC bfvmm_debug)
 
-target_link_libraries(vmm PUBLIC ${VMM_PREFIX_PATH}/lib/libc++.a)
+target_link_libraries(vmm PUBLIC ${PREFIX}::bfintrinsics)
+target_link_libraries(vmm PUBLIC ${VMM_PREFIX_PATH}/lib/libc++.a) #TODO: rm VMM
 target_link_libraries(vmm PUBLIC ${VMM_PREFIX_PATH}/lib/libc++abi.a)
-target_link_libraries(vmm PUBLIC bfpthread bfunwind)
+target_link_libraries(vmm PUBLIC ${PREFIX}::bfpthread)
+target_link_libraries(vmm PUBLIC ${PREFIX}::bfunwind)
 target_link_libraries(vmm PUBLIC ${VMM_PREFIX_PATH}/lib/libm.a)
 target_link_libraries(vmm PUBLIC ${VMM_PREFIX_PATH}/lib/libc.a)
-target_link_libraries(vmm PUBLIC bfsyscall bfcrt)
+target_link_libraries(vmm PUBLIC ${PREFIX}::bfsyscall)
+target_link_libraries(vmm PUBLIC ${PREFIX}::bfcrt)
 
 set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 target_sources(vmm PRIVATE $<${X64}:arch/intel_x64/vcpu_factory.cpp>)
-install(TARGETS vmm DESTINATION bin EXPORT bfvmm)
+
+install(TARGETS vmm DESTINATION bin EXPORT bfvmm-${PREFIX}-targets)

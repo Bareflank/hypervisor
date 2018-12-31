@@ -18,5 +18,5 @@
 
 add_library(bfvmm_entry)
 target_sources(bfvmm_entry PRIVATE entry.cpp)
-target_link_libraries(bfvmm_entry PUBLIC bfvmm)
-install(TARGETS bfvmm_entry DESTINATION lib EXPORT bfvmm)
+target_link_libraries(bfvmm_entry PUBLIC ${PREFIX}::bfvmm)
+install(TARGETS bfvmm_entry DESTINATION lib EXPORT bfvmm-${PREFIX}-targets)

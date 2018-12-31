@@ -23,19 +23,22 @@ init_project(bfunwind)
 
 set(C $<COMPILE_LANGUAGE:C>)
 set(CXX $<COMPILE_LANGUAGE:CXX>)
-set(C_OR_CXX $<OR:${CXX},${C}>)
 set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>>)
-set(NEED_INCLUDE $<AND:${C_OR_CXX},${BUILD}>)
+set(NEED_INCLUDE $<AND:$<OR:${C},${CXX}>,${BUILD}>)
 
-target_link_libraries(bfunwind PUBLIC bfutil)
+target_link_libraries(bfunwind PUBLIC ${PREFIX}::bfutil)
+
 target_include_directories(bfunwind PUBLIC
     $<${NEED_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../include>
 )
+
 target_sources(bfunwind PRIVATE
     dwarf4.cpp
     eh_frame.cpp
     ia64_cxx_abi.cpp
     registers_intel_x64.asm
 )
+
 install(FILES ../include/ia64_cxx_abi.h DESTINATION include RENAME unwind.h)
+
 fini_project()

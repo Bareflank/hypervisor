@@ -21,5 +21,5 @@ project(bfdso C CXX)
 
 init_project(bfdso)
 target_sources(bfdso PRIVATE dso.cpp)
-target_link_libraries(bfdso PUBLIC bfutil)
+target_link_libraries(bfdso PUBLIC ${PREFIX}::bfroot)
 fini_project()

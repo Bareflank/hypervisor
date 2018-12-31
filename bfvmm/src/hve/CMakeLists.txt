@@ -17,12 +17,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 add_library(bfvmm_hve)
-target_link_libraries(bfvmm_hve PUBLIC bfvmm)
+target_link_libraries(bfvmm_hve PUBLIC ${PREFIX}::bfvmm)
 
 set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 set(WIN $<BOOL:${WIN32}>)
 set(MOCK $<BOOL:${ENABLE_MOCKING}>)
-set(NEED_ASM $<AND:$<NOT:${WIN}>,$<NOT:${MOCK}>>)
+set(X64_ASM $<AND:$<NOT:${WIN}>,$<NOT:${MOCK}>,${X64}>)
 
 target_sources(bfvmm_hve PRIVATE
     $<${X64}:arch/intel_x64/check_vmcs_control_fields.cpp>
@@ -34,13 +34,13 @@ target_sources(bfvmm_hve PRIVATE
     $<${X64}:arch/intel_x64/vcpu.cpp>
     $<${X64}:arch/intel_x64/vmcs.cpp>
     $<${X64}:arch/intel_x64/vmx.cpp>
-    $<$<AND:${X64},${NEED_ASM}>:arch/intel_x64/exception.asm>
-    $<$<AND:${X64},${NEED_ASM}>:arch/intel_x64/nmi.asm>
-    $<$<AND:${X64},${NEED_ASM}>:arch/intel_x64/exit_handler_entry.asm>
-    $<$<AND:${X64},${NEED_ASM}>:arch/intel_x64/vmcs_launch.asm>
-    $<$<AND:${X64},${NEED_ASM}>:arch/intel_x64/vmcs_promote.asm>
-    $<$<AND:${X64},${NEED_ASM}>:arch/intel_x64/vmcs_resume.asm>
+    $<${X64_ASM}:arch/intel_x64/exception.asm>
+    $<${X64_ASM}:arch/intel_x64/nmi.asm>
+    $<${X64_ASM}:arch/intel_x64/exit_handler_entry.asm>
+    $<${X64_ASM}:arch/intel_x64/vmcs_launch.asm>
+    $<${X64_ASM}:arch/intel_x64/vmcs_promote.asm>
+    $<${X64_ASM}:arch/intel_x64/vmcs_resume.asm>
 )
 
-install(TARGETS bfvmm_hve DESTINATION lib EXPORT bfvmm)
+install(TARGETS bfvmm_hve DESTINATION lib EXPORT bfvmm-${PREFIX}-targets)
 install(DIRECTORY ../../include/hve/ DESTINATION include/bfvmm/hve)

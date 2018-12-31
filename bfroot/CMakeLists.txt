@@ -22,6 +22,47 @@ project(bfroot C CXX)
 init_project(bfroot INTERFACE)
 
 # ------------------------------------------------------------------------------
+# Generator expressions
+# ------------------------------------------------------------------------------
+
+# Common
+set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
+set(C $<COMPILE_LANGUAGE:C>)
+set(CXX $<COMPILE_LANGUAGE:CXX>)
+set(C_CXX $<OR:${C},${CXX}>)
+set(C_CXX_X64 $<AND:${C_CXX},${X64}>)
+set(MSVC $<CXX_COMPILER_ID:MSVC>)
+set(CLANG $<CXX_COMPILER_ID:Clang>)
+set(VMM $<AND:$<STREQUAL:${PREFIX},vmm>,$<BOOL:${BUILD_VMM}>>)
+set(EFI $<AND:$<STREQUAL:${PREFIX},efi>,$<BOOL:${BUILD_EFI}>>)
+set(TST $<AND:$<STREQUAL:${PREFIX},test>,$<BOOL:${BUILD_TEST}>>)
+set(USR $<AND:$<STREQUAL:${PREFIX},userspace>,$<BOOL:${BUILD_USERSPACE}>>)
+
+# VMM
+set(VMM_CXX $<AND:${VMM},${CXX}>)
+set(VMM_C_CXX $<AND:${VMM},${C_CXX}>)
+set(VMM_C_CXX_CLANG $<AND:${VMM_C_CXX},${CLANG}>)
+set(VMM_C_CXX_MSVC $<AND:${VMM_C_CXX},${MSVC}>)
+
+# EFI
+set(EFI_C_CXX $<AND:${EFI},${C_CXX}>)
+
+# Test
+set(TST_C_CXX $<AND:${TST},${C_CXX}>)
+set(TST_C_CXX_MSVC $<AND:${TST_C_CXX},${MSVC}>)
+set(TST_CXX_CLANG $<AND:${TST},${CXX},${CLANG}>)
+set(TST_C_CXX_CLANG $<AND:${TST_C_CXX},${CLANG}>)
+set(TST_C_CXX_CLANG_ASAN $<AND:${TST_C_CXX_CLANG},$<BOOL:${ENABLE_ASAN}>>)
+set(TST_C_CXX_CLANG_USAN $<AND:${TST_C_CXX_CLANG},$<BOOL:${ENABLE_USAN}>>)
+set(TST_C_CXX_CLANG_CODECOV $<AND:${TST_C_CXX_CLANG},$<BOOL:${ENABLE_CODECOV}>>)
+
+# Userspace
+set(USR_C_CXX $<AND:${USR},${C_CXX}>)
+set(USR_C_CXX_MSVC $<AND:${USR_C_CXX},${MSVC}>)
+set(USR_CXX_CLANG $<AND:${USR},${CXX},${CLANG}>)
+set(USR_C_CXX_CLANG $<AND:${USR_C_CXX},${CLANG}>)
+
+# ------------------------------------------------------------------------------
 # Root interface for all prefixes
 # ------------------------------------------------------------------------------
 
@@ -41,6 +82,13 @@ target_compile_options(bfroot INTERFACE
 # ------------------------------------------------------------------------------
 # Root interface for vmm prefix
 # ------------------------------------------------------------------------------
+
+if(PREFIX STREQUAL vmm)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${VMM_PREFIX_PATH}/include/c++/v1
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${VMM_PREFIX_PATH}/lib
+    )
+endif()
 
 target_compile_options(bfroot INTERFACE
     $<${VMM_C_CXX}:--target=${BUILD_TARGET_ARCH}-vmm-elf>
@@ -77,6 +125,13 @@ target_compile_definitions(bfroot INTERFACE
 # Root interface for test prefix
 # ------------------------------------------------------------------------------
 
+if(PREFIX STREQUAL test)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${TEST_PREFIX_PATH}/include/c++/v1
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${TEST_PREFIX_PATH}/lib
+    )
+endif()
+
 target_compile_options(bfroot INTERFACE
     $<${TST_C_CXX_CLANG}:-fpic>
     $<${TST_C_CXX_CLANG}:-fno-stack-protector>
@@ -112,6 +167,13 @@ target_link_directories(bfroot INTERFACE
 # ------------------------------------------------------------------------------
 # Root interface for userspace prefix
 # ------------------------------------------------------------------------------
+
+if(PREFIX STREQUAL userspace)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${USERSPACE_PREFIX_PATH}/include/c++/v1
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${USERSPACE_PREFIX_PATH}/lib
+    )
+endif()
 
 target_compile_options(bfroot INTERFACE
     $<${USR_C_CXX_CLANG}:-fpic>

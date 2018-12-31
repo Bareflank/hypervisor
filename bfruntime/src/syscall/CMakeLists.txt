@@ -21,5 +21,5 @@ project(bfsyscall C CXX)
 
 init_project(bfsyscall)
 target_sources(bfsyscall PRIVATE syscall.cpp)
-target_link_libraries(bfsyscall PUBLIC bfutil)
+target_link_libraries(bfsyscall PUBLIC ${PREFIX}::bfutil)
 fini_project()

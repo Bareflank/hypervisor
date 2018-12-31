@@ -43,10 +43,9 @@ if(BUILD_TEST)
 endif()
 
 # ------------------------------------------------------------------------------
-# Super-build include files
+# Superbuild include files
 # ------------------------------------------------------------------------------
 
-include(${SOURCE_CMAKE_DIR}/genexp.cmake)
 include(${SOURCE_CMAKE_DIR}/macros.cmake)
 include(${SOURCE_CMAKE_DIR}/targets.cmake)
 
@@ -54,7 +53,6 @@ include(${SOURCE_CMAKE_DIR}/targets.cmake)
 # Subproject include files
 # ------------------------------------------------------------------------------
 
-add_project_include(${SOURCE_CMAKE_DIR}/genexp.cmake)
 add_project_include(${SOURCE_CMAKE_DIR}/macros.cmake)
 
 # ------------------------------------------------------------------------------
@@ -67,7 +65,7 @@ message(STATUS "    vmm: ${BFM_VMM}")
 message(STATUS "    target: ${BFM_VMM_TARGET}")
 
 # ------------------------------------------------------------------------------
-# External Dependencies
+# General Dependencies
 # ------------------------------------------------------------------------------
 
 include_dependency(SOURCE_DEPENDS_DIR gsl)
@@ -78,7 +76,6 @@ include_dependency(SOURCE_DEPENDS_DIR clang_tidy)
 include_dependency(SOURCE_DEPENDS_DIR catch)
 include_dependency(SOURCE_DEPENDS_DIR hippomocks)
 include_dependency(SOURCE_DEPENDS_DIR python)
-include_dependency(SOURCE_DEPENDS_DIR binutils)
 
 # ------------------------------------------------------------------------------
 # No Build Components
@@ -101,65 +98,64 @@ add_subproject(bfroot userspace SOURCE_DIR ${CMAKE_SOURCE_DIR}/bfroot)
 # ------------------------------------------------------------------------------
 
 add_subproject(bfutil vmm DEPENDS bfroot SOURCE_DIR ${SOURCE_BFUTIL_DIR})
+include_dependency(SOURCE_DEPENDS_DIR binutils)
 
-#if(NOT WIN32)
-#    if(NOT BUILD_BINUTILS)
-#        add_subproject(
-#            bfdso vmm
-#            SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
-#        )
-#    else()
-#        add_subproject(
-#            bfdso vmm
-#            SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
-#            DEPENDS binutils
-#        )
-#    endif()
-#endif()
-#
-#include_dependency(SOURCE_DEPENDS_DIR newlib)
-#include_dependency(SOURCE_DEPENDS_DIR llvm)
-#include_dependency(SOURCE_DEPENDS_DIR libcxxabi)
-#include_dependency(SOURCE_DEPENDS_DIR libcxx)
-#
-#if(BUILD_VMM OR (BUILD_TEST AND NOT WIN32))
-#    add_subproject(
-#        bfcrt vmm
-#        DEPENDS gsl
-#        DEPENDS libcxx
-#        DEPENDS bfutil
-#        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/crt
-#    )
-#
-#    add_subproject(
-#        bfpthread vmm
-#        DEPENDS gsl
-#        DEPENDS libcxx
-#        DEPENDS bfcrt
-#        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/pthread
-#    )
-#
-#    add_subproject(
-#        bfsyscall vmm
-#        DEPENDS gsl
-#        DEPENDS libcxx
-#        DEPENDS bfpthread
-#        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/syscall
-#    )
-#
-#    add_subproject(
-#        bfunwind vmm
-#        DEPENDS bfcrt
-#        DEPENDS bfpthread
-#        DEPENDS bfsyscall
-#    )
-#endif()
-#
-#if(BUILD_VMM)
-#    add_subproject(bfintrinsics vmm DEPENDS bfunwind)
-#    add_subproject(bfvmm vmm DEPENDS bfintrinsics)
-#endif()
-#
+if(NOT WIN32)
+    if(NOT BUILD_BINUTILS)
+        add_subproject(
+            bfdso vmm
+            SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
+        )
+    else()
+        add_subproject(
+            bfdso vmm
+            SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
+            DEPENDS binutils
+        )
+    endif()
+endif()
+
+include_dependency(SOURCE_DEPENDS_DIR newlib)
+include_dependency(SOURCE_DEPENDS_DIR llvm)
+include_dependency(SOURCE_DEPENDS_DIR libcxxabi)
+include_dependency(SOURCE_DEPENDS_DIR libcxx)
+
+if(BUILD_VMM OR (BUILD_TEST AND NOT WIN32))
+    add_subproject(
+        bfcrt vmm
+        DEPENDS gsl
+        DEPENDS libcxx
+        DEPENDS bfutil
+        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/crt
+    )
+
+    add_subproject(
+        bfpthread vmm
+        DEPENDS gsl
+        DEPENDS libcxx
+        DEPENDS bfcrt
+        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/pthread
+    )
+
+    add_subproject(
+        bfsyscall vmm
+        DEPENDS gsl
+        DEPENDS libcxx
+        DEPENDS bfpthread
+        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/syscall
+    )
+
+    add_subproject(
+        bfunwind vmm
+        DEPENDS bfpthread
+    )
+endif()
+
+if(BUILD_VMM)
+    add_subproject(bfintrinsics vmm DEPENDS bfunwind)
+    add_subproject(bfvmm vmm DEPENDS bfintrinsics)
+endif()
+
 ## ------------------------------------------------------------------------------
 ## Unit Tests
 ## ------------------------------------------------------------------------------

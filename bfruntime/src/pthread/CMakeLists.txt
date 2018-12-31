@@ -21,5 +21,5 @@ project(bfpthread C CXX)
 
 init_project(bfpthread)
 target_sources(bfpthread PRIVATE pthread.cpp threadcontext.asm)
-target_link_libraries(bfpthread PUBLIC bfutil)
+target_link_libraries(bfpthread PUBLIC ${PREFIX}::bfutil)
 fini_project()

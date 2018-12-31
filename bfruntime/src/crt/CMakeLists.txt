@@ -21,13 +21,14 @@ project(bfcrt C CXX)
 
 init_project(bfcrt)
 
+set(WIN $<BOOL:${WIN32}>)
+set(CXX $<COMPILE_LANGUAGE:CXX>)
 set(ARM $<STREQUAL:${BUILD_TARGET_ARCH},aarch64>)
 set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
-set(WIN $<BOOL:${WIN32}>)
 set(X64_AND_NOT_WIN $<AND:${X64},$<NOT:${WIN}>>)
 
-target_compile_options(bfcrt PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-main>)
-target_link_libraries(bfcrt PUBLIC bfutil)
+target_compile_options(bfcrt PRIVATE $<${CXX}:-Wno-main>)
+target_link_libraries(bfcrt PUBLIC ${PREFIX}::bfutil)
 target_sources(bfcrt PRIVATE
     crt.cpp
     $<${X64_AND_NOT_WIN}:start_x64.asm>

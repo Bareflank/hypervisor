@@ -17,13 +17,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 add_library(bfvmm_memory_manager)
-target_link_libraries(bfvmm_memory_manager PUBLIC bfvmm)
-
-set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
+target_link_libraries(bfvmm_memory_manager PUBLIC ${PREFIX}::bfvmm)
 target_sources(bfvmm_memory_manager PRIVATE
     memory_manager.cpp
-    $<${X64}:arch/x64/cr3/helpers.cpp>
+    $<$<STREQUAL:${BUILD_TARGET_ARCH},x86_64>:arch/x64/cr3/helpers.cpp>
 )
-
-install(TARGETS bfvmm_memory_manager DESTINATION lib EXPORT bfvmm)
-install(DIRECTORY ../../include/memory_manager/ DESTINATION include/bfvmm/memory_manager)
+install(
+    TARGETS bfvmm_memory_manager
+    DESTINATION lib
+    EXPORT bfvmm-${PREFIX}-targets
+)
+install(
+    DIRECTORY ../../include/memory_manager/
+    DESTINATION include/bfvmm/memory_manager
+)

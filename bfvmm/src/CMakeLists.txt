@@ -20,13 +20,14 @@ cmake_minimum_required(VERSION 3.10)
 project(bfvmm C CXX)
 
 init_project(bfvmm INTERFACE)
-target_link_libraries(bfvmm INTERFACE bfutil)
 
 set(C $<COMPILE_LANGUAGE:C>)
 set(CXX $<COMPILE_LANGUAGE:CXX>)
-set(C_OR_CXX $<OR:${CXX},${C}>)
+set(C_CXX $<OR:${CXX},${C}>)
 set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>>)
-set(NEED_INCLUDE $<AND:${C_OR_CXX},${BUILD}>)
+set(NEED_INCLUDE $<AND:${C_CXX},${BUILD}>)
+
+target_link_libraries(bfvmm INTERFACE ${PREFIX}::bfutil)
 
 target_include_directories(bfvmm SYSTEM INTERFACE
     $<${NEED_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../include>
