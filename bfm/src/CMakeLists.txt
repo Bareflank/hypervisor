@@ -16,48 +16,42 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.10)
 project(bfm C CXX)
 
-list(APPEND BFM_CXX_FLAGS
-    -DBFM_VMM_BIN_PATH=${BFM_VMM_BIN_PATH}
-    -DBFM_VMM_LIB_PATH=${BFM_VMM_LIB_PATH}
+set(C_CXX $<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>)
+set(LIN $<STREQUAL:${BUILD_TARGET_OS},Linux>)
+set(WIN $<STREQUAL:${BUILD_TARGET_OS},Windows>)
+
+init_project(bfm BINARY)
+
+target_compile_definitions(bfm PUBLIC
+    $<${C_CXX}:BFM_VMM_BIN_PATH=${BFM_VMM_BIN_PATH}>
+    $<${C_CXX}:BFM_VMM_LIB_PATH=${BFM_VMM_LIB_PATH}>
+    $<${C_CXX}:MAIN=main>
+    $<${C_CXX}:ABORT=abort>
 )
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project(
-    INCLUDES ${CMAKE_CURRENT_LIST_DIR}/../include
-    CXX_FLAGS ${BFM_CXX_FLAGS}
+target_include_directories(bfm PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>
+    $<${LIN}:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/platform/linux>>
+    $<${WIN}:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/platform/windows>>
+
 )
 
-if(BUILD_TARGET_OS STREQUAL "Linux")
-    list(APPEND SOURCES
-        platform/linux/ioctl.cpp
-        platform/linux/ioctl_private.cpp
-    )
-    include_directories(platform/linux/)
-elseif(BUILD_TARGET_OS STREQUAL "Windows")
-    list(APPEND SOURCES
-        platform/windows/ioctl.cpp
-        platform/windows/ioctl_private.cpp
-    )
-    include_directories(platform/windows/)
-else()
-    message(FATAL_ERROR "Unsupported OS: ${BUILD_TARGET_OS}")
-endif()
-
-list(APPEND SOURCES
+target_sources(bfm PRIVATE
+    $<${LIN}:platform/linux/ioctl.cpp>
+    $<${LIN}:platform/linux/ioctl_private.cpp>
+    $<${WIN}:platform/windows/ioctl.cpp>
+    $<${WIN}:platform/windows/ioctl_private.cpp>
     command_line_parser.cpp
     ioctl_driver.cpp
     main.cpp
 )
 
-add_executable(bfm ${SOURCES})
-target_compile_definitions(bfm PUBLIC MAIN=main)
-target_compile_definitions(bfm PUBLIC ABORT=abort)
+target_link_libraries(bfm PRIVATE
+    ${PREFIX}::bfutil
+    $<$<OR:$<BOOL:${CYGWIN}>,$<BOOL:${WIN32}>>:setupapi>
+)
 
-if(CYGWIN OR WIN32)
-    target_link_libraries(bfm setupapi)
-endif()
-
-install(TARGETS bfm DESTINATION bin)
+fini_project()

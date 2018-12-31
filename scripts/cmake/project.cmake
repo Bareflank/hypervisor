@@ -21,7 +21,9 @@ foreach(file ${PROJECT_INCLUDE_LIST})
     include(${file})
 endforeach(file)
 
-string(REPLACE "|" ";" PACKAGE_LIST "${PACKAGE_LIST}")
-foreach(pkg ${PACKAGE_LIST})
-    find_package(${pkg} QUIET)
+file(TOUCH "${PKG_FILE}")
+file(STRINGS "${PKG_FILE}" pkg_list)
+
+foreach(pkg IN LISTS pkg_list)
+    find_package(${pkg} REQUIRED)
 endforeach(pkg)

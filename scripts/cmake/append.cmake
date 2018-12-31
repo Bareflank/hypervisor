@@ -1,6 +1,6 @@
 #
 # Bareflank Hypervisor
-# Copyright (C) 2015 Assured Information Security, Inc.
+# Copyright (C) 2018 Assured Information Security, Inc.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,33 +16,4 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-cmake_minimum_required(VERSION 3.10)
-project(bfintrinsics C CXX)
-
-init_project(bfintrinsics)
-
-target_link_libraries(bfintrinsics PUBLIC ${PREFIX}::bfutil)
-
-target_sources(bfintrinsics PRIVATE
-    arch/x64/cache.asm
-    arch/x64/cpuid.asm
-    arch/x64/gdt.asm
-    arch/x64/idt.asm
-    arch/x64/msrs.asm
-    arch/x64/pm.asm
-    arch/x64/portio.asm
-    arch/x64/rdtsc.asm
-    arch/x64/rflags.asm
-    arch/x64/srs.asm
-    arch/x64/tlb.asm
-    arch/intel_x64/barrier.asm
-    arch/intel_x64/bit.asm
-    arch/intel_x64/crs.asm
-    arch/intel_x64/drs.asm
-    arch/intel_x64/pause.asm
-    arch/intel_x64/vmx.asm
-)
-
-install(DIRECTORY ../include/ DESTINATION include)
-
-fini_project()
+file(APPEND "${PKG_FILE}" "${PKG}\n")

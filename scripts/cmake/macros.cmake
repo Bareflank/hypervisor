@@ -800,7 +800,7 @@ function(add_subproject NAME PREFIX)
         -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN}
         -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
         -DPROJECT_INCLUDE_LIST=${PROJECT_INCLUDE_LIST}
-        -DPACKAGE_LIST=${PACKAGE_LIST}
+        -DPKG_FILE=${PKG_FILE}
         -DBFM_VMM=${BFM_VMM}
         -DEFI_EXTENSION_SOURCES=${EFI_EXTENSION_SOURCES}
     )
@@ -842,11 +842,14 @@ function(add_subproject NAME PREFIX)
         DEPENDEES configure
     )
 
-    # This must come *after* ExternalProject_Add, otherwise find_package
-    # will fail since it hasn't been installed yet
-    #
-    set(PACKAGE_LIST "${PACKAGE_LIST}|${NAME}-${SHORT_PREFIX}" PARENT_SCOPE)
-
+    ExternalProject_Add_Step(
+        ${NAME}_${PREFIX}
+        ${NAME}_${PREFIX}_package
+        COMMAND ${CMAKE_COMMAND}
+            -DPKG_FILE=${PKG_FILE} -DPKG=${NAME}-${SHORT_PREFIX}
+            -P ${SOURCE_CMAKE_DIR}/append.cmake
+        DEPENDEES install
+    )
 endfunction(add_subproject)
 
 # ------------------------------------------------------------------------------
@@ -943,7 +946,7 @@ endmacro(enable_asm)
 # @param INTERFACE make TARGET an interface library
 #
 macro(init_project TARGET)
-    set(options INTERFACE)
+    set(options INTERFACE BINARY)
     cmake_parse_arguments(ARG "${options}" "" "" ${ARGN})
 
     if(CMAKE_INSTALL_PREFIX STREQUAL "${VMM_PREFIX_PATH}")
@@ -964,11 +967,18 @@ macro(init_project TARGET)
 
     if(${ARG_INTERFACE})
         add_library(${TARGET} INTERFACE)
-    else()
+        add_library(${PREFIX}::${TARGET} ALIAS ${TARGET})
+        set(INTERFACE TRUE)
+    elseif(NOT ${ARG_BINARY})
         add_library(${TARGET} STATIC)
+        add_library(${PREFIX}::${TARGET} ALIAS ${TARGET})
         set_target_properties(${TARGET} PROPERTIES LINKER_LANGUAGE C)
+    else()
+        add_executable(${TARGET})
+        add_executable(${PREFIX}::${TARGET} ALIAS ${TARGET})
+        set_target_properties(${TARGET} PROPERTIES LINKER_LANGUAGE C)
+        set(BINARY TRUE)
     endif()
-    add_library(${PREFIX}::${TARGET} ALIAS ${TARGET})
 
     if(PREFIX STREQUAL "vmm")
         set(CMAKE_SKIP_RPATH TRUE)
@@ -991,9 +1001,13 @@ macro(fini_project)
     set(PROJECT ${CMAKE_PROJECT_NAME})
     set(EXPORT ${PROJECT}-${PREFIX}-targets)
 
-    install(TARGETS ${PROJECT} DESTINATION lib EXPORT ${EXPORT})
-    install(EXPORT ${EXPORT} DESTINATION ${EXPORT_DIR} NAMESPACE ${PREFIX}::)
+    if(NOT BINARY)
+        install(TARGETS ${PROJECT} DESTINATION lib EXPORT ${EXPORT})
+    else()
+        install(TARGETS ${PROJECT} DESTINATION bin EXPORT ${EXPORT})
+    endif()
 
+    install(EXPORT ${EXPORT} DESTINATION ${EXPORT_DIR} NAMESPACE ${PREFIX}::)
     configure_file(
         ${SOURCE_CMAKE_DIR}/package.cmake.in
         ${EXPORT_DIR}/${PROJECT}-${PREFIX}-config.cmake
@@ -1169,13 +1183,11 @@ function(do_test FILENAME)
 
     string(REPLACE "test_" "" NAME "${FILENAME}")
 
-    add_executable(test_${NAME} ${ARG_SOURCES})
-    target_link_libraries(test_${NAME} ${ARG_DEPENDS} test_catch)
+    add_executable(test_${NAME})
+    target_sources(test_${NAME} PRIVATE ${ARG_SOURCES})
+    target_link_libraries(test_${NAME} PRIVATE ${ARG_DEPENDS} ${CMAKE_PROJECT_NAME})
     target_compile_definitions(test_${NAME} PRIVATE ${ARG_DEFINES})
     add_test(test_${NAME} test_${NAME} ${ARG_CMD_LINE_ARGS})
-    if(CYGWIN OR WIN32)
-        target_link_libraries(test_${NAME} setupapi)
-    endif()
 endfunction(do_test)
 
 # ------------------------------------------------------------------------------

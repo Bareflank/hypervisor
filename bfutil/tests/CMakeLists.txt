@@ -17,13 +17,19 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 cmake_minimum_required(VERSION 3.6)
-project(bfutil_test C CXX)
+project(bfutil C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project(NAME bfutil_test)
+init_project(bfutil INTERFACE)
 
-add_library(test_catch STATIC test_catch.cpp)
-install(TARGETS test_catch DESTINATION lib)
+add_library(catch)
+target_sources(catch PRIVATE test_catch.cpp)
+target_link_libraries(bfutil INTERFACE
+    test::bfroot
+    catch
+    $<$<OR:$<BOOL:${CYGWIN}>,$<BOOL:${WIN32}>>:setupapi>
+)
+
+install(TARGETS catch DESTINATION lib EXPORT bfutil-test-targets)
 
 do_test(test_affinity)
 do_test(test_benchmark)
@@ -70,3 +76,5 @@ do_test(test_vector)
 #do_test(test_real DEPENDS test_support)
 #do_test(test_set_args DEPENDS test_support)
 #do_test(test_set_integer_args DEPENDS test_support)
+
+fini_project()

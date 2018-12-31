@@ -37,6 +37,7 @@ set(VMM $<AND:$<STREQUAL:${PREFIX},vmm>,$<BOOL:${BUILD_VMM}>>)
 set(EFI $<AND:$<STREQUAL:${PREFIX},efi>,$<BOOL:${BUILD_EFI}>>)
 set(TST $<AND:$<STREQUAL:${PREFIX},test>,$<BOOL:${BUILD_TEST}>>)
 set(USR $<AND:$<STREQUAL:${PREFIX},userspace>,$<BOOL:${BUILD_USERSPACE}>>)
+set(WIN_CYG $<OR:$<BOOL:${CYGWIN}>,$<BOOL:${WIN32}>>)
 
 # VMM
 set(VMM_CXX $<AND:${VMM},${CXX}>)
