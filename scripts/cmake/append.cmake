@@ -16,4 +16,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-file(APPEND "${PKG_FILE}" "${PKG}\n")
+file(STRINGS "${PKG_FILE}" EXISTS REGEX ${PKG})
+if(NOT EXISTS)
+    file(APPEND "${PKG_FILE}" "${PKG}\n")
+endif()
