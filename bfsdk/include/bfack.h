@@ -19,12 +19,12 @@
 #ifndef BFACK_H
 #define BFACK_H
 
+#include <bftypes.h>
+
 #ifdef __cplusplus
 #define NOEXCEPT noexcept
-#include <cstdint>
 #else
 #define NOEXCEPT
-#include <stdint.h>
 #endif
 
 #ifdef __cplusplus

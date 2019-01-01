@@ -137,20 +137,22 @@ platform_memset(void *ptr, char value, uint64_t num)
     return ptr;
 }
 
-void *
+int64_t
 platform_memcpy(
     void *dst, uint64_t dst_size, const void *src, uint64_t src_size, uint64_t num)
 {
     if (dst == 0 || src == 0) {
-        return 0;
+        BFALERT("platform_memcpy: invalid dst or src\n");
+        return FAILURE;
     }
 
     if (num > dst_size || num > src_size) {
-        return 0;
+        BFALERT("platform_memcpy: num out of range\n");
+        return FAILURE;
     }
 
     gBS->CopyMem((VOID *)dst, (VOID *)src, num);
-    return dst;
+    return SUCCESS;
 }
 
 int64_t

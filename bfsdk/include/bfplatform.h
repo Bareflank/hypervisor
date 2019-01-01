@@ -129,9 +129,9 @@ void *platform_memset(void *ptr, char value, uint64_t num);
  * @param src a pointer to the memory to copy from
  * @param src_size the max size of the source
  * @param num the number of bytes to copy
- * @return dst pointer, nullptr if the function fails
+ * @return BF_SUCCESS on success, negative error code on failure
  */
-void *platform_memcpy(
+int64_t platform_memcpy(
     void *dst, uint64_t dst_size, const void *src, uint64_t src_size, uint64_t num);
 
 /**

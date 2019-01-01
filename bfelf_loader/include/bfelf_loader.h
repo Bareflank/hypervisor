@@ -1931,7 +1931,8 @@ private_load_binary(struct bfelf_binary_t *binary)
             dst = bfadd(char *, binary->exec, instr->mem_offset);
             src = bfcadd(const char *, binary->file, instr->file_offset);
 
-            if (platform_memcpy(dst, dst_size, src, src_size, instr->filesz) == 0) {
+            ret = platform_memcpy(dst, dst_size, src, src_size, instr->filesz);
+            if (ret != SUCCESS) {
                 return bfinvalid_argument("memcpy failed with unknown reason");
             }
         }

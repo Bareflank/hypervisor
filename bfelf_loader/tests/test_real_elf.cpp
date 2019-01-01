@@ -90,6 +90,13 @@ extern "C" void *
 platform_memset(void *ptr, char value, uint64_t num)
 { return memset(ptr, value, num); }
 
-extern "C" void *
-platform_memcpy(void *dst, const void *src, uint64_t num)
-{ return memcpy(dst, src, num); }
+extern "C" int64_t
+platform_memcpy(
+    void *dst, uint64_t dst_size, const void *src, uint64_t src_size, uint64_t num)
+{
+    bfignored(dst_size);
+    bfignored(src_size);
+
+    memcpy(dst, src, num);
+    return SUCCESS;
+}
