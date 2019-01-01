@@ -76,8 +76,8 @@ target_compile_options(bfroot INTERFACE
     $<${C_CXX_X64}:-msse>
     $<${C_CXX_X64}:-msse2>
     $<${C_CXX_X64}:-msse3>
-    $<${C}:-std=c11>
     $<${CXX}:-std=c++17>
+    $<${C}:-std=c11>
 )
 
 # ------------------------------------------------------------------------------
@@ -92,7 +92,6 @@ if(PREFIX STREQUAL vmm)
 endif()
 
 target_compile_options(bfroot INTERFACE
-    $<${VMM_C_CXX}:--target=${BUILD_TARGET_ARCH}-vmm-elf>
     $<${VMM_C_CXX}:--sysroot=${VMM_PREFIX_PATH}>
     $<${VMM_C_CXX}:-fpic>
     $<${VMM_C_CXX}:-mno-red-zone>
@@ -103,23 +102,35 @@ target_compile_options(bfroot INTERFACE
     $<${VMM_C_CXX}:-D__USER_LABEL_PREFIX__=>
     $<${VMM_CXX}:-x c++>
 )
-
-target_include_directories(bfroot SYSTEM INTERFACE
-    $<${VMM_C_CXX}:${VMM_PREFIX_PATH}/include/c++/v1>
-    $<${VMM_C_CXX}:${VMM_PREFIX_PATH}/include>
-)
 target_compile_definitions(bfroot INTERFACE
     $<${VMM_C_CXX}:VMM>
+    $<${VMM_C_CXX}:MALLOC_PROVIDED>
     $<${VMM_C_CXX}:CLOCK_MONOTONIC>
-    $<${VMM_C_CXX}:_POSIX_THREADS>
-    $<${VMM_C_CXX}:_POSIX_TIMERS>
     $<${VMM_C_CXX}:_HAVE_LONG_DOUBLE>
     $<${VMM_C_CXX}:_LDBL_EQ_DBL>
+    $<${VMM_C_CXX}:_POSIX_TIMERS>
+    $<${VMM_C_CXX}:_POSIX_THREADS>
     $<${VMM_C_CXX}:_POSIX_PRIORITY_SCHEDULING>
     $<${VMM_C_CXX}:_UNIX98_THREAD_MUTEX_ATTRIBUTES>
     $<${VMM_C_CXX}:__SINGLE_THREAD__>
     $<${VMM_C_CXX}:__ELF__>
     $<${EFI_C_CXX}:BUILD_EFI>
+)
+target_include_directories(bfroot SYSTEM INTERFACE
+    $<INSTALL_INTERFACE:$<${VMM_C_CXX}:${VMM_PREFIX_PATH}/include/c++/v1>>
+    $<INSTALL_INTERFACE:$<${VMM_C_CXX}:${VMM_PREFIX_PATH}/include>>
+)
+target_link_directories(bfroot INTERFACE
+    $<INSTALL_INTERFACE:$<${VMM_C_CXX}:${VMM_PREFIX_PATH}/lib>>
+)
+target_link_options(bfroot INTERFACE
+    $<${VMM}:--sysroot=${VMM_PREFIX_PATH}>
+    $<${VMM}:-z max-page-size=4096 "SHELL:-z common-page-size=4096" "SHELL:-z relro" "SHELL:-z now" >
+    $<${VMM}:-nostdlib>
+    $<${VMM}:-pie>
+)
+target_link_directories(bfroot INTERFACE
+    $<INSTALL_INTERFACE:$<${VMM_C_CXX}:${VMM_PREFIX_PATH}/lib>>
 )
 
 # ------------------------------------------------------------------------------
@@ -140,15 +151,15 @@ target_compile_options(bfroot INTERFACE
     $<${TST_C_CXX_CLANG}:-Wno-deprecated-declarations>
     $<${TST_CXX_CLANG}:-fvisibility-inlines-hidden>
 
-    $<${TST_C_CXX_MSVC}:/EHsc>
-    $<${TST_C_CXX_MSVC}:/bigobj>
-    $<${TST_C_CXX_MSVC}:/WX>
-
     $<${TST_C_CXX_CLANG_ASAN}:-O1 -g -fno-omit-frame-pointer>
     $<${TST_C_CXX_CLANG_ASAN}:-fsanitize=address -fsanitize=leak>
     $<${TST_C_CXX_CLANG_USAN}:-fsanitize=undefined>
     $<${TST_C_CXX_CLANG_CODECOV}:-g -O0 -fprofile-arcs>
     $<${TST_C_CXX_CLANG_CODECOV}:-ftest-coverage -DDEBUG_LEVEL=5>
+
+    $<${TST_C_CXX_MSVC}:/EHsc>
+    $<${TST_C_CXX_MSVC}:/bigobj>
+    $<${TST_C_CXX_MSVC}:/WX>
 )
 target_compile_definitions(bfroot INTERFACE
     $<${TST_C_CXX}:NATIVE>
@@ -158,11 +169,11 @@ target_compile_definitions(bfroot INTERFACE
     $<${TST_C_CXX_MSVC}:NOMINMAX>
 )
 target_include_directories(bfroot SYSTEM INTERFACE
-    $<${TST_C_CXX}:${TEST_PREFIX_PATH}/include/c++/v1>
-    $<${TST_C_CXX}:${TEST_PREFIX_PATH}/include>
+    $<INSTALL_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/include/c++/v1>>
+    $<INSTALL_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/include>>
 )
 target_link_directories(bfroot INTERFACE
-    $<${TST_C_CXX}:${TEST_PREFIX_PATH}/lib>
+    $<INSTALL_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/lib>>
 )
 
 # ------------------------------------------------------------------------------
@@ -194,11 +205,11 @@ target_compile_definitions(bfroot INTERFACE
     $<${USR_C_CXX_MSVC}:NOMINMAX>
 )
 target_include_directories(bfroot SYSTEM INTERFACE
-    $<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include/c++/v1>
-    $<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include>
+    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include/c++/v1>>
+    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include>>
 )
 target_link_directories(bfroot INTERFACE
-    $<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/lib>
+    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/lib>>
 )
 
 fini_project()

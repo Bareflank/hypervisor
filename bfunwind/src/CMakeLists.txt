@@ -21,17 +21,15 @@ project(bfunwind C CXX)
 
 init_project(bfunwind)
 
-set(C $<COMPILE_LANGUAGE:C>)
-set(CXX $<COMPILE_LANGUAGE:CXX>)
 set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>>)
-set(NEED_INCLUDE $<AND:$<OR:${C},${CXX}>,${BUILD}>)
-
-target_link_libraries(bfunwind PUBLIC ${PREFIX}::bfutil)
-
-target_include_directories(bfunwind PUBLIC
-    $<${NEED_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../include>
+set(BUILD_INCLUDE
+    $<AND:$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>,${BUILD}>
 )
 
+target_link_libraries(bfunwind PUBLIC ${PREFIX}::bfutil)
+target_include_directories(bfunwind PUBLIC
+    $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../include>
+)
 target_sources(bfunwind PRIVATE
     dwarf4.cpp
     eh_frame.cpp

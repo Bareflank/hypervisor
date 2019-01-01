@@ -963,6 +963,9 @@ macro(init_project TARGET)
 
     set(CMAKE_C_EXTENSIONS OFF)
     set(CMAKE_CXX_EXTENSIONS OFF)
+    #set(CMAKE_C_ABI_COMPILED ON)
+    #set(CMAKE_CXX_ABI_COMPILED ON)
+
     enable_asm(${PREFIX})
 
     if(${ARG_INTERFACE})
@@ -1187,7 +1190,7 @@ function(do_test FILENAME)
     target_sources(test_${NAME} PRIVATE ${ARG_SOURCES})
     target_link_libraries(test_${NAME} PRIVATE ${ARG_DEPENDS} ${CMAKE_PROJECT_NAME})
     target_compile_definitions(test_${NAME} PRIVATE ${ARG_DEFINES})
-    add_test(test_${NAME} test_${NAME} ${ARG_CMD_LINE_ARGS})
+    add_test(NAME test_${NAME} COMMAND test_${NAME} ${ARG_CMD_LINE_ARGS})
 endfunction(do_test)
 
 # ------------------------------------------------------------------------------

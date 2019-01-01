@@ -21,16 +21,15 @@ project(bfvmm C CXX)
 
 init_project(bfvmm INTERFACE)
 
-set(C $<COMPILE_LANGUAGE:C>)
-set(CXX $<COMPILE_LANGUAGE:CXX>)
-set(C_CXX $<OR:${CXX},${C}>)
-set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>>)
-set(NEED_INCLUDE $<AND:${C_CXX},${BUILD}>)
-
-target_link_libraries(bfvmm INTERFACE ${PREFIX}::bfutil)
-
+target_link_libraries(bfvmm INTERFACE vmm::bfutil)
+target_link_directories(bfvmm INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/lib>
+    $<BUILD_INTERFACE:${CMAKE_INSTALL_PREFIX}/lib>
+)
 target_include_directories(bfvmm SYSTEM INTERFACE
-    $<${NEED_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../bfintrinsics/include>
+    $<INSTALL_INTERFACE:include/bfvmm>
 )
 
 add_subdirectory(debug)

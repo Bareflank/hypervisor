@@ -16,14 +16,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-add_library(bfvmm_hve)
-target_link_libraries(bfvmm_hve PUBLIC ${PREFIX}::bfvmm)
-
-set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 set(WIN $<BOOL:${WIN32}>)
+set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 set(MOCK $<BOOL:${ENABLE_MOCKING}>)
 set(X64_ASM $<AND:$<NOT:${WIN}>,$<NOT:${MOCK}>,${X64}>)
 
+add_library(bfvmm_hve)
+
+target_link_libraries(bfvmm_hve PUBLIC ${PREFIX}::bfvmm)
 target_sources(bfvmm_hve PRIVATE
     $<${X64}:arch/intel_x64/check_vmcs_control_fields.cpp>
     $<${X64}:arch/intel_x64/check_vmcs_guest_fields.cpp>

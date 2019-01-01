@@ -17,6 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 add_library(bfvmm_debug)
+
 target_link_libraries(bfvmm_debug PUBLIC ${PREFIX}::bfvmm)
 target_sources(bfvmm_debug PRIVATE
     debug_ring/debug_ring.cpp

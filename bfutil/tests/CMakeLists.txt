@@ -23,10 +23,15 @@ init_project(bfutil INTERFACE)
 
 add_library(catch)
 target_sources(catch PRIVATE test_catch.cpp)
+target_link_libraries(catch PRIVATE test::bfroot)
+
 target_link_libraries(bfutil INTERFACE
     test::bfroot
     catch
     $<$<OR:$<BOOL:${CYGWIN}>,$<BOOL:${WIN32}>>:setupapi>
+)
+target_include_directories(bfutil INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>
 )
 
 install(TARGETS catch DESTINATION lib EXPORT bfutil-test-targets)

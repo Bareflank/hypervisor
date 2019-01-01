@@ -16,22 +16,5 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-list(APPEND ARGN
-    DEPENDS bfvmm_vcpu
-    DEPENDS bfvmm_hve
-    DEPENDS bfvmm_memory_manager
-    DEFINES STATIC_VCPU
-    DEFINES STATIC_HVE
-    DEFINES STATIC_MEMORY_MANAGER
-    DEFINES STATIC_INTRINSICS
-)
-
-do_test(test_vcpu
-    SOURCES test_vcpu.cpp
-    ${ARGN}
-)
-
-do_test(test_vcpu_factory
-    SOURCES test_vcpu_factory.cpp
-    ${ARGN}
-)
+do_test(test_vcpu SOURCES test_vcpu.cpp ${ARGN})
+do_test(test_vcpu_factory SOURCES test_vcpu_factory.cpp ${ARGN})
