@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 #include <catch/catch.hpp>
+#include <test/support.h>
 #include <vcpu/vcpu_factory.h>
 
 namespace bfvmm
@@ -29,6 +30,7 @@ WEAK_SYM std::unique_ptr<vcpu>
 vcpu_factory::make(vcpuid::type vcpuid, bfobject *obj)
 {
     bfignored(obj);
+    setup_test_support();
     return std::make_unique<vcpu>(vcpuid);
 }
 
@@ -36,6 +38,7 @@ vcpu_factory::make(vcpuid::type vcpuid, bfobject *obj)
 
 TEST_CASE("vcpu_factory: make_vcpu")
 {
+    setup_test_support();
     bfvmm::vcpu_factory factory;
     CHECK(factory.make(0, nullptr) != nullptr);
 }

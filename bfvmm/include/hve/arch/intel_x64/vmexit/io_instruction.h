@@ -299,6 +299,7 @@ private:
 
     vcpu *m_vcpu;
 
+    gsl::span<uint8_t> m_msr_bitmap;
     gsl::span<uint8_t> m_io_bitmap_a;
     gsl::span<uint8_t> m_io_bitmap_b;
 

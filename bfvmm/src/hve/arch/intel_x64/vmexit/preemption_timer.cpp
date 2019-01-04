@@ -24,9 +24,7 @@
 namespace bfvmm::intel_x64
 {
 
-preemption_timer_handler::preemption_timer_handler(
-    gsl::not_null<vcpu *> vcpu
-) :
+preemption_timer_handler::preemption_timer_handler(vcpu_t vcpu) :
     m_vcpu{vcpu}
 {
     using namespace vmcs_n;
@@ -83,7 +81,7 @@ preemption_timer_handler::get_timer() const
 // -----------------------------------------------------------------------------
 
 bool
-preemption_timer_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+preemption_timer_handler::handle(vcpu_t vcpu)
 {
     for (const auto &d : m_handlers) {
         if (d(vcpu)) {

@@ -30,10 +30,12 @@
 
 #include <intrinsics.h>
 
-#include "vmcs.h"
-#include "../x64/gdt.h"
-#include "../x64/idt.h"
-#include "../x64/tss.h"
+#include "delegator/cpuid.h"
+#include "delegator/nmi.h"
+#include "delegator/cr.h"
+#include "delegator/invd.h"
+#include "delegator/msr.h"
+#include "delegator/fallback.h"
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -70,36 +72,12 @@ using handler_delegate_t = delegate<handler_t>;
 using init_handler_delegate_t = delegate<handler_t>;
 using fini_handler_delegate_t = delegate<handler_t>;
 
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
-
-::x64::msrs::value_type emulate_rdmsr(::x64::msrs::field_type msr);
-void emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val);
-
-uintptr_t emulate_rdgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu);
-void emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu, uintptr_t val);
-
-// -----------------------------------------------------------------------------
-// Exit Handler
-// -----------------------------------------------------------------------------
-
 namespace bfvmm::intel_x64
 {
 
-/// Exit Handler
+/// Exit handler
 ///
-/// This class is responsible for detecting why a guest exited (i.e. stopped
-/// its execution), and handleres the appropriated handler to emulate the
-/// instruction that could not execute. Note that this class could be executed
-/// a lot, so performance is key here.
-///
-/// This class works with the VMCS class to provide the bare minimum exit
-/// handler needed to execute a 64bit guest, with the TRUE controls being used.
-/// In general, the only instruction that needs to be emulated is the CPUID
-/// instruction. If more functionality is needed (which is likely), the user
-/// can subclass this class, and overload the handlers that are needed. The
-/// basics are provided with this class to ease development.
+/// Processes all Intel based vmexits using an exit-specific delegator
 ///
 class EXPORT_HVE exit_handler
 {
@@ -110,9 +88,7 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    /// @param vcpu The vCPU associated with this exit handler
-    ///
-    exit_handler(gsl::not_null<vcpu *> vcpu);
+    exit_handler();
 
     /// Destructor
     ///
@@ -161,37 +137,6 @@ public:
         const handler_delegate_t &d
     );
 
-    /// Add Init Delegate
-    ///
-    /// Adds an init function to the init list. Init functions are executed
-    /// right after a vCPU is started.
-    ///
-    /// @note The init function is the first VMexit that Bareflank causes
-    ///     intentionally. It might not be the first VMexit to occur.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param d The delegate being registered
-    ///
-    VIRTUAL void add_init_handler(
-        const handler_delegate_t &d
-    );
-
-    /// Add Fini Delegate
-    ///
-    /// Adds an fini function to the fini list. Fini functions are executed
-    /// right before the vCPU is about to stop.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param d The delegate being registered
-    ///
-    VIRTUAL void add_fini_handler(
-        const handler_delegate_t &d
-    );
-
     /// Handle
     ///
     /// Handles a VM exit. This function should only be called by the exit
@@ -202,71 +147,52 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    /// @param exit_handler The exit handler to handler the VM exit to
+    /// @param vcpu The vcpu this exit occured on
     ///
-    static void handle(
-        bfvmm::intel_x64::exit_handler *exit_handler) noexcept;
-
-    /// Get Host TSS
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @return Returns a pointer to the host_tss
-    ///
-    auto host_tss() noexcept
-    { return &m_host_tss; }
-
-    /// Get Host IDT
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @return Returns a pointer to the host_idt
-    ///
-    auto host_idt() noexcept
-    { return &m_host_idt; }
-
-    /// Get Host GDT
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @return Returns a pointer to the host_gdt
-    ///
-    auto host_gdt() noexcept
-    { return &m_host_gdt; }
+    /// @return True if the vmexit was successfully handled, false otherwise
+    bool handle(vcpu_t vcpu);
 
 private:
 
-    void write_host_state();
-    void write_guest_state();
-    void write_control_state();
-
-protected:
-
-    /// @cond
-
-    x64::tss m_host_tss{};
-    x64::gdt m_host_gdt{512};
-    x64::idt m_host_idt{256};
-
-    /// @endcond
-
-private:
-
-    bool handle_cpuid(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu);
-
-private:
-
-    vcpu *m_vcpu;
-    std::unique_ptr<gsl::byte[]> m_ist1;
-    std::unique_ptr<gsl::byte[]> m_stack;
-
+    // These members provide the legacy exit handler mechanism, and will be
+    // deprecated slowly
     std::list<init_handler_delegate_t> m_exit_handlers;
     std::list<init_handler_delegate_t> m_init_handlers;
     std::list<fini_handler_delegate_t> m_fini_handlers;
-    std::array<std::list<handler_delegate_t>, 128> m_exit_handlers_array;
+    std::array<std::list<handler_delegate_t>, 64> m_exit_handlers_array;
+
+    // These members will provide the new exit handler mechanism
+    std::array<handler_delegate_t, 64> m_exit_delegates;
+    std::unique_ptr<cpuid::delegator> m_cpuid_delegator;
+    std::unique_ptr<nmi::delegator> m_nmi_delegator;
+    std::unique_ptr<cr::delegator> m_cr_delegator;
+    std::unique_ptr<invd::delegator> m_invd_delegator;
+    std::unique_ptr<msr::delegator> m_msr_delegator;
+    std::unique_ptr<fallback::delegator> m_fallback_delegator;
+
+public:
+
+    /// @cond
+
+    cpuid::delegator *cpuid_delegator() const
+    { return m_cpuid_delegator.get(); }
+
+    nmi::delegator *nmi_delegator() const
+    { return m_nmi_delegator.get(); }
+
+    cr::delegator *cr_delegator() const
+    { return m_cr_delegator.get(); }
+
+    invd::delegator *invd_delegator() const
+    { return m_invd_delegator.get(); }
+
+    msr::delegator *msr_delegator() const
+    { return m_msr_delegator.get(); }
+
+    fallback::delegator *fallback_delegator() const
+    { return m_fallback_delegator.get(); }
+
+    /// @endcond
 
 public:
 
