@@ -97,6 +97,8 @@ void
 vmcs::resume()
 {
     vmcs_resume(m_save_state.get());
+
+    this->check();
     throw std::runtime_error("vmcs resume failed");
 }
 
