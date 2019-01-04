@@ -87,6 +87,9 @@ namespace bfvmm::intel_x64
 class EXPORT_HVE vcpu : public bfvmm::vcpu
 {
 
+    using handler_t = bool(gsl::not_null<bfvmm::intel_x64::vcpu *>);
+    using handler_delegate_t = delegate<handler_t>;
+
 public:
 
     /// Default Constructor
@@ -133,28 +136,6 @@ public:
     VIRTUAL void hlt_delegate(bfobject *obj);
 
 public:
-
-    //==========================================================================
-    // VMCS Operations
-    //==========================================================================
-
-    /// Load vCPU
-    ///
-    /// Loads the vCPU into hardware.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    VIRTUAL void load();
-
-    /// Promote vCPU
-    ///
-    /// Promotes the vCPU.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    VIRTUAL void promote();
 
     //==========================================================================
     // Handlers
@@ -296,13 +277,33 @@ public:
     ///
     VIRTUAL void pass_through_msr_access(vmcs_n::value_type msr);
 
-    //==========================================================================
-    // VMExit
-    //==========================================================================
+    /// Enable write to CR0 exiting
+    ///
+    /// Temporary interface to control_register_handler::enable_wrcr0_exiting
+    /// during delegator refactor. This will be deprecated
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param mask the mask
+    ///
+    VIRTUAL void enable_wrcr0_exiting(vmcs_n::value_type mask);
 
-    //--------------------------------------------------------------------------
-    // Control Register
-    //--------------------------------------------------------------------------
+    /// Enable write to CR4 exiting
+    ///
+    /// Temporary interface to control_register_handler::enable_wrcr4_exiting
+    /// during delegator refactor. This will be deprecated
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param mask the mask
+    ///
+    VIRTUAL void enable_wrcr4_exiting(vmcs_n::value_type mask);
+
+    //==========================================================================
+    // Legacy Handler Mechanism, these will be deprecated
+    //==========================================================================
 
     /// Add Write CR0 Handler
     ///
@@ -348,10 +349,6 @@ public:
         vmcs_n::value_type mask,
         const control_register_handler::handler_delegate_t &d);
 
-    //--------------------------------------------------------------------------
-    // CPUID
-    //--------------------------------------------------------------------------
-
     /// Add CPUID Handler
     ///
     /// @expects
@@ -387,10 +384,6 @@ public:
     VIRTUAL void add_default_cpuid_handler(
         const ::handler_delegate_t &d);
 
-    //--------------------------------------------------------------------------
-    // EPT Misconfiguration
-    //--------------------------------------------------------------------------
-
     /// Add EPT Misconfiguration Handler
     ///
     /// @expects
@@ -400,10 +393,6 @@ public:
     ///
     VIRTUAL void add_ept_misconfiguration_handler(
         const ept_misconfiguration_handler::handler_delegate_t &d);
-
-    //--------------------------------------------------------------------------
-    // EPT Violation
-    //--------------------------------------------------------------------------
 
     /// Add EPT read violation handler
     ///
@@ -465,10 +454,6 @@ public:
     VIRTUAL void add_default_ept_execute_violation_handler(
         const ::handler_delegate_t &d);
 
-    //--------------------------------------------------------------------------
-    // External Interrupt
-    //--------------------------------------------------------------------------
-
     /// Add External Interrupt Handler
     ///
     /// Turns on external interrupt handling and adds an external interrupt
@@ -488,10 +473,6 @@ public:
     /// @ensures
     ///
     VIRTUAL void disable_external_interrupts();
-
-    //--------------------------------------------------------------------------
-    // Interrupt Window
-    //--------------------------------------------------------------------------
 
     /// Queue External Interrupt
     ///
@@ -533,10 +514,6 @@ public:
     /// @param vector the vector to inject into the guest
     ///
     VIRTUAL void inject_external_interrupt(uint64_t vector);
-
-    //--------------------------------------------------------------------------
-    // IO Instruction
-    //--------------------------------------------------------------------------
 
     /// Trap All IO Instruction Accesses
     ///
@@ -604,10 +581,6 @@ public:
     VIRTUAL void add_default_io_instruction_handler(
         const ::handler_delegate_t &d);
 
-    //--------------------------------------------------------------------------
-    // Monitor Trap
-    //--------------------------------------------------------------------------
-
     /// Add Monitor Trap Flag Handler
     ///
     /// @expects
@@ -624,10 +597,6 @@ public:
     /// @ensures
     ///
     VIRTUAL void enable_monitor_trap_flag();
-
-    //--------------------------------------------------------------------------
-    // Read MSR
-    //--------------------------------------------------------------------------
 
     /// Trap On Access
     ///
@@ -704,10 +673,6 @@ public:
     VIRTUAL void add_default_rdmsr_handler(
         const ::handler_delegate_t &d);
 
-    //--------------------------------------------------------------------------
-    // Write MSR
-    //--------------------------------------------------------------------------
-
     /// Trap On Access
     ///
     /// Sets a '1' in the MSR bitmap corresponding with the provided msr. All
@@ -783,10 +748,6 @@ public:
     VIRTUAL void add_default_wrmsr_handler(
         const ::handler_delegate_t &d);
 
-    //--------------------------------------------------------------------------
-    // XSetBV
-    //--------------------------------------------------------------------------
-
     /// Add XSetBV Handler
     ///
     /// @expects
@@ -796,10 +757,6 @@ public:
     ///
     VIRTUAL void add_xsetbv_handler(
         const xsetbv_handler::handler_delegate_t &d);
-
-    //--------------------------------------------------------------------------
-    // VMX preemption timer
-    //--------------------------------------------------------------------------
 
     /// Add VMX preemption timer handler
     ///
@@ -1689,11 +1646,8 @@ public:
     VIRTUAL uint64_t ldtr_access_rights() const noexcept;
     VIRTUAL void set_ldtr_access_rights(uint64_t val) noexcept;
 
-    // TODO:
-    //
-    // Remove me. This causes a trainwreck
-    //
-    VIRTUAL gsl::not_null<save_state_t *> save_state() const;
+    VIRTUAL gsl::not_null<intel_x64::exit_handler *> exit_handler() const;
+    VIRTUAL gsl::not_null<intel_x64::vmcs *> vmcs() const;
 
     /// @endcond
 
@@ -1703,19 +1657,14 @@ private:
 
 private:
 
-    std::unique_ptr<vmx> m_vmx{};
-
     ept::mmap *m_mmap{};
     vcpu_global_state_t *m_vcpu_global_state{};
 
-    page_ptr<uint8_t> m_msr_bitmap;
-    page_ptr<uint8_t> m_io_bitmap_a;
-    page_ptr<uint8_t> m_io_bitmap_b;
-
 private:
 
-    vmcs m_vmcs;
-    exit_handler m_exit_handler;
+    std::unique_ptr<intel_x64::vmx> m_vmx;
+    std::unique_ptr<intel_x64::vmcs> m_vmcs;
+    std::unique_ptr<intel_x64::exit_handler> m_exit_handler;
 
     control_register_handler m_control_register_handler;
     cpuid_handler m_cpuid_handler;
@@ -1746,11 +1695,16 @@ private:
     friend class io_instruction_handler;
     friend class rdmsr_handler;
     friend class wrmsr_handler;
+
+    std::list<handler_delegate_t> m_init_delegates;
+    std::list<handler_delegate_t> m_fini_delegates;
+
+private:
+
+    void vmexit_handler() noexcept;
 };
 
 }
-
-using vcpu_t = bfvmm::intel_x64::vcpu;
 
 /// Get Guest vCPU
 ///

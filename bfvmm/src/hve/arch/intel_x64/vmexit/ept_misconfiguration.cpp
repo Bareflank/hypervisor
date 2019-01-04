@@ -25,7 +25,7 @@ namespace bfvmm::intel_x64
 {
 
 ept_misconfiguration_handler::ept_misconfiguration_handler(
-    gsl::not_null<vcpu *> vcpu
+    vcpu_t vcpu
 ) :
     m_vcpu{vcpu}
 {
@@ -50,7 +50,7 @@ ept_misconfiguration_handler::add_handler(const handler_delegate_t &d)
 // -----------------------------------------------------------------------------
 
 bool
-ept_misconfiguration_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+ept_misconfiguration_handler::handle(vcpu_t vcpu)
 {
     struct info_t info = {
         vmcs_n::guest_linear_address::get(),

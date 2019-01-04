@@ -19,17 +19,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <bfvmm/vcpu/vcpu_factory.h>
-#include <bfvmm/hve/arch/intel_x64/vcpu.h>
+#include <vcpu/vcpu.h>
 
-namespace bfvmm
+#include "sdk/arch/intel_x64/cpuid.h"
+
+namespace bfvmm::intel_x64::cpuid
 {
 
-WEAK_SYM std::unique_ptr<vcpu>
-vcpu_factory::make(vcpuid::type vcpuid, bfobject *obj)
+void emulate(vcpu_t vcpu, leaf_t leaf, delegate_t handler)
 {
-    bfignored(obj);
-    return std::make_unique<intel_x64::vcpu>(vcpuid);
+    vcpu->exit_handler()->cpuid_delegator()->add_handler(leaf, handler);
 }
 
 }

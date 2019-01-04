@@ -25,7 +25,7 @@ namespace bfvmm::intel_x64
 {
 
 init_signal_handler::init_signal_handler(
-    gsl::not_null<vcpu *> vcpu
+    vcpu_t vcpu
 ) :
     m_vcpu{vcpu}
 {
@@ -42,7 +42,7 @@ init_signal_handler::init_signal_handler(
 // -----------------------------------------------------------------------------
 
 bool
-init_signal_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+init_signal_handler::handle(vcpu_t vcpu)
 {
     bfignored(vcpu);
 

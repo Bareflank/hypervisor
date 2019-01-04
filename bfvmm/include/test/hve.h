@@ -72,8 +72,8 @@ setup_idt_x64()
 #include "../hve/arch/intel_x64/vmcs.h"
 #include "../hve/arch/intel_x64/check.h"
 #include "../hve/arch/intel_x64/exception.h"
-#include "../hve/arch/intel_x64/exit_handler.h"
 #include "../hve/arch/intel_x64/vcpu.h"
+#include <bftypes.h>
 
 bfvmm::intel_x64::save_state_t g_save_state{};
 
@@ -89,7 +89,7 @@ extern "C" void vmcs_resume(
     bfvmm::intel_x64::save_state_t *save_state) noexcept
 { bfignored(save_state); }
 
-extern "C" void exit_handler_entry(void)
+extern "C" void vmexit_entry(void)
 { }
 
 auto
@@ -114,8 +114,6 @@ setup_vcpu(MockRepository &mocks, ::intel_x64::vmcs::value_type reason = 0)
 
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::run_delegate);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::hlt_delegate);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::load);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::promote);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_handler);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_exit_handler);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::dump);
@@ -298,8 +296,6 @@ setup_vcpu(MockRepository &mocks, ::intel_x64::vmcs::value_type reason = 0)
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::ldtr_access_rights);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_ldtr_access_rights);
 
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::save_state).Return(&g_save_state);
-
     g_vmcs_fields[::intel_x64::vmcs::exit_reason::addr] = reason;
     g_vmcs_fields[::intel_x64::vmcs::vm_exit_instruction_length::addr] = 42;
 
@@ -311,5 +307,12 @@ setup_vcpu(MockRepository &mocks, ::intel_x64::vmcs::value_type reason = 0)
 }
 
 #endif
+
+bool vmm_main(vcpu_t vcpu)
+{ return true; }
+
+bool vmm_fini(vcpu_t vcpu)
+{ return true; }
+
 
 /// @endcond
