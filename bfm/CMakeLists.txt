@@ -54,8 +54,7 @@ if(PREFIX STREQUAL userspace)
         src/platform/${OS}/ioctl_private.cpp
     )
     set_target_properties(bfm-binary PROPERTIES OUTPUT_NAME bfm)
-    install(TARGETS bfm-binary DESTINATION bin)
-
+    install(TARGETS bfm-binary DESTINATION bin EXPORT bfm-userspace-targets)
 elseif(PREFIX STREQUAL test)
     target_include_directories(bfm INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/tests>

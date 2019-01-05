@@ -20,7 +20,7 @@ cmake_minimum_required(VERSION 3.10)
 project(bfruntime C CXX)
 
 init_project(bfruntime INTERFACE)
-target_link_libraries(bfruntime INTERFACE vmm::bfutil)
+target_link_libraries(bfruntime INTERFACE ${PREFIX}::bfutil)
 
 #
 # Generator expressions
@@ -36,7 +36,7 @@ set(BUILD_INCLUDE $<AND:${C_CXX},${BUILD}>)
 # crt
 #
 add_library(bfcrt)
-target_link_libraries(bfcrt PUBLIC vmm::bfruntime)
+target_link_libraries(bfcrt PUBLIC ${PREFIX}::bfruntime)
 target_compile_options(bfcrt PRIVATE $<${C_CXX}:-Wno-main>)
 target_sources(bfcrt PRIVATE
     src/crt/crt.cpp
@@ -44,11 +44,15 @@ target_sources(bfcrt PRIVATE
     $<${ARM}:src/crt/start_x64.S>
 )
 
+if(PREFIX STREQUAL test)
+    do_test(tests/crt/test_crt.cpp DEPENDS bfcrt)
+endif()
+
 #
 # pthread
 #
 add_library(bfpthread)
-target_link_libraries(bfpthread PUBLIC vmm::bfutil)
+target_link_libraries(bfpthread PUBLIC ${PREFIX}::bfutil)
 target_sources(bfpthread PRIVATE
     src/pthread/pthread.cpp
     $<${ASM}:src/pthread/threadcontext.asm>
@@ -58,14 +62,14 @@ target_sources(bfpthread PRIVATE
 # syscall
 #
 add_library(bfsyscall)
-target_link_libraries(bfsyscall PUBLIC vmm::bfutil)
+target_link_libraries(bfsyscall PUBLIC ${PREFIX}::bfutil)
 target_sources(bfsyscall PRIVATE src/syscall/syscall.cpp)
 
 #
 # unwind
 #
 add_library(bfunwind)
-target_link_libraries(bfunwind PUBLIC vmm::bfutil)
+target_link_libraries(bfunwind PUBLIC ${PREFIX}::bfutil)
 target_include_directories(bfunwind PRIVATE
     $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/src/unwind/include>
 )
@@ -85,9 +89,9 @@ install(
     RENAME unwind.h
 )
 
-install(TARGETS bfcrt DESTINATION lib EXPORT bfruntime-vmm-targets)
-install(TARGETS bfpthread DESTINATION lib EXPORT bfruntime-vmm-targets)
-install(TARGETS bfsyscall DESTINATION lib EXPORT bfruntime-vmm-targets)
-install(TARGETS bfunwind DESTINATION lib EXPORT bfruntime-vmm-targets)
+install(TARGETS bfcrt DESTINATION lib EXPORT bfruntime-${PREFIX}-targets)
+install(TARGETS bfpthread DESTINATION lib EXPORT bfruntime-${PREFIX}-targets)
+install(TARGETS bfsyscall DESTINATION lib EXPORT bfruntime-${PREFIX}-targets)
+install(TARGETS bfunwind DESTINATION lib EXPORT bfruntime-${PREFIX}-targets)
 
 fini_project()

@@ -186,7 +186,6 @@ if(BUILD_TEST)
     add_subproject(
         bfm test
         DEPENDS bfutil
-        NOINSTALL
     )
 
 #    add_subproject(
