@@ -17,9 +17,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 cmake_minimum_required(VERSION 3.10)
-project(bfsyscall C CXX)
+project(bfdso C CXX)
 
-init_project(bfsyscall)
-target_sources(bfsyscall PRIVATE syscall.cpp)
-target_link_libraries(bfsyscall PUBLIC ${PREFIX}::bfutil)
+init_project(bfdso)
+target_sources(bfdso PRIVATE dso.cpp)
+target_link_libraries(bfdso PUBLIC vmm::bfroot)
 fini_project()

@@ -110,13 +110,11 @@ if(NOT WIN32)
     if(NOT BUILD_BINUTILS)
         add_subproject(
             bfdso vmm
-            SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
             DEPENDS bfroot
         )
     else()
         add_subproject(
             bfdso vmm
-            SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
             DEPENDS binutils
             DEPENDS bfroot
         )
@@ -130,31 +128,7 @@ include_dependency(SOURCE_DEPENDS_DIR libcxx)
 
 if(BUILD_VMM OR (BUILD_TEST AND NOT WIN32))
     add_subproject(
-        bfcrt vmm
-        DEPENDS gsl
-        DEPENDS libcxx
-        DEPENDS bfutil
-        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/crt
-    )
-
-    add_subproject(
-        bfpthread vmm
-        DEPENDS gsl
-        DEPENDS libcxx
-        DEPENDS bfutil
-        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/pthread
-    )
-
-    add_subproject(
-        bfsyscall vmm
-        DEPENDS gsl
-        DEPENDS libcxx
-        DEPENDS bfutil
-        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/syscall
-    )
-
-    add_subproject(
-        bfunwind vmm
+        bfruntime vmm
         DEPENDS gsl
         DEPENDS libcxx
         DEPENDS bfutil
@@ -166,10 +140,7 @@ if(BUILD_VMM)
     add_subproject(
         bfvmm vmm
         DEPENDS bfintrinsics
-        DEPENDS bfunwind
-        DEPENDS bfsyscall
-        DEPENDS bfpthread
-        DEPENDS bfcrt
+        DEPENDS bfruntime
     )
 endif()
 

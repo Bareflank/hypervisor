@@ -19,7 +19,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(bfm C CXX)
 
-init_project(bfm)
+init_project(bfm BINARY)
 
 set(USR $<STREQUAL:${PREFIX},userspace>)
 
@@ -43,19 +43,16 @@ target_compile_definitions(bfm PUBLIC
 )
 
 if(PREFIX STREQUAL userspace)
-    add_executable(bfm-binary)
-    target_link_libraries(bfm-binary PRIVATE bfm)
-
     string(TOLOWER ${BUILD_TARGET_OS} OS)
-    target_include_directories(bfm-binary PRIVATE
+    target_include_directories(bfm PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/platform/${OS}>
     )
-    target_sources(bfm-binary PRIVATE
+    target_sources(bfm PRIVATE
         src/platform/${OS}/ioctl.cpp
         src/platform/${OS}/ioctl_private.cpp
     )
-    install(TARGETS bfm-binary DESTINATION bin RENAME bfm)
 elseif(PREFIX STREQUAL test)
+    set(CMAKE_ENABLE_EXPORTS ON)
     target_include_directories(bfm INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/tests>
     )
