@@ -278,13 +278,18 @@ set(SOURCE_BFVMM_DIR ${CMAKE_SOURCE_DIR}/bfvmm
     "bfvmm source dir"
 )
 
+set(SOURCE_BFROOT_DIR ${CMAKE_SOURCE_DIR}/bfroot
+    CACHE INTERNAL
+    "bfroot source dir"
+)
+
 # ------------------------------------------------------------------------------
 # Build Tree
 # ------------------------------------------------------------------------------
 
 set(BUILD_ROOT_DIR ${CMAKE_BINARY_DIR}
     CACHE INTERNAL
-    "Build root directory"
+    "Build-root directory"
 )
 
 set(BUILD_BFDRIVER_DIR ${CMAKE_BINARY_DIR}/bfdriver

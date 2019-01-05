@@ -725,11 +725,7 @@ function(add_subproject NAME PREFIX)
     if(ARG_SOURCE_DIR)
         set(SOURCE_DIR ${ARG_SOURCE_DIR})
     else()
-        if(PREFIX STREQUAL "test")
-            set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/${NAME}/tests)
-        else()
-            set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/${NAME}/src)
-        endif()
+        set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/${NAME})
     endif()
 
     set(SHORT_PREFIX ${PREFIX})
@@ -944,27 +940,14 @@ endmacro(enable_asm)
 #
 # @param TARGET the name of the project target to create
 # @param INTERFACE make TARGET an interface library
+# @param BINARY make TARGET an executable
 #
 macro(init_project TARGET)
     set(options INTERFACE BINARY)
     cmake_parse_arguments(ARG "${options}" "" "" ${ARGN})
 
-    if(CMAKE_INSTALL_PREFIX STREQUAL "${VMM_PREFIX_PATH}")
-        set(PREFIX "vmm")
-    elseif(CMAKE_INSTALL_PREFIX STREQUAL "${USERSPACE_PREFIX_PATH}")
-        set(PREFIX "userspace")
-    elseif(CMAKE_INSTALL_PREFIX STREQUAL "${TEST_PREFIX_PATH}")
-        set(PREFIX "test")
-    elseif(CMAKE_INSTALL_PREFIX STREQUAL "${EFI_PREFIX_PATH}")
-        set(PREFIX "efi")
-    else()
-        message(FATAL_ERROR "Invalid prefix: ${CMAKE_INSTALL_PREFIX}")
-    endif()
-
     set(CMAKE_C_EXTENSIONS OFF)
     set(CMAKE_CXX_EXTENSIONS OFF)
-    #set(CMAKE_C_ABI_COMPILED ON)
-    #set(CMAKE_CXX_ABI_COMPILED ON)
 
     enable_asm(${PREFIX})
 
@@ -1166,25 +1149,25 @@ endfunction(add_vmm_executable)
 #
 # Adds a unit test.
 #
-# @param FILENAME the file name of the test. Must start with "test_"
+# @param FILEPATH the file name of the test.
 # @param DEFINES Additional definitions for the test
-# @param DEPENDS Additional dependencies for the test. "_static" is added
-#     for you
+# @param DEPENDS Additional dependencies for the test.
 # @param SOURCES The source files to use for the test. If this is not defined,
-#     the file used is ${FILENAME}.cpp. This is only needed if the test file
+#     the file used is ${FILEPATH}.cpp. This is only needed if the test file
 #     is not in the same directory, allowing you to pass a source file with
-#     a directory. Nomrally FILENAME should still match the filename being
+#     a directory. Nomrally FILEPATH should still match the filename being
 #     used.
 #
-function(do_test FILENAME)
+function(do_test FILEPATH)
     set(multiVal DEFINES DEPENDS SOURCES CMD_LINE_ARGS)
     cmake_parse_arguments(ARG "" "" "${multiVal}" ${ARGN})
 
     if(NOT ARG_SOURCES)
-        set(ARG_SOURCES "${FILENAME}.cpp")
+        set(ARG_SOURCES "${FILEPATH}")
     endif()
 
-    string(REPLACE "test_" "" NAME "${FILENAME}")
+    get_filename_component(TEST_NAME "${FILEPATH}" NAME_WE)
+    string(REPLACE "test_" "" NAME "${TEST_NAME}")
 
     add_executable(test_${NAME})
     target_sources(test_${NAME} PRIVATE ${ARG_SOURCES})

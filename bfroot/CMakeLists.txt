@@ -26,10 +26,10 @@ init_project(bfroot INTERFACE)
 # ------------------------------------------------------------------------------
 
 # Common
-set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 set(C $<COMPILE_LANGUAGE:C>)
 set(CXX $<COMPILE_LANGUAGE:CXX>)
 set(C_CXX $<OR:${C},${CXX}>)
+set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 set(C_CXX_X64 $<AND:${C_CXX},${X64}>)
 set(MSVC $<CXX_COMPILER_ID:MSVC>)
 set(CLANG $<CXX_COMPILER_ID:Clang>)
@@ -37,7 +37,6 @@ set(VMM $<AND:$<STREQUAL:${PREFIX},vmm>,$<BOOL:${BUILD_VMM}>>)
 set(EFI $<AND:$<STREQUAL:${PREFIX},efi>,$<BOOL:${BUILD_EFI}>>)
 set(TST $<AND:$<STREQUAL:${PREFIX},test>,$<BOOL:${BUILD_TEST}>>)
 set(USR $<AND:$<STREQUAL:${PREFIX},userspace>,$<BOOL:${BUILD_USERSPACE}>>)
-set(WIN_CYG $<OR:$<BOOL:${CYGWIN}>,$<BOOL:${WIN32}>>)
 
 # VMM
 set(VMM_CXX $<AND:${VMM},${CXX}>)
@@ -46,7 +45,10 @@ set(VMM_C_CXX_CLANG $<AND:${VMM_C_CXX},${CLANG}>)
 set(VMM_C_CXX_MSVC $<AND:${VMM_C_CXX},${MSVC}>)
 
 # EFI
+set(EFI_C $<AND:${EFI},${C}>)
+set(EFI_C_CLANG $<AND:${EFI_C},${CLANG}>)
 set(EFI_C_CXX $<AND:${EFI},${C_CXX}>)
+set(EFI_C_CXX_CLANG $<AND:${EFI_C_CXX},${CLANG}>)
 
 # Test
 set(TST_C_CXX $<AND:${TST},${C_CXX}>)
@@ -210,6 +212,44 @@ target_include_directories(bfroot SYSTEM INTERFACE
 )
 target_link_directories(bfroot INTERFACE
     $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/lib>>
+)
+
+# ------------------------------------------------------------------------------
+# Root interface for EFI prefix
+# ------------------------------------------------------------------------------
+
+if(PREFIX STREQUAL efi)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${EFI_PREFIX_PATH}/include/efi/x86_64
+    )
+endif()
+
+target_compile_options(bfroot INTERFACE
+    $<${EFI_C_CLANG}:-mno-red-zone>
+    $<${EFI_C_CLANG}:-mno-avx>
+    $<${EFI_C_CLANG}:-g>
+    $<${EFI_C_CLANG}:-O2>
+    $<${EFI_C_CLANG}:-Wall>
+    $<${EFI_C_CLANG}:-Wextra>
+    $<${EFI_C_CLANG}:-Wno-error=pragmas>
+    $<${EFI_C_CLANG}:-fshort-wchar>
+    $<${EFI_C_CLANG}:-fno-strict-aliasing>
+    $<${EFI_C_CLANG}:-ffreestanding>
+    $<${EFI_C_CLANG}:-fno-stack-protector>
+    $<${EFI_C_CLANG}:-fno-stack-check>
+    $<${EFI_C_CLANG}:-fno-merge-all-constants>
+    $<${EFI_C_CLANG}:-std=c11>
+)
+target_compile_definitions(bfroot INTERFACE
+    $<${EFI_C_CLANG}:CONFIG_x86_64>
+    $<${EFI_C_CLANG}:GNU_EFI_USE_MS_ABI>
+    $<${EFI_C_CLANG}:__KERNEL__>
+    $<${EFI_C_CLANG}:KERNEL>
+    $<${EFI_C_CLANG}:EFI>
+)
+target_include_directories(bfroot SYSTEM INTERFACE
+    $<BUILD_INTERFACE:$<${EFI_C_CLANG}:${EFI_PREFIX_PATH}/include/efi>>
+    $<BUILD_INTERFACE:$<${EFI_C_CLANG}:${EFI_PREFIX_PATH}/include/efi/x86_64>>
 )
 
 fini_project()

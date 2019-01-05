@@ -1,6 +1,6 @@
 #
 # Bareflank Hypervisor
-# Copyright (C) 2015 Assured Information Security, Inc.
+# Copyright (C) 2019 Assured Information Security, Inc.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -21,22 +21,21 @@ project(bfunwind C CXX)
 
 init_project(bfunwind)
 
-set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include>>)
-set(BUILD_INCLUDE
-    $<AND:$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>,${BUILD}>
-)
+set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>>)
+set(C_CXX $<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>)
+set(BUILD_INCLUDE $<AND:${C_CXX},${BUILD}>)
 
 target_link_libraries(bfunwind PUBLIC ${PREFIX}::bfutil)
 target_include_directories(bfunwind PUBLIC
-    $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../include>
+    $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/include>
 )
 target_sources(bfunwind PRIVATE
-    dwarf4.cpp
-    eh_frame.cpp
-    ia64_cxx_abi.cpp
-    registers_intel_x64.asm
+    src/dwarf4.cpp
+    src/eh_frame.cpp
+    src/ia64_cxx_abi.cpp
+    src/registers_intel_x64.asm
 )
 
-install(FILES ../include/ia64_cxx_abi.h DESTINATION include RENAME unwind.h)
+install(FILES include/ia64_cxx_abi.h DESTINATION include RENAME unwind.h)
 
 fini_project()
