@@ -18,6 +18,7 @@
 
 add_executable(vmm)
 
+target_link_libraries(vmm PUBLIC bfvmm)
 target_link_libraries(vmm PUBLIC --whole-archive bfvmm_entry --no-whole-archive)
 target_link_libraries(vmm PUBLIC vmm::bfintrinsics)
 target_link_libraries(vmm PUBLIC ${CMAKE_INSTALL_PREFIX}/lib/libc++.a)

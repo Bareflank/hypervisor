@@ -18,7 +18,12 @@
 
 add_library(bfvmm_debug)
 
-target_link_libraries(bfvmm_debug PUBLIC ${PREFIX}::bfvmm)
+target_link_libraries(bfvmm_debug PUBLIC ${PREFIX}::bfroot)
+target_include_directories(bfvmm_debug PUBLIC
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/include>
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfintrinsics/include>
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfutil/include>
+)
 target_sources(bfvmm_debug PRIVATE
     debug_ring/debug_ring.cpp
     serial/serial_ns16550a.cpp

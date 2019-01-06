@@ -18,7 +18,12 @@
 
 add_library(bfvmm_memory_manager)
 
-target_link_libraries(bfvmm_memory_manager PUBLIC ${PREFIX}::bfvmm)
+target_link_libraries(bfvmm_memory_manager PUBLIC ${PREFIX}::bfroot)
+target_include_directories(bfvmm_memory_manager PUBLIC
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/include>
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfintrinsics/include>
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfutil/include>
+)
 target_sources(bfvmm_memory_manager PRIVATE
     memory_manager.cpp
     $<$<STREQUAL:${BUILD_TARGET_ARCH},x86_64>:arch/x64/cr3/helpers.cpp>

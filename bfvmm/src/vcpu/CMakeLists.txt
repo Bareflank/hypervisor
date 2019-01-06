@@ -19,7 +19,12 @@
 add_library(bfvmm_vcpu)
 
 target_sources(bfvmm_vcpu PRIVATE vcpu.cpp)
-target_link_libraries(bfvmm_vcpu PUBLIC ${PREFIX}::bfvmm)
+target_link_libraries(bfvmm_vcpu PUBLIC ${PREFIX}::bfroot)
+target_include_directories(bfvmm_vcpu PUBLIC
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/include>
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfintrinsics/include>
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfutil/include>
+)
 
 install(TARGETS bfvmm_vcpu DESTINATION lib EXPORT bfvmm-${PREFIX}-targets)
 
