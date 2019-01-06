@@ -4733,13 +4733,13 @@ namespace guest_ia32_sysenter_cs
     { dump_vmcs_nhex(level, msg); }
 }
 
-namespace vmx_preemption_timer_value
+namespace preemption_timer_value
 {
     constexpr const auto addr = 0x000000000000482EULL;
-    constexpr const auto name = "vmx_preemption_timer_value";
+    constexpr const auto name = "preemption_timer_value";
 
     inline auto exists()
-    { return msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::is_allowed1(); }
+    { return msrs::ia32_vmx_true_pinbased_ctls::activate_preemption_timer::is_allowed1(); }
 
     inline auto get()
     { return get_vmcs_field(addr, name, exists()); }

@@ -193,11 +193,11 @@ namespace pin_based_vm_execution_controls
         { dump_vm_control(level, exists(), is_allowed1(), is_enabled_if_exists(), name, msg); }
     }
 
-    namespace activate_vmx_preemption_timer
+    namespace activate_preemption_timer
     {
         constexpr const auto mask = 0x0000000000000040ULL;
         constexpr const auto from = 6ULL;
-        constexpr const auto name = "activate_vmx_preemption_timer";
+        constexpr const auto name = "activate_preemption_timer";
 
         inline auto is_enabled()
         { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
@@ -212,10 +212,10 @@ namespace pin_based_vm_execution_controls
         { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
 
         inline auto is_allowed0()
-        { return msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::is_allowed0(); }
+        { return msrs::ia32_vmx_true_pinbased_ctls::activate_preemption_timer::is_allowed0(); }
 
         inline auto is_allowed1()
-        { return msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::is_allowed1(); }
+        { return msrs::ia32_vmx_true_pinbased_ctls::activate_preemption_timer::is_allowed1(); }
 
         inline void enable()
         { enable_vm_control(addr, from, is_allowed1(), name, exists()); }
@@ -291,7 +291,7 @@ namespace pin_based_vm_execution_controls
         external_interrupt_exiting::dump(level, msg);
         nmi_exiting::dump(level, msg);
         virtual_nmis::dump(level, msg);
-        activate_vmx_preemption_timer::dump(level, msg);
+        activate_preemption_timer::dump(level, msg);
         process_posted_interrupts::dump(level, msg);
     }
 }
@@ -1793,11 +1793,11 @@ namespace vm_exit_controls
         { dump_vm_control(level, exists(), is_allowed1(), is_enabled_if_exists(), name, msg); }
     }
 
-    namespace save_vmx_preemption_timer_value
+    namespace save_preemption_timer_value
     {
         constexpr const auto mask = 0x0000000000400000ULL;
         constexpr const auto from = 22ULL;
-        constexpr const auto name = "save_vmx_preemption_timer_value";
+        constexpr const auto name = "save_preemption_timer_value";
 
         inline auto is_enabled()
         { return is_bit_set(get_vmcs_field(addr, name, exists()), from); }
@@ -1812,10 +1812,10 @@ namespace vm_exit_controls
         { return is_bit_cleared(get_vmcs_field_if_exists(addr, name, verbose, exists()), from); }
 
         inline auto is_allowed0()
-        { return msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::is_allowed0(); }
+        { return msrs::ia32_vmx_true_exit_ctls::save_preemption_timer_value::is_allowed0(); }
 
         inline auto is_allowed1()
-        { return msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::is_allowed1(); }
+        { return msrs::ia32_vmx_true_exit_ctls::save_preemption_timer_value::is_allowed1(); }
 
         inline void enable()
         { enable_vm_control(addr, from, is_allowed1(), name, exists()); }
@@ -1942,7 +1942,7 @@ namespace vm_exit_controls
         load_ia32_pat::dump(level, msg);
         save_ia32_efer::dump(level, msg);
         load_ia32_efer::dump(level, msg);
-        save_vmx_preemption_timer_value::dump(level, msg);
+        save_preemption_timer_value::dump(level, msg);
         clear_ia32_bndcfgs::dump(level, msg);
         pt_conceal_vm_exits::dump(level, msg);
     }

@@ -12544,11 +12544,11 @@ namespace ia32_vmx_true_pinbased_ctls
         { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
-    namespace activate_vmx_preemption_timer
+    namespace activate_preemption_timer
     {
         constexpr const auto mask = 0x0000000000000040ULL;
         constexpr const auto from = 6ULL;
-        constexpr const auto name = "activate_vmx_preemption_timer";
+        constexpr const auto name = "activate_preemption_timer";
 
         inline auto is_enabled()
         { return is_bit_set(_read_msr(addr), from); }
@@ -12606,7 +12606,7 @@ namespace ia32_vmx_true_pinbased_ctls
         external_interrupt_exiting::dump(level, msg);
         nmi_exiting::dump(level, msg);
         virtual_nmis::dump(level, msg);
-        activate_vmx_preemption_timer::dump(level, msg);
+        activate_preemption_timer::dump(level, msg);
         process_posted_interrupts::dump(level, msg);
     }
 }
@@ -13478,11 +13478,11 @@ namespace ia32_vmx_true_exit_ctls
         { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
-    namespace save_vmx_preemption_timer_value
+    namespace save_preemption_timer_value
     {
         constexpr const auto mask = 0x0000000000400000ULL;
         constexpr const auto from = 22ULL;
-        constexpr const auto name = "save_vmx_preemption_timer_value";
+        constexpr const auto name = "save_preemption_timer_value";
 
         inline auto is_enabled()
         { return is_bit_set(_read_msr(addr), from); }
@@ -13545,7 +13545,7 @@ namespace ia32_vmx_true_exit_ctls
         load_ia32_pat::dump(level, msg);
         save_ia32_efer::dump(level, msg);
         load_ia32_efer::dump(level, msg);
-        save_vmx_preemption_timer_value::dump(level, msg);
+        save_preemption_timer_value::dump(level, msg);
         clear_ia32_bndcfgs::dump(level, msg);
     }
 }
@@ -16955,7 +16955,7 @@ namespace ia32_gs_base
     { bfdebug_nhex(level, name, get(), msg); }
 }
 
-namespace platform_info
+namespace ia32_platform_info
 {
     constexpr const auto addr = 0x000000CEU;
     constexpr const auto name = "platform_info";
