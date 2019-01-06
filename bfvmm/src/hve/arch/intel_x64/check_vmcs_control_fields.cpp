@@ -564,11 +564,11 @@ control_vm_exit_ctls_reserved_properly_set()
 void
 control_activate_and_save_preemption_timer_must_be_0()
 {
-    if (::intel_x64::vmcs::pin_based_vm_execution_controls::activate_vmx_preemption_timer::is_enabled()) {
+    if (::intel_x64::vmcs::pin_based_vm_execution_controls::activate_preemption_timer::is_enabled()) {
         return;
     }
 
-    if (::intel_x64::vmcs::vm_exit_controls::save_vmx_preemption_timer_value::is_enabled()) {
+    if (::intel_x64::vmcs::vm_exit_controls::save_preemption_timer_value::is_enabled()) {
         throw std::logic_error("save vmx preemption timer must be 0 "
                                "if activate vmx preemption timer is 0");
     }
