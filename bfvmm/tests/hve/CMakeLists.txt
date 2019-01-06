@@ -16,57 +16,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-do_test(test_gdt
-    SOURCES arch/x64/test_gdt.cpp
-    ${ARGN}
-)
-
-do_test(test_idt
-    SOURCES arch/x64/test_idt.cpp
-    ${ARGN}
-)
-
-do_test(test_check_vmcs_controls_fields
-    SOURCES arch/intel_x64/test_check_vmcs_controls_fields.cpp
-    ${ARGN}
-)
-
-do_test(test_check_vmcs_guest_fields
-    SOURCES arch/intel_x64/test_check_vmcs_guest_fields.cpp
-    ${ARGN}
-)
-
-do_test(test_check_vmcs_host_fields
-    SOURCES arch/intel_x64/test_check_vmcs_host_fields.cpp
-    ${ARGN}
-)
-
-do_test(test_nmi
-    SOURCES arch/intel_x64/test_nmi.cpp
-    ${ARGN}
-)
-
-do_test(test_exception
-    SOURCES arch/intel_x64/test_exception.cpp
-    ${ARGN}
-)
-
-do_test(test_check
-    SOURCES arch/intel_x64/test_check.cpp
-    ${ARGN}
-)
-
-do_test(test_exit_handler
-    SOURCES arch/intel_x64/test_exit_handler.cpp
-    ${ARGN}
-)
-
-do_test(test_vmcs
-    SOURCES arch/intel_x64/test_vmcs.cpp
-    ${ARGN}
-)
-
-do_test(test_vmx
-    SOURCES arch/intel_x64/test_vmx.cpp
-    ${ARGN}
-)
+do_test(arch/x64/test_gdt.cpp ${ARGN})
+do_test(arch/x64/test_idt.cpp ${ARGN})
+do_test(arch/intel_x64/test_check_vmcs_controls_fields.cpp ${ARGN})
+do_test(arch/intel_x64/test_check_vmcs_guest_fields.cpp ${ARGN})
+do_test(arch/intel_x64/test_check_vmcs_host_fields.cpp ${ARGN})
+do_test(arch/intel_x64/test_nmi.cpp ${ARGN})
+do_test(arch/intel_x64/test_exception.cpp ${ARGN})
+do_test(arch/intel_x64/test_check.cpp ${ARGN})
+do_test(arch/intel_x64/test_exit_handler.cpp ${ARGN})
+do_test(arch/intel_x64/test_vmcs.cpp ${ARGN})
+do_test(arch/intel_x64/test_vmx.cpp ${ARGN})

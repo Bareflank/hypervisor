@@ -19,37 +19,30 @@
 cmake_minimum_required(VERSION 3.10)
 project(bfintrinsics C CXX)
 
-if(PREFIX STREQUAL test)
-    init_project(bfintrinsics INTERFACE)
-    target_link_libraries(bfintrinsics INTERFACE test::bfutil)
-elseif(PREFIX STREQUAL vmm OR PREFIX STREQUAL userspace)
-    init_project(bfintrinsics)
-    target_link_libraries(bfintrinsics PUBLIC ${PREFIX}::bfutil)
-    set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
-    target_sources(bfintrinsics PRIVATE
-        $<${X64}:src/arch/x64/cache.asm>
-        $<${X64}:src/arch/x64/cpuid.asm>
-        $<${X64}:src/arch/x64/gdt.asm>
-        $<${X64}:src/arch/x64/idt.asm>
-        $<${X64}:src/arch/x64/msrs.asm>
-        $<${X64}:src/arch/x64/pm.asm>
-        $<${X64}:src/arch/x64/portio.asm>
-        $<${X64}:src/arch/x64/rdtsc.asm>
-        $<${X64}:src/arch/x64/rflags.asm>
-        $<${X64}:src/arch/x64/srs.asm>
-        $<${X64}:src/arch/x64/tlb.asm>
-        $<${X64}:src/arch/intel_x64/barrier.asm>
-        $<${X64}:src/arch/intel_x64/bit.asm>
-        $<${X64}:src/arch/intel_x64/crs.asm>
-        $<${X64}:src/arch/intel_x64/drs.asm>
-        $<${X64}:src/arch/intel_x64/pause.asm>
-        $<${X64}:src/arch/intel_x64/vmx.asm>
-    )
-endif()
+set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 
-target_include_directories(bfintrinsics SYSTEM INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+init_project(bfintrinsics)
+target_link_libraries(bfintrinsics PUBLIC ${PREFIX}::bfroot)
+target_sources(bfintrinsics PRIVATE
+    $<${X64}:src/arch/x64/cache.asm>
+    $<${X64}:src/arch/x64/cpuid.asm>
+    $<${X64}:src/arch/x64/gdt.asm>
+    $<${X64}:src/arch/x64/idt.asm>
+    $<${X64}:src/arch/x64/msrs.asm>
+    $<${X64}:src/arch/x64/pm.asm>
+    $<${X64}:src/arch/x64/portio.asm>
+    $<${X64}:src/arch/x64/rdtsc.asm>
+    $<${X64}:src/arch/x64/rflags.asm>
+    $<${X64}:src/arch/x64/srs.asm>
+    $<${X64}:src/arch/x64/tlb.asm>
+    $<${X64}:src/arch/intel_x64/barrier.asm>
+    $<${X64}:src/arch/intel_x64/bit.asm>
+    $<${X64}:src/arch/intel_x64/crs.asm>
+    $<${X64}:src/arch/intel_x64/drs.asm>
+    $<${X64}:src/arch/intel_x64/pause.asm>
+    $<${X64}:src/arch/intel_x64/vmx.asm>
 )
-install(DIRECTORY include/ DESTINATION include)
+
+#install(DIRECTORY include/ DESTINATION include)
 
 fini_project()

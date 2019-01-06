@@ -19,15 +19,15 @@
 cmake_minimum_required(VERSION 3.10)
 project(bfm C CXX)
 
-init_project(bfm)
-
 set(USR $<STREQUAL:${PREFIX},userspace>)
 
-target_include_directories(bfm PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-)
+# -----------------------------------------------------------------------------
+# Common
+# -----------------------------------------------------------------------------
+
+init_project(bfm)
 target_link_libraries(bfm PUBLIC
-    ${PREFIX}::bfutil
+    ${PREFIX}::bfroot
     $<$<OR:$<BOOL:${CYGWIN}>,$<BOOL:${WIN32}>>:setupapi>
 )
 target_sources(bfm PRIVATE
@@ -41,6 +41,14 @@ target_compile_definitions(bfm PUBLIC
     $<BUILD_INTERFACE:$<${USR}:MAIN=main>>
     $<BUILD_INTERFACE:$<${USR}:ABORT=abort>>
 )
+target_include_directories(bfm PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../bfutil/include>
+)
+
+# -----------------------------------------------------------------------------
+# Userspace
+# -----------------------------------------------------------------------------
 
 if(PREFIX STREQUAL userspace)
     add_executable(bfm-binary)
@@ -55,7 +63,13 @@ if(PREFIX STREQUAL userspace)
     )
     set_target_properties(bfm-binary PROPERTIES OUTPUT_NAME bfm)
     install(TARGETS bfm-binary DESTINATION bin EXPORT bfm-userspace-targets)
-elseif(PREFIX STREQUAL test)
+endif()
+
+# -----------------------------------------------------------------------------
+# Test
+# -----------------------------------------------------------------------------
+
+if(PREFIX STREQUAL test)
     target_include_directories(bfm INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/tests>
     )

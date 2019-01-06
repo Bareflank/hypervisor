@@ -34,15 +34,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/scripts/cmake/config/default.cmake)
 include_external_config()
 
 # ------------------------------------------------------------------------------
-# Testing
-# ------------------------------------------------------------------------------
-
-if(BUILD_TEST)
-    include(CTest)
-    enable_testing(true)
-endif()
-
-# ------------------------------------------------------------------------------
 # BFM VMM
 # ------------------------------------------------------------------------------
 
@@ -90,60 +81,61 @@ endif()
 # ------------------------------------------------------------------------------
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${EXPORT_DIR})
+file(TOUCH ${PKG_FILE})
 
-add_subproject(bfroot vmm)
-add_subproject(bfroot test)
-add_subproject(bfroot userspace)
-#add_subproject(bfroot efi SOURCE_DIR ${CMAKE_SOURCE_DIR}/bfroot)
+#add_subproject(bfroot vmm)
+add_subproject(bfroot test DEPENDS catch)
+#add_subproject(bfroot userspace)
+##add_subproject(bfroot efi SOURCE_DIR ${CMAKE_SOURCE_DIR}/bfroot)
 
 # ------------------------------------------------------------------------------
 # VMM Components
 # ------------------------------------------------------------------------------
 
-include_dependency(SOURCE_DEPENDS_DIR binutils)
-
-if(NOT WIN32)
-    add_subproject(
-        bfutil vmm
-        DEPENDS bfroot
-    )
-    if(NOT BUILD_BINUTILS)
-        add_subproject(
-            bfdso vmm
-            DEPENDS bfroot
-        )
-    else()
-        add_subproject(
-            bfdso vmm
-            DEPENDS binutils
-            DEPENDS bfroot
-        )
-    endif()
-endif()
-
-include_dependency(SOURCE_DEPENDS_DIR newlib)
-include_dependency(SOURCE_DEPENDS_DIR llvm)
-include_dependency(SOURCE_DEPENDS_DIR libcxxabi)
-include_dependency(SOURCE_DEPENDS_DIR libcxx)
-
-if(BUILD_VMM OR (BUILD_TEST AND NOT WIN32))
-    add_subproject(
-        bfruntime vmm
-        DEPENDS gsl
-        DEPENDS libcxx
-        DEPENDS bfutil
-    )
-endif()
-
-if(BUILD_VMM)
-    add_subproject(bfintrinsics vmm DEPENDS bfutil)
-    add_subproject(
-        bfvmm vmm
-        DEPENDS bfintrinsics
-        DEPENDS bfruntime
-    )
-endif()
-
+#include_dependency(SOURCE_DEPENDS_DIR binutils)
+#
+#if(NOT WIN32)
+#    add_subproject(
+#        bfutil vmm
+#        DEPENDS bfroot
+#    )
+#    if(NOT BUILD_BINUTILS)
+#        add_subproject(
+#            bfdso vmm
+#            DEPENDS bfroot
+#        )
+#    else()
+#        add_subproject(
+#            bfdso vmm
+#            DEPENDS binutils
+#            DEPENDS bfroot
+#        )
+#    endif()
+#endif()
+#
+#include_dependency(SOURCE_DEPENDS_DIR newlib)
+#include_dependency(SOURCE_DEPENDS_DIR llvm)
+#include_dependency(SOURCE_DEPENDS_DIR libcxxabi)
+#include_dependency(SOURCE_DEPENDS_DIR libcxx)
+#
+#if(BUILD_VMM OR (BUILD_TEST AND NOT WIN32))
+#    add_subproject(
+#        bfruntime vmm
+#        DEPENDS gsl
+#        DEPENDS libcxx
+#        DEPENDS bfutil
+#    )
+#endif()
+#
+#if(BUILD_VMM)
+#    add_subproject(bfintrinsics vmm DEPENDS bfroot)
+#    add_subproject(
+#        bfvmm vmm
+#        DEPENDS bfintrinsics
+#        DEPENDS bfruntime
+#    )
+#endif()
+#
 # ------------------------------------------------------------------------------
 # Unit Tests
 # ------------------------------------------------------------------------------
@@ -157,135 +149,130 @@ if(BUILD_TEST)
         DEPENDS hippomocks
         DEPENDS bfroot
     )
-    add_subproject(
-        bfintrinsics test
-        DEPENDS bfutil
-    )
 endif()
 
-#if(BUILD_TEST AND NOT WIN32)
-#    add_subproject(
-#        bfdummy vmm
-#        DEPENDS bfunwind
-#    )
+##if(BUILD_TEST AND NOT WIN32)
+##    add_subproject(
+##        bfdummy vmm
+##        DEPENDS bfunwind
+##    )
+##
+##    add_subproject(
+##        bfdummy_main vmm
+##        SOURCE_DIR ${SOURCE_BFDUMMY_DIR}/src/main
+##        DEPENDS bfdummy
+##    )
+##
+##    add_subproject(
+##        bfdriver test
+##        DEPENDS bfutil
+##        NOINSTALL
+##    )
+##endif()
 #
-#    add_subproject(
-#        bfdummy_main vmm
-#        SOURCE_DIR ${SOURCE_BFDUMMY_DIR}/src/main
-#        DEPENDS bfdummy
-#    )
-#
-#    add_subproject(
-#        bfdriver test
-#        DEPENDS bfutil
-#        NOINSTALL
-#    )
-#endif()
-
 if(BUILD_TEST)
     add_subproject(
         bfm test
-        DEPENDS bfutil
+        DEPENDS bfroot
     )
 
-#    add_subproject(
-#        bfruntime test
-#        DEPENDS bfutil
-#        NOINSTALL
-#    )
+    add_subproject(
+        bfruntime test
+        DEPENDS bfroot
+    )
 
     add_subproject(
         bfvmm test
-        DEPENDS bfintrinsics
-    )
-endif()
-
-# ------------------------------------------------------------------------------
-# Userspace Components
-# ------------------------------------------------------------------------------
-
-if(BUILD_USERSPACE)
-    add_subproject(
-        bfutil userspace
         DEPENDS bfroot
     )
-    add_subproject(
-        bfintrinsics userspace
-        DEPENDS gsl
-        DEPENDS json
-        DEPENDS bfutil
-    )
-    add_subproject(
-        bfm userspace
-        DEPENDS gsl
-        DEPENDS json
-        DEPENDS cxxopts
-        DEPENDS bfutil
-    )
 endif()
 
-# ------------------------------------------------------------------------------
-# External Components
-# ------------------------------------------------------------------------------
-
-include_external_extensions()
-
-# ------------------------------------------------------------------------------
-# EFI Components
-# ------------------------------------------------------------------------------
-
-if(BUILD_EFI AND NOT WIN32)
-    include_dependency(SOURCE_DEPENDS_DIR gnuefi)
-
-    add_subproject(
-        efi efi
-        DEPENDS gnuefi ${BFM_VMM_TARGET}
-        SOURCE_DIR ${SOURCE_BFDRIVER_DIR}/src/platform/efi
-    )
-endif()
-
-# ------------------------------------------------------------------------------
-# Force Rebuild
-# ------------------------------------------------------------------------------
-
-get_property(FORCE_REBUILD GLOBAL PROPERTY "FORCE_REBUILD")
-
-if(FORCE_REBUILD STREQUAL "ON")
-    set_property(GLOBAL PROPERTY "FORCE_REBUILD" "OFF")
-    file(REMOVE_RECURSE ${DEPENDS_DIR})
-    file(REMOVE_RECURSE ${PREFIXES_DIR})
-    message(FATAL_ERROR "${Yellow}dependencies updated, rebuild is required. Rerun cmake${ColorReset}")
-endif()
-
-# TODO:
+## ------------------------------------------------------------------------------
+## Userspace Components
+## ------------------------------------------------------------------------------
 #
-# Detect if the flags have changed, delete the depends and prefixes, and then
-# tell the user that cmake needs to be run again as a rebuild is required.
-
-# ------------------------------------------------------------------------------
-# Validate Build
-# ------------------------------------------------------------------------------
-
-include(scripts/cmake/validate.cmake)
-validate_build()
-
-# ------------------------------------------------------------------------------
-# Banners
-# ------------------------------------------------------------------------------
-
-print_banner()
-print_usage()
-
-# ------------------------------------------------------------------------------
-# Helpers
-# ------------------------------------------------------------------------------
-
-git_dir_script()
-
-# ------------------------------------------------------------------------------
-# Info
-# ------------------------------------------------------------------------------
-
-if(NOT WIN32)
-    add_custom_command(TARGET info COMMAND ${CMAKE_COMMAND} -E cmake_echo_color " ")
-endif()
+#if(BUILD_USERSPACE)
+#    add_subproject(
+#        bfutil userspace
+#        DEPENDS bfroot
+#    )
+#    add_subproject(
+#        bfintrinsics userspace
+#        DEPENDS gsl
+#        DEPENDS json
+#        DEPENDS bfutil
+#    )
+#    add_subproject(
+#        bfm userspace
+#        DEPENDS gsl
+#        DEPENDS json
+#        DEPENDS cxxopts
+#        DEPENDS bfutil
+#    )
+#endif()
+#
+## ------------------------------------------------------------------------------
+## External Components
+## ------------------------------------------------------------------------------
+#
+#include_external_extensions()
+#
+## ------------------------------------------------------------------------------
+## EFI Components
+## ------------------------------------------------------------------------------
+#
+#if(BUILD_EFI AND NOT WIN32)
+#    include_dependency(SOURCE_DEPENDS_DIR gnuefi)
+#
+#    add_subproject(
+#        efi efi
+#        DEPENDS gnuefi ${BFM_VMM_TARGET}
+#        SOURCE_DIR ${SOURCE_BFDRIVER_DIR}/src/platform/efi
+#    )
+#endif()
+#
+## ------------------------------------------------------------------------------
+## Force Rebuild
+## ------------------------------------------------------------------------------
+#
+#get_property(FORCE_REBUILD GLOBAL PROPERTY "FORCE_REBUILD")
+#
+#if(FORCE_REBUILD STREQUAL "ON")
+#    set_property(GLOBAL PROPERTY "FORCE_REBUILD" "OFF")
+#    file(REMOVE_RECURSE ${DEPENDS_DIR})
+#    file(REMOVE_RECURSE ${PREFIXES_DIR})
+#    message(FATAL_ERROR "${Yellow}dependencies updated, rebuild is required. Rerun cmake${ColorReset}")
+#endif()
+#
+## TODO:
+##
+## Detect if the flags have changed, delete the depends and prefixes, and then
+## tell the user that cmake needs to be run again as a rebuild is required.
+#
+## ------------------------------------------------------------------------------
+## Validate Build
+## ------------------------------------------------------------------------------
+#
+#include(scripts/cmake/validate.cmake)
+#validate_build()
+#
+## ------------------------------------------------------------------------------
+## Banners
+## ------------------------------------------------------------------------------
+#
+#print_banner()
+#print_usage()
+#
+## ------------------------------------------------------------------------------
+## Helpers
+## ------------------------------------------------------------------------------
+#
+#git_dir_script()
+#
+## ------------------------------------------------------------------------------
+## Info
+## ------------------------------------------------------------------------------
+#
+#if(NOT WIN32)
+#    add_custom_command(TARGET info COMMAND ${CMAKE_COMMAND} -E cmake_echo_color " ")
+#endif()

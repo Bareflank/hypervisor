@@ -21,14 +21,15 @@ foreach(file ${PROJECT_INCLUDE_LIST})
     include(${file})
 endforeach(file)
 
-file(TOUCH "${PKG_FILE}")
 file(STRINGS "${PKG_FILE}" pkg_list)
 
 foreach(pkg IN LISTS pkg_list)
     find_package(${pkg} REQUIRED)
 endforeach(pkg)
 
-enable_testing()
+if(BUILD_TEST)
+    enable_testing()
+endif()
 
 if(CMAKE_INSTALL_PREFIX STREQUAL "${VMM_PREFIX_PATH}")
     set(PREFIX "vmm")

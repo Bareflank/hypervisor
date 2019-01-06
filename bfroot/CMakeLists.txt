@@ -131,9 +131,6 @@ target_link_options(bfroot INTERFACE
     $<${VMM}:-nostdlib>
     $<${VMM}:-pie>
 )
-target_link_directories(bfroot INTERFACE
-    $<INSTALL_INTERFACE:$<${VMM_C_CXX}:${VMM_PREFIX_PATH}/lib>>
-)
 
 # ------------------------------------------------------------------------------
 # Root interface for test prefix
@@ -141,52 +138,60 @@ target_link_directories(bfroot INTERFACE
 
 if(PREFIX STREQUAL test)
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${TEST_PREFIX_PATH}/include/c++/v1
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${TEST_PREFIX_PATH}/include
         COMMAND ${CMAKE_COMMAND} -E make_directory ${TEST_PREFIX_PATH}/lib
     )
+
+    add_library(catch)
+    target_sources(catch PRIVATE ${SOURCE_BFUTIL_DIR}/tests/test_catch.cpp)
+    target_include_directories(catch PRIVATE
+        $<BUILD_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/include>>
+    )
+    install(TARGETS catch DESTINATION lib EXPORT bfroot-test-targets)
+
+    target_compile_options(bfroot INTERFACE
+        $<${TST_C_CXX_CLANG}:-fpic>
+        $<${TST_C_CXX_CLANG}:-fno-stack-protector>
+        $<${TST_C_CXX_CLANG}:-fvisibility=hidden>
+        $<${TST_C_CXX_CLANG}:-Wno-deprecated-declarations>
+        $<${TST_CXX_CLANG}:-fvisibility-inlines-hidden>
+
+        $<${TST_C_CXX_CLANG_ASAN}:-O1 -g -fno-omit-frame-pointer>
+        $<${TST_C_CXX_CLANG_ASAN}:-fsanitize=address -fsanitize=leak>
+        $<${TST_C_CXX_CLANG_USAN}:-fsanitize=undefined>
+        $<${TST_C_CXX_CLANG_CODECOV}:-g -O0 -fprofile-arcs>
+        $<${TST_C_CXX_CLANG_CODECOV}:-ftest-coverage -DDEBUG_LEVEL=5>
+
+        $<${TST_C_CXX_MSVC}:/EHsc>
+        $<${TST_C_CXX_MSVC}:/bigobj>
+        $<${TST_C_CXX_MSVC}:/WX>
+    )
+    target_compile_definitions(bfroot INTERFACE
+        $<${TST_C_CXX}:NATIVE>
+        $<${TST_C_CXX}:BUILD_TEST>
+        $<${TST_C_CXX_MSVC}:_SCL_SECURE_NO_WARNINGS>
+        $<${TST_C_CXX_MSVC}:_CRT_SECURE_NO_WARNINGS>
+        $<${TST_C_CXX_MSVC}:NOMINMAX>
+    )
+    target_include_directories(bfroot SYSTEM INTERFACE
+        $<INSTALL_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/include>>
+    )
+    target_link_directories(bfroot INTERFACE
+        $<INSTALL_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/lib>>
+    )
+    target_link_libraries(bfroot INTERFACE catch)
+
 endif()
-
-target_compile_options(bfroot INTERFACE
-    $<${TST_C_CXX_CLANG}:-fpic>
-    $<${TST_C_CXX_CLANG}:-fno-stack-protector>
-    $<${TST_C_CXX_CLANG}:-fvisibility=hidden>
-    $<${TST_C_CXX_CLANG}:-Wno-deprecated-declarations>
-    $<${TST_CXX_CLANG}:-fvisibility-inlines-hidden>
-
-    $<${TST_C_CXX_CLANG_ASAN}:-O1 -g -fno-omit-frame-pointer>
-    $<${TST_C_CXX_CLANG_ASAN}:-fsanitize=address -fsanitize=leak>
-    $<${TST_C_CXX_CLANG_USAN}:-fsanitize=undefined>
-    $<${TST_C_CXX_CLANG_CODECOV}:-g -O0 -fprofile-arcs>
-    $<${TST_C_CXX_CLANG_CODECOV}:-ftest-coverage -DDEBUG_LEVEL=5>
-
-    $<${TST_C_CXX_MSVC}:/EHsc>
-    $<${TST_C_CXX_MSVC}:/bigobj>
-    $<${TST_C_CXX_MSVC}:/WX>
-)
-target_compile_definitions(bfroot INTERFACE
-    $<${TST_C_CXX}:NATIVE>
-    $<${TST_C_CXX}:BUILD_TEST>
-    $<${TST_C_CXX_MSVC}:_SCL_SECURE_NO_WARNINGS>
-    $<${TST_C_CXX_MSVC}:_CRT_SECURE_NO_WARNINGS>
-    $<${TST_C_CXX_MSVC}:NOMINMAX>
-)
-target_include_directories(bfroot SYSTEM INTERFACE
-    $<INSTALL_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/include/c++/v1>>
-    $<INSTALL_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/include>>
-)
-target_link_directories(bfroot INTERFACE
-    $<INSTALL_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/lib>>
-)
 
 # ------------------------------------------------------------------------------
 # Root interface for userspace prefix
 # ------------------------------------------------------------------------------
 
 if(PREFIX STREQUAL userspace)
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${USERSPACE_PREFIX_PATH}/include/c++/v1
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${USERSPACE_PREFIX_PATH}/lib
-    )
+    #    execute_process(
+    #        COMMAND ${CMAKE_COMMAND} -E make_directory ${USERSPACE_PREFIX_PATH}/include/c++/v1
+    #        COMMAND ${CMAKE_COMMAND} -E make_directory ${USERSPACE_PREFIX_PATH}/lib
+    #    )
 endif()
 
 target_compile_options(bfroot INTERFACE
@@ -206,22 +211,22 @@ target_compile_definitions(bfroot INTERFACE
     $<${USR_C_CXX_MSVC}:_CRT_SECURE_NO_WARNINGS>
     $<${USR_C_CXX_MSVC}:NOMINMAX>
 )
-target_include_directories(bfroot SYSTEM INTERFACE
-    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include/c++/v1>>
-    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include>>
-)
-target_link_directories(bfroot INTERFACE
-    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/lib>>
-)
+#target_include_directories(bfroot SYSTEM INTERFACE
+#    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include/c++/v1>>
+#    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include>>
+#)
+#target_link_directories(bfroot INTERFACE
+#    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/lib>>
+#)
 
 # ------------------------------------------------------------------------------
 # Root interface for EFI prefix
 # ------------------------------------------------------------------------------
 
 if(PREFIX STREQUAL efi)
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${EFI_PREFIX_PATH}/include/efi/x86_64
-    )
+    #    execute_process(
+    #        COMMAND ${CMAKE_COMMAND} -E make_directory ${EFI_PREFIX_PATH}/include/efi/x86_64
+    #    )
 endif()
 
 target_compile_options(bfroot INTERFACE
@@ -247,9 +252,9 @@ target_compile_definitions(bfroot INTERFACE
     $<${EFI_C_CLANG}:KERNEL>
     $<${EFI_C_CLANG}:EFI>
 )
-target_include_directories(bfroot SYSTEM INTERFACE
-    $<BUILD_INTERFACE:$<${EFI_C_CLANG}:${EFI_PREFIX_PATH}/include/efi>>
-    $<BUILD_INTERFACE:$<${EFI_C_CLANG}:${EFI_PREFIX_PATH}/include/efi/x86_64>>
-)
+#target_include_directories(bfroot SYSTEM INTERFACE
+#    $<BUILD_INTERFACE:$<${EFI_C_CLANG}:${EFI_PREFIX_PATH}/include/efi>>
+#    $<BUILD_INTERFACE:$<${EFI_C_CLANG}:${EFI_PREFIX_PATH}/include/efi/x86_64>>
+#)
 
 fini_project()

@@ -16,6 +16,6 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-do_test(test_debug_ring SOURCES debug_ring/test_debug_ring.cpp)
-do_test(test_serial_ns16550a SOURCES serial/test_serial_ns16550a.cpp)
-#do_test(test_serial_port_pl011 SOURCES serial/test_serial_pl011.cpp)
+do_test(debug_ring/test_debug_ring.cpp)
+do_test(serial/test_serial_ns16550a.cpp)
+#do_test(serial/test_serial_pl011.cpp)

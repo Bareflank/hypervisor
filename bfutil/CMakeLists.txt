@@ -19,35 +19,29 @@
 cmake_minimum_required(VERSION 3.10)
 project(bfutil C CXX)
 
+# -----------------------------------------------------------------------------
 # Common
-#
+# -----------------------------------------------------------------------------
+
 init_project(bfutil INTERFACE)
-
 target_link_libraries(bfutil INTERFACE ${PREFIX}::bfroot)
-target_include_directories(bfutil INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-)
-install(DIRECTORY include/ DESTINATION include)
-
 if(NOT PREFIX STREQUAL test)
+    install(DIRECTORY include/ DESTINATION include)
     fini_project()
     return()
 endif()
 
-# Test-specific
-#
-add_library(catch)
-target_sources(catch PRIVATE tests/test_catch.cpp)
-target_link_libraries(catch PRIVATE test::bfroot)
-install(TARGETS catch DESTINATION lib EXPORT bfutil-test-targets)
+# -----------------------------------------------------------------------------
+# Test
+# -----------------------------------------------------------------------------
 
 target_link_libraries(bfutil INTERFACE
-    catch
     $<$<OR:$<BOOL:${CYGWIN}>,$<BOOL:${WIN32}>>:setupapi>
 )
+target_include_directories(bfutil INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+)
 
-# Unit tests
-#
 do_test(tests/test_affinity.cpp)
 do_test(tests/test_benchmark.cpp)
 do_test(tests/test_bitmanip.cpp)

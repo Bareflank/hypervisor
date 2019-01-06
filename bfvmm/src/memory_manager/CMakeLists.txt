@@ -29,7 +29,10 @@ install(
     DESTINATION lib
     EXPORT bfvmm-${PREFIX}-targets
 )
-install(
-    DIRECTORY ../../include/memory_manager/
-    DESTINATION include/bfvmm/memory_manager
-)
+
+if(PREFIX STREQUAL vmm)
+    install(
+        DIRECTORY ../../include/memory_manager/
+        DESTINATION include/bfvmm/memory_manager
+    )
+endif()

@@ -19,17 +19,23 @@
 cmake_minimum_required(VERSION 3.10)
 project(bfvmm C CXX)
 
+set(CXX $<COMPILE_LANGUAGE:CXX>)
+set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>>)
+set(BUILD_INCLUDE $<AND:${CXX},${BUILD}>)
+
+# ------------------------------------------------------------------------------
+# Common
+# ------------------------------------------------------------------------------
+
 init_project(bfvmm INTERFACE)
 
-target_link_libraries(bfvmm INTERFACE ${PREFIX}::bfintrinsics)
-target_link_directories(bfvmm INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/lib>
-    $<BUILD_INTERFACE:${CMAKE_INSTALL_PREFIX}/lib>
-)
-target_include_directories(bfvmm SYSTEM INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+target_include_directories(bfvmm INTERFACE
+    $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/include>
+    $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../bfintrinsics/include>
+    $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../bfutil/include>
     $<INSTALL_INTERFACE:include/bfvmm>
 )
+target_link_libraries(bfvmm INTERFACE ${PREFIX}::bfroot)
 
 add_subdirectory(src/hve)
 add_subdirectory(src/vcpu)
@@ -41,16 +47,25 @@ target_link_libraries(bfvmm INTERFACE bfvmm_vcpu)
 target_link_libraries(bfvmm INTERFACE bfvmm_memory_manager)
 target_link_libraries(bfvmm INTERFACE bfvmm_debug)
 
+# ------------------------------------------------------------------------------
+# test
+# ------------------------------------------------------------------------------
+
 if(PREFIX STREQUAL test)
     add_subdirectory(tests/hve ${CMAKE_CURRENT_BINARY_DIR}/tests/hve)
     add_subdirectory(tests/vcpu ${CMAKE_CURRENT_BINARY_DIR}/tests/vcpu)
     add_subdirectory(tests/memory_manager ${CMAKE_CURRENT_BINARY_DIR}/tests/memory_manager)
     add_subdirectory(tests/debug ${CMAKE_CURRENT_BINARY_DIR}/tests/debug)
-elseif(PREFIX STREQUAL vmm)
+endif()
+
+# ------------------------------------------------------------------------------
+# vmm
+# ------------------------------------------------------------------------------
+
+if(PREFIX STREQUAL vmm)
     add_subdirectory(src/entry)
     add_subdirectory(src/main)
 endif()
 
-install(DIRECTORY include/ DESTINATION include)
-
+install(DIRECTORY include/ DESTINATION include/bfvmm)
 fini_project()

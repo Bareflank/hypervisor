@@ -19,12 +19,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(bfruntime C CXX)
 
-init_project(bfruntime INTERFACE)
-target_link_libraries(bfruntime INTERFACE ${PREFIX}::bfutil)
-
-#
+# -----------------------------------------------------------------------------
 # Generator expressions
-#
+# -----------------------------------------------------------------------------
+
 set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 set(ARM $<STREQUAL:${BUILD_TARGET_ARCH},aarch64>)
 set(ASM $<AND:${X64},$<NOT:$<BOOL:${WIN32}>>>)
@@ -32,11 +30,23 @@ set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>>)
 set(C_CXX $<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>)
 set(BUILD_INCLUDE $<AND:${C_CXX},${BUILD}>)
 
-#
+# -----------------------------------------------------------------------------
+# Common
+# -----------------------------------------------------------------------------
+
+init_project(bfruntime INTERFACE)
+target_link_libraries(bfruntime INTERFACE ${PREFIX}::bfroot)
+target_include_directories(bfruntime INTERFACE
+    $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/include>
+    $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../bfutil/include>
+)
+
+# -----------------------------------------------------------------------------
 # crt
-#
+# -----------------------------------------------------------------------------
+
 add_library(bfcrt)
-target_link_libraries(bfcrt PUBLIC ${PREFIX}::bfruntime)
+target_link_libraries(bfcrt PUBLIC bfruntime)
 target_compile_options(bfcrt PRIVATE $<${C_CXX}:-Wno-main>)
 target_sources(bfcrt PRIVATE
     src/crt/crt.cpp
@@ -46,30 +56,36 @@ target_sources(bfcrt PRIVATE
 
 if(PREFIX STREQUAL test)
     do_test(tests/crt/test_crt.cpp DEPENDS bfcrt)
+    install(TARGETS bfcrt DESTINATION lib EXPORT bfruntime-test-targets)
+    fini_project()
+    return()
 endif()
 
-#
+# -----------------------------------------------------------------------------
 # pthread
-#
+# -----------------------------------------------------------------------------
+
 add_library(bfpthread)
-target_link_libraries(bfpthread PUBLIC ${PREFIX}::bfutil)
+target_link_libraries(bfpthread PUBLIC bfruntime)
 target_sources(bfpthread PRIVATE
     src/pthread/pthread.cpp
     $<${ASM}:src/pthread/threadcontext.asm>
 )
 
-#
+# -----------------------------------------------------------------------------
 # syscall
-#
+# -----------------------------------------------------------------------------
+
 add_library(bfsyscall)
-target_link_libraries(bfsyscall PUBLIC ${PREFIX}::bfutil)
+target_link_libraries(bfsyscall PUBLIC bfruntime)
 target_sources(bfsyscall PRIVATE src/syscall/syscall.cpp)
 
-#
+# -----------------------------------------------------------------------------
 # unwind
-#
+# -----------------------------------------------------------------------------
+
 add_library(bfunwind)
-target_link_libraries(bfunwind PUBLIC ${PREFIX}::bfutil)
+target_link_libraries(bfunwind PUBLIC bfruntime)
 target_include_directories(bfunwind PRIVATE
     $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/src/unwind/include>
 )
@@ -80,9 +96,10 @@ target_sources(bfunwind PRIVATE
     src/unwind/registers_intel_x64.asm
 )
 
-#
+# -----------------------------------------------------------------------------
 # install
-#
+# -----------------------------------------------------------------------------
+
 install(
     FILES src/unwind/include/ia64_cxx_abi.h
     DESTINATION include

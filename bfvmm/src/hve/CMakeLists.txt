@@ -43,4 +43,7 @@ target_sources(bfvmm_hve PRIVATE
 )
 
 install(TARGETS bfvmm_hve DESTINATION lib EXPORT bfvmm-${PREFIX}-targets)
-install(DIRECTORY ../../include/hve/ DESTINATION include/bfvmm/hve)
+
+if(PREFIX STREQUAL vmm)
+    install(DIRECTORY ../../include/hve/ DESTINATION include/bfvmm/hve)
+endif()
