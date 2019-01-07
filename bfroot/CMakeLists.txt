@@ -159,8 +159,8 @@ target_compile_options(bfroot INTERFACE
     $<${TST_CXX_CLANG}:-fvisibility-inlines-hidden>
 
     $<${TST_C_CXX_CLANG_ASAN}:-O1 -g -fno-omit-frame-pointer>
-    $<${TST_C_CXX_CLANG_ASAN}:-fsanitize=address -fsanitize=leak>
-    $<${TST_C_CXX_CLANG_USAN}:-fsanitize=undefined>
+    $<${TST_C_CXX_CLANG_ASAN}:-fsanitize=address -fsanitize=leak -fuse-ld=gold>
+    $<${TST_C_CXX_CLANG_USAN}:-fsanitize=undefined -fuse-ld=gold>
     $<${TST_C_CXX_CLANG_CODECOV}:-g -O0 -fprofile-arcs>
     $<${TST_C_CXX_CLANG_CODECOV}:-ftest-coverage -DDEBUG_LEVEL=5>
 
