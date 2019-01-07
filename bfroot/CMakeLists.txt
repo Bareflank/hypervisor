@@ -188,10 +188,9 @@ endif()
 # ------------------------------------------------------------------------------
 
 if(PREFIX STREQUAL userspace)
-    #    execute_process(
-    #        COMMAND ${CMAKE_COMMAND} -E make_directory ${USERSPACE_PREFIX_PATH}/include/c++/v1
-    #        COMMAND ${CMAKE_COMMAND} -E make_directory ${USERSPACE_PREFIX_PATH}/lib
-    #    )
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${USERSPACE_PREFIX_PATH}/include
+    )
 endif()
 
 target_compile_options(bfroot INTERFACE
@@ -211,10 +210,10 @@ target_compile_definitions(bfroot INTERFACE
     $<${USR_C_CXX_MSVC}:_CRT_SECURE_NO_WARNINGS>
     $<${USR_C_CXX_MSVC}:NOMINMAX>
 )
-#target_include_directories(bfroot SYSTEM INTERFACE
-#    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include/c++/v1>>
-#    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include>>
-#)
+target_include_directories(bfroot SYSTEM INTERFACE
+    #    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include/c++/v1>>
+    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include>>
+)
 #target_link_directories(bfroot INTERFACE
 #    $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/lib>>
 #)

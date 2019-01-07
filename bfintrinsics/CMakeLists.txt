@@ -22,6 +22,7 @@ project(bfintrinsics C CXX)
 set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 
 init_project(bfintrinsics)
+
 target_link_libraries(bfintrinsics PUBLIC ${PREFIX}::bfroot)
 target_sources(bfintrinsics PRIVATE
     $<${X64}:src/arch/x64/cache.asm>
@@ -43,6 +44,8 @@ target_sources(bfintrinsics PRIVATE
     $<${X64}:src/arch/intel_x64/vmx.asm>
 )
 
-#install(DIRECTORY include/ DESTINATION include)
+if(PREFIX STREQUAL vmm)
+    install(DIRECTORY include/ DESTINATION include)
+endif()
 
 fini_project()

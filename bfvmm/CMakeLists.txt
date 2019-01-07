@@ -37,6 +37,7 @@ set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 # ------------------------------------------------------------------------------
 
 init_project(bfvmm INTERFACE)
+target_link_libraries(bfvmm INTERFACE ${PREFIX}::bfroot)
 
 add_subdirectory(src/hve)
 add_subdirectory(src/vcpu)
