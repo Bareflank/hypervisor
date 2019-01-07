@@ -37,7 +37,7 @@ include_external_config()
 # BFM VMM
 # ------------------------------------------------------------------------------
 
-set_bfm_vmm(${DEFAULT_VMM} DEFAULT TARGET vmm::vmm)
+set_bfm_vmm(vmm TARGET bfvmm_x86_64-vmm-elf)
 message(STATUS "Bareflank Manager VMM")
 message(STATUS "    vmm: ${BFM_VMM}")
 message(STATUS "    target: ${BFM_VMM_TARGET}")
@@ -232,7 +232,7 @@ if(BUILD_EFI AND NOT WIN32)
     include_dependency(SOURCE_DEPENDS_DIR gnuefi)
 
     add_subproject(
-        efi efi
+        bfefi efi
         DEPENDS gnuefi ${BFM_VMM_TARGET}
         SOURCE_DIR ${SOURCE_BFDRIVER_DIR}/src/platform/efi
     )

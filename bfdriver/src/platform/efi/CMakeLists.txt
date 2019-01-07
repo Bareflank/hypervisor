@@ -17,21 +17,22 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 cmake_minimum_required(VERSION 3.6)
-project(efi C CXX)
+project(bfefi C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project(
-    INCLUDES ../../../include
-    INCLUDES ${CMAKE_BINARY_DIR}
-)
+init_project(bfefi INTERFACE)
+target_link_libraries(bfefi INTERFACE efi::bfroot)
 
-list(APPEND SOURCES
-    entry.c
-    platform.c
-    platform.asm
-    ../../../src/common.c
-    ${EFI_EXTENSION_SOURCES}
-)
+# ------------------------------------------------------------------------------
+# Generator expressions
+# ------------------------------------------------------------------------------
+
+set(C $<COMPILE_LANGUAGE:C>)
+set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>>)
+set(BUILD_INCLUDE $<AND:${C},${BUILD}>)
+
+# ------------------------------------------------------------------------------
+# Shellcode command
+# ------------------------------------------------------------------------------
 
 add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/vmm.h
@@ -42,15 +43,31 @@ add_custom_command(
     DEPENDS ${BFM_VMM_BIN_PATH}/${BFM_VMM}
     COMMENT "  EFI VMM: ${BFM_VMM_BIN_PATH}/${BFM_VMM}"
 )
-
 add_custom_target(
     bareflank_xxd
     DEPENDS ${CMAKE_BINARY_DIR}/vmm.h
 )
 
-add_library(bareflank SHARED ${SOURCES})
-add_dependencies(bareflank bareflank_xxd)
+# ------------------------------------------------------------------------------
+# EFI application
+# ------------------------------------------------------------------------------
 
+add_library(bareflank SHARED)
+add_dependencies(bareflank bareflank_xxd)
+target_link_libraries(bareflank PRIVATE bfefi)
+
+target_include_directories(bareflank PRIVATE
+    $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../../../include>
+    $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../../../../bfutil/include>
+    $<${BUILD_INCLUDE}:${CMAKE_BINARY_DIR}>
+)
+target_sources(bareflank PRIVATE
+    entry.c
+    platform.c
+    platform.asm
+    ../../../src/common.c
+    ${EFI_EXTENSION_SOURCES}
+)
 add_custom_command(
     TARGET bareflank
     POST_BUILD
@@ -61,3 +78,4 @@ add_custom_command(
 )
 
 install(FILES ${CMAKE_BINARY_DIR}/bareflank.efi DESTINATION bin)
+fini_project()
