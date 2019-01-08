@@ -1212,7 +1212,7 @@ bfdebug_exception(const std::exception &e)
 
 #ifdef KERNEL
 #ifdef __linux__
-#include <linux/module.h>
+#include <linux/printk.h>
 #define BFINFO(...) printk(KERN_INFO __VA_ARGS__)
 #define BFDEBUG(...) printk(KERN_INFO "[BAREFLANK DEBUG]: " __VA_ARGS__)
 #define BFALERT(...) printk(KERN_INFO "[BAREFLANK ALERT]: " __VA_ARGS__)
