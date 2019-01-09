@@ -108,6 +108,9 @@ sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cm
 - [Visual Studio 2017 / WDK 10](https://docs.microsoft.com/en-us/windows-hardware/drivers/)
   - Check "Desktop development with C++"
   - Check "C++ CLI / Support"
+  - Check "VC++ 2017 version xxx Libs for Spectre (ARM)"
+  - Check "VC++ 2017 version xxx Libs for Spectre (ARM64)"
+  - Check "VC++ 2017 version xxx Libs for Spectre (x86 and x64)"
 - [Cygwin](https://www.cygwin.com/setup-x86_64.exe)
 
 To install Cygwin, simply install using all default settings, and then copy
