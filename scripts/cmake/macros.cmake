@@ -294,9 +294,9 @@ endfunction(generate_flags)
 
 # Private
 #
-function(include_dependency DIR NAME)
+macro(include_dependency DIR NAME)
     include(${${DIR}}/${NAME}.cmake)
-endfunction(include_dependency)
+endmacro(include_dependency)
 
 # ------------------------------------------------------------------------------
 # download_dependency

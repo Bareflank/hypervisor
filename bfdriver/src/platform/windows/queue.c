@@ -58,7 +58,7 @@ ioctl_add_module(const char *file, int64_t len)
         return BF_IOCTL_FAILURE;
     }
 
-    platform_memcpy(buf, file, len);
+    RtlCopyMemory(buf, file, len);
 
     ret = common_add_module(buf, len);
     if (ret != BF_SUCCESS) {
@@ -181,7 +181,7 @@ ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
         return BF_IOCTL_FAILURE;
     }
 
-    platform_memcpy(user_drr, drr, sizeof(struct debug_ring_resources_t));
+    RtlCopyMemory(user_drr, drr, sizeof(struct debug_ring_resources_t));
 
     BFDEBUG("IOCTL_DUMP_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
