@@ -29,9 +29,26 @@ auto fini_throws = false;
 auto run_throws = false;
 auto hlt_throws = false;
 
-class test
+class not_a_test_base
 {
 public:
+    not_a_test_base() = default;
+    virtual ~not_a_test_base() = default;
+};
+
+class test_base
+{
+public:
+    test_base() = default;
+    virtual ~test_base() = default;
+};
+
+class test : public test_base
+{
+public:
+
+    test() = default;
+    ~test() override = default;
 
     using id_t = uint64_t;
 
@@ -237,7 +254,37 @@ TEST_CASE("test_manager: hlt_hlt_throws")
     g_test_manager->destroy(0);
 }
 
-TEST_CASE("test_manager: hlt_no_create")
+TEST_CASE("test_manager: get without creating")
 {
-    CHECK_THROWS(g_test_manager->hlt(0));
+    CHECK_THROWS(g_test_manager->get(0));
 }
+
+TEST_CASE("test_manager: get without creating with custom string")
+{
+    CHECK_THROWS(g_test_manager->get(0), "unable to find");
+}
+
+TEST_CASE("test_manager: get success")
+{
+    g_test_manager->create(0);
+    CHECK_NOTHROW(g_test_manager->get(0));
+    g_test_manager->destroy(0);
+}
+
+TEST_CASE("test_manager: get success custom type")
+{
+    g_test_manager->create(0);
+    CHECK_NOTHROW(g_test_manager->get<test_base *>(0));
+    g_test_manager->destroy(0);
+}
+
+TEST_CASE("test_manager: get invalid type")
+{
+    not_a_test_base{};
+
+    g_test_manager->create(0);
+    CHECK_THROWS(g_test_manager->get<not_a_test_base *>(0));
+    g_test_manager->destroy(0);
+}
+
+
