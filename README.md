@@ -149,13 +149,24 @@ instructions follow below.
 
 #### Windows (WSL):
 - Ubuntu 18.04 LTS (Windows Store)
-- Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux (Powershell with admin rights)
 
-Then run the following in the WSL command prompt:
+In a powershell terminal with admin right, run the following:
+
+```
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+```
+
+Then run the following in the WSL command prompt that is created:
 
 ```
 sudo apt-get update
 sudo apt-get install git build-essential nasm clang cmake libelf-dev
+```
+
+Your files can be found here:
+
+```
+C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\
 ```
 
 Note that the WSL cannot be used to compile the Windows drivers or start/stop the hypervisor.
