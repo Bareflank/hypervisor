@@ -104,13 +104,35 @@ sudo pacman -S git base-devel linux-headers nasm clang cmake
 sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cmake libelf-dev
 ```
 
-#### Windows (Cygwin):
+#### Windows (Visual Studio):
 - [Visual Studio 2017 / WDK 10](https://docs.microsoft.com/en-us/windows-hardware/drivers/)
   - Check "Desktop development with C++"
   - Check "C++ CLI / Support"
   - Check "VC++ 2017 version xxx Libs for Spectre (ARM)"
   - Check "VC++ 2017 version xxx Libs for Spectre (ARM64)"
   - Check "VC++ 2017 version xxx Libs for Spectre (x86 and x64)"
+  
+After installing the the above packages you must enable test signing mode. This can be done from a
+command prompt with admin privileges:
+```
+bcdedit.exe /set testsigning ON
+<reboot>
+```
+
+Once the build environment is set up, Bareflank can be configured using the following
+instead of the cmake configure commands listed below which assume Linux:
+```
+cmake -G "Visual Studio 15 2017 Win64" -DENABLE_BUILD_VMM=OFF ..
+```
+
+Note that this version of Bareflank cannot be used to compile hypervisor as Visual Studio currently 
+cannot build the needed ELF files that Bareflank relies on. This build environment also relys on 
+msbuild, which doesn't support any of the build targets so compiling the drivers must be done 
+manually. This environment however will compile the userspace applications natively which is 
+needed for deployment to remove dependencies on Cygwin. 
+
+#### Windows (Cygwin):
+- All of the Windows (Visual Studio) instructions
 - [Cygwin](https://www.cygwin.com/setup-x86_64.exe)
 
 To install Cygwin, simply install using all default settings, and then copy
@@ -119,16 +141,23 @@ run the following:
 
 ```
 setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext,bash-completion
-git config --global core.autocrlf false
 ```
 
-After installing the the above packages and disabling auto CRLF (which breaks
-bash scripts) you must enable test signing mode. This can be done from a
-command prompt with admin privileges:
-```
-bcdedit.exe /set testsigning ON
-<reboot>
-```
+This build environment provides a complete toolchain for building and running Bareflank. Most 
+developers using Bareflank on Windows will need Cygwin for this reason. The remaining compilation 
+instructions follow below. 
+
+#### Windows (WSL):
+- Ubuntu 18.04 LTS (Windows Store)
+- Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux (Powershell with admin rights)
+- Update Ubuntu using 'sudo apt-get update'
+
+Note that the WSL cannot be used to compile the Windows drivers or start/stop the hypervisor. 
+It can, however, be used to compile the hypervisor including the UEFI version without the 
+need for Cygwin. If this is paired with the Visual Studio build environment, and you manually 
+compile the drivers, you can piece together a complete build enviornment for Windows without the 
+need for Cygwin. Developers are advised not to use this however as it is cumbersome and instead 
+should use the Cygwin environment. The WSL is only supported for deployment purposes. 
 
 ## Compilation Instructions
 
