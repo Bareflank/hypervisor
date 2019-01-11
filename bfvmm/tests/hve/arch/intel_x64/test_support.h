@@ -188,8 +188,8 @@ setup_check_control_vm_exit_control_fields_all_paths(std::vector<struct control_
 
     path.setup = [&] {
         g_msrs[intel_x64::msrs::ia32_vmx_true_exit_ctls::addr] = 0xffffffff00000000UL;
-        pin_ctl_allow1(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::mask);
-        pin_based_vm_execution_controls::activate_vmx_preemption_timer::enable();
+        pin_ctl_allow1(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_preemption_timer::mask);
+        pin_based_vm_execution_controls::activate_preemption_timer::enable();
         vm_exit_msr_store_count::set(0UL);
         vm_exit_msr_load_count::set(0UL);
     };
