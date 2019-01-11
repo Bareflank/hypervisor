@@ -1194,7 +1194,7 @@ bfdebug_exception(const std::exception &e)
 /* C Debugging                                                                */
 /* -------------------------------------------------------------------------- */
 
-#ifndef KERNEL
+#if !defined(KERNEL) && !defined(EFI)
 #ifdef __cplusplus
 #include <cstdio>
 #else
@@ -1210,7 +1210,7 @@ bfdebug_exception(const std::exception &e)
 /* Linux Debugging                                                            */
 /* -------------------------------------------------------------------------- */
 
-#ifdef KERNEL
+#if defined(KERNEL) && !defined(EFI)
 #ifdef __linux__
 #include <linux/printk.h>
 #define BFINFO(...) printk(KERN_INFO __VA_ARGS__)
@@ -1224,7 +1224,7 @@ bfdebug_exception(const std::exception &e)
 /* Windows Debugging                                                          */
 /* -------------------------------------------------------------------------- */
 
-#ifdef KERNEL
+#if defined(KERNEL) && !defined(EFI)
 #ifdef _WIN32
 #include <wdm.h>
 #define BFINFO(...) DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, __VA_ARGS__)
@@ -1238,8 +1238,7 @@ bfdebug_exception(const std::exception &e)
 /* EFI Debugging                                                              */
 /* -------------------------------------------------------------------------- */
 
-#ifdef KERNEL
-#ifdef EFI
+#if defined(KERNEL) && defined(EFI)
 #include "efi.h"
 #include "efilib.h"
 #define BFINFO(...) Print(L__VA_ARGS__)
@@ -1247,8 +1246,6 @@ bfdebug_exception(const std::exception &e)
 #define BFALERT(...) Print(L"[BAREFLANK ALERT]: " __VA_ARGS__)
 #define BFERROR(...) Print(L"[BAREFLANK ERROR]: " __VA_ARGS__)
 #endif
-#endif
-
 
 /** @endcond */
 

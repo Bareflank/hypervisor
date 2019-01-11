@@ -63,7 +63,7 @@ ioctl_add_module(const char *file, uint64_t len)
         return BF_IOCTL_FAILURE;
     }
 
-    platform_memcpy(buf, file, len);
+    gBS->CopyMem(buf, (void *)file, len);
 
     ret = common_add_module(buf, len);
     if (ret != BF_SUCCESS) {
@@ -125,13 +125,116 @@ failure:
 }
 
 /* -------------------------------------------------------------------------- */
+/* Load / Image                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * TODO
+ *
+ * Instead of loading the OS, we need to actually load a EFI/BOOT/chain.efi
+ * file which is the previous EFI/BOOT/boot64.efi. This will allow us to
+ * support the different types of loaders that are instealled regardless of
+ * which one is actually installed.
+ */
+
+static long
+load_start_vm(EFI_HANDLE ParentImage)
+{
+    /**
+     * TODO
+     *
+     * Need to check to see if there are deallocate functions for a lot of
+     * these functions as they are returning pointers.
+     */
+
+    EFI_STATUS status;
+
+    UINTN i;
+    UINTN NumberFileSystemHandles = 0;
+    EFI_HANDLE *FileSystemHandles = NULL;
+
+    status =
+        gBS->LocateHandleBuffer(
+            ByProtocol,
+            &gEfiBlockIoProtocolGuid,
+            NULL,
+            &NumberFileSystemHandles,
+            &FileSystemHandles
+        );
+
+    if (EFI_ERROR(status)) {
+        BFALERT("LocateHandleBuffer failed\n");
+        return EFI_ABORTED;
+    }
+
+    for(i = 0; i < NumberFileSystemHandles; ++i) {
+
+        EFI_DEVICE_PATH_PROTOCOL *FilePath = NULL;
+        EFI_BLOCK_IO *BlkIo = NULL;
+        EFI_HANDLE ImageHandle = NULL;
+        EFI_LOADED_IMAGE_PROTOCOL *ImageInfo = NULL;
+
+        status =
+            gBS->HandleProtocol(
+                FileSystemHandles[i],
+                &gEfiBlockIoProtocolGuid,
+                (VOID**) &BlkIo
+            );
+
+        if (EFI_ERROR(status)) {
+            continue;
+        }
+
+        FilePath = FileDevicePath(FileSystemHandles[i], L"\\EFI\\BOOT\\bootx64.efi");
+
+        status =
+            gBS->LoadImage(
+                FALSE,
+                ParentImage,
+                FilePath,
+                NULL,
+                0,
+                &ImageHandle
+            );
+
+        gBS->FreePool(FilePath);
+
+        if (EFI_ERROR(status)) {
+            continue;
+        }
+
+        status =
+            gBS->HandleProtocol(
+                ImageHandle,
+                &gEfiLoadedImageProtocolGuid,
+                (VOID **) &ImageInfo
+        );
+
+        if (EFI_ERROR(status)) {
+            continue;
+        }
+
+        if(ImageInfo->ImageCodeType != EfiLoaderCode) {
+            continue;
+        }
+
+        gBS->StartImage(ImageHandle, NULL, NULL);
+
+        break;
+    }
+
+    BFALERT("Unable to locate EFI bootloader\n");
+    return EFI_ABORTED;
+}
+
+/* -------------------------------------------------------------------------- */
 /* Entry / Exit                                                               */
 /* -------------------------------------------------------------------------- */
 
 EFI_STATUS
 efi_main(EFI_HANDLE image, EFI_SYSTEM_TABLE *systab)
 {
-	InitializeLib(image, systab);
+    InitializeLib(image, systab);
 
     Print(L"\n");
     Print(L"  ___                __ _           _   \n");
@@ -150,5 +253,8 @@ efi_main(EFI_HANDLE image, EFI_SYSTEM_TABLE *systab)
     ioctl_load_vmm();
     ioctl_start_vmm();
 
-	return EFI_SUCCESS;
+    load_start_vm(image);
+    
+    return EFI_SUCCESS;
 }
+
