@@ -254,7 +254,6 @@ efi_main(EFI_HANDLE image, EFI_SYSTEM_TABLE *systab)
     ioctl_start_vmm();
 
     load_start_vm(image);
-    
+
     return EFI_SUCCESS;
 }
-
