@@ -49,11 +49,12 @@ add_subdirectory(src/debug)
 # ------------------------------------------------------------------------------
 
 if(PREFIX STREQUAL test)
-    target_link_libraries(bfvmm INTERFACE bfvmm_hve)
-    target_link_libraries(bfvmm INTERFACE bfvmm_vcpu)
-    target_link_libraries(bfvmm INTERFACE bfvmm_memory_manager)
-    target_link_libraries(bfvmm INTERFACE bfvmm_debug)
-
+    target_link_libraries(bfvmm INTERFACE
+        bfvmm_hve
+        bfvmm_vcpu
+        bfvmm_memory_manager
+        bfvmm_debug
+    )
     add_subdirectory(tests/hve ${CMAKE_CURRENT_BINARY_DIR}/tests/hve)
     add_subdirectory(tests/vcpu ${CMAKE_CURRENT_BINARY_DIR}/tests/vcpu)
     add_subdirectory(tests/memory_manager ${CMAKE_CURRENT_BINARY_DIR}/tests/memory_manager)
@@ -65,9 +66,26 @@ endif()
 # ------------------------------------------------------------------------------
 
 if(PREFIX STREQUAL vmm)
-    target_include_directories(bfvmm INTERFACE $<INSTALL_INTERFACE:include/bfvmm>)
     add_subdirectory(src/entry)
+    target_link_libraries(bfvmm INTERFACE
+        bfvmm_hve
+        bfvmm_vcpu
+        bfvmm_memory_manager
+        bfvmm_debug
+        vmm::bfintrinsics
+        ${CMAKE_INSTALL_PREFIX}/lib/libc++.a
+        ${CMAKE_INSTALL_PREFIX}/lib/libc++abi.a
+        vmm::bfpthread
+        vmm::bfunwind
+        ${CMAKE_INSTALL_PREFIX}/lib/libm.a
+        ${CMAKE_INSTALL_PREFIX}/lib/libc.a
+        vmm::bfsyscall
+    )
+    target_link_options(bfvmm INTERFACE
+        --whole-archive -lbfvmm_entry -lbfcrt -lbfdso --no-whole-archive
+    )
     add_subdirectory(src/main)
+    target_include_directories(bfvmm INTERFACE $<INSTALL_INTERFACE:include/bfvmm>)
     install(DIRECTORY include/ DESTINATION include/bfvmm)
 endif()
 

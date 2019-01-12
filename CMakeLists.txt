@@ -37,7 +37,7 @@ include_external_config()
 # BFM VMM
 # ------------------------------------------------------------------------------
 
-set_bfm_vmm(vmm TARGET bfvmm_x86_64-vmm-elf)
+set_bfm_vmm(${DEFAULT_VMM} DEFAULT TARGET bfvmm_x86_64-vmm-elf)
 message(STATUS "Bareflank Manager VMM")
 message(STATUS "    vmm: ${BFM_VMM}")
 message(STATUS "    target: ${BFM_VMM_TARGET}")

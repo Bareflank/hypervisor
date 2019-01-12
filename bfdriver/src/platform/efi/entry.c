@@ -63,7 +63,7 @@ ioctl_add_module(const char *file, uint64_t len)
         return BF_IOCTL_FAILURE;
     }
 
-    platform_memcpy(buf, file, len);
+    platform_memcpy(buf, len, file, len, len);
 
     ret = common_add_module(buf, len);
     if (ret != BF_SUCCESS) {
