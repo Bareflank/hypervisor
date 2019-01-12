@@ -24,6 +24,12 @@ TEST_CASE("string operator")
     CHECK("10"_s == std::string("10"));
 }
 
+TEST_CASE("digits")
+{
+    CHECK(bfn::digits(42, 10) == 2);
+    CHECK(bfn::digits(0x42, 16) == 2);
+}
+
 TEST_CASE("base 10")
 {
     CHECK(bfn::to_string(static_cast<int>(10), 10) == "10");

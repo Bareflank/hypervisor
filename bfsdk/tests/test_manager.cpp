@@ -261,7 +261,7 @@ TEST_CASE("test_manager: get without creating")
 
 TEST_CASE("test_manager: get without creating with custom string")
 {
-    CHECK_THROWS(g_test_manager->get(0), "unable to find");
+    CHECK_THROWS(g_test_manager->get(0, "unable to find"));
 }
 
 TEST_CASE("test_manager: get success")
@@ -286,5 +286,3 @@ TEST_CASE("test_manager: get invalid type")
     CHECK_THROWS(g_test_manager->get<not_a_test_base *>(0));
     g_test_manager->destroy(0);
 }
-
-

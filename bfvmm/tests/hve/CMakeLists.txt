@@ -71,6 +71,11 @@ do_test(test_exit_handler
     ${ARGN}
 )
 
+do_test(test_bfvmm_vcpu
+    SOURCES arch/intel_x64/test_vcpu.cpp
+    ${ARGN}
+)
+
 do_test(test_vmcs
     SOURCES arch/intel_x64/test_vmcs.cpp
     ${ARGN}
