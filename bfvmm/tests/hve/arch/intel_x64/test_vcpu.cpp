@@ -37,12 +37,21 @@ TEST_CASE("vcpu: resume")
     setup_test_support();
 
     MockRepository mocks;
-    mocks.ExpectCallFunc(bfvmm::intel_x64::check::all);
+    mocks.OnCallFunc(bfvmm::intel_x64::check::all);
 
     bfvmm::intel_x64::vcpu vcpu{0};
 
     CHECK_NOTHROW(vcpu.run());
     CHECK_THROWS(vcpu.run());
+}
+
+TEST_CASE("vcpu: hlt")
+{
+    setup_test_support();
+    bfvmm::intel_x64::vcpu vcpu{0};
+
+    CHECK_NOTHROW(vcpu.run());
+    CHECK_NOTHROW(vcpu.hlt());
 }
 
 TEST_CASE("vcpu: load")
@@ -70,6 +79,7 @@ TEST_CASE("vcpu: add handlers")
     setup_test_support();
     bfvmm::intel_x64::vcpu vcpu{0};
 
+    test_handler(&vcpu);
     CHECK_NOTHROW(vcpu.add_handler(0, handler_delegate_t::create<test_handler>()));
     CHECK_NOTHROW(vcpu.add_exit_handler(handler_delegate_t::create<test_handler>()));
 }

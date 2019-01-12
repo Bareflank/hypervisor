@@ -175,6 +175,19 @@ TEST_CASE("exit_handler: unhandled exit reason, invalid reason")
     CHECK_NOTHROW(ehlr.handle(&ehlr));
 }
 
+TEST_CASE("exit_handler: add_exit_handler")
+{
+    MockRepository mocks;
+    auto &&vcpu = setup_vcpu(mocks, 0x0);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
+
+    CHECK_NOTHROW(
+        ehlr.add_exit_handler(handler_delegate_t::create<test_handler>())
+    );
+
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
+}
+
 TEST_CASE("exit_handler: handle_nmi")
 {
     MockRepository mocks;
@@ -222,6 +235,24 @@ TEST_CASE("exit_handler: handle_cpuid")
     CHECK(g_save_state.rip != 0);
 }
 
+TEST_CASE("exit_handler: handle_cpuid ack")
+{
+    MockRepository mocks;
+    auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
+
+    ehlr.add_init_handler(
+        ::handler_delegate_t::create<test_handler>()
+    );
+
+    g_save_state.rax = 0x4BF00000;
+    g_save_state.rip = 0;
+
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
+    CHECK(g_save_state.rip != 0);
+    CHECK(g_save_state.rax == 0x4BF00001);
+}
+
 TEST_CASE("exit_handler: handle_cpuid init")
 {
     MockRepository mocks;
@@ -232,7 +263,7 @@ TEST_CASE("exit_handler: handle_cpuid init")
         ::handler_delegate_t::create<test_handler>()
     );
 
-    g_save_state.rax = 0xBF10;
+    g_save_state.rax = 0x4BF00010;
     g_save_state.rip = 0;
 
     CHECK_NOTHROW(ehlr.handle(&ehlr));
@@ -245,7 +276,7 @@ TEST_CASE("exit_handler: handle_cpuid start")
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
 
-    g_save_state.rax = 0xBF11;
+    g_save_state.rax = 0x4BF00011;
     g_save_state.rip = 0;
 
     CHECK_NOTHROW(ehlr.handle(&ehlr));
@@ -262,7 +293,7 @@ TEST_CASE("exit_handler: handle_cpuid fini")
         ::handler_delegate_t::create<test_handler>()
     );
 
-    g_save_state.rax = 0xBF20;
+    g_save_state.rax = 0x4BF00020;
     g_save_state.rip = 0;
 
     CHECK_NOTHROW(ehlr.handle(&ehlr));
@@ -275,7 +306,7 @@ TEST_CASE("exit_handler: handle_cpuid stop")
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
 
-    g_save_state.rax = 0xBF21;
+    g_save_state.rax = 0x4BF00021;
     g_save_state.rip = 0;
 
     CHECK_NOTHROW(ehlr.handle(&ehlr));
