@@ -23,10 +23,8 @@ The Bareflank Hypervisor uses a layered, modular approach.
 implementation, the build system, and architecture specific intrinsics.
 - [extended_apis](https://github.com/Bareflank/extended_apis): adds hardware virtualization extension
 APIs to the hypervisor.
-- [hyperkernel](https://github.com/Bareflank/hyperkernel): adds guest support APIs to the
-hypervisor.
-- [pv_interface](https://github.com/Bareflank/pv_interface): adds a hypercall API/ABI and
-PV interface to the hypervisor.
+- [boxy](https://github.com/Bareflank/boxy): leverages the Bareflank SDK provide a 
+fully functional hypervisor with guest support. 
 
 To support Bareflank's design approach, the hypervisor is licensed
 under MIT, specifically
@@ -64,7 +62,7 @@ Intel _Sandy Bridge_ and above hardware:
 In the future, we would also like to support:
 - macOS
 - BSD
-- ARM64 (currently under development)
+- ARM64 (still under development)
 
 ## Motivation
 
@@ -298,26 +296,6 @@ ssh-host-config -y
 net start sshd
 netsh advfirewall firewall add rule name='SSH Port' dir=in action=allow protocol=TCP localport=22
 ```
-
-## Additional Layers
-
-*** **WARNING** *** <br>
-The master branch is our development branch and should be considered unstable.
-It is possible these additional projects might not compile with master. If you
-need a stable branch that works with these repos, please use a tagged release.
-
-Since the main, hypervisor repo only provides the a minimal implementation,
-we have created other repositories that extend Bareflank to provide additional
-capabilities that you might find useful.
-
-**Extended APIs:**<br>
-https://github.com/Bareflank/extended_apis
-
-**Hyperkernel:**<br>
-https://github.com/Bareflank/hyperkernel
-
-**PV Interface:**<br>
-https://github.com/Bareflank/pv_interface
 
 ## Example Extensions
 
