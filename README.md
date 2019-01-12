@@ -23,7 +23,7 @@ The Bareflank Hypervisor uses a layered, modular approach.
 implementation, the build system, and architecture specific intrinsics.
 - [extended_apis](https://github.com/Bareflank/extended_apis): adds hardware virtualization extension
 APIs to the hypervisor.
-- [boxy](https://github.com/Bareflank/boxy): leverages the Bareflank SDK provide a 
+- [boxy](https://github.com/Bareflank/boxy): leverages the Bareflank SDK to provide a 
 fully functional hypervisor with guest support. 
 
 To support Bareflank's design approach, the hypervisor is licensed
