@@ -163,10 +163,11 @@ sudo apt-get update
 sudo apt-get install git build-essential nasm clang cmake libelf-dev
 ```
 
-Your files can be found here:
+Do not attempt to access the Linux file system from Windows. Instead, you should access the 
+Windows file system from Linux which can be found here:
 
 ```
-C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\
+/mnt/c/
 ```
 
 Note that the WSL cannot be used to compile the Windows drivers or start/stop the hypervisor.
