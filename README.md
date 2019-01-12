@@ -29,7 +29,7 @@ hypervisor.
 PV interface to the hypervisor.
 
 To support Bareflank's design approach, the hypervisor is licensed
-under the GNU Lesser General Public License v2.1 (LGPL), specifically
+under MIT, specifically
 enabling users of the project to both contribute back to the project, but
 also create proprietary extensions of the VMM if so desired.
 
@@ -163,7 +163,7 @@ sudo apt-get update
 sudo apt-get install git build-essential nasm clang cmake libelf-dev
 ```
 
-Do not attempt to access the Linux file system from Windows. Instead, you should access the 
+Do not attempt to access the Linux file system from Windows. Instead, you should access the
 Windows file system from Linux which can be found here:
 
 ```
@@ -343,9 +343,7 @@ https://github.com/Bareflank/extended_apis_example_hook
 
 ## License
 
-The Bareflank Hypervisor is licensed under the GNU Lesser General Public License
-v2.1 (LGPL). The Windows and EFI drivers are licensed under the MIT License. The
-Linux driver is licensed under the General Public License v2.0 (GPL) License.
+The Bareflank Hypervisor is licensed under the MIT License.
 
 ## Related
 
