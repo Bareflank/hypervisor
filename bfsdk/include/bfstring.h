@@ -25,6 +25,7 @@
 
 #include <inttypes.h>
 
+#include <array>
 #include <vector>
 #include <string>
 #include <sstream>
