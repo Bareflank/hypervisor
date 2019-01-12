@@ -25,7 +25,7 @@ TEST_CASE("vcpu: run throws")
     bfvmm::intel_x64::vcpu vcpu{0};
 
     g_vmload_fails = true;
-    auto ___ = gsl::finally([]{
+    auto ___ = gsl::finally([] {
         g_vmload_fails = false;
     });
 
