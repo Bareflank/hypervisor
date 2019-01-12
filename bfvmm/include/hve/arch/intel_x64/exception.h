@@ -31,7 +31,7 @@ vector_to_str(uint64_t vec) noexcept;
 
 extern "C" EXPORT_SYM void
 default_esr(
-    uint64_t vector, uint64_t ec, bool ec_valid, uint64_t *regs) noexcept;
+    uint64_t vector, uint64_t ec, bool ec_valid, uint64_t *regs, void *vcpu) noexcept;
 
 extern "C" void
 set_default_esrs(

@@ -80,7 +80,7 @@ platform_virt_to_phys(void *virt)
 }
 
 void
-platform_free_rw(const void *addr, uint64_t len)
+platform_free_rw(void *addr, uint64_t len)
 {
     (void) len;
 
@@ -89,11 +89,11 @@ platform_free_rw(const void *addr, uint64_t len)
         return;
     }
 
-    ExFreePoolWithTag((void *)addr, BF_TAG);
+    ExFreePoolWithTag(addr, BF_TAG);
 }
 
 void
-platform_free_rwe(const void *addr, uint64_t len)
+platform_free_rwe(void *addr, uint64_t len)
 {
     (void) len;
 
@@ -102,7 +102,7 @@ platform_free_rwe(const void *addr, uint64_t len)
         return;
     }
 
-    ExFreePoolWithTag((void *)addr, BF_TAG);
+    ExFreePoolWithTag(addr, BF_TAG);
 }
 
 void *
@@ -116,15 +116,22 @@ platform_memset(void *ptr, char value, uint64_t num)
     return ptr;
 }
 
-void *
-platform_memcpy(void *dst, const void *src, uint64_t num)
+int64_t
+platform_memcpy(
+    void *dst, uint64_t dst_size, const void *src, uint64_t src_size, uint64_t num)
 {
-    if (dst == nullptr || src == nullptr) {
-        return nullptr;
+    if (dst == 0 || src == 0) {
+        BFALERT("platform_memcpy: invalid dst or src\n");
+        return FAILURE;
+    }
+
+    if (num > dst_size || num > src_size) {
+        BFALERT("platform_memcpy: num out of range\n");
+        return FAILURE;
     }
 
     RtlCopyMemory(dst, src, num);
-    return dst;
+    return SUCCESS;
 }
 
 int64_t

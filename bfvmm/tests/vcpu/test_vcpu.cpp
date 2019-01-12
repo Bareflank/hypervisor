@@ -226,10 +226,10 @@ TEST_CASE("vcpu: is_host_vm_vcpu")
     CHECK(vc->is_host_vm_vcpu());
 }
 
-TEST_CASE("vcpu: is_not_host_vm_vcpu")
+TEST_CASE("vcpu: is_guest_vm_vcpu")
 {
     auto vc = std::make_unique<bfvmm::vcpu>(0x0000000100000000);
-    CHECK_FALSE(vc->is_host_vm_vcpu());
+    CHECK(vc->is_guest_vm_vcpu());
 }
 
 TEST_CASE("vcpu: is_running_vm_vcpu")
@@ -264,6 +264,10 @@ void
 test_delegate(bfobject *data)
 { bfignored(data); }
 
+void
+test_delegate_throws(bfobject *data)
+{ bfignored(data); throw std::runtime_error("error"); }
+
 TEST_CASE("vcpu: run_delegate")
 {
     auto vc = std::make_unique<bfvmm::vcpu>(0);
@@ -290,4 +294,18 @@ TEST_CASE("vcpu: fini_delegate")
     auto vc = std::make_unique<bfvmm::vcpu>(0);
     CHECK_NOTHROW(vc->add_fini_delegate(bfvmm::vcpu::fini_delegate_t::create<test_delegate>()));
     CHECK_NOTHROW(vc->fini());
+}
+
+TEST_CASE("vcpu: run_delegate throws")
+{
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
+    CHECK_NOTHROW(vc->add_run_delegate(bfvmm::vcpu::run_delegate_t::create<test_delegate_throws>()));
+    CHECK_THROWS(vc->run());
+}
+
+TEST_CASE("vcpu: init_delegate throws")
+{
+    auto vc = std::make_unique<bfvmm::vcpu>(0);
+    CHECK_NOTHROW(vc->add_init_delegate(bfvmm::vcpu::init_delegate_t::create<test_delegate_throws>()));
+    CHECK_THROWS(vc->init());
 }

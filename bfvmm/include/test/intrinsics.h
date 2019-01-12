@@ -340,6 +340,10 @@ _vmwrite(uint64_t field, uint64_t value) noexcept
 }
 
 extern "C" bool
+_vmclear(void *ptr) noexcept
+{ (void)ptr; return true; }
+
+extern "C" bool
 _vmptrld(void *ptr) noexcept
 { (void)ptr; return !g_vmload_fails; }
 

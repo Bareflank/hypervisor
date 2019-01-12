@@ -158,7 +158,7 @@ MAIN(int argc, const char *argv[])
 
         return protected_main(args);
     }
-    catch (std::exception &e) {
+    catch (const std::exception &e) {
         std::cerr << "Caught unhandled exception:" << '\n';
         std::cerr << "    - what(): " << e.what() << '\n';
     }

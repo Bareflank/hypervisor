@@ -21,9 +21,7 @@
 #include <bfexception.h>
 
 #include <hve/arch/intel_x64/vmx.h>
-
 #include <intrinsics.h>
-#include <memory_manager/memory_manager.h>
 
 // -----------------------------------------------------------------------------
 // Implementation
@@ -35,7 +33,7 @@ namespace intel_x64
 {
 
 vmx::vmx() :
-    m_vmx_region{static_cast<uint32_t *>(alloc_page()), free_page},
+    m_vmx_region{make_page<uint32_t>()},
     m_vmx_region_phys{g_mm->virtptr_to_physint(m_vmx_region.get())}
 {
     this->reset_vmx();

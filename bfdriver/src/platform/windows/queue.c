@@ -30,7 +30,7 @@
 uint64_t g_vcpuid = 0;
 
 struct pmodule_t {
-    const char *data;
+    char *data;
     int64_t size;
 };
 
@@ -58,7 +58,7 @@ ioctl_add_module(const char *file, int64_t len)
         return BF_IOCTL_FAILURE;
     }
 
-    platform_memcpy(buf, file, len);
+    RtlCopyMemory(buf, file, len);
 
     ret = common_add_module(buf, len);
     if (ret != BF_SUCCESS) {
@@ -181,7 +181,7 @@ ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
         return BF_IOCTL_FAILURE;
     }
 
-    platform_memcpy(user_drr, drr, sizeof(struct debug_ring_resources_t));
+    RtlCopyMemory(user_drr, drr, sizeof(struct debug_ring_resources_t));
 
     BFDEBUG("IOCTL_DUMP_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
@@ -264,7 +264,7 @@ bareflankEvtIoDeviceControl(
         status = WdfRequestRetrieveInputBuffer(Request, InputBufferLength, &in, &in_size);
 
         if (!NT_SUCCESS(status)) {
-            goto FAILURE;
+            goto IOCTL_FAILURE;
         }
     }
 
@@ -272,7 +272,7 @@ bareflankEvtIoDeviceControl(
         status = WdfRequestRetrieveOutputBuffer(Request, OutputBufferLength, &out, &out_size);
 
         if (!NT_SUCCESS(status)) {
-            goto FAILURE;
+            goto IOCTL_FAILURE;
         }
     }
 
@@ -310,7 +310,7 @@ bareflankEvtIoDeviceControl(
             break;
 
         default:
-            goto FAILURE;
+            goto IOCTL_FAILURE;
     }
 
     if (OutputBufferLength != 0) {
@@ -318,13 +318,13 @@ bareflankEvtIoDeviceControl(
     }
 
     if (ret != BF_IOCTL_SUCCESS) {
-        goto FAILURE;
+        goto IOCTL_FAILURE;
     }
 
     WdfRequestComplete(Request, STATUS_SUCCESS);
     return;
 
-FAILURE:
+IOCTL_FAILURE:
 
     WdfRequestComplete(Request, STATUS_ACCESS_DENIED);
     return;

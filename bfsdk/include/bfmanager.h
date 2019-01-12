@@ -19,9 +19,9 @@
 #ifndef BFMANAGER_H
 #define BFMANAGER_H
 
-#include <map>
 #include <mutex>
 #include <memory>
+#include <unordered_map>
 
 #include <bfgsl.h>
 #include <bfobject.h>
@@ -65,19 +65,22 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    /// @param id the t to initialize
+    /// @param id the T to initialize
     /// @param obj object that can be passed around as needed
     ///     by extensions of Bareflank
     ///
     void create(tid id, bfobject *obj = nullptr)
     {
-        auto ___ = gsl::on_failure([&] {
+        try {
+            if (auto t = add_t(id, obj)) {
+                t->init(obj);
+            }
+        }
+        catch (...) {
             std::lock_guard<std::mutex> guard(m_mutex);
             m_ts.erase(id);
-        });
 
-        if (auto &&t = add_t(id, obj)) {
-            t->init(obj);
+            throw;
         }
     }
 
@@ -85,20 +88,18 @@ public:
     ///
     /// Deletes T.
     ///
-    /// @param id the t to destroy
+    /// @param id the T to destroy
     /// @param obj object that can be passed around as needed
     ///     by extensions of Bareflank
     ///
     void destroy(tid id, bfobject *obj = nullptr)
     {
-        auto ___ = gsl::finally([&] {
-            std::lock_guard<std::mutex> guard(m_mutex);
-            m_ts.erase(id);
-        });
-
-        if (auto &&t = get_t(id)) {
+        if (auto t = get(id)) {
             t->fini(obj);
         }
+
+        std::lock_guard<std::mutex> guard(m_mutex);
+        m_ts.erase(id);
     }
 
     /// Run T
@@ -108,13 +109,13 @@ public:
     /// @expects t exists
     /// @ensures none
     ///
-    /// @param id the t to run
+    /// @param id the T to run
     /// @param obj object that can be passed around as needed
     ///     by extensions of Bareflank
     ///
     void run(tid id, bfobject *obj = nullptr)
     {
-        if (auto &&t = get_t(id)) {
+        if (auto t = get(id)) {
             t->run(obj);
         }
     }
@@ -126,28 +127,54 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    /// @param id the t to halt
+    /// @param id the T to halt
     /// @param obj object that can be passed around as needed
     ///     by extensions of Bareflank
     ///
     void hlt(tid id, bfobject *obj = nullptr)
     {
-        if (auto &&t = get_t(id)) {
+        if (auto t = get(id)) {
             t->hlt(obj);
         }
     }
 
-    /// Set Factory
-    ///
-    /// Should only be used by unit tests
+    /// Get
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param factory the new factory to use
+    /// @param id the T to get
+    /// @param err the error to display
+    /// @return returns a pointer to the T associated with tid
     ///
-    void set_factory(std::unique_ptr<T_factory> factory)
-    { m_T_factory = std::move(factory); }
+    gsl::not_null<T *> get(tid id, const char *err = nullptr)
+    {
+        std::lock_guard<std::mutex> guard(m_mutex);
+
+        if (auto iter = m_ts.find(id); iter != m_ts.end()) {
+            return iter->second.get();
+        }
+
+        if (err != nullptr) {
+            throw std::runtime_error(err);
+        }
+        else {
+            throw std::runtime_error("bfmanager: failed to get T");
+        }
+    }
+
+    /// Get (Dynamic Cast)
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param id the T to get
+    /// @param err the error to display
+    /// @return returns a pointer to the T associated with tid
+    ///
+    template<typename U>
+    gsl::not_null<U> get(tid id, const char *err = nullptr)
+    { return dynamic_cast<U>(get(id, err).get()); }
 
 private:
 
@@ -155,32 +182,39 @@ private:
         m_T_factory(std::make_unique<T_factory>())
     { }
 
-    std::unique_ptr<T> &add_t(tid id, bfobject *obj)
+    gsl::not_null<T *> add_t(tid id, bfobject *obj)
     {
-        if (auto &&t = get_t(id)) {
-            return t;
+        if (auto iter = m_ts.find(id); iter != m_ts.end()) {
+            return iter->second.get();
         }
 
         if (auto t = m_T_factory->make(id, obj)) {
             std::lock_guard<std::mutex> guard(m_mutex);
-            return m_ts[id] = std::move(t);
+
+            auto ptr = t.get();
+            m_ts[id] = std::move(t);
+
+            return ptr;
         }
 
         throw std::runtime_error("make returned a nullptr");
     }
 
-    std::unique_ptr<T> &get_t(tid id)
-    {
-        std::lock_guard<std::mutex> guard(m_mutex);
-        return m_ts[id];
-    }
-
 private:
 
     std::unique_ptr<T_factory> m_T_factory;
-    std::map<tid, std::unique_ptr<T>> m_ts;
+    std::unordered_map<tid, std::unique_ptr<T>> m_ts;
 
     mutable std::mutex m_mutex;
+
+public:
+
+    /// @cond
+
+    void set_factory(std::unique_ptr<T_factory> factory)
+    { m_T_factory = std::move(factory); }
+
+    /// @endcond
 
 public:
 

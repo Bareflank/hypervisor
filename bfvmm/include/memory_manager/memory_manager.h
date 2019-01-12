@@ -422,15 +422,15 @@ private:
     buddy_allocator g_huge_pool;
     buddy_allocator g_mem_map_pool;
 
-    basic_object_allocator slab010;
-    basic_object_allocator slab020;
-    basic_object_allocator slab030;
-    basic_object_allocator slab040;
-    basic_object_allocator slab080;
-    basic_object_allocator slab100;
-    basic_object_allocator slab200;
-    basic_object_allocator slab400;
-    basic_object_allocator slab800;
+    object_allocator slab010;
+    object_allocator slab020;
+    object_allocator slab030;
+    object_allocator slab040;
+    object_allocator slab080;
+    object_allocator slab100;
+    object_allocator slab200;
+    object_allocator slab400;
+    object_allocator slab800;
 
 public:
 
@@ -478,6 +478,18 @@ extern "C" void *alloc_page();
 /// @param ptr a pointer to the previously allocated page
 ///
 extern "C" void free_page(void *ptr);
+
+/// Page Pointer
+template<typename T>
+using page_ptr = std::unique_ptr<T, void(*)(void *)>;
+
+/// Make Page
+///
+/// @return returns a std::unique_ptr with a single page
+///
+template<typename T>
+page_ptr<T> make_page()
+{ return page_ptr<T>(static_cast<T *>(alloc_page()), free_page); }
 
 #ifdef _MSC_VER
 #pragma warning(pop)

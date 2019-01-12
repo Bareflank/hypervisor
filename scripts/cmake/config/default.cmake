@@ -636,6 +636,17 @@ set(GSL_URL_MD5 "0cc95192658d10e43162ef7b2892e37a"
     "GSL URL MD5 hash"
 )
 
+set(CXXOPTS_URL "https://github.com/jarro2783/cxxopts/archive/v2.1.1.zip"
+    CACHE INTERNAL FORCE
+    "cxxopts URL"
+)
+
+set(CXXOPTS_URL_MD5 "474adf4a53d41549a84bacbe496c035a"
+    CACHE INTERNAL FORCE
+    "cxxopts URL MD5 hash"
+)
+
+
 set(JSON_URL "https://github.com/nlohmann/json/archive/v3.1.2.zip"
     CACHE INTERNAL FORCE
     "JSON URL"

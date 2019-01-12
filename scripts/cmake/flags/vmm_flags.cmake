@@ -36,7 +36,7 @@ list(APPEND BFFLAGS_VMM
     -fstack-protector-strong
     -DVMM
     -D${OSTYPE}
-    -D${ABITYPE}
+    -DSYSV
     -DGSL_THROW_ON_CONTRACT_VIOLATION
     -DMALLOC_PROVIDED
     -DCLOCK_MONOTONIC
@@ -67,3 +67,9 @@ list(APPEND BFFLAGS_VMM_X86_64
     -msse2
     -msse3
 )
+
+if(DEFINED ENABLE_BUILD_EFI)
+    list(APPEND BFFLAGS_VMM
+        -DENABLE_BUILD_EFI
+    )
+endif()

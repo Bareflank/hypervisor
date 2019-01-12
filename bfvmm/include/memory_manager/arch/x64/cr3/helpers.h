@@ -22,12 +22,55 @@
 
 #include "mmap.h"
 
-namespace bfvmm
+namespace bfvmm::x64::cr3
 {
-namespace x64
-{
-namespace cr3
-{
+
+/// The VMM's CR3
+///
+/// This function returns the memory map that is used by the VMM.
+/// This memory map stores and maintains the page tables for the VMM,
+/// and all VMM mapping moves through this map.
+///
+/// It should be noted that the VMM's memory map is a bit complex as the VMM
+/// has to mimic part of the Host OS's memory map for init/fini of the VMM.
+///
+/// Specifically, but default, the VMM looks like the following:
+///
+///                       0x0 +------------------+
+///                           | Unusable         |
+///                  0x100000 +------------------+
+///                           | BIOS/EFI         |
+///                       xxx +------------------+
+///                           | VMM for BIOS/EFI |
+///                 xxx + VMM +------------------+
+///                           | Unusable         |
+///             0xBF000000000 +------------------+
+///                           | VMM Map Space    |
+///            0x7FFFFFFFFFFF +------------------+
+///                           | Unusable         |
+///        0xFFFF800000000000 +------------------+
+///                           | Host OS Kernel   |
+///        0xFFFF800000000xxx +------------------+
+///                           | VMM for Host OS  |
+///  0xFFFF800000000xxx + VMM +------------------+
+///                           | Unusable         |
+///        0xFFFFFFFFFFFFFFFF +------------------+
+///
+/// There are two different locations the VMM could exist:
+/// - If the VMM is loaded by BIOS/EFI, the VMM is likely loaded into the lower
+///   half of the canoncial space, which means its virtual memory space is in
+///   the lower one half.
+/// - If the VMM is loaded by a Host OS, the VMM is likely loaded into the
+///   high half of the canonical space, as most 64bit operating systems load
+///   themselves into the high half, and leave the lower half for applications.
+///
+/// In either case, we place the VMM map space (by default) at 0xBF000000000
+/// which is high enough in the lower half to stay out of the way of BIOS/EFI,
+/// while at the same time, not touching any address in the higher half which
+/// might accidentally collide with the Host OS.
+///
+gsl::not_null<mmap *>
+vmm_cr3();
 
 /// Identity Map with 1g Granularity
 ///
@@ -40,23 +83,13 @@ namespace cr3
 /// @param attr the memory attributes to apply to the map
 /// @param cache the memory type to apply to the map
 ///
-inline void
+void
 identity_map_1g(
     mmap &map,
     mmap::phys_addr_t saddr,
     mmap::phys_addr_t eaddr,
     mmap::attr_type attr = mmap::attr_type::read_write,
-    mmap::memory_type cache = mmap::memory_type::write_back)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(saddr, pdpt::from) == 0);
-    expects(bfn::lower(eaddr, pdpt::from) == 0);
-
-    for (auto gpa = saddr; gpa < eaddr; gpa += pdpt::page_size) {
-        map.map_1g(gpa, gpa, attr, cache);
-    }
-}
+    mmap::memory_type cache = mmap::memory_type::write_back);
 
 /// Identity Map with 2m Granularity
 ///
@@ -69,23 +102,13 @@ identity_map_1g(
 /// @param attr the memory attributes to apply to the map
 /// @param cache the memory type to apply to the map
 ///
-inline void
+void
 identity_map_2m(
     mmap &map,
     mmap::phys_addr_t saddr,
     mmap::phys_addr_t eaddr,
     mmap::attr_type attr = mmap::attr_type::read_write,
-    mmap::memory_type cache = mmap::memory_type::write_back)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(saddr, pd::from) == 0);
-    expects(bfn::lower(eaddr, pd::from) == 0);
-
-    for (auto gpa = saddr; gpa < eaddr; gpa += pd::page_size) {
-        map.map_2m(gpa, gpa, attr, cache);
-    }
-}
+    mmap::memory_type cache = mmap::memory_type::write_back);
 
 /// Identity Map with 4k Granularity
 ///
@@ -98,23 +121,13 @@ identity_map_2m(
 /// @param attr the memory attributes to apply to the map
 /// @param cache the memory type to apply to the map
 ///
-inline void
+void
 identity_map_4k(
     mmap &map,
     mmap::phys_addr_t saddr,
     mmap::phys_addr_t eaddr,
     mmap::attr_type attr = mmap::attr_type::read_write,
-    mmap::memory_type cache = mmap::memory_type::write_back)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(saddr, pt::from) == 0);
-    expects(bfn::lower(eaddr, pt::from) == 0);
-
-    for (auto gpa = saddr; gpa < eaddr; gpa += pt::page_size) {
-        map.map_4k(gpa, gpa, attr, cache);
-    }
-}
+    mmap::memory_type cache = mmap::memory_type::write_back);
 
 /// Identity Unmap with 1g Granularity
 ///
@@ -125,21 +138,11 @@ identity_map_4k(
 /// @param saddr the starting address for the map
 /// @param eaddr the ending address for the map
 ///
-inline void
+void
 identity_unmap_1g(
     mmap &map,
     mmap::phys_addr_t saddr,
-    mmap::phys_addr_t eaddr)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(saddr, pdpt::from) == 0);
-    expects(bfn::lower(eaddr, pdpt::from) == 0);
-
-    for (auto gpa = saddr; gpa < eaddr; gpa += pdpt::page_size) {
-        map.unmap(gpa);
-    }
-}
+    mmap::phys_addr_t eaddr);
 
 /// Identity Unmap with 2m Granularity
 ///
@@ -150,21 +153,11 @@ identity_unmap_1g(
 /// @param saddr the starting address for the map
 /// @param eaddr the ending address for the map
 ///
-inline void
+void
 identity_unmap_2m(
     mmap &map,
     mmap::phys_addr_t saddr,
-    mmap::phys_addr_t eaddr)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(saddr, pd::from) == 0);
-    expects(bfn::lower(eaddr, pd::from) == 0);
-
-    for (auto gpa = saddr; gpa < eaddr; gpa += pd::page_size) {
-        map.unmap(gpa);
-    }
-}
+    mmap::phys_addr_t eaddr);
 
 /// Identity Unmap with 4k Granularity
 ///
@@ -175,21 +168,11 @@ identity_unmap_2m(
 /// @param saddr the starting address for the map
 /// @param eaddr the ending address for the map
 ///
-inline void
+void
 identity_unmap_4k(
     mmap &map,
     mmap::phys_addr_t saddr,
-    mmap::phys_addr_t eaddr)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(saddr, pt::from) == 0);
-    expects(bfn::lower(eaddr, pt::from) == 0);
-
-    for (auto gpa = saddr; gpa < eaddr; gpa += pt::page_size) {
-        map.unmap(gpa);
-    }
-}
+    mmap::phys_addr_t eaddr);
 
 /// Identity Release with 1g Granularity
 ///
@@ -200,21 +183,11 @@ identity_unmap_4k(
 /// @param saddr the starting address for the map
 /// @param eaddr the ending address for the map
 ///
-inline void
+void
 identity_release_1g(
     mmap &map,
     mmap::phys_addr_t saddr,
-    mmap::phys_addr_t eaddr)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(saddr, pdpt::from) == 0);
-    expects(bfn::lower(eaddr, pdpt::from) == 0);
-
-    for (auto gpa = saddr; gpa < eaddr; gpa += pdpt::page_size) {
-        map.release(gpa);
-    }
-}
+    mmap::phys_addr_t eaddr);
 
 /// Identity Release with 2m Granularity
 ///
@@ -225,21 +198,11 @@ identity_release_1g(
 /// @param saddr the starting address for the map
 /// @param eaddr the ending address for the map
 ///
-inline void
+void
 identity_release_2m(
     mmap &map,
     mmap::phys_addr_t saddr,
-    mmap::phys_addr_t eaddr)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(saddr, pd::from) == 0);
-    expects(bfn::lower(eaddr, pd::from) == 0);
-
-    for (auto gpa = saddr; gpa < eaddr; gpa += pd::page_size) {
-        map.release(gpa);
-    }
-}
+    mmap::phys_addr_t eaddr);
 
 /// Identity Release with 4k Granularity
 ///
@@ -250,21 +213,11 @@ identity_release_2m(
 /// @param saddr the starting address for the map
 /// @param eaddr the ending address for the map
 ///
-inline void
+void
 identity_release_4k(
     mmap &map,
     mmap::phys_addr_t saddr,
-    mmap::phys_addr_t eaddr)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(saddr, pt::from) == 0);
-    expects(bfn::lower(eaddr, pt::from) == 0);
-
-    for (auto gpa = saddr; gpa < eaddr; gpa += pt::page_size) {
-        map.release(gpa);
-    }
-}
+    mmap::phys_addr_t eaddr);
 
 /// Convert Identity Map Granularity
 ///
@@ -275,24 +228,12 @@ identity_release_4k(
 /// @param attr the memory attributes to apply to the map
 /// @param cache the memory type to apply to the map
 ///
-inline void
+void
 identity_map_convert_1g_to_2m(
     mmap &map,
     mmap::phys_addr_t addr,
     mmap::attr_type attr = mmap::attr_type::read_write,
-    mmap::memory_type cache = mmap::memory_type::write_back)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(addr, pdpt::from) == 0);
-    expects(map.is_1g(addr));
-
-    map.unmap(addr);
-
-    identity_map_2m(
-        map, addr, addr + pdpt::page_size, attr, cache
-    );
-}
+    mmap::memory_type cache = mmap::memory_type::write_back);
 
 /// Convert Identity Map Granularity
 ///
@@ -303,24 +244,12 @@ identity_map_convert_1g_to_2m(
 /// @param attr the memory attributes to apply to the map
 /// @param cache the memory type to apply to the map
 ///
-inline void
+void
 identity_map_convert_1g_to_4k(
     mmap &map,
     mmap::phys_addr_t addr,
     mmap::attr_type attr = mmap::attr_type::read_write,
-    mmap::memory_type cache = mmap::memory_type::write_back)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(addr, pdpt::from) == 0);
-    expects(map.is_1g(addr));
-
-    map.unmap(addr);
-
-    identity_map_4k(
-        map, addr, addr + pdpt::page_size, attr, cache
-    );
-}
+    mmap::memory_type cache = mmap::memory_type::write_back);
 
 /// Convert Identity Map Granularity
 ///
@@ -331,24 +260,12 @@ identity_map_convert_1g_to_4k(
 /// @param attr the memory attributes to apply to the map
 /// @param cache the memory type to apply to the map
 ///
-inline void
+void
 identity_map_convert_2m_to_1g(
     mmap &map,
     mmap::phys_addr_t addr,
     mmap::attr_type attr = mmap::attr_type::read_write,
-    mmap::memory_type cache = mmap::memory_type::write_back)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(addr, pdpt::from) == 0);
-    expects(map.is_2m(addr));
-
-    identity_release_2m(
-        map, addr, addr + pdpt::page_size
-    );
-
-    map.map_1g(addr, addr, attr, cache);
-}
+    mmap::memory_type cache = mmap::memory_type::write_back);
 
 /// Convert Identity Map Granularity
 ///
@@ -359,24 +276,12 @@ identity_map_convert_2m_to_1g(
 /// @param attr the memory attributes to apply to the map
 /// @param cache the memory type to apply to the map
 ///
-inline void
+void
 identity_map_convert_4k_to_1g(
     mmap &map,
     mmap::phys_addr_t addr,
     mmap::attr_type attr = mmap::attr_type::read_write,
-    mmap::memory_type cache = mmap::memory_type::write_back)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(addr, pdpt::from) == 0);
-    expects(map.is_4k(addr));
-
-    identity_release_4k(
-        map, addr, addr + pdpt::page_size
-    );
-
-    map.map_1g(addr, addr, attr, cache);
-}
+    mmap::memory_type cache = mmap::memory_type::write_back);
 
 /// Convert Identity Map Granularity
 ///
@@ -387,24 +292,12 @@ identity_map_convert_4k_to_1g(
 /// @param attr the memory attributes to apply to the map
 /// @param cache the memory type to apply to the map
 ///
-inline void
+void
 identity_map_convert_2m_to_4k(
     mmap &map,
     mmap::phys_addr_t addr,
     mmap::attr_type attr = mmap::attr_type::read_write,
-    mmap::memory_type cache = mmap::memory_type::write_back)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(addr, pd::from) == 0);
-    expects(map.is_2m(addr));
-
-    map.unmap(addr);
-
-    identity_map_4k(
-        map, addr, addr + pd::page_size, attr, cache
-    );
-}
+    mmap::memory_type cache = mmap::memory_type::write_back);
 
 /// Convert Identity Map Granularity
 ///
@@ -415,27 +308,19 @@ identity_map_convert_2m_to_4k(
 /// @param attr the memory attributes to apply to the map
 /// @param cache the memory type to apply to the map
 ///
-inline void
+void
 identity_map_convert_4k_to_2m(
     mmap &map,
     mmap::phys_addr_t addr,
     mmap::attr_type attr = mmap::attr_type::read_write,
-    mmap::memory_type cache = mmap::memory_type::write_back)
-{
-    using namespace ::intel_x64::ept;
-
-    expects(bfn::lower(addr, pd::from) == 0);
-    expects(map.is_4k(addr));
-
-    identity_release_4k(
-        map, addr, addr + pd::page_size
-    );
-
-    map.map_2m(addr, addr, attr, cache);
-}
+    mmap::memory_type cache = mmap::memory_type::write_back);
 
 }
-}
-}
+
+/// Global CR3
+///
+/// Returns a pointer to the CR3 map used by the VMM.
+///
+#define g_cr3 bfvmm::x64::cr3::vmm_cr3().get()
 
 #endif

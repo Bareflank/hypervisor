@@ -184,8 +184,7 @@ pthread_key_delete(pthread_key_t /*unused*/)
 extern "C" EXPORT_SYM int
 pthread_mutex_destroy(pthread_mutex_t * /*unused*/)
 {
-    UNHANDLED();
-    return -ENOSYS;
+    return 0;
 }
 
 extern "C" EXPORT_SYM int

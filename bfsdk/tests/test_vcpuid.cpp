@@ -1,6 +1,6 @@
 //
 // Bareflank Hypervisor
-// Copyright (C) 2018 Assured Information Security, Inc.
+// Copyright (C) 2015 Assured Information Security, Inc.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -15,22 +15,13 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-//
 
-#ifndef VTD_INTEL_X64_H
-#define VTD_INTEL_X64_H
+#include <catch/catch.hpp>
+#include <bfvcpuid.h>
 
-#include <arch/intel_x64/vtd/context_entry.h>
-#include <arch/intel_x64/vtd/extended_context_entry.h>
-#include <arch/intel_x64/vtd/extended_root_entry.h>
-#include <arch/intel_x64/vtd/fault_record.h>
-#include <arch/intel_x64/vtd/first_level_paging_entries.h>
-#include <arch/intel_x64/vtd/irte.h>
-#include <arch/intel_x64/vtd/pasid_entry.h>
-#include <arch/intel_x64/vtd/pasid_state_entry.h>
-#include <arch/intel_x64/vtd/pid.h>
-#include <arch/intel_x64/vtd/root_entry.h>
-#include <arch/intel_x64/vtd/second_level_paging_entries.h>
-#include <arch/intel_x64/vtd/iommu.h>
-
-#endif
+TEST_CASE("functions")
+{
+    CHECK(vcpuid::is_bootstrap_vcpu(0));
+    CHECK(vcpuid::is_host_vm_vcpu(0));
+    CHECK(vcpuid::is_guest_vm_vcpu(0x10000));
+}

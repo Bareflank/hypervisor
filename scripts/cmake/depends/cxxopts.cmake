@@ -16,34 +16,18 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-codecov:
-  notify:
-    require_ci_to_pass: no
+if(ENABLE_BUILD_USERSPACE)
+    message(STATUS "Including dependency: cxxopts")
 
-coverage:
-  status:
-    project: yes
-    patch: no
-    changes: no
-  precision: 2
-  round: down
-  range: "100...100"
+    download_dependency(
+        cxxopts
+        URL         ${CXXOPTS_URL}
+        URL_MD5     ${CXXOPTS_URL_MD5}
+    )
+endif()
 
-parsers:
-  gcov:
-    branch_detection:
-      conditional: no
-      loop: no
-      method: no
-      macro: no
-
-ignore:
-  - "bfintrinsics/**"
-  - "bfm/ioctl/arch/**"
-  - "bfvmm/include/test/**"
-  - "bfelf_loader/**"
-
-comment:
-  layout: "header, diff, files"
-  behavior: default
-  require_changes: no
+if(ENABLE_BUILD_USERSPACE)
+    add_dependency(
+        cxxopts userspace
+    )
+endif()

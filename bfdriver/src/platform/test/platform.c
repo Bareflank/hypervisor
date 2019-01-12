@@ -68,17 +68,17 @@ platform_alloc_rwe(uint64_t len)
 }
 
 void
-platform_free_rw(const void *addr, uint64_t len)
+platform_free_rw(void *addr, uint64_t len)
 {
     bfignored(len);
-    free((void *)addr);
+    free(addr);
 }
 
 void
-platform_free_rwe(const void *addr, uint64_t len)
+platform_free_rwe(void *addr, uint64_t len)
 {
     bfignored(len);
-    free((void *)addr);
+    free(addr);
 }
 
 void *
@@ -89,9 +89,16 @@ void *
 platform_memset(void *ptr, char value, uint64_t num)
 { return memset(ptr, value, num); }
 
-void *
-platform_memcpy(void *dst, const void *src, uint64_t num)
-{ return memcpy(dst, src, num); }
+int64_t
+platform_memcpy(
+    void *dst, uint64_t dst_size, const void *src, uint64_t src_size, uint64_t num)
+{
+    bfignored(dst_size);
+    bfignored(src_size);
+
+    memcpy(dst, src, num);
+    return SUCCESS;
+}
 
 int64_t
 platform_num_cpus(void)

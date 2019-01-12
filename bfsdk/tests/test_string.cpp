@@ -24,6 +24,12 @@ TEST_CASE("string operator")
     CHECK("10"_s == std::string("10"));
 }
 
+TEST_CASE("digits")
+{
+    CHECK(bfn::digits(42, 10) == 2);
+    CHECK(bfn::digits(0x42, 16) == 2);
+}
+
 TEST_CASE("base 10")
 {
     CHECK(bfn::to_string(static_cast<int>(10), 10) == "10");
@@ -36,22 +42,22 @@ TEST_CASE("base 10")
 
 TEST_CASE("base 16")
 {
-    CHECK(bfn::to_string(static_cast<int>(10), 16) == "0x000000000000000a");
-    CHECK(bfn::to_string(static_cast<long>(10), 16) == "0x000000000000000a");
-    CHECK(bfn::to_string(static_cast<long long>(10), 16) == "0x000000000000000a");
-    CHECK(bfn::to_string(static_cast<unsigned>(10), 16) == "0x000000000000000a");
-    CHECK(bfn::to_string(static_cast<unsigned long>(10), 16) == "0x000000000000000a");
-    CHECK(bfn::to_string(static_cast<unsigned long long>(10), 16) == "0x000000000000000a");
+    CHECK(bfn::to_string(static_cast<int>(10), 16) == "0xa");
+    CHECK(bfn::to_string(static_cast<long>(10), 16) == "0xa");
+    CHECK(bfn::to_string(static_cast<long long>(10), 16) == "0xa");
+    CHECK(bfn::to_string(static_cast<unsigned>(10), 16) == "0xa");
+    CHECK(bfn::to_string(static_cast<unsigned long>(10), 16) == "0xa");
+    CHECK(bfn::to_string(static_cast<unsigned long long>(10), 16) == "0xa");
 }
 
-TEST_CASE("base 8")
+TEST_CASE("base 16 pad")
 {
-    CHECK(bfn::to_string(static_cast<int>(10), 8) == "012");
-    CHECK(bfn::to_string(static_cast<long>(10), 8) == "012");
-    CHECK(bfn::to_string(static_cast<long long>(10), 8) == "012");
-    CHECK(bfn::to_string(static_cast<unsigned>(10), 8) == "012");
-    CHECK(bfn::to_string(static_cast<unsigned long>(10), 8) == "012");
-    CHECK(bfn::to_string(static_cast<unsigned long long>(10), 8) == "012");
+    CHECK(bfn::to_string(static_cast<int>(10), 16, true) == "0x000000000000000a");
+    CHECK(bfn::to_string(static_cast<long>(10), 16, true) == "0x000000000000000a");
+    CHECK(bfn::to_string(static_cast<long long>(10), 16, true) == "0x000000000000000a");
+    CHECK(bfn::to_string(static_cast<unsigned>(10), 16, true) == "0x000000000000000a");
+    CHECK(bfn::to_string(static_cast<unsigned long>(10), 16, true) == "0x000000000000000a");
+    CHECK(bfn::to_string(static_cast<unsigned long long>(10), 16, true) == "0x000000000000000a");
 }
 
 TEST_CASE("split")

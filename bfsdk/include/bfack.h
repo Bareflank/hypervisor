@@ -16,19 +16,39 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <catch/catch.hpp>
-#include <bfelf_loader.h>
+#ifndef BFACK_H
+#define BFACK_H
 
-TEST_CASE("bfelf_file_get_total_size: invalid elf file")
-{
-    auto ret = bfelf_file_get_total_size(nullptr);
-    CHECK(ret == 0);
+#include <bftypes.h>
+
+#ifdef __cplusplus
+#define NOEXCEPT noexcept
+#else
+#define NOEXCEPT
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+uint32_t _cpuid_eax(uint32_t val) NOEXCEPT;
+
+#ifdef __cplusplus
 }
+#endif
 
-TEST_CASE("bfelf_file_get_total_size: success")
-{
-    bfelf_file_t ef = {};
+/// Ack
+///
+/// Note:
+///
+/// Use this function instead of calling CPUID manually as the CPUID leaves
+/// are always subject to change, as nested virtualization might require
+/// mods to this approach.
+///
+/// @return returns 1 if Bareflank is running, 0 otherwise.
+///
+static inline int
+bfack(void) NOEXCEPT
+{ return _cpuid_eax(0x4BF00000) == 0x4BF00001 ? 1 : 0; }
 
-    auto ret = bfelf_file_get_total_size(&ef);
-    CHECK(ret == 0);
-}
+#endif

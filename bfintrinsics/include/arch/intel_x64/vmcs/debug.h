@@ -197,7 +197,7 @@ namespace debug
             guest_activity_state::dump(level, msg);
             guest_smbase::dump(level, msg);
             guest_ia32_sysenter_cs::dump(level, msg);
-            vmx_preemption_timer_value::dump(level, msg);
+            preemption_timer_value::dump(level, msg);
 
             bfdebug_lnbr(level, msg);
             bfdebug_info(level, "32bit host state fields", msg);

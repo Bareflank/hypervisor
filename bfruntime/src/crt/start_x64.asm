@@ -44,7 +44,14 @@ _start:
     push rbp
     mov rbp, rsp
 
-%ifdef MS64
+; NOTE:
+;
+; We use the OSTYPE instead of the ABI type because the ABI for the VMM is
+; SYSV, but in this case the OS is Windows. The whole point of this file
+; is to transtion from the OSTYPE to the VMM.
+;
+
+%ifdef WIN64
     mov rsp, rcx    ; stack
     mov r13, rdx    ; crt_info
 %else

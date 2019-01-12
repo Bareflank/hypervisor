@@ -1323,6 +1323,21 @@ namespace ia32_lstar
     { bfdebug_nhex(level, name, get(), msg); }
 }
 
+namespace ia32_cstar
+{
+    constexpr const auto addr = 0xC0000083U;
+    constexpr const auto name = "ia32_cstar";
+
+    inline auto get() noexcept
+    { return _read_msr(addr); }
+
+    inline void set(value_type val) noexcept
+    { _write_msr(addr, val); }
+
+    inline void dump(int level, std::string *msg = nullptr)
+    { bfdebug_nhex(level, name, get(), msg); }
+}
+
 namespace ia32_fmask
 {
     constexpr const auto addr = 0xC0000084U;

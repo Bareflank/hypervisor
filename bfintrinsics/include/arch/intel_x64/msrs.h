@@ -2403,6 +2403,18 @@ namespace ia32_misc_enable
         inline auto is_disabled(value_type msr)
         { return is_bit_cleared(msr, from); }
 
+        inline void enable()
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
+
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
+
+        inline void disable()
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
+
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
+
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
     }
@@ -2425,6 +2437,18 @@ namespace ia32_misc_enable
         inline auto is_disabled(value_type msr)
         { return is_bit_cleared(msr, from); }
 
+        inline void enable()
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
+
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
+
+        inline void disable()
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
+
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
+
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
     }
@@ -2446,6 +2470,18 @@ namespace ia32_misc_enable
 
         inline auto is_disabled(value_type msr)
         { return is_bit_cleared(msr, from); }
+
+        inline void enable()
+        { _write_msr(addr, set_bit(_read_msr(addr), from)); }
+
+        inline void enable(value_type &msr)
+        { msr = set_bit(msr, from); }
+
+        inline void disable()
+        { _write_msr(addr, clear_bit(_read_msr(addr), from)); }
+
+        inline void disable(value_type &msr)
+        { msr = clear_bit(msr, from); }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
@@ -12508,11 +12544,11 @@ namespace ia32_vmx_true_pinbased_ctls
         { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
-    namespace activate_vmx_preemption_timer
+    namespace activate_preemption_timer
     {
         constexpr const auto mask = 0x0000000000000040ULL;
         constexpr const auto from = 6ULL;
-        constexpr const auto name = "activate_vmx_preemption_timer";
+        constexpr const auto name = "activate_preemption_timer";
 
         inline auto is_enabled()
         { return is_bit_set(_read_msr(addr), from); }
@@ -12570,7 +12606,7 @@ namespace ia32_vmx_true_pinbased_ctls
         external_interrupt_exiting::dump(level, msg);
         nmi_exiting::dump(level, msg);
         virtual_nmis::dump(level, msg);
-        activate_vmx_preemption_timer::dump(level, msg);
+        activate_preemption_timer::dump(level, msg);
         process_posted_interrupts::dump(level, msg);
     }
 }
@@ -13442,11 +13478,11 @@ namespace ia32_vmx_true_exit_ctls
         { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
-    namespace save_vmx_preemption_timer_value
+    namespace save_preemption_timer_value
     {
         constexpr const auto mask = 0x0000000000400000ULL;
         constexpr const auto from = 22ULL;
-        constexpr const auto name = "save_vmx_preemption_timer_value";
+        constexpr const auto name = "save_preemption_timer_value";
 
         inline auto is_enabled()
         { return is_bit_set(_read_msr(addr), from); }
@@ -13509,7 +13545,7 @@ namespace ia32_vmx_true_exit_ctls
         load_ia32_pat::dump(level, msg);
         save_ia32_efer::dump(level, msg);
         load_ia32_efer::dump(level, msg);
-        save_vmx_preemption_timer_value::dump(level, msg);
+        save_preemption_timer_value::dump(level, msg);
         clear_ia32_bndcfgs::dump(level, msg);
     }
 }
@@ -16917,6 +16953,36 @@ namespace ia32_gs_base
 
     inline void dump(int level, std::string *msg = nullptr)
     { bfdebug_nhex(level, name, get(), msg); }
+}
+
+namespace ia32_platform_info
+{
+    constexpr const auto addr = 0x000000CEU;
+    constexpr const auto name = "platform_info";
+
+    inline auto get() noexcept
+    { return _read_msr(addr); }
+
+    namespace max_nonturbo_ratio
+    {
+        constexpr const auto mask = 0x0000FF00U;
+        constexpr const auto from = 8;
+        constexpr const auto name = "max_non_turbo_ratio";
+
+        inline auto get() noexcept
+        { return get_bits(_read_msr(addr), mask) >> from; }
+
+        inline auto get(value_type msr) noexcept
+        { return get_bits(msr, mask) >> from; }
+
+        inline void dump(int level, value_type msr, std::string *msg = nullptr)
+        {bfdebug_nhex(level, name, msr, msg); }
+    }
+
+    inline void dump(int level, value_type msr, std::string *msg = nullptr)
+    {
+        max_nonturbo_ratio::dump(level, msr);
+    }
 }
 
 }

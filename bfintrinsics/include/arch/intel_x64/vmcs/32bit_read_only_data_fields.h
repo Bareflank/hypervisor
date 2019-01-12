@@ -204,7 +204,7 @@ namespace exit_reason
         constexpr const auto ept_misconfiguration = 49U;                        // ept_misconfig
         constexpr const auto invept = 50U;                                      // invept
         constexpr const auto rdtscp = 51U;                                      // rdtscp
-        constexpr const auto vmx_preemption_timer_expired = 52U;                // vmx_preemption_timer
+        constexpr const auto preemption_timer_expired = 52U;                    // preemption_timer
         constexpr const auto invvpid = 53U;                                     // invvpid
         constexpr const auto wbinvd = 54U;                                      // wbinvd
         constexpr const auto xsetbv = 55U;                                      // xsetbv
@@ -369,8 +369,8 @@ namespace exit_reason
                 case rdtscp:
                     return "rdtscp";
 
-                case vmx_preemption_timer_expired:
-                    return "vmx_preemption_timer_expired";
+                case preemption_timer_expired:
+                    return "preemption_timer_expired";
 
                 case invvpid:
                     return "invvpid";

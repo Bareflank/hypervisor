@@ -99,7 +99,7 @@ platform_alloc_rwe(uint64_t len)
 }
 
 void
-platform_free_rw(const void *addr, uint64_t len)
+platform_free_rw(void *addr, uint64_t len)
 {
     if (addr == nullptr) {
         BFALERT("platform_free_rw: invalid address %p\n", addr);
@@ -112,7 +112,7 @@ platform_free_rw(const void *addr, uint64_t len)
 }
 
 void
-platform_free_rwe(const void *addr, uint64_t len)
+platform_free_rwe(void *addr, uint64_t len)
 {
     if (addr == nullptr) {
         BFALERT("platform_free_rw: invalid address %p\n", addr);
@@ -137,11 +137,22 @@ platform_memset(void *ptr, char value, uint64_t num)
     return ptr;
 }
 
-void *
-platform_memcpy(void *dst, const void *src, uint64_t num)
+int64_t
+platform_memcpy(
+    void *dst, uint64_t dst_size, const void *src, uint64_t src_size, uint64_t num)
 {
+    if (dst == 0 || src == 0) {
+        BFALERT("platform_memcpy: invalid dst or src\n");
+        return FAILURE;
+    }
+
+    if (num > dst_size || num > src_size) {
+        BFALERT("platform_memcpy: num out of range\n");
+        return FAILURE;
+    }
+
     gBS->CopyMem((VOID *)dst, (VOID *)src, num);
-    return dst;
+    return SUCCESS;
 }
 
 int64_t

@@ -294,9 +294,9 @@ endfunction(generate_flags)
 
 # Private
 #
-function(include_dependency DIR NAME)
+macro(include_dependency DIR NAME)
     include(${${DIR}}/${NAME}.cmake)
-endfunction(include_dependency)
+endmacro(include_dependency)
 
 # ------------------------------------------------------------------------------
 # download_dependency
@@ -1010,7 +1010,7 @@ endfunction(test_extension)
 
 # Private
 #
-macro(enable_asm)
+macro(enable_asm PREFIX)
     if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
         find_program(NASM_BIN nasm)
 
@@ -1026,8 +1026,7 @@ macro(enable_asm)
 
         if(PREFIX STREQUAL "vmm")
             set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
-        endif()
-        if(PREFIX STREQUAL "userspace")
+        else()
             if(HOST_FORMAT_TYPE STREQUAL "pe")
                 set(CMAKE_ASM_NASM_OBJECT_FORMAT "win64")
             endif()
@@ -1038,7 +1037,12 @@ macro(enable_asm)
 
         enable_language(ASM_NASM)
 
-        set(CMAKE_ASM_NASM_FLAGS "-d ${ABITYPE}")
+        if(PREFIX STREQUAL "vmm")
+            set(CMAKE_ASM_NASM_FLAGS "-d ${PREFIX} -d ${OSTYPE} -d SYSV")
+        else()
+            set(CMAKE_ASM_NASM_FLAGS "-d ${PREFIX} -d ${OSTYPE} -d ${ABITYPE}")
+        endif()
+
         set(CMAKE_ASM_NASM_CREATE_SHARED_LIBRARY TRUE)
         set(CMAKE_ASM_NASM_CREATE_STATIC_LIBRARY TRUE)
     endif()
@@ -1085,7 +1089,7 @@ macro(init_project)
         set(BUILD_SHARED_LIBS OFF)
     endif()
 
-    enable_asm()
+    enable_asm(${PREFIX})
 
     list(APPEND CMAKE_C_FLAGS ${ARG_C_FLAGS})
     list(APPEND CMAKE_CXX_FLAGS ${ARG_CXX_FLAGS})
@@ -1264,7 +1268,7 @@ endfunction(target_link_static_libraries)
 #
 function(add_vmm_executable NAME)
     set(options NOVMMLIBS)
-    set(multiVal LIBRARIES SOURCES DEFINES)
+    set(multiVal LIBRARIES EXT_LIBRARIES SOURCES DEFINES)
     cmake_parse_arguments(ARG "${options}" "" "${multiVal}" ${ARGN})
 
     if(NOT ARG_SOURCES)
@@ -1283,6 +1287,10 @@ function(add_vmm_executable NAME)
         set(LIBRARIES "")
         foreach(d ${ARG_LIBRARIES})
             list(APPEND LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/lib${d}_shared.so")
+        endforeach(d)
+
+        foreach(d ${ARG_EXT_LIBRARIES})
+            list(APPEND LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/lib${d}.so")
         endforeach(d)
 
         if(NOT ARG_NOVMMLIBS)
@@ -1318,6 +1326,10 @@ function(add_vmm_executable NAME)
         set(LIBRARIES "")
         foreach(d ${ARG_LIBRARIES})
             list(APPEND LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/lib${d}_static.a")
+        endforeach(d)
+
+        foreach(d ${ARG_EXT_LIBRARIES})
+            list(APPEND LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/lib${d}.a")
         endforeach(d)
 
         if(NOT ARG_NOVMMLIBS)

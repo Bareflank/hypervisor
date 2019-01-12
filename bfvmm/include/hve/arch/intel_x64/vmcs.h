@@ -25,6 +25,8 @@
 #include "save_state.h"
 #include "check.h"
 
+#include "../../../memory_manager/memory_manager.h"
+
 // -----------------------------------------------------------------------------
 // Exports
 // -----------------------------------------------------------------------------
@@ -163,6 +165,32 @@ public:
     ///
     VIRTUAL void load();
 
+    /// Clear
+    ///
+    /// This function clears the VMCS. This is needed for two main reasons:
+    /// - During a VMCS migration, the way to do this is to clear the VMCS
+    ///   and then do a VMLanuch again.
+    /// - During initialization, we need to clear the VMCS just in case the
+    ///   VMCS is given the same physical address twice, which does actually
+    ///   happen.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    VIRTUAL void clear();
+
+    /// Check
+    ///
+    /// This function checks to see if the VMCS is configured improperly.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns true if the VMCS is configured properly, false
+    ///     otherwise
+    ///
+    VIRTUAL bool check() const noexcept;
+
     /// Save State
     ///
     /// Returns the VMCS's save state. This is state that is above and beyond
@@ -177,17 +205,12 @@ public:
     VIRTUAL save_state_t *save_state() const
     { return m_save_state.get(); }
 
-protected:
-
-    /// @cond
-
-    std::unique_ptr<save_state_t> m_save_state;
-
-    /// @endcond
-
 private:
 
-    std::unique_ptr<uint32_t, void(*)(void *)> m_vmcs_region;
+    vcpuid::type m_vcpuid;
+    std::unique_ptr<save_state_t> m_save_state;
+
+    page_ptr<uint32_t> m_vmcs_region;
     uintptr_t m_vmcs_region_phys;
 
 public:
@@ -205,6 +228,8 @@ public:
 
 }
 }
+
+using vmcs_t = bfvmm::intel_x64::vmcs;
 
 #ifdef _MSC_VER
 #pragma warning(pop)
