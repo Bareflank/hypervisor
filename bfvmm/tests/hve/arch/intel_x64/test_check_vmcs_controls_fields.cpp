@@ -884,24 +884,24 @@ setup_check_control_activate_and_save_preemption_timer_must_be_0_paths(
     std::vector<struct control_flow_path> &cfg)
 {
     g_path.setup = [&] {
-        pin_ctl_allow1(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::mask);
-        pin_based_vm_execution_controls::activate_vmx_preemption_timer::enable();
+        pin_ctl_allow1(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_preemption_timer::mask);
+        pin_based_vm_execution_controls::activate_preemption_timer::enable();
     };
     g_path.throws_exception = false;
     cfg.push_back(g_path);
 
     g_path.setup = [&] {
-        pin_ctl_allow0(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_vmx_preemption_timer::mask);
-        exit_ctl_allow1(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::mask);
-        pin_based_vm_execution_controls::activate_vmx_preemption_timer::disable();
-        vm_exit_controls::save_vmx_preemption_timer_value::enable();
+        pin_ctl_allow0(intel_x64::msrs::ia32_vmx_true_pinbased_ctls::activate_preemption_timer::mask);
+        exit_ctl_allow1(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_preemption_timer_value::mask);
+        pin_based_vm_execution_controls::activate_preemption_timer::disable();
+        vm_exit_controls::save_preemption_timer_value::enable();
     };
     g_path.throws_exception = true;
     cfg.push_back(g_path);
 
     g_path.setup = [&] {
-        exit_ctl_allow0(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_vmx_preemption_timer_value::mask);
-        vm_exit_controls::save_vmx_preemption_timer_value::disable();
+        exit_ctl_allow0(intel_x64::msrs::ia32_vmx_true_exit_ctls::save_preemption_timer_value::mask);
+        vm_exit_controls::save_preemption_timer_value::disable();
     };
     g_path.throws_exception = false;
     cfg.push_back(g_path);

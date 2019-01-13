@@ -67,7 +67,14 @@ endif()
 
 if(PREFIX STREQUAL vmm)
     add_subdirectory(src/entry)
+    add_dependencies(bfvmm bfvmm_entry)
     target_link_libraries(bfvmm INTERFACE
+        --whole-archive
+        -lbfcrt
+        -lbfdso
+        $<BUILD_INTERFACE:bfvmm_entry>
+        $<INSTALL_INTERFACE:-lbfvmm_entry>
+        --no-whole-archive
         bfvmm_hve
         bfvmm_vcpu
         bfvmm_memory_manager
@@ -80,9 +87,6 @@ if(PREFIX STREQUAL vmm)
         ${CMAKE_INSTALL_PREFIX}/lib/libm.a
         ${CMAKE_INSTALL_PREFIX}/lib/libc.a
         vmm::bfsyscall
-    )
-    target_link_options(bfvmm INTERFACE
-        --whole-archive -lbfvmm_entry -lbfcrt -lbfdso --no-whole-archive
     )
     add_subdirectory(src/main)
     target_include_directories(bfvmm INTERFACE $<INSTALL_INTERFACE:include/bfvmm>)

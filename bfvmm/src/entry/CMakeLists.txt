@@ -17,11 +17,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 add_library(bfvmm_entry)
+
 target_sources(bfvmm_entry PRIVATE entry.cpp)
-target_link_libraries(bfvmm_entry PUBLIC vmm::bfvmm)
+target_link_libraries(bfvmm_entry PUBLIC vmm::bfroot)
 target_include_directories(bfvmm_entry PUBLIC
     $<${BUILD_INCLUDE}:${PROJECT_ROOT}/include>
     $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfintrinsics/include>
     $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfutil/include>
 )
+
 install(TARGETS bfvmm_entry DESTINATION lib EXPORT bfvmm-vmm-targets)
