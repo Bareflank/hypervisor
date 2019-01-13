@@ -450,7 +450,7 @@ set(CMAKE_BUILD_TYPE "Release"
     "Defines the build type"
 )
 
-set(CMAKE_VERBOSE_MAKEFILE ON
+set(CMAKE_VERBOSE_MAKEFILE OFF
     CACHE INTERNAL
     "Enables verbose output"
 )
@@ -466,7 +466,7 @@ add_config(
 add_config(
     CONFIG_NAME CMAKE_INSTALL_MESSAGE
     CONFIG_TYPE STRING
-    DEFAULT_VAL LAZY
+    DEFAULT_VAL ALWAYS
     DESCRIPTION "Defines the install output"
     OPTIONS ALWAYS LAZY NEVER
     ADVANCED
