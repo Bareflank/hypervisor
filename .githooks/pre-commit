@@ -29,21 +29,29 @@ EOF
     exit 1
 fi
 
-execs=$(git diff-index HEAD | grep 100755 | cut -f2)
-for f in $execs
+# Check for files trying to be commited with +x that shouldn't be
+index=$(git diff-index --cached --diff-filter=d --compact-summary $against | head --lines=-1)
+while read index;
 do
-    file $f > tmp
-    if ! grep -q "executable" tmp
+    if [[ ! -z $(echo $index | grep " +x)") ]]
     then
-        bad="$bad $f"
+        full=$(echo $index | awk '{print $1}')
+        name=$(basename -- $full)
+        extn="${name##*.}"
+
+        case $extn in
+        sh) # Add more "recognized" executable file extensions here as needed
+            ;;
+        *)
+            bad="$full $bad"
+        esac
     fi
-    rm -f tmp
-done
+done <<< "$index"
 
 if [[ ! -z $bad ]]; then
     for f in $bad
     do
-        echo -e "\e[1;91mERROR\e[0m: should not be executable: $f"
+        echo -e "\e[1;91mfailed hook\e[0m \e[1mpre-commit\e[0m: file should not be executable: $f"
     done
     exit 1
 fi
