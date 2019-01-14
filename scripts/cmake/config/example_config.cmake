@@ -64,14 +64,14 @@ set(ENABLE_DEVELOPER_MODE OFF)
 # This option enables the use of the extended APIs. It assumes the extended
 # APIs are located in the same directory as this configuration file.
 #
-set(ENABLE_EXTENDED_APIS OFF)
+set(ENABLE_EXTENDED_APIS ON)
 
 # Hyperkernel
 #
 # This option enables the use of the boxy. It assumes that
 # boxy is located in the same directory as this configuration file.
 #
-set(ENABLE_BOXY OFF)
+set(ENABLE_BOXY ON)
 
 # Enable EFI
 #
@@ -79,7 +79,7 @@ set(ENABLE_BOXY OFF)
 # this forces static build, disables testing, ASAN, codecov and clang tidy,
 # and requries the VMM be compiled
 #
-set(BUILD_EFI OFF)
+set(BUILD_EFI ON)
 
 # Examples
 #
@@ -139,7 +139,8 @@ set(CACHE_DIR ${CMAKE_CURRENT_LIST_DIR}/cache)
 if(ENABLE_DEVELOPER_MODE AND NOT BUILD_EFI)
     set(BUILD_TEST ON)
 else()
-    set(BUILD_TEST OFF)
+    set(BUILD_TEST ON)
+    #set(BUILD_TEST OFF)
 endif()
 
 if(ENABLE_DEVELOPER_MODE AND NOT BUILD_EFI AND NOT WIN32)
@@ -170,18 +171,18 @@ endif()
 # ------------------------------------------------------------------------------
 
 if(ENABLE_EXTENDED_APIS)
-    set_bfm_vmm(eapis_bfvmm)
+    set_bfm_vmm(eapis_vmm TARGET eapis_x86_64-vmm-elf)
     list(APPEND EXTENSION
         ${CMAKE_CURRENT_LIST_DIR}/extended_apis
     )
 endif()
 
 # ------------------------------------------------------------------------------
-# Hyperkernel
+# Boxy
 # ------------------------------------------------------------------------------
 
 if(ENABLE_BOXY)
-    set_bfm_vmm(boxy_bfvmm)
+    set_bfm_vmm(boxy_vmm TARGET boxy_x86_64-vmm-elf)
     list(APPEND EXTENSION
         ${CMAKE_CURRENT_LIST_DIR}/boxy
     )
