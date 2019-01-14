@@ -51,7 +51,7 @@ done <<< "$index"
 if [[ ! -z $bad ]]; then
     for f in $bad
     do
-        echo -e "\e[1;91mfailed hook\e[0m \e[1mpre-commit\e[0m: file should not be executable: $f"
+        echo -e "\e[1;91mfailed hook\e[0m: \e[1mpre-commit\e[0m: file should not be executable: $f"
     done
     exit 1
 fi

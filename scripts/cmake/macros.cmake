@@ -60,6 +60,10 @@ macro(include_external_extensions)
         if(EXISTS "${e}/CMakeLists.txt")
             message(STATUS "Extension: ${e}")
             include(${e}/CMakeLists.txt)
+            execute_process(
+                COMMAND git config core.hooksPath ${SOURCE_ROOT_DIR}/.githooks
+                WORKING_DIRECTORY ${e}
+            )
         else()
             message(FATAL_ERROR "Extension not found: ${e}")
         endif()
