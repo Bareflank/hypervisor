@@ -1,20 +1,23 @@
 //
-// Bareflank Hypervisor
-// Copyright (C) 2015 Assured Information Security, Inc.
+// Copyright (C) 2019 Assured Information Security, Inc.
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-// Lesser General Public License for more details.
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 //
-// You should have received a copy of the GNU Lesser General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 #include <catch/catch.hpp>
 #include <hippomocks.h>
@@ -175,6 +178,19 @@ TEST_CASE("exit_handler: unhandled exit reason, invalid reason")
     CHECK_NOTHROW(ehlr.handle(&ehlr));
 }
 
+TEST_CASE("exit_handler: add_exit_handler")
+{
+    MockRepository mocks;
+    auto &&vcpu = setup_vcpu(mocks, 0x0);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
+
+    CHECK_NOTHROW(
+        ehlr.add_exit_handler(handler_delegate_t::create<test_handler>())
+    );
+
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
+}
+
 TEST_CASE("exit_handler: handle_nmi")
 {
     MockRepository mocks;
@@ -222,6 +238,24 @@ TEST_CASE("exit_handler: handle_cpuid")
     CHECK(g_save_state.rip != 0);
 }
 
+TEST_CASE("exit_handler: handle_cpuid ack")
+{
+    MockRepository mocks;
+    auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
+    auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
+
+    ehlr.add_init_handler(
+        ::handler_delegate_t::create<test_handler>()
+    );
+
+    g_save_state.rax = 0x4BF00000;
+    g_save_state.rip = 0;
+
+    CHECK_NOTHROW(ehlr.handle(&ehlr));
+    CHECK(g_save_state.rip != 0);
+    CHECK(g_save_state.rax == 0x4BF00001);
+}
+
 TEST_CASE("exit_handler: handle_cpuid init")
 {
     MockRepository mocks;
@@ -232,7 +266,7 @@ TEST_CASE("exit_handler: handle_cpuid init")
         ::handler_delegate_t::create<test_handler>()
     );
 
-    g_save_state.rax = 0xBF10;
+    g_save_state.rax = 0x4BF00010;
     g_save_state.rip = 0;
 
     CHECK_NOTHROW(ehlr.handle(&ehlr));
@@ -245,7 +279,7 @@ TEST_CASE("exit_handler: handle_cpuid start")
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
 
-    g_save_state.rax = 0xBF11;
+    g_save_state.rax = 0x4BF00011;
     g_save_state.rip = 0;
 
     CHECK_NOTHROW(ehlr.handle(&ehlr));
@@ -262,7 +296,7 @@ TEST_CASE("exit_handler: handle_cpuid fini")
         ::handler_delegate_t::create<test_handler>()
     );
 
-    g_save_state.rax = 0xBF20;
+    g_save_state.rax = 0x4BF00020;
     g_save_state.rip = 0;
 
     CHECK_NOTHROW(ehlr.handle(&ehlr));
@@ -275,7 +309,7 @@ TEST_CASE("exit_handler: handle_cpuid stop")
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
 
-    g_save_state.rax = 0xBF21;
+    g_save_state.rax = 0x4BF00021;
     g_save_state.rip = 0;
 
     CHECK_NOTHROW(ehlr.handle(&ehlr));

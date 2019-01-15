@@ -1,4 +1,4 @@
-![Bareflank](https://github.com/Bareflank/hypervisor/blob/gh-pages/bareflank_logo.jpg?raw=true)
+![Bareflank](https://github.com/Bareflank/hypervisor/raw/gh-pages/logo.png)
 
 <br>
 
@@ -23,13 +23,11 @@ The Bareflank Hypervisor uses a layered, modular approach.
 implementation, the build system, and architecture specific intrinsics.
 - [extended_apis](https://github.com/Bareflank/extended_apis): adds hardware virtualization extension
 APIs to the hypervisor.
-- [hyperkernel](https://github.com/Bareflank/hyperkernel): adds guest support APIs to the
-hypervisor.
-- [pv_interface](https://github.com/Bareflank/pv_interface): adds a hypercall API/ABI and
-PV interface to the hypervisor.
+- [boxy](https://github.com/Bareflank/boxy): leverages the Bareflank SDK to provide a
+fully functional hypervisor with guest support.
 
 To support Bareflank's design approach, the hypervisor is licensed
-under the GNU Lesser General Public License v2.1 (LGPL), specifically
+under MIT, specifically
 enabling users of the project to both contribute back to the project, but
 also create proprietary extensions of the VMM if so desired.
 
@@ -64,7 +62,7 @@ Intel _Sandy Bridge_ and above hardware:
 In the future, we would also like to support:
 - macOS
 - BSD
-- ARM64 (currently under development)
+- ARM64 (still under development)
 
 ## Motivation
 
@@ -83,7 +81,7 @@ Checkout the latest demo for how to compile and use the Bareflank Hypervisor on 
 
 ## Additional Videos
 
-Checkout our [YouTube Channel](https://www.youtube.com/channel/UCH-7Pw96K5V1RHAPn5-cmYA) for more great content as well as 
+Checkout our [YouTube Channel](https://www.youtube.com/channel/UCH-7Pw96K5V1RHAPn5-cmYA) for more great content as well as
 the following videos at [CppCon](https://www.youtube.com/user/CppCon) below:
 
 [![CppCon 2017](https://i.imgur.com/bLnrVon.png)](https://www.youtube.com/watch?v=KdJhQuycD78)
@@ -104,10 +102,35 @@ sudo pacman -S git base-devel linux-headers nasm clang cmake
 sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cmake libelf-dev
 ```
 
-#### Windows (Cygwin):
+#### Windows (Visual Studio):
 - [Visual Studio 2017 / WDK 10](https://docs.microsoft.com/en-us/windows-hardware/drivers/)
   - Check "Desktop development with C++"
   - Check "C++ CLI / Support"
+  - Check "VC++ 2017 version xxx Libs for Spectre (ARM)"
+  - Check "VC++ 2017 version xxx Libs for Spectre (ARM64)"
+  - Check "VC++ 2017 version xxx Libs for Spectre (x86 and x64)"
+
+After installing the the above packages you must enable test signing mode. This can be done from a
+command prompt with admin privileges:
+```
+bcdedit.exe /set testsigning ON
+<reboot>
+```
+
+Once the build environment is set up, Bareflank can be configured using the following
+instead of the cmake configure commands listed below which assume Linux:
+```
+cmake -G "Visual Studio 15 2017 Win64" -DENABLE_BUILD_VMM=OFF ..
+```
+
+Note that this version of Bareflank cannot be used to compile hypervisor as Visual Studio currently
+cannot build the needed ELF files that Bareflank relies on. This build environment also relys on
+msbuild, which doesn't support any of the build targets so compiling the drivers must be done
+manually. This environment however will compile the userspace applications natively which is
+needed for deployment to remove dependencies on Cygwin.
+
+#### Windows (Cygwin):
+- All of the Windows (Visual Studio) instructions
 - [Cygwin](https://www.cygwin.com/setup-x86_64.exe)
 
 To install Cygwin, simply install using all default settings, and then copy
@@ -116,16 +139,41 @@ run the following:
 
 ```
 setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext,bash-completion
-git config --global core.autocrlf false
 ```
 
-After installing the the above packages and disabling auto CRLF (which breaks
-bash scripts) you must enable test signing mode. This can be done from a
-command prompt with admin privileges:
+This build environment provides a complete toolchain for building and running Bareflank. Most
+developers using Bareflank on Windows will need Cygwin for this reason. The remaining compilation
+instructions follow below.
+
+#### Windows (WSL):
+- Ubuntu 18.04 LTS (Windows Store)
+
+In a powershell terminal with admin right, run the following:
+
 ```
-bcdedit.exe /set testsigning ON
-<reboot>
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 ```
+
+Then run the following in the WSL command prompt that is created:
+
+```
+sudo apt-get update
+sudo apt-get install git build-essential nasm clang cmake libelf-dev
+```
+
+Do not attempt to access the Linux file system from Windows. Instead, you should access the
+Windows file system from Linux which can be found here:
+
+```
+/mnt/c/
+```
+
+Note that the WSL cannot be used to compile the Windows drivers or start/stop the hypervisor.
+It can, however, be used to compile the hypervisor including the UEFI version without the
+need for Cygwin. If this is paired with the Visual Studio build environment, and you manually
+compile the drivers, you can piece together a complete build enviornment for Windows without the
+need for Cygwin. Developers are advised not to use this however as it is cumbersome and instead
+should use the Cygwin environment. The WSL is only supported for deployment purposes.
 
 ## Compilation Instructions
 
@@ -173,7 +221,7 @@ make distclean
 
 ## UEFI:
 A UEFI application version of Bareflank may be compiled on Linux and used to boot
-both Linux and Windows if you also include the Extended APIs. The followinging 
+both Linux and Windows if you also include the Extended APIs. The followinging
 describes how to build and execute Bareflank with EFI. For additional information,
 please see the following YouTube [video](https://www.youtube.com/watch?v=FuEyjDqA53M&t=4s)
 
@@ -182,21 +230,21 @@ To compile for UEFI, add the following to CMake when configuring:
 -DBUILD_EFI=ON
 ```
 It should be noted that unit tests must be disabled, and static builds are currently
-required (the example config provides an example of how to configure Bareflank as 
-needed for more complex builds). 
+required (the example config provides an example of how to configure Bareflank as
+needed for more complex builds).
 
-To boot Windows or Linux with the Extended APIs you will need to provide your own 
-extension that enables EPT. To see an example of this type of extension, please 
+To boot Windows or Linux with the Extended APIs you will need to provide your own
+extension that enables EPT. To see an example of this type of extension, please
 see the following integration test:
 ```
 https://github.com/Bareflank/extended_apis/blob/master/bfvmm/integration/arch/intel_x64/efi/test_efi.cpp
 ```
-Once you have your own extension, the example config is required to tell the build 
+Once you have your own extension, the example config is required to tell the build
 system which VMM and target to use. The example config can be found here:
 ```
 https://github.com/Bareflank/hypervisor/blob/master/scripts/cmake/config/example_config.cmake
 ```
-Our front page video on YouTube explains how to use this config, and the instructions 
+Our front page video on YouTube explains how to use this config, and the instructions
 are also in the config itself. To enable EFI, turn on the build Extended APIs and EFI
 flags. You will also need to set the following:
 ```
@@ -209,25 +257,25 @@ be as follows:
 set(OVERRIDE_VMM eapis_integration_intel_x64_efi_test_efi)
 set(OVERRIDE_VMM_TARGET eapis_integration)
 ```
-The first variable defines the VMM's name and the second variable defines the target 
-that builds this VMM (which tells the buid system what dependency EFI has). From 
-there build as normal. 
+The first variable defines the VMM's name and the second variable defines the target
+that builds this VMM (which tells the buid system what dependency EFI has). From
+there build as normal.
 
 The resulting UEFI application can be found here:
 ```
 build/prefixes/x86_64-efi-pe/bin/bareflank.efi
 ```
-Place this binary in your EFI partition (e.g., on Ubuntu this is 
-/boot/efi/EFI/BOOT/bareflank.efi) and execute it like any other EFI application. 
-Once Bareflank is running, you can start Windows or Linux if you included the 
-above. Also note that utilities like "make dump" do not work when using EFI as 
-the driver doesn't have access to the debug ring. You can however use 
-"make ack" if you are using the Extended APIs to get the hypervisor to say "hi". 
+Place this binary in your EFI partition (e.g., on Ubuntu this is
+/boot/efi/EFI/BOOT/bareflank.efi) and execute it like any other EFI application.
+Once Bareflank is running, you can start Windows or Linux if you included the
+above. Also note that utilities like "make dump" do not work when using EFI as
+the driver doesn't have access to the debug ring. You can however use
+"make ack" if you are using the Extended APIs to get the hypervisor to say "hi".
 
 ## Serial Instructions
 
 On Windows, serial output might not work, and on some systems (e.g. Intel NUC),
-the default Windows serial device may prevent Bareflank from starting at all. 
+the default Windows serial device may prevent Bareflank from starting at all.
 If this is the case, disable the default serial device using the following:
 ```
 reg add "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\Serial" /f /v "start" /t REG_DWORD /d "4"
@@ -248,26 +296,6 @@ ssh-host-config -y
 net start sshd
 netsh advfirewall firewall add rule name='SSH Port' dir=in action=allow protocol=TCP localport=22
 ```
-
-## Additional Layers
-
-*** **WARNING** *** <br>
-The master branch is our development branch and should be considered unstable.
-It is possible these additional projects might not compile with master. If you
-need a stable branch that works with these repos, please use a tagged release.
-
-Since the main, hypervisor repo only provides the a minimal implementation,
-we have created other repositories that extend Bareflank to provide additional
-capabilities that you might find useful.
-
-**Extended APIs:**<br>
-https://github.com/Bareflank/extended_apis
-
-**Hyperkernel:**<br>
-https://github.com/Bareflank/hyperkernel
-
-**PV Interface:**<br>
-https://github.com/Bareflank/pv_interface
 
 ## Example Extensions
 
@@ -293,9 +321,7 @@ https://github.com/Bareflank/extended_apis_example_hook
 
 ## License
 
-The Bareflank Hypervisor is licensed under the GNU Lesser General Public License
-v2.1 (LGPL). The Windows and EFI drivers are licensed under the MIT License. The
-Linux driver is licensed under the General Public License v2.0 (GPL) License.
+The Bareflank Hypervisor is licensed under the MIT License.
 
 ## Related
 

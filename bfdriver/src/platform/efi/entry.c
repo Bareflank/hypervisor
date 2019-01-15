@@ -1,20 +1,23 @@
 /*
- * Bareflank Hypervisor
- * Copyright (C) 2015 Assured Information Security, Inc.
+ * Copyright (C) 2019 Assured Information Security, Inc.
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include <efi.h>
@@ -125,13 +128,116 @@ failure:
 }
 
 /* -------------------------------------------------------------------------- */
+/* Load / Image                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * TODO
+ *
+ * Instead of loading the OS, we need to actually load a EFI/BOOT/chain.efi
+ * file which is the previous EFI/BOOT/boot64.efi. This will allow us to
+ * support the different types of loaders that are instealled regardless of
+ * which one is actually installed.
+ */
+
+static long
+load_start_vm(EFI_HANDLE ParentImage)
+{
+    /**
+     * TODO
+     *
+     * Need to check to see if there are deallocate functions for a lot of
+     * these functions as they are returning pointers.
+     */
+
+    EFI_STATUS status;
+
+    UINTN i;
+    UINTN NumberFileSystemHandles = 0;
+    EFI_HANDLE *FileSystemHandles = NULL;
+
+    status =
+        gBS->LocateHandleBuffer(
+            ByProtocol,
+            &gEfiBlockIoProtocolGuid,
+            NULL,
+            &NumberFileSystemHandles,
+            &FileSystemHandles
+        );
+
+    if (EFI_ERROR(status)) {
+        BFALERT("LocateHandleBuffer failed\n");
+        return EFI_ABORTED;
+    }
+
+    for(i = 0; i < NumberFileSystemHandles; ++i) {
+
+        EFI_DEVICE_PATH_PROTOCOL *FilePath = NULL;
+        EFI_BLOCK_IO *BlkIo = NULL;
+        EFI_HANDLE ImageHandle = NULL;
+        EFI_LOADED_IMAGE_PROTOCOL *ImageInfo = NULL;
+
+        status =
+            gBS->HandleProtocol(
+                FileSystemHandles[i],
+                &gEfiBlockIoProtocolGuid,
+                (VOID**) &BlkIo
+            );
+
+        if (EFI_ERROR(status)) {
+            continue;
+        }
+
+        FilePath = FileDevicePath(FileSystemHandles[i], L"\\EFI\\BOOT\\bootx64.efi");
+
+        status =
+            gBS->LoadImage(
+                FALSE,
+                ParentImage,
+                FilePath,
+                NULL,
+                0,
+                &ImageHandle
+            );
+
+        gBS->FreePool(FilePath);
+
+        if (EFI_ERROR(status)) {
+            continue;
+        }
+
+        status =
+            gBS->HandleProtocol(
+                ImageHandle,
+                &gEfiLoadedImageProtocolGuid,
+                (VOID **) &ImageInfo
+        );
+
+        if (EFI_ERROR(status)) {
+            continue;
+        }
+
+        if(ImageInfo->ImageCodeType != EfiLoaderCode) {
+            continue;
+        }
+
+        gBS->StartImage(ImageHandle, NULL, NULL);
+
+        break;
+    }
+
+    BFALERT("Unable to locate EFI bootloader\n");
+    return EFI_ABORTED;
+}
+
+/* -------------------------------------------------------------------------- */
 /* Entry / Exit                                                               */
 /* -------------------------------------------------------------------------- */
 
 EFI_STATUS
 efi_main(EFI_HANDLE image, EFI_SYSTEM_TABLE *systab)
 {
-	InitializeLib(image, systab);
+    InitializeLib(image, systab);
 
     Print(L"\n");
     Print(L"  ___                __ _           _   \n");
@@ -150,5 +256,7 @@ efi_main(EFI_HANDLE image, EFI_SYSTEM_TABLE *systab)
     ioctl_load_vmm();
     ioctl_start_vmm();
 
-	return EFI_SUCCESS;
+    load_start_vm(image);
+
+    return EFI_SUCCESS;
 }
