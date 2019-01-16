@@ -80,7 +80,7 @@ TEST_CASE("set bits")
     CHECK(set_bits(0xF0F0F0F0U, 0x00111100U, 0x00111100U) == 0xF0F1F1F0U);
 }
 
-TEST_CASE("bitmanip_eapis: set bit from span")
+TEST_CASE("set bit from span")
 {
     auto buf = std::make_unique<unsigned[]>(10);
     auto buf_view = gsl::make_span(buf.get(), 10);
@@ -101,7 +101,7 @@ TEST_CASE("bitmanip_eapis: set bit from span")
     CHECK_THROWS(set_bit(buf_view, 1000000));
 }
 
-TEST_CASE("bitmanip_eapis: clear bit from span")
+TEST_CASE("clear bit from span")
 {
     auto buf = std::make_unique<unsigned[]>(10);
     auto buf_view = gsl::make_span(buf.get(), 10);

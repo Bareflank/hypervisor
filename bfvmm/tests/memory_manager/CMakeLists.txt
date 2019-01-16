@@ -21,35 +21,60 @@
 
 do_test(test_memory_manager
     SOURCES test_memory_manager.cpp
+    DEPENDS bfvmm_hve
+    DEPENDS bfvmm_vcpu
     DEPENDS bfvmm_memory_manager
+    DEFINES STATIC_HVE
+    DEFINES STATIC_VCPU
     DEFINES STATIC_MEMORY_MANAGER
+    DEFINES STATIC_INTRINSICS
 )
 
 do_test(test_buddy_allocator
     SOURCES test_buddy_allocator.cpp
+    DEPENDS bfvmm_hve
+    DEPENDS bfvmm_vcpu
     DEPENDS bfvmm_memory_manager
+    DEFINES STATIC_HVE
+    DEFINES STATIC_VCPU
     DEFINES STATIC_MEMORY_MANAGER
+    DEFINES STATIC_INTRINSICS
 )
 
 if(NOT WIN32)
     do_test(test_object_allocator
         SOURCES test_object_allocator.cpp
+        DEPENDS bfvmm_hve
+        DEPENDS bfvmm_vcpu
         DEPENDS bfvmm_memory_manager
+        DEFINES STATIC_HVE
+        DEFINES STATIC_VCPU
         DEFINES STATIC_MEMORY_MANAGER
+        DEFINES STATIC_INTRINSICS
     )
 endif()
 
 if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
     do_test(test_helpers
         SOURCES arch/x64/cr3/test_helpers.cpp
+        DEPENDS bfvmm_hve
+        DEPENDS bfvmm_vcpu
         DEPENDS bfvmm_memory_manager
+        DEFINES STATIC_HVE
+        DEFINES STATIC_VCPU
         DEFINES STATIC_MEMORY_MANAGER
+        DEFINES STATIC_INTRINSICS
     )
 
     do_test(test_mmap
         SOURCES arch/x64/cr3/test_mmap.cpp
+        DEPENDS bfvmm_hve
+        DEPENDS bfvmm_vcpu
         DEPENDS bfvmm_memory_manager
+        DEFINES STATIC_HVE
+        DEFINES STATIC_VCPU
         DEFINES STATIC_MEMORY_MANAGER
+        DEFINES STATIC_INTRINSICS
     )
 elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
     message(WARNING "Unimplemented")

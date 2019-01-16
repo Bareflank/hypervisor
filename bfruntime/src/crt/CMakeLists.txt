@@ -32,16 +32,17 @@ list(APPEND SOURCES
     crt.cpp
 )
 
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64" AND NOT WIN32)
-    list(APPEND SOURCES
-        start_x64.asm
-    )
-endif()
-
-if(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
-    list(APPEND SOURCES
-        start_aarch64.S
-    )
+if(NOT CMAKE_INSTALL_PREFIX STREQUAL "${TEST_PREFIX_PATH}")
+    if(${BUILD_TARGET_ARCH} STREQUAL "x86_64" AND NOT WIN32)
+        list(APPEND SOURCES
+            start_x64.asm
+        )
+    endif()
+    if(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
+        list(APPEND SOURCES
+            start_aarch64.S
+        )
+    endif()
 endif()
 
 add_static_library(

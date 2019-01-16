@@ -50,9 +50,7 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
-namespace bfvmm
-{
-namespace intel_x64
+namespace bfvmm::intel_x64
 {
 
 /// VMXON (Intel x86_64)
@@ -117,7 +115,6 @@ public:
     /// @endcond
 };
 
-}
 }
 
 #ifdef _MSC_VER

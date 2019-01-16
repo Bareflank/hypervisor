@@ -25,6 +25,8 @@
 #include <bfthreadcontext.h>
 
 #include <hve/arch/intel_x64/vmcs.h>
+#include <hve/arch/intel_x64/vcpu.h>
+
 #include <intrinsics.h>
 
 // -----------------------------------------------------------------------------
@@ -49,9 +51,11 @@ namespace bfvmm
 namespace intel_x64
 {
 
-vmcs::vmcs(vcpuid::type vcpuid) :
-    m_vcpuid{vcpuid},
-    m_save_state{std::make_unique<save_state_t>()},
+vmcs::vmcs(
+    gsl::not_null<vcpu *> vcpu
+) :
+    m_vcpu{vcpu},
+    m_save_state{make_page<save_state_t>()},
     m_vmcs_region{make_page<uint32_t>()},
     m_vmcs_region_phys{g_mm->virtptr_to_physint(m_vmcs_region.get())}
 {
@@ -73,7 +77,7 @@ void
 vmcs::launch()
 {
     try {
-        if (vcpuid::is_host_vm_vcpu(m_vcpuid)) {
+        if (m_vcpu->is_host_vm_vcpu()) {
             ::intel_x64::vm::launch_demote();
         }
         else {

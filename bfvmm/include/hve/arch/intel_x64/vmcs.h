@@ -55,10 +55,10 @@
 // Definitions
 // -----------------------------------------------------------------------------
 
-namespace bfvmm
+namespace bfvmm::intel_x64
 {
-namespace intel_x64
-{
+
+class vcpu;
 
 /// Intel x86_64 VMCS
 ///
@@ -86,9 +86,9 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    /// @param vcpuid the vcpuid for this VMCS
+    /// @param vcpu The vCPU associated with this VMCS
     ///
-    vmcs(vcpuid::type vcpuid);
+    vmcs(gsl::not_null<vcpu *> vcpu);
 
     /// Destructor
     ///
@@ -210,8 +210,8 @@ public:
 
 private:
 
-    vcpuid::type m_vcpuid;
-    std::unique_ptr<save_state_t> m_save_state;
+    vcpu *m_vcpu;
+    page_ptr<save_state_t> m_save_state;
 
     page_ptr<uint32_t> m_vmcs_region;
     uintptr_t m_vmcs_region_phys;
@@ -229,7 +229,6 @@ public:
     /// @endcond
 };
 
-}
 }
 
 using vmcs_t = bfvmm::intel_x64::vmcs;
