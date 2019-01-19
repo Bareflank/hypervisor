@@ -22,87 +22,12 @@
 #include <hippomocks.h>
 #include <catch/catch.hpp>
 
-#define NEED_GSL_LITE
-#define GSL_ABORT ut_abort
-
-void ut_abort()
-{
-    std::cout << "test\n";
-}
-
 #include <bfgsl.h>
-#include <bftypes.h>
 
-#ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
-
-TEST_CASE("expects / ensures")
+TEST_CASE("memset")
 {
-    ut_abort();
-
-    {
-        MockRepository mocks;
-        mocks.ExpectCallFunc(ut_abort);
-        mocks.ExpectCallFunc(ut_abort);
-
-        expects(true);
-        ensures(true);
-
-        expects(false);
-        ensures(false);
-    }
-
-    // Note:
-    //
-    // Clang Tidy seems to have a bug and thinks that the Mock library
-    // has a dangling pointer if this is not done. This might be able to
-    // be removed when Clang Tidy is updated
-    //
-    HippoMocks::MockRepoInstanceHolder<0>::instance = nullptr;
-}
-
-TEST_CASE("narrow cast")
-{
-    auto var = gsl::narrow_cast<int>(42);
-}
-
-TEST_CASE("array")
-{
-    int count = 0;
     char buf[42] = {};
+    auto view = gsl::span(buf);
 
-    for (int i = 0; i < 42; i++) {
-        count += gsl::at(buf, i);
-    }
+    gsl::memset(view, 0);
 }
-
-TEST_CASE("const array")
-{
-    int count = 0;
-    const char buf[42] = {};
-
-    for (int i = 0; i < 42; i++) {
-        count += gsl::at(buf, i);
-    }
-}
-
-TEST_CASE("array with provided limit")
-{
-    int count = 0;
-    char buf[42] = {};
-
-    for (int i = 0; i < 42; i++) {
-        count += gsl::at(static_cast<char *>(buf), 42, i);
-    }
-}
-
-TEST_CASE("const array with provided limit")
-{
-    int count = 0;
-    const char buf[42] = {};
-
-    for (int i = 0; i < 42; i++) {
-        count += gsl::at(static_cast<const char *>(buf), 42, i);
-    }
-}
-
-#endif

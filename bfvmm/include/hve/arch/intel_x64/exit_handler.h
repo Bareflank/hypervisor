@@ -84,9 +84,7 @@ void emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu, uintptr_t val);
 // Exit Handler
 // -----------------------------------------------------------------------------
 
-namespace bfvmm
-{
-namespace intel_x64
+namespace bfvmm::intel_x64
 {
 
 /// Exit Handler
@@ -114,9 +112,7 @@ public:
     ///
     /// @param vcpu The vCPU associated with this exit handler
     ///
-    exit_handler(
-        gsl::not_null<vcpu *> vcpu
-    );
+    exit_handler(gsl::not_null<vcpu *> vcpu);
 
     /// Destructor
     ///
@@ -285,7 +281,6 @@ public:
     /// @endcond
 };
 
-}
 }
 
 using exit_handler_t = bfvmm::intel_x64::exit_handler;

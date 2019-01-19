@@ -30,88 +30,10 @@ static bool
 test_handler(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 { bfignored(vcpu); return true; }
 
-auto
-setup_vcpu(MockRepository &mocks, ::intel_x64::vmcs::value_type reason)
+TEST_CASE("quiet")
 {
     setup_test_support();
 
-    auto vcpu = mocks.Mock<bfvmm::intel_x64::vcpu>();
-
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::run);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::hlt);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::init);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::fini);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::id).Return(0);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_running).Return(false);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_initialized).Return(false);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_bootstrap_vcpu).Return(true);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_host_vm_vcpu).Return(true);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_guest_vm_vcpu).Return(false);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_run_delegate);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_hlt_delegate);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_init_delegate);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_fini_delegate);
-
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::load);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::promote);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_handler);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::halt);
-
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::advance).Do([&] {
-        g_save_state.rip = 42;
-        return true;
-    });
-
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::rax).Do([&] { return g_save_state.rax; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::rbx).Do([&] { return g_save_state.rbx; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::rcx).Do([&] { return g_save_state.rcx; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::rdx).Do([&] { return g_save_state.rdx; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::rbp).Do([&] { return g_save_state.rbp; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::rsi).Do([&] { return g_save_state.rsi; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::rdi).Do([&] { return g_save_state.rdi; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::r08).Do([&] { return g_save_state.r08; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::r09).Do([&] { return g_save_state.r09; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::r10).Do([&] { return g_save_state.r10; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::r11).Do([&] { return g_save_state.r11; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::r12).Do([&] { return g_save_state.r12; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::r13).Do([&] { return g_save_state.r13; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::r14).Do([&] { return g_save_state.r14; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::r15).Do([&] { return g_save_state.r15; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::rip).Do([&] { return g_save_state.rip; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::rsp).Do([&] { return g_save_state.rsp; });
-
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_rax).Do([&](uint64_t val) { g_save_state.rax = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_rbx).Do([&](uint64_t val) { g_save_state.rbx = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_rcx).Do([&](uint64_t val) { g_save_state.rcx = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_rdx).Do([&](uint64_t val) { g_save_state.rdx = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_rbp).Do([&](uint64_t val) { g_save_state.rbp = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_rsi).Do([&](uint64_t val) { g_save_state.rsi = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_rdi).Do([&](uint64_t val) { g_save_state.rdi = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_r08).Do([&](uint64_t val) { g_save_state.r08 = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_r09).Do([&](uint64_t val) { g_save_state.r09 = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_r10).Do([&](uint64_t val) { g_save_state.r10 = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_r11).Do([&](uint64_t val) { g_save_state.r11 = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_r12).Do([&](uint64_t val) { g_save_state.r12 = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_r13).Do([&](uint64_t val) { g_save_state.r13 = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_r14).Do([&](uint64_t val) { g_save_state.r14 = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_r15).Do([&](uint64_t val) { g_save_state.r15 = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_rip).Do([&](uint64_t val) { g_save_state.rip = val; });
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_rsp).Do([&](uint64_t val) { g_save_state.rsp = val; });
-
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::save_state).Return(&g_save_state);
-
-    g_vmcs_fields[::intel_x64::vmcs::exit_reason::addr] = reason;
-    g_vmcs_fields[::intel_x64::vmcs::vm_exit_instruction_length::addr] = 42;
-
-    g_eax_cpuid[intel_x64::cpuid::arch_perf_monitoring::addr] = 0xFFFFFFFF;
-    g_ecx_cpuid[intel_x64::cpuid::feature_information::addr] = 0xFFFFFFFF;
-    g_ebx_cpuid[intel_x64::cpuid::extended_feature_flags::addr] = 0xFFFFFFFF;
-
-    return vcpu;
-}
-
-TEST_CASE("quiet")
-{
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0x0);
 
@@ -120,6 +42,8 @@ TEST_CASE("quiet")
 
 TEST_CASE("exit_handler: construct / destruct")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0x0);
 
@@ -131,6 +55,8 @@ TEST_CASE("exit_handler: construct / destruct")
 
 TEST_CASE("exit_handler: add_handler")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0x0);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -142,6 +68,8 @@ TEST_CASE("exit_handler: add_handler")
 
 TEST_CASE("exit_handler: add_handler invalid reason")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0x0);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -153,6 +81,8 @@ TEST_CASE("exit_handler: add_handler invalid reason")
 
 TEST_CASE("exit_handler: unhandled exit reason")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0x0);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -162,6 +92,8 @@ TEST_CASE("exit_handler: unhandled exit reason")
 
 TEST_CASE("exit_handler: unhandled exit reason, invalid guest state")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::vm_entry_failure::mask);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -171,6 +103,8 @@ TEST_CASE("exit_handler: unhandled exit reason, invalid guest state")
 
 TEST_CASE("exit_handler: unhandled exit reason, invalid reason")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0x0000BEEF);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -180,6 +114,8 @@ TEST_CASE("exit_handler: unhandled exit reason, invalid reason")
 
 TEST_CASE("exit_handler: add_exit_handler")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0x0);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -193,6 +129,8 @@ TEST_CASE("exit_handler: add_exit_handler")
 
 TEST_CASE("exit_handler: handle_nmi")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::exception_or_non_maskable_interrupt);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -209,6 +147,8 @@ TEST_CASE("exit_handler: handle_nmi")
 
 TEST_CASE("exit_handler: handle_nmi_window")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::nmi_window);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -228,6 +168,8 @@ TEST_CASE("exit_handler: handle_nmi_window")
 
 TEST_CASE("exit_handler: handle_cpuid")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -240,6 +182,8 @@ TEST_CASE("exit_handler: handle_cpuid")
 
 TEST_CASE("exit_handler: handle_cpuid ack")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -258,6 +202,8 @@ TEST_CASE("exit_handler: handle_cpuid ack")
 
 TEST_CASE("exit_handler: handle_cpuid init")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -275,6 +221,8 @@ TEST_CASE("exit_handler: handle_cpuid init")
 
 TEST_CASE("exit_handler: handle_cpuid start")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -288,6 +236,8 @@ TEST_CASE("exit_handler: handle_cpuid start")
 
 TEST_CASE("exit_handler: handle_cpuid fini")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -305,6 +255,8 @@ TEST_CASE("exit_handler: handle_cpuid fini")
 
 TEST_CASE("exit_handler: handle_cpuid stop")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::cpuid);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -318,6 +270,8 @@ TEST_CASE("exit_handler: handle_cpuid stop")
 
 TEST_CASE("exit_handler: handle_invd")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::invd);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -330,6 +284,8 @@ TEST_CASE("exit_handler: handle_invd")
 
 TEST_CASE("exit_handler: handle_vmxoff")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::vmxoff);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -342,6 +298,8 @@ TEST_CASE("exit_handler: handle_vmxoff")
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_debug_ctl")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -357,6 +315,8 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_debug_ctl")
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_pat")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -374,6 +334,8 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_pat")
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_efer")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -391,6 +353,8 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_efer")
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_perf")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -408,6 +372,8 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_perf")
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_cs")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -423,6 +389,8 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_cs")
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_esp")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -438,6 +406,8 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_esp")
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_eip")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -453,6 +423,8 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_eip")
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_fs_base")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -468,6 +440,8 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_fs_base")
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_gs_base")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -483,6 +457,8 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_gs_base")
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_default")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -498,6 +474,8 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_default")
 
 TEST_CASE("exit_handler: vm_exit_reason_rdmsr_ignore")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::rdmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -513,6 +491,8 @@ TEST_CASE("exit_handler: vm_exit_reason_rdmsr_ignore")
 
 TEST_CASE("exit_handler: vm_exit_reason_wrmsr_debug_ctrl")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -528,6 +508,8 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_debug_ctrl")
 
 TEST_CASE("exit_handler: vm_exit_reason_wrmsr_pat")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -545,6 +527,8 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_pat")
 
 TEST_CASE("exit_handler: vm_exit_reason_wrmsr_efer")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -562,6 +546,8 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_efer")
 
 TEST_CASE("exit_handler: vm_exit_reason_wrmsr_perf")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -579,6 +565,8 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_perf")
 
 TEST_CASE("exit_handler: vm_exit_reason_wrmsr_cs")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -594,6 +582,8 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_cs")
 
 TEST_CASE("exit_handler: vm_exit_reason_wrmsr_esp")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -609,6 +599,8 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_esp")
 
 TEST_CASE("exit_handler: vm_exit_reason_wrmsr_eip")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -624,6 +616,8 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_eip")
 
 TEST_CASE("exit_handler: vm_exit_reason_wrmsr_fs_base")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -639,6 +633,8 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_fs_base")
 
 TEST_CASE("exit_handler: vm_exit_reason_wrmsr_gs_base")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -654,6 +650,8 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_gs_base")
 
 TEST_CASE("exit_handler: vm_exit_reason_wrmsr_default")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::wrmsr);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -668,6 +666,8 @@ TEST_CASE("exit_handler: vm_exit_reason_wrmsr_default")
 
 TEST_CASE("exit_handler: vm_exit_reason_wrcr4")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::control_register_accesses);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -680,6 +680,8 @@ TEST_CASE("exit_handler: vm_exit_reason_wrcr4")
 
 TEST_CASE("exit_handler: vm_exit_reason_wrcr4 invalid")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::basic_exit_reason::control_register_accesses);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
@@ -690,6 +692,8 @@ TEST_CASE("exit_handler: vm_exit_reason_wrcr4 invalid")
 
 TEST_CASE("exit_handler: emulate_rdgpr rax")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -701,6 +705,8 @@ TEST_CASE("exit_handler: emulate_rdgpr rax")
 
 TEST_CASE("exit_handler: emulate_rdgpr rcx")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -712,6 +718,8 @@ TEST_CASE("exit_handler: emulate_rdgpr rcx")
 
 TEST_CASE("exit_handler: emulate_rdgpr rdx")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -723,6 +731,8 @@ TEST_CASE("exit_handler: emulate_rdgpr rdx")
 
 TEST_CASE("exit_handler: emulate_rdgpr rbx")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -734,6 +744,8 @@ TEST_CASE("exit_handler: emulate_rdgpr rbx")
 
 TEST_CASE("exit_handler: emulate_rdgpr rsp")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -745,6 +757,8 @@ TEST_CASE("exit_handler: emulate_rdgpr rsp")
 
 TEST_CASE("exit_handler: emulate_rdgpr rbp")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -756,6 +770,8 @@ TEST_CASE("exit_handler: emulate_rdgpr rbp")
 
 TEST_CASE("exit_handler: emulate_rdgpr rsi")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -767,6 +783,8 @@ TEST_CASE("exit_handler: emulate_rdgpr rsi")
 
 TEST_CASE("exit_handler: emulate_rdgpr rdi")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -778,6 +796,8 @@ TEST_CASE("exit_handler: emulate_rdgpr rdi")
 
 TEST_CASE("exit_handler: emulate_rdgpr r8")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -789,6 +809,8 @@ TEST_CASE("exit_handler: emulate_rdgpr r8")
 
 TEST_CASE("exit_handler: emulate_rdgpr r9")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -800,6 +822,8 @@ TEST_CASE("exit_handler: emulate_rdgpr r9")
 
 TEST_CASE("exit_handler: emulate_rdgpr r10")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -811,6 +835,8 @@ TEST_CASE("exit_handler: emulate_rdgpr r10")
 
 TEST_CASE("exit_handler: emulate_rdgpr r11")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -822,6 +848,8 @@ TEST_CASE("exit_handler: emulate_rdgpr r11")
 
 TEST_CASE("exit_handler: emulate_rdgpr r12")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -833,6 +861,8 @@ TEST_CASE("exit_handler: emulate_rdgpr r12")
 
 TEST_CASE("exit_handler: emulate_rdgpr r13")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -844,6 +874,8 @@ TEST_CASE("exit_handler: emulate_rdgpr r13")
 
 TEST_CASE("exit_handler: emulate_rdgpr r14")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -855,6 +887,8 @@ TEST_CASE("exit_handler: emulate_rdgpr r14")
 
 TEST_CASE("exit_handler: emulate_rdgpr r15")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -866,6 +900,8 @@ TEST_CASE("exit_handler: emulate_rdgpr r15")
 
 TEST_CASE("exit_handler: emulate_wrgpr rax")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -877,6 +913,8 @@ TEST_CASE("exit_handler: emulate_wrgpr rax")
 
 TEST_CASE("exit_handler: emulate_wrgpr rcx")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -888,6 +926,8 @@ TEST_CASE("exit_handler: emulate_wrgpr rcx")
 
 TEST_CASE("exit_handler: emulate_wrgpr rdx")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -899,6 +939,8 @@ TEST_CASE("exit_handler: emulate_wrgpr rdx")
 
 TEST_CASE("exit_handler: emulate_wrgpr rbx")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -910,6 +952,8 @@ TEST_CASE("exit_handler: emulate_wrgpr rbx")
 
 TEST_CASE("exit_handler: emulate_wrgpr rsp")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -921,6 +965,8 @@ TEST_CASE("exit_handler: emulate_wrgpr rsp")
 
 TEST_CASE("exit_handler: emulate_wrgpr rbp")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -932,6 +978,8 @@ TEST_CASE("exit_handler: emulate_wrgpr rbp")
 
 TEST_CASE("exit_handler: emulate_wrgpr rsi")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -943,6 +991,8 @@ TEST_CASE("exit_handler: emulate_wrgpr rsi")
 
 TEST_CASE("exit_handler: emulate_wrgpr rdi")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -954,6 +1004,8 @@ TEST_CASE("exit_handler: emulate_wrgpr rdi")
 
 TEST_CASE("exit_handler: emulate_wrgpr r8")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -965,6 +1017,8 @@ TEST_CASE("exit_handler: emulate_wrgpr r8")
 
 TEST_CASE("exit_handler: emulate_wrgpr r9")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -976,6 +1030,8 @@ TEST_CASE("exit_handler: emulate_wrgpr r9")
 
 TEST_CASE("exit_handler: emulate_wrgpr r10")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -987,6 +1043,8 @@ TEST_CASE("exit_handler: emulate_wrgpr r10")
 
 TEST_CASE("exit_handler: emulate_wrgpr r11")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -998,6 +1056,8 @@ TEST_CASE("exit_handler: emulate_wrgpr r11")
 
 TEST_CASE("exit_handler: emulate_wrgpr r12")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -1009,6 +1069,8 @@ TEST_CASE("exit_handler: emulate_wrgpr r12")
 
 TEST_CASE("exit_handler: emulate_wrgpr r13")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -1020,6 +1082,8 @@ TEST_CASE("exit_handler: emulate_wrgpr r13")
 
 TEST_CASE("exit_handler: emulate_wrgpr r14")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 
@@ -1031,6 +1095,8 @@ TEST_CASE("exit_handler: emulate_wrgpr r14")
 
 TEST_CASE("exit_handler: emulate_wrgpr r15")
 {
+    setup_test_support();
+
     MockRepository mocks;
     auto &&vcpu = setup_vcpu(mocks, 0);
 

@@ -86,7 +86,7 @@ vmx::check_vmx_capabilities_msr()
 
     bfdebug_pass(1, "check vmx capabilities physical address width");
 
-    if (::intel_x64::msrs::ia32_vmx_basic::memory_type::get() != x64::memory_type::write_back) {
+    if (::intel_x64::msrs::ia32_vmx_basic::memory_type::get() != ::x64::memory_type::write_back) {
         throw std::runtime_error("invalid memory type");
     }
 

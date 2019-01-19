@@ -21,15 +21,35 @@
 
 if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
     list(APPEND SOURCES
+        arch/intel_x64/vmexit/control_register.cpp
+        arch/intel_x64/vmexit/cpuid.cpp
+        arch/intel_x64/vmexit/ept_misconfiguration.cpp
+        arch/intel_x64/vmexit/ept_violation.cpp
+        arch/intel_x64/vmexit/external_interrupt.cpp
+        arch/intel_x64/vmexit/init_signal.cpp
+        arch/intel_x64/vmexit/interrupt_window.cpp
+        arch/intel_x64/vmexit/io_instruction.cpp
+        arch/intel_x64/vmexit/monitor_trap.cpp
+        arch/intel_x64/vmexit/rdmsr.cpp
+        arch/intel_x64/vmexit/sipi_signal.cpp
+        arch/intel_x64/vmexit/preemption_timer.cpp
+        arch/intel_x64/vmexit/wrmsr.cpp
+        arch/intel_x64/vmexit/xsetbv.cpp
         arch/intel_x64/check_vmcs_control_fields.cpp
         arch/intel_x64/check_vmcs_guest_fields.cpp
         arch/intel_x64/check_vmcs_host_fields.cpp
+        arch/intel_x64/ept.cpp
         arch/intel_x64/exception.cpp
-        arch/intel_x64/nmi.cpp
         arch/intel_x64/exit_handler.cpp
+        arch/intel_x64/interrupt_queue.cpp
+        arch/intel_x64/microcode.cpp
+        arch/intel_x64/mtrrs.cpp
+        arch/intel_x64/nmi.cpp
         arch/intel_x64/vcpu.cpp
         arch/intel_x64/vmcs.cpp
         arch/intel_x64/vmx.cpp
+        arch/intel_x64/vpid.cpp
+        arch/x64/unmapper.cpp
     )
 
     if(NOT WIN32 AND NOT ENABLE_MOCKING)
