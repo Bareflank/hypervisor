@@ -28,7 +28,13 @@ fi
 index=$(git diff-index --cached --diff-filter=d $against)
 while read index;
 do
-    if [[ ! -z $(echo $index | grep ':100755') ]]
+    index=$(grep ':100755 100755')
+    if [[ ! -z $(echo $index) ]]
+    then
+        index=$(grep ':100644 100755')
+    fi
+
+    if [[ ! -z $(echo $index) ]]
     then
         full=$(echo $index | awk '{print $NF}')
         name=$(basename -- $full)
