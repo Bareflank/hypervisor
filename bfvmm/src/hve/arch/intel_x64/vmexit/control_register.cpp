@@ -24,6 +24,136 @@
 namespace bfvmm::intel_x64
 {
 
+uintptr_t
+emulate_rdgpr(vcpu *vcpu)
+{
+    using namespace ::intel_x64::vmcs;
+    using namespace exit_qualification::control_register_access;
+
+    switch (general_purpose_register::get()) {
+        case general_purpose_register::rax:
+            return vcpu->rax();
+
+        case general_purpose_register::rbx:
+            return vcpu->rbx();
+
+        case general_purpose_register::rcx:
+            return vcpu->rcx();
+
+        case general_purpose_register::rdx:
+            return vcpu->rdx();
+
+        case general_purpose_register::rsp:
+            return vcpu->rsp();
+
+        case general_purpose_register::rbp:
+            return vcpu->rbp();
+
+        case general_purpose_register::rsi:
+            return vcpu->rsi();
+
+        case general_purpose_register::rdi:
+            return vcpu->rdi();
+
+        case general_purpose_register::r8:
+            return vcpu->r08();
+
+        case general_purpose_register::r9:
+            return vcpu->r09();
+
+        case general_purpose_register::r10:
+            return vcpu->r10();
+
+        case general_purpose_register::r11:
+            return vcpu->r11();
+
+        case general_purpose_register::r12:
+            return vcpu->r12();
+
+        case general_purpose_register::r13:
+            return vcpu->r13();
+
+        case general_purpose_register::r14:
+            return vcpu->r14();
+
+        default:
+            return vcpu->r15();
+    }
+}
+
+void
+emulate_wrgpr(vcpu *vcpu, uintptr_t val)
+{
+    using namespace ::intel_x64::vmcs;
+    using namespace exit_qualification::control_register_access;
+
+    switch (general_purpose_register::get()) {
+        case general_purpose_register::rax:
+            vcpu->set_rax(val);
+            return;
+
+        case general_purpose_register::rbx:
+            vcpu->set_rbx(val);
+            return;
+
+        case general_purpose_register::rcx:
+            vcpu->set_rcx(val);
+            return;
+
+        case general_purpose_register::rdx:
+            vcpu->set_rdx(val);
+            return;
+
+        case general_purpose_register::rsp:
+            vcpu->set_rsp(val);
+            return;
+
+        case general_purpose_register::rbp:
+            vcpu->set_rbp(val);
+            return;
+
+        case general_purpose_register::rsi:
+            vcpu->set_rsi(val);
+            return;
+
+        case general_purpose_register::rdi:
+            vcpu->set_rdi(val);
+            return;
+
+        case general_purpose_register::r8:
+            vcpu->set_r08(val);
+            return;
+
+        case general_purpose_register::r9:
+            vcpu->set_r09(val);
+            return;
+
+        case general_purpose_register::r10:
+            vcpu->set_r10(val);
+            return;
+
+        case general_purpose_register::r11:
+            vcpu->set_r11(val);
+            return;
+
+        case general_purpose_register::r12:
+            vcpu->set_r12(val);
+            return;
+
+        case general_purpose_register::r13:
+            vcpu->set_r13(val);
+            return;
+
+        case general_purpose_register::r14:
+            vcpu->set_r14(val);
+            return;
+
+        default:
+            vcpu->set_r15(val);
+            return;
+    }
+}
+
 static bool
 emulate_ia_32e_mode_switch(
     control_register_handler::info_t &info)
@@ -82,7 +212,6 @@ default_wrcr3_handler(
     bfignored(vcpu);
     bfignored(info);
 
-    ::intel_x64::vmx::invept_global();
     return true;
 }
 
@@ -386,6 +515,7 @@ control_register_handler::handle_wrcr4(vcpu *vcpu)
     };
 
     info.shadow = info.val;
+    info.val |= ::intel_x64::cr4::vmx_enable_bit::mask;
     info.val |= m_vcpu->global_state()->ia32_vmx_cr4_fixed0;
 
     for (const auto &d : m_wrcr4_handlers) {

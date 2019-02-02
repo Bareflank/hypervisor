@@ -862,7 +862,7 @@ public:
     ///
     /// @return the global state object associated with this vCPU.
     ///
-    gsl::not_null<vcpu_global_state_t *> global_state() const
+    VIRTUAL gsl::not_null<vcpu_global_state_t *> global_state() const
     { return m_vcpu_global_state; }
 
     //==========================================================================

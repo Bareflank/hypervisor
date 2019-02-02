@@ -21,6 +21,54 @@
 
 #include <hve/arch/intel_x64/vcpu.h>
 
+void
+emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val)
+{
+    using namespace ::intel_x64::vmcs;
+
+    switch (msr) {
+        case ::intel_x64::msrs::ia32_debugctl::addr:
+            guest_ia32_debugctl::set(val);
+            return;
+
+        case ::x64::msrs::ia32_pat::addr:
+            guest_ia32_pat::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_efer::addr:
+            guest_ia32_efer::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
+            guest_ia32_perf_global_ctrl::set_if_exists(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_sysenter_cs::addr:
+            guest_ia32_sysenter_cs::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_sysenter_esp::addr:
+            guest_ia32_sysenter_esp::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_sysenter_eip::addr:
+            guest_ia32_sysenter_eip::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_fs_base::addr:
+            guest_fs_base::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_gs_base::addr:
+            guest_gs_base::set(val);
+            return;
+
+        default:
+            ::intel_x64::msrs::set(msr, val);
+            return;
+    }
+}
+
 namespace bfvmm::intel_x64
 {
 
@@ -103,18 +151,15 @@ wrmsr_handler::pass_through_all_accesses()
 bool
 wrmsr_handler::handle(vcpu *vcpu)
 {
-    // TODO: IMPORTANT!!!
-    //
-    // We need to create a list of MSRs that are implemented and GP when the
-    // MSR is not implemented. We also need to test to make sure the the hardware
-    // is enforcing the privilege level of this instruction while the hypervisor
-    // is loaded.
-    //
-    // To fire a GP, we need to add a Bareflank specific exception that can be
-    // thrown. The base hypervisor can then trap on this type of exception and
-    // have delegates that can be registered to handle the exeption type, which in
-    // this case would be the interrupt code that would then inject a GP.
-    //
+    auto user_already_emulating = m_emulate[vcpu->rcx()];
+
+    struct info_t info = {
+        gsl::narrow_cast<::x64::msrs::field_type>(vcpu->rcx()),
+        ((vcpu->rax() & 0x00000000FFFFFFFF) << 0) |
+        ((vcpu->rdx() & 0x00000000FFFFFFFF) << 32),
+        false,
+        false
+    };
 
     const auto &hdlrs =
         m_handlers.find(
@@ -123,25 +168,11 @@ wrmsr_handler::handle(vcpu *vcpu)
 
     if (GSL_LIKELY(hdlrs != m_handlers.end())) {
 
-        struct info_t info = {
-            gsl::narrow_cast<uint32_t>(vcpu->rcx()),
-            0,
-            false,
-            false
-        };
-
-        info.val =
-            ((vcpu->rax() & 0x00000000FFFFFFFF) << 0) |
-            ((vcpu->rdx() & 0x00000000FFFFFFFF) << 32);
-
         for (const auto &d : hdlrs->second) {
             if (d(vcpu, info)) {
 
-                if (!info.ignore_write && !m_emulate[vcpu->rcx()]) {
-                    emulate_wrmsr(
-                        gsl::narrow_cast<::x64::msrs::field_type>(info.msr),
-                        info.val
-                    );
+                if (!info.ignore_write && !user_already_emulating) {
+                    emulate_wrmsr(info.msr, info.val);
                 }
 
                 if (!info.ignore_advance) {
@@ -157,7 +188,12 @@ wrmsr_handler::handle(vcpu *vcpu)
         return m_default_handler(vcpu);
     }
 
-    return false;
+    if (user_already_emulating) {
+        return false;
+    }
+
+    emulate_wrmsr(info.msr, info.val);
+    return vcpu->advance();
 }
 
 }

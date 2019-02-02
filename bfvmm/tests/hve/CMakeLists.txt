@@ -39,6 +39,21 @@ do_test(test_idt
     ${ARGN}
 )
 
+do_test(test_control_register
+    SOURCES arch/intel_x64/vmexit/test_control_register.cpp
+    ${ARGN}
+)
+
+do_test(test_rdmsr
+    SOURCES arch/intel_x64/vmexit/test_rdmsr.cpp
+    ${ARGN}
+)
+
+do_test(test_wrmsr
+    SOURCES arch/intel_x64/vmexit/test_wrmsr.cpp
+    ${ARGN}
+)
+
 do_test(test_check_vmcs_controls_fields
     SOURCES arch/intel_x64/test_check_vmcs_controls_fields.cpp
     ${ARGN}

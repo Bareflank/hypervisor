@@ -76,6 +76,7 @@ setup_idt_x64()
 #include "../hve/arch/intel_x64/vcpu.h"
 
 bfvmm::intel_x64::save_state_t g_save_state{};
+bfvmm::intel_x64::vcpu_global_state_t g_global_state{};
 
 extern "C" void vmcs_launch(
     bfvmm::intel_x64::save_state_t *save_state) noexcept
@@ -299,6 +300,7 @@ setup_vcpu(MockRepository &mocks, ::intel_x64::vmcs::value_type reason = 0)
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::set_ldtr_access_rights);
 
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::save_state).Return(&g_save_state);
+    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::global_state).Return(&g_global_state);
 
     g_vmcs_fields[::intel_x64::vmcs::exit_reason::addr] = reason;
     g_vmcs_fields[::intel_x64::vmcs::vm_exit_instruction_length::addr] = 42;

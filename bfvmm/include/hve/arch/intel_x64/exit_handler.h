@@ -71,16 +71,6 @@ using init_handler_delegate_t = delegate<handler_t>;
 using fini_handler_delegate_t = delegate<handler_t>;
 
 // -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
-
-::x64::msrs::value_type emulate_rdmsr(::x64::msrs::field_type msr);
-void emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val);
-
-uintptr_t emulate_rdgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu);
-void emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu, uintptr_t val);
-
-// -----------------------------------------------------------------------------
 // Exit Handler
 // -----------------------------------------------------------------------------
 
