@@ -28,15 +28,38 @@ target_include_directories(bfvmm_hve PUBLIC
     $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfutil/include>
 )
 target_sources(bfvmm_hve PRIVATE
+    $<${X64}:arch/intel_x64/vmexit/control_register.cpp>
+    $<${X64}:arch/intel_x64/vmexit/cpuid.cpp>
+    $<${X64}:arch/intel_x64/vmexit/ept_misconfiguration.cpp>
+    $<${X64}:arch/intel_x64/vmexit/ept_violation.cpp>
+    $<${X64}:arch/intel_x64/vmexit/external_interrupt.cpp>
+    $<${X64}:arch/intel_x64/vmexit/init_signal.cpp>
+    $<${X64}:arch/intel_x64/vmexit/interrupt_window.cpp>
+    $<${X64}:arch/intel_x64/vmexit/io_instruction.cpp>
+    $<${X64}:arch/intel_x64/vmexit/monitor_trap.cpp>
+    $<${X64}:arch/intel_x64/vmexit/preemption_timer.cpp>
+    $<${X64}:arch/intel_x64/vmexit/rdmsr.cpp>
+    $<${X64}:arch/intel_x64/vmexit/sipi_signal.cpp>
+    $<${X64}:arch/intel_x64/vmexit/wrmsr.cpp>
+    $<${X64}:arch/intel_x64/vmexit/xsetbv.cpp>
+
     $<${X64}:arch/intel_x64/check_vmcs_control_fields.cpp>
     $<${X64}:arch/intel_x64/check_vmcs_guest_fields.cpp>
     $<${X64}:arch/intel_x64/check_vmcs_host_fields.cpp>
+    $<${X64}:arch/intel_x64/ept.cpp>
     $<${X64}:arch/intel_x64/exception.cpp>
-    $<${X64}:arch/intel_x64/nmi.cpp>
     $<${X64}:arch/intel_x64/exit_handler.cpp>
+    $<${X64}:arch/intel_x64/interrupt_queue.cpp>
+    $<${X64}:arch/intel_x64/microcode.cpp>
+    $<${X64}:arch/intel_x64/mtrrs.cpp>
+    $<${X64}:arch/intel_x64/nmi.cpp>
     $<${X64}:arch/intel_x64/vcpu.cpp>
     $<${X64}:arch/intel_x64/vmcs.cpp>
     $<${X64}:arch/intel_x64/vmx.cpp>
+    $<${X64}:arch/intel_x64/vpid.cpp>
+
+    $<${X64}:arch/x64/unmapper.cpp>
+
     $<${X64_ASM}:arch/intel_x64/exception.asm>
     $<${X64_ASM}:arch/intel_x64/nmi.asm>
     $<${X64_ASM}:arch/intel_x64/exit_handler_entry.asm>

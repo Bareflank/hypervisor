@@ -22,10 +22,18 @@
 cmake_minimum_required(VERSION 3.6)
 project(bfack C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
+init_project(bfack INTERFACE)
 
-add_executable(bfack ack.cpp)
-target_link_static_libraries(bfack bfintrinsics)
+add_executable(bfack-binary src/ack.cpp)
 
-install(TARGETS bfack DESTINATION bin)
+target_link_libraries(bfack INTERFACE userspace::bfintrinsics)
+target_link_libraries(bfack-binary PRIVATE bfack)
+target_include_directories(bfack-binary
+    PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+    PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../bfutil/include>
+)
+
+set_target_properties(bfack-binary PROPERTIES OUTPUT_NAME bfack)
+install(TARGETS bfack-binary DESTINATION bin)
+
+fini_project()

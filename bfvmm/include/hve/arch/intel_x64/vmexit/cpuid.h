@@ -30,22 +30,6 @@
 #include "../exit_handler.h"
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_HVE
-#ifdef SHARED_HVE
-#define EXPORT_HVE EXPORT_SYM
-#else
-#define EXPORT_HVE IMPORT_SYM
-#endif
-#else
-#define EXPORT_HVE
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
@@ -59,7 +43,7 @@ class vcpu;
 /// Provides an interface for registering handlers for cpuid exits
 /// at a given (leaf, subleaf).
 ///
-class EXPORT_HVE cpuid_handler
+class cpuid_handler
 {
 public:
 

@@ -22,8 +22,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(integration C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
+init_project(integration INTERFACE)
 
 if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
     add_subdirectory(arch/intel_x64)

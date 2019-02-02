@@ -36,6 +36,9 @@
 
 namespace bfvmm::intel_x64
 {
+
+class vcpu;
+
 /// Intel x86_64 VMCS
 ///
 /// The following provides the basic VMCS implementation as defined by the

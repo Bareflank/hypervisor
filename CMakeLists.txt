@@ -141,12 +141,6 @@ if(BUILD_VMM)
         DEPENDS bfintrinsics
         DEPENDS bfruntime
     )
-
-    add_subproject(
-        integration vmm
-        DEPENDS bfvmm
-        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/bfvmm/integration/
-    )
 endif()
 
 # ------------------------------------------------------------------------------
@@ -222,6 +216,7 @@ if(BUILD_USERSPACE)
 
     add_subproject(
         bfack userspace
+        DEPENDS cxxopts
         DEPENDS bfintrinsics
     )
 endif()
