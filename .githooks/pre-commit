@@ -25,12 +25,12 @@ fi
 
 # Check for files trying to be commited with +x that shouldn't be
 #
-index=$(git diff-index --cached --diff-filter=d --compact-summary $against | head --lines=-1)
+index=$(git diff-index --cached --diff-filter=d $against)
 while read index;
 do
-    if [[ ! -z $(echo $index | grep " +x)") ]]
+    if [[ ! -z $(echo $index | grep ':100755') ]]
     then
-        full=$(echo $index | awk '{print $1}')
+        full=$(echo $index | awk '{print $NF}')
         name=$(basename -- $full)
         extn="${name##*.}"
 
@@ -38,7 +38,10 @@ do
         sh|bat) # Add more "recognized" executable file extensions here as needed
             ;;
         *)
-            bad="$full $bad"
+            if [[ -z $(grep '#!/' $full) ]]
+            then
+                bad="$bad $full"
+            fi
         esac
     fi
 done <<< "$index"
@@ -46,7 +49,7 @@ done <<< "$index"
 if [[ ! -z $bad ]]; then
     for f in $bad
     do
-        echo -e "\e[1;91mfailed hook\e[0m: \e[1mpre-commit\e[0m: file should not be executable: $f"
+        echo -e "\e[1;91mfailed hook\e[0m \e[1m(pre-commit)\e[0m: file should not be executable: $f"
     done
     exit 1
 fi
