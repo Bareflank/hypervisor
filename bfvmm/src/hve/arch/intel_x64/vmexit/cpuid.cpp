@@ -26,7 +26,7 @@ namespace bfvmm::intel_x64
 
 static bool
 handle_cpuid_feature_information(
-    gsl::not_null<vcpu_t *> vcpu, cpuid_handler::info_t &info)
+    vcpu *vcpu, cpuid_handler::info_t &info)
 {
     bfignored(vcpu);
 
@@ -83,7 +83,7 @@ cpuid_handler::set_default_handler(
 // -----------------------------------------------------------------------------
 
 bool
-cpuid_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+cpuid_handler::handle(vcpu *vcpu)
 {
     const auto &hdlrs =
         m_handlers.find(vcpu->rax());

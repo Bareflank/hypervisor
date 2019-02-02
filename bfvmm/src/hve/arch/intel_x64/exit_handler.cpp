@@ -360,8 +360,13 @@ emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu, uintptr_t val)
 // Handlers
 // -----------------------------------------------------------------------------
 
+namespace bfvmm
+{
+namespace intel_x64
+{
+
 static bool
-handle_nmi(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
+handle_nmi(vcpu *vcpu)
 {
     bfignored(vcpu);
     using namespace ::intel_x64::vmcs;
@@ -372,7 +377,7 @@ handle_nmi(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 }
 
 static bool
-handle_nmi_window(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
+handle_nmi_window(vcpu *vcpu)
 {
     bfignored(vcpu);
     using namespace ::intel_x64::vmcs;
@@ -385,14 +390,14 @@ handle_nmi_window(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 }
 
 static bool
-handle_invd(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
+handle_invd(vcpu *vcpu)
 {
     ::x64::cache::wbinvd();
     return vcpu->advance();
 }
 
 static bool
-handle_rdmsr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
+handle_rdmsr(vcpu *vcpu)
 {
     auto val =
         emulate_rdmsr(
@@ -406,7 +411,7 @@ handle_rdmsr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 }
 
 static bool
-handle_wrmsr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
+handle_wrmsr(vcpu *vcpu)
 {
     auto val = 0ULL;
 
@@ -422,7 +427,7 @@ handle_wrmsr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 }
 
 static bool
-handle_wrcr4(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
+handle_wrcr4(vcpu *vcpu)
 {
     using namespace ::intel_x64::vmcs;
     using namespace exit_qualification::control_register_access;
@@ -448,11 +453,6 @@ handle_wrcr4(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
 // -----------------------------------------------------------------------------
 // Implementation
 // -----------------------------------------------------------------------------
-
-namespace bfvmm
-{
-namespace intel_x64
-{
 
 exit_handler::exit_handler(
     gsl::not_null<vcpu *> vcpu
@@ -767,8 +767,7 @@ exit_handler::handle(
 }
 
 bool
-exit_handler::handle_cpuid(
-    gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
+exit_handler::handle_cpuid(vcpu *vcpu)
 {
     using namespace ::x64::cpuid;
 

@@ -26,22 +26,22 @@
 //     from the EPT map.
 //
 
-#include <bfcallonce.h>
-
-#include <bfvmm/vcpu/vcpu_factory.h>
-#include <bfvmm/hve/arch/intel_x64/vcpu.h>
-
-using namespace bfvmm::intel_x64;
+#include <vmm.h>
 
 // -----------------------------------------------------------------------------
 // vCPU
 // -----------------------------------------------------------------------------
 
+ept::mmap g_guest_map;
+
+void
+init()
+{
+    ept::identity_map(g_guest_map, MAX_PHYS_ADDR);
+}
+
 namespace test
 {
-
-bfn::once_flag flag;
-ept::mmap g_guest_map;
 
 class vcpu : public bfvmm::intel_x64::vcpu
 {
@@ -49,16 +49,8 @@ public:
     explicit vcpu(vcpuid::type id) :
         bfvmm::intel_x64::vcpu{id}
     {
-        bfn::call_once(flag, [&] {
-            ept::identity_map(
-                g_guest_map,
-                MAX_PHYS_ADDR
-            );
-        });
-
-        this->add_wrmsr_handler(
-            ::intel_x64::msrs::ia32_apic_base::addr,
-            wrmsr_handler::handler_delegate_t::create<vcpu, &vcpu::ia32_apic_base__wrmsr_handler>(this)
+        this->add_external_interrupt_handler(
+            external_interrupt_handler_delegate_t::create<vcpu, &vcpu::test_handler>(this)
         );
 
         this->set_eptp(g_guest_map);
@@ -67,26 +59,10 @@ public:
     ~vcpu() override = default;
 
     bool
-    external_interrupt_handler(
+    test_handler(
         vcpu_t *vcpu, external_interrupt_handler::info_t &info)
     {
         vcpu->queue_external_interrupt(info.vector);
-        return true;
-    }
-
-    bool
-    ia32_apic_base__wrmsr_handler(
-        vcpu_t *v, wrmsr_handler::info_t &info)
-    {
-        if (::intel_x64::msrs::ia32_apic_base::extd::is_enabled(info.val)) {
-            v->add_external_interrupt_handler(
-                external_interrupt_handler::handler_delegate_t::create<vcpu, &vcpu::external_interrupt_handler>(this)
-            );
-        }
-        else {
-            bferror_info(0, "local xAPIC mode is not supported");
-        }
-
         return true;
     }
 

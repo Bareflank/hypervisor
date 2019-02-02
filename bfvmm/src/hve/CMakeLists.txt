@@ -46,6 +46,7 @@ if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
         arch/intel_x64/mtrrs.cpp
         arch/intel_x64/nmi.cpp
         arch/intel_x64/vcpu.cpp
+        arch/intel_x64/vcpu_factory.cpp
         arch/intel_x64/vmcs.cpp
         arch/intel_x64/vmx.cpp
         arch/intel_x64/vpid.cpp

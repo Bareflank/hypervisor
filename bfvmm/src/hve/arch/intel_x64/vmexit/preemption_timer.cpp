@@ -83,7 +83,7 @@ preemption_timer_handler::get_timer() const
 // -----------------------------------------------------------------------------
 
 bool
-preemption_timer_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+preemption_timer_handler::handle(vcpu *vcpu)
 {
     for (const auto &d : m_handlers) {
         if (d(vcpu)) {

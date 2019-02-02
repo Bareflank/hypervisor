@@ -138,7 +138,7 @@ public:
     /// handlers
     ///
     using handler_delegate_t =
-        delegate<bool(gsl::not_null<vcpu *>, info_t &)>;
+        delegate<bool(vcpu *, info_t &)>;
 
     /// Constructor
     ///
@@ -280,20 +280,20 @@ public:
 
     /// @cond
 
-    bool handle(gsl::not_null<vcpu *> vcpu);
+    bool handle(vcpu *vcpu);
 
     /// @endcond
 
 private:
 
-    bool handle_in(gsl::not_null<vcpu *> vcpu, info_t &info);
-    bool handle_out(gsl::not_null<vcpu *> vcpu, info_t &info);
+    bool handle_in(vcpu *vcpu, info_t &info);
+    bool handle_out(vcpu *vcpu, info_t &info);
 
     void emulate_in(info_t &info);
     void emulate_out(info_t &info);
 
-    void load_operand(gsl::not_null<vcpu *> vcpu, info_t &info);
-    void store_operand(gsl::not_null<vcpu *> vcpu, info_t &info);
+    void load_operand(vcpu *vcpu, info_t &info);
+    void store_operand(vcpu *vcpu, info_t &info);
 
 private:
 
@@ -319,6 +319,8 @@ public:
 
     /// @endcond
 };
+
+using io_instruction_handler_delegate_t = io_instruction_handler::handler_delegate_t;
 
 }
 

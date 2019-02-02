@@ -50,7 +50,7 @@ xsetbv_handler::add_handler(const handler_delegate_t &d)
 // -----------------------------------------------------------------------------
 
 bool
-xsetbv_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+xsetbv_handler::handle(vcpu *vcpu)
 {
     struct info_t info = {
         0,

@@ -57,7 +57,7 @@ monitor_trap_handler::enable()
 // -----------------------------------------------------------------------------
 
 bool
-monitor_trap_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+monitor_trap_handler::handle(vcpu *vcpu)
 {
     using namespace vmcs_n;
 

@@ -53,7 +53,7 @@ emulate_ia_32e_mode_switch(
 
 static bool
 default_wrcr0_handler(
-    gsl::not_null<vcpu_t *> vcpu, control_register_handler::info_t &info)
+    vcpu *vcpu, control_register_handler::info_t &info)
 {
     using namespace vmcs_n::guest_cr0;
     bfignored(vcpu);
@@ -67,7 +67,7 @@ default_wrcr0_handler(
 
 static bool
 default_rdcr3_handler(
-    gsl::not_null<vcpu_t *> vcpu, control_register_handler::info_t &info)
+    vcpu *vcpu, control_register_handler::info_t &info)
 {
     bfignored(vcpu);
     bfignored(info);
@@ -77,7 +77,7 @@ default_rdcr3_handler(
 
 static bool
 default_wrcr3_handler(
-    gsl::not_null<vcpu_t *> vcpu, control_register_handler::info_t &info)
+    vcpu *vcpu, control_register_handler::info_t &info)
 {
     bfignored(vcpu);
     bfignored(info);
@@ -88,7 +88,7 @@ default_wrcr3_handler(
 
 static bool
 default_wrcr4_handler(
-    gsl::not_null<vcpu_t *> vcpu, control_register_handler::info_t &info)
+    vcpu *vcpu, control_register_handler::info_t &info)
 {
     bfignored(vcpu);
     bfignored(info);
@@ -193,7 +193,7 @@ control_register_handler::enable_wrcr4_exiting(
 // -----------------------------------------------------------------------------
 
 bool
-control_register_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+control_register_handler::handle(vcpu *vcpu)
 {
     using namespace vmcs_n::exit_qualification::control_register_access;
 
@@ -215,7 +215,7 @@ control_register_handler::handle(gsl::not_null<vcpu_t *> vcpu)
 }
 
 bool
-control_register_handler::handle_cr0(gsl::not_null<vcpu_t *> vcpu)
+control_register_handler::handle_cr0(vcpu *vcpu)
 {
     using namespace vmcs_n::exit_qualification::control_register_access;
 
@@ -241,7 +241,7 @@ control_register_handler::handle_cr0(gsl::not_null<vcpu_t *> vcpu)
 }
 
 bool
-control_register_handler::handle_cr3(gsl::not_null<vcpu_t *> vcpu)
+control_register_handler::handle_cr3(vcpu *vcpu)
 {
     using namespace vmcs_n::exit_qualification::control_register_access;
 
@@ -265,7 +265,7 @@ control_register_handler::handle_cr3(gsl::not_null<vcpu_t *> vcpu)
 }
 
 bool
-control_register_handler::handle_cr4(gsl::not_null<vcpu_t *> vcpu)
+control_register_handler::handle_cr4(vcpu *vcpu)
 {
     using namespace vmcs_n::exit_qualification::control_register_access;
 
@@ -291,7 +291,7 @@ control_register_handler::handle_cr4(gsl::not_null<vcpu_t *> vcpu)
 }
 
 bool
-control_register_handler::handle_wrcr0(gsl::not_null<vcpu_t *> vcpu)
+control_register_handler::handle_wrcr0(vcpu *vcpu)
 {
     struct info_t info = {
         emulate_rdgpr(vcpu),
@@ -322,7 +322,7 @@ control_register_handler::handle_wrcr0(gsl::not_null<vcpu_t *> vcpu)
 }
 
 bool
-control_register_handler::handle_rdcr3(gsl::not_null<vcpu_t *> vcpu)
+control_register_handler::handle_rdcr3(vcpu *vcpu)
 {
     struct info_t info = {
         vmcs_n::guest_cr3::get(),
@@ -349,7 +349,7 @@ control_register_handler::handle_rdcr3(gsl::not_null<vcpu_t *> vcpu)
 }
 
 bool
-control_register_handler::handle_wrcr3(gsl::not_null<vcpu_t *> vcpu)
+control_register_handler::handle_wrcr3(vcpu *vcpu)
 {
     struct info_t info = {
         emulate_rdgpr(vcpu),
@@ -376,7 +376,7 @@ control_register_handler::handle_wrcr3(gsl::not_null<vcpu_t *> vcpu)
 }
 
 bool
-control_register_handler::handle_wrcr4(gsl::not_null<vcpu_t *> vcpu)
+control_register_handler::handle_wrcr4(vcpu *vcpu)
 {
     struct info_t info = {
         emulate_rdgpr(vcpu),

@@ -101,7 +101,7 @@ wrmsr_handler::pass_through_all_accesses()
 // -----------------------------------------------------------------------------
 
 bool
-wrmsr_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+wrmsr_handler::handle(vcpu *vcpu)
 {
     // TODO: IMPORTANT!!!
     //

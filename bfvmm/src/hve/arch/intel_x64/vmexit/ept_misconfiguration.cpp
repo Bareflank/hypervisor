@@ -50,7 +50,7 @@ ept_misconfiguration_handler::add_handler(const handler_delegate_t &d)
 // -----------------------------------------------------------------------------
 
 bool
-ept_misconfiguration_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+ept_misconfiguration_handler::handle(vcpu *vcpu)
 {
     struct info_t info = {
         vmcs_n::guest_linear_address::get(),

@@ -89,7 +89,7 @@ public:
 
     bool
     test_read_violation_handler(
-        gsl::not_null<vcpu_t *> vcpu, ept_violation_handler::info_t &info)
+        vcpu_t *vcpu, ept_violation_handler::info_t &info)
     {
         bfignored(vcpu);
         bfignored(info);

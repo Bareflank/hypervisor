@@ -65,7 +65,7 @@ namespace bfvmm::intel_x64
 class vcpu;
 }
 
-using handler_t = bool(gsl::not_null<bfvmm::intel_x64::vcpu *>);
+using handler_t = bool(bfvmm::intel_x64::vcpu *);
 using handler_delegate_t = delegate<handler_t>;
 using init_handler_delegate_t = delegate<handler_t>;
 using fini_handler_delegate_t = delegate<handler_t>;
@@ -255,7 +255,7 @@ protected:
 
 private:
 
-    bool handle_cpuid(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu);
+    bool handle_cpuid(vcpu *vcpu);
 
 private:
 

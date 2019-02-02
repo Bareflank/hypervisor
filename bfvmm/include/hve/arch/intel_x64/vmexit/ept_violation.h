@@ -106,7 +106,7 @@ public:
     /// handlers
     ///
     using handler_delegate_t =
-        delegate<bool(gsl::not_null<vcpu *>, info_t &)>;
+        delegate<bool(vcpu *, info_t &)>;
 
     /// Constructor
     ///
@@ -212,15 +212,15 @@ public:
 
     /// @cond
 
-    bool handle(gsl::not_null<vcpu *> vcpu);
+    bool handle(vcpu *vcpu);
 
     /// @endcond
 
 private:
 
-    bool handle_read(gsl::not_null<vcpu *> vcpu, info_t &info);
-    bool handle_write(gsl::not_null<vcpu *> vcpu, info_t &info);
-    bool handle_execute(gsl::not_null<vcpu *> vcpu, info_t &info);
+    bool handle_read(vcpu *vcpu, info_t &info);
+    bool handle_write(vcpu *vcpu, info_t &info);
+    bool handle_execute(vcpu *vcpu, info_t &info);
 
 private:
 
@@ -246,6 +246,8 @@ public:
 
     /// @endcond
 };
+
+using ept_violation_handler_delegate_t = ept_violation_handler::handler_delegate_t;
 
 }
 

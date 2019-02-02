@@ -24,6 +24,11 @@ add_vmm_executable(
     SOURCES test_all.cpp
 )
 
+add_vmm_executable(
+    integration_intel_x64_test_all_inheritance
+    SOURCES test_all_inheritance.cpp
+)
+
 add_subdirectory(efi)
 add_subdirectory(ept)
 add_subdirectory(vmexit/control_register)

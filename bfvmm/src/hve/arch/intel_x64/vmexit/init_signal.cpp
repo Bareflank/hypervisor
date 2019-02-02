@@ -42,7 +42,7 @@ init_signal_handler::init_signal_handler(
 // -----------------------------------------------------------------------------
 
 bool
-init_signal_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+init_signal_handler::handle(vcpu *vcpu)
 {
     bfignored(vcpu);
 

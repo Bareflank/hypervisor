@@ -27,7 +27,7 @@
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
 static bool
-test_handler(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
+test_handler(vcpu_t *vcpu)
 { bfignored(vcpu); return true; }
 
 TEST_CASE("quiet")

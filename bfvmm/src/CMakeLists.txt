@@ -32,3 +32,5 @@ add_subdirectory(memory_manager)
 add_subdirectory(hve)
 add_subdirectory(vcpu)
 add_subdirectory(entry)
+
+install(FILES ../include/vmm.h DESTINATION include)

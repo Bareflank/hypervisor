@@ -64,7 +64,7 @@ public:
     }
 
     bool cpuid_handler(
-        gsl::not_null<vcpu_t *> vcpu, cpuid_handler::info_t &info)
+        vcpu_t *vcpu, cpuid_handler::info_t &info)
     {
         bfignored(vcpu);
 
@@ -78,7 +78,7 @@ public:
     }
 
     bool monitor_trap_handler(
-        gsl::not_null<vcpu_t *> vcpu, monitor_trap_handler::info_t &info)
+        vcpu_t *vcpu, monitor_trap_handler::info_t &info)
     {
         bfignored(vcpu);
         bfignored(info);

@@ -114,7 +114,7 @@ public:
     /// handlers
     ///
     using handler_delegate_t =
-        delegate<bool(gsl::not_null<vcpu *>, info_t &)>;
+        delegate<bool(vcpu *, info_t &)>;
 
     /// Constructor
     ///
@@ -227,20 +227,20 @@ public:
 
     /// @cond
 
-    bool handle(gsl::not_null<vcpu *> vcpu);
+    bool handle(vcpu *vcpu);
 
     /// @endcond
 
 private:
 
-    bool handle_cr0(gsl::not_null<vcpu *> vcpu);
-    bool handle_cr3(gsl::not_null<vcpu *> vcpu);
-    bool handle_cr4(gsl::not_null<vcpu *> vcpu);
+    bool handle_cr0(vcpu *vcpu);
+    bool handle_cr3(vcpu *vcpu);
+    bool handle_cr4(vcpu *vcpu);
 
-    bool handle_wrcr0(gsl::not_null<vcpu *> vcpu);
-    bool handle_rdcr3(gsl::not_null<vcpu *> vcpu);
-    bool handle_wrcr3(gsl::not_null<vcpu *> vcpu);
-    bool handle_wrcr4(gsl::not_null<vcpu *> vcpu);
+    bool handle_wrcr0(vcpu *vcpu);
+    bool handle_rdcr3(vcpu *vcpu);
+    bool handle_wrcr3(vcpu *vcpu);
+    bool handle_wrcr4(vcpu *vcpu);
 
 private:
 
@@ -263,6 +263,8 @@ public:
 
     /// @endcond
 };
+
+using control_register_handler_delegate_t = control_register_handler::handler_delegate_t;
 
 }
 

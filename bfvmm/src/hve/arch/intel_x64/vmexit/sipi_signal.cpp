@@ -42,7 +42,7 @@ sipi_signal_handler::sipi_signal_handler(
 // -----------------------------------------------------------------------------
 
 bool
-sipi_signal_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+sipi_signal_handler::handle(vcpu *vcpu)
 {
     using namespace vmcs_n::guest_activity_state;
     using namespace vmcs_n::vm_entry_controls;

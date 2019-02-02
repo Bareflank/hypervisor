@@ -33,7 +33,7 @@ auto wrcr3_called = false;
 
 bool
 test_rdcr3_handler(
-    gsl::not_null<vcpu_t *> vcpu, control_register_handler::info_t &info)
+    vcpu_t *vcpu, control_register_handler::info_t &info)
 {
     bfignored(vcpu);
     bfignored(info);
@@ -44,7 +44,7 @@ test_rdcr3_handler(
 
 bool
 test_wrcr3_handler(
-    gsl::not_null<vcpu_t *> vcpu, control_register_handler::info_t &info)
+    vcpu_t *vcpu, control_register_handler::info_t &info)
 {
     bfignored(vcpu);
     bfignored(info);

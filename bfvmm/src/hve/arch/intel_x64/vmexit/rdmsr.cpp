@@ -101,7 +101,7 @@ rdmsr_handler::pass_through_all_accesses()
 // -----------------------------------------------------------------------------
 
 bool
-rdmsr_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+rdmsr_handler::handle(vcpu *vcpu)
 {
 
     // TODO: IMPORTANT!!!

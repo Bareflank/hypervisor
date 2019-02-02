@@ -118,7 +118,7 @@ public:
     /// handlers
     ///
     using handler_delegate_t =
-        delegate<bool(gsl::not_null<vcpu *>, info_t &)>;
+        delegate<bool(vcpu *, info_t &)>;
 
     /// Constructor
     ///
@@ -185,7 +185,7 @@ public:
 
     /// @cond
 
-    bool handle(gsl::not_null<vcpu *> vcpu);
+    bool handle(vcpu *vcpu);
 
     /// @endcond
 
@@ -209,6 +209,8 @@ public:
 
     /// @endcond
 };
+
+using cpuid_handler_delegate_t = cpuid_handler::handler_delegate_t;
 
 }
 
