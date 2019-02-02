@@ -29,15 +29,6 @@
 uint64_t reg_data[38] = {0};
 uint64_t *regs = &reg_data[0];
 
-auto
-setup_vcpu(MockRepository &mocks)
-{
-    auto vcpu = mocks.Mock<bfvmm::intel_x64::vcpu>();
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::halt);
-
-    return vcpu;
-}
-
 TEST_CASE("vector_to_str")
 {
     CHECK(strcmp(vector_to_str(0x00U), "fault: divide by 0") == 0);

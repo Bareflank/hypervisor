@@ -110,6 +110,24 @@ if(NOT WIN32)
 endif()
 
 # ------------------------------------------------------------------------------
+# Astyle
+# ------------------------------------------------------------------------------
+
+if(NOT WIN32)
+    add_custom_target_category("Query Commands")
+
+    add_custom_target(ack
+        COMMAND ${USERSPACE_PREFIX_PATH}/bin/ack
+        USES_TERMINAL
+    )
+
+    add_custom_target_info(
+        TARGET ack
+        COMMENT "Ack the hypervisor"
+    )
+endif()
+
+# ------------------------------------------------------------------------------
 # BFM
 # ------------------------------------------------------------------------------
 

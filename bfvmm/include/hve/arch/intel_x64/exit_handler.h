@@ -91,9 +91,7 @@ public:
     ///
     /// @param vcpu The vCPU associated with this exit handler
     ///
-    exit_handler(
-        gsl::not_null<vcpu *> vcpu
-    );
+    exit_handler(gsl::not_null<vcpu *> vcpu);
 
     /// Destructor
     ///

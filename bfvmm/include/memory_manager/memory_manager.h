@@ -473,4 +473,12 @@ template<typename T>
 page_ptr<T> make_page()
 { return page_ptr<T>(static_cast<T *>(alloc_page()), free_page); }
 
+/// Make Page
+///
+/// @return returns a std::unique_ptr with a single page
+///
+template<typename T>
+page_ptr<T> make_nullptr_page()
+{ return page_ptr<T>(nullptr, free_page); }
+
 #endif

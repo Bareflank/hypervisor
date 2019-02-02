@@ -30,7 +30,6 @@
 # - working
 #   - build
 #   - hypervisor
-#   - extended_apis                     # optional
 #   - hypervisor_example_vpid           # optional
 #   - hypervisor_example_rdtsc          # optional
 #   - hypervisor_example_cpuidcount     # optional
@@ -62,21 +61,7 @@
 #
 set(ENABLE_DEVELOPER_MODE OFF)
 
-# Extended APIs
-#
-# This option enables the use of the extended APIs. It assumes the extended
-# APIs are located in the same directory as this configuration file.
-#
-set(ENABLE_EXTENDED_APIS ON)
-
-# Hyperkernel
-#
-# This option enables the use of the boxy. It assumes that
-# boxy is located in the same directory as this configuration file.
-#
-set(ENABLE_BOXY ON)
-
-# Hyperkernel
+# Boxy
 #
 # This option enables the use of the boxy. It assumes that
 # boxy is located in the same directory as this configuration file.
@@ -153,7 +138,7 @@ else()
     #set(BUILD_TEST OFF)
 endif()
 
-if(ENABLE_DEVELOPER_MODE AND NOT BUILD_EFI AND NOT WIN32)
+if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI AND NOT WIN32 AND NOT CYGWIN)
     set(ENABLE_ASAN ON)
     set(ENABLE_TIDY ON)
     set(ENABLE_FORMAT ON)
@@ -174,17 +159,6 @@ if(ENABLE_DEVELOPER_MODE AND NOT OVERRIDE_COMPILER_WARNINGS)
     set(ENABLE_COMPILER_WARNINGS OFF)
 else()
     set(ENABLE_COMPILER_WARNINGS ${OVERRIDE_COMPILER_WARNINGS})
-endif()
-
-# ------------------------------------------------------------------------------
-# Extended APIs
-# ------------------------------------------------------------------------------
-
-if(ENABLE_EXTENDED_APIS)
-    set_bfm_vmm(eapis_vmm TARGET eapis_x86_64-vmm-elf)
-    list(APPEND EXTENSION
-        ${CMAKE_CURRENT_LIST_DIR}/extended_apis
-    )
 endif()
 
 # ------------------------------------------------------------------------------

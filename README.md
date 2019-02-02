@@ -19,17 +19,15 @@ is written in C/C++, and includes support for C++ exceptions, JSON, the GSL and 
 Template Library (STL).
 
 The Bareflank Hypervisor uses a layered, modular approach.
-- [hypervisor](https://github.com/Bareflank/hypervisor): provides a minimal, hypervisor
+- [hypervisor](https://github.com/Bareflank/hypervisor): provides the base SDK, hypervisor
 implementation, the build system, and architecture specific intrinsics.
-- [extended_apis](https://github.com/Bareflank/extended_apis): adds hardware virtualization extension
-APIs to the hypervisor.
 - [boxy](https://github.com/Bareflank/boxy): leverages the Bareflank SDK to provide a
 fully functional hypervisor with guest support.
 
 To support Bareflank's design approach, the hypervisor is licensed
 under MIT, specifically
 enabling users of the project to both contribute back to the project, but
-also create proprietary extensions of the VMM if so desired.
+also create proprietary versions of the hypervisor if so desired.
 
 In addition, the project comes complete with a set of unit tests to validate
 that the provided SDK works as expected. These tests are checked for completeness using
@@ -221,7 +219,7 @@ make distclean
 
 ## UEFI:
 A UEFI application version of Bareflank may be compiled on Linux and used to boot
-both Linux and Windows if you also include the Extended APIs. The followinging
+both Linux and Windows The following
 describes how to build and execute Bareflank with EFI. For additional information,
 please see the following YouTube [video](https://www.youtube.com/watch?v=FuEyjDqA53M&t=4s)
 
@@ -233,11 +231,11 @@ It should be noted that unit tests must be disabled, and static builds are curre
 required (the example config provides an example of how to configure Bareflank as
 needed for more complex builds).
 
-To boot Windows or Linux with the Extended APIs you will need to provide your own
+To boot Windows or Linux you will need to provide your own
 extension that enables EPT. To see an example of this type of extension, please
 see the following integration test:
 ```
-https://github.com/Bareflank/extended_apis/blob/master/bfvmm/integration/arch/intel_x64/efi/test_efi.cpp
+https://github.com/Bareflank/hypervisor/blob/master/bfvmm/integration/arch/intel_x64/efi/test_efi.cpp
 ```
 Once you have your own extension, the example config is required to tell the build
 system which VMM and target to use. The example config can be found here:
@@ -245,8 +243,8 @@ system which VMM and target to use. The example config can be found here:
 https://github.com/Bareflank/hypervisor/blob/master/scripts/cmake/config/example_config.cmake
 ```
 Our front page video on YouTube explains how to use this config, and the instructions
-are also in the config itself. To enable EFI, turn on the build Extended APIs and EFI
-flags. You will also need to set the following:
+are also in the config itself. To enable EFI, turn on the EFI
+flag. You will also need to set the following:
 ```
 set(OVERRIDE_VMM <name>)
 set(OVERRIDE_VMM_TARGET <name>)
@@ -254,11 +252,11 @@ set(OVERRIDE_VMM_TARGET <name>)
 If for example you are using the integration test listed above, these setting would
 be as follows:
 ```
-set(OVERRIDE_VMM eapis_integration_intel_x64_efi_test_efi)
-set(OVERRIDE_VMM_TARGET eapis_integration)
+set(OVERRIDE_VMM integration_intel_x64_efi_test_efi)
+set(OVERRIDE_VMM_TARGET integration)
 ```
 The first variable defines the VMM's name and the second variable defines the target
-that builds this VMM (which tells the buid system what dependency EFI has). From
+that builds this VMM (which tells the build system what dependency EFI has). From
 there build as normal.
 
 The resulting UEFI application can be found here:
@@ -270,7 +268,7 @@ Place this binary in your EFI partition (e.g., on Ubuntu this is
 Once Bareflank is running, you can start Windows or Linux if you included the
 above. Also note that utilities like "make dump" do not work when using EFI as
 the driver doesn't have access to the debug ring. You can however use
-"make ack" if you are using the Extended APIs to get the hypervisor to say "hi".
+"make ack" to get the hypervisor to say "hi".
 
 ## Serial Instructions
 
@@ -296,28 +294,6 @@ ssh-host-config -y
 net start sshd
 netsh advfirewall firewall add rule name='SSH Port' dir=in action=allow protocol=TCP localport=22
 ```
-
-## Example Extensions
-
-*** **WARNING** *** <br>
-The master branch is our development branch and should be considered unstable.
-It is possible these additional projects might not compile with master. If you
-need a stable branch that works with these repos, please use a tagged release.
-
-To provide examples of how you might extend Bareflank to provide your own custom
-functionality, we have provided a couple of examples:
-
-**Enable VPID:**<br>
-https://github.com/Bareflank/hypervisor_example_vpid
-
-**CPUID Count:**<br>
-https://github.com/Bareflank/hypervisor_example_cpuidcount
-
-**MSR Bitmap:**<br>
-https://github.com/Bareflank/hypervisor_example_msr_bitmap
-
-**Extended APIs EPT Hook:**<br>
-https://github.com/Bareflank/extended_apis_example_hook
 
 ## License
 

@@ -27,24 +27,35 @@
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
 
 auto
-setup_vmcs()
+setup_vmcs(MockRepository &mocks, bool guest_vcpu = false)
 {
     setup_test_support();
-    return bfvmm::intel_x64::vmcs{0x0};
+    auto vcpu = setup_vcpu(mocks);
+
+    if (guest_vcpu) {
+        mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::id).Return(0xF0000000);
+        mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_bootstrap_vcpu).Return(false);
+        mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_host_vm_vcpu).Return(false);
+        mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_guest_vm_vcpu).Return(true);
+    }
+
+    return bfvmm::intel_x64::vmcs{vcpu};
 }
 
 TEST_CASE("vmcs: construct / destruct")
 {
-    MockRepository mocks;
-    auto vmcs = setup_vmcs();
+    setup_test_support();
 
-    CHECK_NOTHROW(bfvmm::intel_x64::vmcs{0});
+    MockRepository mocks;
+    auto vcpu = setup_vcpu(mocks);
+
+    CHECK_NOTHROW(bfvmm::intel_x64::vmcs{vcpu});
 }
 
 TEST_CASE("vmcs: launch demote success")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs();
+    auto vmcs = setup_vmcs(mocks);
 
     CHECK_NOTHROW(vmcs.launch());
 }
@@ -52,7 +63,7 @@ TEST_CASE("vmcs: launch demote success")
 TEST_CASE("vmcs: launch demote failure")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs();
+    auto vmcs = setup_vmcs(mocks);
 
     mocks.OnCallFunc(bfvmm::intel_x64::check::all);
     mocks.OnCallFunc(::intel_x64::vmcs::debug::dump);
@@ -68,19 +79,18 @@ TEST_CASE("vmcs: launch demote failure")
 TEST_CASE("vmcs: launch failure")
 {
     MockRepository mocks;
-    setup_vmcs();
+    auto vmcs = setup_vmcs(mocks, true);
 
     mocks.OnCallFunc(bfvmm::intel_x64::check::all);
     mocks.OnCallFunc(::intel_x64::vmcs::debug::dump);
 
-    bfvmm::intel_x64::vmcs vmcs{0xF0000000};
     CHECK_THROWS(vmcs.launch());
 }
 
 TEST_CASE("vmcs: load failure")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs();
+    auto vmcs = setup_vmcs(mocks);
 
     g_vmload_fails = true;
     auto ___ = gsl::finally([&] {
@@ -93,7 +103,7 @@ TEST_CASE("vmcs: load failure")
 TEST_CASE("vmcs: promote failure")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs();
+    auto vmcs = setup_vmcs(mocks);
 
     ::intel_x64::vmcs::guest_cr3::set(0x1000);
     CHECK_THROWS(vmcs.promote());
@@ -102,7 +112,7 @@ TEST_CASE("vmcs: promote failure")
 TEST_CASE("vmcs: resume failure")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs();
+    auto vmcs = setup_vmcs(mocks);
 
     CHECK_THROWS(vmcs.resume());
 }
@@ -110,7 +120,7 @@ TEST_CASE("vmcs: resume failure")
 TEST_CASE("vmcs: save state")
 {
     MockRepository mocks;
-    auto vmcs = setup_vmcs();
+    auto vmcs = setup_vmcs(mocks);
 
     CHECK(vmcs.save_state() != nullptr);
 }
