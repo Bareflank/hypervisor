@@ -46,21 +46,25 @@ if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
         arch/intel_x64/mtrrs.cpp
         arch/intel_x64/nmi.cpp
         arch/intel_x64/vcpu.cpp
-        arch/intel_x64/vcpu_factory.cpp
         arch/intel_x64/vmcs.cpp
         arch/intel_x64/vmx.cpp
         arch/intel_x64/vpid.cpp
         arch/x64/unmapper.cpp
     )
 
-    if(NOT WIN32 AND NOT ENABLE_MOCKING)
+    if(NOT ENABLE_MOCKING)
+        if(NOT WIN32)
+            list(APPEND SOURCES
+                arch/intel_x64/exception.asm
+                arch/intel_x64/nmi.asm
+                arch/intel_x64/exit_handler_entry.asm
+                arch/intel_x64/vmcs_launch.asm
+                arch/intel_x64/vmcs_promote.asm
+                arch/intel_x64/vmcs_resume.asm
+            )
+        endif()
         list(APPEND SOURCES
-            arch/intel_x64/exception.asm
-            arch/intel_x64/nmi.asm
-            arch/intel_x64/exit_handler_entry.asm
-            arch/intel_x64/vmcs_launch.asm
-            arch/intel_x64/vmcs_promote.asm
-            arch/intel_x64/vmcs_resume.asm
+            arch/intel_x64/vcpu_factory.cpp
         )
     endif()
 elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")

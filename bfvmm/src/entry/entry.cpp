@@ -51,7 +51,7 @@ WEAK_SYM init()
 
 void
 WEAK_SYM init_vcpu(vcpu_t *vcpu)
-{ }
+{ bfignored(vcpu); }
 #endif
 
 extern "C" int64_t
