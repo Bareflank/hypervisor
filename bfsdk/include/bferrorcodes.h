@@ -43,9 +43,7 @@
 #define ENTRY_ERROR_VMM_INIT_FAILED bfscast(status_t, 0x8000000000000020)
 #define ENTRY_ERROR_VMM_START_FAILED bfscast(status_t, 0x8000000000000030)
 #define ENTRY_ERROR_VMM_STOP_FAILED bfscast(status_t, 0x8000000000000040)
-#define ENTRY_ERROR_INIT bfscast(status_t, 0x8000000000000050)
-#define ENTRY_ERROR_FINI bfscast(status_t, 0x8000000000000060)
-#define ENTRY_ERROR_UNKNOWN bfscast(status_t, 0x8000000000000070)
+#define ENTRY_ERROR_UNKNOWN bfscast(status_t, 0x8000000000000050)
 
 /* -------------------------------------------------------------------------- */
 /* C Runtime Error Codes                                                      */
