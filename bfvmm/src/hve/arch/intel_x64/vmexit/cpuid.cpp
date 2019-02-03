@@ -46,6 +46,8 @@ static bool
 handle_cpuid_0x4BF00000(
     vcpu *vcpu, cpuid_handler::info_t &info)
 {
+    bfignored(vcpu);
+
     /// Ack
     ///
     /// This can be used by an application to ack the existence of the
@@ -62,6 +64,9 @@ static bool
 handle_cpuid_0x4BF00011(
     vcpu *vcpu, cpuid_handler::info_t &info)
 {
+    bfignored(vcpu);
+    bfignored(info);
+
     /// Say Hi
     ///
     /// If the vCPU is a host vCPU and not a guest vCPU, we should say hi
@@ -77,6 +82,8 @@ static bool
 handle_cpuid_0x4BF00021(
     vcpu *vcpu, cpuid_handler::info_t &info)
 {
+    bfignored(info);
+
     /// Say Goobye
     ///
     /// The most reliable method for turning off the hypervisor is from the
