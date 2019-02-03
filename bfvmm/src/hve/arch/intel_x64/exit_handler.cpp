@@ -150,13 +150,6 @@ handle_nmi_window(vcpu *vcpu)
     return true;
 }
 
-static bool
-handle_invd(vcpu *vcpu)
-{
-    ::x64::cache::wbinvd();
-    return vcpu->advance();
-}
-
 // -----------------------------------------------------------------------------
 // Implementation
 // -----------------------------------------------------------------------------
@@ -197,16 +190,6 @@ exit_handler::exit_handler(
         exit_reason::basic_exit_reason::nmi_window,
         handler_delegate_t::create<handle_nmi_window>()
     );
-
-    this->add_handler(
-        exit_reason::basic_exit_reason::invd,
-        handler_delegate_t::create<handle_invd>()
-    );
-
-    this->add_handler(
-        exit_reason::basic_exit_reason::cpuid,
-        handler_delegate_t::create<exit_handler, &exit_handler::handle_cpuid>(this)
-    );
 }
 
 void
@@ -219,16 +202,6 @@ void
 exit_handler::add_exit_handler(
     const handler_delegate_t &d)
 { m_exit_handlers.push_front(d); }
-
-void
-exit_handler::add_init_handler(
-    const handler_delegate_t &d)
-{ m_init_handlers.push_front(d); }
-
-void
-exit_handler::add_fini_handler(
-    const handler_delegate_t &d)
-{ m_fini_handlers.push_front(d); }
 
 void
 exit_handler::write_host_state()
@@ -456,94 +429,6 @@ exit_handler::handle(
     });
 
     exit_handler->m_vcpu->halt();
-}
-
-bool
-exit_handler::handle_cpuid(vcpu *vcpu)
-{
-    using namespace ::x64::cpuid;
-
-    /// Ack
-    ///
-    /// This can be used by an application to ack the existence of the
-    /// hypervisor. This is useful because vmcall only exists if the hypervisor
-    /// is running while cpuid can be run from any ring, and always exists
-    /// which means it can be used to ack safely from any application.
-    ///
-    if (vcpu->rax() == 0x4BF00000) {
-        vcpu->set_rax(0x4BF00001);
-        return vcpu->advance();
-    }
-
-    /// Init
-    ///
-    /// Some initialization is required after the hypervisor has started. For
-    /// example, any memory mapped resources such as ACPI or VT-d need to be
-    /// initalized using the VMM's CR3, and not the hosts.
-    ///
-    if (vcpu->rax() == 0x4BF00010) {
-        for (const auto &d : m_init_handlers) {
-            d(vcpu);
-        }
-
-        return vcpu->advance();
-    }
-
-    /// Fini
-    ///
-    /// Some teardown logic is required before the hypervisor stops running.
-    /// These handlers can be used in these scenarios.
-    ///
-    if (vcpu->rax() == 0x4BF00020) {
-        for (const auto &d : m_fini_handlers) {
-            d(vcpu);
-        }
-
-        return vcpu->advance();
-    }
-
-    /// Say Hi
-    ///
-    /// If the vCPU is a host vCPU and not a guest vCPU, we should say hi
-    /// so that the user of Bareflank has a simple, reliable way to know
-    /// that the hypervisor is running.
-    ///
-    if (vcpu->rax() == 0x4BF00011) {
-        bfdebug_info(0, "host os is" bfcolor_green " now " bfcolor_end "in a vm");
-        return vcpu->advance();
-    }
-
-    /// Say Goobye
-    ///
-    /// The most reliable method for turning off the hypervisor is from the
-    /// exit handler as it ensures that all of the destructors are executed
-    /// after a promote, and not during. Also, say goodbye before we promote
-    /// and turn off the hypervisor.
-    ///
-    if (vcpu->rax() == 0x4BF00021) {
-        bfdebug_info(0, "host os is" bfcolor_red " not " bfcolor_end "in a vm");
-        vcpu->promote();
-    }
-
-    /// Emulate
-    ///
-    /// Emulate a normal cpuid instruction. If we get here, which is the likely
-    /// case, emulate the cpuid instruction.
-    ///
-    auto ret =
-        ::x64::cpuid::get(
-            gsl::narrow_cast<field_type>(vcpu->rax()),
-            gsl::narrow_cast<field_type>(vcpu->rbx()),
-            gsl::narrow_cast<field_type>(vcpu->rcx()),
-            gsl::narrow_cast<field_type>(vcpu->rdx())
-        );
-
-    vcpu->set_rax(ret.rax);
-    vcpu->set_rbx(ret.rbx);
-    vcpu->set_rcx(ret.rcx);
-    vcpu->set_rdx(ret.rdx);
-
-    return vcpu->advance();
 }
 
 }

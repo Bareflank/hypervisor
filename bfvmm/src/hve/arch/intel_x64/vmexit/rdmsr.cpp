@@ -150,7 +150,7 @@ rdmsr_handler::handle(vcpu *vcpu)
         false
     };
 
-    if (user_already_emulating) {
+    if (!user_already_emulating) {
         info.val = emulate_rdmsr(info.msr);
     }
 

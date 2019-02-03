@@ -44,6 +44,11 @@ do_test(test_control_register
     ${ARGN}
 )
 
+do_test(test_cpuid
+    SOURCES arch/intel_x64/vmexit/test_cpuid.cpp
+    ${ARGN}
+)
+
 do_test(test_rdmsr
     SOURCES arch/intel_x64/vmexit/test_rdmsr.cpp
     ${ARGN}

@@ -67,8 +67,6 @@ class vcpu;
 
 using handler_t = bool(bfvmm::intel_x64::vcpu *);
 using handler_delegate_t = delegate<handler_t>;
-using init_handler_delegate_t = delegate<handler_t>;
-using fini_handler_delegate_t = delegate<handler_t>;
 
 // -----------------------------------------------------------------------------
 // Exit Handler
@@ -151,37 +149,6 @@ public:
         const handler_delegate_t &d
     );
 
-    /// Add Init Delegate
-    ///
-    /// Adds an init function to the init list. Init functions are executed
-    /// right after a vCPU is started.
-    ///
-    /// @note The init function is the first VMexit that Bareflank causes
-    ///     intentionally. It might not be the first VMexit to occur.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param d The delegate being registered
-    ///
-    VIRTUAL void add_init_handler(
-        const handler_delegate_t &d
-    );
-
-    /// Add Fini Delegate
-    ///
-    /// Adds an fini function to the fini list. Fini functions are executed
-    /// right before the vCPU is about to stop.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param d The delegate being registered
-    ///
-    VIRTUAL void add_fini_handler(
-        const handler_delegate_t &d
-    );
-
     /// Handle
     ///
     /// Handles a VM exit. This function should only be called by the exit
@@ -253,9 +220,7 @@ private:
     std::unique_ptr<gsl::byte[]> m_ist1;
     std::unique_ptr<gsl::byte[]> m_stack;
 
-    std::list<init_handler_delegate_t> m_exit_handlers;
-    std::list<init_handler_delegate_t> m_init_handlers;
-    std::list<fini_handler_delegate_t> m_fini_handlers;
+    std::list<handler_delegate_t> m_exit_handlers;
     std::array<std::list<handler_delegate_t>, 128> m_exit_handlers_array;
 
 public:
