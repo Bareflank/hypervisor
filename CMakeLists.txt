@@ -84,7 +84,7 @@ endif()
 # ------------------------------------------------------------------------------
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${EXPORT_DIR})
-file(TOUCH ${PKG_FILE})
+file(APPEND ${PKG_FILE} "")
 
 # ------------------------------------------------------------------------------
 # Root Targets
