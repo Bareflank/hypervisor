@@ -24,11 +24,66 @@
 namespace bfvmm::intel_x64
 {
 
+static ::x64::msrs::value_type
+emulate_rdmsr(::x64::msrs::field_type msr)
+{
+    using namespace ::intel_x64::vmcs;
+
+    switch (msr) {
+        case ::intel_x64::msrs::ia32_debugctl::addr:
+            return guest_ia32_debugctl::get();
+
+        case ::x64::msrs::ia32_pat::addr:
+            return guest_ia32_pat::get();
+
+        case ::intel_x64::msrs::ia32_efer::addr:
+            return guest_ia32_efer::get();
+
+        case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
+            return guest_ia32_perf_global_ctrl::get_if_exists();
+
+        case ::intel_x64::msrs::ia32_sysenter_cs::addr:
+            return guest_ia32_sysenter_cs::get();
+
+        case ::intel_x64::msrs::ia32_sysenter_esp::addr:
+            return guest_ia32_sysenter_esp::get();
+
+        case ::intel_x64::msrs::ia32_sysenter_eip::addr:
+            return guest_ia32_sysenter_eip::get();
+
+        case ::intel_x64::msrs::ia32_fs_base::addr:
+            return guest_fs_base::get();
+
+        case ::intel_x64::msrs::ia32_gs_base::addr:
+            return guest_gs_base::get();
+
+        default:
+            return ::intel_x64::msrs::get(msr);
+
+        // QUIRK:
+        //
+        // The following is specifically for CPU-Z. For whatever reason, it is
+        // reading the following undefined MSRs, which causes the system to
+        // freeze since attempting to read these MSRs in the exit handler
+        // will cause a GPF which is not being caught. The result is, the core
+        // that runs RDMSR on these freezes, the other cores receive an
+        // INIT signal to reset, and the system dies.
+        //
+
+        case 0x31:
+        case 0x39:
+        case 0x1ae:
+        case 0x1af:
+        case 0x602:
+            return 0;
+    }
+}
+
 rdmsr_handler::rdmsr_handler(
-    gsl::not_null<vcpu *> vcpu
+    vcpu_t vcpu
 ) :
     m_vcpu{vcpu},
-    m_msr_bitmap{vcpu->m_msr_bitmap.get(), ::x64::pt::page_size}
+    m_msr_bitmap{vcpu->vmcs()->msr_bitmap().get(), ::x64::pt::page_size}
 {
     using namespace vmcs_n;
 
@@ -101,7 +156,7 @@ rdmsr_handler::pass_through_all_accesses()
 // -----------------------------------------------------------------------------
 
 bool
-rdmsr_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+rdmsr_handler::handle(vcpu_t vcpu)
 {
 
     // TODO: IMPORTANT!!!

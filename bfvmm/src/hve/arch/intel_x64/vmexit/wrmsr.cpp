@@ -24,11 +24,59 @@
 namespace bfvmm::intel_x64
 {
 
+static void
+emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val)
+{
+    using namespace ::intel_x64::vmcs;
+
+    switch (msr) {
+        case ::intel_x64::msrs::ia32_debugctl::addr:
+            guest_ia32_debugctl::set(val);
+            return;
+
+        case ::x64::msrs::ia32_pat::addr:
+            guest_ia32_pat::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_efer::addr:
+            guest_ia32_efer::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_perf_global_ctrl::addr:
+            guest_ia32_perf_global_ctrl::set_if_exists(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_sysenter_cs::addr:
+            guest_ia32_sysenter_cs::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_sysenter_esp::addr:
+            guest_ia32_sysenter_esp::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_sysenter_eip::addr:
+            guest_ia32_sysenter_eip::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_fs_base::addr:
+            guest_fs_base::set(val);
+            return;
+
+        case ::intel_x64::msrs::ia32_gs_base::addr:
+            guest_gs_base::set(val);
+            return;
+
+        default:
+            ::intel_x64::msrs::set(msr, val);
+            return;
+    }
+}
+
 wrmsr_handler::wrmsr_handler(
-    gsl::not_null<vcpu *> vcpu
+    vcpu_t vcpu
 ) :
     m_vcpu{vcpu},
-    m_msr_bitmap{vcpu->m_msr_bitmap.get(), ::x64::pt::page_size}
+    m_msr_bitmap{vcpu->vmcs()->msr_bitmap().get(), ::x64::pt::page_size}
 {
     using namespace vmcs_n;
 
@@ -101,7 +149,7 @@ wrmsr_handler::pass_through_all_accesses()
 // -----------------------------------------------------------------------------
 
 bool
-wrmsr_handler::handle(gsl::not_null<vcpu_t *> vcpu)
+wrmsr_handler::handle(vcpu_t vcpu)
 {
     // TODO: IMPORTANT!!!
     //

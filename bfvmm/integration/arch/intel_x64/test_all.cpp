@@ -26,82 +26,36 @@
 //     from the EPT map.
 //
 
-#include <bfcallonce.h>
-
-#include <bfvmm/vcpu/vcpu_factory.h>
-#include <bfvmm/hve/arch/intel_x64/vcpu.h>
+#include <vmm.h>
 
 using namespace bfvmm::intel_x64;
 
-// -----------------------------------------------------------------------------
-// vCPU
-// -----------------------------------------------------------------------------
-
-namespace test
-{
-
-bfn::once_flag flag;
 ept::mmap g_guest_map;
 
-class vcpu : public bfvmm::intel_x64::vcpu
+bool test_external_interrupt_handler(
+    vcpu_t vcpu, external_interrupt_handler::info_t &info)
 {
-public:
-    explicit vcpu(vcpuid::type id) :
-        bfvmm::intel_x64::vcpu{id}
-    {
-        bfn::call_once(flag, [&] {
-            ept::identity_map(
-                g_guest_map,
-                MAX_PHYS_ADDR
-            );
-        });
+    bfignored(vcpu);
 
-        this->add_external_interrupt_handler(
-            external_interrupt_handler::handler_delegate_t::create<vcpu, &vcpu::test_external_interrupt_handler>(this)
-        );
+    vcpu->queue_external_interrupt(info.vector);
 
-        this->set_eptp(g_guest_map);
-    }
-
-    ~vcpu() override = default;
-
-    bool
-    test_external_interrupt_handler(
-        gsl::not_null<vcpu_t *> vcpu, external_interrupt_handler::info_t &info)
-    {
-        bfignored(vcpu);
-
-        this->queue_external_interrupt(info.vector);
-        return true;
-    }
-
-public:
-
-    /// @cond
-
-    vcpu(vcpu &&) = delete;
-    vcpu &operator=(vcpu &&) = delete;
-
-    vcpu(const vcpu &) = delete;
-    vcpu &operator=(const vcpu &) = delete;
-
-    /// @endcond
-};
-
+    return true;
 }
 
-// -----------------------------------------------------------------------------
-// vCPU Factory
-// -----------------------------------------------------------------------------
-
-namespace bfvmm
+bool vmm_init()
 {
-
-std::unique_ptr<vcpu>
-vcpu_factory::make(vcpuid::type vcpuid, bfobject *obj)
-{
-    bfignored(obj);
-    return std::make_unique<test::vcpu>(vcpuid);
+    ept::identity_map(g_guest_map, MAX_PHYS_ADDR);
+    return true;
 }
 
+bool vmm_main(vcpu_t vcpu)
+{
+    vcpu->add_external_interrupt_handler(
+        external_interrupt_handler::handler_delegate_t::create
+        <test_external_interrupt_handler>()
+    );
+
+    vcpu->set_eptp(g_guest_map);
+
+    return true;
 }

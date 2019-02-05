@@ -32,3 +32,12 @@ add_subdirectory(memory_manager)
 add_subdirectory(hve)
 add_subdirectory(vcpu)
 add_subdirectory(entry)
+add_subdirectory(sdk)
+
+# ------------------------------------------------------------------------------
+# Install
+# ------------------------------------------------------------------------------
+
+install(FILES ../include/vmm.h DESTINATION include)
+install(FILES ../include/bfvmm.h DESTINATION include/bfvmm)
+install(FILES ../include/vmm_types.h DESTINATION include/bfvmm)

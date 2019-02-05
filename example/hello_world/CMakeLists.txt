@@ -19,23 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.6)
-project(bfvmm_main C CXX)
-
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
-
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    list(APPEND SOURCES
-        arch/intel_x64/vcpu_factory.cpp
-    )
-elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
-    message(WARNING "Unimplemented")
-else()
-    message(FATAL_ERROR "Unsupported archiecture")
-endif()
-
-add_vmm_executable(
-    bfvmm
-    SOURCES ${SOURCES}
+vmm_extension(
+    hello_world
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/src
 )

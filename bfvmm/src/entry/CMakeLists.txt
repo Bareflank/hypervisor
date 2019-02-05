@@ -28,3 +28,5 @@ add_static_library(
     SOURCES ${SOURCES}
     ALWAYS
 )
+
+install(DIRECTORY ../../include/entry/ DESTINATION include/bfvmm/entry)

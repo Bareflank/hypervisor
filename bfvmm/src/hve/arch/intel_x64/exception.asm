@@ -104,7 +104,7 @@ section .text
         mov rsi, 0
         mov rdx, 0
         mov rcx, rsp
-        mov r8,  [gs:0x098]
+        mov r8,  [gs:0x0A0]
         call default_esr wrt ..plt
         POPALL
         iretq
@@ -118,7 +118,7 @@ section .text
         mov rsi, [rsp + 248]
         mov rdx, 1
         mov rcx, rsp
-        mov r8,  [gs:0x098]
+        mov r8,  [gs:0x0A0]
         call default_esr wrt ..plt
         POPALL
         add rsp, 8

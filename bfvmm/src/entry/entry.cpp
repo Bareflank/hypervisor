@@ -34,12 +34,17 @@
 #include <bfexports.h>
 #include <bfsupport.h>
 #include <bfexception.h>
+#include <bftypes.h>
+#include <bfcallonce.h>
 
 #include <vcpu/vcpu_manager.h>
 #include <debug/debug_ring/debug_ring.h>
 #include <memory_manager/memory_manager.h>
 
-#include <intrinsics.h>
+#include "entry/entry.h"
+#include "bfvmm.h"
+
+static bfn::once_flag g_init_flag;
 
 extern "C" int64_t
 private_init(void)
@@ -69,45 +74,42 @@ private_set_rsdp(uintptr_t rsdp) noexcept
     return ENTRY_SUCCESS;
 }
 
-bfobject *
-WEAK_SYM pre_create_vcpu(vcpuid::type id)
-{ (void) id; return nullptr; }
+bool
+WEAK_SYM vmm_init()
+{ return true; }
 
-bfobject *
-WEAK_SYM pre_run_vcpu(vcpuid::type id)
-{ (void) id; return nullptr; }
+bool
+WEAK_SYM vmm_main(vcpu_t vcpu)
+{ bfignored(vcpu); return true; }
 
-extern "C" int64_t
-private_init_vmm(uint64_t arg) noexcept
-{
-    return guard_exceptions(ENTRY_ERROR_VMM_START_FAILED, [&]() {
-
-        g_vcm->create(arg, pre_create_vcpu(arg));
-
-        auto ___ = gsl::on_failure([&]
-        { g_vcm->destroy(arg); });
-
-        g_vcm->run(arg, pre_run_vcpu(arg));
-
-        return ENTRY_SUCCESS;
-    });
-}
-
-bfobject *
-WEAK_SYM pre_hlt_vcpu(vcpuid::type id)
-{ (void) id; return nullptr; }
-
-bfobject *
-WEAK_SYM pre_destroy_vcpu(vcpuid::type id)
-{ (void) id; return nullptr; }
+bool
+WEAK_SYM vmm_fini(vcpu_t vcpu)
+{ bfignored(vcpu); return true; }
 
 extern "C" int64_t
 private_fini_vmm(uint64_t arg) noexcept
 {
     return guard_exceptions(ENTRY_ERROR_VMM_STOP_FAILED, [&]() {
+        g_vcm->hlt(arg);
+        g_vcm->destroy(arg);
 
-        g_vcm->hlt(arg, pre_hlt_vcpu(arg));
-        g_vcm->destroy(arg, pre_destroy_vcpu(arg));
+        return ENTRY_SUCCESS;
+    });
+}
+
+extern "C" bool
+private_init_vmm(uint64_t arg) noexcept
+{
+    return guard_exceptions(ENTRY_ERROR_VMM_START_FAILED, [&]() {
+
+        bfn::call_once(g_init_flag, vmm_init);
+
+        g_vcm->create(arg, nullptr);
+
+        auto ___ = gsl::on_failure([&]
+        { g_vcm->destroy(arg); });
+
+        g_vcm->run(arg, nullptr);
 
         return ENTRY_SUCCESS;
     });
