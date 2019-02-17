@@ -23,36 +23,40 @@
 
 using namespace bfvmm::intel_x64;
 
-bool my_cpuid_handler(vcpu_t vcpu, cpuid::info_t &info)
+bool cpuid_emulate_handler(vcpu_t vcpu, cpuid::info_t &info)
 {
-    bfignored(vcpu);
     bfignored(info);
 
-    bfdebug_info(0, "This handler gets called when a guest runs CPUID 0xF00D");
-    bfdebug_info(0, "The guest will observe the result 0xBEEF in register rax");
-    vcpu->set_rax(0xBEEF);
+    bfdebug_info(0, "This handler gets called when a guest runs the cpuid");
+    bfdebug_info(0, "instruction with a value 0xF00D in register eax.");
+    bfdebug_info(0, "The guest will observe the result 0xBEEF in eax.");
+
+    cpuid::emulate(vcpu, 0xBEEF, 0, 0, 0);
 
     return true;
 }
 
-bool my_cpuid_handler_2(vcpu_t vcpu, cpuid::info_t &info)
+bool cpuid_pass_through_handler(vcpu_t vcpu, cpuid::info_t &info)
 {
-    bfignored(vcpu);
     bfignored(info);
 
-    bfdebug_info(0, "An extra handler for special-purpose CPUID leaf 0x4BF00020");
-    bfdebug_info(0, "This handler is only registered to vcpu 0");
+    bfdebug_info(0, "This handler passes-through the cpuid instruction that");
+    bfdebug_info(0, "triggered a vmexit.");
+    bfdebug_nhex(0, "CPUID leaf:", info.leaf);
+    bfdebug_nhex(0, "CPUID subleaf:", info.subleaf);
 
-    return false;
+    cpuid::pass_through(vcpu);
+
+    return true;
 }
 
 bool vmm_main(vcpu_t vcpu)
 {
-    auto handler = cpuid::handler(my_cpuid_handler);
-    cpuid::emulate(vcpu, 0xF00D, handler);
+    auto handler = cpuid::handler(cpuid_emulate_handler);
+    cpuid::handle(vcpu, 0xF00D, handler);
 
-    auto handler_2 = cpuid::handler(my_cpuid_handler_2);
-    cpuid::emulate(vcpu, 0x4BF00020, handler_2);
+    auto handler_2 = cpuid::handler(cpuid_pass_through_handler);
+    cpuid::handle(vcpu, 0x8086, handler_2);
 
     bfdebug_info(0, "CPUID example initialized");
 

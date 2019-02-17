@@ -26,9 +26,32 @@
 namespace bfvmm::intel_x64::cpuid
 {
 
-void emulate(vcpu_t vcpu, leaf_t leaf, delegate_t handler)
+void handle(vcpu_t vcpu, leaf_t leaf, delegate_t handler)
 {
     vcpu->exit_handler()->cpuid_delegator()->add_handler(leaf, handler);
+}
+
+void emulate(vcpu_t vcpu, uint64_t rax, uint64_t rbx, uint64_t rcx, uint64_t rdx)
+{
+    vcpu->set_rax(set_bits(vcpu->rax(), 0x00000000FFFFFFFFULL, rax));
+    vcpu->set_rbx(set_bits(vcpu->rbx(), 0x00000000FFFFFFFFULL, rbx));
+    vcpu->set_rcx(set_bits(vcpu->rcx(), 0x00000000FFFFFFFFULL, rcx));
+    vcpu->set_rdx(set_bits(vcpu->rdx(), 0x00000000FFFFFFFFULL, rdx));
+}
+
+void pass_through(vcpu_t vcpu)
+{
+    auto ret = ::x64::cpuid::get(
+                   gsl::narrow_cast<::x64::cpuid::field_type>(vcpu->rax()),
+                   gsl::narrow_cast<::x64::cpuid::field_type>(vcpu->rbx()),
+                   gsl::narrow_cast<::x64::cpuid::field_type>(vcpu->rcx()),
+                   gsl::narrow_cast<::x64::cpuid::field_type>(vcpu->rdx())
+               );
+
+    vcpu->set_rax(ret.rax);
+    vcpu->set_rbx(ret.rbx);
+    vcpu->set_rcx(ret.rcx);
+    vcpu->set_rdx(ret.rdx);
 }
 
 }

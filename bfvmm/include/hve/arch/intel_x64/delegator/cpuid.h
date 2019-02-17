@@ -61,31 +61,17 @@ using leaf_t = uint64_t;
 ///
 struct info_t {
 
-    /// RAX (in/out)
+    /// Leaf (in)
     ///
-    uint64_t rax;
+    /// The CPUID leaf (eax) that caused a vmexit
+    ///
+    leaf_t leaf;
 
-    /// RBX (in/out)
+    /// Subleaf (in)
     ///
-    uint64_t rbx;
-
-    /// RCX (in/out)
+    /// The CPUID subleaf (ecx) that caused a vmexit
     ///
-    uint64_t rcx;
-
-    /// RDX (in/out)
-    ///
-    uint64_t rdx;
-
-    /// Ignore write (out)
-    ///
-    /// If true, do not update the guest's register state with the four
-    /// register values above. Set this to true if you do not want the guest
-    /// rax, rbx, rcx, or rdx to be written to after your handler completes.
-    ///
-    /// default: false
-    ///
-    bool ignore_write;
+    leaf_t subleaf;
 
     /// Ignore advance (out)
     ///
@@ -152,7 +138,6 @@ private:
 
     std::unordered_map<cpuid::leaf_t, std::list<cpuid::delegate_t>> m_handlers;
     cpuid::delegate_t m_default_handler;
-    // std::unordered_map<leaf_t, bool> m_emulate;
 
 public:
 

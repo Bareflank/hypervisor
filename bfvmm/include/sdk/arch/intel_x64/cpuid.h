@@ -25,14 +25,31 @@
 namespace bfvmm::intel_x64::cpuid
 {
 
-/// Emulate the given cpuid leaf using the given cpuid handler on
+/// Handle the given cpuid leaf using the given cpuid handler on
 /// the given vcpu
 ///
-/// @param vcpu the vcpu to apply emulation to
+/// @param vcpu the vcpu to register @param handler to
 /// @param leaf the cpuid leaf to emulate
 /// @param handler the handler to be called for the emulation of @param leaf
 ///
-void emulate(vcpu_t vcpu, leaf_t leaf, delegate_t handler);
+void handle(vcpu_t vcpu, leaf_t leaf, delegate_t handler);
+
+/// Emulate a cpuid leaf for the the given vcpu. The upper 32-bits of each
+/// emulated value are masked.
+///
+/// @param vcpu the vcpu to apply emulation to
+/// @param rax the emulated value to be returned in rax
+/// @param rbx the emulated value to be returned in rbx
+/// @param rcx the emulated value to be returned in rcx
+/// @param rdx the emulated value to be returned in rdx
+///
+void emulate(vcpu_t vcpu, uint64_t rax, uint64_t rbx, uint64_t rcx, uint64_t rdx);
+
+/// Pass through a cpuid instruction for the given vcpu, using the current state
+/// of the vcpu's rax, rbx, rcx, and rdx registers
+///
+/// @param vcpu the vcpu to pass cpuid access through for
+void pass_through(vcpu_t vcpu);
 
 }
 

@@ -122,20 +122,16 @@ delegator::add_handler(cpuid::leaf_t leaf, const cpuid::delegate_t &d)
 bool
 delegator::handle(vcpu_t vcpu)
 {
-    const auto &hdlrs = m_handlers.find(vcpu->rax());
-    struct info_t info = { 0, 0, 0, 0, false, false };
+    auto leaf = vcpu->rax();
+    auto subleaf = vcpu->rcx();
+
+    const auto &hdlrs = m_handlers.find(leaf);
+    struct info_t info = { leaf, subleaf, false };
 
     if (hdlrs != m_handlers.end()) {
 
         for (const auto &d : hdlrs->second) {
             if (d(vcpu, info)) {
-
-                if (!info.ignore_write) {
-                    vcpu->set_rax(set_bits(vcpu->rax(), 0x00000000FFFFFFFFULL, info.rax));
-                    vcpu->set_rbx(set_bits(vcpu->rbx(), 0x00000000FFFFFFFFULL, info.rbx));
-                    vcpu->set_rcx(set_bits(vcpu->rcx(), 0x00000000FFFFFFFFULL, info.rcx));
-                    vcpu->set_rdx(set_bits(vcpu->rdx(), 0x00000000FFFFFFFFULL, info.rdx));
-                }
 
                 if (!info.ignore_advance) {
                     return vcpu->advance();
