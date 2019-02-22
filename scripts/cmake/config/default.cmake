@@ -154,11 +154,6 @@ set(SOURCE_BFVMM_DIR ${CMAKE_SOURCE_DIR}/bfvmm
     "bfvmm source dir"
 )
 
-set(SOURCE_EXAMPLE_DIR ${CMAKE_SOURCE_DIR}/example
-    CACHE INTERNAL
-    "vmm example source dir"
-)
-
 # ------------------------------------------------------------------------------
 # Build Tree
 # ------------------------------------------------------------------------------

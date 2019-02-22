@@ -31,6 +31,8 @@
 #include "vmexit/interrupt_window.h"
 #include "vmexit/io_instruction.h"
 #include "vmexit/monitor_trap.h"
+#include "vmexit/nmi_window.h"
+#include "vmexit/nmi.h"
 #include "vmexit/rdmsr.h"
 #include "vmexit/sipi_signal.h"
 #include "vmexit/preemption_timer.h"
@@ -42,6 +44,7 @@
 #include "interrupt_queue.h"
 #include "microcode.h"
 #include "vcpu_global_state.h"
+#include "vcpu_state.h"
 #include "vmcs.h"
 #include "vmx.h"
 #include "vpid.h"
@@ -87,9 +90,6 @@ namespace bfvmm::intel_x64
 class EXPORT_HVE vcpu : public bfvmm::vcpu
 {
 
-    using handler_t = bool(gsl::not_null<bfvmm::intel_x64::vcpu *>);
-    using handler_delegate_t = delegate<handler_t>;
-
 public:
 
     /// Default Constructor
@@ -98,11 +98,11 @@ public:
     /// @ensures none
     ///
     /// @param id the id of the vcpu
-    /// @param vcpu_global_state a pointer to the vCPUs state
+    /// @param global_state a pointer to the vCPUs state
     ///
     explicit vcpu(
         vcpuid::type id,
-        vcpu_global_state_t *vcpu_global_state = nullptr);
+        vcpu_global_state_t *global_state = nullptr);
 
     /// Destructor
     ///
@@ -110,6 +110,8 @@ public:
     /// @ensures none
     ///
     ~vcpu() override = default;
+
+public:
 
     /// Run Delegate
     ///
@@ -135,10 +137,49 @@ public:
     ///
     VIRTUAL void hlt_delegate(bfobject *obj);
 
+private:
+
+    void write_host_state();
+    void write_guest_state();
+    void write_control_state();
+
 public:
 
     //==========================================================================
-    // Handlers
+    // VMCS Operations
+    //==========================================================================
+
+    /// Load vCPU
+    ///
+    /// Loads the vCPU into hardware.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    VIRTUAL void load();
+
+    /// Promote vCPU
+    ///
+    /// Promotes the vCPU.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    VIRTUAL void promote();
+
+    /// Advance vCPU
+    ///
+    /// Advances the vCPU.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return always returns true
+    ///
+    VIRTUAL bool advance();
+
+    //==========================================================================
+    // Handler Operations
     //==========================================================================
 
     /// Add Handler vCPU
@@ -172,7 +213,7 @@ public:
         const handler_delegate_t &d);
 
     //==========================================================================
-    // Misc
+    // Fault Handling
     //==========================================================================
 
     /// Dump State
@@ -196,114 +237,13 @@ public:
     ///
     virtual void halt(const std::string &str = {});
 
-    /// Advance vCPU
-    ///
-    /// Advances the vCPU.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @return always returns true
-    ///
-    VIRTUAL bool advance();
-
     //==========================================================================
-    // EPT
+    // VMExit
     //==========================================================================
 
-    /// Set EPTP
-    ///
-    /// Enables EPT and sets the EPTP to point to the provided mmap.
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    /// @param map The map to set EPTP to.
-    ///
-    VIRTUAL void set_eptp(ept::mmap &map);
-
-    /// Disable EPT
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    VIRTUAL void disable_ept();
-
-    //==========================================================================
-    // VPID
-    //==========================================================================
-
-    /// Enable VPID
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    VIRTUAL void enable_vpid();
-
-    /// Disable VPID
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    VIRTUAL void disable_vpid();
-
-    //==========================================================================
-    // Helpers
-    //==========================================================================
-
-    /// Trap MSR Access
-    ///
-    /// Sets a '1' in the MSR bitmap corresponding with the provided msr. All
-    /// attempts made by the guest to read/write from the provided msr will be
-    /// trapped by the hypervisor.
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    /// @param msr the msr to trap
-    ///
-    VIRTUAL void trap_on_msr_access(vmcs_n::value_type msr);
-
-    /// Pass Through Access
-    ///
-    /// Sets a '0' in the MSR bitmap corresponding with the provided msr. All
-    /// attempts made by the guest to read/write from the provided msr will be
-    /// executed by the guest and will not trap to the hypervisor.
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    /// @param msr the msr to pass through
-    ///
-    VIRTUAL void pass_through_msr_access(vmcs_n::value_type msr);
-
-    /// Enable write to CR0 exiting
-    ///
-    /// Temporary interface to control_register_handler::enable_wrcr0_exiting
-    /// during delegator refactor. This will be deprecated
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    /// @param mask the mask
-    ///
-    VIRTUAL void enable_wrcr0_exiting(vmcs_n::value_type mask);
-
-    /// Enable write to CR4 exiting
-    ///
-    /// Temporary interface to control_register_handler::enable_wrcr4_exiting
-    /// during delegator refactor. This will be deprecated
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    /// @param mask the mask
-    ///
-    VIRTUAL void enable_wrcr4_exiting(vmcs_n::value_type mask);
-
-    //==========================================================================
-    // Legacy Handler Mechanism, these will be deprecated
-    //==========================================================================
+    //--------------------------------------------------------------------------
+    // Control Register
+    //--------------------------------------------------------------------------
 
     /// Add Write CR0 Handler
     ///
@@ -314,8 +254,7 @@ public:
     /// @param d the delegate to call when a mov-to-cr0 exit occurs
     ///
     VIRTUAL void add_wrcr0_handler(
-        vmcs_n::value_type mask,
-        const control_register_handler::handler_delegate_t &d);
+        vmcs_n::value_type mask, const handler_delegate_t &d);
 
     /// Add Read CR3 Handler
     ///
@@ -325,7 +264,7 @@ public:
     /// @param d the delegate to call when a mov-from-cr3 exit occurs
     ///
     VIRTUAL void add_rdcr3_handler(
-        const control_register_handler::handler_delegate_t &d);
+        const handler_delegate_t &d);
 
     /// Add Write CR3 Handler
     ///
@@ -335,7 +274,7 @@ public:
     /// @param d the delegate to call when a mov-to-cr3 exit occurs
     ///
     VIRTUAL void add_wrcr3_handler(
-        const control_register_handler::handler_delegate_t &d);
+        const handler_delegate_t &d);
 
     /// Add Write CR4 Handler
     ///
@@ -346,43 +285,112 @@ public:
     /// @param d the delegate to call when a mov-to-cr4 exit occurs
     ///
     VIRTUAL void add_wrcr4_handler(
-        vmcs_n::value_type mask,
-        const control_register_handler::handler_delegate_t &d);
+        vmcs_n::value_type mask, const handler_delegate_t &d);
+
+    /// Execute wrcr0
+    ///
+    /// Executes the wrcr0 instruction, and populates the vCPU's registers.
+    /// For more information, please see the control register VM exit handler's
+    /// documentation.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void execute_wrcr0();
+
+    /// Execute rdcr3
+    ///
+    /// Executes the rdcr3 instruction, and populates the vCPU's registers.
+    /// For more information, please see the control register VM exit handler's
+    /// documentation.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void execute_rdcr3();
+
+    /// Execute wrcr3
+    ///
+    /// Executes the wrcr3 instruction, and populates the vCPU's registers.
+    /// For more information, please see the control register VM exit handler's
+    /// documentation.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void execute_wrcr3();
+
+    /// Execute wrcr3
+    ///
+    /// Executes the wrcr3 instruction, and populates the vCPU's registers.
+    /// For more information, please see the control register VM exit handler's
+    /// documentation.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void execute_wrcr4();
+
+    //--------------------------------------------------------------------------
+    // CPUID
+    //--------------------------------------------------------------------------
 
     /// Add CPUID Handler
     ///
+    /// Add a delegate to handle a CPUID VM exit. Your handler should always
+    /// return false unless you need to override the default behavior of the
+    /// base hypervisor. For more information, please see the CPUID VM exit
+    /// handler for details.
+    ///
     /// @expects
     /// @ensures
     ///
     /// @param leaf the leaf to call d on
-    /// @param d the delegate to call when the guest executes CPUID
+    /// @param d the delegate to call on the vm exit
     ///
     VIRTUAL void add_cpuid_handler(
-        cpuid_handler::leaf_t leaf, const cpuid_handler::handler_delegate_t &d);
+        cpuid_handler::leaf_t leaf, const handler_delegate_t &d);
 
-    /// Emulate CPUID
+    /// Add Emulate
     ///
-    /// Adds a handler, and tells the APIs that full emulation is desired.
-    /// This will prevent the real hardware from being touched.
+    /// Emulate the exeuction of the CPUID instruction. For more information
+    /// please see the CPUID VM exit handler for details. Generally speaking,
+    /// you should typically use add_handler() instead.
     ///
     /// @expects
     /// @ensures
     ///
     /// @param leaf the leaf to call d on
-    /// @param d the delegate to call when the guest executes CPUID
+    /// @param d the delegate to call on the vm exit
     ///
-    VIRTUAL void emulate_cpuid(
-        cpuid_handler::leaf_t leaf, const cpuid_handler::handler_delegate_t &d);
+    VIRTUAL void add_cpuid_emulator(
+        cpuid_handler::leaf_t leaf, const handler_delegate_t &d);
 
-    /// Add CPUID Default Handler
+    /// Execute CPUID
+    ///
+    /// Executes the CPUID instruction, and populates the vCPU's registers.
+    /// For more information, please see the CPUID VM exit handler's
+    /// documentation.
     ///
     /// @expects
     /// @ensures
     ///
-    /// @param d the delegate to call when the guest executes CPUID
+    VIRTUAL void execute_cpuid();
+
+    /// Enable Whitelisting
     ///
-    VIRTUAL void add_default_cpuid_handler(
-        const ::handler_delegate_t &d);
+    /// Ensures that if a VM exit occurs, that an emulator must be registered
+    /// for the exit. If an emulator is not registered, the VM exit is
+    /// reported as unhandled.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void enable_cpuid_whitelisting() noexcept;
+
+    //--------------------------------------------------------------------------
+    // EPT Misconfiguration
+    //--------------------------------------------------------------------------
 
     /// Add EPT Misconfiguration Handler
     ///
@@ -393,6 +401,10 @@ public:
     ///
     VIRTUAL void add_ept_misconfiguration_handler(
         const ept_misconfiguration_handler::handler_delegate_t &d);
+
+    //--------------------------------------------------------------------------
+    // EPT Violation
+    //--------------------------------------------------------------------------
 
     /// Add EPT read violation handler
     ///
@@ -454,6 +466,10 @@ public:
     VIRTUAL void add_default_ept_execute_violation_handler(
         const ::handler_delegate_t &d);
 
+    //--------------------------------------------------------------------------
+    // External Interrupt
+    //--------------------------------------------------------------------------
+
     /// Add External Interrupt Handler
     ///
     /// Turns on external interrupt handling and adds an external interrupt
@@ -474,12 +490,13 @@ public:
     ///
     VIRTUAL void disable_external_interrupts();
 
+    //--------------------------------------------------------------------------
+    // Interrupt Window
+    //--------------------------------------------------------------------------
+
     /// Queue External Interrupt
     ///
-    /// Queues an external interrupt for injection. If the interrupt window
-    /// is open, and there are no interrupts queued for injection, the
-    /// interrupt may be injected on the upcoming VM-entry, othewise the
-    /// interrupt is queued, and injected when appropriate.
+    /// Queues an external interrupt for injection.
     ///
     /// @expects
     /// @ensures
@@ -505,7 +522,7 @@ public:
     /// Inject External Interrupt
     ///
     /// Inject an external interrupt on the next VM entry. Note that this will
-    /// overwriteany interrupts that are already injected for the next VM entry
+    /// overwrite any interrupts that are already injected for the next VM entry
     /// so care should be taken when using this function
     ///
     /// @expects
@@ -514,6 +531,10 @@ public:
     /// @param vector the vector to inject into the guest
     ///
     VIRTUAL void inject_external_interrupt(uint64_t vector);
+
+    //--------------------------------------------------------------------------
+    // IO Instruction
+    //--------------------------------------------------------------------------
 
     /// Trap All IO Instruction Accesses
     ///
@@ -581,6 +602,10 @@ public:
     VIRTUAL void add_default_io_instruction_handler(
         const ::handler_delegate_t &d);
 
+    //--------------------------------------------------------------------------
+    // Monitor Trap
+    //--------------------------------------------------------------------------
+
     /// Add Monitor Trap Flag Handler
     ///
     /// @expects
@@ -597,6 +622,65 @@ public:
     /// @ensures
     ///
     VIRTUAL void enable_monitor_trap_flag();
+
+    //--------------------------------------------------------------------------
+    // Non-Mackable Interrupt Window
+    //--------------------------------------------------------------------------
+
+    /// Queue NMI
+    ///
+    /// Queues an NMI for injection.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void queue_nmi();
+
+    /// Inject NMI
+    ///
+    /// Inject an NMI on the next VM entry. Note that this will
+    /// overwrite any interrupts that are already injected for the next VM entry
+    /// so care should be taken when using this function
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void inject_nmi();
+
+    //--------------------------------------------------------------------------
+    // Non-Maskable Interrupts
+    //--------------------------------------------------------------------------
+
+    /// Add NMI Handler
+    ///
+    /// Turns on NMI handling and adds an NMI
+    /// handler to handle NMIs
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param d the delegate to call when an exit occurs
+    ///
+    VIRTUAL void add_nmi_handler(
+        const nmi_handler::handler_delegate_t &d);
+
+    /// Enable NMI Support
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void enable_nmis();
+
+    /// Disable NMI Support
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void disable_nmis();
+
+    //--------------------------------------------------------------------------
+    // Read MSR
+    //--------------------------------------------------------------------------
 
     /// Trap On Access
     ///
@@ -673,6 +757,10 @@ public:
     VIRTUAL void add_default_rdmsr_handler(
         const ::handler_delegate_t &d);
 
+    //--------------------------------------------------------------------------
+    // Write MSR
+    //--------------------------------------------------------------------------
+
     /// Trap On Access
     ///
     /// Sets a '1' in the MSR bitmap corresponding with the provided msr. All
@@ -748,6 +836,10 @@ public:
     VIRTUAL void add_default_wrmsr_handler(
         const ::handler_delegate_t &d);
 
+    //--------------------------------------------------------------------------
+    // XSetBV
+    //--------------------------------------------------------------------------
+
     /// Add XSetBV Handler
     ///
     /// @expects
@@ -757,6 +849,10 @@ public:
     ///
     VIRTUAL void add_xsetbv_handler(
         const xsetbv_handler::handler_delegate_t &d);
+
+    //--------------------------------------------------------------------------
+    // VMX preemption timer
+    //--------------------------------------------------------------------------
 
     /// Add VMX preemption timer handler
     ///
@@ -802,15 +898,78 @@ public:
     VIRTUAL void disable_preemption_timer();
 
     //==========================================================================
-    // Resources
+    // EPT
     //==========================================================================
 
-    // TODO
-    //
-    // Remvoe me. This creates a trainwreck. Intead, this object should be
-    // passed to the the objects that need it.
-    //
-    //
+    /// Set EPTP
+    ///
+    /// Enables EPT and sets the EPTP to point to the provided mmap.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param map The map to set EPTP to.
+    ///
+    VIRTUAL void set_eptp(ept::mmap &map);
+
+    /// Disable EPT
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void disable_ept();
+
+    //==========================================================================
+    // VPID
+    //==========================================================================
+
+    /// Enable VPID
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void enable_vpid();
+
+    /// Disable VPID
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void disable_vpid();
+
+    //==========================================================================
+    // Helpers
+    //==========================================================================
+
+    /// Trap MSR Access
+    ///
+    /// Sets a '1' in the MSR bitmap corresponding with the provided msr. All
+    /// attempts made by the guest to read/write from the provided msr will be
+    /// trapped by the hypervisor.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param msr the msr to trap
+    ///
+    VIRTUAL void trap_on_msr_access(vmcs_n::value_type msr);
+
+    /// Pass Through Access
+    ///
+    /// Sets a '0' in the MSR bitmap corresponding with the provided msr. All
+    /// attempts made by the guest to read/write from the provided msr will be
+    /// executed by the guest and will not trap to the hypervisor.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param msr the msr to pass through
+    ///
+    VIRTUAL void pass_through_msr_access(vmcs_n::value_type msr);
+
+    //==========================================================================
+    // Resources
+    //==========================================================================
 
     /// Global State
     ///
@@ -819,8 +978,48 @@ public:
     ///
     /// @return the global state object associated with this vCPU.
     ///
-    gsl::not_null<vcpu_global_state_t *> global_state() const
-    { return m_vcpu_global_state; }
+    VIRTUAL gsl::not_null<vcpu_global_state_t *> global_state()
+    { return m_global_state; }
+
+    /// State
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @return the state object associated with this vCPU.
+    ///
+    VIRTUAL gsl::not_null<vcpu_state_t *> state()
+    { return &m_state; }
+
+    /// MSR bitmap
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the vCPU's msr bitmap
+    ///
+    VIRTUAL gsl::not_null<uint8_t *> msr_bitmap() const
+    { return m_msr_bitmap.get(); }
+
+    /// IO bitmap a
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the vCPU's io bitmap a
+    ///
+    VIRTUAL gsl::not_null<uint8_t *> io_bitmap_a() const
+    { return m_io_bitmap_a.get(); }
+
+    /// IO bitmap b
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the vCPU's io bitmap b
+    ///
+    VIRTUAL gsl::not_null<uint8_t *> io_bitmap_b() const
+    { return m_io_bitmap_b.get(); }
 
     //==========================================================================
     // Memory Mapping
@@ -1514,6 +1713,10 @@ public:
     auto map_arg(void *gva)
     { return map_gva_4k<T>(gva, 1); }
 
+private:
+
+    uintptr_t get_entry(uintptr_t tble_gpa, std::ptrdiff_t index);
+
 public:
 
     /// @cond
@@ -1646,78 +1849,91 @@ public:
     VIRTUAL uint64_t ldtr_access_rights() const noexcept;
     VIRTUAL void set_ldtr_access_rights(uint64_t val) noexcept;
 
-    VIRTUAL gsl::not_null<intel_x64::exit_handler *> exit_handler() const;
-    VIRTUAL gsl::not_null<intel_x64::vmcs *> vmcs() const;
+    /// @endcond
+
+public:
+
+    /// General Register
+    ///
+    /// The GRs are registers used as input into the VM exit
+    /// handlers. The meaning of each general register depends
+    /// on the VM exit handler you are registering. See the execute
+    /// functions for more details.
+    ///
+
+    /// @cond
+
+    VIRTUAL uint64_t gr1() const noexcept;
+    VIRTUAL void set_gr1(uint64_t val) noexcept;
+    VIRTUAL uint64_t gr2() const noexcept;
+    VIRTUAL void set_gr2(uint64_t val) noexcept;
+    VIRTUAL uint64_t gr3() const noexcept;
+    VIRTUAL void set_gr3(uint64_t val) noexcept;
+    VIRTUAL uint64_t gr4() const noexcept;
+    VIRTUAL void set_gr4(uint64_t val) noexcept;
 
     /// @endcond
 
 private:
 
-    uintptr_t get_entry(uintptr_t tble_gpa, std::ptrdiff_t index);
+    uint64_t m_gr1{};
+    uint64_t m_gr2{};
+    uint64_t m_gr3{};
+    uint64_t m_gr4{};
 
 private:
 
-    ept::mmap *m_mmap{};
-    vcpu_global_state_t *m_vcpu_global_state{};
+    vcpu_global_state_t *m_global_state{};
+    vcpu_state_t m_state{};
+
+    page_ptr<uint8_t> m_msr_bitmap;
+    page_ptr<uint8_t> m_io_bitmap_a;
+    page_ptr<uint8_t> m_io_bitmap_b;
+
+    std::unique_ptr<gsl::byte[]> m_ist1;
+    std::unique_ptr<gsl::byte[]> m_stack;
+
+    x64::tss m_host_tss{};
+    x64::gdt m_host_gdt{512};
+    x64::idt m_host_idt{256};
 
 private:
 
-    std::unique_ptr<intel_x64::vmx> m_vmx;
-    std::unique_ptr<intel_x64::vmcs> m_vmcs;
-    std::unique_ptr<intel_x64::exit_handler> m_exit_handler;
+    std::unique_ptr<vmx> m_vmx;
+
+    vmcs m_vmcs;
+    exit_handler m_exit_handler;
 
     control_register_handler m_control_register_handler;
     cpuid_handler m_cpuid_handler;
-    io_instruction_handler m_io_instruction_handler;
-    monitor_trap_handler m_monitor_trap_handler;
-    rdmsr_handler m_rdmsr_handler;
-    wrmsr_handler m_wrmsr_handler;
-    xsetbv_handler m_xsetbv_handler;
-
     ept_misconfiguration_handler m_ept_misconfiguration_handler;
     ept_violation_handler m_ept_violation_handler;
     external_interrupt_handler m_external_interrupt_handler;
     init_signal_handler m_init_signal_handler;
     interrupt_window_handler m_interrupt_window_handler;
+    io_instruction_handler m_io_instruction_handler;
+    monitor_trap_handler m_monitor_trap_handler;
+    nmi_window_handler m_nmi_window_handler;
+    nmi_handler m_nmi_handler;
+    preemption_timer_handler m_preemption_timer_handler;
+    rdmsr_handler m_rdmsr_handler;
     sipi_signal_handler m_sipi_signal_handler;
+    wrmsr_handler m_wrmsr_handler;
+    xsetbv_handler m_xsetbv_handler;
 
     ept_handler m_ept_handler;
     microcode_handler m_microcode_handler;
     vpid_handler m_vpid_handler;
-    preemption_timer_handler m_preemption_timer_handler;
 
 private:
 
     bool m_launched{false};
-
-private:
-
-    friend class io_instruction_handler;
-    friend class rdmsr_handler;
-    friend class wrmsr_handler;
-
-    std::list<handler_delegate_t> m_init_delegates;
-    std::list<handler_delegate_t> m_fini_delegates;
-
-private:
-
-    void vmexit_handler() noexcept;
+    ept::mmap *m_mmap{};
 };
 
 }
 
-/// Get Guest vCPU
-///
-/// Gets a guest vCPU from the vCPU manager given a vcpuid
-///
-/// @expects
-/// @ensures
-///
-/// @return returns a pointer to the vCPU being queried or throws
-///     and exception.
-///
-#define get_vcpu(a) \
-    g_vcm->get<bfvmm::intel_x64::vcpu *>(a, __FILE__ ": invalid vcpuid")
+using vcpu_t = bfvmm::intel_x64::vcpu;
 
 #ifdef _MSC_VER
 #pragma warning(pop)

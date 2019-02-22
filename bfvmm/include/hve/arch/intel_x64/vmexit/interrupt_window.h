@@ -54,8 +54,6 @@ class vcpu;
 
 /// Interrupt window
 ///
-/// Provides an interface for registering handlers of the interrupt-window exit.
-///
 class EXPORT_HVE interrupt_window_handler
 {
 public:
@@ -122,7 +120,7 @@ public:
 
     /// @cond
 
-    bool handle(gsl::not_null<vcpu *> vcpu);
+    bool handle(vcpu *vcpu);
 
     /// @endcond
 

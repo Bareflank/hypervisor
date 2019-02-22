@@ -33,12 +33,11 @@ namespace bfvmm::intel_x64
 {
 
 io_instruction_handler::io_instruction_handler(
-    vcpu_t vcpu
+    gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu},
-    m_msr_bitmap{vcpu->vmcs()->msr_bitmap().get(), ::x64::pt::page_size},
-    m_io_bitmap_a{vcpu->vmcs()->io_bitmap_a().get(), ::x64::pt::page_size},
-    m_io_bitmap_b{vcpu->vmcs()->io_bitmap_b().get(), ::x64::pt::page_size}
+    m_io_bitmap_a{vcpu->io_bitmap_a(), ::x64::pt::page_size},
+    m_io_bitmap_b{vcpu->io_bitmap_b(), ::x64::pt::page_size}
 {
     using namespace vmcs_n;
 
@@ -126,7 +125,7 @@ io_instruction_handler::pass_through_all_accesses()
 // -----------------------------------------------------------------------------
 
 bool
-io_instruction_handler::handle(vcpu_t vcpu)
+io_instruction_handler::handle(vcpu *vcpu)
 {
     namespace io_instruction = vmcs_n::exit_qualification::io_instruction;
     auto eq = io_instruction::get();
@@ -177,7 +176,7 @@ io_instruction_handler::handle(vcpu_t vcpu)
 }
 
 bool
-io_instruction_handler::handle_in(vcpu_t vcpu, info_t &info)
+io_instruction_handler::handle_in(vcpu *vcpu, info_t &info)
 {
     const auto &hdlrs =
         m_in_handlers.find(info.port_number);
@@ -213,7 +212,7 @@ io_instruction_handler::handle_in(vcpu_t vcpu, info_t &info)
 }
 
 bool
-io_instruction_handler::handle_out(vcpu_t vcpu, info_t &info)
+io_instruction_handler::handle_out(vcpu *vcpu, info_t &info)
 {
     const auto &hdlrs =
         m_out_handlers.find(info.port_number);
@@ -296,7 +295,7 @@ io_instruction_handler::emulate_out(info_t &info)
 
 void
 io_instruction_handler::load_operand(
-    vcpu_t vcpu, info_t &info)
+    vcpu *vcpu, info_t &info)
 {
     namespace io_instruction = vmcs_n::exit_qualification::io_instruction;
 
@@ -355,7 +354,7 @@ io_instruction_handler::load_operand(
 
 void
 io_instruction_handler::store_operand(
-    vcpu_t vcpu, info_t &info)
+    vcpu *vcpu, info_t &info)
 {
     namespace io_instruction = vmcs_n::exit_qualification::io_instruction;
 

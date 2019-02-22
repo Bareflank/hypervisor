@@ -24,7 +24,14 @@
 namespace bfvmm::intel_x64
 {
 
-ept_misconfiguration_handler::ept_misconfiguration_handler(
+static bool
+handle_nmi(vcpu *vcpu)
+{
+    vcpu->queue_nmi();
+    return true;
+}
+
+nmi_handler::nmi_handler(
     gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu}
@@ -32,8 +39,12 @@ ept_misconfiguration_handler::ept_misconfiguration_handler(
     using namespace vmcs_n;
 
     vcpu->add_handler(
-        exit_reason::basic_exit_reason::ept_misconfiguration,
-        ::handler_delegate_t::create<ept_misconfiguration_handler, &ept_misconfiguration_handler::handle>(this)
+        exit_reason::basic_exit_reason::exception_or_non_maskable_interrupt,
+        ::handler_delegate_t::create<nmi_handler, &nmi_handler::handle>(this)
+    );
+
+    this->add_handler(
+        nmi_handler_delegate_t::create<handle_nmi>()
     );
 }
 
@@ -42,36 +53,38 @@ ept_misconfiguration_handler::ept_misconfiguration_handler(
 // -----------------------------------------------------------------------------
 
 void
-ept_misconfiguration_handler::add_handler(const handler_delegate_t &d)
+nmi_handler::add_handler(
+    const handler_delegate_t &d)
 { m_handlers.push_front(d); }
+
+void
+nmi_handler::enable_exiting()
+{
+    vmcs_n::pin_based_vm_execution_controls::nmi_exiting::enable();
+    vmcs_n::pin_based_vm_execution_controls::virtual_nmis::enable();
+}
+
+void
+nmi_handler::disable_exiting()
+{
+    vmcs_n::pin_based_vm_execution_controls::nmi_exiting::disable();
+    vmcs_n::pin_based_vm_execution_controls::virtual_nmis::disable();
+}
 
 // -----------------------------------------------------------------------------
 // Handlers
 // -----------------------------------------------------------------------------
 
 bool
-ept_misconfiguration_handler::handle(vcpu *vcpu)
+nmi_handler::handle(vcpu *vcpu)
 {
-    struct info_t info = {
-        vmcs_n::guest_linear_address::get(),
-        vmcs_n::guest_physical_address::get(),
-        false
-    };
-
     for (const auto &d : m_handlers) {
-        if (d(vcpu, info)) {
-
-            if (!info.ignore_advance) {
-                return vcpu->advance();
-            }
-
-            return true;
+        if (d(vcpu)) {
+            break;
         }
     }
 
-    throw std::runtime_error(
-        "ept_misconfiguration_handler::handle: unhandled ept misconfiguration"
-    );
+    return true;
 }
 
 }

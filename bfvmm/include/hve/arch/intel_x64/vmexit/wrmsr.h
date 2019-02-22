@@ -46,6 +46,12 @@
 #endif
 
 // -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+void emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val);
+
+// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
@@ -75,16 +81,11 @@ public:
         ///
         /// The address of the msr the guest tried to write to.
         ///
-        /// default: vmcs->save_state()->rcx
-        ///
         uint32_t msr;
 
         /// Value (in/out)
         ///
         /// The value the guest tried to write
-        ///
-        /// default: (vmcs->save_state()->rax & 0xFFFFFFFF << 0)  |
-        ///          (vmcs->save_state()->rdx & 0xFFFFFFFF << 32) |
         ///
         uint64_t val;
 
@@ -111,7 +112,7 @@ public:
     /// handlers
     ///
     using handler_delegate_t =
-        delegate<bool(gsl::not_null<vcpu *>, info_t &)>;
+        delegate<bool(vcpu *, info_t &)>;
 
     /// Constructor
     ///
@@ -249,7 +250,7 @@ public:
 
     /// @cond
 
-    bool handle(gsl::not_null<vcpu *> vcpu);
+    bool handle(vcpu *vcpu);
 
     /// @endcond
 
@@ -274,6 +275,8 @@ public:
 
     /// @endcond
 };
+
+using wrmsr_handler_delegate_t = wrmsr_handler::handler_delegate_t;
 
 }
 

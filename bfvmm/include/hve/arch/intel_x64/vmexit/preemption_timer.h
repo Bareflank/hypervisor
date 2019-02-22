@@ -68,7 +68,7 @@ public:
     /// The type of delegate clients must use when registering
     /// handlers
     ///
-    using handler_delegate_t = delegate<bool(gsl::not_null<vcpu *>)>;
+    using handler_delegate_t = delegate<bool(vcpu *)>;
 
     /// Constructor
     ///
@@ -143,7 +143,7 @@ public:
 
     /// @cond
 
-    bool handle(gsl::not_null<vcpu *> vcpu);
+    bool handle(vcpu *vcpu);
 
     /// @endcond
 
@@ -164,6 +164,8 @@ public:
 
     /// @endcond
 };
+
+using preemption_timer_handler_delegate_t = preemption_timer_handler::handler_delegate_t;
 
 }
 

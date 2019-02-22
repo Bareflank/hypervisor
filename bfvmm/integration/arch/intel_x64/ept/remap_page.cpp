@@ -65,8 +65,8 @@ public:
     explicit vcpu(vcpuid::type id) :
         bfvmm::intel_x64::vcpu{id}
     {
-        this->add_cpuid_handler(
-            42, cpuid_handler::handler_delegate_t::create<vcpu, &vcpu::test_cpuid_handler>(this)
+        this->add_cpuid_emulator(
+            42, handler_delegate_t::create<vcpu, &vcpu::test_cpuid_handler>(this)
         );
 
         this->add_hlt_delegate(
@@ -88,11 +88,9 @@ public:
     ~vcpu() override = default;
 
     bool
-    test_cpuid_handler(
-        gsl::not_null<vcpu_t *> vcpu, cpuid_handler::info_t &info)
+    test_cpuid_handler(vcpu_t *vcpu)
     {
         bfignored(vcpu);
-        bfignored(info);
 
         bfn::call_once(flag, [&] {
             auto [gpa1, unused1] = this->gva_to_gpa(buffer1.data());

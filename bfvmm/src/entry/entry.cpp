@@ -28,31 +28,35 @@
 //
 
 #include <bfgsl.h>
-#include <bfdebug.h>
+#include <bfarch.h>
 #include <bfvcpuid.h>
 #include <bfobject.h>
 #include <bfexports.h>
 #include <bfsupport.h>
-#include <bfexception.h>
-#include <bftypes.h>
 #include <bfcallonce.h>
+#include <bfexception.h>
 
 #include <vcpu/vcpu_manager.h>
 #include <debug/debug_ring/debug_ring.h>
 #include <memory_manager/memory_manager.h>
 
-#include "entry/entry.h"
-#include "bfvmm.h"
-
 static bfn::once_flag g_init_flag;
 
-extern "C" int64_t
-private_init(void)
-{ return ENTRY_SUCCESS; }
+void
+WEAK_SYM global_init()
+{ }
 
-extern "C" int64_t
-private_fini(void)
-{ return ENTRY_SUCCESS; }
+#ifdef BF_INTEL_X64
+#include <hve/arch/intel_x64/vcpu.h>
+
+void
+WEAK_SYM vcpu_init_nonroot(vcpu_t *vcpu)
+{ bfignored(vcpu); }
+
+void
+WEAK_SYM vcpu_fini_nonroot(vcpu_t *vcpu)
+{ bfignored(vcpu); }
+#endif
 
 extern "C" int64_t
 private_add_md(struct memory_descriptor *md) noexcept
@@ -74,42 +78,40 @@ private_set_rsdp(uintptr_t rsdp) noexcept
     return ENTRY_SUCCESS;
 }
 
-bool
-WEAK_SYM vmm_init()
-{ return true; }
-
-bool
-WEAK_SYM vmm_main(vcpu_t vcpu)
-{ bfignored(vcpu); return true; }
-
-bool
-WEAK_SYM vmm_fini(vcpu_t vcpu)
-{ bfignored(vcpu); return true; }
-
 extern "C" int64_t
-private_fini_vmm(uint64_t arg) noexcept
-{
-    return guard_exceptions(ENTRY_ERROR_VMM_STOP_FAILED, [&]() {
-        g_vcm->hlt(arg);
-        g_vcm->destroy(arg);
-
-        return ENTRY_SUCCESS;
-    });
-}
-
-extern "C" bool
 private_init_vmm(uint64_t arg) noexcept
 {
     return guard_exceptions(ENTRY_ERROR_VMM_START_FAILED, [&]() {
 
-        bfn::call_once(g_init_flag, vmm_init);
+        bfn::call_once(g_init_flag, global_init);
 
         g_vcm->create(arg, nullptr);
 
         auto ___ = gsl::on_failure([&]
         { g_vcm->destroy(arg); });
 
+#ifdef BF_INTEL_X64
+        vcpu_init_nonroot(g_vcm->get<vcpu_t *>(arg));
+#endif
+
         g_vcm->run(arg, nullptr);
+
+        return ENTRY_SUCCESS;
+    });
+}
+
+extern "C" int64_t
+private_fini_vmm(uint64_t arg) noexcept
+{
+    return guard_exceptions(ENTRY_ERROR_VMM_STOP_FAILED, [&]() {
+
+        g_vcm->hlt(arg, nullptr);
+
+#ifdef BF_INTEL_X64
+        vcpu_fini_nonroot(g_vcm->get<vcpu_t *>(arg));
+#endif
+
+        g_vcm->destroy(arg, nullptr);
 
         return ENTRY_SUCCESS;
     });
@@ -123,10 +125,10 @@ bfmain(uintptr_t request, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 
     switch (request) {
         case BF_REQUEST_INIT:
-            return private_init();
+            return ENTRY_SUCCESS;
 
         case BF_REQUEST_FINI:
-            return private_fini();
+            return ENTRY_SUCCESS;
 
         case BF_REQUEST_ADD_MDL:
             return private_add_md(reinterpret_cast<memory_descriptor *>(arg1));

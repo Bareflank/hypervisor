@@ -24,138 +24,158 @@
 namespace bfvmm::intel_x64
 {
 
-static uintptr_t
-emulate_rdgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+void
+emulate_rdgpr(vcpu *vcpu)
 {
     using namespace ::intel_x64::vmcs;
     using namespace exit_qualification::control_register_access;
 
     switch (general_purpose_register::get()) {
         case general_purpose_register::rax:
-            return vcpu->rax();
+            vcpu->set_gr1(vcpu->rax());
+            return;
 
         case general_purpose_register::rbx:
-            return vcpu->rbx();
+            vcpu->set_gr1(vcpu->rbx());
+            return;
 
         case general_purpose_register::rcx:
-            return vcpu->rcx();
+            vcpu->set_gr1(vcpu->rcx());
+            return;
 
         case general_purpose_register::rdx:
-            return vcpu->rdx();
+            vcpu->set_gr1(vcpu->rdx());
+            return;
 
         case general_purpose_register::rsp:
-            return vcpu->rsp();
+            vcpu->set_gr1(vcpu->rsp());
+            return;
 
         case general_purpose_register::rbp:
-            return vcpu->rbp();
+            vcpu->set_gr1(vcpu->rbp());
+            return;
 
         case general_purpose_register::rsi:
-            return vcpu->rsi();
+            vcpu->set_gr1(vcpu->rsi());
+            return;
 
         case general_purpose_register::rdi:
-            return vcpu->rdi();
+            vcpu->set_gr1(vcpu->rdi());
+            return;
 
         case general_purpose_register::r8:
-            return vcpu->r08();
+            vcpu->set_gr1(vcpu->r08());
+            return;
 
         case general_purpose_register::r9:
-            return vcpu->r09();
+            vcpu->set_gr1(vcpu->r09());
+            return;
 
         case general_purpose_register::r10:
-            return vcpu->r10();
+            vcpu->set_gr1(vcpu->r10());
+            return;
 
         case general_purpose_register::r11:
-            return vcpu->r11();
+            vcpu->set_gr1(vcpu->r11());
+            return;
 
         case general_purpose_register::r12:
-            return vcpu->r12();
+            vcpu->set_gr1(vcpu->r12());
+            return;
 
         case general_purpose_register::r13:
-            return vcpu->r13();
+            vcpu->set_gr1(vcpu->r13());
+            return;
 
         case general_purpose_register::r14:
-            return vcpu->r14();
+            vcpu->set_gr1(vcpu->r14());
+            return;
 
         default:
-            return vcpu->r15();
+            vcpu->set_gr1(vcpu->r15());
+            return;
+    }
+}
+
+void
+emulate_wrgpr(vcpu *vcpu)
+{
+    using namespace ::intel_x64::vmcs;
+    using namespace exit_qualification::control_register_access;
+
+    switch (general_purpose_register::get()) {
+        case general_purpose_register::rax:
+            vcpu->set_rax(vcpu->gr1());
+            return;
+
+        case general_purpose_register::rbx:
+            vcpu->set_rbx(vcpu->gr1());
+            return;
+
+        case general_purpose_register::rcx:
+            vcpu->set_rcx(vcpu->gr1());
+            return;
+
+        case general_purpose_register::rdx:
+            vcpu->set_rdx(vcpu->gr1());
+            return;
+
+        case general_purpose_register::rsp:
+            vcpu->set_rsp(vcpu->gr1());
+            return;
+
+        case general_purpose_register::rbp:
+            vcpu->set_rbp(vcpu->gr1());
+            return;
+
+        case general_purpose_register::rsi:
+            vcpu->set_rsi(vcpu->gr1());
+            return;
+
+        case general_purpose_register::rdi:
+            vcpu->set_rdi(vcpu->gr1());
+            return;
+
+        case general_purpose_register::r8:
+            vcpu->set_r08(vcpu->gr1());
+            return;
+
+        case general_purpose_register::r9:
+            vcpu->set_r09(vcpu->gr1());
+            return;
+
+        case general_purpose_register::r10:
+            vcpu->set_r10(vcpu->gr1());
+            return;
+
+        case general_purpose_register::r11:
+            vcpu->set_r11(vcpu->gr1());
+            return;
+
+        case general_purpose_register::r12:
+            vcpu->set_r12(vcpu->gr1());
+            return;
+
+        case general_purpose_register::r13:
+            vcpu->set_r13(vcpu->gr1());
+            return;
+
+        case general_purpose_register::r14:
+            vcpu->set_r14(vcpu->gr1());
+            return;
+
+        default:
+            vcpu->set_r15(vcpu->gr1());
+            return;
     }
 }
 
 static void
-emulate_wrgpr(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu, uintptr_t val)
-{
-    using namespace ::intel_x64::vmcs;
-    using namespace exit_qualification::control_register_access;
-
-    switch (general_purpose_register::get()) {
-        case general_purpose_register::rax:
-            vcpu->set_rax(val);
-            return;
-
-        case general_purpose_register::rbx:
-            vcpu->set_rbx(val);
-            return;
-
-        case general_purpose_register::rcx:
-            vcpu->set_rcx(val);
-            return;
-
-        case general_purpose_register::rdx:
-            vcpu->set_rdx(val);
-            return;
-
-        case general_purpose_register::rsp:
-            vcpu->set_rsp(val);
-            return;
-
-        case general_purpose_register::rbp:
-            vcpu->set_rbp(val);
-            return;
-
-        case general_purpose_register::rsi:
-            vcpu->set_rsi(val);
-            return;
-
-        case general_purpose_register::rdi:
-            vcpu->set_rdi(val);
-            return;
-
-        case general_purpose_register::r8:
-            vcpu->set_r08(val);
-            return;
-
-        case general_purpose_register::r9:
-            vcpu->set_r09(val);
-            return;
-
-        case general_purpose_register::r10:
-            vcpu->set_r10(val);
-            return;
-
-        case general_purpose_register::r11:
-            vcpu->set_r11(val);
-            return;
-
-        case general_purpose_register::r12:
-            vcpu->set_r12(val);
-            return;
-
-        case general_purpose_register::r13:
-            vcpu->set_r13(val);
-            return;
-
-        case general_purpose_register::r14:
-            vcpu->set_r14(val);
-            return;
-
-        default:
-            vcpu->set_r15(val);
-            return;
-    }
-}
-static bool
-emulate_ia_32e_mode_switch(
-    control_register_handler::info_t &info)
+emulate_ia_32e_mode_switch(vcpu *vcpu)
 {
     using namespace vmcs_n::guest_cr0;
     using namespace vmcs_n::guest_ia32_efer;
@@ -163,10 +183,10 @@ emulate_ia_32e_mode_switch(
     using namespace vmcs_n::secondary_processor_based_vm_execution_controls;
 
     if (unrestricted_guest::is_disabled() || lme::is_disabled()) {
-        return true;
+        return;
     }
 
-    if (paging::is_enabled(info.val)) {
+    if (paging::is_enabled(vcpu->gr1())) {
         lma::enable();
         ia_32e_mode_guest::enable();
         ::intel_x64::vmx::invept_global();
@@ -176,57 +196,58 @@ emulate_ia_32e_mode_switch(
         ia_32e_mode_guest::disable();
         ::intel_x64::vmx::invept_global();
     }
-
-    return true;
 }
 
 static bool
-default_wrcr0_handler(
-    vcpu_t vcpu, control_register_handler::info_t &info)
+default_wrcr0_handler(vcpu *vcpu)
 {
     using namespace vmcs_n::guest_cr0;
-    bfignored(vcpu);
 
-    if (paging::is_enabled() != paging::is_enabled(info.val)) {
-        return emulate_ia_32e_mode_switch(info);
+    if (paging::is_enabled(vcpu->gr1()) != paging::is_enabled(vcpu->gr2())) {
+        emulate_ia_32e_mode_switch(vcpu);
     }
 
-    return true;
+    return false;
 }
 
 static bool
-default_rdcr3_handler(
-    vcpu_t vcpu, control_register_handler::info_t &info)
+default_rdcr3_handler(vcpu *vcpu)
 {
     bfignored(vcpu);
-    bfignored(info);
-
-    return true;
+    return false;
 }
 
 static bool
-default_wrcr3_handler(
-    vcpu_t vcpu, control_register_handler::info_t &info)
+default_wrcr3_handler(vcpu *vcpu)
 {
     bfignored(vcpu);
-    bfignored(info);
+
+    // Note:
+    //
+    // Just like with CR0, we need to emulate the entire instruction, including
+    // the instruction's side effects. For a write to CR3, this includes
+    // flushing the TLB, minus the global entires. For now we do this using
+    // an EPT global flush. In the future, we should figure out if there is a
+    // more granular way to do this.
+    //
 
     ::intel_x64::vmx::invept_global();
-    return true;
+    return false;
 }
 
 static bool
-default_wrcr4_handler(
-    vcpu_t vcpu, control_register_handler::info_t &info)
+default_wrcr4_handler(vcpu *vcpu)
 {
     bfignored(vcpu);
-    bfignored(info);
-
-    return true;
+    return false;
 }
 
+// -----------------------------------------------------------------------------
+// Implementation
+// -----------------------------------------------------------------------------
+
 control_register_handler::control_register_handler(
-    vcpu_t vcpu
+    gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu}
 {
@@ -255,7 +276,7 @@ control_register_handler::control_register_handler(
 }
 
 // -----------------------------------------------------------------------------
-// Add Handler / Enablers
+// Add Handler Functions
 // -----------------------------------------------------------------------------
 
 void
@@ -278,14 +299,17 @@ control_register_handler::add_wrcr4_handler(
     const handler_delegate_t &d)
 { m_wrcr4_handlers.push_front(d); }
 
-void
-control_register_handler::enable_wrcr0_exiting(vmcs_n::value_type mask)
-{
-    using namespace vmcs_n;
-    mask |= m_vcpu->global_state()->ia32_vmx_cr0_fixed0;
+// -----------------------------------------------------------------------------
+// Enablers
+// -----------------------------------------------------------------------------
 
-    cr0_guest_host_mask::set(mask);
-    cr0_read_shadow::set(guest_cr0::get());
+void
+control_register_handler::enable_wrcr0_exiting(
+    vmcs_n::value_type mask)
+{
+    vmcs_n::cr0_guest_host_mask::set(
+        mask | m_vcpu->global_state()->ia32_vmx_cr0_fixed0
+    );
 }
 
 void
@@ -306,11 +330,48 @@ void
 control_register_handler::enable_wrcr4_exiting(
     vmcs_n::value_type mask)
 {
-    using namespace vmcs_n;
-    mask |= m_vcpu->global_state()->ia32_vmx_cr4_fixed0;
+    vmcs_n::cr4_guest_host_mask::set(
+        mask | m_vcpu->global_state()->ia32_vmx_cr4_fixed0
+    );
+}
 
-    cr4_guest_host_mask::set(mask);
-    cr4_read_shadow::set(guest_cr4::get());
+// -----------------------------------------------------------------------------
+// Execute Functions
+// -----------------------------------------------------------------------------
+
+void
+control_register_handler::execute_wrcr0(
+    gsl::not_null<vcpu *> vcpu)
+{
+    emulate_rdgpr(vcpu);
+    vcpu->set_gr2(vcpu->cr0());
+    vcpu->set_cr0(vcpu->gr1());
+}
+
+void
+control_register_handler::execute_rdcr3(
+    gsl::not_null<vcpu *> vcpu)
+{
+    vcpu->set_gr1(vcpu->cr3());
+    emulate_wrgpr(vcpu);
+}
+
+void
+control_register_handler::execute_wrcr3(
+    gsl::not_null<vcpu *> vcpu)
+{
+    emulate_rdgpr(vcpu);
+    vcpu->set_gr2(vcpu->cr3());
+    vcpu->set_cr3(vcpu->gr1());
+}
+
+void
+control_register_handler::execute_wrcr4(
+    gsl::not_null<vcpu *> vcpu)
+{
+    emulate_rdgpr(vcpu);
+    vcpu->set_gr2(vcpu->cr4());
+    vcpu->set_cr4(vcpu->gr1());
 }
 
 // -----------------------------------------------------------------------------
@@ -318,7 +379,7 @@ control_register_handler::enable_wrcr4_exiting(
 // -----------------------------------------------------------------------------
 
 bool
-control_register_handler::handle(vcpu_t vcpu)
+control_register_handler::handle(vcpu *vcpu)
 {
     using namespace vmcs_n::exit_qualification::control_register_access;
 
@@ -340,7 +401,7 @@ control_register_handler::handle(vcpu_t vcpu)
 }
 
 bool
-control_register_handler::handle_cr0(vcpu_t vcpu)
+control_register_handler::handle_cr0(vcpu *vcpu)
 {
     using namespace vmcs_n::exit_qualification::control_register_access;
 
@@ -366,7 +427,7 @@ control_register_handler::handle_cr0(vcpu_t vcpu)
 }
 
 bool
-control_register_handler::handle_cr3(vcpu_t vcpu)
+control_register_handler::handle_cr3(vcpu *vcpu)
 {
     using namespace vmcs_n::exit_qualification::control_register_access;
 
@@ -390,7 +451,7 @@ control_register_handler::handle_cr3(vcpu_t vcpu)
 }
 
 bool
-control_register_handler::handle_cr4(vcpu_t vcpu)
+control_register_handler::handle_cr4(vcpu *vcpu)
 {
     using namespace vmcs_n::exit_qualification::control_register_access;
 
@@ -416,119 +477,63 @@ control_register_handler::handle_cr4(vcpu_t vcpu)
 }
 
 bool
-control_register_handler::handle_wrcr0(vcpu_t vcpu)
+control_register_handler::handle_wrcr0(vcpu *vcpu)
 {
-    struct info_t info = {
-        emulate_rdgpr(vcpu),
-        vmcs_n::cr0_read_shadow::get(),
-        false,
-        false
-    };
-
-    info.shadow = info.val;
-    info.val |= m_vcpu->global_state()->ia32_vmx_cr0_fixed0;
+    this->execute_wrcr0(vcpu);
 
     for (const auto &d : m_wrcr0_handlers) {
-        if (d(vcpu, info)) {
-            break;
+        if (d(vcpu)) {
+            return true;
         }
     }
 
-    if (!info.ignore_write) {
-        vmcs_n::guest_cr0::set(info.val);
-        vmcs_n::cr0_read_shadow::set(info.shadow);
-    }
-
-    if (!info.ignore_advance) {
-        return vcpu->advance();
-    }
-
-    return true;
+    return vcpu->advance();
 }
 
 bool
-control_register_handler::handle_rdcr3(vcpu_t vcpu)
+control_register_handler::handle_rdcr3(vcpu *vcpu)
 {
-    struct info_t info = {
-        vmcs_n::guest_cr3::get(),
-        0,
-        false,
-        false
-    };
+    auto ___ = gsl::finally([&] {
+        this->execute_rdcr3(vcpu);
+    });
+
+    vcpu->set_gr2(vcpu->cr3());
 
     for (const auto &d : m_rdcr3_handlers) {
-        if (d(vcpu, info)) {
-            break;
+        if (d(vcpu)) {
+            return true;
         }
     }
 
-    if (!info.ignore_write) {
-        emulate_wrgpr(vcpu, info.val);
-    }
-
-    if (!info.ignore_advance) {
-        return vcpu->advance();
-    }
-
-    return true;
+    return vcpu->advance();
 }
 
 bool
-control_register_handler::handle_wrcr3(vcpu_t vcpu)
+control_register_handler::handle_wrcr3(vcpu *vcpu)
 {
-    struct info_t info = {
-        emulate_rdgpr(vcpu),
-        0,
-        false,
-        false
-    };
+    this->execute_wrcr3(vcpu);
 
     for (const auto &d : m_wrcr3_handlers) {
-        if (d(vcpu, info)) {
-            break;
+        if (d(vcpu)) {
+            return true;
         }
     }
 
-    if (!info.ignore_write) {
-        vmcs_n::guest_cr3::set(info.val & 0x7FFFFFFFFFFFFFFF);
-    }
-
-    if (!info.ignore_advance) {
-        return vcpu->advance();
-    }
-
-    return true;
+    return vcpu->advance();
 }
 
 bool
-control_register_handler::handle_wrcr4(vcpu_t vcpu)
+control_register_handler::handle_wrcr4(vcpu *vcpu)
 {
-    struct info_t info = {
-        emulate_rdgpr(vcpu),
-        vmcs_n::cr4_read_shadow::get(),
-        false,
-        false
-    };
-
-    info.shadow = info.val;
-    info.val |= m_vcpu->global_state()->ia32_vmx_cr4_fixed0;
+    this->execute_wrcr4(vcpu);
 
     for (const auto &d : m_wrcr4_handlers) {
-        if (d(vcpu, info)) {
-            break;
+        if (d(vcpu)) {
+            return true;
         }
     }
 
-    if (!info.ignore_write) {
-        vmcs_n::guest_cr4::set(info.val);
-        vmcs_n::cr4_read_shadow::set(info.shadow);
-    }
-
-    if (!info.ignore_advance) {
-        return vcpu->advance();
-    }
-
-    return true;
+    return vcpu->advance();
 }
 
 }

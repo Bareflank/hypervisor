@@ -29,13 +29,10 @@ using namespace bfvmm::intel_x64;
 // -----------------------------------------------------------------------------
 
 bool
-test_cpuid_handler(
-    gsl::not_null<vcpu_t *> vcpu, cpuid_handler::info_t &info)
+test_cpuid_handler(vcpu_t *vcpu)
 {
-    bfignored(vcpu);
-
-    info.rax = 42;
-    info.rcx = 42;
+    vcpu->set_rax(42);
+    vcpu->set_rcx(42);
 
     return true;
 }
@@ -75,8 +72,8 @@ public:
             hlt_delegate_t::create<test_hlt_delegate>()
         );
 
-        this->add_cpuid_handler(
-            42, cpuid_handler::handler_delegate_t::create<test_cpuid_handler>()
+        this->add_cpuid_emulator(
+            42, handler_delegate_t::create<test_cpuid_handler>()
         );
     }
 

@@ -19,27 +19,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <bfvmm/vcpu/vcpu_factory.h>
-#include <bfvmm/hve/arch/intel_x64/vcpu.h>
-
-using namespace bfvmm::intel_x64;
-
-// -----------------------------------------------------------------------------
-// Handlers
-// -----------------------------------------------------------------------------
+#include <vmm.h>
 
 uint64_t g_cr4;
 
-bool
-test_handler(
-    gsl::not_null<vcpu_t *> vcpu, control_register_handler::info_t &info)
+void
+global_init()
 {
-    bfignored(vcpu);
-    bfignored(info);
+    bfdebug_info(0, "running trap_cr4 integration test");
+    bfdebug_lnbr(0);
+}
 
-    info.val = g_cr4;
-    info.shadow = g_cr4;
-
+bool
+test_handler(vcpu_t *vcpu)
+{
+    vcpu->set_cr4(g_cr4);
     return false;
 }
 
@@ -56,58 +50,14 @@ test_hlt_delegate(bfobject *obj)
     }
 }
 
-// -----------------------------------------------------------------------------
-// vCPU
-// -----------------------------------------------------------------------------
-
-namespace test
+void
+vcpu_init_nonroot(vcpu_t *vcpu)
 {
+    vcpu->add_hlt_delegate(
+        hlt_delegate_t::create<test_hlt_delegate>()
+    );
 
-class vcpu : public bfvmm::intel_x64::vcpu
-{
-public:
-    explicit vcpu(vcpuid::type id) :
-        bfvmm::intel_x64::vcpu{id}
-    {
-        this->add_hlt_delegate(
-            hlt_delegate_t::create<test_hlt_delegate>()
-        );
-
-        this->add_wrcr4_handler(
-            0xFFFFFFFFFFFFFFFF,
-            control_register_handler::handler_delegate_t::create<test_handler>()
-        );
-    }
-
-    ~vcpu() override = default;
-
-public:
-
-    /// @cond
-
-    vcpu(vcpu &&) = delete;
-    vcpu &operator=(vcpu &&) = delete;
-
-    vcpu(const vcpu &) = delete;
-    vcpu &operator=(const vcpu &) = delete;
-
-    /// @endcond
-};
-
-}
-
-// -----------------------------------------------------------------------------
-// vCPU Factory
-// -----------------------------------------------------------------------------
-
-namespace bfvmm
-{
-
-std::unique_ptr<vcpu>
-vcpu_factory::make(vcpuid::type vcpuid, bfobject *obj)
-{
-    bfignored(obj);
-    return std::make_unique<test::vcpu>(vcpuid);
-}
-
+    vcpu->add_wrcr4_handler(
+        0xFFFFFFFFFFFFFFFF, handler_delegate_t::create<test_handler>()
+    );
 }

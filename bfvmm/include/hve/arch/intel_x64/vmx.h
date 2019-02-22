@@ -79,24 +79,6 @@ public:
     ///
     ~vmx();
 
-    /// Enable
-    ///
-    /// Enables vmx in hardware and executes the vmxon instruction
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    void enable();
-
-    /// Disable
-    ///
-    /// Runs the vmxoff instruction and disables vmx in hardware
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    void disable();
-
 private:
 
     void check_cpuid_vmx_supported();

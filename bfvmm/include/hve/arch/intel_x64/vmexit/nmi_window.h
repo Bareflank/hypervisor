@@ -19,14 +19,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef BFVMM_DELEGATOR_INVD_INTEL_X64_H
-#define BFVMM_DELEGATOR_INVD_INTEL_X64_H
+#ifndef VMEXIT_NMI_WINDOW_HANDLER_INTEL_X64_H
+#define VMEXIT_NMI_WINDOW_HANDLER_INTEL_X64_H
 
-#include <stdint.h>
-#include <bfdelegate.h>
 #include <bfgsl.h>
-
-#include "../../../../vmm_types.h"
+#include <bfdelegate.h>
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -44,44 +41,87 @@
 #define EXPORT_HVE
 #endif
 
-namespace bfvmm::intel_x64::invd
+// -----------------------------------------------------------------------------
+// Definitions
+// -----------------------------------------------------------------------------
+
+namespace bfvmm::intel_x64
 {
 
-/// INVD delegator
-///
-/// Delegates processing of invd instruction based vmexits to registered handlers
-///
-class EXPORT_HVE delegator
-{
+class vcpu;
 
+/// NMI window
+///
+class EXPORT_HVE nmi_window_handler
+{
 public:
 
-    /// Default Constructor
+    /// Constructor
     ///
-    /// @expects none
-    /// @ensures none
+    /// @expects
+    /// @ensures
     ///
-    delegator() = default;
+    /// @param vcpu the vcpu object for this interrupt window handler
+    ///
+    nmi_window_handler(gsl::not_null<vcpu *> vcpu);
 
     /// Destructor
     ///
-    /// @expects none
-    /// @ensures none
+    /// @expects
+    /// @ensures
     ///
-    ~delegator() = default;
+    ~nmi_window_handler() = default;
 
-    /// Handle
+public:
+
+    /// Queue NMI
     ///
-    /// Handle a vmexit using registered handlers
+    /// Queues an NMI for injection.
     ///
-    /// @expects none
-    /// @ensures none
+    /// @expects
+    /// @ensures
     ///
-    /// @param vcpu The vcpu the vmexit occurred on
+    void queue_nmi();
+
+    /// Inject NMI
     ///
-    /// @return True if the vmexit was successfully handled, false otherwise
+    /// Inject an NMI on the next VM entry.
     ///
-    bool handle(vcpu_t vcpu);
+    /// @expects
+    /// @ensures
+    ///
+    /// @param vector the vector to inject into the guest
+    ///
+    void inject_nmi();
+
+public:
+
+    /// @cond
+
+    bool handle(vcpu *vcpu);
+
+    /// @endcond
+
+private:
+
+    void enable_exiting();
+    void disable_exiting();
+
+private:
+
+    vcpu *m_vcpu;
+
+public:
+
+    /// @cond
+
+    nmi_window_handler(nmi_window_handler &&) = default;
+    nmi_window_handler &operator=(nmi_window_handler &&) = default;
+
+    nmi_window_handler(const nmi_window_handler &) = delete;
+    nmi_window_handler &operator=(const nmi_window_handler &) = delete;
+
+    /// @endcond
 };
 
 }

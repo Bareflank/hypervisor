@@ -25,7 +25,7 @@ namespace bfvmm::intel_x64
 {
 
 ept_violation_handler::ept_violation_handler(
-    vcpu_t vcpu
+    gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu}
 {
@@ -76,7 +76,7 @@ ept_violation_handler::set_default_execute_handler(
 // -----------------------------------------------------------------------------
 
 bool
-ept_violation_handler::handle(vcpu_t vcpu)
+ept_violation_handler::handle(vcpu *vcpu)
 {
     using namespace vmcs_n;
     auto qual = exit_qualification::ept_violation::get();
@@ -106,7 +106,7 @@ ept_violation_handler::handle(vcpu_t vcpu)
 }
 
 bool
-ept_violation_handler::handle_read(vcpu_t vcpu, info_t &info)
+ept_violation_handler::handle_read(vcpu *vcpu, info_t &info)
 {
     for (const auto &d : m_read_handlers) {
         if (d(vcpu, info)) {
@@ -129,7 +129,7 @@ ept_violation_handler::handle_read(vcpu_t vcpu, info_t &info)
 }
 
 bool
-ept_violation_handler::handle_write(vcpu_t vcpu, info_t &info)
+ept_violation_handler::handle_write(vcpu *vcpu, info_t &info)
 {
     for (const auto &d : m_write_handlers) {
         if (d(vcpu, info)) {
@@ -152,7 +152,7 @@ ept_violation_handler::handle_write(vcpu_t vcpu, info_t &info)
 }
 
 bool
-ept_violation_handler::handle_execute(vcpu_t vcpu, info_t &info)
+ept_violation_handler::handle_execute(vcpu *vcpu, info_t &info)
 {
     for (const auto &d : m_execute_handlers) {
         if (d(vcpu, info)) {

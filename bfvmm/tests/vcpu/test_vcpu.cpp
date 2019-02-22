@@ -22,7 +22,6 @@
 #include <bftypes.h>
 
 #include <catch/catch.hpp>
-#include <test/support.h>
 #include <vcpu/vcpu.h>
 
 TEST_CASE("vcpu: invalid_id")
@@ -37,7 +36,6 @@ TEST_CASE("vcpu: valid")
 
 TEST_CASE("vcpu: init_null_attr")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_initialized());
@@ -47,7 +45,6 @@ TEST_CASE("vcpu: init_null_attr")
 
 TEST_CASE("vcpu: init_valid_attr")
 {
-    setup_test_support();
     bfobject data{};
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
@@ -58,7 +55,6 @@ TEST_CASE("vcpu: init_valid_attr")
 
 TEST_CASE("vcpu: fini_null_attr")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->init();
@@ -70,7 +66,6 @@ TEST_CASE("vcpu: fini_null_attr")
 
 TEST_CASE("vcpu: fini_valid_attr")
 {
-    setup_test_support();
     bfobject data{};
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
@@ -83,7 +78,6 @@ TEST_CASE("vcpu: fini_valid_attr")
 
 TEST_CASE("vcpu: fini_without_init_without_run")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
@@ -95,7 +89,6 @@ TEST_CASE("vcpu: fini_without_init_without_run")
 
 TEST_CASE("vcpu: fini_with_init_without_run")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->init();
@@ -109,7 +102,6 @@ TEST_CASE("vcpu: fini_with_init_without_run")
 
 TEST_CASE("vcpu: fini_without_init_with_run")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->run();
@@ -123,7 +115,6 @@ TEST_CASE("vcpu: fini_without_init_with_run")
 
 TEST_CASE("vcpu: fini_with_init_with_run")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->init();
@@ -138,7 +129,6 @@ TEST_CASE("vcpu: fini_with_init_with_run")
 
 TEST_CASE("vcpu: run_null_attr")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
@@ -148,7 +138,6 @@ TEST_CASE("vcpu: run_null_attr")
 
 TEST_CASE("vcpu: run_valid_attr")
 {
-    setup_test_support();
     bfobject data{};
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
@@ -159,7 +148,6 @@ TEST_CASE("vcpu: run_valid_attr")
 
 TEST_CASE("vcpu: run_without_init")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
@@ -169,7 +157,6 @@ TEST_CASE("vcpu: run_without_init")
 
 TEST_CASE("vcpu: run_with_init")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->init();
@@ -181,7 +168,6 @@ TEST_CASE("vcpu: run_with_init")
 
 TEST_CASE("vcpu: hlt_null_attr")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
@@ -191,7 +177,6 @@ TEST_CASE("vcpu: hlt_null_attr")
 
 TEST_CASE("vcpu: hlt_valid_attr")
 {
-    setup_test_support();
     bfobject data{};
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
@@ -202,7 +187,6 @@ TEST_CASE("vcpu: hlt_valid_attr")
 
 TEST_CASE("vcpu: hlt_without_run")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     CHECK_FALSE(vc->is_running());
@@ -212,7 +196,6 @@ TEST_CASE("vcpu: hlt_without_run")
 
 TEST_CASE("vcpu: hlt_with_run")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->run();
@@ -224,42 +207,36 @@ TEST_CASE("vcpu: hlt_with_run")
 
 TEST_CASE("vcpu: id")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(1);
     CHECK(vc->id() == 1);
 }
 
 TEST_CASE("vcpu: is_bootstrap_vcpu")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
     CHECK(vc->is_bootstrap_vcpu());
 }
 
 TEST_CASE("vcpu: is_not_bootstrap_vcpu")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(1);
     CHECK_FALSE(vc->is_bootstrap_vcpu());
 }
 
 TEST_CASE("vcpu: is_host_vm_vcpu")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(1);
     CHECK(vc->is_host_vm_vcpu());
 }
 
 TEST_CASE("vcpu: is_guest_vm_vcpu")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0x0000000100000000);
     CHECK(vc->is_guest_vm_vcpu());
 }
 
 TEST_CASE("vcpu: is_running_vm_vcpu")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->run();
@@ -268,14 +245,12 @@ TEST_CASE("vcpu: is_running_vm_vcpu")
 
 TEST_CASE("vcpu: is_not_running_vm_vcpu")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
     CHECK_FALSE(vc->is_running());
 }
 
 TEST_CASE("vcpu: is_initialized_vm_vcpu")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
 
     vc->init();
@@ -284,7 +259,6 @@ TEST_CASE("vcpu: is_initialized_vm_vcpu")
 
 TEST_CASE("vcpu: is_not_initialized_vm_vcpu")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
     CHECK_FALSE(vc->is_initialized());
 }
@@ -299,48 +273,42 @@ test_delegate_throws(bfobject *data)
 
 TEST_CASE("vcpu: run_delegate")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
-    CHECK_NOTHROW(vc->add_run_delegate(bfvmm::vcpu::run_delegate_t::create<test_delegate>()));
+    CHECK_NOTHROW(vc->add_run_delegate(run_delegate_t::create<test_delegate>()));
     CHECK_NOTHROW(vc->run());
 }
 
 TEST_CASE("vcpu: hlt_delegate")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
-    CHECK_NOTHROW(vc->add_hlt_delegate(bfvmm::vcpu::hlt_delegate_t::create<test_delegate>()));
+    CHECK_NOTHROW(vc->add_hlt_delegate(hlt_delegate_t::create<test_delegate>()));
     CHECK_NOTHROW(vc->hlt());
 }
 
 TEST_CASE("vcpu: init_delegate")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
-    CHECK_NOTHROW(vc->add_init_delegate(bfvmm::vcpu::init_delegate_t::create<test_delegate>()));
+    CHECK_NOTHROW(vc->add_init_delegate(init_delegate_t::create<test_delegate>()));
     CHECK_NOTHROW(vc->init());
 }
 
 TEST_CASE("vcpu: fini_delegate")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
-    CHECK_NOTHROW(vc->add_fini_delegate(bfvmm::vcpu::fini_delegate_t::create<test_delegate>()));
+    CHECK_NOTHROW(vc->add_fini_delegate(fini_delegate_t::create<test_delegate>()));
     CHECK_NOTHROW(vc->fini());
 }
 
 TEST_CASE("vcpu: run_delegate throws")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
-    CHECK_NOTHROW(vc->add_run_delegate(bfvmm::vcpu::run_delegate_t::create<test_delegate_throws>()));
+    CHECK_NOTHROW(vc->add_run_delegate(run_delegate_t::create<test_delegate_throws>()));
     CHECK_THROWS(vc->run());
 }
 
 TEST_CASE("vcpu: init_delegate throws")
 {
-    setup_test_support();
     auto vc = std::make_unique<bfvmm::vcpu>(0);
-    CHECK_NOTHROW(vc->add_init_delegate(bfvmm::vcpu::init_delegate_t::create<test_delegate_throws>()));
+    CHECK_NOTHROW(vc->add_init_delegate(init_delegate_t::create<test_delegate_throws>()));
     CHECK_THROWS(vc->init());
 }

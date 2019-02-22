@@ -31,7 +31,6 @@
 #include <bfvcpuid.h>
 #include <bfobject.h>
 #include <bfdelegate.h>
-#include <bfarch.h>
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -53,6 +52,15 @@
 #pragma warning(push)
 #pragma warning(disable : 4251)
 #endif
+
+// -----------------------------------------------------------------------------
+// Delegate Types
+// -----------------------------------------------------------------------------
+
+using run_delegate_t = delegate<void(bfobject *)>;      ///< Run delegate type
+using hlt_delegate_t = delegate<void(bfobject *)>;      ///< Halt delegate type
+using init_delegate_t = delegate<void(bfobject *)>;     ///< Init delegate type
+using fini_delegate_t = delegate<void(bfobject *)>;     ///< Fini delegate type
 
 // -----------------------------------------------------------------------------
 // Definitions
@@ -111,11 +119,6 @@ namespace bfvmm
 class EXPORT_VCPU vcpu
 {
 public:
-
-    using run_delegate_t = delegate<void(bfobject *)>;      ///< Run delegate type
-    using hlt_delegate_t = delegate<void(bfobject *)>;      ///< Halt delegate type
-    using init_delegate_t = delegate<void(bfobject *)>;     ///< Init delegate type
-    using fini_delegate_t = delegate<void(bfobject *)>;     ///< Fini delegate type
 
     /// Constructor
     ///
@@ -366,12 +369,6 @@ public:
 };
 
 }
-
-#if defined(BF_INTEL_X64)
-#include "../hve/arch/intel_x64/vcpu.h"
-#else
-#   error "vcpu.h: unsupported architecture"
-#endif
 
 #ifdef _MSC_VER
 #pragma warning(pop)

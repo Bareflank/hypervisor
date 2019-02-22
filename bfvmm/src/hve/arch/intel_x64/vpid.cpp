@@ -25,16 +25,13 @@ namespace bfvmm::intel_x64
 {
 
 vpid_handler::vpid_handler(
-    gsl::not_null<vcpu *> vcpu
-) :
-    m_vcpu{vcpu}
+    gsl::not_null<vcpu *> vcpu)
 {
+    bfignored(vcpu);
+
     static uint16_t s_id = 1;
     m_id = s_id++;
 }
-
-vmcs_n::value_type vpid_handler::id() const noexcept
-{ return m_id; }
 
 void vpid_handler::enable()
 {
@@ -43,6 +40,9 @@ void vpid_handler::enable()
 }
 
 void vpid_handler::disable()
-{ vmcs_n::secondary_processor_based_vm_execution_controls::enable_vpid::disable(); }
+{
+    vmcs_n::virtual_processor_identifier::set(0);
+    vmcs_n::secondary_processor_based_vm_execution_controls::enable_vpid::disable();
+}
 
 }

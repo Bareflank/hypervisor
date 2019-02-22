@@ -46,7 +46,7 @@ public:
 
     bool
     test_external_interrupt_handler(
-        gsl::not_null<vcpu_t *> vcpu, external_interrupt_handler::info_t &info)
+        vcpu_t *vcpu, external_interrupt_handler::info_t &info)
     {
         bfignored(vcpu);
 

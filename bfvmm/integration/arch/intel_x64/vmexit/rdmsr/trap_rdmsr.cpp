@@ -30,7 +30,7 @@ using namespace bfvmm::intel_x64;
 
 bool
 test_handler(
-    gsl::not_null<vcpu_t *> vcpu, rdmsr_handler::info_t &info)
+    vcpu_t *vcpu, rdmsr_handler::info_t &info)
 { bfignored(vcpu); bfignored(info); return true; }
 
 // -----------------------------------------------------------------------------
