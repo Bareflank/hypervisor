@@ -151,8 +151,12 @@ public:
 
 public:
 
+    /// @cond
+
     static void handle(
         vcpu *vcpu, exit_handler *exit_handler) noexcept;
+
+    /// @endcond
 
 private:
 

@@ -90,8 +90,6 @@ public:
     /// @expects
     /// @ensures
     ///
-    /// @param vector the vector to inject into the guest
-    ///
     void inject_nmi();
 
 public:
