@@ -624,7 +624,7 @@ public:
     VIRTUAL void enable_monitor_trap_flag();
 
     //--------------------------------------------------------------------------
-    // Non-Mackable Interrupt Window
+    // Non-Maskable Interrupt Window
     //--------------------------------------------------------------------------
 
     /// Queue NMI

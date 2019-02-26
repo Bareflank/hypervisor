@@ -1344,7 +1344,7 @@ void
 vcpu::set_cr0(uint64_t val) noexcept
 {
     vmcs_n::cr0_read_shadow::set(val);
-    vmcs_n::guest_cr0::set(val |= m_global_state->ia32_vmx_cr0_fixed0);
+    vmcs_n::guest_cr0::set(val | m_global_state->ia32_vmx_cr0_fixed0);
 }
 
 uint64_t
@@ -1365,7 +1365,7 @@ void
 vcpu::set_cr4(uint64_t val) noexcept
 {
     vmcs_n::cr4_read_shadow::set(val);
-    vmcs_n::guest_cr4::set(val |= m_global_state->ia32_vmx_cr4_fixed0);
+    vmcs_n::guest_cr4::set(val | m_global_state->ia32_vmx_cr4_fixed0);
 }
 
 uint64_t
