@@ -87,7 +87,7 @@ TEST_CASE("exit_handler: unhandled exit reason")
     auto &&vcpu = setup_vcpu(mocks, 0x0);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
 
-    CHECK_NOTHROW(ehlr.handle(vcpu, &ehlr));
+    CHECK_NOTHROW(handle_exit(vcpu, &ehlr));
 }
 
 TEST_CASE("exit_handler: unhandled exit reason, invalid guest state")
@@ -98,7 +98,7 @@ TEST_CASE("exit_handler: unhandled exit reason, invalid guest state")
     auto &&vcpu = setup_vcpu(mocks, ::intel_x64::vmcs::exit_reason::vm_entry_failure::mask);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
 
-    CHECK_NOTHROW(ehlr.handle(vcpu, &ehlr));
+    CHECK_NOTHROW(handle_exit(vcpu, &ehlr));
 }
 
 TEST_CASE("exit_handler: unhandled exit reason, invalid reason")
@@ -109,7 +109,7 @@ TEST_CASE("exit_handler: unhandled exit reason, invalid reason")
     auto &&vcpu = setup_vcpu(mocks, 0x0000BEEF);
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
 
-    CHECK_NOTHROW(ehlr.handle(vcpu, &ehlr));
+    CHECK_NOTHROW(handle_exit(vcpu, &ehlr));
 }
 
 TEST_CASE("exit_handler: add_exit_handler")
@@ -124,7 +124,7 @@ TEST_CASE("exit_handler: add_exit_handler")
         ehlr.add_exit_handler(handler_delegate_t::create<test_handler>())
     );
 
-    CHECK_NOTHROW(ehlr.handle(vcpu, &ehlr));
+    CHECK_NOTHROW(handle_exit(vcpu, &ehlr));
 }
 
 #endif

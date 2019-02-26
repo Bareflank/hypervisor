@@ -25,7 +25,7 @@ default rel
 %define VMCS_GUEST_RSP 0x0000681C
 %define VMCS_GUEST_RIP 0x0000681E
 
-extern _ZN5bfvmm9intel_x6412exit_handler6handleEPNS0_4vcpuEPS1_
+extern handle_exit
 global exit_handler_entry:function
 
 section .text
@@ -73,7 +73,7 @@ exit_handler_entry:
 
     mov rdi, [gs:0x0098]
     mov rsi, [gs:0x00A0]
-    call _ZN5bfvmm9intel_x6412exit_handler6handleEPNS0_4vcpuEPS1_ wrt ..plt
+    call handle_exit wrt ..plt
 
 ; The code should never get this far as the exit handler should resume back
 ; into the guest using the VMCS's resume function. If we get this far,

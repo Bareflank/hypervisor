@@ -63,10 +63,26 @@
 namespace bfvmm::intel_x64
 {
 class vcpu;
+class exit_handler;
 }
 
 using handler_t = bool(bfvmm::intel_x64::vcpu *);
 using handler_delegate_t = delegate<handler_t>;
+
+// -----------------------------------------------------------------------------
+// Dispatcher
+// -----------------------------------------------------------------------------
+
+/// Private Handler
+///
+/// This function is called by the exit_handler_entry and is used to
+/// dispatch the exit handlers for the class defined here. Ther other way
+/// to implement this would be to use a member function in the exit_handler
+/// but that would require an even deeper knowledge of the C++ ABI, which
+/// we would like to avoid in the ASM code where possible.
+///
+extern "C" void handle_exit(
+    bfvmm::intel_x64::vcpu *vcpu, bfvmm::intel_x64::exit_handler *exit_handler);
 
 // -----------------------------------------------------------------------------
 // Exit Handler
@@ -149,15 +165,6 @@ public:
         const handler_delegate_t &d
     );
 
-public:
-
-    /// @cond
-
-    static void handle(
-        vcpu *vcpu, exit_handler *exit_handler) noexcept;
-
-    /// @endcond
-
 private:
 
     std::list<handler_delegate_t> m_exit_handlers;
@@ -174,6 +181,11 @@ public:
     exit_handler &operator=(const exit_handler &) = delete;
 
     /// @endcond
+
+private:
+
+    friend void (::handle_exit)(
+        bfvmm::intel_x64::vcpu *vcpu, bfvmm::intel_x64::exit_handler *exit_handler);
 };
 
 }

@@ -56,9 +56,11 @@ exit_handler::add_exit_handler(
     const handler_delegate_t &d)
 { m_exit_handlers.push_front(d); }
 
-void
-exit_handler::handle(
-    vcpu *vcpu, exit_handler *exit_handler) noexcept
+}
+
+extern "C"  void
+handle_exit(
+    vcpu_t *vcpu, exit_handler_t *exit_handler)
 {
     guard_exceptions([&]() {
 
@@ -79,6 +81,4 @@ exit_handler::handle(
     });
 
     vcpu->halt("unhandled vm exit");
-}
-
 }
