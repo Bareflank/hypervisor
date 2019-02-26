@@ -162,6 +162,12 @@ if(ENABLE_BUILD_VMM)
         DEPENDS bfvmm
         SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/bfvmm/integration/
     )
+
+    add_subproject(
+        examples vmm
+        DEPENDS bfvmm
+        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/examples/
+    )
 endif()
 
 # ------------------------------------------------------------------------------

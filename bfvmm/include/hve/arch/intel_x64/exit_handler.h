@@ -81,6 +81,9 @@ using handler_delegate_t = delegate<handler_t>;
 /// but that would require an even deeper knowledge of the C++ ABI, which
 /// we would like to avoid in the ASM code where possible.
 ///
+/// @param vcpu the vcpu associated with the VM exit
+/// @param exit_handler the exit handler associated with the vCPU
+///
 extern "C" void handle_exit(
     bfvmm::intel_x64::vcpu *vcpu, bfvmm::intel_x64::exit_handler *exit_handler);
 
