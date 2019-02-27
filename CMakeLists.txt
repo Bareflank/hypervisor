@@ -151,15 +151,12 @@ if(ENABLE_BUILD_VMM)
         DEPENDS bfunwind
     )
 
-    vmm_extension(
-        bfvmm_main
+    add_subproject(
+        bfvmm_main vmm
         DEPENDS bfvmm
-        DEPENDS bfintrinsics
-        SOURCE_DIR ${SOURCE_EXAMPLE_DIR}/bfvmm_main/src
+        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/bfvmm/main/
     )
-endif()
 
-if(ENABLE_BUILD_TEST AND ENABLE_BUILD_VMM)
     add_subproject(
         integration vmm
         DEPENDS bfvmm

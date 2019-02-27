@@ -30,12 +30,10 @@
 
 #include <intrinsics.h>
 
-#include "delegator/cpuid.h"
-#include "delegator/nmi.h"
-#include "delegator/cr.h"
-#include "delegator/invd.h"
-#include "delegator/msr.h"
-#include "delegator/fallback.h"
+#include "vmcs.h"
+#include "../x64/gdt.h"
+#include "../x64/idt.h"
+#include "../x64/tss.h"
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -65,19 +63,50 @@
 namespace bfvmm::intel_x64
 {
 class vcpu;
+class exit_handler;
 }
 
-using handler_t = bool(gsl::not_null<bfvmm::intel_x64::vcpu *>);
+using handler_t = bool(bfvmm::intel_x64::vcpu *);
 using handler_delegate_t = delegate<handler_t>;
-using init_handler_delegate_t = delegate<handler_t>;
-using fini_handler_delegate_t = delegate<handler_t>;
+
+// -----------------------------------------------------------------------------
+// Dispatcher
+// -----------------------------------------------------------------------------
+
+/// Private Handler
+///
+/// This function is called by the exit_handler_entry and is used to
+/// dispatch the exit handlers for the class defined here. Ther other way
+/// to implement this would be to use a member function in the exit_handler
+/// but that would require an even deeper knowledge of the C++ ABI, which
+/// we would like to avoid in the ASM code where possible.
+///
+/// @param vcpu the vcpu associated with the VM exit
+/// @param exit_handler the exit handler associated with the provided vcpu
+///
+extern "C" void handle_exit(
+    bfvmm::intel_x64::vcpu *vcpu, bfvmm::intel_x64::exit_handler *exit_handler);
+
+// -----------------------------------------------------------------------------
+// Exit Handler
+// -----------------------------------------------------------------------------
 
 namespace bfvmm::intel_x64
 {
 
-/// Exit handler
+/// Exit Handler
 ///
-/// Processes all Intel based vmexits using an exit-specific delegator
+/// This class is responsible for detecting why a guest exited (i.e. stopped
+/// its execution), and handleres the appropriated handler to emulate the
+/// instruction that could not execute. Note that this class could be executed
+/// a lot, so performance is key here.
+///
+/// This class works with the VMCS class to provide the bare minimum exit
+/// handler needed to execute a 64bit guest, with the TRUE controls being used.
+/// In general, the only instruction that needs to be emulated is the CPUID
+/// instruction. If more functionality is needed (which is likely), the user
+/// can subclass this class, and overload the handlers that are needed. The
+/// basics are provided with this class to ease development.
 ///
 class EXPORT_HVE exit_handler
 {
@@ -88,14 +117,16 @@ public:
     /// @expects none
     /// @ensures none
     ///
-    exit_handler();
+    /// @param vcpu The vCPU associated with this exit handler
+    ///
+    exit_handler(gsl::not_null<vcpu *> vcpu);
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    VIRTUAL ~exit_handler() = default;
+    ~exit_handler() = default;
 
     /// Add Handler Delegate
     ///
@@ -115,7 +146,7 @@ public:
     /// @param reason The exit reason for the handler being registered
     /// @param d The delegate being registered
     ///
-    VIRTUAL void add_handler(
+    void add_handler(
         ::intel_x64::vmcs::value_type reason,
         const handler_delegate_t &d
     );
@@ -133,66 +164,14 @@ public:
     ///
     /// @param d The delegate being registered
     ///
-    VIRTUAL void add_exit_handler(
+    void add_exit_handler(
         const handler_delegate_t &d
     );
 
-    /// Handle
-    ///
-    /// Handles a VM exit. This function should only be called by the exit
-    /// handler entry function, which gets called when a VM exit occurs, and
-    /// then calls this function to handler the VM exit to the proper
-    /// handler.
-    ///
-    /// @expects none
-    /// @ensures none
-    ///
-    /// @param vcpu The vcpu this exit occured on
-    ///
-    /// @return True if the vmexit was successfully handled, false otherwise
-    bool handle(vcpu_t vcpu);
-
 private:
 
-    // These members provide the legacy exit handler mechanism, and will be
-    // deprecated slowly
-    std::list<init_handler_delegate_t> m_exit_handlers;
-    std::list<init_handler_delegate_t> m_init_handlers;
-    std::list<fini_handler_delegate_t> m_fini_handlers;
-    std::array<std::list<handler_delegate_t>, 64> m_exit_handlers_array;
-
-    // These members will provide the new exit handler mechanism
-    std::array<handler_delegate_t, 64> m_exit_delegates;
-    std::unique_ptr<cpuid::delegator> m_cpuid_delegator;
-    std::unique_ptr<nmi::delegator> m_nmi_delegator;
-    std::unique_ptr<cr::delegator> m_cr_delegator;
-    std::unique_ptr<invd::delegator> m_invd_delegator;
-    std::unique_ptr<msr::delegator> m_msr_delegator;
-    std::unique_ptr<fallback::delegator> m_fallback_delegator;
-
-public:
-
-    /// @cond
-
-    cpuid::delegator *cpuid_delegator() const
-    { return m_cpuid_delegator.get(); }
-
-    nmi::delegator *nmi_delegator() const
-    { return m_nmi_delegator.get(); }
-
-    cr::delegator *cr_delegator() const
-    { return m_cr_delegator.get(); }
-
-    invd::delegator *invd_delegator() const
-    { return m_invd_delegator.get(); }
-
-    msr::delegator *msr_delegator() const
-    { return m_msr_delegator.get(); }
-
-    fallback::delegator *fallback_delegator() const
-    { return m_fallback_delegator.get(); }
-
-    /// @endcond
+    std::list<handler_delegate_t> m_exit_handlers;
+    std::array<std::list<handler_delegate_t>, 128> m_exit_handlers_array;
 
 public:
 
@@ -205,6 +184,11 @@ public:
     exit_handler &operator=(const exit_handler &) = delete;
 
     /// @endcond
+
+private:
+
+    friend void (::handle_exit)(
+        bfvmm::intel_x64::vcpu *vcpu, bfvmm::intel_x64::exit_handler *exit_handler);
 };
 
 }

@@ -25,7 +25,7 @@ namespace bfvmm::intel_x64
 {
 
 interrupt_window_handler::interrupt_window_handler(
-    vcpu_t vcpu
+    gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu}
 {
@@ -130,7 +130,7 @@ interrupt_window_handler::inject_external_interrupt(uint64_t vector)
 // -----------------------------------------------------------------------------
 
 bool
-interrupt_window_handler::handle(vcpu_t vcpu)
+interrupt_window_handler::handle(vcpu *vcpu)
 {
     bfignored(vcpu);
     this->inject_external_interrupt(m_interrupt_queue.pop());

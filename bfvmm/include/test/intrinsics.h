@@ -46,40 +46,6 @@ uint16_t g_tr;
 ::x64::gdt_reg::reg_t g_gdtr{};
 ::x64::idt_reg::reg_t g_idtr{};
 
-extern "C" void _handle_nmi(void) noexcept {}
-
-extern "C" void _esr0(void) noexcept {}
-extern "C" void _esr1(void) noexcept {}
-extern "C" void _esr3(void) noexcept {}
-extern "C" void _esr4(void) noexcept {}
-extern "C" void _esr5(void) noexcept {}
-extern "C" void _esr6(void) noexcept {}
-extern "C" void _esr7(void) noexcept {}
-extern "C" void _esr8(void) noexcept {}
-extern "C" void _esr9(void) noexcept {}
-extern "C" void _esr10(void) noexcept {}
-extern "C" void _esr11(void) noexcept {}
-extern "C" void _esr12(void) noexcept {}
-extern "C" void _esr13(void) noexcept {}
-extern "C" void _esr14(void) noexcept {}
-extern "C" void _esr15(void) noexcept {}
-extern "C" void _esr16(void) noexcept {}
-extern "C" void _esr17(void) noexcept {}
-extern "C" void _esr18(void) noexcept {}
-extern "C" void _esr19(void) noexcept {}
-extern "C" void _esr20(void) noexcept {}
-extern "C" void _esr21(void) noexcept {}
-extern "C" void _esr22(void) noexcept {}
-extern "C" void _esr23(void) noexcept {}
-extern "C" void _esr24(void) noexcept {}
-extern "C" void _esr25(void) noexcept {}
-extern "C" void _esr26(void) noexcept {}
-extern "C" void _esr27(void) noexcept {}
-extern "C" void _esr28(void) noexcept {}
-extern "C" void _esr29(void) noexcept {}
-extern "C" void _esr30(void) noexcept {}
-extern "C" void _esr31(void) noexcept {}
-
 extern "C" uint64_t
 _read_msr(uint32_t addr) noexcept
 { return g_msrs[addr]; }

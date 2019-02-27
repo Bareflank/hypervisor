@@ -25,7 +25,7 @@ namespace bfvmm::intel_x64
 {
 
 external_interrupt_handler::external_interrupt_handler(
-    vcpu_t vcpu
+    gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu}
 {
@@ -65,7 +65,7 @@ external_interrupt_handler::disable_exiting()
 // -----------------------------------------------------------------------------
 
 bool
-external_interrupt_handler::handle(vcpu_t vcpu)
+external_interrupt_handler::handle(vcpu *vcpu)
 {
     struct info_t info = {
         vmcs_n::vm_exit_interruption_information::vector::get()

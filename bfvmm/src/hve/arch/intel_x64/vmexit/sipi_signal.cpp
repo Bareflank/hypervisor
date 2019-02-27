@@ -25,7 +25,7 @@ namespace bfvmm::intel_x64
 {
 
 sipi_signal_handler::sipi_signal_handler(
-    vcpu_t vcpu
+    gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu}
 {
@@ -42,7 +42,7 @@ sipi_signal_handler::sipi_signal_handler(
 // -----------------------------------------------------------------------------
 
 bool
-sipi_signal_handler::handle(vcpu_t vcpu)
+sipi_signal_handler::handle(vcpu *vcpu)
 {
     using namespace vmcs_n::guest_activity_state;
     using namespace vmcs_n::vm_entry_controls;

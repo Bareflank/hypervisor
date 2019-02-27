@@ -1301,7 +1301,6 @@ function(add_vmm_executable NAME)
                 --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_entry_static.a --no-whole-archive
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_vcpu_shared.so
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_hve_shared.so
-                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_sdk_shared.so
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_memory_manager_shared.so
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_debug_shared.so
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfintrinsics_shared.so
@@ -1341,7 +1340,6 @@ function(add_vmm_executable NAME)
                 --whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_entry_static.a --no-whole-archive
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_vcpu_static.a
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_hve_static.a
-                ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_sdk_static.a
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_memory_manager_static.a
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfvmm_debug_static.a
                 ${CMAKE_INSTALL_PREFIX}/lib/libbfintrinsics_static.a

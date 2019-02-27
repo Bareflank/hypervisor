@@ -61,6 +61,19 @@ extern "C" EXPORT_SYM void
 default_esr(
     uint64_t vector, uint64_t ec, bool ec_valid, uint64_t *regs, void *vcpu) noexcept
 {
+    // -------------------------------------------------------------------------
+    // NMIs
+    // -------------------------------------------------------------------------
+
+    if (vector == 2) {
+        static_cast<bfvmm::intel_x64::vcpu *>(vcpu)->queue_nmi();
+        return;
+    }
+
+    // -------------------------------------------------------------------------
+    // Everything Else (i.e. Errors)
+    // -------------------------------------------------------------------------
+
     unlock_write();
     auto view = gsl::span<uint64_t>(regs, 37);
 
@@ -142,6 +155,7 @@ void set_default_esrs(
 {
     idt->set(0, _esr0, selector);
     idt->set(1, _esr1, selector);
+    idt->set(2, _esr2, selector);
     idt->set(3, _esr3, selector);
     idt->set(4, _esr4, selector);
     idt->set(5, _esr5, selector);

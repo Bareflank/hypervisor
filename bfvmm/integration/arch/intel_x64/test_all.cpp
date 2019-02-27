@@ -28,34 +28,28 @@
 
 #include <vmm.h>
 
-using namespace bfvmm::intel_x64;
-
 ept::mmap g_guest_map;
 
-bool test_external_interrupt_handler(
-    vcpu_t vcpu, external_interrupt_handler::info_t &info)
-{
-    bfignored(vcpu);
-
-    vcpu->queue_external_interrupt(info.vector);
-
-    return true;
-}
-
-bool vmm_init()
+void
+init()
 {
     ept::identity_map(g_guest_map, MAX_PHYS_ADDR);
+}
+
+bool
+test_handler(
+    vcpu_t *vcpu, external_interrupt_handler::info_t &info)
+{
+    vcpu->queue_external_interrupt(info.vector);
     return true;
 }
 
-bool vmm_main(vcpu_t vcpu)
+void
+init_vcpu(vcpu_t *vcpu)
 {
     vcpu->add_external_interrupt_handler(
-        external_interrupt_handler::handler_delegate_t::create
-        <test_external_interrupt_handler>()
+        external_interrupt_handler_delegate_t::create<test_handler>()
     );
 
     vcpu->set_eptp(g_guest_map);
-
-    return true;
 }

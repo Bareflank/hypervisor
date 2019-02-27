@@ -41,6 +41,7 @@ set_default_esrs(
 
 extern "C" void _esr0(void) noexcept;
 extern "C" void _esr1(void) noexcept;
+extern "C" void _esr2(void) noexcept;
 extern "C" void _esr3(void) noexcept;
 extern "C" void _esr4(void) noexcept;
 extern "C" void _esr5(void) noexcept;

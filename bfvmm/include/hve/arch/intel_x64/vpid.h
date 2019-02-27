@@ -72,15 +72,6 @@ public:
     ///
     ~vpid_handler() = default;
 
-    /// Get ID
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    /// @return Returns the VPID
-    ///
-    vmcs_n::value_type id() const noexcept;
-
     /// Enable
     ///
     /// @expects
@@ -97,7 +88,6 @@ public:
 
 private:
 
-    vcpu *m_vcpu;
     vmcs_n::value_type m_id;
 
 public:

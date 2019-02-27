@@ -25,7 +25,7 @@ namespace bfvmm::intel_x64
 {
 
 xsetbv_handler::xsetbv_handler(
-    vcpu_t vcpu
+    gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu}
 {
@@ -50,7 +50,7 @@ xsetbv_handler::add_handler(const handler_delegate_t &d)
 // -----------------------------------------------------------------------------
 
 bool
-xsetbv_handler::handle(vcpu_t vcpu)
+xsetbv_handler::handle(vcpu *vcpu)
 {
     struct info_t info = {
         0,

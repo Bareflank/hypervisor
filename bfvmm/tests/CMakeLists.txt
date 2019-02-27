@@ -31,7 +31,6 @@ add_subdirectory(../src/debug ${CMAKE_CURRENT_BINARY_DIR}/src/debug)
 add_subdirectory(../src/hve ${CMAKE_CURRENT_BINARY_DIR}/src/hve)
 add_subdirectory(../src/memory_manager ${CMAKE_CURRENT_BINARY_DIR}/src/memory_manager)
 add_subdirectory(../src/vcpu ${CMAKE_CURRENT_BINARY_DIR}/src/vcpu)
-add_subdirectory(../src/sdk ${CMAKE_CURRENT_BINARY_DIR}/src/sdk)
 
 add_subdirectory(debug)
 add_subdirectory(hve)

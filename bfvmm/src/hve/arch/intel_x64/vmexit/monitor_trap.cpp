@@ -25,7 +25,7 @@ namespace bfvmm::intel_x64
 {
 
 monitor_trap_handler::monitor_trap_handler(
-    vcpu_t vcpu
+    gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu}
 {
@@ -57,7 +57,7 @@ monitor_trap_handler::enable()
 // -----------------------------------------------------------------------------
 
 bool
-monitor_trap_handler::handle(vcpu_t vcpu)
+monitor_trap_handler::handle(vcpu *vcpu)
 {
     using namespace vmcs_n;
 

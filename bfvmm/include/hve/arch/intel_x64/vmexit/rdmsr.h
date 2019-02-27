@@ -46,6 +46,12 @@
 #endif
 
 // -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+::x64::msrs::value_type emulate_rdmsr(::x64::msrs::field_type msr);
+
+// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
@@ -75,15 +81,11 @@ public:
         ///
         /// The address of the msr the guest tried to read from.
         ///
-        /// default: vmcs->save_state()->rcx
-        ///
         uint32_t msr;
 
         /// Value (in/out)
         ///
         /// The value of from the read to update guest state with.
-        ///
-        /// default: exit_handler::emulate_rdmsr(vmcs->save_state()->rcx)
         ///
         uint64_t val;
 
@@ -110,7 +112,7 @@ public:
     /// handlers
     ///
     using handler_delegate_t =
-        delegate<bool(gsl::not_null<vcpu *>, info_t &)>;
+        delegate<bool(vcpu *, info_t &)>;
 
     /// Constructor
     ///
@@ -248,7 +250,7 @@ public:
 
     /// @cond
 
-    bool handle(gsl::not_null<vcpu *> vcpu);
+    bool handle(vcpu *vcpu);
 
     /// @endcond
 
@@ -273,6 +275,8 @@ public:
 
     /// @endcond
 };
+
+using rdmsr_handler_delegate_t = rdmsr_handler::handler_delegate_t;
 
 }
 

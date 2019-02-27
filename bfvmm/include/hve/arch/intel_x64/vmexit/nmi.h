@@ -19,8 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef VMEXIT_EPT_MISCONFIGURATION_INTEL_X64_H
-#define VMEXIT_EPT_MISCONFIGURATION_INTEL_X64_H
+#ifndef VMEXIT_NMI_INTEL_X64_H
+#define VMEXIT_NMI_INTEL_X64_H
 
 #include <list>
 
@@ -52,74 +52,41 @@ namespace bfvmm::intel_x64
 
 class vcpu;
 
-/// EPT Misconfiguration
+/// External interrupt
 ///
-/// Provides an interface for registering handlers for EPT misconfiguration
+/// Provides an interface for registering handlers for external-interrupt
 /// exits.
 ///
-class EXPORT_HVE ept_misconfiguration_handler
+class EXPORT_HVE nmi_handler
 {
 public:
-
-    ///
-    /// Info
-    ///
-    /// This struct is created by ept_misconfiguration_handler::handle before being
-    /// passed to each registered handler.
-    ///
-    struct info_t {
-
-        /// GVA (in)
-        ///
-        /// The guest virtual (linear) address that caused the exit
-        ///
-        uint64_t gva;
-
-        /// GPA (in)
-        ///
-        /// The guest physical address that caused the exit
-        ///
-        uint64_t gpa;
-
-        /// Ignore advance (out)
-        ///
-        /// If true, do not advance the guest's instruction pointer.
-        /// Set this to true if your handler returns true and has already
-        /// advanced the guest's instruction pointer.
-        ///
-        /// default: false
-        ///
-        bool ignore_advance;
-    };
 
     /// Handler delegate type
     ///
     /// The type of delegate clients must use when registering
     /// handlers
     ///
-    using handler_delegate_t =
-        delegate<bool(vcpu *, info_t &)>;
+    using handler_delegate_t = delegate<bool(vcpu *)>;
 
     /// Constructor
     ///
     /// @expects
     /// @ensures
     ///
-    /// @param vcpu the vcpu object for this EPT misconfiguration handler
+    /// @param vcpu the vcpu object for this external-interrupt handler
     ///
-    ept_misconfiguration_handler(
-        gsl::not_null<vcpu *> vcpu);
+    nmi_handler(gsl::not_null<vcpu *> vcpu);
 
     /// Destructor
     ///
     /// @expects
     /// @ensures
     ///
-    ~ept_misconfiguration_handler() = default;
+    ~nmi_handler() = default;
 
 public:
 
-    /// Add EPT Misconfiguration Handler
+    /// Add Handler
     ///
     /// @expects
     /// @ensures
@@ -127,6 +94,33 @@ public:
     /// @param d the handler to call when an exit occurs
     ///
     void add_handler(const handler_delegate_t &d);
+
+public:
+
+    /// Enable exiting
+    ///
+    /// Example:
+    /// @code
+    /// this->enable_exiting();
+    /// @endcode
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    void enable_exiting();
+
+    /// Disable exiting
+    ///
+    /// Example:
+    /// @code
+    /// this->disable_exiting();
+    /// @endcode
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    void disable_exiting();
+
 
 public:
 
@@ -145,16 +139,16 @@ public:
 
     /// @cond
 
-    ept_misconfiguration_handler(ept_misconfiguration_handler &&) = default;
-    ept_misconfiguration_handler &operator=(ept_misconfiguration_handler &&) = default;
+    nmi_handler(nmi_handler &&) = default;
+    nmi_handler &operator=(nmi_handler &&) = default;
 
-    ept_misconfiguration_handler(const ept_misconfiguration_handler &) = delete;
-    ept_misconfiguration_handler &operator=(const ept_misconfiguration_handler &) = delete;
+    nmi_handler(const nmi_handler &) = delete;
+    nmi_handler &operator=(const nmi_handler &) = delete;
 
     /// @endcond
 };
 
-using ept_misconfiguration_handler_delegate_t = ept_misconfiguration_handler::handler_delegate_t;
+using nmi_handler_delegate_t = nmi_handler::handler_delegate_t;
 
 }
 

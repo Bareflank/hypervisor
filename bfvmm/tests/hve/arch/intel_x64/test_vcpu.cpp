@@ -75,8 +75,24 @@ TEST_CASE("vcpu: hlt")
     CHECK_NOTHROW(vcpu.hlt());
 }
 
+TEST_CASE("vcpu: load")
+{
+    setup_test_support();
+    bfvmm::intel_x64::vcpu vcpu{0};
+
+    CHECK_NOTHROW(vcpu.load());
+}
+
+TEST_CASE("vcpu: promote")
+{
+    setup_test_support();
+    bfvmm::intel_x64::vcpu vcpu{0};
+
+    CHECK_THROWS(vcpu.promote());
+}
+
 static bool
-test_handler(gsl::not_null<bfvmm::intel_x64::vcpu *> vcpu)
+test_handler(vcpu_t *vcpu)
 { bfignored(vcpu); return true; }
 
 TEST_CASE("vcpu: add handlers")
@@ -248,7 +264,7 @@ TEST_CASE("vcpu: save state")
     setup_test_support();
     bfvmm::intel_x64::vcpu vcpu{0};
 
-    CHECK_NOTHROW(vcpu.vmcs()->save_state());
+    CHECK_NOTHROW(vcpu.state());
 }
 
 #endif

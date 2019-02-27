@@ -39,22 +39,11 @@ vmx::vmx() :
     m_vmx_region{make_page<uint32_t>()},
     m_vmx_region_phys{g_mm->virtptr_to_physint(m_vmx_region.get())}
 {
-    this->check_cpuid_vmx_supported();
-    this->check_vmx_capabilities_msr();
-}
-
-vmx::~vmx()
-{
-    if (::intel_x64::cr4::vmx_enable_bit::is_enabled()) {
-        this->disable();
-    }
-}
-
-void
-vmx::enable()
-{
     this->reset_vmx();
     this->setup_vmx_region();
+
+    this->check_cpuid_vmx_supported();
+    this->check_vmx_capabilities_msr();
 
     this->enable_vmx();
 
@@ -65,19 +54,19 @@ vmx::enable()
 
     this->execute_vmxon();
 
-    bfdebug_pass(1, "vmx: enabled and on");
+    bfdebug_pass(1, "vmx: complete");
 }
 
-void
-vmx::disable()
+vmx::~vmx()
 {
     guard_exceptions([&]() {
         this->execute_vmxoff();
         this->disable_vmx();
     });
 
-    bfdebug_pass(1, "vmx: disabled and off");
+    bfdebug_pass(1, "~vmx: complete");
 }
+
 void
 vmx::check_cpuid_vmx_supported()
 {

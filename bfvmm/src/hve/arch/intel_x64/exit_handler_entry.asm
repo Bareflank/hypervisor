@@ -25,21 +25,21 @@ default rel
 %define VMCS_GUEST_RSP 0x0000681C
 %define VMCS_GUEST_RIP 0x0000681E
 
-extern _ZN5bfvmm9intel_x644vcpu14vmexit_handlerEv
-global vmexit_entry:function
+extern handle_exit
+global exit_handler_entry:function
 
 section .text
 
-; VMExit Entry Point
+; Exit Handler Entry Point
 ;
 ; With respect to VT-x, when an exit occurs, the CPU keeps the state of the
 ; registers from the guest intact, and gives the state of the registers prior
 ; to vmresume, back to the guest. The only exception to this is RSP and RIP as
-; these two registers are specific to the VMM (RIP is vmexit_entry,
+; these two registers are specific to the VMM (RIP is exit_handler_entry,
 ; and RSP is the exit_handler_stack). So the only job that this entry point
 ; has is to preserve the state of the guest
 ;
-vmexit_entry:
+exit_handler_entry:
 
     mov [gs:0x000], rax
     mov [gs:0x008], rbx
@@ -71,8 +71,9 @@ vmexit_entry:
     mov rdi, VMCS_GUEST_RSP
     vmread [gs:0x080], rdi
 
-    mov rdi, [gs:0x00A0]
-    call _ZN5bfvmm9intel_x644vcpu14vmexit_handlerEv wrt ..plt
+    mov rdi, [gs:0x0098]
+    mov rsi, [gs:0x00A0]
+    call handle_exit wrt ..plt
 
 ; The code should never get this far as the exit handler should resume back
 ; into the guest using the VMCS's resume function. If we get this far,

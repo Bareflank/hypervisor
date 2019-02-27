@@ -43,9 +43,8 @@ public:
     explicit vcpu(vcpuid::type id) :
         bfvmm::intel_x64::vcpu{id}
     {
-        this->add_cpuid_handler(
-            42,
-            cpuid_handler::handler_delegate_t::create<vcpu, &vcpu::cpuid_handler>(this)
+        this->add_cpuid_emulator(
+            42, handler_delegate_t::create<vcpu, &vcpu::cpuid_handler>(this)
         );
 
         this->add_monitor_trap_handler(
@@ -63,22 +62,19 @@ public:
         ::x64::cpuid::get(42, 0, 0, 0);
     }
 
-    bool cpuid_handler(
-        gsl::not_null<vcpu_t *> vcpu, cpuid_handler::info_t &info)
+    bool cpuid_handler(vcpu_t *vcpu)
     {
-        bfignored(vcpu);
-
-        info.rax = 42;
-        info.rbx = 42;
-        info.rcx = 42;
-        info.rdx = 42;
+        vcpu->set_rax(42);
+        vcpu->set_rbx(42);
+        vcpu->set_rcx(42);
+        vcpu->set_rdx(42);
 
         this->enable_monitor_trap_flag();
         return false;
     }
 
     bool monitor_trap_handler(
-        gsl::not_null<vcpu_t *> vcpu, monitor_trap_handler::info_t &info)
+        vcpu_t *vcpu, monitor_trap_handler::info_t &info)
     {
         bfignored(vcpu);
         bfignored(info);

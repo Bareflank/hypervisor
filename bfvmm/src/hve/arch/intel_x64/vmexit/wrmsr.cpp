@@ -21,10 +21,7 @@
 
 #include <hve/arch/intel_x64/vcpu.h>
 
-namespace bfvmm::intel_x64
-{
-
-static void
+void
 emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val)
 {
     using namespace ::intel_x64::vmcs;
@@ -72,11 +69,14 @@ emulate_wrmsr(::x64::msrs::field_type msr, ::x64::msrs::value_type val)
     }
 }
 
+namespace bfvmm::intel_x64
+{
+
 wrmsr_handler::wrmsr_handler(
-    vcpu_t vcpu
+    gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu},
-    m_msr_bitmap{vcpu->vmcs()->msr_bitmap().get(), ::x64::pt::page_size}
+    m_msr_bitmap{vcpu->msr_bitmap(), ::x64::pt::page_size}
 {
     using namespace vmcs_n;
 
@@ -149,20 +149,17 @@ wrmsr_handler::pass_through_all_accesses()
 // -----------------------------------------------------------------------------
 
 bool
-wrmsr_handler::handle(vcpu_t vcpu)
+wrmsr_handler::handle(vcpu *vcpu)
 {
-    // TODO: IMPORTANT!!!
-    //
-    // We need to create a list of MSRs that are implemented and GP when the
-    // MSR is not implemented. We also need to test to make sure the the hardware
-    // is enforcing the privilege level of this instruction while the hypervisor
-    // is loaded.
-    //
-    // To fire a GP, we need to add a Bareflank specific exception that can be
-    // thrown. The base hypervisor can then trap on this type of exception and
-    // have delegates that can be registered to handle the exeption type, which in
-    // this case would be the interrupt code that would then inject a GP.
-    //
+    auto user_already_emulating = m_emulate[vcpu->rcx()];
+
+    struct info_t info = {
+        gsl::narrow_cast<::x64::msrs::field_type>(vcpu->rcx()),
+        ((vcpu->rax() & 0x00000000FFFFFFFF) << 0) |
+        ((vcpu->rdx() & 0x00000000FFFFFFFF) << 32),
+        false,
+        false
+    };
 
     const auto &hdlrs =
         m_handlers.find(
@@ -171,25 +168,11 @@ wrmsr_handler::handle(vcpu_t vcpu)
 
     if (GSL_LIKELY(hdlrs != m_handlers.end())) {
 
-        struct info_t info = {
-            gsl::narrow_cast<uint32_t>(vcpu->rcx()),
-            0,
-            false,
-            false
-        };
-
-        info.val =
-            ((vcpu->rax() & 0x00000000FFFFFFFF) << 0) |
-            ((vcpu->rdx() & 0x00000000FFFFFFFF) << 32);
-
         for (const auto &d : hdlrs->second) {
             if (d(vcpu, info)) {
 
-                if (!info.ignore_write && !m_emulate[vcpu->rcx()]) {
-                    emulate_wrmsr(
-                        gsl::narrow_cast<::x64::msrs::field_type>(info.msr),
-                        info.val
-                    );
+                if (!info.ignore_write && !user_already_emulating) {
+                    emulate_wrmsr(info.msr, info.val);
                 }
 
                 if (!info.ignore_advance) {
@@ -205,7 +188,12 @@ wrmsr_handler::handle(vcpu_t vcpu)
         return m_default_handler(vcpu);
     }
 
-    return false;
+    if (user_already_emulating) {
+        return false;
+    }
+
+    emulate_wrmsr(info.msr, info.val);
+    return vcpu->advance();
 }
 
 }
