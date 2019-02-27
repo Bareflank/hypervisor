@@ -104,7 +104,7 @@ public:
     /// handlers
     ///
     using handler_delegate_t =
-        delegate<bool(vcpu_t, info_t &)>;
+        delegate<bool(vcpu *, info_t &)>;
 
     /// Constructor
     ///
@@ -138,7 +138,7 @@ public:
 
     /// @cond
 
-    bool handle(vcpu_t vcpu);
+    bool handle(vcpu *vcpu);
 
     /// @endcond
 
@@ -159,6 +159,8 @@ public:
 
     /// @endcond
 };
+
+using xsetbv_handler_delegate_t = xsetbv_handler::handler_delegate_t;
 
 }
 

@@ -26,7 +26,7 @@ namespace bfvmm::intel_x64
 
 static bool
 ia32_bios_updt_trig__rdmsr_handler(
-    vcpu_t vcpu, rdmsr_handler::info_t &info)
+    vcpu *vcpu, rdmsr_handler::info_t &info)
 {
     bfignored(vcpu);
 
@@ -36,7 +36,7 @@ ia32_bios_updt_trig__rdmsr_handler(
 
 static bool
 ia32_bios_updt_trig__wrmsr_handler(
-    vcpu_t vcpu, wrmsr_handler::info_t &info)
+    vcpu *vcpu, wrmsr_handler::info_t &info)
 {
     bfignored(vcpu);
 
@@ -46,7 +46,7 @@ ia32_bios_updt_trig__wrmsr_handler(
 
 static bool
 ia32_bios_sign_id__rdmsr_handler(
-    vcpu_t vcpu, rdmsr_handler::info_t &info)
+    vcpu *vcpu, rdmsr_handler::info_t &info)
 {
     bfignored(vcpu);
 
@@ -66,7 +66,7 @@ ia32_bios_sign_id__rdmsr_handler(
 
 static bool
 ia32_bios_sign_id__wrmsr_handler(
-    vcpu_t vcpu, wrmsr_handler::info_t &info)
+    vcpu *vcpu, wrmsr_handler::info_t &info)
 {
     bfignored(vcpu);
 

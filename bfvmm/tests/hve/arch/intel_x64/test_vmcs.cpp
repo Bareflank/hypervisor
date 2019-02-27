@@ -117,12 +117,4 @@ TEST_CASE("vmcs: resume failure")
     CHECK_THROWS(vmcs.resume());
 }
 
-TEST_CASE("vmcs: save state")
-{
-    MockRepository mocks;
-    auto vmcs = setup_vmcs(mocks);
-
-    CHECK(vmcs.save_state() != nullptr);
-}
-
 #endif

@@ -19,35 +19,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <bfvmm/vcpu/vcpu_factory.h>
-#include <bfvmm/hve/arch/intel_x64/vcpu.h>
-
-using namespace bfvmm::intel_x64;
-
-// -----------------------------------------------------------------------------
-// Handlers
-// -----------------------------------------------------------------------------
+#include <vmm.h>
 
 auto rdcr3_called = false;
 auto wrcr3_called = false;
 
+void
+global_init()
+{
+    bfdebug_info(0, "running trap_cr3 integration test");
+    bfdebug_lnbr(0);
+}
+
 bool
-test_rdcr3_handler(
-    gsl::not_null<vcpu_t *> vcpu, control_register_handler::info_t &info)
+test_rdcr3_handler(vcpu_t *vcpu)
 {
     bfignored(vcpu);
-    bfignored(info);
 
     rdcr3_called = true;
     return false;
 }
 
 bool
-test_wrcr3_handler(
-    gsl::not_null<vcpu_t *> vcpu, control_register_handler::info_t &info)
+test_wrcr3_handler(vcpu_t *vcpu)
 {
     bfignored(vcpu);
-    bfignored(info);
 
     wrcr3_called = true;
     return false;
@@ -66,61 +62,18 @@ test_hlt_delegate(bfobject *obj)
     }
 }
 
-// -----------------------------------------------------------------------------
-// vCPU
-// -----------------------------------------------------------------------------
-
-namespace test
+void
+vcpu_init_nonroot(vcpu_t *vcpu)
 {
+    vcpu->add_hlt_delegate(
+        hlt_delegate_t::create<test_hlt_delegate>()
+    );
 
-class vcpu : public bfvmm::intel_x64::vcpu
-{
-public:
-    explicit vcpu(vcpuid::type id) :
-        bfvmm::intel_x64::vcpu{id}
-    {
-        this->add_hlt_delegate(
-            hlt_delegate_t::create<test_hlt_delegate>()
-        );
+    vcpu->add_rdcr3_handler(
+        handler_delegate_t::create<test_rdcr3_handler>()
+    );
 
-        this->add_rdcr3_handler(
-            control_register_handler::handler_delegate_t::create<test_rdcr3_handler>()
-        );
-
-        this->add_wrcr3_handler(
-            control_register_handler::handler_delegate_t::create<test_wrcr3_handler>()
-        );
-    }
-
-    ~vcpu() override = default;
-
-public:
-
-    /// @cond
-
-    vcpu(vcpu &&) = delete;
-    vcpu &operator=(vcpu &&) = delete;
-
-    vcpu(const vcpu &) = delete;
-    vcpu &operator=(const vcpu &) = delete;
-
-    /// @endcond
-};
-
-}
-
-// -----------------------------------------------------------------------------
-// vCPU Factory
-// -----------------------------------------------------------------------------
-
-namespace bfvmm
-{
-
-std::unique_ptr<vcpu>
-vcpu_factory::make(vcpuid::type vcpuid, bfobject *obj)
-{
-    bfignored(obj);
-    return std::make_unique<test::vcpu>(vcpuid);
-}
-
+    vcpu->add_wrcr3_handler(
+        handler_delegate_t::create<test_wrcr3_handler>()
+    );
 }

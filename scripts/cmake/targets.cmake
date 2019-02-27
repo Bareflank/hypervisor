@@ -117,7 +117,7 @@ if(NOT WIN32)
     add_custom_target_category("Query Commands")
 
     add_custom_target(ack
-        COMMAND ${USERSPACE_PREFIX_PATH}/bin/ack
+        COMMAND ${USERSPACE_PREFIX_PATH}/bin/bfack
         USES_TERMINAL
     )
 

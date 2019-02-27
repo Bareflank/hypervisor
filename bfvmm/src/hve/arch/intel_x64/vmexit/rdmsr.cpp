@@ -21,10 +21,7 @@
 
 #include <hve/arch/intel_x64/vcpu.h>
 
-namespace bfvmm::intel_x64
-{
-
-static ::x64::msrs::value_type
+::x64::msrs::value_type
 emulate_rdmsr(::x64::msrs::field_type msr)
 {
     using namespace ::intel_x64::vmcs;
@@ -59,31 +56,17 @@ emulate_rdmsr(::x64::msrs::field_type msr)
 
         default:
             return ::intel_x64::msrs::get(msr);
-
-        // QUIRK:
-        //
-        // The following is specifically for CPU-Z. For whatever reason, it is
-        // reading the following undefined MSRs, which causes the system to
-        // freeze since attempting to read these MSRs in the exit handler
-        // will cause a GPF which is not being caught. The result is, the core
-        // that runs RDMSR on these freezes, the other cores receive an
-        // INIT signal to reset, and the system dies.
-        //
-
-        case 0x31:
-        case 0x39:
-        case 0x1ae:
-        case 0x1af:
-        case 0x602:
-            return 0;
     }
 }
 
+namespace bfvmm::intel_x64
+{
+
 rdmsr_handler::rdmsr_handler(
-    vcpu_t vcpu
+    gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu},
-    m_msr_bitmap{vcpu->vmcs()->msr_bitmap().get(), ::x64::pt::page_size}
+    m_msr_bitmap{vcpu->msr_bitmap(), ::x64::pt::page_size}
 {
     using namespace vmcs_n;
 
@@ -156,21 +139,20 @@ rdmsr_handler::pass_through_all_accesses()
 // -----------------------------------------------------------------------------
 
 bool
-rdmsr_handler::handle(vcpu_t vcpu)
+rdmsr_handler::handle(vcpu *vcpu)
 {
+    auto user_already_emulating = m_emulate[vcpu->rcx()];
 
-    // TODO: IMPORTANT!!!
-    //
-    // We need to create a list of MSRs that are implemented and GP when the
-    // MSR is not implemented. We also need to test to make sure the the hardware
-    // is enforcing the privilege level of this instruction while the hypervisor
-    // is loaded.
-    //
-    // To fire a GP, we need to add a Bareflank specific exception that can be
-    // thrown. The base hypervisor can then trap on this type of exception and
-    // have delegates that can be registered to handle the exeption type, which in
-    // this case would be the interrupt code that would then inject a GP.
-    //
+    struct info_t info = {
+        gsl::narrow_cast<uint32_t>(vcpu->rcx()),
+        0,
+        false,
+        false
+    };
+
+    if (!user_already_emulating) {
+        info.val = emulate_rdmsr(info.msr);
+    }
 
     const auto &hdlrs =
         m_handlers.find(
@@ -178,20 +160,6 @@ rdmsr_handler::handle(vcpu_t vcpu)
         );
 
     if (GSL_LIKELY(hdlrs != m_handlers.end())) {
-
-        struct info_t info = {
-            gsl::narrow_cast<uint32_t>(vcpu->rcx()),
-            0,
-            false,
-            false
-        };
-
-        if (!m_emulate[vcpu->rcx()]) {
-            info.val =
-                emulate_rdmsr(
-                    gsl::narrow_cast<::x64::msrs::field_type>(vcpu->rcx())
-                );
-        }
 
         for (const auto &d : hdlrs->second) {
             if (d(vcpu, info)) {
@@ -214,7 +182,14 @@ rdmsr_handler::handle(vcpu_t vcpu)
         return m_default_handler(vcpu);
     }
 
-    return false;
+    if (user_already_emulating) {
+        return false;
+    }
+
+    vcpu->set_rax(((info.val >> 0x00) & 0x00000000FFFFFFFF));
+    vcpu->set_rdx(((info.val >> 0x20) & 0x00000000FFFFFFFF));
+
+    return vcpu->advance();
 }
 
 }

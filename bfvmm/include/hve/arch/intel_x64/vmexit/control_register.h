@@ -27,8 +27,8 @@
 #include <bfgsl.h>
 #include <bfdelegate.h>
 
-#include "../vmcs.h"
-#include "../../../../vmm_types.h"
+#include "../exit_handler.h"
+#include <intrinsics.h>
 
 // -----------------------------------------------------------------------------
 // Exports
@@ -65,58 +65,6 @@ class EXPORT_HVE control_register_handler
 {
 public:
 
-    ///
-    /// Info
-    ///
-    /// This struct is created by control_register_handler::handle before being
-    /// passed to each registered handler.
-    ///
-    struct info_t {
-
-        /// Value (in/out)
-        ///
-        /// The value the guest VM would like the CR to be, or'd with the
-        /// fixed0 bits which the CR must be. This is the value that will be
-        /// writen to the CR
-        ///
-        uint64_t val;
-
-        /// Shadow (out)
-        ///
-        /// The value the guest VM would like the CR to be. This is the value
-        /// that will be written to the shadow
-        ///
-        ///
-        uint64_t shadow;
-
-        /// Ignore write (out)
-        ///
-        /// If true, do not update the guest's register state. It is assumed
-        /// the handler has already done this.
-        ///
-        /// default: false
-        ///
-        bool ignore_write;
-
-        /// Ignore advance (out)
-        ///
-        /// If true, do not advance the guest's instruction pointer.
-        /// Set this to true if your handler returns true and has already
-        /// advanced the guest's instruction pointer.
-        ///
-        /// default: false
-        ///
-        bool ignore_advance;
-    };
-
-    /// Handler delegate type
-    ///
-    /// The type of delegate clients must use when registering
-    /// handlers
-    ///
-    using handler_delegate_t =
-        delegate<bool(gsl::not_null<vcpu *>, info_t &)>;
-
     /// Constructor
     ///
     /// @expects
@@ -136,7 +84,32 @@ public:
 
 public:
 
-    /// Add Write CR0 Handler
+    /// Add wrcr0 Handler
+    ///
+    /// Adds a VM exit handler. When a VM exit occurs, the registered
+    /// handler will be called. More than one handler can be registered. If
+    /// a handler returns true, the handler is stating that it is the last
+    /// handler to be called, and no other handlers will be executed. If a
+    /// handler returns false, the next registered handler will be called
+    /// until all of the handlers are called, or another handler in the chain
+    /// returns true. If a handler returns true, it must also execute
+    /// vcpu->advance() when applicable to ensure the instruction pointer is
+    /// advanced. If all of the handlers return false, the base implementation
+    /// will return true for you and advance the instruction pointer.
+    /// In general, handlers should always return false unless you
+    /// explicitly wish to prevent any other handlers from executing (e.g. if
+    /// you wish to override the default behavior). Do not call
+    /// vcpu->advance() unless you return true, otherwise you will advance and
+    /// instruction pointer twice.
+    ///
+    /// Prior to the handlers being called, the execute() function is called
+    /// which places the hardware state into the vCPU registers. Please see
+    /// this function for how the registers are set.
+    ///
+    /// To handle the VM exit, modify the cr0 register using the following two
+    /// functions as needed:
+    /// - vcpu->cr0()
+    /// - vcpu->set_cr0()
     ///
     /// @expects
     /// @ensures
@@ -145,7 +118,37 @@ public:
     ///
     void add_wrcr0_handler(const handler_delegate_t &d);
 
-    /// Add Read CR3 Handler
+    /// Add rdcr3 Handler
+    ///
+    /// Adds a VM exit handler. When a VM exit occurs, the registered
+    /// handler will be called. More than one handler can be registered. If
+    /// a handler returns true, the handler is stating that it is the last
+    /// handler to be called, and no other handlers will be executed. If a
+    /// handler returns false, the next registered handler will be called
+    /// until all of the handlers are called, or another handler in the chain
+    /// returns true. If a handler returns true, it must also execute
+    /// vcpu->advance() when applicable to ensure the instruction pointer is
+    /// advanced. If all of the handlers return false, the base implementation
+    /// will return true for you and advance the instruction pointer.
+    /// In general, handlers should always return false unless you
+    /// explicitly wish to prevent any other handlers from executing (e.g. if
+    /// you wish to override the default behavior). Do not call
+    /// vcpu->advance() unless you return true, otherwise you will advance and
+    /// instruction pointer twice.
+    ///
+    /// Prior to the handlers being called, gr2 is populated with the old value
+    /// of cr3 (the value that was in the VMCS just prior to the VM exit).
+    /// Once all of the handlers have completed, the result of the vcpu->cr3()
+    /// will be written to the proper output register defined by the Intel
+    /// specification for you, including handlers that return true and advance
+    /// the instruction pointer manually. If this functionality is not desired,
+    /// register a custom control register handler with the base hypervisor
+    /// and return true to indicate you are manually handling the exit.
+    ///
+    /// To handle the VM exit, modify the cr3 register using the following two
+    /// functions as needed:
+    /// - vcpu->cr3()
+    /// - vcpu->set_cr3()
     ///
     /// @expects
     /// @ensures
@@ -154,7 +157,32 @@ public:
     ///
     void add_rdcr3_handler(const handler_delegate_t &d);
 
-    /// Add Write CR3 Handler
+    /// Add wrcr3 Handler
+    ///
+    /// Adds a VM exit handler. When a VM exit occurs, the registered
+    /// handler will be called. More than one handler can be registered. If
+    /// a handler returns true, the handler is stating that it is the last
+    /// handler to be called, and no other handlers will be executed. If a
+    /// handler returns false, the next registered handler will be called
+    /// until all of the handlers are called, or another handler in the chain
+    /// returns true. If a handler returns true, it must also execute
+    /// vcpu->advance() when applicable to ensure the instruction pointer is
+    /// advanced. If all of the handlers return false, the base implementation
+    /// will return true for you and advance the instruction pointer.
+    /// In general, handlers should always return false unless you
+    /// explicitly wish to prevent any other handlers from executing (e.g. if
+    /// you wish to override the default behavior). Do not call
+    /// vcpu->advance() unless you return true, otherwise you will advance and
+    /// instruction pointer twice.
+    ///
+    /// Prior to the handlers being called, the execute() function is called
+    /// which places the hardware state into the vCPU registers. Please see
+    /// this function for how the registers are set.
+    ///
+    /// To handle the VM exit, modify the cr3 register using the following two
+    /// functions as needed:
+    /// - vcpu->cr3()
+    /// - vcpu->set_cr3()
     ///
     /// @expects
     /// @ensures
@@ -163,7 +191,32 @@ public:
     ///
     void add_wrcr3_handler(const handler_delegate_t &d);
 
-    /// Add Write CR4 Handler
+    /// Add wrcr4 Handler
+    ///
+    /// Adds a VM exit handler. When a VM exit occurs, the registered
+    /// handler will be called. More than one handler can be registered. If
+    /// a handler returns true, the handler is stating that it is the last
+    /// handler to be called, and no other handlers will be executed. If a
+    /// handler returns false, the next registered handler will be called
+    /// until all of the handlers are called, or another handler in the chain
+    /// returns true. If a handler returns true, it must also execute
+    /// vcpu->advance() when applicable to ensure the instruction pointer is
+    /// advanced. If all of the handlers return false, the base implementation
+    /// will return true for you and advance the instruction pointer.
+    /// In general, handlers should always return false unless you
+    /// explicitly wish to prevent any other handlers from executing (e.g. if
+    /// you wish to override the default behavior). Do not call
+    /// vcpu->advance() unless you return true, otherwise you will advance and
+    /// instruction pointer twice.
+    ///
+    /// Prior to the handlers being called, the execute() function is called
+    /// which places the hardware state into the vCPU registers. Please see
+    /// this function for how the registers are set.
+    ///
+    /// To handle the VM exit, modify the cr4 register using the following two
+    /// functions as needed:
+    /// - vcpu->cr4()
+    /// - vcpu->set_cr4()
     ///
     /// @expects
     /// @ensures
@@ -171,6 +224,67 @@ public:
     /// @param d the handler to call when an exit occurs
     ///
     void add_wrcr4_handler(const handler_delegate_t &d);
+
+public:
+
+    /// Execute wrcr0
+    ///
+    /// Executes the mov to CR0 instruction and populates the vCPU's registers
+    /// as follows:
+    /// - vcpu->gr1() = new cr0
+    /// - vcpu->gr2() = old cr0 (vcpu->cr0())
+    /// - vcpu->cr0() = vcpu->gr1()
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param vcpu the vcpu object to execute wrcr0 on
+    ///
+    void execute_wrcr0(gsl::not_null<vcpu *> vcpu);
+
+    /// Execute rdcr3
+    ///
+    /// Executes the mov from CR3 instruction and populates the vCPU's registers
+    /// as follows:
+    /// - vcpu->gr1() = new cr3 (vcpu->cr3())
+    /// - reg being read to = vcpu->gr1()
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param vcpu the vcpu object to execute rdcr3 on
+    ///
+    void execute_rdcr3(gsl::not_null<vcpu *> vcpu);
+
+    /// Execute wrcr3
+    ///
+    /// Executes the mov to CR3 instruction and populates the vCPU's registers
+    /// as follows:
+    /// - vcpu->gr1() = new cr3
+    /// - vcpu->gr2() = old cr3 (vcpu->cr3())
+    /// - vcpu->cr3() = vcpu->gr1()
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param vcpu the vcpu object to execute wrcr3 on
+    ///
+    void execute_wrcr3(gsl::not_null<vcpu *> vcpu);
+
+    /// Execute wrcr4
+    ///
+    /// Executes the mov to CR4 instruction and populates the vCPU's registers
+    /// as follows:
+    /// - vcpu->gr1() = new cr4
+    /// - vcpu->gr2() = old cr4 (vcpu->cr4())
+    /// - vcpu->cr4() = vcpu->gr1()
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param vcpu the vcpu object to execute wrcr4 on
+    ///
+    void execute_wrcr4(gsl::not_null<vcpu *> vcpu);
 
 public:
 
@@ -226,22 +340,24 @@ public:
     ///
     void enable_wrcr4_exiting(vmcs_n::value_type mask);
 
+public:
+
     /// @cond
 
-    bool handle(gsl::not_null<vcpu *> vcpu);
+    bool handle(vcpu *vcpu);
 
     /// @endcond
 
 private:
 
-    bool handle_cr0(gsl::not_null<vcpu *> vcpu);
-    bool handle_cr3(gsl::not_null<vcpu *> vcpu);
-    bool handle_cr4(gsl::not_null<vcpu *> vcpu);
+    bool handle_cr0(vcpu *vcpu);
+    bool handle_cr3(vcpu *vcpu);
+    bool handle_cr4(vcpu *vcpu);
 
-    bool handle_wrcr0(gsl::not_null<vcpu *> vcpu);
-    bool handle_rdcr3(gsl::not_null<vcpu *> vcpu);
-    bool handle_wrcr3(gsl::not_null<vcpu *> vcpu);
-    bool handle_wrcr4(gsl::not_null<vcpu *> vcpu);
+    bool handle_wrcr0(vcpu *vcpu);
+    bool handle_rdcr3(vcpu *vcpu);
+    bool handle_wrcr3(vcpu *vcpu);
+    bool handle_wrcr4(vcpu *vcpu);
 
 private:
 

@@ -68,7 +68,7 @@ public:
 
     bool
     test_misconfiguration_handler(
-        gsl::not_null<vcpu_t *> vcpu, ept_misconfiguration_handler::info_t &info)
+        vcpu_t *vcpu, ept_misconfiguration_handler::info_t &info)
     {
         bfignored(vcpu);
         bfignored(info);
