@@ -982,29 +982,35 @@ endmacro(add_efi_source)
 # ------------------------------------------------------------------------------
 
 function(vmm_extension NAME)
-    list(APPEND ARGN
-        DEPENDS bfvmm
-        DEPENDS bfintrinsics
-    )
+    if (ENABLE_BUILD_VMM)
+        list(APPEND ARGN
+            DEPENDS bfvmm
+            DEPENDS bfintrinsics
+        )
 
-    add_subproject(
-        ${NAME} vmm
-        ${ARGN}
-    )
+        add_subproject(
+            ${NAME} vmm
+            ${ARGN}
+        )
+    endif()
 endfunction(vmm_extension)
 
 function(userspace_extension NAME)
-    add_subproject(
-        ${NAME} userspace
-        ${ARGN}
-    )
+    if (ENABLE_BUILD_USERSPACE)
+        add_subproject(
+            ${NAME} userspace
+            ${ARGN}
+        )
+    endif()
 endfunction(userspace_extension)
 
 function(test_extension NAME)
-    add_subproject(
-        ${NAME} test
-        ${ARGN}
-    )
+    if (ENABLE_BUILD_TEST)
+        add_subproject(
+            ${NAME} test
+            ${ARGN}
+        )
+    endif()
 endfunction(test_extension)
 
 # ------------------------------------------------------------------------------
