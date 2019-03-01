@@ -43,7 +43,7 @@ handle_cpuid(vcpu_t *vcpu)
     bfignored(vcpu);
 
     g_count++;
-    vcpu->data<uint64_t&>()++;
+    vcpu->data<uint64_t &>()++;
 
     return false;
 }

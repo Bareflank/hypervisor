@@ -86,7 +86,8 @@ vmcall_handler(vcpu_t *vcpu)
     // sent to the serial device, and the vmcall will return safely.
     //
     guard_exceptions([&] {
-        switch(vcpu->rax()) {
+        switch (vcpu->rax())
+        {
             case 0:
                 vmcall_handler_hook(vcpu);
                 break;
@@ -111,7 +112,7 @@ vmcall_handler_hook(vcpu_t *vcpu)
     // Get a reference to our per-vcpu data. Note that we need to explicitly
     // ask for a reference, similar to the std::any APIs.
     //
-    auto &d = vcpu->data<d_t&>();
+    auto &d = vcpu->data<d_t &>();
 
     // Store the guest virtual address of both the hello_world() function
     // and the hooked_hello_world() function
@@ -175,7 +176,7 @@ ept_execute_violation_handler(
     // Get a reference to our per-vcpu data. Note that we need to explicitly
     // ask for a reference, similar to the std::any APIs.
     //
-    auto &d = vcpu->data<d_t&>();
+    auto &d = vcpu->data<d_t &>();
 
     // If we got an EPT violation (i.e. this function was executed), it
     // means that our userspace application attempted to execute code in
@@ -217,7 +218,7 @@ mt_handler(
     // Get a reference to our per-vcpu data. Note that we need to explicitly
     // ask for a reference, similar to the std::any APIs.
     //
-    auto &d = vcpu->data<d_t&>();
+    auto &d = vcpu->data<d_t &>();
 
     // If this function is executed, it means that our memory access has
     // successfully executed, and we need to disable access to our page
@@ -238,7 +239,7 @@ vmcall_handler_unhook(vcpu_t *vcpu)
     // Get a reference to our per-vcpu data. Note that we need to explicitly
     // ask for a reference, similar to the std::any APIs.
     //
-    auto &d = vcpu->data<d_t&>();
+    auto &d = vcpu->data<d_t &>();
 
     // Set our pte to our shadow. This effectively unhooks the pte while
     // ensuring that we are not setting the pte to a nullptr, which could
