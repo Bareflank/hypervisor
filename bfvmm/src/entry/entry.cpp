@@ -33,17 +33,18 @@
 #include <bfobject.h>
 #include <bfexports.h>
 #include <bfsupport.h>
-#include <bfcallonce.h>
 #include <bfexception.h>
 
 #include <vcpu/vcpu_manager.h>
 #include <debug/debug_ring/debug_ring.h>
 #include <memory_manager/memory_manager.h>
 
-static bfn::once_flag g_init_flag;
-
 void
 WEAK_SYM global_init()
+{ }
+
+void
+WEAK_SYM global_fini()
 { }
 
 #ifdef BF_INTEL_X64
@@ -83,7 +84,9 @@ private_init_vmm(uint64_t arg) noexcept
 {
     return guard_exceptions(ENTRY_ERROR_VMM_START_FAILED, [&]() {
 
-        bfn::call_once(g_init_flag, global_init);
+        if (arg == 0) {
+            global_init();
+        }
 
         g_vcm->create(arg, nullptr);
 
@@ -112,6 +115,10 @@ private_fini_vmm(uint64_t arg) noexcept
 #endif
 
         g_vcm->destroy(arg, nullptr);
+
+        if (arg == 0) {
+            global_fini();
+        }
 
         return ENTRY_SUCCESS;
     });

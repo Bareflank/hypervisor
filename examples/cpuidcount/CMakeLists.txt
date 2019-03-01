@@ -19,16 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.6)
-project(examples C CXX)
-
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
-
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    add_subdirectory(vpid)
-elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
-    message(WARNING "Unimplemented")
-else()
-    message(FATAL_ERROR "Unsupported architecture")
-endif()
+vmm_extension(
+    example_cpuidcount_vmm
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/vmm
+)

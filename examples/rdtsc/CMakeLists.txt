@@ -20,6 +20,6 @@
 # SOFTWARE.
 
 vmm_extension(
-    example_vpid_vmm
+    example_rdtsc_vmm
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/vmm
 )

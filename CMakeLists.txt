@@ -162,12 +162,6 @@ if(ENABLE_BUILD_VMM)
         DEPENDS bfvmm
         SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/bfvmm/integration/
     )
-
-    add_subproject(
-        examples vmm
-        DEPENDS bfvmm
-        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/examples/
-    )
 endif()
 
 # ------------------------------------------------------------------------------
@@ -251,6 +245,15 @@ if(ENABLE_BUILD_USERSPACE)
         DEPENDS bfintrinsics
     )
 endif()
+
+# ------------------------------------------------------------------------------
+# Examples
+# ------------------------------------------------------------------------------
+
+include(examples/cpuidcount/CMakeLists.txt)
+include(examples/hook/CMakeLists.txt)
+include(examples/rdtsc/CMakeLists.txt)
+include(examples/vpid/CMakeLists.txt)
 
 # ------------------------------------------------------------------------------
 # External Components

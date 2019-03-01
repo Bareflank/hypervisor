@@ -22,6 +22,7 @@
 #ifndef VCPU_H
 #define VCPU_H
 
+#include <any>
 #include <list>
 #include <string>
 #include <memory>
@@ -343,6 +344,38 @@ public:
     VIRTUAL void add_fini_delegate(const fini_delegate_t &d) noexcept
     { m_fini_delegates.push_front(std::move(d)); }
 
+    /// Get User Data
+    ///
+    /// Note, you must be explicit about whether you wish to get an l-value,
+    /// r-value or reference.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns user data that is stored in the vCPU
+    ///
+    template<typename T>
+    T data()
+    { return std::any_cast<T>(m_data); }
+
+    /// Set User Data
+    ///
+    /// Provides the ability for an extension to store data in the vCPU without
+    /// having to subclass the vCPU if that is not desired in a type-safe way.
+    /// It should be noted that this uses std::any which does perform a malloc.
+    /// We also use the same API structure as std::any, so you need to be
+    /// explicit about whether you wish to have an l-value, r-value or
+    /// reference when using the get function.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param t the value to store
+    ///
+    template<typename T>
+    void set_data(T &&t)
+    { m_data = std::any(t); }
+
 private:
 
     vcpuid::type m_id;
@@ -354,6 +387,8 @@ private:
     std::list<hlt_delegate_t> m_hlt_delegates;
     std::list<init_delegate_t> m_init_delegates;
     std::list<fini_delegate_t> m_fini_delegates;
+
+    std::any m_data;
 
 public:
 
