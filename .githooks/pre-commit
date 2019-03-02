@@ -1,0 +1,62 @@
+#!/bin/sh
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+    against=HEAD
+else
+    # Initial commit: diff against an empty tree object
+    against=$(git hash-object -t tree /dev/null)
+fi
+
+exec 1>&2
+
+# Cross platform projects tend to avoid non-ASCII filenames; prevent
+# them from being added to the repository. We exploit the fact that the
+# printable range starts at the space character and ends with tilde.
+#
+if test $(git diff --cached --name-only --diff-filter=A -z $against |
+    LC_ALL=C tr -d '[ -~]\0' | wc -c) != 0
+then
+    cat <<\EOF
+Error: Attempt to add a non-ASCII file name.
+EOF
+    exit 1
+fi
+
+# Check for files trying to be commited with +x that shouldn't be
+#
+index=$(git diff-index --cached --diff-filter=d $against)
+while read index;
+do
+    result=$(echo $index | grep ':100644 100755')
+    if [[ -z $result ]]
+    then
+        result=$(echo $index | grep ':000000 100755')
+    fi
+
+    if [[ ! -z $result ]]
+    then
+        path=$(echo $result | awk '{print $NF}')
+        name=$(basename -- $path)
+        extn="${name##*.}"
+
+        case $extn in
+        sh|bat) # Add more "recognized" executable file extensions here as needed
+            ;;
+        *)
+            bad="$bad $path"
+            ;;
+        esac
+    fi
+done <<< "$index"
+
+if [[ ! -z $bad ]]; then
+    for f in $bad
+    do
+        echo -e "\e[1;91mfailed\e[0m \e[1m(.githooks/pre-commit)\e[0m: file shouldn't be executable: $f"
+    done
+    exit 1
+fi
+
+# If there are whitespace errors, print the offending file names and fail.
+exec git diff-index --check --cached $against --
