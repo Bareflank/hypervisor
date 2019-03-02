@@ -117,6 +117,14 @@ matrix:
           git diff --check HEAD^
           exit -1
         fi
+      - cd ..
+      - |
+        if [[ -n $(./scripts/util/chk_perms.sh) ]]; then
+          echo "You checked in files that shouldn't be executable"
+          echo ""
+          ./scripts/util/chk_perms.sh
+          exit -1
+        fi
 
   #
   # Astyle Format
