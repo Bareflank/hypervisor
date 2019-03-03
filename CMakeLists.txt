@@ -145,6 +145,7 @@ if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
         DEPENDS bfcrt
         DEPENDS bfpthread
         DEPENDS bfsyscall
+        SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/unwind
     )
 endif()
 

@@ -24,7 +24,7 @@ project(bfunwind C CXX)
 
 include(${SOURCE_CMAKE_DIR}/project.cmake)
 init_project(
-    INCLUDES ${CMAKE_CURRENT_LIST_DIR}/../include
+    INCLUDES ${CMAKE_CURRENT_LIST_DIR}
     TIDY_EXCLUSIONS -cppcoreguidelines-pro*
 )
 
@@ -41,4 +41,4 @@ add_static_library(
     DEFINES STATIC_SYSCALL
 )
 
-install(FILES ../include/ia64_cxx_abi.h DESTINATION include RENAME unwind.h)
+install(FILES ia64_cxx_abi.h DESTINATION include RENAME unwind.h)
