@@ -19,29 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-string(REPLACE "|" ";" PROJECT_INCLUDE_LIST "${PROJECT_INCLUDE_LIST}")
-foreach(file ${PROJECT_INCLUDE_LIST})
-    include(${file})
-endforeach(file)
-
-file(STRINGS "${PKG_FILE}" pkg_list)
-
-foreach(pkg IN LISTS pkg_list)
-    #    find_package(${pkg} REQUIRED)
-endforeach(pkg)
-
-if(BUILD_TEST)
-    enable_testing()
-endif()
-
-if(CMAKE_INSTALL_PREFIX STREQUAL "${VMM_PREFIX_PATH}")
-    set(PREFIX "vmm")
-elseif(CMAKE_INSTALL_PREFIX STREQUAL "${USERSPACE_PREFIX_PATH}")
-    set(PREFIX "userspace")
-elseif(CMAKE_INSTALL_PREFIX STREQUAL "${TEST_PREFIX_PATH}")
-    set(PREFIX "test")
-elseif(CMAKE_INSTALL_PREFIX STREQUAL "${EFI_PREFIX_PATH}")
-    set(PREFIX "efi")
-else()
-    message(FATAL_ERROR "Invalid prefix: ${CMAKE_INSTALL_PREFIX}")
+file(STRINGS "${PKG_FILE}" EXISTS REGEX ${PKG})
+if(NOT EXISTS)
+    file(APPEND "${PKG_FILE}" "${PKG}\n")
 endif()

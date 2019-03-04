@@ -848,6 +848,7 @@ function(add_subproject NAME PREFIX)
         endif()
     endif()
 
+    set(SHORT_PREFIX ${PREFIX})
     if(NOT PREFIX STREQUAL "efi")
         add_targets(${NAME} ${PREFIX} ${SOURCE_DIR})
     endif()
@@ -913,18 +914,16 @@ function(add_subproject NAME PREFIX)
         endif()
     endforeach()
 
-    if(ENABLE_BUILD_TEST)
-        list(APPEND CMAKE_ARGS -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
-    endif()
-
     list(APPEND CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=${PREFIXES_DIR}/${PREFIX}
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=${CMAKE_EXPORT_COMPILE_COMMANDS}
         -DCMAKE_INSTALL_MESSAGE=${CMAKE_INSTALL_MESSAGE}
-        -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
+        -DCMAKE_INSTALL_PREFIX=${PREFIXES_DIR}/${PREFIX}
+        -DCMAKE_PREFIX_PATH=${EXPORT_DIR}
+        -DCMAKE_PROJECT_${NAME}_INCLUDE=${SOURCE_CMAKE_DIR}/project.cmake
         -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN}
-        -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
-        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
         -DPROJECT_INCLUDE_LIST=${PROJECT_INCLUDE_LIST}
+        -DPKG_FILE=${PKG_FILE}
         -DBFM_VMM=${BFM_VMM}
         -DEFI_EXTENSION_SOURCES=${EFI_EXTENSION_SOURCES}
     )
@@ -964,6 +963,15 @@ function(add_subproject NAME PREFIX)
         ${NAME}_${PREFIX}_cleanup
         COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/${NAME}/${PREFIX}/src
         DEPENDEES configure
+    )
+
+    ExternalProject_Add_Step(
+        ${NAME}_${PREFIX}
+        ${NAME}_${PREFIX}_package
+        COMMAND ${CMAKE_COMMAND}
+            -DPKG_FILE=${PKG_FILE} -DPKG=${NAME}-${SHORT_PREFIX}
+            -P ${SOURCE_CMAKE_DIR}/append.cmake
+        DEPENDEES install
     )
 endfunction(add_subproject)
 
