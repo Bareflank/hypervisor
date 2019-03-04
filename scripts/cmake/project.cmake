@@ -27,10 +27,10 @@ endforeach(file)
 file(STRINGS "${PKG_FILE}" pkg_list)
 
 foreach(pkg IN LISTS pkg_list)
-    #    find_package(${pkg} REQUIRED)
+    find_package(${pkg} REQUIRED)
 endforeach(pkg)
 
-if(BUILD_TEST)
+if(ENABLE_BUILD_TEST)
     enable_testing()
 endif()
 
