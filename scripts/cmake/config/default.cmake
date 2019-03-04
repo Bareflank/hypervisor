@@ -19,7 +19,104 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-include(${CMAKE_SOURCE_DIR}/scripts/cmake/macros.cmake)
+# ------------------------------------------------------------------------------
+# add_config
+# ------------------------------------------------------------------------------
+
+# Add Config
+#
+# Add a configurable varibale to the CMake build. This function ensures each
+# variable is properly set, and ensures it's properly visible in ccmake.
+#
+# @param ADVANCED Only show this variable in the advanced mode for ccmake
+# @param SKIP_VALIDATION do not validate that the varibale is properly set
+# @param CONFIG_NAME The name of the variable
+# @param CONFIG_TYPE The variable's type: STRING, PATH, FILEPATH, BOOL
+# @param DEFAULT_VAL The default value for the variable
+# @param DESCRIPTION A description of the variable
+# @param OPTIONS Possible values for the the variable. Only applies to STRING
+#    type variables.
+#
+macro(add_config)
+    set(options ADVANCED SKIP_VALIDATION)
+    set(oneVal CONFIG_NAME CONFIG_TYPE DEFAULT_VAL DESCRIPTION)
+    set(multiVal OPTIONS)
+    cmake_parse_arguments(ARG "${options}" "${oneVal}" "${multiVal}" ${ARGN})
+
+    if(ARG_CONFIG_TYPE STREQUAL "BOOL" AND NOT ARG_DEFAULT_VAL)
+        set(ARG_DEFAULT_VAL OFF)
+    endif()
+
+    if(NOT DEFINED ${ARG_CONFIG_NAME})
+        set(${ARG_CONFIG_NAME} ${ARG_DEFAULT_VAL} CACHE ${ARG_CONFIG_TYPE} ${ARG_DESCRIPTION})
+    else()
+        set(${ARG_CONFIG_NAME} ${${ARG_CONFIG_NAME}} CACHE ${ARG_CONFIG_TYPE} ${ARG_DESCRIPTION})
+    endif()
+
+    if(ARG_OPTIONS AND ARG_CONFIG_TYPE STREQUAL "STRING")
+        set_property(CACHE ${ARG_CONFIG_NAME} PROPERTY STRINGS ${ARG_OPTIONS})
+    endif()
+
+    if(NOT ARG_SKIP_VALIDATION)
+        if(ARG_OPTIONS AND ARG_CONFIG_TYPE STREQUAL "STRING")
+            if(NOT ARG_DEFAULT_VAL IN_LIST ARG_OPTIONS)
+                message(FATAL_ERROR "${ARG_CONFIG_NAME} invalid option \'${ARG_DEFAULT_VAL}\'")
+            endif()
+        endif()
+
+        if(ARG_CONFIG_TYPE STREQUAL "PATH")
+            if(NOT EXISTS "${ARG_DEFAULT_VAL}")
+                message(FATAL_ERROR "${ARG_CONFIG_NAME} path not found: ${ARG_DEFAULT_VAL}")
+            endif()
+        endif()
+
+        if(ARG_CONFIG_TYPE STREQUAL "FILEPATH")
+            if(NOT EXISTS "${ARG_DEFAULT_VAL}")
+                message(FATAL_ERROR "${ARG_CONFIG_NAME} file not found: ${ARG_DEFAULT_VAL}")
+            endif()
+        endif()
+
+        if(ARG_CONFIG_TYPE STREQUAL "BOOL")
+            if(NOT ARG_DEFAULT_VAL STREQUAL ON AND NOT ARG_DEFAULT_VAL STREQUAL OFF)
+                message(FATAL_ERROR "${ARG_CONFIG_NAME} must be set to ON or OFF")
+            endif()
+        endif()
+    endif()
+
+    if(ARG_ADVANCED)
+        mark_as_advanced(${ARG_CONFIG_NAME})
+    endif()
+endmacro(add_config)
+
+# ------------------------------------------------------------------------------
+# include_external_config
+# ------------------------------------------------------------------------------
+
+macro(include_external_config)
+    if(CONFIG)
+        foreach(c ${CONFIG})
+            if(EXISTS "${SOURCE_CONFIG_DIR}/${c}.cmake")
+                message(STATUS "Config: ${SOURCE_CONFIG_DIR}/${c}.cmake")
+                include(${SOURCE_CONFIG_DIR}/${c}.cmake)
+                continue()
+            endif()
+            if(NOT IS_ABSOLUTE "${c}")
+                get_filename_component(c "${BUILD_ROOT_DIR}/${c}" ABSOLUTE)
+            endif()
+            if(EXISTS "${c}")
+                message(STATUS "Config: ${c}")
+                include(${c})
+                continue()
+            endif()
+
+            message(FATAL_ERROR "File not found: ${c}")
+        endforeach(c)
+    elseif(EXISTS "${CMAKE_SOURCE_DIR}/../config.cmake")
+        get_filename_component(CONFIG "${CMAKE_SOURCE_DIR}/../config.cmake" ABSOLUTE)
+        message(STATUS "Config: ${CONFIG}")
+        include(${CONFIG})
+    endif()
+endmacro(include_external_config)
 
 # ------------------------------------------------------------------------------
 # Quirks
@@ -149,13 +246,18 @@ set(SOURCE_BFVMM_DIR ${CMAKE_SOURCE_DIR}/bfvmm
     "bfvmm source dir"
 )
 
+set(SOURCE_BFROOT_DIR ${CMAKE_SOURCE_DIR}/bfroot
+    CACHE INTERNAL
+    "bfroot source dir"
+)
+
 # ------------------------------------------------------------------------------
 # Build Tree
 # ------------------------------------------------------------------------------
 
 set(BUILD_ROOT_DIR ${CMAKE_BINARY_DIR}
     CACHE INTERNAL
-    "Build root directory"
+    "Build-root directory"
 )
 
 set(BUILD_BFDRIVER_DIR ${CMAKE_BINARY_DIR}/bfdriver
@@ -310,7 +412,7 @@ set(CMAKE_BUILD_TYPE "Release"
     "Defines the build type"
 )
 
-set(CMAKE_VERBOSE_MAKEFILE ON
+set(CMAKE_VERBOSE_MAKEFILE OFF
     CACHE INTERNAL
     "Enables verbose output"
 )
@@ -326,7 +428,7 @@ add_config(
 add_config(
     CONFIG_NAME CMAKE_INSTALL_MESSAGE
     CONFIG_TYPE STRING
-    DEFAULT_VAL LAZY
+    DEFAULT_VAL ALWAYS
     DESCRIPTION "Defines the install output"
     OPTIONS ALWAYS LAZY NEVER
     ADVANCED
@@ -739,7 +841,7 @@ set(GNUEFI_URL_MD5 "3cd10dc9c14f4a3891f8537fd78ed04f"
 add_config(
     CONFIG_NAME DEFAULT_VMM
     CONFIG_TYPE STRING
-    DEFAULT_VAL bfvmm
+    DEFAULT_VAL vmm
     DESCRIPTION "Default vmm"
 )
 

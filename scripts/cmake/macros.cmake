@@ -19,14 +19,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-include(ProcessorCount)
-include(ExternalProject)
-
-if(ENABLE_BUILD_TEST)
-    include(CTest)
-    enable_testing(true)
-endif()
-
 # ------------------------------------------------------------------------------
 # colors
 # ------------------------------------------------------------------------------
@@ -52,122 +44,17 @@ if(NOT WIN32)
 endif()
 
 # ------------------------------------------------------------------------------
-# add_config
-# ------------------------------------------------------------------------------
-
-# Add Config
-#
-# Add a configurable varibale to the CMake build. This function ensures each
-# variable is properly set, and ensures it's properly visible in ccmake.
-#
-# @param ADVANCED Only show this variable in the advanced mode for ccmake
-# @param SKIP_VALIDATION do not validate that the varibale is properly set
-# @param CONFIG_NAME The name of the variable
-# @param CONFIG_TYPE The variable's type: STRING, PATH, FILEPATH, BOOL
-# @param DEFAULT_VAL The default value for the variable
-# @param DESCRIPTION A description of the variable
-# @param OPTIONS Possible values for the the variable. Only applies to STRING
-#    type variables.
-#
-macro(add_config)
-    set(options ADVANCED SKIP_VALIDATION)
-    set(oneVal CONFIG_NAME CONFIG_TYPE DEFAULT_VAL DESCRIPTION)
-    set(multiVal OPTIONS)
-    cmake_parse_arguments(ARG "${options}" "${oneVal}" "${multiVal}" ${ARGN})
-
-    if(ARG_CONFIG_TYPE STREQUAL "BOOL" AND NOT ARG_DEFAULT_VAL)
-        set(ARG_DEFAULT_VAL OFF)
-    endif()
-
-    if(NOT DEFINED ${ARG_CONFIG_NAME})
-        set(${ARG_CONFIG_NAME} ${ARG_DEFAULT_VAL} CACHE ${ARG_CONFIG_TYPE} ${ARG_DESCRIPTION})
-    else()
-        set(${ARG_CONFIG_NAME} ${${ARG_CONFIG_NAME}} CACHE ${ARG_CONFIG_TYPE} ${ARG_DESCRIPTION})
-    endif()
-
-    if(ARG_OPTIONS AND ARG_CONFIG_TYPE STREQUAL "STRING")
-        set_property(CACHE ${ARG_CONFIG_NAME} PROPERTY STRINGS ${ARG_OPTIONS})
-    endif()
-
-    if(NOT ARG_SKIP_VALIDATION)
-        if(ARG_OPTIONS AND ARG_CONFIG_TYPE STREQUAL "STRING")
-            if(NOT ARG_DEFAULT_VAL IN_LIST ARG_OPTIONS)
-                message(FATAL_ERROR "${ARG_CONFIG_NAME} invalid option \'${ARG_DEFAULT_VAL}\'")
-            endif()
-        endif()
-
-        if(ARG_CONFIG_TYPE STREQUAL "PATH")
-            if(NOT EXISTS "${ARG_DEFAULT_VAL}")
-                message(FATAL_ERROR "${ARG_CONFIG_NAME} path not found: ${ARG_DEFAULT_VAL}")
-            endif()
-        endif()
-
-        if(ARG_CONFIG_TYPE STREQUAL "FILEPATH")
-            if(NOT EXISTS "${ARG_DEFAULT_VAL}")
-                message(FATAL_ERROR "${ARG_CONFIG_NAME} file not found: ${ARG_DEFAULT_VAL}")
-            endif()
-        endif()
-
-        if(ARG_CONFIG_TYPE STREQUAL "BOOL")
-            if(NOT ARG_DEFAULT_VAL STREQUAL ON AND NOT ARG_DEFAULT_VAL STREQUAL OFF)
-                message(FATAL_ERROR "${ARG_CONFIG_NAME} must be set to ON or OFF")
-            endif()
-        endif()
-    endif()
-
-    if(ARG_ADVANCED)
-        mark_as_advanced(${ARG_CONFIG_NAME})
-    endif()
-endmacro(add_config)
-
-# ------------------------------------------------------------------------------
 # Macro File List
 # ------------------------------------------------------------------------------
 
-# Private
-#
 macro(add_project_include FILE)
     set(PROJECT_INCLUDE_LIST "${PROJECT_INCLUDE_LIST}|${FILE}")
 endmacro(add_project_include)
 
 # ------------------------------------------------------------------------------
-# include_external_config
-# ------------------------------------------------------------------------------
-
-# Private
-#
-macro(include_external_config)
-    if(CONFIG)
-        foreach(c ${CONFIG})
-            if(EXISTS "${SOURCE_CONFIG_DIR}/${c}.cmake")
-                message(STATUS "Config: ${SOURCE_CONFIG_DIR}/${c}.cmake")
-                include(${SOURCE_CONFIG_DIR}/${c}.cmake)
-                continue()
-            endif()
-            if(NOT IS_ABSOLUTE "${c}")
-                get_filename_component(c "${BUILD_ROOT_DIR}/${c}" ABSOLUTE)
-            endif()
-            if(EXISTS "${c}")
-                message(STATUS "Config: ${c}")
-                include(${c})
-                continue()
-            endif()
-
-            message(FATAL_ERROR "File not found: ${c}")
-        endforeach(c)
-    elseif(EXISTS "${CMAKE_SOURCE_DIR}/../config.cmake")
-        get_filename_component(CONFIG "${CMAKE_SOURCE_DIR}/../config.cmake" ABSOLUTE)
-        message(STATUS "Config: ${CONFIG}")
-        include(${CONFIG})
-    endif()
-endmacro(include_external_config)
-
-# ------------------------------------------------------------------------------
 # include_external_extensions
 # ------------------------------------------------------------------------------
 
-# Private
-#
 macro(include_external_extensions)
     foreach(e ${EXTENSION})
         if(NOT IS_ABSOLUTE "${e}")
@@ -817,10 +704,9 @@ endfunction(add_custom_target_info)
 #
 #
 function(add_subproject NAME PREFIX)
-    set(options NOBUILD NOINSTALL)
     set(oneVal SOURCE_DIR TOOLCHAIN)
-    set(multiVal C_FLAGS CXX_FLAGS DEPENDS)
-    cmake_parse_arguments(ARG "${options}" "${oneVal}" "${multiVal}" ${ARGN})
+    set(multiVal DEPENDS)
+    cmake_parse_arguments(ARG "" "${oneVal}" "${multiVal}" ${ARGN})
 
     if(PREFIX STREQUAL "vmm" AND NOT ENABLE_BUILD_VMM AND NOT ENABLE_BUILD_TEST)
         return()
@@ -841,20 +727,12 @@ function(add_subproject NAME PREFIX)
     if(ARG_SOURCE_DIR)
         set(SOURCE_DIR ${ARG_SOURCE_DIR})
     else()
-        if(PREFIX STREQUAL "test")
-            set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/${NAME}/tests)
-        else()
-            set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/${NAME}/src)
-        endif()
+        set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/${NAME})
     endif()
 
     set(SHORT_PREFIX ${PREFIX})
-    if(NOT PREFIX STREQUAL "efi")
+    if(NOT PREFIX STREQUAL "efi" AND NOT ${NAME} STREQUAL "bfroot")
         add_targets(${NAME} ${PREFIX} ${SOURCE_DIR})
-    endif()
-
-    if(ARG_NOBUILD)
-        return()
     endif()
 
     if(NOT ARG_TOOLCHAIN)
@@ -873,12 +751,6 @@ function(add_subproject NAME PREFIX)
         set(TOOLCHAIN ${ARG_TOOLCHAIN})
     endif()
 
-    generate_flags(
-        ${PREFIX}
-        C_FLAGS ${ARG_C_FLAGS}
-        CXX_FLAGS ${ARG_CXX_FLAGS}
-    )
-
     if(PREFIX STREQUAL "vmm")
         set(PREFIX ${VMM_PREFIX})
     elseif(PREFIX STREQUAL "userspace")
@@ -891,7 +763,6 @@ function(add_subproject NAME PREFIX)
         message(FATAL_ERROR "Invalid prefix: ${PREFIX}")
     endif()
 
-    set(DEPENDS "")
     foreach(d ${ARG_DEPENDS})
         if(d MATCHES ${VMM_PREFIX})
             list(APPEND DEPENDS "${d}")
@@ -936,12 +807,6 @@ function(add_subproject NAME PREFIX)
     if(NOT WIN32)
         list(APPEND CMAKE_ARGS
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        )
-    endif()
-
-    if(ARG_NOINSTALL)
-        list(APPEND EPA_ARGS
-            INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "-- Install step ignored"
         )
     endif()
 
@@ -1069,30 +934,35 @@ endmacro(enable_asm)
 
 # Init Project
 #
-# Initializes a sub project or extension. This function should be used right
-# after running project(), and enables ASM, sets up include and library
-# folders and addition flags.
+# Initializes a subproject or extension.
 #
-# @param C_FLAGS Additonal flags to add to CMAKE_C_FLAGS
-# @param CXX_FLAGS Additonal flags to add to CMAKE_CXX_FLAGS
-# @param INCLUDES Additional includes
+# @param TARGET the name of the project target to create
+# @param INTERFACE make TARGET an interface library
+# @param BINARY make TARGET an executable
 #
-macro(init_project)
-    set(multiVal C_FLAGS CXX_FLAGS INCLUDES)
-    cmake_parse_arguments(ARG "" "" "${multiVal}" ${ARGN})
+macro(init_project TARGET)
+    set(options INTERFACE BINARY)
+    cmake_parse_arguments(ARG "${options}" "" "" ${ARGN})
 
-    if(CMAKE_INSTALL_PREFIX STREQUAL "${VMM_PREFIX_PATH}")
-        set(PREFIX "vmm")
-    elseif(CMAKE_INSTALL_PREFIX STREQUAL "${USERSPACE_PREFIX_PATH}")
-        set(PREFIX "userspace")
-    elseif(CMAKE_INSTALL_PREFIX STREQUAL "${TEST_PREFIX_PATH}")
-        set(PREFIX "test")
-    elseif(CMAKE_INSTALL_PREFIX STREQUAL "${EFI_PREFIX_PATH}")
-        set(PREFIX "efi")
+    set(CMAKE_C_EXTENSIONS OFF)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+
+    enable_asm(${PREFIX})
+
+    if(${ARG_INTERFACE})
+        add_library(${TARGET} INTERFACE)
+        add_library(${PREFIX}::${TARGET} ALIAS ${TARGET})
+        set(INTERFACE TRUE)
+    elseif(NOT ${ARG_BINARY})
+        add_library(${TARGET} STATIC)
+        add_library(${PREFIX}::${TARGET} ALIAS ${TARGET})
+        set_target_properties(${TARGET} PROPERTIES LINKER_LANGUAGE C)
     else()
-        message(FATAL_ERROR "Invalid prefix: ${CMAKE_INSTALL_PREFIX}")
+        add_executable(${TARGET})
+        add_executable(${PREFIX}::${TARGET} ALIAS ${TARGET})
+        set_target_properties(${TARGET} PROPERTIES LINKER_LANGUAGE C)
+        set(BINARY TRUE)
     endif()
-    message(STATUS "Prefix: ${CMAKE_INSTALL_PREFIX}")
 
     if(PREFIX STREQUAL "vmm")
         set(CMAKE_SKIP_RPATH TRUE)
@@ -1103,37 +973,31 @@ macro(init_project)
         set(CMAKE_BUILD_TYPE "Debug")
     endif()
 
-    enable_asm(${PREFIX})
-
-    list(APPEND CMAKE_C_FLAGS ${ARG_C_FLAGS})
-    list(APPEND CMAKE_CXX_FLAGS ${ARG_CXX_FLAGS})
-
-    string(REPLACE ";" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-
-    include_directories(SYSTEM
-        ${ARG_INCLUDES}
-        ${SOURCE_BFSDK_DIR}/include
-        ${SOURCE_BFINTRINSICS_DIR}/include
-        ${CMAKE_CURRENT_LIST_DIR}
-        ${CMAKE_CURRENT_LIST_DIR}/include
-    )
-
-    if(NOT PREFIX STREQUAL "vmm")
-        include_directories(
-            SYSTEM ${CMAKE_INSTALL_PREFIX}/include
-        )
-    endif()
-
-    link_directories(
-        ${CMAKE_INSTALL_PREFIX}/lib
-    )
-
     get_cmake_property(_vars CACHE_VARIABLES)
     foreach (_var ${_vars})
         set(${_var} ${${_var}})
     endforeach()
 endmacro(init_project)
+
+# Fini Project
+#
+macro(fini_project)
+    set(PROJECT ${CMAKE_PROJECT_NAME})
+    set(EXPORT ${PROJECT}-${PREFIX}-targets)
+
+    if(NOT BINARY)
+        install(TARGETS ${PROJECT} DESTINATION lib EXPORT ${EXPORT})
+    else()
+        install(TARGETS ${PROJECT} DESTINATION bin EXPORT ${EXPORT})
+    endif()
+
+    install(EXPORT ${EXPORT} DESTINATION ${EXPORT_DIR} NAMESPACE ${PREFIX}::)
+    configure_file(
+        ${SOURCE_CMAKE_DIR}/package.cmake.in
+        ${EXPORT_DIR}/${PROJECT}-${PREFIX}-config.cmake
+        @ONLY
+    )
+endmacro(fini_project)
 
 # ------------------------------------------------------------------------------
 # validate_build / invalid_config
@@ -1315,33 +1179,31 @@ endmacro(set_bfm_vmm)
 #
 # Adds a unit test.
 #
-# @param FILENAME the file name of the test. Must start with "test_"
+# @param FILEPATH the file name of the test.
 # @param DEFINES Additional definitions for the test
-# @param DEPENDS Additional dependencies for the test. "_static" is added
-#     for you
+# @param DEPENDS Additional dependencies for the test.
 # @param SOURCES The source files to use for the test. If this is not defined,
-#     the file used is ${FILENAME}.cpp. This is only needed if the test file
+#     the file used is ${FILEPATH}.cpp. This is only needed if the test file
 #     is not in the same directory, allowing you to pass a source file with
-#     a directory. Nomrally FILENAME should still match the filename being
+#     a directory. Nomrally FILEPATH should still match the filename being
 #     used.
 #
-function(do_test FILENAME)
+function(do_test FILEPATH)
     set(multiVal DEFINES DEPENDS SOURCES CMD_LINE_ARGS)
     cmake_parse_arguments(ARG "" "" "${multiVal}" ${ARGN})
 
     if(NOT ARG_SOURCES)
-        set(ARG_SOURCES "${FILENAME}.cpp")
+        set(ARG_SOURCES "${FILEPATH}")
     endif()
 
-    string(REPLACE "test_" "" NAME "${FILENAME}")
+    get_filename_component(TEST_NAME "${FILEPATH}" NAME_WE)
+    string(REPLACE "test_" "" NAME "${TEST_NAME}")
 
-    add_executable(test_${NAME} ${ARG_SOURCES})
-    target_link_libraries(test_${NAME} ${ARG_DEPENDS} test_catch)
+    add_executable(test_${NAME})
+    target_sources(test_${NAME} PRIVATE ${ARG_SOURCES})
+    target_link_libraries(test_${NAME} PRIVATE ${ARG_DEPENDS} ${CMAKE_PROJECT_NAME})
     target_compile_definitions(test_${NAME} PRIVATE ${ARG_DEFINES})
-    add_test(test_${NAME} test_${NAME} ${ARG_CMD_LINE_ARGS})
-    if(CYGWIN OR WIN32)
-        target_link_libraries(test_${NAME} setupapi)
-    endif()
+    add_test(NAME test_${NAME} COMMAND test_${NAME} ${ARG_CMD_LINE_ARGS})
 endfunction(do_test)
 
 # ------------------------------------------------------------------------------
