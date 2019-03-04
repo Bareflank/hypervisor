@@ -272,6 +272,8 @@ set(EXPORT_DIR ${CMAKE_BINARY_DIR}/export
     "Target export directory"
 )
 
+set(PKG_FILE ${EXPORT_DIR}/pkg.list)
+
 # ------------------------------------------------------------------------------
 # Target Properties
 # ------------------------------------------------------------------------------
