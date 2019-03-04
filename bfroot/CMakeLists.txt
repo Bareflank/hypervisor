@@ -19,6 +19,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(bfroot C CXX)
 
+init_project(bfroot INTERFACE)
+
 # ------------------------------------------------------------------------------
 # Generator expressions
 # ------------------------------------------------------------------------------
@@ -31,10 +33,10 @@ set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 set(C_CXX_X64 $<AND:${C_CXX},${X64}>)
 set(MSVC $<CXX_COMPILER_ID:MSVC>)
 set(CLANG $<CXX_COMPILER_ID:Clang>)
-set(VMM $<AND:$<STREQUAL:${PREFIX},vmm>,$<BOOL:${BUILD_VMM}>>)
-set(EFI $<AND:$<STREQUAL:${PREFIX},efi>,$<BOOL:${BUILD_EFI}>>)
-set(TST $<AND:$<STREQUAL:${PREFIX},test>,$<BOOL:${BUILD_TEST}>>)
-set(USR $<AND:$<STREQUAL:${PREFIX},userspace>,$<BOOL:${BUILD_USERSPACE}>>)
+set(VMM $<AND:$<STREQUAL:${PREFIX},vmm>,$<BOOL:${ENABLE_BUILD_VMM}>>)
+set(EFI $<AND:$<STREQUAL:${PREFIX},efi>,$<BOOL:${ENABLE_BUILD_EFI}>>)
+set(TST $<AND:$<STREQUAL:${PREFIX},test>,$<BOOL:${ENABLE_BUILD_TEST}>>)
+set(USR $<AND:$<STREQUAL:${PREFIX},userspace>,$<BOOL:${ENABLE_BUILD_USERSPACE}>>)
 
 # VMM
 set(VMM_CXX $<AND:${VMM},${CXX}>)
@@ -141,12 +143,13 @@ if(PREFIX STREQUAL test)
     )
 
     add_library(catch)
-    target_sources(catch PRIVATE ${SOURCE_BFUTIL_DIR}/tests/test_catch.cpp)
-    target_include_directories(catch PRIVATE
+    target_link_libraries(bfroot INTERFACE catch)
+    target_sources(catch PRIVATE ${SOURCE_BFSDK_DIR}/tests/test_catch.cpp)
+    target_include_directories(catch SYSTEM PUBLIC
         $<BUILD_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/include>>
     )
+
     install(TARGETS catch DESTINATION lib EXPORT bfroot-test-targets)
-    target_link_libraries(bfroot INTERFACE catch)
 endif()
 
 target_compile_options(bfroot INTERFACE
@@ -168,7 +171,7 @@ target_compile_options(bfroot INTERFACE
 )
 target_compile_definitions(bfroot INTERFACE
     $<${TST_C_CXX}:NATIVE>
-    $<${TST_C_CXX}:BUILD_TEST>
+    $<${TST_C_CXX}:ENABLE_BUILD_TEST>
     $<${TST_C_CXX_MSVC}:_SCL_SECURE_NO_WARNINGS>
     $<${TST_C_CXX_MSVC}:_CRT_SECURE_NO_WARNINGS>
     $<${TST_C_CXX_MSVC}:NOMINMAX>
@@ -248,3 +251,5 @@ target_include_directories(bfroot SYSTEM INTERFACE
     $<INSTALL_INTERFACE:$<${EFI_C_CLANG}:${EFI_PREFIX_PATH}/include/efi>>
     $<INSTALL_INTERFACE:$<${EFI_C_CLANG}:${EFI_PREFIX_PATH}/include/efi/x86_64>>
 )
+
+fini_project()

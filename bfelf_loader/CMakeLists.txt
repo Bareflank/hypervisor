@@ -19,19 +19,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.6)
-project(bfelf_loader_test C CXX)
+cmake_minimum_required(VERSION 3.13)
+project(bfelf_loader C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project(
-    CXX_FLAGS -DVMM_PREFIX_PATH='"${VMM_PREFIX_PATH}"'
+init_project(bfelf_loader INTERFACE)
+
+target_link_libraries(bfelf_loader INTERFACE ${PREFIX}::bfroot)
+target_compile_definitions(bfelf_loader INTERFACE
+    $<$<COMPILE_LANGUAGE:CXX>:VMM_PREFIX_PATH='"${VMM_PREFIX_PATH}"'>
 )
 
-add_static_library(
-    test_support
-    SOURCES test_real_elf.cpp test_fake_elf.cpp
-    ALWAYS
+if(NOT PREFIX STREQUAL test)
+    install(DIRECTORY include/ DESTINATION include)
+    fini_project()
+    return()
+endif()
+
+add_library(test_support)
+target_sources(test_support PRIVATE
+    tests/test_real_elf.cpp
+    tests/test_fake_elf.cpp
 )
+target_link_libraries(test_support PUBLIC bfelf_loader)
 
 #do_test(test_binary DEPENDS test_support)
 #do_test(test_file_get_entry DEPENDS test_support)
@@ -52,3 +61,5 @@ add_static_library(
 #do_test(test_real DEPENDS test_support)
 #do_test(test_set_args DEPENDS test_support)
 #do_test(test_set_integer_args DEPENDS test_support)
+
+fini_project()

@@ -19,33 +19,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.6)
-project(bfsdk_test C CXX)
+cmake_minimum_required(VERSION 3.13)
+project(bfack C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
+init_project(bfack BINARY)
 
-add_library(test_catch STATIC test_catch.cpp)
-install(TARGETS test_catch DESTINATION lib)
+target_sources(bfack PRIVATE src/ack.cpp)
+target_link_libraries(bfack PRIVATE userspace::bfintrinsics)
+target_include_directories(bfack PRIVATE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/../bfsdk/include>
+)
 
-do_test(test_affinity)
-do_test(test_benchmark)
-do_test(test_bitmanip)
-do_test(test_buffer)
-do_test(test_callonce)
-do_test(test_debug)
-do_test(test_debugringinterface)
-do_test(test_delegate)
-do_test(test_errorcodes)
-do_test(test_exceptions)
-do_test(test_file)
-do_test(test_gsl_lite)
-do_test(test_gsl)
-do_test(test_json)
-do_test(test_manager)
-do_test(test_shuffle)
-do_test(test_string)
-do_test(test_types)
-do_test(test_upperlower)
-do_test(test_vcpuid)
-do_test(test_vector)
+install(TARGETS bfack DESTINATION bin)
+
+fini_project()
