@@ -19,23 +19,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-do_test(test_debug_ring
-    SOURCES debug_ring/test_debug_ring.cpp
-    DEPENDS bfvmm_debug
-    DEFINES STATIC_DEBUG
-    DEFINES STATIC_INTRINSICS
-)
-
-do_test(test_serial_ns16550a
-    SOURCES serial/test_serial_ns16550a.cpp
-    DEPENDS bfvmm_debug
-    DEFINES STATIC_DEBUG
-    DEFINES STATIC_INTRINSICS
-)
-
-# do_test(test_serial_port_pl011
-#     SOURCES serial/test_serial_pl011.cpp
-#     DEPENDS bfvmm_debug
-#     DEFINES STATIC_DEBUG
-#     DEFINES STATIC_INTRINSICS
-# )
+do_test(debug_ring/test_debug_ring.cpp)
+do_test(serial/test_serial_ns16550a.cpp)
+#do_test(serial/test_serial_pl011.cpp)

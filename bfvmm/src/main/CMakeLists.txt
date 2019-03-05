@@ -19,12 +19,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.6)
-project(example_rdtsc_vmm C CXX)
+add_executable(vmm)
+target_sources(vmm PRIVATE main.cpp)
+target_link_libraries(vmm PRIVATE bfvmm)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
-
-add_vmm_executable(example_rdtsc_vmm
-    SOURCES main.cpp
-)
+install(TARGETS vmm DESTINATION bin EXPORT bfvmm-vmm-targets)
