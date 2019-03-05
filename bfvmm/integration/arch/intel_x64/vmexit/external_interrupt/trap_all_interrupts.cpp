@@ -19,8 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <bfvmm/vcpu/vcpu_factory.h>
-#include <bfvmm/hve/arch/intel_x64/vcpu.h>
+#include <vcpu/vcpu_factory.h>
+#include <hve/arch/intel_x64/vcpu.h>
 
 using namespace bfvmm::intel_x64;
 

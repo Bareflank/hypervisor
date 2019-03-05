@@ -28,8 +28,8 @@
 
 #include <bfcallonce.h>
 
-#include <bfvmm/vcpu/vcpu_factory.h>
-#include <bfvmm/hve/arch/intel_x64/vcpu.h>
+#include <vcpu/vcpu_factory.h>
+#include <hve/arch/intel_x64/vcpu.h>
 
 using namespace bfvmm::intel_x64;
 

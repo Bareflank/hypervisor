@@ -39,7 +39,7 @@ set(BUILD_INCLUDE $<AND:${C_CXX},${BUILD}>)
 target_link_libraries(bfruntime INTERFACE ${PREFIX}::bfroot)
 target_include_directories(bfruntime INTERFACE
     $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/include>
-    $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../bfutil/include>
+    $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../bfsdk/include>
 )
 
 # -----------------------------------------------------------------------------
