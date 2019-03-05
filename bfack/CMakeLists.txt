@@ -19,12 +19,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.6)
-project(example_rdtsc_vmm C CXX)
+cmake_minimum_required(VERSION 3.10)
+project(bfack C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
+init_project(bfack BINARY)
 
-add_vmm_executable(example_rdtsc_vmm
-    SOURCES main.cpp
-)
+target_sources(bfack PRIVATE src/ack.cpp)
+target_link_libraries(bfack PRIVATE userspace::bfintrinsics)
+target_include_directories(bfack PRIVATE ../bfsdk/include)
+
+fini_project()

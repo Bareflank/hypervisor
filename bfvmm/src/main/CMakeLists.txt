@@ -19,14 +19,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.6)
-project(hook C CXX)
+add_executable(vmm)
+target_sources(vmm PRIVATE main.cpp)
+target_link_libraries(vmm PRIVATE bfvmm)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
-
-add_executable(hook hook.cpp)
-target_link_static_libraries(hook bfintrinsics)
-
-install(TARGETS hook DESTINATION bin)
-
+install(TARGETS vmm DESTINATION bin EXPORT bfvmm-vmm-targets)

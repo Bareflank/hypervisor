@@ -696,12 +696,9 @@ endfunction(add_custom_target_info)
 # internally by the main build system, but can also be used by extensions
 # for adding additional logic to the hypervisor.
 #
-# @param NOBUILD Include the sub project, but don't build the code. This is
-#     mainly used to register targets for a given sub project, and the prefix
-#     is usually "none".
-# @param NOINSTALL Skip the install step for the sub project
-# @param
-#
+# @param SOURCE_DIR the path to the project's CMakeLists.txt.
+# @param TOOLCHAIN the path to the toolchain file to use.
+# @param DEPENDS superbuild-level dependencies of the project.
 #
 function(add_subproject NAME PREFIX)
     set(oneVal SOURCE_DIR TOOLCHAIN)
