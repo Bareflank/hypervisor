@@ -3,36 +3,63 @@ CMake Buildsystem
 
 ### Overview
 
-This repo is a "superbuild" of many cmake sub-projects. The main "driver" of
+This repo is a superbuild of many cmake sub-projects. The main "driver" of
 the superbuild is the top-level CMakeLists.txt. It uses helper macros defined
 in scripts/cmake/macros.cmake and ExternalProject_Add to create targets for the
-build. From a CMake perspective, all the top-level targets are custom
-targets. The sub-projects themselves may define any type of target
-as needed.
+build. From a CMake perspective, all the top-level targets are custom targets,
+and the sub-projects define the actual libraries and executables.
+
+Because of the superbuild design, keep in mind that there are really two
+levels of dependencies: those between the custom targets specified
+by the superbuild and those between sub-projects themselves. Any dependency between
+targets within two subprojects implies a superbuild dependency of those projects.
+For example, the bfvmm libraries link against the bfintrinsics library, so
+'DEPENDS bfintrinsics' must be specified in the call to add_subproject(bfvmm).
 
 ### Subprojects
 
 Subprojects are simply CMake project()s. They can be built under different
 "prefixes", which is basically another way of saying "build requirements".
-Bareflank defines three prefixes: vmm, test, and userspace. The vmm has its own
-toolchain at scripts/cmake/toolchain/clang_x86_64_vmm.cmake, whereas test and
-userspace technically use the same toolchain, i.e. the host's, but have
-different compile options. Each prefix has its own set of compile options,
-include directories, etc. that every project built under the prefix uses.
-Each prefix specifies its build requirements with an INTERFACE library:
+Bareflank currently defines four prefixes: vmm, efi, test, and userspace.
+The vmm and efi prefixes have their own toolchain:
 
-    bfroot_vmm
-    bfroot_test
-    bfroot_userspace
+    vmm: scripts/cmake/toolchain/clang_x86_64_vmm.cmake
+    efi: scripts/cmake/toolchain/clang_x86_64_efi.cmake
 
-defined in bfroot/CMakeLists.txt. Downstream targets simply link against the
-prefix's root library to inherit the necessary build requirements. Of course
-the downstream target itself can define *its* build requirements as needed.
+whereas test and userspace technically use the same toolchain, i.e. the host's,
+but have slightly different compile options. Each prefix has its own set of
+compile options, include directories, etc. that every project built under the
+prefix uses. Each prefix encapsulates its build requirements with an
+INTERFACE library:
 
-Using this target-based approach delegates the problem of handling build
-requirements to CMake. However due to the superbuild design, there is one
-CMake feature that is needed in order for requirement propagation to work:
-target exports.
+    vmm::bfroot
+    efi::bfroot
+    test::bfroot
+    userspace::bfroot
+
+defined in bfroot/CMakeLists.txt. Downstream targets simply
+target_link_libraries against their prefix's root interface and the prefix's
+build options will be automatically placed in the targets' build commands.
+
+Note that any target defined in a subproject can specify its own build
+requirements, just like bfroot does. This is done with the PUBLIC, PRIVATE,
+and INTERFACE property specifiers to the various target_* commands. For
+example, to specify that the bfvmm_hve library links against the bfsdk
+library, there are three possibilities:
+
+    * target_link_libraries(bfvmm_hve INTERFACE bfsdk)
+    * target_link_libraries(bfvmm_hve PRIVATE bfsdk)
+    * target_link_libraries(bfvmm_hve PUBLIC bfsdk)
+
+The first says "bfvmm_hve _does_not_ link against bfsdk, but every
+target that link against bfvmm_hve _does_ link against bfsdk."
+The second says "bfvmm_hve _does_ link against bfsdk, but dependents of
+bfvmm_hve are not required to".
+The third says "bfvmm_hve and all its dependents link against bfsdk".
+
+Of course other properties like compile definitions and include directories can
+use this as well, and any INTERFACE property (those declared as INTERFACE or
+PUBLIC), will transitively propagate to the target's dependents.
 
 ### Exports
 
@@ -40,14 +67,30 @@ A CMake project defines a set of targets that by default are "private" to the
 project - external CMake projects don't know what targets it defines. Since
 Bareflank components are built as separate CMake projects, there has to be a
 way for a project to communicate its set of targets to external projects.
-Bareflank uses CMake's export functionality solve this problem.
+CMake's export functionality is used to solve this problem.
 
-Each Bareflank sub-project() defines an _export_set_ with a call to
-install(EXPORT <export>). In order to export a target Bareflank appends 'EXPORT
-<export>' to the install(TARGET) command. When 'make install' is run, CMake
-generates an "export file" to ${EXPORT_DIR}/<project>-<prefix>.cmake that
-contains an entry for each exported target. The entry encodes the target's
-build requirements and the name by which the target can be referenced in
-external projects. Each Bareflank project is exported with the name
-<prefix>::<project>. The '<prefix>::' prefix is a namespace used to
-prevent collisions among target names.
+Each Bareflank sub-project defines an _export_set_ with a call to
+install(EXPORT <export>). In order to export a target, append 'EXPORT
+<export>' to the targets install(TARGET) command. When 'make install' is run,
+CMake will generate an "export file" to
+${EXPORT_DIR}/<project>-<prefix>-targets.cmake that contains an entry for each
+exported target. The entry encodes the target's build requirements and the name
+by which the target can be referenced in external projects. Each Bareflank
+project is exported with the name <prefix>::<project>. This means that in
+order to, e.g., link bfvmm_hve against bfintrinsics (two targets defined in
+different *vmm* projects), you should prefix bfintrinsics with 'vmm::'.
+
+### Extensions
+
+Extensions are subprojects that reside in a different git
+repo from this one. Extensions have identical semantics to the subprojects
+described above. They can be added to the superbuild by appending the directory
+of their top CMakeLists.txt to the EXTENSION cmake variable. Near the end of
+its own CMakeLists.txt, the superbuild include()s the CMakeLists.txt found at
+each directory in this variable, so all the targets created prior to the
+include() are available for you to list as DEPENDS in your own add_subproject
+calls. This also means that an extension's top CMakeLists.txt must *not* have
+the typical cmake boilerplate like cmake_minimum_required() or project()
+because it isn't a new project - it is extending the superbuild itself. An
+extension's top CMakeLists.txt can use add_subproject to add its new projects
+to the build.
