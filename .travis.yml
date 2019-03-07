@@ -65,6 +65,14 @@ before_script:
       sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 100
     fi
 
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="http://www.cmake.org/files/v3.13/cmake-3.13.4-Linux-x86_64.tar.gz"
+      mkdir cmake
+      travis_retry wget --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=$(pwd)/cmake/bin:${PATH}
+    fi
+
 #
 # Build Matrix
 #
@@ -143,6 +151,7 @@ matrix:
     env:
       - TEST="Format"
     script:
+      - echo $PATH
       - cmake -DCONFIG=travis_format ..
       - make astyle_x86_64-userspace-elf
       - make format
