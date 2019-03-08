@@ -113,12 +113,13 @@ if(NOT WIN32)
         add_subproject(
             bfdso vmm
             SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
+            DEPENDS bfroot
         )
     else()
         add_subproject(
             bfdso vmm
             SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
-            DEPENDS binutils
+            DEPENDS binutils bfroot
         )
     endif()
 endif()
@@ -133,6 +134,7 @@ if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
         bfruntime vmm
         DEPENDS gsl
         DEPENDS libcxx
+        DEPENDS bfroot
     )
 endif()
 
@@ -196,6 +198,7 @@ if(ENABLE_BUILD_USERSPACE)
         DEPENDS gsl
         DEPENDS json
         DEPENDS cxxopts
+        DEPENDS bfroot
     )
 
     add_subproject(

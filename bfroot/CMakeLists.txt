@@ -25,49 +25,57 @@ init_project(bfroot INTERFACE)
 # Generator expressions
 # ------------------------------------------------------------------------------
 
-# Common
 set(C $<COMPILE_LANGUAGE:C>)
 set(CXX $<COMPILE_LANGUAGE:CXX>)
 set(C_CXX $<OR:${C},${CXX}>)
 set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 set(C_CXX_X64 $<AND:${C_CXX},${X64}>)
+
+set(GNU $<CXX_COMPILER_ID:GNU>)
 set(MSVC $<CXX_COMPILER_ID:MSVC>)
 set(CLANG $<CXX_COMPILER_ID:Clang>)
+
 set(VMM $<AND:$<STREQUAL:${PREFIX},vmm>,$<BOOL:${ENABLE_BUILD_VMM}>>)
 set(EFI $<AND:$<STREQUAL:${PREFIX},efi>,$<BOOL:${ENABLE_BUILD_EFI}>>)
 set(TST $<AND:$<STREQUAL:${PREFIX},test>,$<BOOL:${ENABLE_BUILD_TEST}>>)
 set(USR $<AND:$<STREQUAL:${PREFIX},userspace>,$<BOOL:${ENABLE_BUILD_USERSPACE}>>)
 
-# VMM
 set(VMM_CXX $<AND:${VMM},${CXX}>)
 set(VMM_C_CXX $<AND:${VMM},${C_CXX}>)
 set(VMM_C_CXX_CLANG $<AND:${VMM_C_CXX},${CLANG}>)
-set(VMM_C_CXX_MSVC $<AND:${VMM_C_CXX},${MSVC}>)
 
-# EFI
 set(EFI_C $<AND:${EFI},${C}>)
-set(EFI_C_CLANG $<AND:${EFI_C},${CLANG}>)
 set(EFI_C_CXX $<AND:${EFI},${C_CXX}>)
-set(EFI_C_CXX_CLANG $<AND:${EFI_C_CXX},${CLANG}>)
 
-# Test
 set(TST_C_CXX $<AND:${TST},${C_CXX}>)
-set(TST_C_CXX_MSVC $<AND:${TST_C_CXX},${MSVC}>)
+set(TST_CXX $<AND:${TST},${CXX}>)
+set(TST_CXX_GNU $<AND:${TST},${CXX},${GNU}>)
 set(TST_CXX_CLANG $<AND:${TST},${CXX},${CLANG}>)
+set(TST_CXX_CLANG_GNU $<AND:${TST},${CXX},$<OR:${CLANG},${GNU}>>)
+
+set(TST_C_CXX_GNU $<AND:${TST_C_CXX},${GNU}>)
+set(TST_C_CXX_MSVC $<AND:${TST_C_CXX},${MSVC}>)
 set(TST_C_CXX_CLANG $<AND:${TST_C_CXX},${CLANG}>)
-set(TST_C_CXX_CLANG_ASAN $<AND:${TST_C_CXX_CLANG},$<BOOL:${ENABLE_ASAN}>>)
-set(TST_C_CXX_CLANG_USAN $<AND:${TST_C_CXX_CLANG},$<BOOL:${ENABLE_USAN}>>)
-set(TST_C_CXX_CLANG_CODECOV $<AND:${TST_C_CXX_CLANG},$<BOOL:${ENABLE_CODECOV}>>)
+set(TST_C_CXX_CLANG_GNU $<AND:${TST_C_CXX},$<OR:${CLANG},${GNU}>>)
+
+set(TST_C_CXX_ASAN $<AND:${TST_C_CXX_CLANG_GNU},$<BOOL:${ENABLE_ASAN}>>)
+set(TST_C_CXX_USAN $<AND:${TST_C_CXX_CLANG_GNU},$<BOOL:${ENABLE_USAN}>>)
+set(TST_C_CXX_CODECOV $<AND:${TST_C_CXX_CLANG_GNU},$<BOOL:${ENABLE_CODECOV}>>)
+set(TST_C_CXX_GNU_ASAN $<AND:${TST_C_CXX_GNU},$<BOOL:${ENABLE_ASAN}>>)
+set(TST_C_CXX_GNU_CODECOV $<AND:${TST_C_CXX_GNU},$<BOOL:${ENABLE_CODECOV}>>)
 
 # Userspace
+set(USR_CXX_CLANG_GNU $<AND:${USR},${CXX},$<OR:${CLANG},${GNU}>>)
 set(USR_C_CXX $<AND:${USR},${C_CXX}>)
 set(USR_C_CXX_MSVC $<AND:${USR_C_CXX},${MSVC}>)
-set(USR_CXX_CLANG $<AND:${USR},${CXX},${CLANG}>)
 set(USR_C_CXX_CLANG $<AND:${USR_C_CXX},${CLANG}>)
+set(USR_C_CXX_CLANG_GNU $<AND:${USR_C_CXX},$<OR:${CLANG},${GNU}>>)
 
 # ------------------------------------------------------------------------------
 # Root interface for all prefixes
 # ------------------------------------------------------------------------------
+
+target_compile_features(bfroot INTERFACE c_std_11 cxx_std_17)
 
 target_compile_definitions(bfroot INTERFACE
     $<${C_CXX}:GSL_THROW_ON_CONTRACT_VIOLATION>
@@ -78,8 +86,6 @@ target_compile_options(bfroot INTERFACE
     $<${C_CXX_X64}:-msse>
     $<${C_CXX_X64}:-msse2>
     $<${C_CXX_X64}:-msse3>
-    $<${CXX}:-std=c++17>
-    $<${C}:-std=c11>
 )
 
 # ------------------------------------------------------------------------------
@@ -153,17 +159,16 @@ if(PREFIX STREQUAL test)
 endif()
 
 target_compile_options(bfroot INTERFACE
-    $<${TST_C_CXX_CLANG}:-fpic>
-    $<${TST_C_CXX_CLANG}:-fno-stack-protector>
-    $<${TST_C_CXX_CLANG}:-fvisibility=hidden>
-    $<${TST_C_CXX_CLANG}:-Wno-deprecated-declarations>
-    $<${TST_CXX_CLANG}:-fvisibility-inlines-hidden>
+    $<${TST_CXX_CLANG_GNU}:-fvisibility-inlines-hidden>
 
-    $<${TST_C_CXX_CLANG_ASAN}:-O1 -g -fno-omit-frame-pointer>
-    $<${TST_C_CXX_CLANG_ASAN}:-fsanitize=address -fsanitize=leak -fuse-ld=gold>
-    $<${TST_C_CXX_CLANG_USAN}:-fsanitize=undefined -fuse-ld=gold>
-    $<${TST_C_CXX_CLANG_CODECOV}:-g -O0 -fprofile-arcs>
-    $<${TST_C_CXX_CLANG_CODECOV}:-ftest-coverage -DDEBUG_LEVEL=5>
+    $<${TST_C_CXX_CLANG_GNU}:-fpic -fno-stack-protector>
+    $<${TST_C_CXX_CLANG_GNU}:-fvisibility=hidden -Wno-deprecated-declarations>
+
+    $<${TST_C_CXX_ASAN}:-O1 -g -fno-omit-frame-pointer>
+    $<${TST_C_CXX_ASAN}:-fsanitize=address -fsanitize=leak>
+    $<${TST_C_CXX_USAN}:-fsanitize=undefined>
+    $<${TST_C_CXX_CODECOV}:-g -O0 -fprofile-arcs>
+    $<${TST_C_CXX_CODECOV}:-ftest-coverage -DDEBUG_LEVEL=5>
 
     $<${TST_C_CXX_MSVC}:/EHsc>
     $<${TST_C_CXX_MSVC}:/bigobj>
@@ -176,11 +181,15 @@ target_compile_definitions(bfroot INTERFACE
     $<${TST_C_CXX_MSVC}:_CRT_SECURE_NO_WARNINGS>
     $<${TST_C_CXX_MSVC}:NOMINMAX>
 )
-target_include_directories(bfroot SYSTEM INTERFACE
-    $<INSTALL_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/include>>
+target_link_options(bfroot INTERFACE
+    $<${TST_C_CXX_GNU_ASAN}:-fsanitize=address>
+    $<${TST_C_CXX_GNU_CODECOV}:--coverage>
 )
 target_link_directories(bfroot INTERFACE
     $<INSTALL_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/lib>>
+)
+target_include_directories(bfroot SYSTEM INTERFACE
+    $<INSTALL_INTERFACE:$<${TST_C_CXX}:${TEST_PREFIX_PATH}/include>>
 )
 
 # ------------------------------------------------------------------------------
@@ -194,11 +203,11 @@ if(PREFIX STREQUAL userspace)
 endif()
 
 target_compile_options(bfroot INTERFACE
-    $<${USR_C_CXX_CLANG}:-fpic>
-    $<${USR_C_CXX_CLANG}:-fstack-protector-strong>
-    $<${USR_C_CXX_CLANG}:-fvisibility=hidden>
-    $<${USR_C_CXX_CLANG}:-Wno-deprecated-declarations>
-    $<${USR_CXX_CLANG}:-fvisibility-inlines-hidden>
+    $<${USR_C_CXX_CLANG_GNU}:-fpic>
+    $<${USR_C_CXX_CLANG_GNU}:-fstack-protector-strong>
+    $<${USR_C_CXX_CLANG_GNU}:-fvisibility=hidden>
+    $<${USR_C_CXX_CLANG_GNU}:-Wno-deprecated-declarations>
+    $<${USR_CXX_CLANG_GNU}:-fvisibility-inlines-hidden>
     $<${USR_C_CXX_MSVC}:/EHsc>
     $<${USR_C_CXX_MSVC}:/bigobj>
     $<${USR_C_CXX_MSVC}:/WX>
@@ -224,32 +233,32 @@ if(PREFIX STREQUAL efi)
 endif()
 
 target_compile_options(bfroot INTERFACE
-    $<${EFI_C_CLANG}:-mno-red-zone>
-    $<${EFI_C_CLANG}:-mno-avx>
-    $<${EFI_C_CLANG}:-g>
-    $<${EFI_C_CLANG}:-O2>
-    $<${EFI_C_CLANG}:-Wall>
-    $<${EFI_C_CLANG}:-Wextra>
-    $<${EFI_C_CLANG}:-Wno-error=pragmas>
-    $<${EFI_C_CLANG}:-fshort-wchar>
-    $<${EFI_C_CLANG}:-fno-strict-aliasing>
-    $<${EFI_C_CLANG}:-ffreestanding>
-    $<${EFI_C_CLANG}:-fno-stack-protector>
-    $<${EFI_C_CLANG}:-fno-stack-check>
-    $<${EFI_C_CLANG}:-fno-merge-all-constants>
-    $<${EFI_C_CLANG}:-std=c11>
-    $<${EFI_C_CLANG}:-U__linux__>
+    $<${EFI_C}:-mno-red-zone>
+    $<${EFI_C}:-mno-avx>
+    $<${EFI_C}:-g>
+    $<${EFI_C}:-O2>
+    $<${EFI_C}:-Wall>
+    $<${EFI_C}:-Wextra>
+    $<${EFI_C}:-Wno-error=pragmas>
+    $<${EFI_C}:-fshort-wchar>
+    $<${EFI_C}:-fno-strict-aliasing>
+    $<${EFI_C}:-ffreestanding>
+    $<${EFI_C}:-fno-stack-protector>
+    $<${EFI_C}:-fno-stack-check>
+    $<${EFI_C}:-fno-merge-all-constants>
+    $<${EFI_C}:-std=c11>
+    $<${EFI_C}:-U__linux__>
 )
 target_compile_definitions(bfroot INTERFACE
-    $<${EFI_C_CLANG}:CONFIG_x86_64>
-    $<${EFI_C_CLANG}:GNU_EFI_USE_MS_ABI>
-    $<${EFI_C_CLANG}:__KERNEL__>
-    $<${EFI_C_CLANG}:KERNEL>
-    $<${EFI_C_CLANG}:EFI>
+    $<${EFI_C}:CONFIG_x86_64>
+    $<${EFI_C}:GNU_EFI_USE_MS_ABI>
+    $<${EFI_C}:__KERNEL__>
+    $<${EFI_C}:KERNEL>
+    $<${EFI_C}:EFI>
 )
 target_include_directories(bfroot SYSTEM INTERFACE
-    $<INSTALL_INTERFACE:$<${EFI_C_CLANG}:${EFI_PREFIX_PATH}/include/efi>>
-    $<INSTALL_INTERFACE:$<${EFI_C_CLANG}:${EFI_PREFIX_PATH}/include/efi/x86_64>>
+    $<INSTALL_INTERFACE:$<${EFI_C}:${EFI_PREFIX_PATH}/include/efi>>
+    $<INSTALL_INTERFACE:$<${EFI_C}:${EFI_PREFIX_PATH}/include/efi/x86_64>>
 )
 
 fini_project()
