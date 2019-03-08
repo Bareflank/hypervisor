@@ -113,12 +113,13 @@ if(NOT WIN32)
         add_subproject(
             bfdso vmm
             SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
+            DEPENDS bfroot
         )
     else()
         add_subproject(
             bfdso vmm
             SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
-            DEPENDS binutils
+            DEPENDS binutils bfroot
         )
     endif()
 endif()
