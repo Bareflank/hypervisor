@@ -60,7 +60,7 @@ namespace bfn
 /// @param base the base for conversion
 /// @return the total number of digits in val given base
 ///
-inline int
+inline std::size_t
 digits(std::size_t val, const int base = 10)
 {
     std::array<char, 32> buf;
@@ -91,7 +91,7 @@ digits(std::size_t val, const int base = 10)
 /// @param pad if padding should be used
 /// @return the total number of digits of val given base
 ///
-inline int
+inline std::size_t
 to_string(std::string &str, std::size_t val, const int base = 10, bool pad = true)
 {
     std::array<char, 32> buf;
@@ -120,7 +120,7 @@ to_string(std::string &str, std::size_t val, const int base = 10, bool pad = tru
         }
     }
 
-    str += std::string_view(buf.data(), len);
+    str.append(buf.data(), len);
     return digits;
 }
 
