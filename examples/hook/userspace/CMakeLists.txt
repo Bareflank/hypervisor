@@ -29,4 +29,3 @@ add_executable(hook hook.cpp)
 target_link_static_libraries(hook bfintrinsics)
 
 install(TARGETS hook DESTINATION bin)
-
