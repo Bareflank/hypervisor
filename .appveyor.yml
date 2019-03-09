@@ -79,7 +79,7 @@ for:
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; wget %CMAKE_URL%"'
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; unzip cmake-3.13.4-win64-x64.zip"'
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; mkdir build_cygwin"'
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; ../cmake-3.13.4-win64-x64/bin/cmake.exe .."'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; ../cmake-3.13.4-win64-x64/bin/cmake .. -G \"Unix Makefiles\" -DENABLE_BUILD_VMM=OFF -DENABLE_BUILD_TEST=ON -DCMAKE_C_COMPILER_WORKS=ON'
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make -j3"'
 
   test: off

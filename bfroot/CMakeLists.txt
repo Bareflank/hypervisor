@@ -25,6 +25,9 @@ init_project(bfroot INTERFACE)
 # Generator expressions
 # ------------------------------------------------------------------------------
 
+set(CYG $<BOOL:${CYGWIN}>)
+set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
+
 set(C $<COMPILE_LANGUAGE:C>)
 set(CXX $<COMPILE_LANGUAGE:CXX>)
 set(C_CXX $<OR:${C},${CXX}>)
@@ -75,7 +78,7 @@ set(USR_C_CXX_CLANG_GNU $<AND:${USR_C_CXX},$<OR:${CLANG},${GNU}>>)
 # Root interface for all prefixes
 # ------------------------------------------------------------------------------
 
-target_compile_features(bfroot INTERFACE c_std_11 cxx_std_17)
+target_compile_features(bfroot INTERFACE $<$<NOT:${CYG}>:c_std_11 cxx_std_17>)
 
 target_compile_definitions(bfroot INTERFACE
     $<${C_CXX}:GSL_THROW_ON_CONTRACT_VIOLATION>
@@ -86,6 +89,7 @@ target_compile_options(bfroot INTERFACE
     $<${C_CXX_X64}:-msse>
     $<${C_CXX_X64}:-msse2>
     $<${C_CXX_X64}:-msse3>
+    $<${CYG}:-std=c11 -std=c++17>
 )
 
 # ------------------------------------------------------------------------------
@@ -180,6 +184,7 @@ target_compile_definitions(bfroot INTERFACE
     $<${TST_C_CXX_MSVC}:_SCL_SECURE_NO_WARNINGS>
     $<${TST_C_CXX_MSVC}:_CRT_SECURE_NO_WARNINGS>
     $<${TST_C_CXX_MSVC}:NOMINMAX>
+    $<${TST_C_CXX_MSVC}:_SILENCE_CXX17_UNCAUGHT_EXCEPTION_DEPRECATION_WARNING>
 )
 target_link_options(bfroot INTERFACE
     $<${TST_C_CXX_GNU_ASAN}:-fsanitize=address>
