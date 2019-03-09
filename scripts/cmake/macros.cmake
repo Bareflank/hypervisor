@@ -612,13 +612,13 @@ function(add_targets NAME PREFIX SOURCE_DIR)
         add_custom_command(
             TARGET unittest
             COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
-                ctest --output-on-failure
+            ctest -C Debug --output-on-failure
         )
 
         add_custom_target(
             unittest-${NAME}_${FULLPREFIX}
             COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${NAME}/${FULLPREFIX}/build
-                ctest --output-on-failure
+            ctest -C Debug --output-on-failure
         )
     endif()
 endfunction(add_targets)
