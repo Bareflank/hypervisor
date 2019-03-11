@@ -247,6 +247,15 @@ if(ENABLE_BUILD_USERSPACE)
 endif()
 
 # ------------------------------------------------------------------------------
+# Examples
+# ------------------------------------------------------------------------------
+
+include(examples/cpuidcount/CMakeLists.txt)
+include(examples/hook/CMakeLists.txt)
+include(examples/rdtsc/CMakeLists.txt)
+include(examples/vpid/CMakeLists.txt)
+
+# ------------------------------------------------------------------------------
 # External Components
 # ------------------------------------------------------------------------------
 
