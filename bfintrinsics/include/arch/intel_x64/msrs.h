@@ -13826,7 +13826,7 @@ namespace ia32_vmx_vmfunc
         { return is_bit_set(msr, from); }
 
         inline auto is_allowed1() noexcept
-        { return (_read_msr(addr) & (mask << 32)) != 0; }
+        { return (_read_msr(addr) & (mask)) != 0; }
 
         inline void dump(int level, std::string *msg = nullptr)
         { bfdebug_subbool(level, name, is_enabled(), msg); }
