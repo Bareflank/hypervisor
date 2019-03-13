@@ -33,7 +33,7 @@ do
         extn="${name##*.}"
 
         case $extn in
-        sh|bat|py|yml) # Add more "recognized" executable file extensions here as needed
+        sh|bat|py) # Add more "recognized" executable file extensions here as needed
             ;;
         *)
             bad="$bad $path"

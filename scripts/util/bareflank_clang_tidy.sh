@@ -106,14 +106,11 @@ get_changed_files $1 $2
 if [[ -z "$files" ]]; then
     echo -e "\033[1;32m\xE2\x9C\x93 nothing changed:\033[0m $2";
     exit 0
+elif [[ ! -f compile_commands.json ]]; then
+    # INTERFACE libraries are not compiled, so they
+    # will not have a compile_commands.json.
+    exit 0
 else
-    if [[ ! -f "compile_commands.json" ]]; then
-        echo "ERROR: database is missing. Did you run?"
-        echo "    - cmake -DENABLE_TIDY=ON .."
-        echo "    - files: $files"
-        exit 1
-    fi
-
     echo -e "\033[1;33m- processing:";
     echo -e "  \033[1;35msrc - \033[0m$2";
     echo -e "  \033[1;35mbld - \033[0m$PWD";

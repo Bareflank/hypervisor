@@ -151,7 +151,6 @@ matrix:
     env:
       - TEST="Format"
     script:
-      - echo $PATH
       - cmake -DCONFIG=travis_format ..
       - make astyle_x86_64-userspace-elf
       - make format
