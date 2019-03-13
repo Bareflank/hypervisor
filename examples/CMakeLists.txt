@@ -50,11 +50,3 @@ elseif(PREFIX STREQUAL "userspace")
 endif()
 
 fini_project()
-
-
-
-
-
-
-
-

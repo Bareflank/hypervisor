@@ -510,6 +510,10 @@ set(EFI_PREFIX_PATH ${PREFIXES_DIR}/${EFI_PREFIX}
     "EFI prefix path"
 )
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON
+    CACHE INTERNAL FORCE
+    "Export compile commands")
+
 # ------------------------------------------------------------------------------
 # Scripts
 # ------------------------------------------------------------------------------
