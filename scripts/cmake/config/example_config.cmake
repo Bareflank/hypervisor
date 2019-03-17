@@ -24,16 +24,13 @@
 # ------------------------------------------------------------------------------
 
 # To use this config, put this file in the same folder that contains the
-# hypervisor and build folder, (and extended apis if your using them), and
-# rename it to "config.cmake". For example:
+# hypervisor and build folder and rename it to "config.cmake".
+# For example:
 #
 # - working
 #   - build
 #   - hypervisor
-#   - hypervisor_example_vpid           # optional
-#   - hypervisor_example_rdtsc          # optional
-#   - hypervisor_example_cpuidcount     # optional
-#   - hypervisor_example_msr_bitmap     # optional
+#   - boxy # optional
 #   - config.cmake
 #
 # Change the options as needed, and then from the build folder, run the
@@ -80,44 +77,47 @@ set(ENABLE_BUILD_EFI OFF)
 #
 # These options enable the examples
 #
-set(ENABLE_HYPERVISOR_EXAMPLE_VPID OFF)
-set(ENABLE_HYPERVISOR_EXAMPLE_RDTSC OFF)
-set(ENABLE_HYPERVISOR_EXAMPLE_CPUIDCOUNT OFF)
-set(ENABLE_HYPERVISOR_EXAMPLE_MSR_BITMAP OFF)
-set(ENABLE_EXTENDED_APIS_EXAMPLE_HOOK OFF)
+set(ENABLE_EXAMPLE_CPUIDCOUNT OFF)
+set(ENABLE_EXAMPLE_HOOK OFF)
+set(ENABLE_EXAMPLE_RDTSC OFF)
+set(ENABLE_EXAMPLE_VPID OFF)
 
 # Override VMM
 #
-# If the override VMM is set, this VMM will be used instead of the default VMM
-# based on the current configuration.
+# Setting the OVERRIDE_VMM variable is the same as setting the DEFAULT_VMM
+# from the command line. Use this to change which VMM the build system will
+# load when you run 'make load` or `make quick`.
 #
 # set(OVERRIDE_VMM <name>)
+
+# Override VMM Target
+#
+# This is only needed if you also turn on EFI. If you are building EFI from
+# your own extension, you will need to tell the build system what the target
+# name is for your VMM so that it will know what target the EFI portion of
+# the build system depends on. This simply ensures that the build system
+# first compiles your custom VMM before compiling the bareflank.efi. In other
+# words, within the build system, this will add a call to add_dependency()
+# with the value you provide.
+#
 # set(OVERRIDE_VMM_TARGET <name>)
 
-# Override Compiler Warnings
-#
-# Tells the configuration that you want -Werror enabled regardless of the
-# setting of developer mode
-#
-# set(OVERRIDE_COMPILER_WARNINGS ON)
 
-# ------------------------------------------------------------------------------
-# Config Variables (No Need To Modify)
-# ------------------------------------------------------------------------------
 
-# Build Type
-#
-# Defines the type of hypervisor that is built. Possible values are Release
-# and Debug. Release mode turns on all optimizations and is the default
-#
+
+
+
+
+# ==============================================================================
+# DO NOT MODIFY BELOW
+# ==============================================================================
+
 if(ENABLE_DEVELOPER_MODE)
     set(CMAKE_BUILD_TYPE Debug)
 else()
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Shared vs Static Builds
-#
 if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI)
     set(BUILD_SHARED_LIBS ON)
     set(BUILD_STATIC_LIBS OFF)
@@ -126,21 +126,9 @@ else()
     set(BUILD_STATIC_LIBS ON)
 endif()
 
-# Cache
-#
-# THe build system maintains it's own cache of all external dependencies to
-# eliminate the need to download these dependencies multiple times. The default
-# location is in the build folder, but if you plan to do more than one build,
-# moving this cache outside of the build folder will speed up build times, and
-# prevent needless downloading.
-#
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/cache)
 set(CACHE_DIR ${CMAKE_CURRENT_LIST_DIR}/cache)
 
-# Enable Bits
-#
-# There are several enable bits that can be used to enable additional
-# functionality, or reduce which portions of the hypervisor are built.
-#
 if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI)
     set(ENABLE_BUILD_TEST ON)
 else()
@@ -159,19 +147,10 @@ else()
     set(ENABLE_CODECOV OFF)
 endif()
 
-# Compiler Warnings
-#
-# Enables compiler warnings. This option should always be on when developing.
-# Not that Release builds add "-Werror".
-#
-if(ENABLE_DEVELOPER_MODE AND NOT OVERRIDE_COMPILER_WARNINGS)
-    set(ENABLE_COMPILER_WARNINGS OFF)
-else()
-    set(ENABLE_COMPILER_WARNINGS ${OVERRIDE_COMPILER_WARNINGS})
-endif()
+set(ENABLE_COMPILER_WARNINGS ON)
 
 # ------------------------------------------------------------------------------
-# Hyperkernel
+# Boxy
 # ------------------------------------------------------------------------------
 
 if(ENABLE_BOXY)
@@ -185,39 +164,20 @@ endif()
 # Examples
 # ------------------------------------------------------------------------------
 
-if(ENABLE_HYPERVISOR_EXAMPLE_VPID)
-    set_bfm_vmm(example_vmm)
-    list(APPEND EXTENSION
-        ${CMAKE_CURRENT_LIST_DIR}/hypervisor_example_vpid
-    )
+if(ENABLE_EXAMPLE_CPUIDCOUNT)
+    set_bfm_vmm(example_cpuidcount_vmm)
 endif()
 
-if(ENABLE_HYPERVISOR_EXAMPLE_RDTSC)
-    set_bfm_vmm(example_vmm)
-    list(APPEND EXTENSION
-        ${CMAKE_CURRENT_LIST_DIR}/hypervisor_example_rdtsc
-    )
+if(ENABLE_EXAMPLE_HOOK)
+    set_bfm_vmm(example_hook_vmm)
 endif()
 
-if(ENABLE_HYPERVISOR_EXAMPLE_CPUIDCOUNT)
-    set_bfm_vmm(example_vmm)
-    list(APPEND EXTENSION
-        ${CMAKE_CURRENT_LIST_DIR}/hypervisor_example_cpuidcount
-    )
+if(ENABLE_EXAMPLE_RDTSC)
+    set_bfm_vmm(example_rdtsc_vmm)
 endif()
 
-if(ENABLE_HYPERVISOR_EXAMPLE_MSR_BITMAP)
-    set_bfm_vmm(example_vmm)
-    list(APPEND EXTENSION
-        ${CMAKE_CURRENT_LIST_DIR}/hypervisor_example_msr_bitmap
-    )
-endif()
-
-if(ENABLE_EXTENDED_APIS_EXAMPLE_HOOK)
-    set_bfm_vmm(example_vmm)
-    list(APPEND EXTENSION
-        ${CMAKE_CURRENT_LIST_DIR}/extended_apis_example_hook
-    )
+if(ENABLE_EXAMPLE_VPID)
+    set_bfm_vmm(example_vpid_vmm)
 endif()
 
 # ------------------------------------------------------------------------------
