@@ -32,7 +32,7 @@ also create proprietary versions of the hypervisor if so desired.
 In addition, the project comes complete with a set of unit tests to validate
 that the provided SDK works as expected. These tests are checked for completeness using
 [Codecov](https://codecov.io/gh/Bareflank/hypervisor). Furthermore,
-[Travis CI](https://travis-ci.org/Bareflank/hypervisor) has been setup to
+[Travis CI](https://travis-ci.org/Bareflank/hypervisor) has been set up to
 test source code formatting via
 [Astyle](http://astyle.sourceforge.net), and static / dynamic analysis
 via
@@ -49,7 +49,7 @@ and the
 including support for the
 [Guideline Support Library](https://github.com/Microsoft/GSL).
 
-Currently we have support for the following 64bit host operating systems on
+Currently, we have support for the following 64bit host operating systems on
 Intel _Sandy Bridge_ and above hardware:
 - Arch Linux
 - Ubuntu 17.10+
@@ -73,7 +73,7 @@ Most people think that hypervisors are meant to virtualize servers and provide a
 
 ## Demo
 
-Checkout the latest demo for how to compile and use the Bareflank Hypervisor on Ubuntu 18.04:
+Check out the latest demo for how to compile and use the Bareflank Hypervisor on Ubuntu 18.04:
 
 [![Bareflank Demonstration Video](http://img.youtube.com/vi/fNLXxtdkhLg/maxresdefault.jpg)](https://www.youtube.com/watch?v=fNLXxtdkhLg)
 
@@ -108,7 +108,7 @@ sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cm
   - Check "VC++ 2017 version xxx Libs for Spectre (ARM64)"
   - Check "VC++ 2017 version xxx Libs for Spectre (x86 and x64)"
 
-After installing the the above packages you must enable test signing mode. This can be done from a
+After installing the above packages, you must enable test signing mode. This can be done from a
 command prompt with admin privileges:
 ```
 bcdedit.exe /set testsigning ON
@@ -122,9 +122,9 @@ cmake -G "Visual Studio 15 2017 Win64" -DENABLE_BUILD_VMM=OFF ..
 ```
 
 Note that this version of Bareflank cannot be used to compile hypervisor as Visual Studio currently
-cannot build the needed ELF files that Bareflank relies on. This build environment also relys on
+cannot build the needed ELF files that Bareflank relies on. This build environment also relies on
 msbuild, which doesn't support any of the build targets so compiling the drivers must be done
-manually. This environment however will compile the userspace applications natively which is
+manually. This environment, however, will compile the userspace applications natively which is
 needed for deployment to remove dependencies on Cygwin.
 
 #### Windows (Cygwin):
@@ -169,7 +169,7 @@ Windows file system from Linux which can be found here:
 Note that the WSL cannot be used to compile the Windows drivers or start/stop the hypervisor.
 It can, however, be used to compile the hypervisor including the UEFI version without the
 need for Cygwin. If this is paired with the Visual Studio build environment, and you manually
-compile the drivers, you can piece together a complete build enviornment for Windows without the
+compile the drivers, you can piece together a complete build environment for Windows without the
 need for Cygwin. Developers are advised not to use this however as it is cumbersome and instead
 should use the Cygwin environment. The WSL is only supported for deployment purposes.
 
@@ -216,6 +216,40 @@ to clean up:
 ```
 make distclean
 ```
+## Example Extensions
+As stated above, the Bareflank Hypervisor is an SDK to create your own, more complicated
+hypervisors. One example of an extension is the [boxy](https://github.com/Bareflank/boxy)
+hypervisor, which provides support for Linux based guest virtual machines. There are
+several other examples in our [examples](https://github.com/Bareflank/hypervisor/tree/master/examples)
+folder.
+
+To use one of these examples, you must tell the build system which Virtual Machine
+Monitor (VMM) you wish to use. By default, the build system will use "bfvmm", but
+you can override this by defining DEFAULT_VMM variable when running cmake. Each
+example has its own VMM target. For example, the CPUID count example's VMM is
+"example_cpuidcount_vmm" which can be seen in the following
+[CMakeLists.txt](https://github.com/Bareflank/hypervisor/blob/master/examples/cpuidcount/CMakeLists.txt)
+file. So for example, to compile Bareflank and test out the CPUID count example,
+you could configure Bareflank using the following:
+
+```
+cmake -DDEFAULT_VMM=example_cpuidcount_vmm ..
+```
+
+In addition to setting the DEFAULT_VMM, if you are using the
+[example_config.cmake](https://github.com/Bareflank/hypervisor/blob/master/scripts/cmake/config/example_config.cmake)
+config file, you can either set the DEFAULT_VMM variable in your config, or you
+can set the OVERRIDE_VMM which will set the DEFAULT_VMM for you.
+
+Finally, if you are creating your own out of tree extension, you must tell the build system
+where your extension is located so that it can include it when building the hypervisor.
+To do this, you must define EXTENSION variable. So for example, if you are creating your
+own extension, with your own VMM target, you would use the following when configuring
+cmake:
+
+```
+cmake -DDEFAULT_VMM=<vmm target name> -DEXTENSION=<path to extension> ..
+```
 
 ## UEFI:
 A UEFI application version of Bareflank may be compiled on Linux and used to boot
@@ -249,7 +283,7 @@ flag. You will also need to set the following:
 set(OVERRIDE_VMM <name>)
 set(OVERRIDE_VMM_TARGET <name>)
 ```
-If for example you are using the integration test listed above, these setting would
+If for example, you are using the integration test listed above, these setting would
 be as follows:
 ```
 set(OVERRIDE_VMM integration_intel_x64_efi_test_efi)
@@ -267,7 +301,7 @@ Place this binary in your EFI partition (e.g., on Ubuntu this is
 /boot/efi/EFI/BOOT/bareflank.efi) and execute it like any other EFI application.
 Once Bareflank is running, you can start Windows or Linux if you included the
 above. Also note that utilities like "make dump" do not work when using EFI as
-the driver doesn't have access to the debug ring. You can however use
+the driver doesn't have access to the debug ring. You can, however, use
 "make ack" to get the hypervisor to say "hi".
 
 ## Serial Instructions
