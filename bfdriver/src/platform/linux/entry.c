@@ -27,6 +27,7 @@
 #include <linux/kallsyms.h>
 #include <linux/notifier.h>
 #include <linux/reboot.h>
+#include <linux/suspend.h>
 
 #include <common.h>
 
@@ -345,8 +346,7 @@ static struct miscdevice bareflank_dev = {
 /* -------------------------------------------------------------------------- */
 
 int
-dev_reboot(struct notifier_block *nb,
-           unsigned long code, void *unused)
+dev_reboot(struct notifier_block *nb, unsigned long code, void *unused)
 {
     (void) nb;
     (void) code;
@@ -357,14 +357,49 @@ dev_reboot(struct notifier_block *nb,
     return NOTIFY_DONE;
 }
 
-static struct notifier_block bareflank_notifier_block = {
+int
+dev_pm(struct notifier_block *nb, unsigned long code, void *unused)
+{
+    (void) nb;
+    (void) unused;
+
+    switch(code) {
+        case PM_SUSPEND_PREPARE:
+        case PM_HIBERNATION_PREPARE:
+        case PM_RESTORE_PREPARE:
+            if (ioctl_stop_vmm() != 0) {
+                return -EPERM;
+            }
+            break;
+
+        case PM_POST_SUSPEND:
+        case PM_POST_HIBERNATION:
+        case PM_POST_RESTORE:
+            if (ioctl_start_vmm() != 0) {
+                return -EPERM;
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    return NOTIFY_DONE;
+}
+
+static struct notifier_block reboot_notifier_block = {
     .notifier_call = dev_reboot
+};
+
+static struct notifier_block pm_notifier_block = {
+    .notifier_call = dev_pm
 };
 
 int
 dev_init(void)
 {
-    register_reboot_notifier(&bareflank_notifier_block);
+    register_reboot_notifier(&reboot_notifier_block);
+    register_pm_notifier(&pm_notifier_block);
 
     if (misc_register(&bareflank_dev) != 0) {
         BFALERT("misc_register failed\n");
@@ -385,7 +420,9 @@ dev_exit(void)
     common_fini();
 
     misc_deregister(&bareflank_dev);
-    unregister_reboot_notifier(&bareflank_notifier_block);
+
+    unregister_pm_notifier(&pm_notifier_block);
+    unregister_reboot_notifier(&reboot_notifier_block);
 
     BFDEBUG("dev_exit succeeded\n");
     return;
