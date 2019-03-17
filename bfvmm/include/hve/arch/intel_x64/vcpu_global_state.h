@@ -33,7 +33,8 @@ namespace bfvmm::intel_x64
 struct vcpu_global_state_t {
 
     uint64_t ia32_vmx_cr0_fixed0 {
-        ::intel_x64::msrs::ia32_vmx_cr0_fixed0::get()
+        ::intel_x64::msrs::ia32_vmx_cr0_fixed0::get() |
+        ::intel_x64::cr0::extension_type::mask
     };
 
     uint64_t ia32_vmx_cr4_fixed0 {

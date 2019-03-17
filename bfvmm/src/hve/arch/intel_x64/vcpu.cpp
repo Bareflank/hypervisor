@@ -317,9 +317,9 @@ vcpu::write_guest_state()
     guest_ldtr_base::set(ldtr_index != 0 ? guest_gdt.base(ldtr_index) : 0);
     guest_tr_base::set(tr_index != 0 ? guest_gdt.base(tr_index) : 0);
 
-    guest_cr0::set(cr0::get() | ::intel_x64::msrs::ia32_vmx_cr0_fixed0::get());
+    this->set_cr0(cr0::get());
     guest_cr3::set(cr3::get());
-    guest_cr4::set(cr4::get() | ::intel_x64::msrs::ia32_vmx_cr4_fixed0::get());
+    this->set_cr4(cr4::get());
     guest_dr7::set(dr7::get());
 
     guest_rflags::set(::x64::rflags::get());
@@ -1344,6 +1344,11 @@ void
 vcpu::set_cr0(uint64_t val) noexcept
 {
     vmcs_n::cr0_read_shadow::set(val);
+
+    ::intel_x64::cr0::extension_type::enable(val);
+    ::intel_x64::cr0::not_write_through::disable(val);
+    ::intel_x64::cr0::cache_disable::disable(val);
+
     vmcs_n::guest_cr0::set(val | m_global_state->ia32_vmx_cr0_fixed0);
 }
 
