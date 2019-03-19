@@ -24,9 +24,18 @@ project(bfelf_loader C CXX)
 
 init_project(bfelf_loader INTERFACE)
 
+set(CXX $<COMPILE_LANGUAGE:CXX>)
+set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>>)
+set(BUILD_INCLUDE $<AND:${CXX},${BUILD}>)
+
 target_link_libraries(bfelf_loader INTERFACE ${PREFIX}::bfroot)
 target_compile_definitions(bfelf_loader INTERFACE
-    $<$<COMPILE_LANGUAGE:CXX>:VMM_PREFIX_PATH='"${VMM_PREFIX_PATH}"'>
+    $<${CXX}:VMM_PREFIX_PATH='${VMM_PREFIX_PATH}'>
+)
+target_include_directories(bfelf_loader INTERFACE
+    $<${BUILD_INCLUDE}:${PROJECT_SOURCE_DIR}/tests>
+    $<${BUILD_INCLUDE}:${PROJECT_SOURCE_DIR}/include>
+    $<${BUILD_INCLUDE}:${PROJECT_SOURCE_DIR}/../bfsdk/include>
 )
 
 if(NOT PREFIX STREQUAL test)
@@ -35,12 +44,13 @@ if(NOT PREFIX STREQUAL test)
     return()
 endif()
 
-add_library(test_support)
-target_sources(test_support PRIVATE
-    tests/test_real_elf.cpp
-    tests/test_fake_elf.cpp
-)
-target_link_libraries(test_support PUBLIC bfelf_loader)
+#add_library(test_support)
+#target_sources(test_support PRIVATE
+#    tests/test_real_elf.cpp
+#    tests/test_fake_elf.cpp
+#)
+#target_link_libraries(test_support PUBLIC bfelf_loader)
+#target_include_directories(test_support PUBLIC ${PROJECT_SOURCE_DIR}/tests)
 
 #do_test(test_binary DEPENDS test_support)
 #do_test(test_file_get_entry DEPENDS test_support)

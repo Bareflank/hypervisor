@@ -145,12 +145,12 @@ endif()
 # ------------------------------------------------------------------------------
 
 if(ENABLE_BUILD_TEST)
-    add_subproject(bfsdk test DEPENDS gsl json hippomocks)
+    add_subproject(bfsdk test DEPENDS gsl json hippomocks bfroot)
 endif()
 
 if(ENABLE_BUILD_TEST AND NOT WIN32)
-    add_subproject(bfdummy vmm DEPENDS bfunwind)
-    add_subproject(bfelf_loader test DEPENDS bfsdk)
+    #    add_subproject(bfdummy vmm DEPENDS bfunwind)
+    #    add_subproject(bfelf_loader test DEPENDS bfsdk)
     add_subproject(bfdriver test DEPENDS bfsdk)
 endif()
 
@@ -165,7 +165,7 @@ endif()
 # ------------------------------------------------------------------------------
 
 if(ENABLE_BUILD_USERSPACE)
-    add_subproject(bfintrinsics userspace DEPENDS gsl json)
+    add_subproject(bfintrinsics userspace DEPENDS gsl json bfroot)
     add_subproject(bfm userspace DEPENDS gsl json cxxopts bfroot)
     add_subproject(bfack userspace DEPENDS bfintrinsics)
     add_subproject(examples userspace DEPENDS bfintrinsics)
@@ -183,11 +183,7 @@ include_external_extensions()
 
 if(ENABLE_BUILD_EFI AND NOT WIN32)
     include_dependency(SOURCE_DEPENDS_DIR gnuefi)
-
-    add_subproject(
-        bfdriver efi
-        DEPENDS bfroot gnuefi ${BFM_VMM_TARGET}
-    )
+    add_subproject(bfdriver efi DEPENDS bfroot gnuefi ${BFM_VMM_TARGET})
 endif()
 
 # ------------------------------------------------------------------------------

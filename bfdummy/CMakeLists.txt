@@ -19,12 +19,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.13)
 project(bfdummy C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project(
-    INCLUDES ${CMAKE_CURRENT_LIST_DIR}/../include
-)
+init_project(bfdummy INTERFACE)
 
-add_subdirectory(libs)
+add_library(dummy_lib1 src/libs/dummy_lib1.cpp)
+add_library(dummy_lib2 src/libs/dummy_lib2.cpp)
+
+set_target_properties(dummy_lib1 PROPERTIES LINKER_LANGUAGE C)
+set_target_properties(dummy_lib2 PROPERTIES LINKER_LANGUAGE C)
+
+install(TARGETS dummy_lib1 DESTINATION lib EXPORT bfdummy-vmm-targets)
+install(TARGETS dummy_lib2 DESTINATION lib EXPORT bfdummy-vmm-targets)
+
+fini_project()
