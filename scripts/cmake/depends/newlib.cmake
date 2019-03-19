@@ -19,6 +19,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+include(${VMM_TOOLCHAIN_PATH})
+
 if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
     message(STATUS "Including dependency: newlib")
 
@@ -28,8 +30,8 @@ if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
         URL_MD5     ${NEWLIB_URL_MD5}
     )
 
-    set(CC_FOR_TARGET clang)
-    set(CXX_FOR_TARGET clang)
+    set(CC_FOR_TARGET ${CLANG_BIN})
+    set(CXX_FOR_TARGET ${CLANG_BIN})
 
     set(AR_FOR_TARGET ar)
     set(AS_FOR_TARGET as)
@@ -39,12 +41,7 @@ if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
     set(RANLIB_FOR_TARGET ranlib)
     set(READELF_FOR_TARGET readelf)
     set(STRIP_FOR_TARGET strip)
-
-    if(DEFINED ENV{LD_BIN})
-        set(LD_FOR_TARGET $ENV{LD_BIN})
-    else()
-        set(LD_FOR_TARGET ${VMM_PREFIX_PATH}/bin/ld)
-    endif()
+    set(LD_FOR_TARGET ${LD_BIN})
 
     generate_flags(
         vmm

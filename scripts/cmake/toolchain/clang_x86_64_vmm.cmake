@@ -45,7 +45,7 @@ endif()
 if(DEFINED ENV{LD_BIN})
     set(LD_BIN $ENV{LD_BIN})
 else()
-    set(LD_BIN ${CMAKE_INSTALL_PREFIX}/bin/ld)
+    set(LD_BIN ${VMM_PREFIX_PATH}/bin/ld)
 endif()
 
 string(CONCAT LD_FLAGS
