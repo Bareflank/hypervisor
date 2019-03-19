@@ -43,7 +43,7 @@ PROJECT_BRIEF = "lightweight, extendable hypervisor written in C++ with support 
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT = bfdriver/include bfm/include bfsdk/include bfvmm/include
+INPUT = bfdriver/include bfelf_loader/include bfm/include bfsdk/include bfvmm/include
 
 # The EXCLUDE tag can be used to specify files and/or directories that should be
 # excluded from the INPUT source files. This way you can easily exclude a

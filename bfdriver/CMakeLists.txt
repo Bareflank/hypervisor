@@ -61,6 +61,7 @@ if(${PREFIX} STREQUAL efi)
     target_include_directories(bareflank PRIVATE
         $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/include>
         $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../bfsdk/include>
+        $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../bfelf_loader/include>
         $<${BUILD_INCLUDE}:${CMAKE_BINARY_DIR}>
     )
     target_sources(bareflank PRIVATE
@@ -91,6 +92,7 @@ if(${PREFIX} STREQUAL test)
     target_include_directories(bfdriver INTERFACE
         $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/include>
         $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../bfsdk/include>
+        $<${BUILD_INCLUDE}:${CMAKE_CURRENT_LIST_DIR}/../bfelf_loader/include>
     )
     target_compile_definitions(bfdriver INTERFACE
         $<${BUILD_INCLUDE_CXX}:VMM_PREFIX_PATH=\"${VMM_PREFIX_PATH}\">
