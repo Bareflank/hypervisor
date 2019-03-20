@@ -230,7 +230,7 @@ example has its own VMM target. For example, the CPUID count example's VMM is
 "example_cpuidcount_vmm" which can be seen in the following
 [CMakeLists.txt](https://github.com/Bareflank/hypervisor/blob/master/examples/cpuidcount/CMakeLists.txt)
 file. So for example, to compile Bareflank and test out the CPUID count example,
-you could configure Bareflank using the following:
+you would configure Bareflank using the following:
 
 ```
 cmake -DDEFAULT_VMM=example_cpuidcount_vmm ..
@@ -238,12 +238,11 @@ cmake -DDEFAULT_VMM=example_cpuidcount_vmm ..
 
 In addition to setting the DEFAULT_VMM, if you are using the
 [example_config.cmake](https://github.com/Bareflank/hypervisor/blob/master/scripts/cmake/config/example_config.cmake)
-config file, you can either set the DEFAULT_VMM variable in your config, or you
-can set the OVERRIDE_VMM which will set the DEFAULT_VMM for you.
+config file you would set the OVERRIDE_VMM variable which will set the DEFAULT_VMM for you.
 
-Finally, if you are creating your own out of tree extension, you must tell the build system
+Finally, if you are creating your own out-of-tree extension, you must tell the build system
 where your extension is located so that it can include it when building the hypervisor.
-To do this, you must define EXTENSION variable. So for example, if you are creating your
+To do this, you must define the EXTENSION variable. So for example, if you are creating your
 own extension, with your own VMM target, you would use the following when configuring
 cmake:
 
