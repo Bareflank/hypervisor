@@ -146,11 +146,15 @@ cpuid_handler::cpuid_handler(
     );
 
     this->add_emulator(
-        0x4BF00011, handler_delegate_t::create<handle_cpuid_0x4BF00011>()
+        0x4BF00020, handler_delegate_t::create<handle_cpuid_0x4BF00020>()
     );
 
+    if (vcpu->is_guest_vm_vcpu()) {
+        return;
+    }
+
     this->add_emulator(
-        0x4BF00020, handler_delegate_t::create<handle_cpuid_0x4BF00020>()
+        0x4BF00011, handler_delegate_t::create<handle_cpuid_0x4BF00011>()
     );
 
     this->add_emulator(

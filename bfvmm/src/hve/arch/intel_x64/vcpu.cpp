@@ -159,11 +159,7 @@ vcpu::vcpu(
     bfn::call_once(g_once_flag, setup);
 
     this->add_run_delegate(
-        run_delegate_t::create<intel_x64::vcpu, &intel_x64::vcpu::run_delegate>(this)
-    );
-
-    this->add_hlt_delegate(
-        hlt_delegate_t::create<intel_x64::vcpu, &intel_x64::vcpu::hlt_delegate>(this)
+        vcpu_delegate_t::create<intel_x64::vcpu, &intel_x64::vcpu::run_delegate>(this)
     );
 
     m_state.vcpu_ptr =
@@ -404,19 +400,14 @@ vcpu::write_control_state()
 void
 vcpu::run_delegate(bfobject *obj)
 {
-    // TODO
-    //
-    // We need to implement a vCPU clear() function that is capable of
-    // setting m_launched back to false and then clearing the VMCS. This
-    // way, the next time this function is executed, a launch takes place
-    // again. This is needed in order to perform a VMCS migration.
-    //
-    // Question: Do we need to re-setup all of the VMCS fields?
-    //
-
     bfignored(obj);
 
     if (m_launched) {
+
+        for (const auto &d : m_resume_delegates) {
+            d(obj);
+        }
+
         m_vmcs.resume();
     }
     else {
@@ -424,26 +415,19 @@ vcpu::run_delegate(bfobject *obj)
         m_launched = true;
 
         try {
-            m_vmcs.load();
+
+            for (const auto &d : m_launch_delegates) {
+                d(obj);
+            }
+
+            m_launched = true;
             m_vmcs.launch();
         }
         catch (...) {
             m_launched = false;
             throw;
         }
-
-        ::x64::cpuid::get(0x4BF00010, 0, 0, 0);
-        ::x64::cpuid::get(0x4BF00011, 0, 0, 0);
     }
-}
-
-void
-vcpu::hlt_delegate(bfobject *obj)
-{
-    bfignored(obj);
-
-    ::x64::cpuid::get(0x4BF00020, 0, 0, 0);
-    ::x64::cpuid::get(0x4BF00021, 0, 0, 0);
 }
 
 //==============================================================================
@@ -453,6 +437,13 @@ vcpu::hlt_delegate(bfobject *obj)
 void
 vcpu::load()
 { m_vmcs.load(); }
+
+void
+vcpu::clear()
+{
+    m_vmcs.clear();
+    m_launched = false;
+}
 
 void
 vcpu::promote()
@@ -752,7 +743,7 @@ vcpu::add_default_io_instruction_handler(
 
 void
 vcpu::add_monitor_trap_handler(
-    const monitor_trap_handler::handler_delegate_t &d)
+    const ::handler_delegate_t &d)
 { m_monitor_trap_handler.add_handler(d); }
 
 void

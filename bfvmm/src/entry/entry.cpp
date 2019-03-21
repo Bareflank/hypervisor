@@ -87,14 +87,14 @@ private_init_vmm(uint64_t arg) noexcept
 
         g_vcm->create(arg, nullptr);
 
-        auto ___ = gsl::on_failure([&]
-        { g_vcm->destroy(arg); });
+        auto vcpu = g_vcm->get<vcpu_t *>(arg);
+        vcpu->load();
 
-#ifdef BF_INTEL_X64
-        vcpu_init_nonroot(g_vcm->get<vcpu_t *>(arg));
-#endif
+        vcpu_init_nonroot(vcpu);
+        vcpu->run();
 
-        g_vcm->run(arg, nullptr);
+        ::x64::cpuid::get(0x4BF00010, 0, 0, 0);
+        ::x64::cpuid::get(0x4BF00011, 0, 0, 0);
 
         return ENTRY_SUCCESS;
     });
@@ -105,11 +105,14 @@ private_fini_vmm(uint64_t arg) noexcept
 {
     return guard_exceptions(ENTRY_ERROR_VMM_STOP_FAILED, [&]() {
 
-        g_vcm->hlt(arg, nullptr);
+        ::x64::cpuid::get(0x4BF00020, 0, 0, 0);
+        ::x64::cpuid::get(0x4BF00021, 0, 0, 0);
 
-#ifdef BF_INTEL_X64
-        vcpu_fini_nonroot(g_vcm->get<vcpu_t *>(arg));
-#endif
+        auto vcpu = g_vcm->get<vcpu_t *>(arg);
+        vcpu->load();
+
+        vcpu->hlt();
+        vcpu_fini_nonroot(vcpu);
 
         g_vcm->destroy(arg, nullptr);
 

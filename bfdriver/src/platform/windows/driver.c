@@ -22,6 +22,13 @@
 
 #include <driver.h>
 
+extern int g_status = 0;
+extern FAST_MUTEX g_status_mutex;
+
+/* -------------------------------------------------------------------------- */
+/* Driver                                                                     */
+/* -------------------------------------------------------------------------- */
+
 NTSTATUS
 DriverEntry(
     _In_ PDRIVER_OBJECT DriverObject,
@@ -42,7 +49,6 @@ DriverEntry(
         return status;
     }
 
-    BFDEBUG("DriverEntry: success\n");
     return STATUS_SUCCESS;
 }
 
@@ -68,7 +74,6 @@ bareflankEvtDeviceAdd(
         return status;
     }
 
-    BFDEBUG("bareflankEvtDeviceAdd: success\n");
     return STATUS_SUCCESS;
 }
 
@@ -78,10 +83,12 @@ bareflankEvtDriverContextCleanup(
 )
 {
     UNREFERENCED_PARAMETER(DriverObject);
+    mutex_lock(&g_status_mutex);
 
     common_fini();
+    g_status = STATUS_STOPPED;
 
-    BFDEBUG("bareflankEvtDriverContextCleanup: success\n");
+    mutex_unlock(&g_status_mutex);
 }
 
 static int g_sleeping = 0;
@@ -95,17 +102,25 @@ bareflankEvtDeviceD0Entry(
     UNREFERENCED_PARAMETER(Device);
     UNREFERENCED_PARAMETER(PreviousState);
 
-    if (g_sleeping == 0) {
+    mutex_lock(&g_status_mutex);
+
+    if (g_status != STATUS_SUSPEND) {
+        mutex_unlock(&g_status_mutex);
         return STATUS_SUCCESS;
     }
 
-    g_sleeping = 0;
-
     if (common_start_vmm() != BF_SUCCESS) {
+
         common_fini();
+        g_status = STATUS_STOPPED;
+
+        mutex_unlock(&g_status_mutex);
         return STATUS_UNSUCCESSFUL;
     }
 
+    g_status = STATUS_RUNNING;
+
+    mutex_unlock(&g_status_mutex);
     return STATUS_SUCCESS;
 }
 
@@ -118,16 +133,24 @@ bareflankEvtDeviceD0Exit(
     UNREFERENCED_PARAMETER(Device);
     UNREFERENCED_PARAMETER(TargetState);
 
-    if (common_vmm_status() != VMM_RUNNING) {
+    mutex_lock(&g_status_mutex);
+
+    if (g_status != STATUS_RUNNING) {
+        mutex_unlock(&g_status_mutex);
         return STATUS_SUCCESS;
     }
 
-    g_sleeping = 1;
-
     if (common_stop_vmm() != BF_SUCCESS) {
+
         common_fini();
+        g_status = STATUS_STOPPED;
+
+        mutex_unlock(&g_status_mutex);
         return STATUS_UNSUCCESSFUL;
     }
 
+    g_status = STATUS_SUSPEND;
+
+    mutex_unlock(&g_status_mutex);
     return STATUS_SUCCESS;
 }

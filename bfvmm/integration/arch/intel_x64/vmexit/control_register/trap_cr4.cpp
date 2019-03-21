@@ -54,7 +54,7 @@ void
 vcpu_init_nonroot(vcpu_t *vcpu)
 {
     vcpu->add_hlt_delegate(
-        hlt_delegate_t::create<test_hlt_delegate>()
+        vcpu_delegate_t::create<test_hlt_delegate>()
     );
 
     vcpu->add_wrcr4_handler(

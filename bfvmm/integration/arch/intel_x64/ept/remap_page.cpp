@@ -70,7 +70,7 @@ public:
         );
 
         this->add_hlt_delegate(
-            hlt_delegate_t::create<test_hlt_delegate>()
+            vcpu_delegate_t::create<test_hlt_delegate>()
         );
 
         for (auto &elem : buffer1) {
