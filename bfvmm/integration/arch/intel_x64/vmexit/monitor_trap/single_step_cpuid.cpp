@@ -48,7 +48,7 @@ public:
         );
 
         this->add_monitor_trap_handler(
-            monitor_trap_handler::handler_delegate_t::create<vcpu, &vcpu::monitor_trap_handler>(this)
+            ::handler_delegate_t::create<vcpu, &vcpu::monitor_trap_handler>(this)
         );
     }
 
@@ -73,11 +73,9 @@ public:
         return false;
     }
 
-    bool monitor_trap_handler(
-        vcpu_t *vcpu, monitor_trap_handler::info_t &info)
+    bool monitor_trap_handler(vcpu_t *vcpu)
     {
         bfignored(vcpu);
-        bfignored(info);
 
         bfdebug_info(0, "instrution after cpuid trapped");
         return false;

@@ -69,7 +69,7 @@ public:
         bfvmm::intel_x64::vcpu{id}
     {
         this->add_hlt_delegate(
-            hlt_delegate_t::create<test_hlt_delegate>()
+            vcpu_delegate_t::create<test_hlt_delegate>()
         );
 
         this->add_cpuid_emulator(

@@ -61,31 +61,6 @@ class EXPORT_HVE monitor_trap_handler
 {
 public:
 
-    /// Info
-    ///
-    /// This struct is created by monitor_trap_handler::handle before being
-    /// passed to each registered handler.
-    ///
-    struct info_t {
-
-        /// Ignore clear
-        ///
-        /// If true, do not disable the monitor trap flag after your
-        /// registered handler returns true.
-        ///
-        /// default: false
-        ///
-        bool ignore_clear;
-    };
-
-    /// Handler delegate type
-    ///
-    /// The type of delegate clients must use when registering
-    /// handlers
-    ///
-    using handler_delegate_t =
-        delegate<bool(vcpu *, info_t &)>;
-
     /// Constructor
     ///
     /// @expects
@@ -112,7 +87,7 @@ public:
     ///
     /// @param d the handler to call when an exit occurs
     ///
-    void add_handler(const handler_delegate_t &d);
+    void add_handler(const ::handler_delegate_t &d);
 
     /// Enable
     ///
@@ -137,7 +112,7 @@ public:
 private:
 
     vcpu *m_vcpu;
-    std::list<handler_delegate_t> m_handlers;
+    std::list<::handler_delegate_t> m_handlers;
 
 public:
 
@@ -151,8 +126,6 @@ public:
 
     /// @endcond
 };
-
-using monitor_trap_handler_delegate_t = monitor_trap_handler::handler_delegate_t;
 
 }
 

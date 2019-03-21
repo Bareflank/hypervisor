@@ -150,7 +150,8 @@ setup_vcpu(MockRepository &mocks, ::intel_x64::vmcs::value_type reason = 0)
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_fini_delegate);
 
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::run_delegate);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::hlt_delegate);
+    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_launch_delegate);
+    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_resume_delegate);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::load);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::promote);
 

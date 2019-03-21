@@ -60,6 +60,28 @@ extern "C" {
 #define IOCTL_DUMP_VMM_CMD 0x807
 #define IOCTL_VMM_STATUS_CMD 0x808
 #define IOCTL_SET_VCPUID_CMD 0x80A
+#define IOCTL_VMCALL_CMD 0x810
+
+/**
+ * @struct ioctl_vmcall_args_t
+ *
+ * Stores the general registers for a vmcall
+ *
+ * @var ioctl_vmcall_args_t::reg1
+ *     general register #1
+ * @var ioctl_vmcall_args_t::reg2
+ *     general register #2
+ * @var ioctl_vmcall_args_t::reg3
+ *     general register #3
+ * @var ioctl_vmcall_args_t::reg4
+ *     general register #4
+ */
+struct ioctl_vmcall_args_t {
+    uint64_t reg1;
+    uint64_t reg2;
+    uint64_t reg3;
+    uint64_t reg4;
+};
 
 /* -------------------------------------------------------------------------- */
 /* Linux Interfaces                                                           */
@@ -76,6 +98,7 @@ extern "C" {
 #define IOCTL_DUMP_VMM _IOR(BAREFLANK_MAJOR, IOCTL_DUMP_VMM_CMD, struct debug_ring_resources_t *)
 #define IOCTL_VMM_STATUS _IOR(BAREFLANK_MAJOR, IOCTL_VMM_STATUS_CMD, int64_t *)
 #define IOCTL_SET_VCPUID _IOW(BAREFLANK_MAJOR, IOCTL_SET_VCPUID_CMD, uint64_t *)
+#define IOCTL_VMCALL _IOWR(BAREFLANK_MAJOR, IOCTL_VMCALL_CMD, struct ioctl_vmcall_args_t *)
 
 #endif
 
@@ -109,6 +132,7 @@ DEFINE_GUID(
 #define IOCTL_DUMP_VMM CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_DUMP_VMM_CMD, METHOD_OUT_DIRECT, FILE_READ_DATA)
 #define IOCTL_VMM_STATUS CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_VMM_STATUS_CMD, METHOD_BUFFERED, FILE_READ_DATA)
 #define IOCTL_SET_VCPUID CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_SET_VCPUID_CMD, METHOD_IN_DIRECT, FILE_WRITE_DATA)
+#define IOCTL_VMCALL CTL_CODE(BAREFLANK_DEVICETYPE, IOCTL_VMCALL_CMD, METHOD_IN_DIRECT, FILE_READ_WRITE_DATA)
 
 #endif
 

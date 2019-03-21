@@ -20,30 +20,24 @@
  * SOFTWARE.
  */
 
-#define INITGUID
+        .code64
+        .intel_syntax noprefix
 
-#include <ntddk.h>
-#include <wdf.h>
+        .globl  _vmcall
+        .type   _vmcall, @function
+_vmcall:
 
-#include <queue.h>
-#include <device.h>
+        push rbx
 
-#include <common.h>
+        mov r9, rdx
+        mov r8, rcx
 
-#include <bfdebug.h>
-#include <bfplatform.h>
-#include <bfdriverinterface.h>
+        mov rax, rdi
+        mov rbx, rsi
+        mov rcx, r9
+        mov rdx, r8
 
-#define STATUS_STOPPED 0
-#define STATUS_RUNNING 1
-#define STATUS_SUSPEND 2
+        vmcall
 
-EXTERN_C_START
-
-DRIVER_INITIALIZE DriverEntry;
-EVT_WDF_DRIVER_DEVICE_ADD bareflankEvtDeviceAdd;
-EVT_WDF_OBJECT_CONTEXT_CLEANUP bareflankEvtDriverContextCleanup;
-EVT_WDF_DEVICE_D0_ENTRY bareflankEvtDeviceD0Entry;
-EVT_WDF_DEVICE_D0_EXIT bareflankEvtDeviceD0Exit;
-
-EXTERN_C_END
+        pop rbx
+        ret

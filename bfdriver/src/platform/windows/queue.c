@@ -23,18 +23,25 @@
 #include <driver.h>
 
 /* -------------------------------------------------------------------------- */
+/* Status                                                                     */
+/* -------------------------------------------------------------------------- */
+
+int g_status = 0;
+FAST_MUTEX g_status_mutex;
+
+/* -------------------------------------------------------------------------- */
 /* Global                                                                     */
 /* -------------------------------------------------------------------------- */
 
-uint64_t g_vcpuid = 0;
+static uint64_t g_vcpuid = 0;
 
 struct pmodule_t {
     char *data;
     int64_t size;
 };
 
-uint64_t g_num_pmodules = 0;
-struct pmodule_t pmodules[MAX_NUM_MODULES] = { 0 };
+static uint64_t g_num_pmodules = 0;
+static struct pmodule_t pmodules[MAX_NUM_MODULES] = { 0 };
 
 /* -------------------------------------------------------------------------- */
 /* Misc Device                                                                */
@@ -62,7 +69,7 @@ ioctl_add_module(const char *file, int64_t len)
     ret = common_add_module(buf, len);
     if (ret != BF_SUCCESS) {
         BFALERT("IOCTL_ADD_MODULE: common_add_module failed: %p - %s\n", (void *)ret, ec_to_str(ret));
-        goto failed;
+        goto IOCTL_FAILURE;
     }
 
     pmodules[g_num_pmodules].data = buf;
@@ -70,14 +77,11 @@ ioctl_add_module(const char *file, int64_t len)
 
     g_num_pmodules++;
 
-    BFDEBUG("IOCTL_ADD_MODULE: succeeded\n");
     return BF_IOCTL_SUCCESS;
 
-failed:
+IOCTL_FAILURE:
 
     platform_free_rw(buf, len);
-
-    BFALERT("IOCTL_ADD_MODULE: failed\n");
     return BF_IOCTL_FAILURE;
 }
 
@@ -86,12 +90,11 @@ ioctl_unload_vmm(void)
 {
     int i;
     int64_t ret;
-    long status = BF_IOCTL_SUCCESS;
 
     ret = common_unload_vmm();
     if (ret != BF_SUCCESS) {
         BFALERT("IOCTL_UNLOAD_VMM: common_unload_vmm failed: %p - %s\n", (void *)ret, ec_to_str(ret));
-        status = BF_IOCTL_FAILURE;
+        goto IOCTL_FAILURE;
     }
 
     for (i = 0; i < g_num_pmodules; i++) {
@@ -101,11 +104,11 @@ ioctl_unload_vmm(void)
     g_num_pmodules = 0;
     platform_memset(&pmodules, 0, sizeof(pmodules));
 
-    if (status == BF_IOCTL_SUCCESS) {
-        BFDEBUG("IOCTL_UNLOAD_VMM: succeeded\n");
-    }
+    return BF_IOCTL_SUCCESS;
 
-    return status;
+IOCTL_FAILURE:
+
+    return BF_IOCTL_FAILURE;
 }
 
 static long
@@ -116,13 +119,12 @@ ioctl_load_vmm(void)
     ret = common_load_vmm();
     if (ret != BF_SUCCESS) {
         BFALERT("IOCTL_LOAD_VMM: common_load_vmm failed: %p - %s\n", (void *)ret, ec_to_str(ret));
-        goto failure;
+        goto IOCTL_FAILURE;
     }
 
-    BFDEBUG("IOCTL_LOAD_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
 
-failure:
+IOCTL_FAILURE:
 
     ioctl_unload_vmm();
     return BF_IOCTL_FAILURE;
@@ -132,39 +134,47 @@ static long
 ioctl_stop_vmm(void)
 {
     int64_t ret;
-    long status = BF_IOCTL_SUCCESS;
+    ExAcquireFastMutex(&g_status_mutex);
 
     ret = common_stop_vmm();
-
     if (ret != BF_SUCCESS) {
         BFALERT("IOCTL_STOP_VMM: common_stop_vmm failed: %p - %s\n", (void *)ret, ec_to_str(ret));
-        status = BF_IOCTL_FAILURE;
+        goto IOCTL_FAILURE;
     }
 
-    if (status == BF_IOCTL_SUCCESS) {
-        BFDEBUG("IOCTL_STOP_VMM: succeeded\n");
-    }
+    g_status = STATUS_STOPPED;
 
-    return status;
+    ExReleaseFastMutex(&g_status_mutex);
+    return BF_IOCTL_SUCCESS;
+
+IOCTL_FAILURE:
+
+    ExReleaseFastMutex(&g_status_mutex);
+    return BF_IOCTL_FAILURE;
 }
 
 static long
 ioctl_start_vmm(void)
 {
     int64_t ret;
+    ExAcquireFastMutex(&g_status_mutex);
 
     ret = common_start_vmm();
     if (ret != BF_SUCCESS) {
         BFALERT("IOCTL_START_VMM: common_start_vmm failed: %p - %s\n", (void *)ret, ec_to_str(ret));
-        goto failure;
+        goto IOCTL_FAILURE;
     }
 
-    BFDEBUG("IOCTL_START_VMM: succeeded\n");
+    g_status = STATUS_RUNNING;
+
+    ExReleaseFastMutex(&g_status_mutex);
     return BF_IOCTL_SUCCESS;
 
-failure:
+IOCTL_FAILURE:
 
-    ioctl_stop_vmm();
+    common_stop_vmm();
+
+    ExReleaseFastMutex(&g_status_mutex);
     return BF_IOCTL_FAILURE;
 }
 
@@ -181,8 +191,6 @@ ioctl_dump_vmm(struct debug_ring_resources_t *user_drr)
     }
 
     RtlCopyMemory(user_drr, drr, sizeof(struct debug_ring_resources_t));
-
-    BFDEBUG("IOCTL_DUMP_VMM: succeeded\n");
     return BF_IOCTL_SUCCESS;
 }
 
@@ -231,13 +239,23 @@ bareflankQueueInitialize(
 
     status = WdfIoQueueCreate(Device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
     if (!NT_SUCCESS(status)) {
-        return status;
+        BFALERT("WdfIoQueueCreate failed\n");
+        goto INIT_FAILURE;
     }
 
-    common_init();
+    if (common_init() != 0) {
+        BFALERT("common_init failed\n");
+        goto INIT_FAILURE;
+    }
 
-    BFDEBUG("bareflankQueueInitialize: success\n");
+    g_status = STATUS_STOPPED;
+    ExInitializeFastMutex(&g_status_mutex);
+
     return STATUS_SUCCESS;
+
+INIT_FAILURE:
+
+    return STATUS_UNSUCCESSFUL;
 }
 
 VOID

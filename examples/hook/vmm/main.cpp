@@ -210,11 +210,8 @@ ept_execute_violation_handler(
 }
 
 bool
-mt_handler(
-    vcpu_t *vcpu, monitor_trap_handler::info_t &info)
+mt_handler(vcpu_t *vcpu)
 {
-    bfignored(info);
-
     // Get a reference to our per-vcpu data. Note that we need to explicitly
     // ask for a reference, similar to the std::any APIs.
     //
@@ -272,7 +269,6 @@ void
 vcpu_init_nonroot(vcpu_t *vcpu)
 {
     using namespace vmcs_n;
-    using mt_delegate_t = monitor_trap_handler::handler_delegate_t;
     using eptv_delegate_t = ept_violation_handler::handler_delegate_t;
 
     // Initialize our per-vcpu data.
@@ -293,7 +289,7 @@ vcpu_init_nonroot(vcpu_t *vcpu)
     // exists in the same physical page as our hello_world() function.
     //
     vcpu->add_monitor_trap_handler(
-        mt_delegate_t::create<mt_handler>()
+        ::handler_delegate_t::create<mt_handler>()
     );
 
     // Add an EPT violation handler (for execute access). If an EPT
