@@ -345,6 +345,8 @@ static struct miscdevice bareflank_dev = {
 /* Entry / Exit                                                               */
 /* -------------------------------------------------------------------------- */
 
+static int g_sleeping = 0;
+
 int
 dev_reboot(struct notifier_block *nb, unsigned long code, void *unused)
 {
@@ -357,6 +359,41 @@ dev_reboot(struct notifier_block *nb, unsigned long code, void *unused)
     return NOTIFY_DONE;
 }
 
+static int
+resume(void)
+{
+    if (g_sleeping == 0) {
+        return NOTIFY_DONE;
+    }
+
+    g_sleeping = 0;
+
+    if (common_start_vmm() != BF_SUCCESS) {
+        common_fini();
+        return -EPERM;
+    }
+
+    return NOTIFY_DONE;
+}
+
+static int
+suspend(void)
+{
+    if (common_vmm_status() != VMM_RUNNING) {
+        return NOTIFY_DONE;
+    }
+
+    g_sleeping = 1;
+
+    if (common_stop_vmm() != BF_SUCCESS) {
+        common_fini();
+        return -EPERM;
+    }
+
+    return NOTIFY_DONE;
+}
+
+
 int
 dev_pm(struct notifier_block *nb, unsigned long code, void *unused)
 {
@@ -367,18 +404,12 @@ dev_pm(struct notifier_block *nb, unsigned long code, void *unused)
         case PM_SUSPEND_PREPARE:
         case PM_HIBERNATION_PREPARE:
         case PM_RESTORE_PREPARE:
-            if (ioctl_stop_vmm() != 0) {
-                return -EPERM;
-            }
-            break;
+            return suspend();
 
         case PM_POST_SUSPEND:
         case PM_POST_HIBERNATION:
         case PM_POST_RESTORE:
-            if (ioctl_start_vmm() != 0) {
-                return -EPERM;
-            }
-            break;
+            return resume();
 
         default:
             break;
