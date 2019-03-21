@@ -84,6 +84,8 @@ bareflankEvtDriverContextCleanup(
     BFDEBUG("bareflankEvtDriverContextCleanup: success\n");
 }
 
+static int g_sleeping = 0;
+
 NTSTATUS
 bareflankEvtDeviceD0Entry(
     _In_ WDFDEVICE Device,
@@ -93,7 +95,17 @@ bareflankEvtDeviceD0Entry(
     UNREFERENCED_PARAMETER(Device);
     UNREFERENCED_PARAMETER(PreviousState);
 
-    BFDEBUG("bareflankEvtDeviceD0Entry: success\n");
+    if (g_sleeping == 0) {
+        return STATUS_SUCCESS;
+    }
+
+    g_sleeping = 0;
+
+    if (common_start_vmm() != BF_SUCCESS) {
+        common_fini();
+        return STATUS_UNSUCCESSFUL;
+    }
+
     return STATUS_SUCCESS;
 }
 
@@ -106,8 +118,16 @@ bareflankEvtDeviceD0Exit(
     UNREFERENCED_PARAMETER(Device);
     UNREFERENCED_PARAMETER(TargetState);
 
-    common_fini();
+    if (common_vmm_status() != VMM_RUNNING) {
+        return STATUS_SUCCESS;
+    }
 
-    BFDEBUG("bareflankEvtDeviceD0Entry: success\n");
+    g_sleeping = 1;
+
+    if (common_stop_vmm() != BF_SUCCESS) {
+        common_fini();
+        return STATUS_UNSUCCESSFUL;
+    }
+
     return STATUS_SUCCESS;
 }
