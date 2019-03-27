@@ -19,30 +19,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.6)
-project(bfm_test C CXX)
+cmake_minimum_required(VERSION 3.13)
+project(bfack C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project(
-    INCLUDES ../include
+init_project(bfack BINARY)
+
+target_sources(bfack PRIVATE src/ack.cpp)
+target_link_libraries(bfack PRIVATE userspace::bfintrinsics)
+target_include_directories(bfack PRIVATE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/../bfsdk/include>
 )
 
-add_static_library(
-    test_support
-    SOURCES ../src/main.cpp
-    SOURCES ../src/command_line_parser.cpp
-    SOURCES ../src/ioctl_driver.cpp
-    ALWAYS
-)
-
-do_test(test_command_line_parser
-    DEPENDS test_support
-)
-
-do_test(test_ioctl_driver
-    DEPENDS test_support
-)
-
-do_test(test_main
-    DEPENDS test_support
-)
+fini_project()

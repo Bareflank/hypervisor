@@ -19,30 +19,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-list(APPEND SOURCES
-    vcpu.cpp
+add_library(bfvmm_vcpu)
+
+target_sources(bfvmm_vcpu PRIVATE vcpu.cpp)
+target_link_libraries(bfvmm_vcpu PUBLIC ${PREFIX}::bfroot)
+target_include_directories(bfvmm_vcpu PUBLIC
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/include>
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfintrinsics/include>
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfsdk/include>
 )
 
-add_shared_library(
-    bfvmm_vcpu
-    SOURCES ${SOURCES}
-    DEFINES SHARED_VCPU
-    DEFINES SHARED_HVE
-    DEFINES SHARED_MEMORY_MANAGER
-    DEFINES SHARED_INTRINSICS
-)
+install(TARGETS bfvmm_vcpu DESTINATION lib EXPORT bfvmm-${PREFIX}-targets)
 
-add_static_library(
-    bfvmm_vcpu
-    SOURCES ${SOURCES}
-    DEFINES STATIC_VCPU
-    DEFINES STATIC_HVE
-    DEFINES STATIC_MEMORY_MANAGER
-    DEFINES STATIC_INTRINSICS
-)
-
-# ------------------------------------------------------------------------------
-# Install
-# ------------------------------------------------------------------------------
-
-install(DIRECTORY ../../include/vcpu/ DESTINATION include/bfvmm/vcpu)
+if(PREFIX STREQUAL vmm)
+    install(DIRECTORY ../../include/vcpu/ DESTINATION include/bfvmm/vcpu)
+endif()

@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-add_vmm_executable(
-    integration_intel_x64_io_instruction_trap_in_out
-    SOURCES trap_in_out.cpp
-)
+file(STRINGS "${PKG_FILE}" EXISTS REGEX ${PKG})
+if(NOT EXISTS)
+    file(APPEND "${PKG_FILE}" "${PKG}\n")
+endif()

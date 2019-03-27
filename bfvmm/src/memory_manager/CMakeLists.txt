@@ -19,36 +19,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-list(APPEND SOURCES
+add_library(bfvmm_memory_manager)
+
+target_link_libraries(bfvmm_memory_manager PUBLIC ${PREFIX}::bfroot)
+target_include_directories(bfvmm_memory_manager PUBLIC
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/include>
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfintrinsics/include>
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfsdk/include>
+)
+target_sources(bfvmm_memory_manager PRIVATE
     memory_manager.cpp
+    $<$<STREQUAL:${BUILD_TARGET_ARCH},x86_64>:arch/x64/cr3/helpers.cpp>
 )
 
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    list(APPEND SOURCES
-        arch/x64/cr3/helpers.cpp
+install(
+    TARGETS bfvmm_memory_manager
+    DESTINATION lib
+    EXPORT bfvmm-${PREFIX}-targets
+)
+
+if(PREFIX STREQUAL vmm)
+    install(
+        DIRECTORY ../../include/memory_manager/
+        DESTINATION include/bfvmm/memory_manager
     )
-elseif(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
-    message(WARNING "Unimplemented")
-else()
-    message(FATAL_ERROR "Unsupported archiecture")
 endif()
-
-add_shared_library(
-    bfvmm_memory_manager
-    SOURCES ${SOURCES}
-    DEFINES SHARED_MEMORY_MANAGER
-    DEFINES SHARED_INTRINSICS
-)
-
-add_static_library(
-    bfvmm_memory_manager
-    SOURCES ${SOURCES}
-    DEFINES STATIC_MEMORY_MANAGER
-    DEFINES STATIC_INTRINSICS
-)
-
-# ------------------------------------------------------------------------------
-# Install
-# ------------------------------------------------------------------------------
-
-install(DIRECTORY ../../include/memory_manager/ DESTINATION include/bfvmm/memory_manager)

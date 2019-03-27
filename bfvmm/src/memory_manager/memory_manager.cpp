@@ -85,7 +85,7 @@ struct stats_data_t {
 int g_stats_index = 0;
 stats_data_t g_stats_data[2048] = {};
 
-extern "C" EXPORT_SYM void
+extern "C" void
 print_stats()
 {
     char numstr[64]; \
@@ -524,21 +524,21 @@ memory_manager::memory_manager() noexcept :
 
 #ifdef VMM
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 _malloc_r(struct _reent *ent, size_t size)
 {
     bfignored(ent);
     return g_mm->alloc(size);
 }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 _free_r(struct _reent *ent, void *ptr)
 {
     bfignored(ent);
     g_mm->free(ptr);
 }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 _calloc_r(struct _reent *ent, size_t nmemb, size_t size)
 {
     bfignored(ent);
@@ -550,7 +550,7 @@ _calloc_r(struct _reent *ent, size_t nmemb, size_t size)
     return nullptr;
 }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 _realloc_r(struct _reent *ent, void *ptr, size_t size)
 {
     bfignored(ent);
@@ -570,11 +570,11 @@ _realloc_r(struct _reent *ent, void *ptr, size_t size)
     return new_ptr;
 }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 alloc_page()
 { return memset(g_mm->alloc_page(), 0, BAREFLANK_PAGE_SIZE); }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 free_page(void *ptr)
 { g_mm->free_page(ptr); }
 

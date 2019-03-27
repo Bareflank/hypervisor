@@ -30,27 +30,6 @@
 #include <bfdebugringinterface.h>
 
 // -----------------------------------------------------------------------------
-// Exports
-// -----------------------------------------------------------------------------
-
-#include <bfexports.h>
-
-#ifndef STATIC_DEBUG
-#ifdef SHARED_DEBUG
-#define EXPORT_DEBUG EXPORT_SYM
-#else
-#define EXPORT_DEBUG IMPORT_SYM
-#endif
-#else
-#define EXPORT_DEBUG
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 
@@ -64,7 +43,7 @@ namespace bfvmm
 /// the same buffer can read from the debug ring to extract the strings
 /// that are written to the buffer.
 ///
-class EXPORT_DEBUG debug_ring
+class debug_ring
 {
 public:
 
@@ -115,7 +94,6 @@ public:
 
     /// @endcond
 };
-
 }
 
 /// Get Debug Ring Resource
@@ -130,11 +108,7 @@ public:
 /// @param drr the resulting debug ring
 /// @return the debug_ring_resources_t for the provided vcpuid
 ///
-extern "C" EXPORT_DEBUG int64_t get_drr(
+extern "C" int64_t get_drr(
     uint64_t vcpuid, struct debug_ring_resources_t **drr) noexcept;
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif

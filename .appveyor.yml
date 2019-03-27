@@ -68,15 +68,18 @@ for:
     CYG_ROOT: C:\cygwin_bareflank
     CYG_BASH: C:\cygwin_bareflank\bin\bash
     CYG_MIRROR: http://mirrors.kernel.org/sourceware/cygwin/
-    CYG_PACKAGES: make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext
+    CYG_PACKAGES: make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext,wget,unzip
+    CMAKE_URL: https://github.com/Kitware/CMake/releases/download/v3.13.4/cmake-3.13.4-win64-x64.zip
 
   install:
     - ps: Start-FileDownload "https://cygwin.com/setup-x86_64.exe" -FileName "setup-x86_64.exe"
     - setup-x86_64.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_ROOT%\var\cache\setup" --packages "%CYG_PACKAGES%"
 
   build_script:
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; wget %CMAKE_URL%"'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; unzip cmake-3.13.4-win64-x64.zip"'
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER; mkdir build_cygwin"'
-    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; cmake .."'
+    - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; ../cmake-3.13.4-win64-x64/bin/cmake .. -G \"Unix Makefiles\" -DENABLE_BUILD_VMM=OFF -DENABLE_BUILD_TEST=ON -DCMAKE_C_COMPILER_WORKS=ON'
     - '%CYG_BASH% -lc "cd $APPVEYOR_BUILD_FOLDER/build_cygwin; make -j3"'
 
   test: off

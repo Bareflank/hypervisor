@@ -19,12 +19,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-add_vmm_executable(
-    integration_intel_x64_misc_ept_enable_ept
-    SOURCES enable_ept.cpp
-)
+add_executable(vmm)
+target_sources(vmm PRIVATE main.cpp)
+target_link_libraries(vmm PRIVATE bfvmm)
 
-add_vmm_executable(
-    integration_intel_x64_misc_ept_remap_page
-    SOURCES remap_page.cpp
-)
+install(TARGETS vmm DESTINATION bin EXPORT bfvmm-vmm-targets)

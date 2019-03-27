@@ -20,36 +20,36 @@
 # SOFTWARE.
 
 # ------------------------------------------------------------------------------
-# Unit Testing
+# Only static builds are supported
 # ------------------------------------------------------------------------------
 
-if(ENABLE_BUILD_TEST AND NOT BUILD_SHARED_LIBS)
-    invalid_config("BUILD_SHARED_LIBS must be enabled if ENABLE_BUILD_TEST is enabled")
-endif()
-
-# ------------------------------------------------------------------------------
-# VMM build type
-# ------------------------------------------------------------------------------
-
-if(NOT BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
-    invalid_config("BUILD_SHARED_LIBS or BUILD_STATIC_LIBS must be enabled")
+if(BUILD_SHARED_LIBS)
+    invalid_config("BUILD_SHARED_LIBS not supported")
 endif()
 
 # ------------------------------------------------------------------------------
 # EFI build validation
 # ------------------------------------------------------------------------------
 
-if (ENABLE_BUILD_EFI AND NOT BUILD_STATIC_LIBS)
-    invalid_config("BUILD_STATIC_LIBS must be enabled to build EFI-bootable vmm (ENABLE_BUILD_EFI)")
-endif()
-
-if (ENABLE_BUILD_EFI AND NOT ENABLE_BUILD_VMM)
-    invalid_config("ENABLE_BUILD_VMM must be enabled to build EFI-bootable vmm (ENABLE_BUILD_EFI)")
+if(ENABLE_BUILD_EFI AND NOT ENABLE_BUILD_VMM)
+    invalid_config("ENABLE_BUILD_VMM must be enabled if ENABLE_BUILD_EFI is enabled")
 endif()
 
 # ------------------------------------------------------------------------------
 # Developer Features
 # ------------------------------------------------------------------------------
+
+if(ENABLE_BUILD_USERSPACE)
+    if(CMAKE_C_COMPILER_ID STREQUAL Clang)
+        invalid_config("ENABLE_BUILD_USERSPACE is not supported with clang")
+    endif()
+endif()
+
+if(ENABLE_BUILD_TEST)
+    if(CMAKE_C_COMPILER_ID STREQUAL Clang)
+        invalid_config("ENABLE_BUILD_TEST is not supported with clang")
+    endif()
+endif()
 
 if(ENABLE_ASAN)
     if(ENABLE_USAN)
@@ -57,6 +57,9 @@ if(ENABLE_ASAN)
     endif()
     if(NOT ENABLE_BUILD_TEST)
         invalid_config("ENABLE_BUILD_TEST must be enabled if ENABLE_ASAN is enabled")
+    endif()
+    if(NOT CMAKE_C_COMPILER_ID STREQUAL GNU)
+        invalid_config("Must use gcc if ENABLE_ASAN is enabled")
     endif()
 endif()
 
@@ -112,22 +115,6 @@ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "CYGWIN")
     endif()
     if(ENABLE_TIDY)
         invalid_config("ENABLE_TIDY is not supported on Cygwin")
-    endif()
-    if(ENABLE_CODECOV)
-        invalid_config("ENABLE_CODECOV is not supported on Cygwin")
-    endif()
-endif()
-
-# ------------------------------------------------------------------------------
-# Cygwin build rules
-# ------------------------------------------------------------------------------
-
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL "CYGWIN")
-    if(ENABLE_ASAN)
-        invalid_config("ENABLE_ASAN is not supported on Cygwin")
-    endif()
-    if(ENABLE_USAN)
-        invalid_config("ENABLE_USAN is not supported on Cygwin")
     endif()
     if(ENABLE_CODECOV)
         invalid_config("ENABLE_CODECOV is not supported on Cygwin")

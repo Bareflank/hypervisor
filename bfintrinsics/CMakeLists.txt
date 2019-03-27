@@ -19,33 +19,36 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.6)
-project(bfsdk_test C CXX)
+cmake_minimum_required(VERSION 3.13)
+project(bfintrinsics C CXX)
 
-include(${SOURCE_CMAKE_DIR}/project.cmake)
-init_project()
+init_project(bfintrinsics)
 
-add_library(test_catch STATIC test_catch.cpp)
-install(TARGETS test_catch DESTINATION lib)
+set(X64 $<STREQUAL:${BUILD_TARGET_ARCH},x86_64>)
 
-do_test(test_affinity)
-do_test(test_benchmark)
-do_test(test_bitmanip)
-do_test(test_buffer)
-do_test(test_callonce)
-do_test(test_debug)
-do_test(test_debugringinterface)
-do_test(test_delegate)
-do_test(test_errorcodes)
-do_test(test_exceptions)
-do_test(test_file)
-do_test(test_gsl_lite)
-do_test(test_gsl)
-do_test(test_json)
-do_test(test_manager)
-do_test(test_shuffle)
-do_test(test_string)
-do_test(test_types)
-do_test(test_upperlower)
-do_test(test_vcpuid)
-do_test(test_vector)
+target_link_libraries(bfintrinsics PUBLIC ${PREFIX}::bfroot)
+target_sources(bfintrinsics PRIVATE
+    $<${X64}:src/arch/x64/cache.asm>
+    $<${X64}:src/arch/x64/cpuid.asm>
+    $<${X64}:src/arch/x64/gdt.asm>
+    $<${X64}:src/arch/x64/idt.asm>
+    $<${X64}:src/arch/x64/msrs.asm>
+    $<${X64}:src/arch/x64/pm.asm>
+    $<${X64}:src/arch/x64/portio.asm>
+    $<${X64}:src/arch/x64/rdtsc.asm>
+    $<${X64}:src/arch/x64/rflags.asm>
+    $<${X64}:src/arch/x64/srs.asm>
+    $<${X64}:src/arch/x64/tlb.asm>
+    $<${X64}:src/arch/intel_x64/barrier.asm>
+    $<${X64}:src/arch/intel_x64/bit.asm>
+    $<${X64}:src/arch/intel_x64/crs.asm>
+    $<${X64}:src/arch/intel_x64/drs.asm>
+    $<${X64}:src/arch/intel_x64/pause.asm>
+    $<${X64}:src/arch/intel_x64/vmx.asm>
+)
+
+if(PREFIX STREQUAL vmm)
+    install(DIRECTORY include/ DESTINATION include)
+endif()
+
+fini_project()

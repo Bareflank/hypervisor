@@ -48,22 +48,6 @@ else()
     set(LD_BIN ${CMAKE_INSTALL_PREFIX}/bin/ld)
 endif()
 
-string(CONCAT LD_FLAGS
-    "--sysroot=${CMAKE_INSTALL_PREFIX} "
-    "-L ${CMAKE_INSTALL_PREFIX}/lib "
-    "-z max-page-size=4096 "
-    "-z common-page-size=4096 "
-    "-z relro "
-    "-z now "
-    "-nostdlib "
-)
-
-if(EXISTS "${CMAKE_INSTALL_PREFIX}/lib/libbfdso_static.a")
-    string(CONCAT LD_FLAGS
-        "--whole-archive ${CMAKE_INSTALL_PREFIX}/lib/libbfdso_static.a --no-whole-archive "
-    )
-endif()
-
 set(CMAKE_C_ARCHIVE_CREATE
     "ar qc <TARGET> <OBJECTS>"
 )
@@ -73,20 +57,15 @@ set(CMAKE_CXX_ARCHIVE_CREATE
 )
 
 set(CMAKE_C_LINK_EXECUTABLE
-    "${LD_BIN} ${LD_FLAGS} -pie <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
+    "${LD_BIN} ${LD_FLAGS} <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
 )
 
 set(CMAKE_CXX_LINK_EXECUTABLE
-    "${LD_BIN} ${LD_FLAGS} -pie <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
-)
-
-set(CMAKE_C_CREATE_SHARED_LIBRARY
-    "${LD_BIN} ${LD_FLAGS} -shared <OBJECTS> -o <TARGET>"
-)
-
-set(CMAKE_CXX_CREATE_SHARED_LIBRARY
-    "${LD_BIN} ${LD_FLAGS} -shared <OBJECTS> -o <TARGET>"
+    "${LD_BIN} ${LD_FLAGS} <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
 )
 
 set(CMAKE_C_COMPILER_WORKS 1)
+set(CMAKE_C_COMPILER_TARGET "x86_64-vmm-elf")
+
 set(CMAKE_CXX_COMPILER_WORKS 1)
+set(CMAKE_CXX_COMPILER_TARGET "x86_64-vmm-elf")

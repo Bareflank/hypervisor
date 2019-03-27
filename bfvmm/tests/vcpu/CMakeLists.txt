@@ -19,22 +19,5 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-list(APPEND ARGN
-    DEPENDS bfvmm_vcpu
-    DEPENDS bfvmm_hve
-    DEPENDS bfvmm_memory_manager
-    DEFINES STATIC_VCPU
-    DEFINES STATIC_HVE
-    DEFINES STATIC_MEMORY_MANAGER
-    DEFINES STATIC_INTRINSICS
-)
-
-do_test(test_vcpu
-    SOURCES test_vcpu.cpp
-    ${ARGN}
-)
-
-do_test(test_vcpu_factory
-    SOURCES test_vcpu_factory.cpp
-    ${ARGN}
-)
+do_test(test_vcpu.cpp ${ARGN})
+do_test(test_vcpu_factory.cpp ${ARGN})

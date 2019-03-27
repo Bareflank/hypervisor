@@ -19,50 +19,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# ------------------------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------------------------
+add_library(bfvmm_debug)
 
-list(APPEND SOURCES
+target_link_libraries(bfvmm_debug PUBLIC ${PREFIX}::bfroot)
+target_include_directories(bfvmm_debug PUBLIC
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/include>
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfintrinsics/include>
+    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfsdk/include>
+)
+target_sources(bfvmm_debug PRIVATE
     debug_ring/debug_ring.cpp
     serial/serial_ns16550a.cpp
-    # serial/serial_pl011.cpp
+    $<$<STREQUAL:${BUILD_TARGET_ARCH},x86_64>:arch/x64/serial_ns16550a.cpp>
+    $<$<STREQUAL:${BUILD_TARGET_ARCH},aarch64>:arch/aarch64/serial_ns16550a.cpp>
+    $<$<NOT:$<BOOL:${ENABLE_MOCKING}>>:unistd.cpp>
 )
 
-if(${BUILD_TARGET_ARCH} STREQUAL "x86_64")
-    list(APPEND SOURCES
-        arch/x64/serial_ns16550a.cpp
-    )
+install(TARGETS bfvmm_debug DESTINATION lib EXPORT bfvmm-${PREFIX}-targets)
+
+if(PREFIX STREQUAL vmm)
+    install(DIRECTORY ../../include/debug/ DESTINATION include/bfvmm/debug)
 endif()
-
-if(${BUILD_TARGET_ARCH} STREQUAL "aarch64")
-    list(APPEND SOURCES
-        arch/aarch64/serial_ns16550a.cpp
-    )
-endif()
-
-if(NOT ENABLE_MOCKING)
-    list(APPEND SOURCES
-        unistd.cpp
-    )
-endif()
-
-add_shared_library(
-    bfvmm_debug
-    SOURCES ${SOURCES}
-    DEFINES SHARED_DEBUG
-    DEFINES SHARED_INTRINSICS
-)
-
-add_static_library(
-    bfvmm_debug
-    SOURCES ${SOURCES}
-    DEFINES STATIC_DEBUG
-    DEFINES STATIC_INTRINSICS
-)
-
-# ------------------------------------------------------------------------------
-# Install
-# ------------------------------------------------------------------------------
-
-install(DIRECTORY ../../include/debug/ DESTINATION include/bfvmm/debug)

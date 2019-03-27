@@ -54,7 +54,7 @@
 #include <bfehframelist.h>
 #include <bfdwarf.h>
 
-extern "C" EXPORT_SYM clock_t
+extern "C" clock_t
 times(struct tms *buf)
 {
     bfignored(buf);
@@ -64,7 +64,7 @@ times(struct tms *buf)
     return 0;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 execve(const char *__path, char *const __argv[], char *const __envp[])
 {
     bfignored(__path);
@@ -77,13 +77,13 @@ execve(const char *__path, char *const __argv[], char *const __envp[])
     return -1;
 }
 
-extern "C" EXPORT_SYM pid_t
+extern "C" pid_t
 getpid(void)
 {
     return 1;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 isatty(int __fildes)
 {
     bfignored(__fildes);
@@ -94,7 +94,7 @@ isatty(int __fildes)
     return -1;
 }
 
-extern "C" EXPORT_SYM off_t
+extern "C" off_t
 lseek(int __fildes, off_t __offset, int __whence)
 {
     bfignored(__fildes);
@@ -107,11 +107,11 @@ lseek(int __fildes, off_t __offset, int __whence)
     return -1;
 }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 _init(void)
 { }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 kill(pid_t _pid, int _sig)
 {
     bfignored(_pid);
@@ -123,7 +123,7 @@ kill(pid_t _pid, int _sig)
     return -1;
 }
 
-extern "C" EXPORT_SYM pid_t
+extern "C" pid_t
 wait(int *status)
 {
     bfignored(status);
@@ -134,7 +134,7 @@ wait(int *status)
     return -1;
 }
 
-extern "C" EXPORT_SYM _READ_WRITE_RETURN_TYPE
+extern "C" _READ_WRITE_RETURN_TYPE
 read(int __fd, void *__buf, size_t __nbyte)
 {
     bfignored(__fd);
@@ -147,7 +147,7 @@ read(int __fd, void *__buf, size_t __nbyte)
     return -1;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 unlink(const char *__path)
 {
     bfignored(__path);
@@ -158,7 +158,7 @@ unlink(const char *__path)
     return -1;
 }
 
-extern "C" EXPORT_SYM pid_t
+extern "C" pid_t
 fork(void)
 {
     UNHANDLED();
@@ -167,7 +167,7 @@ fork(void)
     return -1;
 }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 sbrk(ptrdiff_t __incr)
 {
     bfignored(__incr);
@@ -178,7 +178,7 @@ sbrk(ptrdiff_t __incr)
     return reinterpret_cast<void *>(-1);
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 regcomp(regex_t *preg, const char *regex, int cflags)
 {
     bfignored(preg);
@@ -190,7 +190,7 @@ regcomp(regex_t *preg, const char *regex, int cflags)
     return REG_NOMATCH;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 gettimeofday(struct timeval *__p, void *__tz)
 {
     bfignored(__p);
@@ -202,7 +202,7 @@ gettimeofday(struct timeval *__p, void *__tz)
     return -1;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 clock_gettime(clockid_t clock_id, struct timespec *tp) __THROW
 {
     bfignored(clock_id);
@@ -214,7 +214,7 @@ clock_gettime(clockid_t clock_id, struct timespec *tp) __THROW
     return -1;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 regexec(const regex_t *preg, const char *string,
         size_t nmatch, regmatch_t pmatch[], int eflags)
 {
@@ -229,11 +229,11 @@ regexec(const regex_t *preg, const char *string,
     return REG_NOMATCH;
 }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 _fini(void)
 { }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 stat(const char *__path, struct stat *__sbuf)
 {
     bfignored(__path);
@@ -245,7 +245,7 @@ stat(const char *__path, struct stat *__sbuf)
     return -1;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 link(const char *__path1, const char *__path2)
 {
     bfignored(__path1);
@@ -257,7 +257,7 @@ link(const char *__path1, const char *__path2)
     return -1;
 }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 _exit(int __status)
 {
     bfignored(__status);
@@ -266,7 +266,7 @@ _exit(int __status)
     { }
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 open(const char *file, int mode, ...)
 {
     bfignored(file);
@@ -278,7 +278,7 @@ open(const char *file, int mode, ...)
     return -1;
 }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 regfree(regex_t *preg)
 {
     UNHANDLED();
@@ -286,7 +286,7 @@ regfree(regex_t *preg)
     bfignored(preg);
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 fcntl(int fd, int cmd, ...)
 {
     bfignored(fd);
@@ -298,7 +298,7 @@ fcntl(int fd, int cmd, ...)
     return -1;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 mkdir(const char *_path, mode_t __mode)
 {
     bfignored(_path);
@@ -310,7 +310,7 @@ mkdir(const char *_path, mode_t __mode)
     return -1;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 posix_memalign(void **memptr, size_t alignment, size_t size)
 {
     bfignored(alignment);
@@ -329,7 +329,7 @@ posix_memalign(void **memptr, size_t alignment, size_t size)
     return -ENOMEM;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 close(int __fildes)
 {
     bfignored(__fildes);
@@ -340,7 +340,7 @@ close(int __fildes)
     return -1;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 sigprocmask(int how, const sigset_t *set, sigset_t *oset)
 {
     bfignored(how);
@@ -353,7 +353,7 @@ sigprocmask(int how, const sigset_t *set, sigset_t *oset)
     return -1;
 }
 
-extern "C" EXPORT_SYM long
+extern "C" long
 sysconf(int __name)
 {
     bfignored(__name);
@@ -364,7 +364,7 @@ sysconf(int __name)
     return -1;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 nanosleep(const struct timespec *rqtp, struct timespec *rmtp)
 {
     bfignored(rqtp);
@@ -376,7 +376,7 @@ nanosleep(const struct timespec *rqtp, struct timespec *rmtp)
     return -1;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 fstat(int __fd, struct stat *__sbuf)
 {
     bfignored(__fd);
@@ -386,7 +386,7 @@ fstat(int __fd, struct stat *__sbuf)
     return -1;
 }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 getentropy(void *buf, size_t buflen)
 {
     bfignored(buf);
@@ -396,15 +396,15 @@ getentropy(void *buf, size_t buflen)
     return -1;
 }
 
-extern "C" EXPORT_SYM double
+extern "C" double
 ldexp(double x, int exp)
 { return __builtin_ldexp(x, exp); }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 sched_yield(void)
 { return 0; }
 
-extern "C" EXPORT_SYM float
+extern "C" float
 __mulsc3(float a, float b, float c, float d)
 {
     bfignored(a);
@@ -417,7 +417,7 @@ __mulsc3(float a, float b, float c, float d)
     return 0;
 }
 
-extern "C" EXPORT_SYM double
+extern "C" double
 __muldc3(double a, double b, double c, double d)
 {
     bfignored(a);
@@ -430,7 +430,7 @@ __muldc3(double a, double b, double c, double d)
     return 0;
 }
 
-extern "C" EXPORT_SYM long double
+extern "C" long double
 __mulxc3(long double a, long double b, long double c, long double d)
 {
     bfignored(a);
@@ -443,51 +443,51 @@ __mulxc3(long double a, long double b, long double c, long double d)
     return 0;
 }
 
-EXPORT_SYM int __g_eh_frame_list_num = 0;
-EXPORT_SYM eh_frame_t __g_eh_frame_list[MAX_NUM_MODULES] = {};
-EXPORT_SYM int __g_dwarf_sections_num = 0;
-EXPORT_SYM dwarf_sections_t __g_dwarf_sections[MAX_NUM_MODULES] = {};
+int __g_eh_frame_list_num = 0;
+eh_frame_t __g_eh_frame_list[MAX_NUM_MODULES] = {};
+int __g_dwarf_sections_num = 0;
+dwarf_sections_t __g_dwarf_sections[MAX_NUM_MODULES] = {};
 
-extern "C" EXPORT_SYM struct eh_frame_t *
+extern "C" struct eh_frame_t *
 get_eh_frame_list() noexcept
 { return __g_eh_frame_list; }
 
-extern "C" EXPORT_SYM struct dwarf_sections_t *
+extern "C" struct dwarf_sections_t *
 get_dwarf_sections() noexcept
 { return __g_dwarf_sections; }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 malloc(size_t __size)
 { return _malloc_r(nullptr, __size); }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 free(void *__ptr)
 { _free_r(nullptr, __ptr); }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 calloc(size_t __nmemb, size_t __size)
 { return _calloc_r(nullptr, __nmemb, __size); }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 realloc(void *__r, size_t __size)
 { return _realloc_r(nullptr, __r, __size); }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 WEAK_SYM _malloc_r(struct _reent * /*unused*/, size_t /*unused*/)
 { return nullptr; }
 
-extern "C" EXPORT_SYM void
+extern "C" void
 WEAK_SYM _free_r(struct _reent * /*unused*/, void * /*unused*/)
 { }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 WEAK_SYM _calloc_r(struct _reent * /*unused*/, size_t /*unused*/, size_t /*unused*/)
 { return nullptr; }
 
-extern "C" EXPORT_SYM void *
+extern "C" void *
 WEAK_SYM _realloc_r(struct _reent * /*unused*/, void * /*unused*/, size_t /*unused*/)
 { return nullptr; }
 
-extern "C" EXPORT_SYM int
+extern "C" int
 WEAK_SYM write(int /*unused*/, const void * /*unused*/, size_t /*unused*/)
 { return 0; }

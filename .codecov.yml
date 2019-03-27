@@ -44,6 +44,7 @@ ignore:
   - "bfintrinsics/**"
   - "bfm/ioctl/arch/**"
   - "bfvmm/include/test/**"
+  - "bfdriver/**"
 
   # Remove Me
   - "bfelf_loader/**"

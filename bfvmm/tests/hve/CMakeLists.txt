@@ -19,87 +19,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-list(APPEND ARGN
-    DEPENDS bfvmm_hve
-    DEPENDS bfvmm_vcpu
-    DEPENDS bfvmm_memory_manager
-    DEFINES STATIC_HVE
-    DEFINES STATIC_VCPU
-    DEFINES STATIC_MEMORY_MANAGER
-    DEFINES STATIC_INTRINSICS
-)
-
-do_test(test_gdt
-    SOURCES arch/x64/test_gdt.cpp
-    ${ARGN}
-)
-
-do_test(test_idt
-    SOURCES arch/x64/test_idt.cpp
-    ${ARGN}
-)
-
-# do_test(test_control_register
-#     SOURCES arch/intel_x64/vmexit/test_control_register.cpp
-#     ${ARGN}
-# )
-
-# do_test(test_cpuid
-#     SOURCES arch/intel_x64/vmexit/test_cpuid.cpp
-#     ${ARGN}
-# )
-
-do_test(test_rdmsr
-    SOURCES arch/intel_x64/vmexit/test_rdmsr.cpp
-    ${ARGN}
-)
-
-do_test(test_wrmsr
-    SOURCES arch/intel_x64/vmexit/test_wrmsr.cpp
-    ${ARGN}
-)
-
-do_test(test_check_vmcs_controls_fields
-    SOURCES arch/intel_x64/test_check_vmcs_controls_fields.cpp
-    ${ARGN}
-)
-
-do_test(test_check_vmcs_guest_fields
-    SOURCES arch/intel_x64/test_check_vmcs_guest_fields.cpp
-    ${ARGN}
-)
-
-do_test(test_check_vmcs_host_fields
-    SOURCES arch/intel_x64/test_check_vmcs_host_fields.cpp
-    ${ARGN}
-)
-
-do_test(test_exception
-    SOURCES arch/intel_x64/test_exception.cpp
-    ${ARGN}
-)
-
-do_test(test_check
-    SOURCES arch/intel_x64/test_check.cpp
-    ${ARGN}
-)
-
-do_test(test_exit_handler
-    SOURCES arch/intel_x64/test_exit_handler.cpp
-    ${ARGN}
-)
-
-# do_test(test_bfvmm_vcpu
-#     SOURCES arch/intel_x64/test_vcpu.cpp
-#     ${ARGN}
-# )
-
-do_test(test_vmcs
-    SOURCES arch/intel_x64/test_vmcs.cpp
-    ${ARGN}
-)
-
-do_test(test_vmx
-    SOURCES arch/intel_x64/test_vmx.cpp
-    ${ARGN}
-)
+do_test(arch/x64/test_gdt.cpp ${ARGN})
+do_test(arch/x64/test_idt.cpp ${ARGN})
+do_test(arch/intel_x64/test_check_vmcs_controls_fields.cpp ${ARGN})
+do_test(arch/intel_x64/test_check_vmcs_guest_fields.cpp ${ARGN})
+do_test(arch/intel_x64/test_check_vmcs_host_fields.cpp ${ARGN})
+#do_test(arch/intel_x64/test_nmi.cpp ${ARGN})
+do_test(arch/intel_x64/test_exception.cpp ${ARGN})
+do_test(arch/intel_x64/test_check.cpp ${ARGN})
+do_test(arch/intel_x64/test_exit_handler.cpp ${ARGN})
+do_test(arch/intel_x64/test_vmcs.cpp ${ARGN})
+do_test(arch/intel_x64/test_vmx.cpp ${ARGN})

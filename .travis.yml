@@ -65,6 +65,14 @@ before_script:
       sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 100
     fi
 
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="http://www.cmake.org/files/v3.13/cmake-3.13.4-Linux-x86_64.tar.gz"
+      mkdir cmake
+      travis_retry wget --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=$(pwd)/cmake/bin:${PATH}
+    fi
+
 #
 # Build Matrix
 #
@@ -115,6 +123,14 @@ matrix:
           echo "You must remove whitespace before submitting a pull request"
           echo ""
           git diff --check HEAD^
+          exit -1
+        fi
+      - cd ..
+      - |
+        if [[ -n $(./scripts/util/chk_perms.sh) ]]; then
+          echo "You checked in files that shouldn't be executable"
+          echo ""
+          ./scripts/util/chk_perms.sh
           exit -1
         fi
 
@@ -235,7 +251,7 @@ matrix:
       - make unittest
 
   #
-  # Clang 5.0 (Static Libraries)
+  # Clang 5.0
   #
   - os: linux
     addons:
@@ -249,14 +265,14 @@ matrix:
           - clang-5.0
           - nasm
     env:
-      - TEST="Clang 5.0 (Static Libraries)"
+      - TEST="Clang 5.0"
     script:
       - export CLANG_BIN=clang-5.0
       - cmake -DCONFIG=travis_static ..
       - make -j3
 
   #
-  # Clang 6.0 (Static Libraries)
+  # Clang 6.0
   #
   - os: linux
     addons:
@@ -270,52 +286,10 @@ matrix:
           - clang-6.0
           - nasm
     env:
-      - TEST="Clang 6.0 (Static Libraries)"
+      - TEST="Clang 6.0"
     script:
       - export CLANG_BIN=clang-6.0
       - cmake -DCONFIG=travis_static ..
-      - make -j3
-
-  #
-  # Clang 5.0 (Shared Libraries)
-  #
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-5.0
-        packages:
-          - gcc-8
-          - g++-8
-          - clang-5.0
-          - nasm
-    env:
-      - TEST="Clang 5.0 (Shared Libraries)"
-    script:
-      - export CLANG_BIN=clang-5.0
-      - cmake -DCONFIG=travis_shared ..
-      - make -j3
-
-  #
-  # Clang 6.0 (Shared Libraries)
-  #
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-6.0
-        packages:
-          - gcc-8
-          - g++-8
-          - clang-6.0
-          - nasm
-    env:
-      - TEST="Clang 6.0 (Shared Libraries)"
-    script:
-      - export CLANG_BIN=clang-6.0
-      - cmake -DCONFIG=travis_shared ..
       - make -j3
 
   #
@@ -335,7 +309,7 @@ matrix:
     env:
       - TEST="GCC 7"
     script:
-      - cmake -DCONFIG=travis_shared ..
+      - cmake -DCONFIG=travis_static ..
       - make -j3
 
   #
@@ -355,7 +329,7 @@ matrix:
     env:
       - TEST="GCC 8"
     script:
-      - cmake -DCONFIG=travis_shared ..
+      - cmake -DCONFIG=travis_static ..
       - make -j3
 
   #
@@ -376,7 +350,7 @@ matrix:
       - TEST="ld.gold"
     script:
       - export LD_BIN=ld.gold
-      - cmake -DCONFIG=travis_shared ..
+      - cmake -DCONFIG=travis_static ..
       - make -j3
 
   #
@@ -397,5 +371,5 @@ matrix:
       - TEST="ld.lld"
     script:
       - export LD_BIN=ld.lld
-      - cmake -DCONFIG=travis_shared ..
+      - cmake -DCONFIG=travis_static ..
       - make -j3
