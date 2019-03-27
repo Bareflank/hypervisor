@@ -136,7 +136,7 @@ endif()
 
 if(ENABLE_BUILD_VMM)
     add_subproject(bfintrinsics vmm DEPENDS bfruntime)
-    add_subproject(bfvmm vmm DEPENDS bfunwind)
+    add_subproject(bfvmm vmm DEPENDS bfunwind bfintrinsics)
     add_subproject(examples vmm DEPENDS bfvmm)
 endif()
 
