@@ -1137,38 +1137,6 @@ function(add_vmm_executable NAME)
 endfunction(add_vmm_executable)
 
 # ------------------------------------------------------------------------------
-# set_bfm_vmm
-# ------------------------------------------------------------------------------
-
-# Set BFM VMM
-#
-# Sets the VMM that BFM will use when running "make load" or "make quick". This
-# does not hard code the VMM into BFM. BFM must either be given the VMM to
-# load, or an enviroment variable must be set.
-#
-# @param NAME The name of the VMM to load
-# @param DEFAULT If the VMM has not yet been set, this default value will be
-#     used instead. This should not be used by extensions
-#
-macro(set_bfm_vmm NAME)
-    set(options DEFAULT)
-    set(oneVal TARGET)
-    cmake_parse_arguments(ARG "${options}" "${oneVal}" "" ${ARGN})
-
-    if(NOT ARG_DEFAULT OR (ARG_DEFAULT AND NOT BFM_VMM))
-        set(BFM_VMM "${NAME}")
-    endif()
-
-    if(NOT ARG_DEFAULT OR (ARG_DEFAULT AND NOT BFM_VMM_TARGET))
-        if(ARG_TARGET)
-            set(BFM_VMM_TARGET "${ARG_TARGET}_${VMM_PREFIX}")
-        else()
-            set(BFM_VMM_TARGET "${NAME}_main_${VMM_PREFIX}")
-        endif()
-    endif()
-endmacro(set_bfm_vmm)
-
-# ------------------------------------------------------------------------------
 # do_test
 # ------------------------------------------------------------------------------
 

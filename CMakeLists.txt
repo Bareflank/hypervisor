@@ -165,6 +165,7 @@ endif()
 # ------------------------------------------------------------------------------
 
 if(ENABLE_BUILD_USERSPACE)
+    add_subproject(bfsdk userspace DEPENDS bfroot)
     add_subproject(bfintrinsics userspace DEPENDS gsl json bfroot)
     add_subproject(bfm userspace DEPENDS gsl json cxxopts bfroot)
     add_subproject(bfack userspace DEPENDS bfintrinsics)
