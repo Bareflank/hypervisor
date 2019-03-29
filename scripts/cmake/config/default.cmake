@@ -256,6 +256,11 @@ set(SOURCE_BFROOT_DIR ${CMAKE_SOURCE_DIR}/bfroot
     "bfroot source dir"
 )
 
+set(SOURCE_EXAMPLES_DIR ${CMAKE_SOURCE_DIR}/examples
+    CACHE INTERNAL
+    "VMM examples dir"
+)
+
 # ------------------------------------------------------------------------------
 # Build Tree
 # ------------------------------------------------------------------------------

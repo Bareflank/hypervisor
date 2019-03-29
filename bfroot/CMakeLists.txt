@@ -44,7 +44,7 @@ set(GNU_CLANG $<OR:${GNU},${CLANG}>)
 set(GNU_CLANG_C $<AND:${GNU_CLANG},${C}>)
 set(GNU_CLANG_CXX $<AND:${GNU_CLANG},${CXX}>)
 set(GNU_CLANG_C_CXX_X64 $<AND:${C_CXX_X64},${GNU_CLANG}>)
-set(MSVC_CXX $<AND:${MSVC},${CXX}>)
+set(MSVC_C_CXX $<AND:${MSVC},${C_CXX}>)
 
 set(VMM $<STREQUAL:${PREFIX},vmm>)
 set(EFI $<STREQUAL:${PREFIX},efi>)
@@ -91,7 +91,7 @@ target_compile_options(bfroot INTERFACE
     $<${GNU_CLANG_C_CXX_X64}:-msse>
     $<${GNU_CLANG_C_CXX_X64}:-msse2>
     $<${GNU_CLANG_C_CXX_X64}:-msse3>
-    $<${MSVC_CXX}:/std:c++17>
+    $<${MSVC_C_CXX}:/std:c++17>
 )
 
 # ------------------------------------------------------------------------------
@@ -221,6 +221,7 @@ target_compile_definitions(bfroot INTERFACE
     $<${USR_C_CXX_MSVC}:_SCL_SECURE_NO_WARNINGS>
     $<${USR_C_CXX_MSVC}:_CRT_SECURE_NO_WARNINGS>
     $<${USR_C_CXX_MSVC}:NOMINMAX>
+    $<${USR_C_CXX_MSVC}:_SILENCE_CXX17_UNCAUGHT_EXCEPTION_DEPRECATION_WARNING>
 )
 target_include_directories(bfroot SYSTEM INTERFACE
     $<INSTALL_INTERFACE:$<${USR_C_CXX}:${USERSPACE_PREFIX_PATH}/include>>
