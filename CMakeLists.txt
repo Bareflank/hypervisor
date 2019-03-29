@@ -137,7 +137,23 @@ endif()
 if(ENABLE_BUILD_VMM)
     add_subproject(bfintrinsics vmm DEPENDS bfruntime)
     add_subproject(bfvmm vmm DEPENDS bfunwind bfintrinsics)
-    add_subproject(examples vmm DEPENDS bfvmm)
+
+    add_subproject(cpuidcount vmm
+        DEPENDS bfvmm
+        SOURCE_DIR ${SOURCE_EXAMPLES_DIR}/cpuidcount
+    )
+    add_subproject(hook vmm
+        DEPENDS bfvmm
+        SOURCE_DIR ${SOURCE_EXAMPLES_DIR}/hook
+    )
+    add_subproject(rdtsc vmm
+        DEPENDS bfvmm
+        SOURCE_DIR ${SOURCE_EXAMPLES_DIR}/rdtsc
+    )
+    add_subproject(vpid vmm
+        DEPENDS bfvmm
+        SOURCE_DIR ${SOURCE_EXAMPLES_DIR}/vpid
+    )
 endif()
 
 # ------------------------------------------------------------------------------
@@ -168,7 +184,10 @@ if(ENABLE_BUILD_USERSPACE)
     add_subproject(bfintrinsics userspace DEPENDS gsl json bfroot)
     add_subproject(bfm userspace DEPENDS gsl json cxxopts bfroot)
     add_subproject(bfack userspace DEPENDS bfintrinsics)
-    add_subproject(examples userspace DEPENDS bfintrinsics)
+    add_subproject(hook userspace
+        DEPENDS bfintrinsics
+        SOURCE_DIR ${SOURCE_EXAMPLES_DIR}/hook
+    )
 endif()
 
 # ------------------------------------------------------------------------------

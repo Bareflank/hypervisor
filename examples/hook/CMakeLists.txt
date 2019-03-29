@@ -20,33 +20,20 @@
 # SOFTWARE.
 
 cmake_minimum_required(VERSION 3.13)
-project(examples C CXX)
+project(hook C CXX)
 
-init_project(examples INTERFACE)
+init_project(hook BINARY)
 
 if(PREFIX STREQUAL "vmm")
-    add_executable(cpuidcount_vmm cpuidcount/vmm/main.cpp)
-    add_executable(rdtsc_vmm rdtsc/vmm/main.cpp)
-    add_executable(vpid_vmm vpid/vmm/main.cpp)
-    add_executable(hook_vmm hook/vmm/main.cpp)
-
-    target_link_libraries(cpuidcount_vmm PRIVATE vmm::bfvmm)
-    target_link_libraries(rdtsc_vmm PRIVATE vmm::bfvmm)
-    target_link_libraries(vpid_vmm PRIVATE vmm::bfvmm)
-    target_link_libraries(hook_vmm PRIVATE vmm::bfvmm)
-
-    install(TARGETS cpuidcount_vmm DESTINATION bin EXPORT examples-vmm-targets)
-    install(TARGETS rdtsc_vmm DESTINATION bin EXPORT examples-vmm-targets)
-    install(TARGETS vpid_vmm DESTINATION bin EXPORT examples-vmm-targets)
-    install(TARGETS hook_vmm DESTINATION bin EXPORT examples-vmm-targets)
+    target_sources(hook PRIVATE vmm/main.cpp)
+    target_link_libraries(hook PRIVATE vmm::bfvmm)
 elseif(PREFIX STREQUAL "userspace")
-    add_executable(hook hook/userspace/hook.cpp)
+    target_sources(hook PRIVATE userspace/hook.cpp)
     target_link_libraries(hook PRIVATE userspace::bfintrinsics)
     target_include_directories(hook PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/../bfsdk/include
-        ${CMAKE_CURRENT_LIST_DIR}/../bfintrinsics/include
+        ${CMAKE_CURRENT_LIST_DIR}/../../bfsdk/include
+        ${CMAKE_CURRENT_LIST_DIR}/../../bfintrinsics/include
     )
-    install(TARGETS hook DESTINATION bin EXPORT examples-userspace-targets)
 endif()
 
 fini_project()
