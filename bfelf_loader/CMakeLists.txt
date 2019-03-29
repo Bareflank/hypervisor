@@ -44,32 +44,4 @@ if(NOT PREFIX STREQUAL test)
     return()
 endif()
 
-#add_library(test_support)
-#target_sources(test_support PRIVATE
-#    tests/test_real_elf.cpp
-#    tests/test_fake_elf.cpp
-#)
-#target_link_libraries(test_support PUBLIC bfelf_loader)
-#target_include_directories(test_support PUBLIC ${PROJECT_SOURCE_DIR}/tests)
-
-#do_test(test_binary DEPENDS test_support)
-#do_test(test_file_get_entry DEPENDS test_support)
-#do_test(test_file_get_load_instr DEPENDS test_support)
-#do_test(test_file_get_needed DEPENDS test_support)
-#do_test(test_file_get_num_load_instrs DEPENDS test_support)
-#do_test(test_file_get_num_needed DEPENDS test_support)
-#do_test(test_file_get_pic_pie DEPENDS test_support)
-#do_test(test_file_get_section_info DEPENDS test_support)
-#do_test(test_file_get_total_size DEPENDS test_support)
-#do_test(test_file_init DEPENDS test_support)
-#do_test(test_helpers DEPENDS test_support)
-#do_test(test_load DEPENDS test_support)
-#do_test(test_loader_add DEPENDS test_support)
-#do_test(test_loader_relocate DEPENDS test_support)
-#do_test(test_loader_resolve_symbol DEPENDS test_support)
-#do_test(test_read_binary_and_get_needed_list DEPENDS test_support)
-#do_test(test_real DEPENDS test_support)
-#do_test(test_set_args DEPENDS test_support)
-#do_test(test_set_integer_args DEPENDS test_support)
-
 fini_project()

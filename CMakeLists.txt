@@ -150,7 +150,6 @@ endif()
 
 if(ENABLE_BUILD_TEST AND NOT WIN32)
     add_subproject(bfdummy vmm DEPENDS bfunwind)
-    #add_subproject(bfelf_loader test DEPENDS bfsdk)
     add_subproject(bfdriver test DEPENDS bfsdk)
 endif()
 
