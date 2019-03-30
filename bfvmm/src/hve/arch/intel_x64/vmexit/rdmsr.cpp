@@ -109,6 +109,10 @@ rdmsr_handler::trap_on_access(vmcs_n::value_type msr)
         return set_bit(m_msr_bitmap, (msr - 0xC0000000UL) + 0x2000);
     }
 
+    if (msr >= 0x40000000UL && msr <= 0x40001FFFUL) {
+        return;
+    }
+
     throw std::runtime_error("invalid msr: " + std::to_string(msr));
 }
 

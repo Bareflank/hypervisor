@@ -38,6 +38,7 @@ bfdriver/src/platform/linux/.bareflank.mod.o.cmd
 bfdriver/src/platform/linux/.bareflank.o.cmd
 bfdriver/src/platform/linux/.cache.mk
 bfdriver/src/platform/linux/.entry.o.cmd
+bfdriver/src/platform/linux/.intrinsics.o.cmd
 bfdriver/src/platform/linux/.platform.o.cmd
 bfdriver/src/platform/linux/.tmp_versions/
 bfdriver/src/platform/linux/.vmcall.o.cmd
@@ -48,6 +49,7 @@ bfdriver/src/platform/linux/bareflank.mod.o
 bfdriver/src/platform/linux/bareflank.o
 bfdriver/src/platform/linux/entry.o
 bfdriver/src/platform/linux/modules.order
+bfdriver/src/platform/linux/intrinsics.o
 bfdriver/src/platform/linux/platform.o
 bfdriver/src/platform/linux/vmcall.o
 bfdriver/src/platform/linux/.cache.mk

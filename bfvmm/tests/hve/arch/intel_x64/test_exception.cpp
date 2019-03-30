@@ -55,7 +55,7 @@ TEST_CASE("vector_to_str")
 }
 
 bool
-ec_valid(int vector)
+ec_valid(unsigned int vector)
 {
     switch (vector) {
         case 8:

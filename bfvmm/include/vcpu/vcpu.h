@@ -37,10 +37,7 @@
 // Delegate Types
 // -----------------------------------------------------------------------------
 
-using run_delegate_t = delegate<void(bfobject *)>;      ///< Run delegate type
-using hlt_delegate_t = delegate<void(bfobject *)>;      ///< Halt delegate type
-using init_delegate_t = delegate<void(bfobject *)>;     ///< Init delegate type
-using fini_delegate_t = delegate<void(bfobject *)>;     ///< Fini delegate type
+using vcpu_delegate_t = delegate<void(bfobject *)>;      ///< vCPU delegate type
 
 // -----------------------------------------------------------------------------
 // Definitions
@@ -278,7 +275,7 @@ public:
     ///
     /// @param d the delegate to add to the vcpu
     ///
-    VIRTUAL void add_run_delegate(const run_delegate_t &d) noexcept
+    VIRTUAL void add_run_delegate(const vcpu_delegate_t &d) noexcept
     { m_run_delegates.push_front(std::move(d)); }
 
     /// Add Halt Delegate
@@ -292,7 +289,7 @@ public:
     ///
     /// @param d the delegate to add to the vcpu
     ///
-    VIRTUAL void add_hlt_delegate(const hlt_delegate_t &d) noexcept
+    VIRTUAL void add_hlt_delegate(const vcpu_delegate_t &d) noexcept
     { m_hlt_delegates.push_front(std::move(d)); }
 
     /// Add Init Delegate
@@ -306,7 +303,7 @@ public:
     ///
     /// @param d the delegate to add to the vcpu
     ///
-    VIRTUAL void add_init_delegate(const init_delegate_t &d) noexcept
+    VIRTUAL void add_init_delegate(const vcpu_delegate_t &d) noexcept
     { m_init_delegates.push_front(std::move(d)); }
 
     /// Add Fini Delegate
@@ -320,7 +317,7 @@ public:
     ///
     /// @param d the delegate to add to the vcpu
     ///
-    VIRTUAL void add_fini_delegate(const fini_delegate_t &d) noexcept
+    VIRTUAL void add_fini_delegate(const vcpu_delegate_t &d) noexcept
     { m_fini_delegates.push_front(std::move(d)); }
 
     /// Get User Data
@@ -362,10 +359,10 @@ private:
     bool m_is_running{false};
     bool m_is_initialized{false};
 
-    std::list<run_delegate_t> m_run_delegates;
-    std::list<hlt_delegate_t> m_hlt_delegates;
-    std::list<init_delegate_t> m_init_delegates;
-    std::list<fini_delegate_t> m_fini_delegates;
+    std::list<vcpu_delegate_t> m_run_delegates;
+    std::list<vcpu_delegate_t> m_hlt_delegates;
+    std::list<vcpu_delegate_t> m_init_delegates;
+    std::list<vcpu_delegate_t> m_fini_delegates;
 
     std::any m_data;
 

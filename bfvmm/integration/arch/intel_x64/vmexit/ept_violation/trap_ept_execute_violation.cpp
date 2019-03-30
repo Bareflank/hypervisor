@@ -64,7 +64,7 @@ public:
         });
 
         this->add_hlt_delegate(
-            hlt_delegate_t::create<test_hlt_delegate>()
+            vcpu_delegate_t::create<test_hlt_delegate>()
         );
 
         this->add_ept_execute_violation_handler(

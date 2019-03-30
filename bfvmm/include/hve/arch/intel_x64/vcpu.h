@@ -94,9 +94,13 @@ public:
 
     /// Run Delegate
     ///
-    /// Provides the base implementation for starting the vCPU. This delegate
-    /// does not "resume" a vCPU as the base implementation does not support
-    /// guest VMs.
+    /// Provides the base implementation for starting the vCPU. This will
+    /// either launch the vCPU or resume it (if it has already been launched).
+    /// If clear() is executed, this will lanuch the vCPU the next time this
+    /// is executed.
+    ///
+    /// Note that this function will also execute the launch and resume
+    /// delegates as requested.
     ///
     /// @expects none
     /// @ensures none
@@ -105,16 +109,39 @@ public:
     ///
     VIRTUAL void run_delegate(bfobject *obj);
 
-    /// Halt Delegate
+    /// Add Launch Delegate
     ///
-    /// Provides the base implementation for stopping the vCPU.
+    /// Adds a launch delegate to the VCPU. The delegates are added to a queue and
+    /// executed in FIFO order. All delegates are executed unless an exception
+    /// is thrown that is not handled.
+    ///
+    /// Note that this is executed during a vcpu->run() if the vCPU is being
+    /// launched and not resumed.
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param obj ignored
+    /// @param d the delegate to add to the vcpu
     ///
-    VIRTUAL void hlt_delegate(bfobject *obj);
+    VIRTUAL void add_launch_delegate(const vcpu_delegate_t &d) noexcept
+    { m_launch_delegates.push_front(std::move(d)); }
+
+    /// Add Resume Delegate
+    ///
+    /// Adds a resume delegate to the VCPU. The delegates are added to a queue and
+    /// executed in FIFO order. All delegates are executed unless an exception
+    /// is thrown that is not handled.
+    ///
+    /// Note that this is executed during a vcpu->run() if the vCPU is being
+    /// resumed and not launched.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param d the delegate to add to the vcpu
+    ///
+    VIRTUAL void add_resume_delegate(const vcpu_delegate_t &d) noexcept
+    { m_resume_delegates.push_front(std::move(d)); }
 
 private:
 
@@ -136,6 +163,15 @@ public:
     /// @ensures none
     ///
     VIRTUAL void load();
+
+    /// Clear vCPU
+    ///
+    /// Clears the vCPU in hardware.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    VIRTUAL void clear();
 
     /// Promote vCPU
     ///
@@ -593,7 +629,7 @@ public:
     /// @param d the delegate to call when a monitor-trap flag exit occurs
     ///
     VIRTUAL void add_monitor_trap_handler(
-        const monitor_trap_handler::handler_delegate_t &d);
+        const ::handler_delegate_t &d);
 
     /// Enable Monitor Trap Flag
     ///
@@ -1907,6 +1943,9 @@ private:
 private:
 
     bool m_launched{false};
+    std::list<vcpu_delegate_t> m_launch_delegates;
+    std::list<vcpu_delegate_t> m_resume_delegates;
+
     ept::mmap *m_mmap{};
 };
 }

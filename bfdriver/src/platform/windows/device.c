@@ -48,6 +48,5 @@ bareflankCreateDevice(
         return status;
     }
 
-    BFDEBUG("bareflankCreateDevice: success\n");
     return status;
 }
