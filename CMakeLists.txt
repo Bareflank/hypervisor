@@ -96,10 +96,10 @@ file(APPEND ${PKG_FILE} "")
 # Root Targets
 # ------------------------------------------------------------------------------
 
-add_subproject(bfroot vmm)
-add_subproject(bfroot efi)
-add_subproject(bfroot test DEPENDS catch)
-add_subproject(bfroot userspace)
+add_subproject(bfroot vmm SOURCE_DIR ${SOURCE_CMAKE_DIR})
+add_subproject(bfroot efi SOURCE_DIR ${SOURCE_CMAKE_DIR})
+add_subproject(bfroot test SOURCE_DIR ${SOURCE_CMAKE_DIR} DEPENDS catch)
+add_subproject(bfroot userspace SOURCE_DIR ${SOURCE_CMAKE_DIR})
 
 # ------------------------------------------------------------------------------
 # VMM Components
