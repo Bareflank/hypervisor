@@ -67,30 +67,4 @@ do_test(tests/test_types.cpp)
 do_test(tests/test_upperlower.cpp)
 do_test(tests/test_vector.cpp)
 
-#add_static_library(
-#    test_support
-#    SOURCES test_real_elf.cpp test_fake_elf.cpp
-#    ALWAYS
-#)
-#
-#do_test(test_binary DEPENDS test_support)
-#do_test(test_file_get_entry DEPENDS test_support)
-#do_test(test_file_get_load_instr DEPENDS test_support)
-#do_test(test_file_get_needed DEPENDS test_support)
-#do_test(test_file_get_num_load_instrs DEPENDS test_support)
-#do_test(test_file_get_num_needed DEPENDS test_support)
-#do_test(test_file_get_pic_pie DEPENDS test_support)
-#do_test(test_file_get_section_info DEPENDS test_support)
-#do_test(test_file_get_total_size DEPENDS test_support)
-#do_test(test_file_init DEPENDS test_support)
-#do_test(test_helpers DEPENDS test_support)
-#do_test(test_load DEPENDS test_support)
-#do_test(test_loader_add DEPENDS test_support)
-#do_test(test_loader_relocate DEPENDS test_support)
-#do_test(test_loader_resolve_symbol DEPENDS test_support)
-#do_test(test_read_binary_and_get_needed_list DEPENDS test_support)
-#do_test(test_real DEPENDS test_support)
-#do_test(test_set_args DEPENDS test_support)
-#do_test(test_set_integer_args DEPENDS test_support)
-
 fini_project()

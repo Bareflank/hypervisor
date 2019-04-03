@@ -37,7 +37,7 @@ INTERFACE library:
     test::bfroot
     userspace::bfroot
 
-defined in bfroot/CMakeLists.txt. Downstream targets simply
+defined in scripts/cmake/CMakeLists.txt. Downstream targets simply
 target_link_libraries against their prefix's root interface and the prefix's
 build options will be automatically placed in the targets' build commands.
 

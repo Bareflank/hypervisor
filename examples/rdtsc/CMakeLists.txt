@@ -20,28 +20,11 @@
 # SOFTWARE.
 
 cmake_minimum_required(VERSION 3.13)
-project(bfelf_loader C CXX)
+project(rdtsc C CXX)
 
-init_project(bfelf_loader INTERFACE)
+init_project(rdtsc BINARY)
 
-set(CXX $<COMPILE_LANGUAGE:CXX>)
-set(BUILD $<BOOL:$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>>)
-set(BUILD_INCLUDE $<AND:${CXX},${BUILD}>)
-
-target_link_libraries(bfelf_loader INTERFACE ${PREFIX}::bfroot)
-target_compile_definitions(bfelf_loader INTERFACE
-    $<${CXX}:VMM_PREFIX_PATH='${VMM_PREFIX_PATH}'>
-)
-target_include_directories(bfelf_loader INTERFACE
-    $<${BUILD_INCLUDE}:${PROJECT_SOURCE_DIR}/tests>
-    $<${BUILD_INCLUDE}:${PROJECT_SOURCE_DIR}/include>
-    $<${BUILD_INCLUDE}:${PROJECT_SOURCE_DIR}/../bfsdk/include>
-)
-
-if(NOT PREFIX STREQUAL test)
-    install(DIRECTORY include/ DESTINATION include)
-    fini_project()
-    return()
-endif()
+target_sources(rdtsc PRIVATE vmm/main.cpp)
+target_link_libraries(rdtsc PRIVATE vmm::bfvmm)
 
 fini_project()
