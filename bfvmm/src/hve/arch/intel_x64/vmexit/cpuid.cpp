@@ -179,9 +179,6 @@ cpuid_handler::add_emulator(
 void
 cpuid_handler::execute(gsl::not_null<vcpu *> vcpu)
 {
-    vcpu->set_gr1(vcpu->rax());
-    vcpu->set_gr2(vcpu->rcx());
-
     auto [rax, rbx, rcx, rdx] =
         ::x64::cpuid::get(
             gsl::narrow_cast<::x64::cpuid::field_type>(vcpu->rax()),
@@ -227,21 +224,20 @@ execute_emulators(vcpu *vcpu, const std::list<handler_delegate_t> &emulators)
 bool
 cpuid_handler::handle(vcpu *vcpu)
 {
-    const auto &emulators =
-        m_emulators.find(vcpu->rax());
+    vcpu->set_gr1(vcpu->rax());
+    vcpu->set_gr2(vcpu->rcx());
+
+    const auto &emulators = m_emulators.find(vcpu->rax());
 
     if (emulators != m_emulators.end()) {
         return execute_emulators(vcpu, emulators->second);
     }
 
     if (m_whitelist) {
-        vcpu->set_gr1(vcpu->rax());
-        vcpu->set_gr2(vcpu->rcx());
         return false;
     }
 
-    const auto &handlers =
-        m_handlers.find(vcpu->rax());
+    const auto &handlers = m_handlers.find(vcpu->rax());
 
     this->execute(vcpu);
 
