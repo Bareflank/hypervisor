@@ -253,7 +253,7 @@ control_register_handler::control_register_handler(
 {
     using namespace vmcs_n;
 
-    vcpu->add_handler(
+    vcpu->add_exit_handler_for_reason(
         exit_reason::basic_exit_reason::control_register_accesses,
     {&control_register_handler::handle, this}
     );

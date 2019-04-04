@@ -83,7 +83,6 @@ include_dependency(SOURCE_DEPENDS_DIR astyle)
 include_dependency(SOURCE_DEPENDS_DIR clang_tidy)
 include_dependency(SOURCE_DEPENDS_DIR catch)
 include_dependency(SOURCE_DEPENDS_DIR hippomocks)
-include_dependency(SOURCE_DEPENDS_DIR python)
 
 # ------------------------------------------------------------------------------
 # Package File

@@ -30,7 +30,6 @@
 #include <bfgsl.h>
 #include <bfarch.h>
 #include <bfvcpuid.h>
-#include <bfobject.h>
 #include <bfexports.h>
 #include <bfsupport.h>
 #include <bfcallonce.h>
@@ -40,14 +39,15 @@
 #include <debug/debug_ring/debug_ring.h>
 #include <memory_manager/memory_manager.h>
 
+#ifdef BF_INTEL_X64
+#include <hve/arch/intel_x64/vcpu.h>
+#endif
+
 static bfn::once_flag g_init_flag;
 
 void
 WEAK_SYM global_init()
 { }
-
-#ifdef BF_INTEL_X64
-#include <hve/arch/intel_x64/vcpu.h>
 
 void
 WEAK_SYM vcpu_init_nonroot(vcpu_t *vcpu)
@@ -56,7 +56,14 @@ WEAK_SYM vcpu_init_nonroot(vcpu_t *vcpu)
 void
 WEAK_SYM vcpu_fini_nonroot(vcpu_t *vcpu)
 { bfignored(vcpu); }
-#endif
+
+void
+WEAK_SYM vcpu_init_nonroot_running(vcpu_t *vcpu)
+{ bfignored(vcpu); }
+
+void
+WEAK_SYM vcpu_fini_nonroot_running(vcpu_t *vcpu)
+{ bfignored(vcpu); }
 
 extern "C" int64_t
 private_add_md(struct memory_descriptor *md) noexcept
@@ -85,17 +92,17 @@ private_init_vmm(uint64_t arg) noexcept
 
         bfn::call_once(g_init_flag, global_init);
 
-        g_vcm->create(arg, nullptr);
+        g_vcm->create(arg);
 
         auto vcpu = g_vcm->get<vcpu_t *>(arg);
-        vcpu->load();
-
         vcpu_init_nonroot(vcpu);
+
         vcpu->run();
 
         ::x64::cpuid::get(0x4BF00010, 0, 0, 0);
         ::x64::cpuid::get(0x4BF00011, 0, 0, 0);
 
+        vcpu_init_nonroot_running(vcpu);
         return ENTRY_SUCCESS;
     });
 }
@@ -105,16 +112,14 @@ private_fini_vmm(uint64_t arg) noexcept
 {
     return guard_exceptions(ENTRY_ERROR_VMM_STOP_FAILED, [&]() {
 
+        auto vcpu = g_vcm->get<vcpu_t *>(arg);
+        vcpu_fini_nonroot_running(vcpu);
+
         ::x64::cpuid::get(0x4BF00020, 0, 0, 0);
         ::x64::cpuid::get(0x4BF00021, 0, 0, 0);
 
-        auto vcpu = g_vcm->get<vcpu_t *>(arg);
-        vcpu->load();
-
-        vcpu->hlt();
         vcpu_fini_nonroot(vcpu);
-
-        g_vcm->destroy(arg, nullptr);
+        g_vcm->destroy(arg);
 
         return ENTRY_SUCCESS;
     });

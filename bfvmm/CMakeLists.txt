@@ -44,11 +44,14 @@ set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(bfvmm INTERFACE ${PREFIX}::bfroot)
 
 add_subdirectory(src/hve)
-add_subdirectory(src/vcpu)
 add_subdirectory(src/memory_manager)
 add_subdirectory(src/debug)
 
 install(FILES include/vmm.h DESTINATION include/bfvmm)
+install(DIRECTORY include/debug/ DESTINATION include/bfvmm/debug)
+install(DIRECTORY include/hve/ DESTINATION include/bfvmm/hve)
+install(DIRECTORY include/memory_manager/ DESTINATION include/bfvmm/memory_manager)
+install(DIRECTORY include/vcpu/ DESTINATION include/bfvmm/vcpu)
 
 # ------------------------------------------------------------------------------
 # test
@@ -57,7 +60,6 @@ install(FILES include/vmm.h DESTINATION include/bfvmm)
 if(PREFIX STREQUAL test)
     target_link_libraries(bfvmm INTERFACE
         bfvmm_hve
-        bfvmm_vcpu
         bfvmm_memory_manager
         bfvmm_debug
     )
@@ -82,7 +84,6 @@ if(PREFIX STREQUAL vmm)
         $<INSTALL_INTERFACE:-lbfvmm_entry>
         --no-whole-archive
         bfvmm_hve
-        bfvmm_vcpu
         bfvmm_memory_manager
         bfvmm_debug
         vmm::bfintrinsics
@@ -120,10 +121,9 @@ if(PREFIX STREQUAL vmm)
         add_executable(trap_cr3 ${INT}/vmexit/control_register/trap_cr3.cpp)
         add_executable(trap_cr4 ${INT}/vmexit/control_register/trap_cr4.cpp)
         add_executable(trap_cpuid ${INT}/vmexit/cpuid/trap_cpuid.cpp)
-        add_executable(trap_ept_misconfiguration ${INT}/vmexit/ept_misconfiguration/trap_ept_misconfiguration.cpp)
-        add_executable(trap_ept_execute_violation ${INT}/vmexit/ept_violation/trap_ept_execute_violation.cpp)
-        add_executable(trap_ept_read_violation ${INT}/vmexit/ept_violation/trap_ept_read_violation.cpp)
-        add_executable(trap_ept_write_violation ${INT}/vmexit/ept_violation/trap_ept_write_violation.cpp)
+        # add_executable(trap_ept_execute_violation ${INT}/vmexit/ept_violation/trap_ept_execute_violation.cpp)
+        # add_executable(trap_ept_read_violation ${INT}/vmexit/ept_violation/trap_ept_read_violation.cpp)
+        # add_executable(trap_ept_write_violation ${INT}/vmexit/ept_violation/trap_ept_write_violation.cpp)
         add_executable(trap_all_interrupts ${INT}/vmexit/external_interrupt/trap_all_interrupts.cpp)
         add_executable(trap_in_out ${INT}/vmexit/io_instruction/trap_in_out.cpp)
         add_executable(single_step_cpuid ${INT}/vmexit/monitor_trap/single_step_cpuid.cpp)
@@ -138,10 +138,9 @@ if(PREFIX STREQUAL vmm)
         target_link_libraries(trap_cr3 PRIVATE vmm::bfvmm)
         target_link_libraries(trap_cr4 PRIVATE vmm::bfvmm)
         target_link_libraries(trap_cpuid PRIVATE vmm::bfvmm)
-        target_link_libraries(trap_ept_misconfiguration PRIVATE vmm::bfvmm)
-        target_link_libraries(trap_ept_execute_violation PRIVATE vmm::bfvmm)
-        target_link_libraries(trap_ept_read_violation PRIVATE vmm::bfvmm)
-        target_link_libraries(trap_ept_write_violation PRIVATE vmm::bfvmm)
+        # target_link_libraries(trap_ept_execute_violation PRIVATE vmm::bfvmm)
+        # target_link_libraries(trap_ept_read_violation PRIVATE vmm::bfvmm)
+        # target_link_libraries(trap_ept_write_violation PRIVATE vmm::bfvmm)
         target_link_libraries(trap_all_interrupts PRIVATE vmm::bfvmm)
         target_link_libraries(trap_in_out PRIVATE vmm::bfvmm)
         target_link_libraries(single_step_cpuid PRIVATE vmm::bfvmm)
@@ -156,10 +155,9 @@ if(PREFIX STREQUAL vmm)
         target_include_directories(trap_cr3 PRIVATE include)
         target_include_directories(trap_cr4 PRIVATE include)
         target_include_directories(trap_cpuid PRIVATE include)
-        target_include_directories(trap_ept_misconfiguration PRIVATE include)
-        target_include_directories(trap_ept_execute_violation PRIVATE include)
-        target_include_directories(trap_ept_read_violation PRIVATE include)
-        target_include_directories(trap_ept_write_violation PRIVATE include)
+        # target_include_directories(trap_ept_execute_violation PRIVATE include)
+        # target_include_directories(trap_ept_read_violation PRIVATE include)
+        # target_include_directories(trap_ept_write_violation PRIVATE include)
         target_include_directories(trap_all_interrupts PRIVATE include)
         target_include_directories(trap_in_out PRIVATE include)
         target_include_directories(single_step_cpuid PRIVATE include)
@@ -174,10 +172,9 @@ if(PREFIX STREQUAL vmm)
         install(TARGETS trap_cr3 DESTINATION bin EXPORT bfvmm-vmm-targets)
         install(TARGETS trap_cr4 DESTINATION bin EXPORT bfvmm-vmm-targets)
         install(TARGETS trap_cpuid DESTINATION bin EXPORT bfvmm-vmm-targets)
-        install(TARGETS trap_ept_misconfiguration DESTINATION bin EXPORT bfvmm-vmm-targets)
-        install(TARGETS trap_ept_execute_violation DESTINATION bin EXPORT bfvmm-vmm-targets)
-        install(TARGETS trap_ept_read_violation DESTINATION bin EXPORT bfvmm-vmm-targets)
-        install(TARGETS trap_ept_write_violation DESTINATION bin EXPORT bfvmm-vmm-targets)
+        # install(TARGETS trap_ept_execute_violation DESTINATION bin EXPORT bfvmm-vmm-targets)
+        # install(TARGETS trap_ept_read_violation DESTINATION bin EXPORT bfvmm-vmm-targets)
+        # install(TARGETS trap_ept_write_violation DESTINATION bin EXPORT bfvmm-vmm-targets)
         install(TARGETS trap_all_interrupts DESTINATION bin EXPORT bfvmm-vmm-targets)
         install(TARGETS trap_in_out DESTINATION bin EXPORT bfvmm-vmm-targets)
         install(TARGETS single_step_cpuid DESTINATION bin EXPORT bfvmm-vmm-targets)

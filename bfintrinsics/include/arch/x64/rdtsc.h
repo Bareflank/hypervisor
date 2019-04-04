@@ -34,7 +34,7 @@ extern "C" uint64_t _read_tscp(void) noexcept;
 namespace x64
 {
 
-namespace read_tsc
+namespace tsc
 {
     using value_type = uint64_t;
 
@@ -42,7 +42,7 @@ namespace read_tsc
     { return _read_tsc(); }
 }
 
-namespace read_tscp
+namespace tscp
 {
     using value_type = uint64_t;
 

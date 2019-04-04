@@ -27,7 +27,6 @@
 #include <unordered_map>
 
 #include <bfgsl.h>
-#include <bfobject.h>
 
 /// Manager
 ///
@@ -69,75 +68,51 @@ public:
     /// @ensures none
     ///
     /// @param id the T to initialize
-    /// @param obj object that can be passed around as needed
-    ///     by extensions of Bareflank
+    /// @param data a pointer to user defined data
     ///
-    void create(tid id, bfobject *obj = nullptr)
+    void create(tid id, void *data = nullptr)
     {
-        try {
-            if (auto t = add_t(id, obj)) {
-                t->init(obj);
-            }
-        }
-        catch (...) {
-            std::lock_guard<std::mutex> guard(m_mutex);
-            m_ts.erase(id);
+        std::lock_guard<std::mutex> guard(m_mutex);
 
-            throw;
+        if (auto iter = m_ts.find(id); iter != m_ts.end()) {
+            throw std::runtime_error("bfmanager: id already exists");
         }
+
+        if (auto t = m_T_factory->make(id, data)) {
+            m_ts[id] = std::move(t);
+            return;
+        }
+
+        throw std::runtime_error("bfmanager: factory returned a nullptr");
     }
 
     /// Destroy T
     ///
-    /// Deletes T.
+    /// @expects none
+    /// @ensures none
     ///
     /// @param id the T to destroy
-    /// @param obj object that can be passed around as needed
-    ///     by extensions of Bareflank
     ///
-    void destroy(tid id, bfobject *obj = nullptr)
+    void destroy(tid id)
     {
-        if (auto t = get(id)) {
-            t->fini(obj);
-        }
-
         std::lock_guard<std::mutex> guard(m_mutex);
         m_ts.erase(id);
     }
 
-    /// Run T
+    /// For Each
     ///
-    /// Executes T.
-    ///
-    /// @expects t exists
-    /// @ensures none
-    ///
-    /// @param id the T to run
-    /// @param obj object that can be passed around as needed
-    ///     by extensions of Bareflank
-    ///
-    void run(tid id, bfobject *obj = nullptr)
-    {
-        if (auto t = get(id)) {
-            t->run(obj);
-        }
-    }
-
-    /// Halt T
-    ///
-    /// Halts T.
+    /// Loops through all of the Ts that are being managed and calls a
+    /// provided callback for each T.
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param id the T to halt
-    /// @param obj object that can be passed around as needed
-    ///     by extensions of Bareflank
+    /// @param func the callback to call for each T
     ///
-    void hlt(tid id, bfobject *obj = nullptr)
+    void foreach (void(*func)(T *))
     {
-        if (auto t = get(id)) {
-            t->hlt(obj);
+        for (auto &t : m_ts) {
+            func(&t);
         }
     }
 
@@ -184,24 +159,6 @@ private:
     bfmanager() noexcept :
         m_T_factory(std::make_unique<T_factory>())
     { }
-
-    gsl::not_null<T *> add_t(tid id, bfobject *obj)
-    {
-        if (auto iter = m_ts.find(id); iter != m_ts.end()) {
-            return iter->second.get();
-        }
-
-        if (auto t = m_T_factory->make(id, obj)) {
-            std::lock_guard<std::mutex> guard(m_mutex);
-
-            auto ptr = t.get();
-            m_ts[id] = std::move(t);
-
-            return ptr;
-        }
-
-        throw std::runtime_error("make returned a nullptr");
-    }
 
 private:
 

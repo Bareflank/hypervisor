@@ -38,9 +38,17 @@ test_handler(vcpu_t *vcpu)
 }
 
 void
-test_hlt_delegate(bfobject *obj)
+vcpu_init_nonroot(vcpu_t *vcpu)
 {
-    bfignored(obj);
+    vcpu->add_wrcr4_handler(
+        0xFFFFFFFFFFFFFFFF, test_handler
+    );
+}
+
+void
+vcpu_fini_nonroot_running(vcpu_t *vcpu)
+{
+    bfignored(vcpu);
 
     g_cr4 = ::intel_x64::cr4::get();
     ::intel_x64::cr4::set(0);
@@ -48,11 +56,4 @@ test_hlt_delegate(bfobject *obj)
     if (::intel_x64::cr4::get() == g_cr4) {
         bfdebug_pass(0, "test");
     }
-}
-
-void
-vcpu_init_nonroot(vcpu_t *vcpu)
-{
-    vcpu->add_hlt_delegate(test_hlt_delegate);
-    vcpu->add_wrcr4_handler(0xFFFFFFFFFFFFFFFF, test_handler);
 }

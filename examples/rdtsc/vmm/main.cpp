@@ -38,7 +38,7 @@ handle_rdtsc(vcpu_t *vcpu)
     // For more information, please see the pseudo code for these instructions in
     // the Intel SDM.
 
-    auto ret = x64::read_tsc::get();
+    auto ret = x64::tsc::get();
     vcpu->set_rax((ret >> 0) & 0x00000000FFFFFFFF);
     vcpu->set_rdx((ret >> 32) & 0x00000000FFFFFFFF);
 
@@ -55,7 +55,7 @@ handle_rdtscp(vcpu_t *vcpu)
     // For more information, please see the pseudo code for these instructions in
     // the Intel SDM.
 
-    auto ret = x64::read_tscp::get();
+    auto ret = x64::tscp::get();
     vcpu->set_rax((ret >> 0) & 0x00000000FFFFFFFF);
     vcpu->set_rdx((ret >> 32) & 0x00000000FFFFFFFF);
     vcpu->set_rcx(x64::msrs::ia32_tsc_aux::get() & 0x00000000FFFFFFFF);
@@ -70,8 +70,8 @@ vcpu_init_nonroot(vcpu_t *vcpu)
     using namespace vmcs_n::exit_reason::basic_exit_reason;
     primary_processor_based_vm_execution_controls::rdtsc_exiting::enable();
 
-    vcpu->add_handler(rdtsc, handle_rdtsc);
-    vcpu->add_handler(rdtscp, handle_rdtscp);
+    vcpu->add_exit_handler_for_reason(rdtsc, handle_rdtsc);
+    vcpu->add_exit_handler_for_reason(rdtscp, handle_rdtscp);
 }
 
 // Expected Output (make dump)

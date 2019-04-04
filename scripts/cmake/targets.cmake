@@ -134,12 +134,23 @@ endif()
 if(NOT WIN32 AND ENABLE_BUILD_VMM AND ENABLE_BUILD_USERSPACE)
     add_custom_target_category("Bareflank Manager")
 
-    add_custom_target(
-        quick
-        COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm load ${BFM_VMM_BIN_PATH}/${BFM_VMM}
-        COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm start
-        USES_TERMINAL
-    )
+    if(UNIX)
+        add_custom_target(
+            quick
+            COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm load ${BFM_VMM_BIN_PATH}/${BFM_VMM}
+            COMMAND sync
+            COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm start
+            USES_TERMINAL
+        )
+    else()
+        add_custom_target(
+            quick
+            COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm load ${BFM_VMM_BIN_PATH}/${BFM_VMM}
+            COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm start
+            USES_TERMINAL
+        )
+    endif()
+
     add_custom_target_info(
         TARGET quick
         COMMENT "Load and start the VMM"
@@ -168,11 +179,21 @@ if(NOT WIN32 AND ENABLE_BUILD_VMM AND ENABLE_BUILD_USERSPACE)
         COMMENT "Load the VMM"
     )
 
-    add_custom_target(
-        start
-        COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm start
-        USES_TERMINAL
-    )
+    if(UNIX)
+        add_custom_target(
+            start
+            COMMAND sync
+            COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm start
+            USES_TERMINAL
+        )
+    else()
+        add_custom_target(
+            start
+            COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm start
+            USES_TERMINAL
+        )
+    endif()
+
     add_custom_target_info(
         TARGET start
         COMMENT "Start the VMM"
@@ -226,9 +247,9 @@ endif()
 if(UNIX AND ENABLE_BUILD_VMM AND ENABLE_BUILD_USERSPACE)
     add_custom_target(
         oppss
-        COMMAND sync
         COMMAND ${SOURCE_UTIL_DIR}/driver_load.sh ${SOURCE_BFDRIVER_DIR}
         COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm load ${BFM_VMM_BIN_PATH}/${BFM_VMM}
+        COMMAND sync
         COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm start
         COMMAND ${SUDO} ${USERSPACE_PREFIX_PATH}/bin/bfm dump
         USES_TERMINAL

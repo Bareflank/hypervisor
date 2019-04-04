@@ -27,9 +27,9 @@ namespace bfvmm
 {
 
 WEAK_SYM std::unique_ptr<vcpu>
-vcpu_factory::make(vcpuid::type vcpuid, bfobject *obj)
+vcpu_factory::make(vcpuid::type vcpuid, void *data)
 {
-    bfignored(obj);
+    bfignored(data);
     return std::make_unique<vcpu>(vcpuid);
 }
 

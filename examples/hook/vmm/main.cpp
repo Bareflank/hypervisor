@@ -278,7 +278,8 @@ vcpu_init_nonroot(vcpu_t *vcpu)
     // Add a VMCall handler. This will catch the VMCalls made by the
     // userspace application and call the vmcall_handler() function.
     //
-    vcpu->add_handler(exit_reason::basic_exit_reason::vmcall, vmcall_handler);
+    vcpu->add_exit_handler_for_reason(
+        exit_reason::basic_exit_reason::vmcall, vmcall_handler);
 
     // Add a Monitor Trap handler. This will catch Monitor Trap VM exits
     // and call the mt_handler() function. We will use the
