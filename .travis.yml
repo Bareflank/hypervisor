@@ -185,30 +185,6 @@ matrix:
       - make tidy
 
   #
-  # Codecov
-  #
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-6.0
-        packages:
-          - gcc-7
-          - g++-7
-          - clang-6.0
-          - nasm
-    env:
-      - TEST="Codecov"
-    script:
-      - export LD_BIN=ld.gold
-      - cmake -DCONFIG=travis_codecov ..
-      - make -j3
-      - make unittest
-      - cd ..
-      - bash <(curl -s https://codecov.io/bash)
-
-  #
   # Google Address Sanitizer
   #
   - os: linux

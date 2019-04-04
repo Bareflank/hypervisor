@@ -31,7 +31,7 @@ preemption_timer_handler::preemption_timer_handler(
 {
     using namespace vmcs_n;
 
-    vcpu->add_handler(
+    vcpu->add_exit_handler_for_reason(
         exit_reason::basic_exit_reason::preemption_timer_expired,
     {&preemption_timer_handler::handle, this}
     );
@@ -49,33 +49,23 @@ void
 preemption_timer_handler::enable_exiting()
 {
     using namespace ::intel_x64::vmcs;
-
     pin_based_vm_execution_controls::activate_preemption_timer::enable();
-    vm_exit_controls::save_preemption_timer_value::enable();
 }
 
 void
 preemption_timer_handler::disable_exiting()
 {
     using namespace ::intel_x64::vmcs;
-
-    vm_exit_controls::save_preemption_timer_value::disable();
     pin_based_vm_execution_controls::activate_preemption_timer::disable();
 }
 
 void
 preemption_timer_handler::set_timer(value_t val)
-{
-    using namespace ::intel_x64::vmcs;
-    preemption_timer_value::set(val);
-}
+{ vmcs_n::preemption_timer_value::set(val); }
 
 preemption_timer_handler::value_t
 preemption_timer_handler::get_timer() const
-{
-    using namespace ::intel_x64::vmcs;
-    return preemption_timer_value::get();
-}
+{ return vmcs_n::preemption_timer_value::get(); }
 
 // -----------------------------------------------------------------------------
 // Handlers

@@ -170,7 +170,7 @@ load_start_vm(EFI_HANDLE ParentImage)
         return EFI_ABORTED;
     }
 
-    for(i = 0; i < NumberFileSystemHandles; ++i) {
+    for (i = 0; i < NumberFileSystemHandles; ++i) {
 
         EFI_DEVICE_PATH_PROTOCOL *FilePath = NULL;
         EFI_BLOCK_IO *BlkIo = NULL;
@@ -181,7 +181,7 @@ load_start_vm(EFI_HANDLE ParentImage)
             gBS->HandleProtocol(
                 FileSystemHandles[i],
                 &gEfiBlockIoProtocolGuid,
-                (VOID**) &BlkIo
+                (VOID **) &BlkIo
             );
 
         if (EFI_ERROR(status)) {
@@ -211,13 +211,13 @@ load_start_vm(EFI_HANDLE ParentImage)
                 ImageHandle,
                 &gEfiLoadedImageProtocolGuid,
                 (VOID **) &ImageInfo
-        );
+            );
 
         if (EFI_ERROR(status)) {
             continue;
         }
 
-        if(ImageInfo->ImageCodeType != EfiLoaderCode) {
+        if (ImageInfo->ImageCodeType != EfiLoaderCode) {
             continue;
         }
 

@@ -35,8 +35,8 @@ setup_vmcs(MockRepository &mocks, bool guest_vcpu = false)
     if (guest_vcpu) {
         mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::id).Return(0xF0000000);
         mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_bootstrap_vcpu).Return(false);
-        mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_host_vm_vcpu).Return(false);
-        mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_guest_vm_vcpu).Return(true);
+        mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_host_vcpu).Return(false);
+        mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_guest_vcpu).Return(true);
     }
 
     return bfvmm::intel_x64::vmcs{vcpu};

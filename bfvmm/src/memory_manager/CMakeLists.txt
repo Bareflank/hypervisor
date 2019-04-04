@@ -32,15 +32,4 @@ target_sources(bfvmm_memory_manager PRIVATE
     $<$<STREQUAL:${BUILD_TARGET_ARCH},x86_64>:arch/x64/cr3/helpers.cpp>
 )
 
-install(
-    TARGETS bfvmm_memory_manager
-    DESTINATION lib
-    EXPORT bfvmm-${PREFIX}-targets
-)
-
-if(PREFIX STREQUAL vmm)
-    install(
-        DIRECTORY ../../include/memory_manager/
-        DESTINATION include/bfvmm/memory_manager
-    )
-endif()
+install(TARGETS bfvmm_memory_manager DESTINATION lib EXPORT bfvmm-${PREFIX}-targets)

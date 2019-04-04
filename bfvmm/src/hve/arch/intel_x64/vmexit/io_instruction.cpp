@@ -41,7 +41,7 @@ io_instruction_handler::io_instruction_handler(
 {
     using namespace vmcs_n;
 
-    vcpu->add_handler(
+    vcpu->add_exit_handler_for_reason(
         exit_reason::basic_exit_reason::io_instruction,
     {&io_instruction_handler::handle, this}
     );

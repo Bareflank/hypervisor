@@ -28,19 +28,26 @@ using namespace bfvmm::intel_x64;
 // Handlers
 // -----------------------------------------------------------------------------
 
+void
+global_init()
+{
+    bfdebug_info(0, "running trap_cpuid integration test");
+    bfdebug_lnbr(0);
+}
+
 bool
 test_cpuid_handler(vcpu_t *vcpu)
 {
     vcpu->set_rax(42);
     vcpu->set_rcx(42);
 
-    return true;
+    return vcpu->advance();
 }
 
 void
-test_hlt_delegate(bfobject *obj)
+vcpu_fini_nonroot_running(vcpu_t *vcpu)
 {
-    bfignored(obj);
+    bfignored(vcpu);
 
     auto [rax, rbx, rcx, rdx] =
         ::x64::cpuid::get(
@@ -55,52 +62,10 @@ test_hlt_delegate(bfobject *obj)
     }
 }
 
-// -----------------------------------------------------------------------------
-// vCPU
-// -----------------------------------------------------------------------------
-
-namespace test
+void
+vcpu_init_nonroot(vcpu_t *vcpu)
 {
-
-class vcpu : public bfvmm::intel_x64::vcpu
-{
-public:
-    explicit vcpu(vcpuid::type id) :
-        bfvmm::intel_x64::vcpu{id}
-    {
-        this->add_hlt_delegate(test_hlt_delegate);
-        this->add_cpuid_emulator(42, test_cpuid_handler);
-    }
-
-    ~vcpu() override = default;
-
-public:
-
-    /// @cond
-
-    vcpu(vcpu &&) = delete;
-    vcpu &operator=(vcpu &&) = delete;
-
-    vcpu(const vcpu &) = delete;
-    vcpu &operator=(const vcpu &) = delete;
-
-    /// @endcond
-};
-
-}
-
-// -----------------------------------------------------------------------------
-// vCPU Factory
-// -----------------------------------------------------------------------------
-
-namespace bfvmm
-{
-
-std::unique_ptr<vcpu>
-vcpu_factory::make(vcpuid::type vcpuid, bfobject *obj)
-{
-    bfignored(obj);
-    return std::make_unique<test::vcpu>(vcpuid);
-}
-
+    vcpu->add_cpuid_emulator(
+        42, test_cpuid_handler
+    );
 }

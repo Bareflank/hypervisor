@@ -31,7 +31,7 @@ monitor_trap_handler::monitor_trap_handler(
 {
     using namespace vmcs_n;
 
-    vcpu->add_handler(
+    vcpu->add_exit_handler_for_reason(
         exit_reason::basic_exit_reason::monitor_trap_flag,
     {&monitor_trap_handler::handle, this}
     );

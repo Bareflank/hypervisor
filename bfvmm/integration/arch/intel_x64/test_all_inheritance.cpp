@@ -32,16 +32,11 @@
 // vCPU
 // -----------------------------------------------------------------------------
 
-ept::mmap g_guest_map;
-
-void
-init()
-{
-    ept::identity_map(g_guest_map, MAX_PHYS_ADDR);
-}
-
 namespace test
 {
+
+bfn::once_flag flag;
+ept::mmap g_guest_map;
 
 class vcpu : public bfvmm::intel_x64::vcpu
 {
@@ -49,6 +44,13 @@ public:
     explicit vcpu(vcpuid::type id) :
         bfvmm::intel_x64::vcpu{id}
     {
+        bfn::call_once(flag, [&] {
+            bfdebug_info(0, "running test_all_inheritance integration test");
+            bfdebug_lnbr(0);
+
+            ept::identity_map(g_guest_map, MAX_PHYS_ADDR);
+        });
+
         this->add_external_interrupt_handler({&vcpu::test_handler, this});
         this->set_eptp(g_guest_map);
     }
@@ -86,9 +88,9 @@ namespace bfvmm
 {
 
 std::unique_ptr<vcpu>
-vcpu_factory::make(vcpuid::type vcpuid, bfobject *obj)
+vcpu_factory::make(vcpuid::type vcpuid, void *data)
 {
-    bfignored(obj);
+    bfignored(data);
     return std::make_unique<test::vcpu>(vcpuid);
 }
 

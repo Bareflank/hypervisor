@@ -69,8 +69,8 @@ platform_alloc_rw(uint64_t len)
     }
 
     status = gBS->AllocatePages(
-        AllocateAnyPages, EfiRuntimeServicesData, (len / EFI_PAGE_SIZE) + 1, &addr
-    );
+                 AllocateAnyPages, EfiRuntimeServicesData, (len / EFI_PAGE_SIZE) + 1, &addr
+             );
 
     if (EFI_ERROR(status)) {
         BFALERT("platform_alloc_rw: AllocatePages failed: %lld\n", len);
@@ -91,8 +91,8 @@ platform_alloc_rwe(uint64_t len)
     }
 
     status = gBS->AllocatePages(
-        AllocateAnyPages, EfiRuntimeServicesCode, (len / EFI_PAGE_SIZE) + 1, &addr
-    );
+                 AllocateAnyPages, EfiRuntimeServicesCode, (len / EFI_PAGE_SIZE) + 1, &addr
+             );
 
     if (EFI_ERROR(status)) {
         BFALERT("platform_alloc_rw: AllocatePages failed: %lld\n", len);
