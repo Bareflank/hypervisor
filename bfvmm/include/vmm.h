@@ -65,6 +65,8 @@
 #include "hve/arch/intel_x64/vcpu.h"
 #include "hve/arch/intel_x64/vmx.h"
 #include "hve/arch/intel_x64/vpid.h"
+
+#include "sdk/cpuid.h"
 #endif
 
 #ifdef BF_X64
@@ -81,6 +83,9 @@
 
 #ifdef BF_INTEL_X64
 using namespace bfvmm::intel_x64;
+
+#define handler_delegate(function) handler_delegate_t::create<function>()
+
 #endif
 
 #endif

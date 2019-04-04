@@ -19,57 +19,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <vmm.h>
-#include <atomic>
+#include "hve/arch/intel_x64/vcpu.h"
+#include "sdk/cpuid.h"
 
-std::atomic<uint64_t> g_count{0};
-
-void
-global_init()
+namespace bfvmm::intel_x64::cpuid
 {
-    bfdebug_info(0, "running cpuidcount example");
-    bfdebug_lnbr(0);
 
-    g_count = 0;
+void add_emulator(vcpu *vcpu, leaf_t leaf, handler_delegate_t handler)
+{ vcpu->add_cpuid_emulator(leaf, handler); }
+
+void add_handler(vcpu *vcpu, leaf_t leaf, handler_delegate_t handler)
+{ vcpu->add_cpuid_handler(leaf, handler); }
+
+void emulate(vcpu *vcpu, uint64_t rax, uint64_t rbx, uint64_t rcx, uint64_t rdx)
+{
+    vcpu->set_rax(set_bits(vcpu->rax(), 0x00000000FFFFFFFFULL, rax));
+    vcpu->set_rbx(set_bits(vcpu->rbx(), 0x00000000FFFFFFFFULL, rbx));
+    vcpu->set_rcx(set_bits(vcpu->rcx(), 0x00000000FFFFFFFFULL, rcx));
+    vcpu->set_rdx(set_bits(vcpu->rdx(), 0x00000000FFFFFFFFULL, rdx));
 }
 
-void
-global_fini()
-{ bfdebug_ndec(0, "global count", g_count); }
+void execute(vcpu *vcpu)
+{ vcpu->execute_cpuid(); }
 
-bool
-handle_cpuid(vcpu_t *vcpu)
-{
-    bfignored(vcpu);
+leaf_t get_leaf(vcpu *vcpu)
+{ return vcpu->gr1(); }
 
-    g_count++;
-    vcpu->data<uint64_t &>()++;
+leaf_t get_subleaf(vcpu *vcpu)
+{ return vcpu->gr2(); }
 
-    return false;
 }
-
-void
-vcpu_init_nonroot(vcpu_t *vcpu)
-{
-    using namespace vmcs_n::exit_reason;
-
-    vcpu->add_handler(
-        basic_exit_reason::cpuid, ::handler_delegate_t::create<handle_cpuid>()
-    );
-
-    vcpu->set_data<uint64_t>(0);
-}
-
-void
-vcpu_fini_nonroot(vcpu_t *vcpu)
-{ bfdebug_ndec(0, "vcpu count", vcpu->data<uint64_t>()); }
-
-// Expected Output (make dump)
-//
-// [0x0] DEBUG: running cpuidcount example
-// [0x0] DEBUG:
-// [0x0] DEBUG: host os is now in a vm
-// ...
-// [0x0] DEBUG: host os is not in a vm
-// [0x0] DEBUG: vcpu count                                                      xxx
-// [0x0] DEBUG: global count                                                    xxx

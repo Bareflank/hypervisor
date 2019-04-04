@@ -73,6 +73,7 @@ endif()
 
 if(PREFIX STREQUAL vmm)
     add_subdirectory(src/entry)
+    add_subdirectory(src/sdk)
     add_dependencies(bfvmm bfvmm_entry)
     target_link_libraries(bfvmm INTERFACE
         --whole-archive
@@ -85,6 +86,7 @@ if(PREFIX STREQUAL vmm)
         bfvmm_vcpu
         bfvmm_memory_manager
         bfvmm_debug
+        bfvmm_sdk
         vmm::bfintrinsics
         ${CMAKE_INSTALL_PREFIX}/lib/libc++.a
         ${CMAKE_INSTALL_PREFIX}/lib/libc++abi.a
