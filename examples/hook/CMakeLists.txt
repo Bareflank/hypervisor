@@ -19,21 +19,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.13)
-project(hook C CXX)
-
-init_project(hook BINARY)
-
-if(PREFIX STREQUAL "vmm")
-    target_sources(hook PRIVATE vmm/main.cpp)
-    target_link_libraries(hook PRIVATE vmm::bfvmm)
-elseif(PREFIX STREQUAL "userspace")
-    target_sources(hook PRIVATE userspace/hook.cpp)
-    target_link_libraries(hook PRIVATE userspace::bfintrinsics)
-    target_include_directories(hook PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/../../bfsdk/include
-        ${CMAKE_CURRENT_LIST_DIR}/../../bfintrinsics/include
+if(ENABLE_BUILD_VMM)
+    add_subproject(hook vmm
+        DEPENDS bfvmm
+        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/vmm
     )
 endif()
 
-fini_project()
+if(ENABLE_BUILD_USERSPACE)
+    add_subproject(hook userspace
+        DEPENDS bfintrinsics
+        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/userspace
+    )
+endif()

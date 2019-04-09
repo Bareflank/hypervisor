@@ -19,12 +19,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.13)
-project(cpuidcount C CXX)
-
-init_project(cpuidcount BINARY)
-
-target_sources(cpuidcount PRIVATE vmm/main.cpp)
-target_link_libraries(cpuidcount PRIVATE vmm::bfvmm)
-
-fini_project()
+if(ENABLE_BUILD_VMM)
+    add_subproject(cpuidcount vmm
+        DEPENDS bfvmm
+        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/vmm
+    )
+endif()
