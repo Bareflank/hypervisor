@@ -19,12 +19,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.13)
-project(rdtsc C CXX)
-
-init_project(rdtsc BINARY)
-
-target_sources(rdtsc PRIVATE vmm/main.cpp)
-target_link_libraries(rdtsc PRIVATE vmm::bfvmm)
-
-fini_project()
+if(ENABLE_BUILD_VMM)
+    add_subproject(rdtsc vmm
+        DEPENDS bfvmm
+        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/vmm
+    )
+endif()

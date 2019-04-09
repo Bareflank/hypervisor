@@ -1,3 +1,4 @@
+
 #
 # Copyright (C) 2019 Assured Information Security, Inc.
 #
@@ -19,9 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.6)
-project(bfdso C CXX)
+cmake_minimum_required(VERSION 3.13)
+project(hook C CXX)
 
-init_project(bfdso)
-target_sources(bfdso PRIVATE dso.cpp)
+init_project(hook BINARY)
+
+target_sources(hook PRIVATE hook.cpp)
+target_link_libraries(hook PRIVATE userspace::bfintrinsics)
+target_include_directories(hook PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/../../../bfsdk/include
+    ${CMAKE_CURRENT_LIST_DIR}/../../../bfintrinsics/include
+)
+
 fini_project()

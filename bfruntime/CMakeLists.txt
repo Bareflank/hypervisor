@@ -64,6 +64,14 @@ if(PREFIX STREQUAL test)
 endif()
 
 # -----------------------------------------------------------------------------
+# dso
+# -----------------------------------------------------------------------------
+
+add_library(bfdso)
+target_link_libraries(bfdso PUBLIC bfruntime)
+target_sources(bfdso PRIVATE src/dso/dso.cpp)
+
+# -----------------------------------------------------------------------------
 # pthread
 # -----------------------------------------------------------------------------
 
@@ -87,6 +95,7 @@ target_sources(bfsyscall PRIVATE src/syscall/syscall.cpp)
 # -----------------------------------------------------------------------------
 
 install(TARGETS bfcrt DESTINATION lib EXPORT bfruntime-${PREFIX}-targets)
+install(TARGETS bfdso DESTINATION lib EXPORT bfruntime-${PREFIX}-targets)
 install(TARGETS bfpthread DESTINATION lib EXPORT bfruntime-${PREFIX}-targets)
 install(TARGETS bfsyscall DESTINATION lib EXPORT bfruntime-${PREFIX}-targets)
 

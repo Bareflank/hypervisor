@@ -19,39 +19,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
-    message(STATUS "Including dependency: libcxxabi")
+cmake_minimum_required(VERSION 3.13)
+project(vpid C CXX)
 
-    download_dependency(
-        libcxxabi
-        URL          ${LIBCXXABI_URL}
-        URL_MD5      ${LIBCXXABI_URL_MD5}
-    )
+init_project(vpid BINARY)
 
-    generate_flags(
-        vmm
-        NOWARNINGS
-    )
+target_sources(vpid PRIVATE main.cpp)
+target_link_libraries(vpid PRIVATE vmm::bfvmm)
 
-    list(APPEND LIBCXXABI_CONFIGURE_FLAGS
-        -DLLVM_PATH=${CACHE_DIR}/llvm
-        -DLLVM_ENABLE_LIBCXX=ON
-        -DLIBCXXABI_LIBCXX_PATH=${CACHE_DIR}/libcxx
-        -DLIBCXXABI_SYSROOT=${VMM_PREFIX_PATH}
-        -DLIBCXXABI_HAS_PTHREAD_API=ON
-        -DLIBCXXABI_ENABLE_SHARED=OFF
-        -DLIBCXXABI_ENABLE_STATIC=ON
-        -DLIBCXXABI_INCLUDE_TESTS=OFF
-        -DCMAKE_TOOLCHAIN_FILE=${VMM_TOOLCHAIN_PATH}
-        -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
-        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-        -DCXX_SUPPORTS_CXX11=ON
-    )
-
-    add_dependency(
-        libcxxabi vmm
-        CMAKE_ARGS  ${LIBCXXABI_CONFIGURE_FLAGS}
-        DEPENDS     llvm_${VMM_PREFIX}
-        DEPENDS     newlib_${VMM_PREFIX}
-    )
-endif()
+fini_project()
