@@ -376,6 +376,7 @@ function(add_dependency NAME PREFIX)
             list(APPEND ARGN
                 CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             )
+            list(APPEND ARGN LOG_DIR ${DEPENDS_DIR}/${NAME}/${PREFIX}/stamp)
         endif()
     else()
         list(APPEND ARGN

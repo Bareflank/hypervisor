@@ -105,29 +105,13 @@ add_subproject(bfroot userspace SOURCE_DIR ${SOURCE_CMAKE_DIR})
 # VMM Components
 # ------------------------------------------------------------------------------
 
-add_subproject(bfsdk vmm DEPENDS bfroot)
 include_dependency(SOURCE_DEPENDS_DIR binutils)
-
-if(NOT WIN32)
-    if(NOT ENABLE_BUILD_BINUTILS)
-        add_subproject(
-            bfdso vmm
-            SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
-            DEPENDS bfroot
-        )
-    else()
-        add_subproject(
-            bfdso vmm
-            SOURCE_DIR ${SOURCE_BFRUNTIME_DIR}/src/dso
-            DEPENDS binutils bfroot
-        )
-    endif()
-endif()
-
 include_dependency(SOURCE_DEPENDS_DIR newlib)
 include_dependency(SOURCE_DEPENDS_DIR llvm)
 include_dependency(SOURCE_DEPENDS_DIR libcxxabi)
 include_dependency(SOURCE_DEPENDS_DIR libcxx)
+
+add_subproject(bfsdk vmm DEPENDS bfroot)
 
 if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
     add_subproject(bfruntime vmm DEPENDS gsl libcxx)
@@ -136,24 +120,7 @@ endif()
 
 if(ENABLE_BUILD_VMM)
     add_subproject(bfintrinsics vmm DEPENDS bfruntime)
-    add_subproject(bfvmm vmm DEPENDS bfunwind bfintrinsics)
-
-    add_subproject(cpuidcount vmm
-        DEPENDS bfvmm
-        SOURCE_DIR ${SOURCE_EXAMPLES_DIR}/cpuidcount
-    )
-    add_subproject(hook vmm
-        DEPENDS bfvmm
-        SOURCE_DIR ${SOURCE_EXAMPLES_DIR}/hook
-    )
-    add_subproject(rdtsc vmm
-        DEPENDS bfvmm
-        SOURCE_DIR ${SOURCE_EXAMPLES_DIR}/rdtsc
-    )
-    add_subproject(vpid vmm
-        DEPENDS bfvmm
-        SOURCE_DIR ${SOURCE_EXAMPLES_DIR}/vpid
-    )
+    add_subproject(bfvmm vmm DEPENDS bfunwind bfintrinsics bfsdk)
 endif()
 
 # ------------------------------------------------------------------------------
@@ -184,15 +151,16 @@ if(ENABLE_BUILD_USERSPACE)
     add_subproject(bfintrinsics userspace DEPENDS gsl json bfroot)
     add_subproject(bfm userspace DEPENDS gsl json cxxopts bfroot)
     add_subproject(bfack userspace DEPENDS bfintrinsics)
-    add_subproject(hook userspace
-        DEPENDS bfintrinsics
-        SOURCE_DIR ${SOURCE_EXAMPLES_DIR}/hook
-    )
 endif()
 
 # ------------------------------------------------------------------------------
 # External Components
 # ------------------------------------------------------------------------------
+
+list(APPEND EXTENSION ${SOURCE_EXAMPLES_DIR}/cpuidcount)
+list(APPEND EXTENSION ${SOURCE_EXAMPLES_DIR}/hook)
+list(APPEND EXTENSION ${SOURCE_EXAMPLES_DIR}/rdtsc)
+list(APPEND EXTENSION ${SOURCE_EXAMPLES_DIR}/vpid)
 
 include_external_extensions()
 

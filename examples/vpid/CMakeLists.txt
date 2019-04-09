@@ -19,12 +19,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.13)
-project(vpid C CXX)
-
-init_project(vpid BINARY)
-
-target_sources(vpid PRIVATE vmm/main.cpp)
-target_link_libraries(vpid PRIVATE vmm::bfvmm)
-
-fini_project()
+if(ENABLE_BUILD_VMM)
+    add_subproject(vpid vmm
+        DEPENDS bfvmm
+        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/vmm
+    )
+endif()
