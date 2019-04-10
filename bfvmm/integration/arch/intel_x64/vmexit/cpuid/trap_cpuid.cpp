@@ -72,7 +72,7 @@ public:
             vcpu_delegate_t::create<test_hlt_delegate>()
         );
 
-        this->add_cpuid_emulator(
+        this->cpuid_add_emulator(
             42, handler_delegate_t::create<test_cpuid_handler>()
         );
     }

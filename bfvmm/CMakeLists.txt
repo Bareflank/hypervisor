@@ -49,6 +49,7 @@ add_subdirectory(src/memory_manager)
 add_subdirectory(src/debug)
 
 install(FILES include/vmm.h DESTINATION include/bfvmm)
+install(DIRECTORY include/interface DESTINATION include/bfvmm)
 
 # ------------------------------------------------------------------------------
 # test

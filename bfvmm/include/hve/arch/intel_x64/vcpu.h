@@ -49,6 +49,8 @@
 #include "vmx.h"
 #include "vpid.h"
 
+#include "../../../interface/arch/intel_x64/cpuid.h"
+
 #include "../x64/unmapper.h"
 
 #include "../../../vcpu/vcpu.h"
@@ -66,7 +68,9 @@ namespace bfvmm::intel_x64
 /// This class provides the base implementation for an Intel based vCPU. For
 /// more information on how a vCPU works, please @see bfvmm::vcpu
 ///
-class vcpu : public bfvmm::vcpu
+class vcpu :
+    public bfvmm::vcpu,
+    public vcpu_cpuid_interface
 {
 
 public:
@@ -347,61 +351,36 @@ public:
     VIRTUAL void execute_wrcr4();
 
     //--------------------------------------------------------------------------
-    // CPUID
+    // vCPU CPUID Interface Implementation
     //--------------------------------------------------------------------------
 
-    /// Add CPUID Handler
-    ///
-    /// Add a delegate to handle a CPUID VM exit. Your handler should always
-    /// return false unless you need to override the default behavior of the
-    /// base hypervisor. For more information, please see the CPUID VM exit
-    /// handler for details.
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    /// @param leaf the leaf to call d on
-    /// @param d the delegate to call on the vm exit
-    ///
-    VIRTUAL void add_cpuid_handler(
-        cpuid_handler::leaf_t leaf, const handler_delegate_t &d);
+    /// @cond
 
-    /// Add Emulate
-    ///
-    /// Emulate the exeuction of the CPUID instruction. For more information
-    /// please see the CPUID VM exit handler for details. Generally speaking,
-    /// you should typically use add_handler() instead.
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    /// @param leaf the leaf to call d on
-    /// @param d the delegate to call on the vm exit
-    ///
-    VIRTUAL void add_cpuid_emulator(
-        cpuid_handler::leaf_t leaf, const handler_delegate_t &d);
+    void cpuid_add_handler(
+        vcpu_cpuid_interface::leaf_t leaf, const handler_delegate_t &d) OVERRIDE
+    { m_cpuid_handler.add_handler(leaf, d); }
 
-    /// Execute CPUID
-    ///
-    /// Executes the CPUID instruction, and populates the vCPU's registers.
-    /// For more information, please see the CPUID VM exit handler's
-    /// documentation.
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    VIRTUAL void execute_cpuid();
+    void cpuid_add_emulator(
+        vcpu_cpuid_interface::leaf_t leaf, const handler_delegate_t &d) OVERRIDE
+    { m_cpuid_handler.add_emulator(leaf, d); }
 
-    /// Enable Whitelisting
-    ///
-    /// Ensures that if a VM exit occurs, that an emulator must be registered
-    /// for the exit. If an emulator is not registered, the VM exit is
-    /// reported as unhandled.
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    VIRTUAL void enable_cpuid_whitelisting() noexcept;
+    void cpuid_execute() OVERRIDE
+    { m_cpuid_handler.execute(this); }
+
+    void cpuid_emulate(uint64_t rax, uint64_t rbx, uint64_t rcx, uint64_t rdx) OVERRIDE {
+        this->set_rax(set_bits(this->rax(), 0x00000000FFFFFFFFULL, rax));
+        this->set_rbx(set_bits(this->rbx(), 0x00000000FFFFFFFFULL, rbx));
+        this->set_rcx(set_bits(this->rcx(), 0x00000000FFFFFFFFULL, rcx));
+        this->set_rdx(set_bits(this->rdx(), 0x00000000FFFFFFFFULL, rdx));
+    }
+
+    leaf_t cpuid_vmexit_leaf() const OVERRIDE
+    { return this->gr1(); }
+
+    leaf_t cpuid_vmexit_subleaf() const OVERRIDE
+    { return this->gr2(); }
+
+    /// @endcond
 
     //--------------------------------------------------------------------------
     // EPT Misconfiguration

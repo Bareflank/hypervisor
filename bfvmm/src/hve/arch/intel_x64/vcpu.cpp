@@ -600,28 +600,6 @@ vcpu::execute_wrcr4()
 { m_control_register_handler.execute_wrcr4(this); }
 
 //--------------------------------------------------------------------------
-// CPUID
-//--------------------------------------------------------------------------
-
-void
-vcpu::add_cpuid_handler(
-    cpuid_handler::leaf_t leaf, const handler_delegate_t &d)
-{ m_cpuid_handler.add_handler(leaf, d); }
-
-void
-vcpu::add_cpuid_emulator(
-    cpuid_handler::leaf_t leaf, const handler_delegate_t &d)
-{ m_cpuid_handler.add_emulator(leaf, d); }
-
-void
-vcpu::execute_cpuid()
-{ m_cpuid_handler.execute(this); }
-
-void
-vcpu::enable_cpuid_whitelisting() noexcept
-{ m_cpuid_handler.enable_whitelisting(); }
-
-//--------------------------------------------------------------------------
 // EPT Misconfiguration
 //--------------------------------------------------------------------------
 

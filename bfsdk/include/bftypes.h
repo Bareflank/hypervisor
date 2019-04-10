@@ -84,8 +84,12 @@
 
 #ifdef ENABLE_BUILD_TEST
 #define VIRTUAL virtual
+#define PURE = 0
+#define OVERRIDE override
 #else
 #define VIRTUAL
+#define PURE
+#define OVERRIDE
 #endif
 
 /* -------------------------------------------------------------------------- */

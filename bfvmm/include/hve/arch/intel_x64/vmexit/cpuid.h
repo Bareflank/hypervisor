@@ -28,6 +28,7 @@
 #include <bfdelegate.h>
 
 #include "../exit_handler.h"
+#include "../../../../interface/arch/intel_x64/cpuid.h"
 
 // -----------------------------------------------------------------------------
 // Definitions
@@ -40,17 +41,15 @@ class vcpu;
 
 /// CPUID
 ///
-/// Provides an interface for registering handlers for cpuid exits
-/// at a given (leaf, subleaf).
+/// Provides an implementation for registering handlers for cpuid exits
+/// at a given leaf
 ///
 class cpuid_handler
 {
-public:
 
-    /// Leaf type
-    ///
-    ///
-    using leaf_t = uint64_t;
+    using leaf_t = vcpu_cpuid_interface::leaf_t;
+
+public:
 
     /// Constructor
     ///
@@ -59,8 +58,7 @@ public:
     ///
     /// @param vcpu the vcpu object for this handler
     ///
-    cpuid_handler(
-        gsl::not_null<vcpu *> vcpu);
+    cpuid_handler(gsl::not_null<vcpu *> vcpu);
 
     /// Destructor
     ///

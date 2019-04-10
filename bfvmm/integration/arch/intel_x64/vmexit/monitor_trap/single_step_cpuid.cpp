@@ -43,7 +43,7 @@ public:
     explicit vcpu(vcpuid::type id) :
         bfvmm::intel_x64::vcpu{id}
     {
-        this->add_cpuid_emulator(
+        this->cpuid_add_emulator(
             42, handler_delegate_t::create<vcpu, &vcpu::cpuid_handler>(this)
         );
 
