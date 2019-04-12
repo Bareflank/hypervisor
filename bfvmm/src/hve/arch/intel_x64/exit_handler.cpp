@@ -43,7 +43,7 @@ namespace bfvmm::intel_x64
 
 exit_handler::exit_handler(
     gsl::not_null<vcpu *> vcpu)
-{ bfignored(vcpu); }
+{ bfignored(vcpu); bfline; }
 
 void
 exit_handler::add_handler(

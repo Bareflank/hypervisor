@@ -30,17 +30,13 @@ void
 WEAK_SYM vcpu_fini_root(vcpu_t *vcpu)
 { bfignored(vcpu); }
 
-namespace bfvmm::intel_x64
+namespace bfvmm::intel_x64::vmexit
 {
 
 static bool
 handle_cpuid_feature_information(vcpu *vcpu)
 {
     using namespace ::intel_x64::cpuid;
-
-    // Currently, we do not support nested virtualization. As a result,
-    // the EAPIs adds a default handler to disable support for VMXE here.
-    //
 
     vcpu->set_rcx(
         clear_bit(vcpu->rcx(), feature_information::ecx::vmx::from)
@@ -52,41 +48,33 @@ handle_cpuid_feature_information(vcpu *vcpu)
 static bool
 handle_cpuid_0x4BF00000(vcpu *vcpu)
 {
-    /// Ack
-    ///
-    /// This can be used by an application to ack the existence of the
-    /// hypervisor. This is useful because vmcall only exists if the hypervisor
-    /// is running while cpuid can be run from any ring, and always exists
-    /// which means it can be used to ack safely from any application.
-    ///
-
     vcpu->set_rax(0x4BF00001);
+    vcpu->set_rbx(0);
+    vcpu->set_rcx(0);
+    vcpu->set_rdx(0);
+
     return vcpu->advance();
 }
 
 static bool
 handle_cpuid_0x4BF00010(vcpu *vcpu)
 {
-    /// Init
-    ///
-    /// Some initialization is required after the hypervisor has started. For
-    /// example, any memory mapped resources such as ACPI or VT-d need to be
-    /// initalized using the VMM's CR3, and not the hosts.
-    ///
+    vcpu->set_rax(0);
+    vcpu->set_rbx(0);
+    vcpu->set_rcx(0);
+    vcpu->set_rdx(0);
 
-    vcpu_init_root(vcpu);
+    vcpu_init_root(static_cast<vcpu_t *>(vcpu));
     return vcpu->advance();
 }
 
 static bool
 handle_cpuid_0x4BF00011(vcpu *vcpu)
 {
-    /// Say Hi
-    ///
-    /// If the vCPU is a host vCPU and not a guest vCPU, we should say hi
-    /// so that the user of Bareflank has a simple, reliable way to know
-    /// that the hypervisor is running.
-    ///
+    vcpu->set_rax(0);
+    vcpu->set_rbx(0);
+    vcpu->set_rcx(0);
+    vcpu->set_rdx(0);
 
     bfdebug_info(0, "host os is" bfcolor_green " now " bfcolor_end "in a vm");
     return vcpu->advance();
@@ -95,26 +83,22 @@ handle_cpuid_0x4BF00011(vcpu *vcpu)
 static bool
 handle_cpuid_0x4BF00020(vcpu *vcpu)
 {
-    /// Fini
-    ///
-    /// Some teardown logic is required before the hypervisor stops running.
-    /// These handlers can be used in these scenarios.
-    ///
+    vcpu->set_rax(0);
+    vcpu->set_rbx(0);
+    vcpu->set_rcx(0);
+    vcpu->set_rdx(0);
 
-    vcpu_fini_root(vcpu);
+    vcpu_fini_root(static_cast<vcpu_t *>(vcpu));
     return vcpu->advance();
 }
 
 static bool
 handle_cpuid_0x4BF00021(vcpu *vcpu)
 {
-    /// Say Goobye
-    ///
-    /// The most reliable method for turning off the hypervisor is from the
-    /// exit handler as it ensures that all of the destructors are executed
-    /// after a promote, and not during. Also, say goodbye before we promote
-    /// and turn off the hypervisor.
-    ///
+    vcpu->set_rax(0);
+    vcpu->set_rbx(0);
+    vcpu->set_rcx(0);
+    vcpu->set_rdx(0);
 
     bfdebug_info(0, "host os is" bfcolor_red " not " bfcolor_end "in a vm");
     vcpu->promote();
@@ -122,14 +106,12 @@ handle_cpuid_0x4BF00021(vcpu *vcpu)
     throw std::runtime_error("unreachable exception");
 }
 
-cpuid_handler::cpuid_handler(
+cpuid::cpuid(
     gsl::not_null<vcpu *> vcpu)
 {
-    using namespace vmcs_n;
-
     vcpu->add_handler(
-        exit_reason::basic_exit_reason::cpuid,
-        handler_delegate_t::create<cpuid_handler, &cpuid_handler::handle>(this)
+        vmcs_n::exit_reason::basic_exit_reason::cpuid,
+        handler_delegate_t::create<cpuid, &cpuid::handle>(this)
     );
 
     this->add_handler(
@@ -167,22 +149,19 @@ cpuid_handler::cpuid_handler(
 // -----------------------------------------------------------------------------
 
 void
-cpuid_handler::add_handler(
-    leaf_t leaf, const handler_delegate_t &d)
+cpuid::add_handler(
+    cpuid_n::leaf_t leaf, const handler_delegate_t &d)
 { m_handlers[leaf].push_front(d); }
 
 void
-cpuid_handler::add_emulator(
-    leaf_t leaf, const handler_delegate_t &d)
+cpuid::add_emulator(
+    cpuid_n::leaf_t leaf, const handler_delegate_t &d)
 { m_emulators[leaf].push_front(d); }
 
 void
-cpuid_handler::execute(gsl::not_null<vcpu *> vcpu)
+cpuid::execute(vcpu *vcpu) noexcept
 {
-    vcpu->set_gr1(vcpu->rax());
-    vcpu->set_gr2(vcpu->rcx());
-
-    auto [rax, rbx, rcx, rdx] =
+    const auto [rax, rbx, rcx, rdx] =
         ::x64::cpuid::get(
             gsl::narrow_cast<::x64::cpuid::field_type>(vcpu->rax()),
             gsl::narrow_cast<::x64::cpuid::field_type>(vcpu->rbx()),
@@ -201,7 +180,8 @@ cpuid_handler::execute(gsl::not_null<vcpu *> vcpu)
 // -----------------------------------------------------------------------------
 
 static bool
-execute_handlers(vcpu *vcpu, const std::list<handler_delegate_t> &handlers)
+execute_handlers(
+    vcpu *vcpu, const std::list<handler_delegate_t> &handlers)
 {
     for (const auto &d : handlers) {
         if (d(vcpu)) {
@@ -213,7 +193,8 @@ execute_handlers(vcpu *vcpu, const std::list<handler_delegate_t> &handlers)
 }
 
 static bool
-execute_emulators(vcpu *vcpu, const std::list<handler_delegate_t> &emulators)
+execute_emulators(
+    vcpu *vcpu, const std::list<handler_delegate_t> &emulators)
 {
     for (const auto &d : emulators) {
         if (d(vcpu)) {
@@ -225,18 +206,24 @@ execute_emulators(vcpu *vcpu, const std::list<handler_delegate_t> &emulators)
 }
 
 bool
-cpuid_handler::handle(vcpu *vcpu)
+cpuid::handle(vcpu *vcpu)
 {
     const auto &emulators =
         m_emulators.find(vcpu->rax());
+
+    const auto ___ = gsl::finally([vcpu] {
+        vcpu->set_gr1(0);
+        vcpu->set_gr2(0);
+    });
+
+    vcpu->set_gr1(vcpu->rax());
+    vcpu->set_gr2(vcpu->rcx());
 
     if (emulators != m_emulators.end()) {
         return execute_emulators(vcpu, emulators->second);
     }
 
-    if (m_whitelist) {
-        vcpu->set_gr1(vcpu->rax());
-        vcpu->set_gr2(vcpu->rcx());
+    if (vcpu->is_guest_vm_vcpu()) {
         return false;
     }
 

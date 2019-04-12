@@ -51,10 +51,10 @@ handle_cpuid(vcpu_t *vcpu)
 void
 vcpu_init_nonroot(vcpu_t *vcpu)
 {
-    using namespace vmcs_n::exit_reason::basic_exit_reason;
+    using namespace vmcs_n::exit_reason;
 
     vcpu->add_handler(
-        cpuid, ::handler_delegate_t::create<handle_cpuid>()
+        basic_exit_reason::cpuid, ::handler_delegate_t::create<handle_cpuid>()
     );
 
     vcpu->set_data<uint64_t>(0);

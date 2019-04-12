@@ -22,7 +22,7 @@
 #ifndef EXIT_HANDLER_INTEL_X64_H
 #define EXIT_HANDLER_INTEL_X64_H
 
-#include <bfdelegate.h>
+#include "interface/types.h"
 
 #include <list>
 #include <array>
@@ -44,9 +44,6 @@ namespace bfvmm::intel_x64
 class vcpu;
 class exit_handler;
 }
-
-using handler_t = bool(bfvmm::intel_x64::vcpu *);
-using handler_delegate_t = delegate<handler_t>;
 
 // -----------------------------------------------------------------------------
 // Dispatcher

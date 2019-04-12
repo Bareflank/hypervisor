@@ -19,52 +19,54 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <vmm.h>
+#ifndef IMPLEMENTATION_CPUID_INTEL_X64_H
+#define IMPLEMENTATION_CPUID_INTEL_X64_H
 
-void
-global_init()
+#include "../interface/cpuid.h"
+#include "../vmexit/cpuid.h"
+
+// -----------------------------------------------------------------------------
+// Defintion
+// -----------------------------------------------------------------------------
+
+///@cond
+
+namespace bfvmm::intel_x64::implementation
 {
-    bfdebug_info(0, "running trap_cpuid integration test");
-    bfdebug_lnbr(0);
+
+class cpuid :
+    public vmexit::cpuid
+{
+public:
+
+    explicit cpuid(
+        gsl::not_null<vcpu *> vcpu);
+    VIRTUAL ~cpuid() = default;
+
+    VIRTUAL void emulate(
+        vcpu *vcpu, reg_t rax, reg_t rbx, reg_t rcx, reg_t rdx) noexcept;
+
+    VIRTUAL cpuid_n::leaf_t leaf(const vcpu *vcpu) const;
+    VIRTUAL cpuid_n::subleaf_t subleaf(const vcpu *vcpu) const;
+
+public:
+
+    cpuid(cpuid &&) = default;
+    cpuid &operator=(cpuid &&) = default;
+
+    cpuid(const cpuid &) = delete;
+    cpuid &operator=(const cpuid &) = delete;
+
+public:
+
+#ifdef ENABLE_BUILD_TEST
+    static void mock(
+        MockRepository &mocks, gsl::not_null<vcpu *> vcpu);
+#endif
+};
+
 }
 
-bool
-handle_cpuid(vcpu_t *vcpu)
-{
-    if (cpuid::leaf(vcpu) == 42) {
-        vcpu->set_rcx(42);
-    }
+///@endcond
 
-    return true;
-}
-
-void
-hlt_delegate(bfobject *obj)
-{
-    bfignored(obj);
-
-    auto [rax, rbx, rcx, rdx] =
-        ::x64::cpuid::get(
-            42, 0, 0, 0
-        );
-
-    bfignored(rax);
-    bfignored(rbx);
-    bfignored(rdx);
-
-    if (rcx == 42) {
-        bfdebug_pass(0, "test");
-    }
-}
-
-void
-vcpu_init_nonroot(vcpu_t *vcpu)
-{
-    vcpu->add_hlt_delegate(
-        vcpu_delegate_t::create<hlt_delegate>()
-    );
-
-    cpuid::add_emulator(
-        vcpu, 42, handler_delegate_t::create<handle_cpuid>()
-    );
-}
+#endif

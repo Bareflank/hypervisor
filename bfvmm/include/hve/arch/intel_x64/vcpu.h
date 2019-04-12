@@ -22,8 +22,11 @@
 #ifndef VCPU_INTEL_X64_H
 #define VCPU_INTEL_X64_H
 
+#include "interface/cpuid.h"
+
+#include "implementation/cpuid.h"
+
 #include "vmexit/control_register.h"
-#include "vmexit/cpuid.h"
 #include "vmexit/ept_misconfiguration.h"
 #include "vmexit/ept_violation.h"
 #include "vmexit/external_interrupt.h"
@@ -66,7 +69,9 @@ namespace bfvmm::intel_x64
 /// This class provides the base implementation for an Intel based vCPU. For
 /// more information on how a vCPU works, please @see bfvmm::vcpu
 ///
-class vcpu : public bfvmm::vcpu
+class vcpu :
+    public bfvmm::vcpu,
+    public interface::cpuid<implementation::cpuid>
 {
 
 public:
@@ -345,63 +350,6 @@ public:
     /// @ensures
     ///
     VIRTUAL void execute_wrcr4();
-
-    //--------------------------------------------------------------------------
-    // CPUID
-    //--------------------------------------------------------------------------
-
-    /// Add CPUID Handler
-    ///
-    /// Add a delegate to handle a CPUID VM exit. Your handler should always
-    /// return false unless you need to override the default behavior of the
-    /// base hypervisor. For more information, please see the CPUID VM exit
-    /// handler for details.
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    /// @param leaf the leaf to call d on
-    /// @param d the delegate to call on the vm exit
-    ///
-    VIRTUAL void add_cpuid_handler(
-        cpuid_handler::leaf_t leaf, const handler_delegate_t &d);
-
-    /// Add Emulate
-    ///
-    /// Emulate the exeuction of the CPUID instruction. For more information
-    /// please see the CPUID VM exit handler for details. Generally speaking,
-    /// you should typically use add_handler() instead.
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    /// @param leaf the leaf to call d on
-    /// @param d the delegate to call on the vm exit
-    ///
-    VIRTUAL void add_cpuid_emulator(
-        cpuid_handler::leaf_t leaf, const handler_delegate_t &d);
-
-    /// Execute CPUID
-    ///
-    /// Executes the CPUID instruction, and populates the vCPU's registers.
-    /// For more information, please see the CPUID VM exit handler's
-    /// documentation.
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    VIRTUAL void execute_cpuid();
-
-    /// Enable Whitelisting
-    ///
-    /// Ensures that if a VM exit occurs, that an emulator must be registered
-    /// for the exit. If an emulator is not registered, the VM exit is
-    /// reported as unhandled.
-    ///
-    /// @expects
-    /// @ensures
-    ///
-    VIRTUAL void enable_cpuid_whitelisting() noexcept;
 
     //--------------------------------------------------------------------------
     // EPT Misconfiguration
@@ -1004,7 +952,7 @@ public:
     /// @return the state object associated with this vCPU.
     ///
     VIRTUAL gsl::not_null<vcpu_state_t *> state()
-    { return &m_state; }
+    { return m_state.get(); }
 
     /// MSR bitmap
     ///
@@ -1899,7 +1847,7 @@ private:
 private:
 
     vcpu_global_state_t *m_global_state{};
-    vcpu_state_t m_state{};
+    std::unique_ptr<vcpu_state_t> m_state{};
 
     page_ptr<uint8_t> m_msr_bitmap;
     page_ptr<uint8_t> m_io_bitmap_a;
@@ -1920,7 +1868,6 @@ private:
     exit_handler m_exit_handler;
 
     control_register_handler m_control_register_handler;
-    cpuid_handler m_cpuid_handler;
     ept_misconfiguration_handler m_ept_misconfiguration_handler;
     ept_violation_handler m_ept_violation_handler;
     external_interrupt_handler m_external_interrupt_handler;
@@ -1948,8 +1895,7 @@ private:
 
     ept::mmap *m_mmap{};
 };
-}
 
-using vcpu_t = bfvmm::intel_x64::vcpu;
+}
 
 #endif

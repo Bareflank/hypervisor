@@ -134,6 +134,8 @@ setup_vcpu(MockRepository &mocks, ::intel_x64::vmcs::value_type reason = 0)
 {
     auto vcpu = mocks.Mock<bfvmm::intel_x64::vcpu>();
 
+    bfvmm::intel_x64::vcpu::cpuid_mock(mocks, vcpu);
+
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::run);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::hlt);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::init);
@@ -172,10 +174,6 @@ setup_vcpu(MockRepository &mocks, ::intel_x64::vmcs::value_type reason = 0)
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::execute_rdcr3);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::execute_wrcr3);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::execute_wrcr4);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_cpuid_handler);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_cpuid_emulator);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::execute_cpuid);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::enable_cpuid_whitelisting);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_ept_misconfiguration_handler);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_ept_read_violation_handler);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_ept_write_violation_handler);

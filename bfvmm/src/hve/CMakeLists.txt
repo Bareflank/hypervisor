@@ -30,6 +30,8 @@ target_include_directories(bfvmm_hve PUBLIC
 target_sources(bfvmm_hve PRIVATE
     $<${X64}:arch/x64/unmapper.cpp>
 
+    $<${X64}:arch/intel_x64/implementation/cpuid.cpp>
+
     $<${X64}:arch/intel_x64/vmexit/control_register.cpp>
     $<${X64}:arch/intel_x64/vmexit/cpuid.cpp>
     $<${X64}:arch/intel_x64/vmexit/ept_misconfiguration.cpp>
