@@ -28,8 +28,13 @@ if((ENABLE_BUILD_VMM OR ENABLE_BUILD_TEST) AND NOT WIN32)
         URL_MD5     ${NEWLIB_URL_MD5}
     )
 
-    set(CC_FOR_TARGET clang)
-    set(CXX_FOR_TARGET clang)
+    if(DEFINED ENV{CLANG_BIN})
+        set(CC_FOR_TARGET $ENV{CLANG_BIN})
+        set(CXX_FOR_TARGET $ENV{CLANG_BIN})
+    else()
+        set(CC_FOR_TARGET clang)
+        set(CXX_FOR_TARGET clang)
+    endif()
 
     set(AR_FOR_TARGET ar)
     set(AS_FOR_TARGET as)
