@@ -50,7 +50,7 @@ public:
     /// The type of delegate clients must use when registering
     /// handlers
     ///
-    using handler_delegate_t = delegate<bool(vcpu *)>;
+    using handler_delegate_t = delegate<bool, vcpu *>;
 
     /// Constructor
     ///

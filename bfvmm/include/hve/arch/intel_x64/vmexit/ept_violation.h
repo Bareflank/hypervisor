@@ -90,7 +90,7 @@ public:
     /// handlers
     ///
     using handler_delegate_t =
-        delegate<bool(vcpu *, info_t &)>;
+        delegate<bool, vcpu *, info_t &>;
 
     /// Constructor
     ///

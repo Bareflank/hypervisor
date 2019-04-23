@@ -37,7 +37,7 @@
 // Delegate Types
 // -----------------------------------------------------------------------------
 
-using vcpu_delegate_t = delegate<void(bfobject *)>;      ///< vCPU delegate type
+using vcpu_delegate_t = delegate<void, bfobject *>;      ///< vCPU delegate type
 
 // -----------------------------------------------------------------------------
 // Definitions
