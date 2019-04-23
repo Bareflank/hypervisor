@@ -189,6 +189,8 @@ public:
 
 }
 
+/// Base vmcs type
+///
 using vmcs_t = bfvmm::intel_x64::vmcs;
 
 #endif

@@ -70,13 +70,8 @@ vcpu_init_nonroot(vcpu_t *vcpu)
     using namespace vmcs_n::exit_reason::basic_exit_reason;
     primary_processor_based_vm_execution_controls::rdtsc_exiting::enable();
 
-    vcpu->add_handler(
-        rdtsc, ::handler_delegate_t::create<handle_rdtsc>()
-    );
-
-    vcpu->add_handler(
-        rdtscp, ::handler_delegate_t::create<handle_rdtscp>()
-    );
+    vcpu->add_handler(rdtsc, handle_rdtsc);
+    vcpu->add_handler(rdtscp, handle_rdtscp);
 }
 
 // Expected Output (make dump)

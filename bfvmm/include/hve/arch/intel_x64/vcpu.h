@@ -1950,6 +1950,8 @@ private:
 };
 }
 
+/// Base vcpu type
+///
 using vcpu_t = bfvmm::intel_x64::vcpu;
 
 #endif

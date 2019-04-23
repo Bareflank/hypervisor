@@ -90,7 +90,7 @@ public:
     /// handlers
     ///
     using handler_delegate_t =
-        delegate<bool, vcpu *, info_t &>;
+        delegate<bool(vcpu *, info_t &)>;
 
     /// Constructor
     ///
@@ -210,9 +210,9 @@ private:
 
     vcpu *m_vcpu;
 
-    ::handler_delegate_t m_default_read_handler;
-    ::handler_delegate_t m_default_write_handler;
-    ::handler_delegate_t m_default_execute_handler;
+    ::handler_delegate_t m_default_read_handler{};
+    ::handler_delegate_t m_default_write_handler{};
+    ::handler_delegate_t m_default_execute_handler{};
 
     std::list<handler_delegate_t> m_read_handlers;
     std::list<handler_delegate_t> m_write_handlers;

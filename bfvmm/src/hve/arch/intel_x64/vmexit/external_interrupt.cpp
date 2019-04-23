@@ -33,7 +33,7 @@ external_interrupt_handler::external_interrupt_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::external_interrupt,
-        ::handler_delegate_t::create<external_interrupt_handler, &external_interrupt_handler::handle>(this)
+    {&external_interrupt_handler::handle, this}
     );
 }
 

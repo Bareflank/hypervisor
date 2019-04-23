@@ -38,8 +38,7 @@ public:
         bfvmm::intel_x64::vcpu{id}
     {
         this->add_external_interrupt_handler(
-            external_interrupt_handler::handler_delegate_t::create<vcpu, &vcpu::test_external_interrupt_handler>(this)
-        );
+        {&vcpu::test_external_interrupt_handler, this});
     }
 
     ~vcpu() override = default;

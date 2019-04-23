@@ -82,7 +82,7 @@ wrmsr_handler::wrmsr_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::wrmsr,
-        ::handler_delegate_t::create<wrmsr_handler, &wrmsr_handler::handle>(this)
+    {&wrmsr_handler::handle, this}
     );
 }
 
@@ -188,7 +188,7 @@ wrmsr_handler::handle(vcpu *vcpu)
         }
     }
 
-    if (m_default_handler.is_valid()) {
+    if (m_default_handler) {
         return m_default_handler(vcpu);
     }
 

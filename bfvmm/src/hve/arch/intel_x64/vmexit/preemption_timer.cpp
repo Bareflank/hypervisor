@@ -33,8 +33,7 @@ preemption_timer_handler::preemption_timer_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::preemption_timer_expired,
-        ::handler_delegate_t::create <
-        preemption_timer_handler, &preemption_timer_handler::handle > (this)
+    {&preemption_timer_handler::handle, this}
     );
 }
 

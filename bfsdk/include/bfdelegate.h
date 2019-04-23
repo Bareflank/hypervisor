@@ -44,10 +44,14 @@ class state
     alignas(align) std::array<uint8_t, size> m_buf{};
 };
 
+/// Default state type
+///
 using state_t = state<>;
 
+/// Function call type
+///
 template<typename Ret, typename... Args>
-using call_t = Ret(*)(const state_t&, Args&&...);
+using call_t = Ret(*)(const state_t &, Args && ...);
 
 /// state helpers
 ///
@@ -120,7 +124,7 @@ inline void move_state(state_t &state, F &&fn)
 /// @return the result of the call
 ///
 template<typename F, typename Ret, typename... Args>
-inline Ret call(const state_t &state, Args&&... args)
+inline Ret call(const state_t &state, Args &&... args)
 {
     static_assert(std::is_invocable_r_v<Ret, F, Args...>);
     return get_state<F>(state)(std::forward<Args>(args)...);
@@ -134,7 +138,8 @@ inline Ret call(const state_t &state, Args&&... args)
 /// move, and destroy a given type. It is used to implement
 /// the copy/move ctor/assignment ops of the delegate.
 ///
-class vtable {
+class vtable
+{
 public:
     void (&copy)(state_t &lhs, const state_t &rhs);
     void (&move)(state_t &lhs, state_t &&rhs);
@@ -144,33 +149,32 @@ public:
     static const vtable &init() noexcept
     {
         static const vtable self = {
-            .copy = s_copy<F>,
-            .move = s_move<F>,
-            .destroy = s_destroy<F>
+            s_copy<F>, s_move<F>, s_destroy<F>
         };
 
         return self;
     }
 
 private:
-    template<
+
+    template <
         typename F,
-        typename std::enable_if_t<std::is_copy_constructible_v<F>>* = nullptr
-    >
+        typename std::enable_if_t<std::is_copy_constructible_v<F>> * = nullptr
+        >
     static void s_copy(state_t &lhs, const state_t &rhs) noexcept
     { copy_state<F>(lhs, get_state<F>(rhs)); }
 
-    template<
+    template <
         typename F,
-        typename std::enable_if_t<std::is_move_constructible_v<F>>* = nullptr
-    >
+        typename std::enable_if_t<std::is_move_constructible_v<F>> * = nullptr
+        >
     static void s_move(state_t &lhs, state_t &&rhs) noexcept
     { move_state<F>(lhs, std::move(get_state<F>(rhs))); }
 
-    template<
+    template <
         typename F,
-        typename std::enable_if_t<std::is_destructible_v<F>>* = nullptr
-    >
+        typename std::enable_if_t<std::is_destructible_v<F>> * = nullptr
+        >
     static void s_destroy(state_t &state) noexcept
     { get_state<F>(state).~F(); }
 };
@@ -187,8 +191,10 @@ private:
 /// pointers and member function pointers are supported, but lambdas could
 /// also be used provided their capture list is at most 16 bytes.
 ///
-
 template< typename> class delegate;
+
+/// delegate specialization
+///
 template<typename Ret, typename... Args>
 class delegate<Ret(Args...)>
 {
@@ -253,10 +259,12 @@ public:
     ///
     /// @param fn the function to create the delegate for
     ///
-    template<typename F, typename = std::enable_if<
-        std::is_invocable_r_v<Ret, F, Args...> &&
-        std::is_object_v<F>>
-    >
+    template <
+        typename F,
+        typename = std::enable_if <
+            std::is_invocable_r_v<Ret, F, Args...> &&
+            std::is_object_v<F >>
+        >
     delegate(F fn)
     {
         m_call = &call<decltype(fn), Ret, Args...>;
@@ -288,12 +296,15 @@ public:
     /// @param memfn the member function to create the delegate for
     /// @param obj the object to create the delegate for
     ///
-    template<typename C, typename = std::enable_if<std::is_class_v<C>>>
+    template <
+        typename C,
+        typename = std::enable_if<std::is_class_v<C>>
+        >
     delegate(Ret(C::*memfn)(Args...), C *obj)
     {
         expects(obj);
 
-        auto fn = [memfn, obj](Args&&... args) -> decltype(auto)
+        auto fn = [memfn, obj](Args && ... args) -> decltype(auto)
         { return std::invoke(memfn, obj, args...); };
 
         m_call = &call<decltype(fn), Ret, Args...>;
@@ -325,12 +336,15 @@ public:
     /// @param memfn the member function to create the delegate for
     /// @param obj the object to create the delegate for
     ///
-    template<typename C, typename = std::enable_if<std::is_class_v<C>>>
+    template <
+        typename C,
+        typename = std::enable_if<std::is_class_v<C>>
+        >
     delegate(Ret(C::*memfn)(Args...) const, C *obj)
     {
         expects(obj);
 
-        auto fn = [memfn, obj](Args&&... args) -> decltype(auto)
+        auto fn = [memfn, obj](Args && ... args) -> decltype(auto)
         { return std::invoke(memfn, obj, args...); };
 
         m_call = &call<decltype(fn), Ret, Args...>;
@@ -363,11 +377,11 @@ public:
     /// @param obj the object to create the delegate for
     ///
     template<typename C, typename = std::enable_if<std::is_class_v<C>>>
-    delegate(Ret(C::*memfn)(Args...) const, const C *obj)
+             delegate(Ret(C::*memfn)(Args...) const, const C *obj)
     {
         expects(obj);
 
-        auto fn = [memfn, obj](Args&&... args) -> decltype(auto)
+        auto fn = [memfn, obj](Args && ... args) -> decltype(auto)
         { return std::invoke(memfn, obj, args...); };
 
         m_call = &call<decltype(fn), Ret, Args...>;
@@ -469,7 +483,7 @@ private:
 /// overload. Not sure why we haven't seen this with other types before
 ///
 template<typename Ret, typename... Args>
-inline std::ostream &operator<<(std::ostream &os, const delegate<Ret, Args...> &)
+inline std::ostream &operator<<(std::ostream &os, const delegate<Ret(Args...)> &)
 { return os; }
 
 /// Class deduction guides

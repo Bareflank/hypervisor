@@ -83,22 +83,22 @@ microcode_handler::microcode_handler(
 
     vcpu->add_rdmsr_handler(
         ::intel_x64::msrs::ia32_bios_updt_trig::addr,
-        rdmsr_handler::handler_delegate_t::create<ia32_bios_updt_trig__rdmsr_handler>()
+        ia32_bios_updt_trig__rdmsr_handler
     );
 
     vcpu->add_wrmsr_handler(
         ::intel_x64::msrs::ia32_bios_updt_trig::addr,
-        wrmsr_handler::handler_delegate_t::create<ia32_bios_updt_trig__wrmsr_handler>()
+        ia32_bios_updt_trig__wrmsr_handler
     );
 
     vcpu->add_rdmsr_handler(
         ::intel_x64::msrs::ia32_bios_sign_id::addr,
-        rdmsr_handler::handler_delegate_t::create<ia32_bios_sign_id__rdmsr_handler>()
+        ia32_bios_sign_id__rdmsr_handler
     );
 
     vcpu->add_wrmsr_handler(
         ::intel_x64::msrs::ia32_bios_sign_id::addr,
-        wrmsr_handler::handler_delegate_t::create<ia32_bios_sign_id__wrmsr_handler>()
+        ia32_bios_sign_id__wrmsr_handler
     );
 }
 

@@ -274,41 +274,41 @@ test_delegate_throws(bfobject *data)
 TEST_CASE("vcpu: run_delegate")
 {
     auto vc = std::make_unique<bfvmm::vcpu>(0);
-    CHECK_NOTHROW(vc->add_run_delegate(vcpu_delegate_t::create<test_delegate>()));
+    CHECK_NOTHROW(vc->add_run_delegate(test_delegate));
     CHECK_NOTHROW(vc->run());
 }
 
 TEST_CASE("vcpu: hlt_delegate")
 {
     auto vc = std::make_unique<bfvmm::vcpu>(0);
-    CHECK_NOTHROW(vc->add_hlt_delegate(vcpu_delegate_t::create<test_delegate>()));
+    CHECK_NOTHROW(vc->add_hlt_delegate(test_delegate));
     CHECK_NOTHROW(vc->hlt());
 }
 
 TEST_CASE("vcpu: init_delegate")
 {
     auto vc = std::make_unique<bfvmm::vcpu>(0);
-    CHECK_NOTHROW(vc->add_init_delegate(vcpu_delegate_t::create<test_delegate>()));
+    CHECK_NOTHROW(vc->add_init_delegate(test_delegate));
     CHECK_NOTHROW(vc->init());
 }
 
 TEST_CASE("vcpu: fini_delegate")
 {
     auto vc = std::make_unique<bfvmm::vcpu>(0);
-    CHECK_NOTHROW(vc->add_fini_delegate(vcpu_delegate_t::create<test_delegate>()));
+    CHECK_NOTHROW(vc->add_fini_delegate(test_delegate));
     CHECK_NOTHROW(vc->fini());
 }
 
 TEST_CASE("vcpu: run_delegate throws")
 {
     auto vc = std::make_unique<bfvmm::vcpu>(0);
-    CHECK_NOTHROW(vc->add_run_delegate(vcpu_delegate_t::create<test_delegate_throws>()));
+    CHECK_NOTHROW(vc->add_run_delegate(test_delegate_throws));
     CHECK_THROWS(vc->run());
 }
 
 TEST_CASE("vcpu: init_delegate throws")
 {
     auto vc = std::make_unique<bfvmm::vcpu>(0);
-    CHECK_NOTHROW(vc->add_init_delegate(vcpu_delegate_t::create<test_delegate_throws>()));
+    CHECK_NOTHROW(vc->add_init_delegate(test_delegate_throws));
     CHECK_THROWS(vc->init());
 }

@@ -45,7 +45,9 @@ class vcpu;
 class exit_handler;
 }
 
-using handler_delegate_t = delegate<bool, bfvmm::intel_x64::vcpu *>;
+/// Exit handler delegate type
+///
+using handler_delegate_t = delegate<bool(bfvmm::intel_x64::vcpu *)>;
 
 // -----------------------------------------------------------------------------
 // Dispatcher

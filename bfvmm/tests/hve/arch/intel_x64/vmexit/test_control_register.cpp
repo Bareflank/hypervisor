@@ -490,29 +490,10 @@ TEST_CASE("add handlers")
     auto vcpu = setup_vcpu(mocks, 0);
     auto handler = bfvmm::intel_x64::control_register_handler(vcpu);
 
-    CHECK_NOTHROW(
-        handler.add_wrcr0_handler(
-            bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler>()
-        )
-    );
-
-    CHECK_NOTHROW(
-        handler.add_rdcr3_handler(
-            bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler>()
-        )
-    );
-
-    CHECK_NOTHROW(
-        handler.add_wrcr3_handler(
-            bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler>()
-        )
-    );
-
-    CHECK_NOTHROW(
-        handler.add_wrcr4_handler(
-            bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler>()
-        )
-    );
+    CHECK_NOTHROW(handler.add_wrcr0_handler(test_handler));
+    CHECK_NOTHROW(handler.add_rdcr3_handler(test_handler));
+    CHECK_NOTHROW(handler.add_wrcr3_handler(test_handler));
+    CHECK_NOTHROW(handler.add_wrcr4_handler(test_handler));
 }
 
 TEST_CASE("enable exiting")
@@ -552,9 +533,7 @@ TEST_CASE("wrcr0 exit")
         0x0000000000000000ULL
     );
 
-    handler.add_wrcr0_handler(
-        bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler>()
-    );
+    handler.add_wrcr0_handler(test_handler);
 
     CHECK(handler.handle(vcpu) == true);
     CHECK(vmcs_n::guest_cr0::get() == 42);
@@ -576,9 +555,7 @@ TEST_CASE("wrcr0 exit, ignore write")
         0x0000000000000000ULL
     );
 
-    handler.add_wrcr0_handler(
-        bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler_ignore_write>()
-    );
+    handler.add_wrcr0_handler(test_handler_ignore_write);
 
     CHECK(handler.handle(vcpu) == true);
     CHECK(vmcs_n::guest_cr0::get() == 0);
@@ -602,9 +579,7 @@ TEST_CASE("wrcr0 exit, ignore advance")
         vmcs_n::vm_exit_instruction_length::addr, 42
     );
 
-    handler.add_wrcr0_handler(
-        bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler_ignore_advance>()
-    );
+    handler.add_wrcr0_handler(test_handler_ignore_advance);
 
     CHECK(handler.handle(vcpu) == true);
     CHECK(g_state.rip == 0);
@@ -666,9 +641,7 @@ TEST_CASE("wrcr3 exit")
         0x0000000000000003ULL
     );
 
-    handler.add_wrcr3_handler(
-        bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler>()
-    );
+    handler.add_wrcr3_handler(test_handler);
 
     CHECK(handler.handle(vcpu) == true);
     CHECK(vmcs_n::guest_cr3::get() == 42);
@@ -688,9 +661,7 @@ TEST_CASE("wrcr3 exit, ignore write")
         0x0000000000000003ULL
     );
 
-    handler.add_wrcr3_handler(
-        bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler_ignore_write>()
-    );
+    handler.add_wrcr3_handler(test_handler_ignore_write);
 
     CHECK(handler.handle(vcpu) == true);
     CHECK(vmcs_n::guest_cr3::get() == 0);
@@ -713,9 +684,7 @@ TEST_CASE("wrcr3 exit, ignore advance")
         vmcs_n::vm_exit_instruction_length::addr, 42
     );
 
-    handler.add_wrcr3_handler(
-        bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler_ignore_advance>()
-    );
+    handler.add_wrcr3_handler(test_handler_ignore_advance);
 
     CHECK(handler.handle(vcpu) == true);
     CHECK(g_state.rip == 0);
@@ -735,9 +704,7 @@ TEST_CASE("rdcr3 exit")
         0x0000000000000013ULL
     );
 
-    handler.add_rdcr3_handler(
-        bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler>()
-    );
+    handler.add_rdcr3_handler(test_handler);
 
     CHECK(handler.handle(vcpu) == true);
     CHECK(g_state.rax == 42);
@@ -757,9 +724,7 @@ TEST_CASE("rdcr3 exit, ignore write")
         0x0000000000000013ULL
     );
 
-    handler.add_rdcr3_handler(
-        bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler_ignore_write>()
-    );
+    handler.add_rdcr3_handler(test_handler_ignore_write);
 
     CHECK(handler.handle(vcpu) == true);
     CHECK(g_state.rax == 0);
@@ -782,9 +747,7 @@ TEST_CASE("rdcr3 exit, ignore advance")
         vmcs_n::vm_exit_instruction_length::addr, 42
     );
 
-    handler.add_rdcr3_handler(
-        bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler_ignore_advance>()
-    );
+    handler.add_rdcr3_handler(test_handler_ignore_advance);
 
     CHECK(handler.handle(vcpu) == true);
     CHECK(g_state.rip == 0);
@@ -833,9 +796,7 @@ TEST_CASE("wrcr4 exit")
         0x0000000000000004ULL
     );
 
-    handler.add_wrcr4_handler(
-        bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler>()
-    );
+    handler.add_wrcr4_handler(test_handler);
 
     CHECK(handler.handle(vcpu) == true);
     CHECK(vmcs_n::guest_cr4::get() == 0x202a);
@@ -857,9 +818,7 @@ TEST_CASE("wrcr4 exit, ignore write")
         0x0000000000000004ULL
     );
 
-    handler.add_wrcr4_handler(
-        bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler_ignore_write>()
-    );
+    handler.add_wrcr4_handler(test_handler_ignore_write);
 
     CHECK(handler.handle(vcpu) == true);
     CHECK(vmcs_n::guest_cr4::get() == 0);
@@ -883,9 +842,7 @@ TEST_CASE("wrcr4 exit, ignore advance")
         vmcs_n::vm_exit_instruction_length::addr, 42
     );
 
-    handler.add_wrcr4_handler(
-        bfvmm::intel_x64::control_register_handler_delegate_t::create<test_handler_ignore_advance>()
-    );
+    handler.add_wrcr4_handler(test_handler_ignore_advance);
 
     CHECK(handler.handle(vcpu) == true);
     CHECK(g_state.rip == 0);

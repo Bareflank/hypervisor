@@ -278,27 +278,20 @@ vcpu_init_nonroot(vcpu_t *vcpu)
     // Add a VMCall handler. This will catch the VMCalls made by the
     // userspace application and call the vmcall_handler() function.
     //
-    vcpu->add_handler(
-        exit_reason::basic_exit_reason::vmcall,
-        ::handler_delegate_t::create<vmcall_handler>()
-    );
+    vcpu->add_handler(exit_reason::basic_exit_reason::vmcall, vmcall_handler);
 
     // Add a Monitor Trap handler. This will catch Monitor Trap VM exits
     // and call the mt_handler() function. We will use the
     // monitor trap flag to single step attempts to execute code that
     // exists in the same physical page as our hello_world() function.
     //
-    vcpu->add_monitor_trap_handler(
-        ::handler_delegate_t::create<mt_handler>()
-    );
+    vcpu->add_monitor_trap_handler(mt_handler);
 
     // Add an EPT violation handler (for execute access). If an EPT
     // violation is made for execute accesses,  ept_execute_violation_handler()
     // will be called which is where we will perform our hook.
     //
-    vcpu->add_ept_execute_violation_handler(
-        eptv_delegate_t::create<ept_execute_violation_handler>()
-    );
+    vcpu->add_ept_execute_violation_handler(ept_execute_violation_handler);
 }
 
 // Expected Output (make dump)

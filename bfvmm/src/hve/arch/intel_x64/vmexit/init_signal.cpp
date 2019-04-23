@@ -33,7 +33,7 @@ init_signal_handler::init_signal_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::init_signal,
-        ::handler_delegate_t::create<init_signal_handler, &init_signal_handler::handle>(this)
+    {&init_signal_handler::handle, this}
     );
 }
 

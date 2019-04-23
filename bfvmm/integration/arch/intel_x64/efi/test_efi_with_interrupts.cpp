@@ -58,8 +58,7 @@ public:
 
         this->add_wrmsr_handler(
             ::intel_x64::msrs::ia32_apic_base::addr,
-            wrmsr_handler::handler_delegate_t::create<vcpu, &vcpu::ia32_apic_base__wrmsr_handler>(this)
-        );
+        {&vcpu::ia32_apic_base__wrmsr_handler, this});
 
         this->set_eptp(g_guest_map);
     }
@@ -80,8 +79,7 @@ public:
     {
         if (::intel_x64::msrs::ia32_apic_base::extd::is_enabled(info.val)) {
             v->add_external_interrupt_handler(
-                external_interrupt_handler::handler_delegate_t::create<vcpu, &vcpu::external_interrupt_handler>(this)
-            );
+            {&vcpu::external_interrupt_handler, this});
         }
         else {
             bferror_info(0, "local xAPIC mode is not supported");

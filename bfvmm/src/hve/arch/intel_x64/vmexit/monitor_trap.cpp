@@ -33,7 +33,7 @@ monitor_trap_handler::monitor_trap_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::monitor_trap_flag,
-        ::handler_delegate_t::create<monitor_trap_handler, &monitor_trap_handler::handle>(this)
+    {&monitor_trap_handler::handle, this}
     );
 }
 

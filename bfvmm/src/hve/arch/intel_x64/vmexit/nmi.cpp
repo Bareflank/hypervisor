@@ -40,12 +40,10 @@ nmi_handler::nmi_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::exception_or_non_maskable_interrupt,
-        ::handler_delegate_t::create<nmi_handler, &nmi_handler::handle>(this)
+    {&nmi_handler::handle, this}
     );
 
-    this->add_handler(
-        nmi_handler_delegate_t::create<handle_nmi>()
-    );
+    this->add_handler(handle_nmi);
 }
 
 // -----------------------------------------------------------------------------
