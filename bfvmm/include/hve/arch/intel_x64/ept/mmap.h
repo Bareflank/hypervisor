@@ -1195,8 +1195,8 @@ public:
 
     /// @cond
 
-    mmap(mmap &&) = default;
-    mmap &operator=(mmap &&) = default;
+    mmap(mmap &&) = delete;
+    mmap &operator=(mmap &&) = delete;
 
     mmap(const mmap &) = delete;
     mmap &operator=(const mmap &) = delete;
