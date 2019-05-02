@@ -114,7 +114,7 @@ include_dependency(SOURCE_DEPENDS_DIR libcxx)
 add_subproject(bfsdk vmm DEPENDS bfroot)
 
 if(ENABLE_BUILD_VMM OR (ENABLE_BUILD_TEST AND NOT WIN32))
-    add_subproject(bfruntime vmm DEPENDS gsl libcxx)
+    add_subproject(bfruntime vmm DEPENDS gsl libcxx bfroot)
     add_subproject(bfunwind vmm DEPENDS bfruntime)
 endif()
 
