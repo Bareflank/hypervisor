@@ -101,8 +101,8 @@ TEST_CASE("vcpu: add handlers")
     bfvmm::intel_x64::vcpu vcpu{0};
 
     test_handler(&vcpu);
-    CHECK_NOTHROW(vcpu.add_handler(0, handler_delegate_t::create<test_handler>()));
-    CHECK_NOTHROW(vcpu.add_exit_handler(handler_delegate_t::create<test_handler>()));
+    CHECK_NOTHROW(vcpu.add_handler(0, test_handler));
+    CHECK_NOTHROW(vcpu.add_exit_handler(test_handler));
 }
 
 TEST_CASE("vcpu: dump")

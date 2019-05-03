@@ -52,17 +52,8 @@ public:
     explicit vcpu(vcpuid::type id) :
         bfvmm::intel_x64::vcpu{id}
     {
-        this->add_io_instruction_handler(
-            0xCF8,
-            io_instruction_handler::handler_delegate_t::create<test_handler>(),
-            io_instruction_handler::handler_delegate_t::create<test_handler>()
-        );
-
-        this->add_io_instruction_handler(
-            0xCFC,
-            io_instruction_handler::handler_delegate_t::create<test_handler>(),
-            io_instruction_handler::handler_delegate_t::create<test_handler>()
-        );
+        this->add_io_instruction_handler(0xCF8, test_handler, test_handler);
+        this->add_io_instruction_handler(0xCFC, test_handler, test_handler);
     }
 
     /// Destructor

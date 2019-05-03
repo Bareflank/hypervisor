@@ -58,8 +58,7 @@ public:
         });
 
         this->add_ept_misconfiguration_handler(
-            ept_misconfiguration_handler::handler_delegate_t::create<vcpu, &vcpu::test_misconfiguration_handler>(this)
-        );
+        {&vcpu::test_misconfiguration_handler, this});
 
         this->set_eptp(g_guest_map);
     }

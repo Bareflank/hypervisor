@@ -49,10 +49,7 @@ public:
     explicit vcpu(vcpuid::type id) :
         bfvmm::intel_x64::vcpu{id}
     {
-        this->add_external_interrupt_handler(
-            external_interrupt_handler_delegate_t::create<vcpu, &vcpu::test_handler>(this)
-        );
-
+        this->add_external_interrupt_handler({&vcpu::test_handler, this});
         this->set_eptp(g_guest_map);
     }
 

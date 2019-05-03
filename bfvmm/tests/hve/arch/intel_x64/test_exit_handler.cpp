@@ -62,7 +62,7 @@ TEST_CASE("exit_handler: add_handler")
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
 
     CHECK_NOTHROW(
-        ehlr.add_handler(0, handler_delegate_t::create<test_handler>())
+        ehlr.add_handler(0, test_handler)
     );
 }
 
@@ -75,7 +75,7 @@ TEST_CASE("exit_handler: add_handler invalid reason")
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
 
     CHECK_THROWS(
-        ehlr.add_handler(1000, handler_delegate_t::create<test_handler>())
+        ehlr.add_handler(1000, test_handler)
     );
 }
 
@@ -121,7 +121,7 @@ TEST_CASE("exit_handler: add_exit_handler")
     auto &&ehlr = bfvmm::intel_x64::exit_handler{vcpu};
 
     CHECK_NOTHROW(
-        ehlr.add_exit_handler(handler_delegate_t::create<test_handler>())
+        ehlr.add_exit_handler(test_handler)
     );
 
     CHECK_NOTHROW(handle_exit(vcpu, &ehlr));

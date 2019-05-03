@@ -52,10 +52,7 @@ public:
     explicit vcpu(vcpuid::type id) :
         bfvmm::intel_x64::vcpu{id}
     {
-        this->add_wrmsr_handler(
-            0x000000000000080B,
-            wrmsr_handler::handler_delegate_t::create<test_handler>()
-        );
+        this->add_wrmsr_handler(0x000000000000080B, test_handler);
     }
 
     ~vcpu() override = default;

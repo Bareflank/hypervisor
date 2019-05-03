@@ -43,13 +43,8 @@ public:
     explicit vcpu(vcpuid::type id) :
         bfvmm::intel_x64::vcpu{id}
     {
-        this->add_cpuid_emulator(
-            42, handler_delegate_t::create<vcpu, &vcpu::cpuid_handler>(this)
-        );
-
-        this->add_monitor_trap_handler(
-            ::handler_delegate_t::create<vcpu, &vcpu::monitor_trap_handler>(this)
-        );
+        this->add_cpuid_emulator(42, {&vcpu::cpuid_handler, this});
+        this->add_monitor_trap_handler({&vcpu::monitor_trap_handler, this});
     }
 
     /// Destructor

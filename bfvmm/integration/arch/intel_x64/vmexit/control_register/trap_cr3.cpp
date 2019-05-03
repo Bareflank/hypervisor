@@ -65,15 +65,7 @@ test_hlt_delegate(bfobject *obj)
 void
 vcpu_init_nonroot(vcpu_t *vcpu)
 {
-    vcpu->add_hlt_delegate(
-        vcpu_delegate_t::create<test_hlt_delegate>()
-    );
-
-    vcpu->add_rdcr3_handler(
-        handler_delegate_t::create<test_rdcr3_handler>()
-    );
-
-    vcpu->add_wrcr3_handler(
-        handler_delegate_t::create<test_wrcr3_handler>()
-    );
+    vcpu->add_hlt_delegate(test_hlt_delegate);
+    vcpu->add_rdcr3_handler(test_rdcr3_handler);
+    vcpu->add_wrcr3_handler(test_wrcr3_handler);
 }

@@ -33,7 +33,7 @@ sipi_signal_handler::sipi_signal_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::sipi,
-        ::handler_delegate_t::create<sipi_signal_handler, &sipi_signal_handler::handle>(this)
+    {&sipi_signal_handler::handle, this}
     );
 }
 

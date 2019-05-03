@@ -33,7 +33,7 @@ ept_violation_handler::ept_violation_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::ept_violation,
-        ::handler_delegate_t::create<ept_violation_handler, &ept_violation_handler::handle>(this)
+    {&ept_violation_handler::handle, this}
     );
 }
 
@@ -119,7 +119,7 @@ ept_violation_handler::handle_read(vcpu *vcpu, info_t &info)
         }
     }
 
-    if (m_default_read_handler.is_valid()) {
+    if (m_default_read_handler) {
         return m_default_read_handler(vcpu);
     }
 
@@ -142,7 +142,7 @@ ept_violation_handler::handle_write(vcpu *vcpu, info_t &info)
         }
     }
 
-    if (m_default_write_handler.is_valid()) {
+    if (m_default_write_handler) {
         return m_default_write_handler(vcpu);
     }
 
@@ -165,7 +165,7 @@ ept_violation_handler::handle_execute(vcpu *vcpu, info_t &info)
         }
     }
 
-    if (m_default_execute_handler.is_valid()) {
+    if (m_default_execute_handler) {
         return m_default_execute_handler(vcpu);
     }
 

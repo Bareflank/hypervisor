@@ -26,260 +26,485 @@
 #ifndef BFDELEGATE_H
 #define BFDELEGATE_H
 
-#include <memory>
+#include <array>
+#include <cstdint>
+#include <functional>
+#include <type_traits>
 
-// -----------------------------------------------------------------------------
-// Delegate Definition
-// -----------------------------------------------------------------------------
+#include <bfgsl.h>
 
-template <
-    typename T,
-    typename = std::enable_if<std::is_function<T>::value>
-    >
-class delegate;
-
-// -----------------------------------------------------------------------------
-// Delegate Partial Specialization
-// -----------------------------------------------------------------------------
-
-/// Delegate
+/// state
 ///
-/// This delegate class provides the ability to register a call back function
-/// that originates from:
-/// - A free function
-/// - A member function
-/// - A lambda function (including capture lists)
+/// This stores the non-argument state needed by the delegate such
+/// as lambdas and object addresses.
 ///
-/// It should be noted that this class attempts to provide the most effcient
-/// implementation without the need for malloc / free, or inheritance, at
-/// the expense of a very specific syntax requirement.
-///
-template <
-    typename RET,
-    typename ...PARAMS
-    >
-class delegate<RET(PARAMS...)>
+template<size_t size = 24, size_t align = 32>
+class state
 {
-    using stub_t = RET(*)(void *, PARAMS...);       ///< Stub function type
+    alignas(align) std::array<uint8_t, size> m_buf{};
+};
 
+/// Default state type
+///
+using state_t = state<>;
+
+/// Function call type
+///
+template<typename Ret, typename... Args>
+using call_t = Ret(*)(const state_t &, Args && ...);
+
+/// state helpers
+///
+/// These functions are lifted from Ben Diamand's implementation at
+/// https://github.com/bdiamand/Delegate/blob/master/delegate.h
+///
+/// They are used to reinterpret a piece of memory as a functor type F
+///
+
+/// can_emplace
+///
+/// @return true iff the functor type F can fit in state_t
+///
+template<typename F>
+constexpr bool can_emplace()
+{
+    return (sizeof(F) <= sizeof(state_t)) &&
+           (alignof(state_t) % alignof(F) == 0);
+}
+
+/// get_state
+///
+/// Reinterprets the memory buffer in state_t as
+/// a reference to type F.
+///
+/// @param state the memory to reinterpret
+/// @return reference to the reinterpreted memory
+///
+template<typename F>
+constexpr F &get_state(const state_t &state)
+{ return reinterpret_cast<F &>(const_cast<state_t &>(state)); }
+
+/// copy_state
+///
+/// Emplace an object of type F in the memory
+/// referenced by state
+///
+/// @param state the memory to copy to
+/// @param fn the object to copy from
+///
+template<typename F>
+inline void copy_state(state_t &state, const F &fn)
+{
+    static_assert(can_emplace<F>());
+    new (&get_state<F>(state)) F(fn);
+}
+
+/// move_state
+///
+/// Emplace an object of type F in the memory
+/// referenced by state
+///
+/// @param state the memory to copy to
+/// @param fn the object to copy from
+///
+template<typename F>
+inline void move_state(state_t &state, F &&fn)
+{
+    static_assert(can_emplace<F>());
+    new (&get_state<F>(state)) F(fn);
+}
+
+/// call
+///
+/// Invoke the callable object stored in state with
+/// the provided arguments.
+///
+/// @param state the object to call after reinterpreting to F
+/// @param args the arguments to invoke state with
+/// @return the result of the call
+///
+template<typename F, typename Ret, typename... Args>
+inline Ret call(const state_t &state, Args &&... args)
+{
+    static_assert(std::is_invocable_r_v<Ret, F, Args...>);
+    return get_state<F>(state)(std::forward<Args>(args)...);
+}
+
+/// @cond
+
+/// vtable
+///
+/// Each delegate has a vtable that contains functions to copy,
+/// move, and destroy a given type. It is used to implement
+/// the copy/move ctor/assignment ops of the delegate.
+///
+class vtable
+{
+public:
+    void (&copy)(state_t &lhs, const state_t &rhs);
+    void (&move)(state_t &lhs, state_t &&rhs);
+    void (&destroy)(state_t &state);
+
+    template<typename F>
+    static const vtable &init() noexcept
+    {
+        static const vtable self = {
+            s_copy<F>, s_move<F>, s_destroy<F>
+        };
+
+        return self;
+    }
+
+private:
+
+    template <
+        typename F,
+        typename std::enable_if_t<std::is_copy_constructible_v<F>> * = nullptr
+        >
+    static void s_copy(state_t &lhs, const state_t &rhs) noexcept
+    { copy_state<F>(lhs, get_state<F>(rhs)); }
+
+    template <
+        typename F,
+        typename std::enable_if_t<std::is_move_constructible_v<F>> * = nullptr
+        >
+    static void s_move(state_t &lhs, state_t &&rhs) noexcept
+    { move_state<F>(lhs, std::move(get_state<F>(rhs))); }
+
+    template <
+        typename F,
+        typename std::enable_if_t<std::is_destructible_v<F>> * = nullptr
+        >
+    static void s_destroy(state_t &state) noexcept
+    { get_state<F>(state).~F(); }
+};
+
+/// @endcond
+
+/// delegate
+///
+/// Wraps either a raw function pointer or a pointer-to-member-function
+/// and pointer-to-object into an invocable type with a common signature.
+///
+/// The constructor arguments provide the internal state needed to later
+/// invoke the function with the Args... arguments. Only normal function
+/// pointers and member function pointers are supported, but lambdas could
+/// also be used provided their capture list is at most 16 bytes.
+///
+template< typename> class delegate;
+
+/// delegate specialization
+///
+template<typename Ret, typename... Args>
+class delegate<Ret(Args...)>
+{
 public:
 
-    /// Default Constructor
+    /// The return type of the delegate
     ///
-    /// Creates a nullptr delegate. Note that attempts to execute a nullptr
-    /// delegate will result in a crash as we do not perform a check for
-    /// null
-    ///
-    delegate() noexcept = default;
+    using result_type = Ret;
 
-    /// Default Destructor
+    /// Null delegate
     ///
-    ~delegate() noexcept = default;
+    delegate() : m_call{nullptr}, m_vtbl{nullptr}
+    {}
 
-    /// Is Valid
+    /// Delegate from function pointer
     ///
-    /// @return true if valid, false otherwise
+    /// Create a delegate from the provided function pointer.
+    /// Passing a lambda with an empty capture list prefixed with '+'
+    /// will match this overload as well.
     ///
-    constexpr bool is_valid() const noexcept
-    { return m_stub != nullptr; }
-
-    /// Is Valid
-    ///
-    /// @return true if valid, false otherwise
-    ///
-    constexpr explicit operator bool() const noexcept
-    { return is_valid(); }
-
-    /// Create (Member Function Pointer)
-    ///
-    /// Example usage:
+    /// Example:
     /// @code
-    /// test_class t;
-    /// auto d = delegate<int(int)>::create<test_class, &test_class::foo>(&t);
-    /// std::cout << "d: " << d(1) << '\n';
-    /// @endcode
-    ///
-    /// @param obj a pointer to the class who's member function will
-    ///     be executed.
-    /// @return resulting delegate
-    ///
-    template <
-        typename T,
-        RET(T::*FUNC)(PARAMS...),
-        typename = std::enable_if<std::is_class<T>::value>
-        >
-    constexpr static delegate create(T &obj) noexcept
-    { return delegate(std::addressof(obj), member_stub<T, FUNC>); }
-
-    /// Create (Member Function Pointer Class Pointer)
-    ///
-    /// Example usage:
-    /// @code
-    /// test_class t;
-    /// auto d = delegate<int(int)>::create<test_class, &test_class::foo>(&t);
-    /// std::cout << "d: " << d(1) << '\n';
-    /// @endcode
-    ///
-    /// @param obj a pointer to the class who's member function will
-    ///     be executed.
-    /// @return resulting delegate
-    ///
-    template <
-        typename T,
-        RET(T::*FUNC)(PARAMS...),
-        typename = std::enable_if<std::is_class<T>::value>
-        >
-    constexpr static delegate create(T *obj) noexcept
-    { return delegate(obj, member_stub<T, FUNC>); }
-
-    /// Create (Member Function Unique Pointer)
-    ///
-    /// Example usage:
-    /// @code
-    /// auto t = make_unique<test_class>();
-    /// auto d = delegate<int(int)>::create<test_class, &test_class::foo>(t);
-    /// std::cout << "d: " << d(1) << '\n';
-    /// @endcode
-    ///
-    /// @param obj a pointer to the class who's member function will
-    ///     be executed.
-    /// @return resulting delegate
-    ///
-    template <
-        typename T,
-        RET(T::*FUNC)(PARAMS...),
-        typename = std::enable_if<std::is_class<T>::value>
-        >
-    constexpr static delegate create(const std::unique_ptr<T> &obj) noexcept
-    { return delegate(obj.get(), member_stub<T, FUNC>); }
-
-    /// Create (Const Member Function Pointer)
-    ///
-    /// Example usage:
-    /// @code
-    /// test_class t;
-    /// auto d = delegate<int(int)>::create<test_class, &test_class::foo>(&t);
-    /// std::cout << "d: " << d(1) << '\n';
-    /// @endcode
-    ///
-    /// @note this function has to have _const appended to it's name because
-    ///     MSVC doesn't understand the template overload and fails to
-    ///     compile.
-    ///
-    /// @param obj a pointer to the class who's member function will
-    ///     be executed.
-    /// @return resulting delegate
-    ///
-    template <
-        typename T,
-        RET(T::*FUNC)(PARAMS...) const,
-        typename = std::enable_if<std::is_class<T>::value>
-        >
-    constexpr static delegate create_const(const T &obj) noexcept
-    { return delegate(const_cast<T *>(std::addressof(obj)), const_member_stub<T, FUNC>); }
-
-    /// Create (Function Pointer)
-    ///
-    /// Example usage:
-    /// @code
-    /// auto d = delegate<int(int)>::create<&foo>();
-    /// std::cout << "d: " << d(1) << '\n';
-    /// @endcode
-    ///
-    /// @return resulting delegate
-    ///
-    template <RET(FUNC)(PARAMS...)>
-    constexpr static delegate create() noexcept
-    { return delegate(nullptr, function_stub<FUNC>); }
-
-    /// Create (Lambda Pointer)
-    ///
-    /// Example usage:
-    /// @code
-    /// test_class t;
-    /// auto d = delegate<int(int)>::create([](int val) -> int { return val; });
-    /// std::cout << "d: " << d(1) << '\n';
-    /// @endcode
-    ///
-    /// @param ptr a pointer to the lambda function that will
-    ///     be executed.
-    /// @return resulting delegate
-    ///
-    template <typename LAMBDA>
-    constexpr static delegate create(const LAMBDA &ptr) noexcept
-    { return delegate(reinterpret_cast<void *>(const_cast<LAMBDA *>(std::addressof(ptr))), lambda_stub<LAMBDA>); }
-
-    /// Operator ()
-    ///
-    /// @param params the parameters to pass to the delegate function.
-    /// @return the result of executing the delegate function
-    ///
-    constexpr RET operator()(PARAMS... params) const
-    { return (*m_stub)(m_obj, std::forward<PARAMS>(params)...); }
-
-private:
-
-    /// @cond
-
-    // Note:
+    /// int foo() { return 42; }
     //
-    // The only public constructor is the default constructor. To create a
-    // delegate, use the delegate::create function.
-    //
+    /// int main()
+    /// {
+    ///     delegate x(+[](const char *s){ printf("%s\n", s); });
+    ///     delegate y(foo);
+    ///
+    ///     x("42");
+    ///     return y();
+    /// }
+    /// @endcode
+    ///
+    /// @param fn the function to create the delegate for
+    ///
+    delegate(Ret(*fn)(Args...))
+    {
+        expects(fn);
 
-    constexpr explicit delegate(void *obj, stub_t stub) noexcept :
-        m_obj(obj),
-        m_stub(stub)
-    { }
+        m_call = &call<decltype(fn), Ret, Args...>;
+        m_vtbl = &vtable::init<decltype(fn)>();
+        copy_state(m_state, fn);
+    }
 
-    /// @endcond
+    /// Delegate from functor
+    ///
+    /// Create a delegate from the provided functor. Note
+    /// that there isn't a deduction guide for this overload,
+    /// so the Ret, Args... types must be given in the call
+    ///
+    /// Example:
+    /// @code
+    /// int main()
+    /// {
+    ///     auto foo = [](){ return 42; };
+    ///     auto d = delegate<int>(foo);
+    ///
+    ///     return d();
+    /// }
+    /// @endcode
+    ///
+    /// @param fn the function to create the delegate for
+    ///
+    template <
+        typename F,
+        typename = std::enable_if <
+            std::is_invocable_r_v<Ret, F, Args...> &&
+            std::is_object_v<F >>
+        >
+    delegate(F fn)
+    {
+        m_call = &call<decltype(fn), Ret, Args...>;
+        m_vtbl = &vtable::init<decltype(fn)>();
+        copy_state(m_state, fn);
+    }
+
+    /// Delegate from non-const memfn, non-const object
+    ///
+    /// Create a delegate from the provided member function pointer
+    /// and object address.
+    ///
+    /// Example:
+    /// @code
+    /// struct S {
+    ///     bool even() { return (m_val & 1) == 0; }
+    ///     int m_val;
+    /// }
+    ///
+    /// int main()
+    /// {
+    ///     struct S s;
+    ///     delegate d(&S::even, &s);
+    ///
+    ///     d();
+    /// }
+    /// @endcode
+    ///
+    /// @param memfn the member function to create the delegate for
+    /// @param obj the object to create the delegate for
+    ///
+    template <
+        typename C,
+        typename = std::enable_if<std::is_class_v<C>>
+        >
+    delegate(Ret(C::*memfn)(Args...), C *obj)
+    {
+        expects(obj);
+
+        auto fn = [memfn, obj](Args && ... args) -> decltype(auto)
+        { return std::invoke(memfn, obj, args...); };
+
+        m_call = &call<decltype(fn), Ret, Args...>;
+        m_vtbl = &vtable::init<decltype(fn)>();
+        copy_state(m_state, fn);
+    }
+
+    /// Delegate from const memfn, non-const object
+    ///
+    /// Create a delegate from the provided member function pointer
+    /// and object address.
+    ///
+    /// Example:
+    /// @code
+    /// struct S {
+    ///     bool even() const { return (m_val & 1) == 0; }
+    ///     int m_val;
+    /// }
+    ///
+    /// int main()
+    /// {
+    ///     struct S s;
+    ///     delegate d(&S::even, &s);
+    ///
+    ///     d();
+    /// }
+    /// @endcode
+    ///
+    /// @param memfn the member function to create the delegate for
+    /// @param obj the object to create the delegate for
+    ///
+    template <
+        typename C,
+        typename = std::enable_if<std::is_class_v<C>>
+        >
+    delegate(Ret(C::*memfn)(Args...) const, C *obj)
+    {
+        expects(obj);
+
+        auto fn = [memfn, obj](Args && ... args) -> decltype(auto)
+        { return std::invoke(memfn, obj, args...); };
+
+        m_call = &call<decltype(fn), Ret, Args...>;
+        m_vtbl = &vtable::init<decltype(fn)>();
+        copy_state(m_state, fn);
+    }
+
+    /// Delegate from const memfn, const object
+    ///
+    /// Create a delegate from the provided member function pointer
+    /// and object address.
+    ///
+    /// Example:
+    /// @code
+    /// struct S {
+    ///     bool even() const { return (m_val & 1) == 0; }
+    ///     int m_val;
+    /// }
+    ///
+    /// int main()
+    /// {
+    ///     const struct S s;
+    ///     delegate d(&S::even, &s);
+    ///
+    ///     d();
+    /// }
+    /// @endcode
+    ///
+    /// @param memfn the member function to create the delegate for
+    /// @param obj the object to create the delegate for
+    ///
+    template<typename C, typename = std::enable_if<std::is_class_v<C>>>
+             delegate(Ret(C::*memfn)(Args...) const, const C *obj)
+    {
+        expects(obj);
+
+        auto fn = [memfn, obj](Args && ... args) -> decltype(auto)
+        { return std::invoke(memfn, obj, args...); };
+
+        m_call = &call<decltype(fn), Ret, Args...>;
+        m_vtbl = &vtable::init<decltype(fn)>();
+        copy_state(m_state, fn);
+    }
+
+    /// Copy constructor
+    ///
+    /// @param other the delegate to copy
+    ///
+    delegate(const delegate &other) :
+        m_call{other.m_call},
+        m_vtbl{other.m_vtbl}
+    { m_vtbl->copy(m_state, other.m_state); }
+
+    /// Move constructor
+    ///
+    /// @param other the delegate to move
+    ///
+    delegate(delegate &&other) :
+        m_call{other.m_call},
+        m_vtbl{other.m_vtbl}
+    {
+        m_vtbl->move(m_state, std::move(other.m_state));
+        other.m_call = nullptr;
+    }
+
+    /// Copy assignment
+    ///
+    /// @param other the delegate to copy
+    /// @return the resulting copy
+    ///
+    delegate &operator=(const delegate &other)
+    {
+        m_call = other.m_call;
+        m_vtbl = other.m_vtbl;
+
+        m_vtbl->copy(m_state, other.m_state);
+        return *this;
+    }
+
+    /// Move assignment
+    ///
+    /// @param other the delegate to move
+    /// @return the resulting move
+    ///
+    delegate &operator=(delegate &&other)
+    {
+        m_call = other.m_call;
+        m_vtbl = other.m_vtbl;
+
+        m_vtbl->move(m_state, std::move(other.m_state));
+        other.m_call = nullptr;
+        return *this;
+    }
+
+    /// Destructor
+    ///
+    ~delegate()
+    {
+        if (m_vtbl) {
+            m_vtbl->destroy(m_state);
+        }
+
+        m_vtbl = nullptr;
+        m_call = nullptr;
+    }
+
+    /// operator()
+    ///
+    /// @param args the arguments to pass to the delegate
+    /// @return the result of calling the delegate
+    ///
+    Ret operator()(Args... args) const
+    { return m_call(m_state, std::forward<Args>(args)...); }
+
+    /// operator bool
+    ///
+    /// @return true iff the delegate is callable
+    ///
+    operator bool() const
+    { return m_call != nullptr; }
 
 private:
-
     /// @cond
 
-    template <
-        typename T,
-        RET(T::*FUNC)(PARAMS...),
-        typename = std::enable_if<std::is_class<T>::value>
-        >
-    constexpr static RET member_stub(void *obj, PARAMS... params)
-    { return (static_cast<T *>(obj)->*FUNC)(std::forward<PARAMS>(params)...); }
-
-    template <
-        typename T,
-        RET(T::*FUNC)(PARAMS...) const,
-        typename = std::enable_if<std::is_class<T>::value>
-        >
-    constexpr static RET const_member_stub(void *obj, PARAMS... params)
-    { return (static_cast<T *>(obj)->*FUNC)(std::forward<PARAMS>(params)...); }
-
-    template <RET(*FUNC)(PARAMS...)>
-    constexpr static RET function_stub(void *, PARAMS... params)
-    { return (FUNC)(std::forward<PARAMS>(params)...); }
-
-    template <typename LAMBDA>
-    constexpr static RET lambda_stub(void *ptr, PARAMS... params)
-    { return (static_cast<LAMBDA *>(ptr)->operator())(std::forward<PARAMS>(params)...); }
-
-    /// @endcond
-
-private:
-
-    void *m_obj{nullptr};       ///< Object containing member function
-    stub_t m_stub{nullptr};     ///< Stub that executes the delegate function
-
-public:
-
-    /// @cond
-
-    delegate(const delegate &other) noexcept = default;
-    delegate &operator=(const delegate &other) noexcept = default;
-
-    delegate(delegate &&other) noexcept = default;
-    delegate &operator=(delegate &&other) noexcept = default;
+    state_t m_state;
+    call_t<Ret, Args...> m_call{};
+    const vtable *m_vtbl{};
 
     /// @endcond
 };
+
+/// @cond
+
+/// NOTE: this was added because hippomocks.h:239 tries to print
+/// our delegate, causing the compiler to complain about an ambiguous
+/// overload. Not sure why we haven't seen this with other types before
+///
+template<typename Ret, typename... Args>
+inline std::ostream &operator<<(std::ostream &os, const delegate<Ret(Args...)> &)
+{ return os; }
+
+/// Class deduction guides
+///
+template<typename R, typename... A>
+delegate(R(A...)) -> delegate<R(A...)>;
+
+template<typename C, typename R, typename... A>
+delegate(R(C::*)(A...), C *) -> delegate<R(A...)>;
+
+template<typename C, typename R, typename... A>
+delegate(R(C::*)(A...) const, C *) -> delegate<R(A...)>;
+
+template<typename C, typename R, typename... A>
+delegate(R(C::*)(A...) const, const C *) -> delegate<R(A...)>;
+
+/// TODO:
+/// Figure out how to extract R and A... types from a single
+/// type F so that deduction guides can be written for lambdas.
+///
+
+/// @endcond
 
 #endif

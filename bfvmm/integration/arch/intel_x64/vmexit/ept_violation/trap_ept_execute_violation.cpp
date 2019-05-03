@@ -63,13 +63,9 @@ public:
             );
         });
 
-        this->add_hlt_delegate(
-            vcpu_delegate_t::create<test_hlt_delegate>()
-        );
-
+        this->add_hlt_delegate(test_hlt_delegate);
         this->add_ept_execute_violation_handler(
-            ept_violation_handler::handler_delegate_t::create<vcpu, &vcpu::test_execute_violation_handler>(this)
-        );
+        {&vcpu::test_execute_violation_handler, this});
 
         this->set_eptp(g_guest_map);
     }
