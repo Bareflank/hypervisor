@@ -76,7 +76,7 @@ TEST_CASE("add handlers")
     auto handler = cpuid_handler(vcpu);
 
     CHECK_NOTHROW(
-        handler.add_handler(42, handler_delegate_t::create<test_handler>())
+        handler.add_handler(42, test_handler)
     );
 }
 
@@ -92,7 +92,7 @@ TEST_CASE("cpuid exit")
     g_state.rdx = 0;
 
     handler.add_handler(
-        42, handler_delegate_t::create<test_handler>()
+        42, test_handler
     );
 
     CHECK(handler.handle(vcpu) == true);
@@ -114,7 +114,7 @@ TEST_CASE("cpuid exit")
 //     g_state.rdx = 0;
 
 //     handler.add_handler(
-//         42, handler_delegate_t::create<test_handler_ignore_write>()
+//         42, test_handler_ignore_write
 //     );
 
 //     CHECK(handler.handle(vcpu) == true);
@@ -138,7 +138,7 @@ TEST_CASE("cpuid exit")
 //     );
 
 //     handler.add_handler(
-//         42, handler_delegate_t::create<test_handler_ignore_advance>()
+//         42, test_handler_ignore_advance
 //     );
 
 //     CHECK(handler.handle(vcpu) == true);
@@ -164,7 +164,7 @@ TEST_CASE("cpuid exit")
 //     g_state.rax = 42;
 
 //     handler.add_handler(
-//         42, handler_delegate_t::create<test_handler_returns_false>()
+//         42, test_handler_returns_false
 //     );
 
 //     CHECK(handler.handle(vcpu) == true);

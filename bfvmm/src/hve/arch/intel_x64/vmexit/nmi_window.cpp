@@ -48,7 +48,7 @@ nmi_window_handler::nmi_window_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::nmi_window,
-        ::handler_delegate_t::create<nmi_window_handler, &nmi_window_handler::handle>(this)
+    {&nmi_window_handler::handle, this}
     );
 }
 

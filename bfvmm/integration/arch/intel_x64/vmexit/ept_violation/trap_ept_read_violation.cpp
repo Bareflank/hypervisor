@@ -65,13 +65,9 @@ public:
             );
         });
 
-        this->add_hlt_delegate(
-            vcpu_delegate_t::create<test_hlt_delegate>()
-        );
-
+        this->add_hlt_delegate(test_hlt_delegate);
         this->add_ept_read_violation_handler(
-            ept_violation_handler::handler_delegate_t::create<vcpu, &vcpu::test_read_violation_handler>(this)
-        );
+        {&vcpu::test_read_violation_handler, this});
 
         auto [pte, unused] =
             g_guest_map.entry(

@@ -286,7 +286,7 @@ private:
     gsl::span<uint8_t> m_io_bitmap_a;
     gsl::span<uint8_t> m_io_bitmap_b;
 
-    ::handler_delegate_t m_default_handler;
+    ::handler_delegate_t m_default_handler{};
     std::unordered_map<vmcs_n::value_type, bool> m_emulate;
     std::unordered_map<vmcs_n::value_type, std::list<handler_delegate_t>> m_in_handlers;
     std::unordered_map<vmcs_n::value_type, std::list<handler_delegate_t>> m_out_handlers;

@@ -43,7 +43,7 @@ io_instruction_handler::io_instruction_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::io_instruction,
-        ::handler_delegate_t::create<io_instruction_handler, &io_instruction_handler::handle>(this)
+    {&io_instruction_handler::handle, this}
     );
 }
 
@@ -203,7 +203,7 @@ io_instruction_handler::handle_in(vcpu *vcpu, info_t &info)
         }
     }
 
-    if (m_default_handler.is_valid()) {
+    if (m_default_handler) {
         bfdebug_nhex(0, "handle_in", info.port_number);
         return m_default_handler(vcpu);
     }
@@ -236,7 +236,7 @@ io_instruction_handler::handle_out(vcpu *vcpu, info_t &info)
         }
     }
 
-    if (m_default_handler.is_valid()) {
+    if (m_default_handler) {
         bfdebug_nhex(0, "handle_out", info.port_number);
         return m_default_handler(vcpu);
     }

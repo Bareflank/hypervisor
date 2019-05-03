@@ -47,9 +47,6 @@ test_handler(
 void
 init_vcpu(vcpu_t *vcpu)
 {
-    vcpu->add_external_interrupt_handler(
-        external_interrupt_handler_delegate_t::create<test_handler>()
-    );
-
+    vcpu->add_external_interrupt_handler(test_handler);
     vcpu->set_eptp(g_guest_map);
 }

@@ -68,13 +68,8 @@ public:
     explicit vcpu(vcpuid::type id) :
         bfvmm::intel_x64::vcpu{id}
     {
-        this->add_hlt_delegate(
-            vcpu_delegate_t::create<test_hlt_delegate>()
-        );
-
-        this->add_cpuid_emulator(
-            42, handler_delegate_t::create<test_cpuid_handler>()
-        );
+        this->add_hlt_delegate(test_hlt_delegate);
+        this->add_cpuid_emulator(42, test_cpuid_handler);
     }
 
     ~vcpu() override = default;

@@ -129,37 +129,24 @@ cpuid_handler::cpuid_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::cpuid,
-        handler_delegate_t::create<cpuid_handler, &cpuid_handler::handle>(this)
+    {&cpuid_handler::handle, this}
     );
 
     this->add_handler(
         ::intel_x64::cpuid::feature_information::addr,
-        handler_delegate_t::create<handle_cpuid_feature_information>()
+        handle_cpuid_feature_information
     );
 
-    this->add_emulator(
-        0x4BF00000, handler_delegate_t::create<handle_cpuid_0x4BF00000>()
-    );
-
-    this->add_emulator(
-        0x4BF00010, handler_delegate_t::create<handle_cpuid_0x4BF00010>()
-    );
-
-    this->add_emulator(
-        0x4BF00020, handler_delegate_t::create<handle_cpuid_0x4BF00020>()
-    );
+    this->add_emulator(0x4BF00000, handle_cpuid_0x4BF00000);
+    this->add_emulator(0x4BF00010, handle_cpuid_0x4BF00010);
+    this->add_emulator(0x4BF00020, handle_cpuid_0x4BF00020);
 
     if (vcpu->is_guest_vm_vcpu()) {
         return;
     }
 
-    this->add_emulator(
-        0x4BF00011, handler_delegate_t::create<handle_cpuid_0x4BF00011>()
-    );
-
-    this->add_emulator(
-        0x4BF00021, handler_delegate_t::create<handle_cpuid_0x4BF00021>()
-    );
+    this->add_emulator(0x4BF00011, handle_cpuid_0x4BF00011);
+    this->add_emulator(0x4BF00021, handle_cpuid_0x4BF00021);
 }
 
 // -----------------------------------------------------------------------------

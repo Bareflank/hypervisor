@@ -33,7 +33,7 @@ ept_misconfiguration_handler::ept_misconfiguration_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::ept_misconfiguration,
-        ::handler_delegate_t::create<ept_misconfiguration_handler, &ept_misconfiguration_handler::handle>(this)
+    {&ept_misconfiguration_handler::handle, this}
     );
 }
 

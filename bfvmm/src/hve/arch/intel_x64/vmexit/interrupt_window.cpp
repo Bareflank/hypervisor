@@ -33,7 +33,7 @@ interrupt_window_handler::interrupt_window_handler(
 
     vcpu->add_handler(
         exit_reason::basic_exit_reason::interrupt_window,
-        ::handler_delegate_t::create<interrupt_window_handler, &interrupt_window_handler::handle>(this)
+    {&interrupt_window_handler::handle, this}
     );
 }
 

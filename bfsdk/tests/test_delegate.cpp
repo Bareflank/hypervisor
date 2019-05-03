@@ -63,43 +63,21 @@ int foo(int val)
 // Tests
 // -----------------------------------------------------------------------------
 
-TEST_CASE("segfault cases")
-{
-    // delegate<int(int)> d0;
-    // d0(1);
-
-    // test_class *t1 = nullptr;
-    // auto d1 = delegate<int(int)>::create<test_class, &test_class::foo>(t1);
-    // d1(1);
-}
-
-TEST_CASE("is valid")
-{
-    delegate<int(int)> d0;
-
-    CHECK(!d0);
-    CHECK(!d0.is_valid());
-}
-
 TEST_CASE("test class")
 {
     test_class t;
+    delegate d(&test_class::foo, &t);
 
-    auto d = delegate<int(int)>::create<test_class, &test_class::foo>(t);
+    CHECK(d);
     CHECK(d(1) == result);
 }
 
 TEST_CASE("test class ptr")
 {
     auto t = std::make_unique<test_class>();
-    auto d = delegate<int(int)>::create<test_class, &test_class::foo>(t.get());
-    CHECK(d(1) == result);
-}
+    auto d = delegate(&test_class::foo, t.get());
 
-TEST_CASE("test unique class ptr")
-{
-    auto t = std::make_unique<test_class>();
-    auto d = delegate<int(int)>::create<test_class, &test_class::foo>(t);
+    CHECK(d);
     CHECK(d(1) == result);
 }
 
@@ -107,14 +85,22 @@ TEST_CASE("test const class")
 {
     test_const_class t;
 
-    auto d = delegate<int(int)>::create_const<test_const_class, &test_const_class::foo>(t);
+    auto d = delegate(&test_const_class::foo, &t);
+    CHECK(d);
     CHECK(d(1) == result);
 }
 
 TEST_CASE("free function")
 {
-    auto d = delegate<int(int)>::create<foo>();
+    delegate d(foo);
+
+    CHECK(d);
     CHECK(d(1) == result);
+
+    auto m = std::move(d);
+    CHECK(m);
+    CHECK(!d);
+    CHECK(m(1) == result);
 }
 
 TEST_CASE("lambda no capture")
@@ -123,8 +109,14 @@ TEST_CASE("lambda no capture")
         return val + modval;
     };
 
-    auto d = delegate<int(int)>::create(l);
+    auto d = delegate<int(int)>(l);
+    CHECK(d);
     CHECK(d(1) == result);
+
+    auto c = d;
+    CHECK(c);
+    CHECK(d);
+    CHECK(c(1) == result);
 }
 
 TEST_CASE("lambda capture")
@@ -135,11 +127,17 @@ TEST_CASE("lambda capture")
         return val + modval + capture;
     };
 
-    auto d = delegate<int(int)>::create(l);
+    auto d = delegate<int(int)>(l);
+    CHECK(d);
     CHECK(d(1) == result + capture);
 
     capture = 0;
     CHECK(d(1) != result + capture);
+
+    auto m = std::move(d);
+    CHECK(m);
+    CHECK(!d);
+    CHECK(m(1) != result + capture);
 }
 
 TEST_CASE("lambda reference capture")
@@ -150,24 +148,31 @@ TEST_CASE("lambda reference capture")
         return val + modval + capture;
     };
 
-    auto d = delegate<int(int)>::create(l);
+    auto d = delegate<int(int)>(l);
+    CHECK(d);
     CHECK(d(1) == result + capture);
 
     capture = 0;
     CHECK(d(1) == result);
+
+    auto m = std::move(d);
+    CHECK(m);
+    CHECK(!d);
+    CHECK(m(1) == result);
+
+    auto c = m;
+    CHECK(m);
+    CHECK(c);
+    CHECK(c(1) == result);
 }
 
-TEST_CASE("list")
+TEST_CASE("list copy")
 {
     test_class t;
 
-    auto l = [](int val) -> int {
-        return val + modval;
-    };
-
-    auto d1 = delegate<int(int)>::create(l);
-    auto d2 = delegate<int(int)>::create<foo>();
-    auto d3 = delegate<int(int)>::create<test_class, &test_class::foo>(t);
+    auto d1 = delegate(+[](int val) -> int { return val + modval; });
+    auto d2 = delegate(foo);
+    auto d3 = delegate(&test_class::foo, &t);
 
     std::list<delegate<int(int)>> delegates;
     delegates.push_back(d1);
@@ -175,6 +180,54 @@ TEST_CASE("list")
     delegates.push_back(d3);
 
     for (const auto &d : delegates) {
+        CHECK(d);
         CHECK(d(1) == result);
     }
+
+    CHECK(d1);
+    CHECK(d2);
+    CHECK(d3);
+}
+
+TEST_CASE("list bracket")
+{
+    test_class t;
+    std::list<delegate<int(int)>> delegates;
+
+    delegates.push_back(+[](int val) -> int { return val + modval; });
+    delegates.push_back({foo});
+    delegates.push_back({&test_class::foo, &t});
+
+    for (const auto &d : delegates) {
+        CHECK(d);
+        CHECK(d(1) == result);
+    }
+}
+
+TEST_CASE("list move")
+{
+    test_class t;
+
+    auto d1 = delegate(+[](int val) -> int { return val + modval; });
+    auto d2 = delegate(foo);
+    auto d3 = delegate(&test_class::foo, &t);
+
+    std::list<delegate<int(int)>> delegates;
+
+    CHECK(d1);
+    CHECK(d2);
+    CHECK(d3);
+
+    delegates.push_back(std::move(d1));
+    delegates.push_back(std::move(d2));
+    delegates.push_back(std::move(d3));
+
+    for (const auto &d : delegates) {
+        CHECK(d(1) == result);
+        CHECK(d);
+    }
+
+    CHECK(!d1);
+    CHECK(!d2);
+    CHECK(!d3);
 }

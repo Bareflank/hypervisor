@@ -158,9 +158,7 @@ vcpu::vcpu(
     using namespace vmcs_n;
     bfn::call_once(g_once_flag, setup);
 
-    this->add_run_delegate(
-        vcpu_delegate_t::create<intel_x64::vcpu, &intel_x64::vcpu::run_delegate>(this)
-    );
+    this->add_run_delegate({&intel_x64::vcpu::run_delegate, this});
 
     m_state.vcpu_ptr =
         reinterpret_cast<uintptr_t>(this);
