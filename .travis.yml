@@ -397,3 +397,23 @@ matrix:
       - export LD_BIN=ld.lld
       - cmake -DCONFIG=travis_static ..
       - make -j3
+
+  #
+  # UEFI
+  #
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-6.0
+        packages:
+          - gcc-8
+          - g++-8
+          - clang-6.0
+          - nasm
+    env:
+      - TEST="UEFI"
+    script:
+      - cmake -DCONFIG=travis_efi ..
+      - make -j3
