@@ -22,7 +22,7 @@
 
 #include <driver.h>
 
-extern int g_status = 0;
+extern int g_status;
 extern FAST_MUTEX g_status_mutex;
 
 /* -------------------------------------------------------------------------- */
@@ -83,12 +83,12 @@ bareflankEvtDriverContextCleanup(
 )
 {
     UNREFERENCED_PARAMETER(DriverObject);
-    mutex_lock(&g_status_mutex);
+    ExAcquireFastMutex(&g_status_mutex);
 
     common_fini();
     g_status = STATUS_STOPPED;
 
-    mutex_unlock(&g_status_mutex);
+    ExReleaseFastMutex(&g_status_mutex);
 }
 
 static int g_sleeping = 0;
@@ -102,10 +102,10 @@ bareflankEvtDeviceD0Entry(
     UNREFERENCED_PARAMETER(Device);
     UNREFERENCED_PARAMETER(PreviousState);
 
-    mutex_lock(&g_status_mutex);
+    ExAcquireFastMutex(&g_status_mutex);
 
     if (g_status != STATUS_SUSPEND) {
-        mutex_unlock(&g_status_mutex);
+        ExReleaseFastMutex(&g_status_mutex);
         return STATUS_SUCCESS;
     }
 
@@ -114,13 +114,13 @@ bareflankEvtDeviceD0Entry(
         common_fini();
         g_status = STATUS_STOPPED;
 
-        mutex_unlock(&g_status_mutex);
+        ExReleaseFastMutex(&g_status_mutex);
         return STATUS_UNSUCCESSFUL;
     }
 
     g_status = STATUS_RUNNING;
 
-    mutex_unlock(&g_status_mutex);
+    ExReleaseFastMutex(&g_status_mutex);
     return STATUS_SUCCESS;
 }
 
@@ -133,10 +133,10 @@ bareflankEvtDeviceD0Exit(
     UNREFERENCED_PARAMETER(Device);
     UNREFERENCED_PARAMETER(TargetState);
 
-    mutex_lock(&g_status_mutex);
+    ExAcquireFastMutex(&g_status_mutex);
 
     if (g_status != STATUS_RUNNING) {
-        mutex_unlock(&g_status_mutex);
+        ExReleaseFastMutex(&g_status_mutex);
         return STATUS_SUCCESS;
     }
 
@@ -145,12 +145,12 @@ bareflankEvtDeviceD0Exit(
         common_fini();
         g_status = STATUS_STOPPED;
 
-        mutex_unlock(&g_status_mutex);
+        ExReleaseFastMutex(&g_status_mutex);
         return STATUS_UNSUCCESSFUL;
     }
 
     g_status = STATUS_SUSPEND;
 
-    mutex_unlock(&g_status_mutex);
+    ExReleaseFastMutex(&g_status_mutex);
     return STATUS_SUCCESS;
 }
