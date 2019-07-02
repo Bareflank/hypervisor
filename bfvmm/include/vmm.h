@@ -39,7 +39,6 @@
 #ifdef BF_INTEL_X64
 #include "hve/arch/intel_x64/vmexit/control_register.h"
 #include "hve/arch/intel_x64/vmexit/cpuid.h"
-#include "hve/arch/intel_x64/vmexit/ept_misconfiguration.h"
 #include "hve/arch/intel_x64/vmexit/ept_violation.h"
 #include "hve/arch/intel_x64/vmexit/external_interrupt.h"
 #include "hve/arch/intel_x64/vmexit/init_signal.h"

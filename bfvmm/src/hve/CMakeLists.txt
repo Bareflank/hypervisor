@@ -32,7 +32,6 @@ target_sources(bfvmm_hve PRIVATE
 
     $<${X64}:arch/intel_x64/vmexit/control_register.cpp>
     $<${X64}:arch/intel_x64/vmexit/cpuid.cpp>
-    $<${X64}:arch/intel_x64/vmexit/ept_misconfiguration.cpp>
     $<${X64}:arch/intel_x64/vmexit/ept_violation.cpp>
     $<${X64}:arch/intel_x64/vmexit/external_interrupt.cpp>
     $<${X64}:arch/intel_x64/vmexit/init_signal.cpp>
@@ -70,7 +69,3 @@ target_sources(bfvmm_hve PRIVATE
 )
 
 install(TARGETS bfvmm_hve DESTINATION lib EXPORT bfvmm-${PREFIX}-targets)
-
-if(PREFIX STREQUAL vmm)
-    install(DIRECTORY ../../include/hve/ DESTINATION include/bfvmm/hve)
-endif()

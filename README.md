@@ -5,7 +5,6 @@
 [![GitHub Version](https://badge.fury.io/gh/bareflank%2Fhypervisor.svg)](https://badge.fury.io/gh/bareflank%2Fhypervisor)
 [![Build Status](https://travis-ci.org/Bareflank/hypervisor.svg?branch=master)](https://travis-ci.org/Bareflank/hypervisor)
 [![Build Status](https://ci.appveyor.com/api/projects/status/r82c37nc634tnsv9/branch/master?svg=true)](https://ci.appveyor.com/project/rianquinn/hypervisor-13oyg/branch/master)
-[![codecov](https://codecov.io/gh/Bareflank/hypervisor/branch/master/graph/badge.svg)](https://codecov.io/gh/Bareflank/hypervisor)
 [![Codacy Status](https://api.codacy.com/project/badge/Grade/28ec616803cb4800a4b727b70a3b112f)](https://www.codacy.com/app/rianquinn/hypervisor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Bareflank/hypervisor&amp;utm_campaign=Badge_Grade)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/325/badge)](https://bestpractices.coreinfrastructure.org/projects/325)
 [![Join the chat at https://gitter.im/Bareflank-hypervisor/Lobby](https://badges.gitter.im/Bareflank-hypervisor/Lobby.svg)](https://gitter.im/Bareflank-hypervisor/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -30,8 +29,7 @@ enabling users of the project to both contribute back to the project, but
 also create proprietary versions of the hypervisor if so desired.
 
 In addition, the project comes complete with a set of unit tests to validate
-that the provided SDK works as expected. These tests are checked for completeness using
-[Codecov](https://codecov.io/gh/Bareflank/hypervisor). Furthermore,
+that the provided SDK works as expected. Furthermore,
 [Travis CI](https://travis-ci.org/Bareflank/hypervisor) has been set up to
 test source code formatting via
 [Astyle](http://astyle.sourceforge.net), and static / dynamic analysis

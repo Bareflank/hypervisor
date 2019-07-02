@@ -106,7 +106,7 @@ private_add_raw_md_to_memory_manager(uint64_t virt, uint64_t type)
     md.type = type;
 
     ret = platform_call_vmm_on_core(
-        0, BF_REQUEST_ADD_MDL, (uintptr_t)&md, 0);
+              0, BF_REQUEST_ADD_MDL, (uintptr_t)&md, 0);
 
     if (ret != MEMORY_MANAGER_SUCCESS) {
         return ret;
@@ -163,7 +163,7 @@ private_add_tss_mdl(void)
     for (i = 0; i < g_tls_size; i += BAREFLANK_PAGE_SIZE) {
 
         int64_t ret = private_add_raw_md_to_memory_manager(
-                  (uint64_t)g_tls + i, MEMORY_TYPE_R | MEMORY_TYPE_W);
+                          (uint64_t)g_tls + i, MEMORY_TYPE_R | MEMORY_TYPE_W);
 
         if (ret != BF_SUCCESS) {
             return ret;
@@ -337,7 +337,7 @@ common_load_vmm(void)
         goto failure;
     }
 
-    ret = bfelf_load(g_modules, (uint64_t)g_num_modules,(void **)&_start_func, &g_info, &g_loader);
+    ret = bfelf_load(g_modules, (uint64_t)g_num_modules, (void **)&_start_func, &g_info, &g_loader);
     if (ret != BF_SUCCESS) {
         goto failure;
     }
@@ -347,7 +347,7 @@ common_load_vmm(void)
         goto failure;
     }
 
-    ret = platform_call_vmm_on_core(0, BF_REQUEST_SET_RSDP,  (uint64_t)g_rsdp, 0);
+    ret = platform_call_vmm_on_core(0, BF_REQUEST_SET_RSDP, (uint64_t)g_rsdp, 0);
     if (ret != BF_SUCCESS) {
         goto failure;
     }
@@ -464,7 +464,7 @@ common_stop_vmm(void)
 
     for (cpuid = g_num_cpus_started - 1; cpuid >= 0 ; cpuid--) {
         ret = platform_call_vmm_on_core(
-            (uint64_t)cpuid, BF_REQUEST_VMM_FINI, (uint64_t)cpuid, 0);
+                  (uint64_t)cpuid, BF_REQUEST_VMM_FINI, (uint64_t)cpuid, 0);
 
         if (ret != BFELF_SUCCESS) {
             goto corrupted;
@@ -496,7 +496,7 @@ common_dump_vmm(struct debug_ring_resources_t **drr, uint64_t vcpuid)
     }
 
     ret = platform_call_vmm_on_core(
-        0, BF_REQUEST_GET_DRR, (uint64_t)vcpuid, (uint64_t)drr);
+              0, BF_REQUEST_GET_DRR, (uint64_t)vcpuid, (uint64_t)drr);
 
     if (ret != BFELF_SUCCESS) {
         return ret;

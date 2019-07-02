@@ -311,7 +311,7 @@ ioctl_vmcall(struct ioctl_vmcall_args_t *user_args)
 
     mutex_lock(&g_status_mutex);
 
-    switch(g_status) {
+    switch (g_status) {
         case STATUS_RUNNING:
             args.reg1 = _vmcall(args.reg1, args.reg2, args.reg3, args.reg4);
             break;
@@ -464,7 +464,7 @@ int
 dev_pm(
     struct notifier_block *nb, unsigned long code, void *unused)
 {
-    switch(code) {
+    switch (code) {
         case PM_SUSPEND_PREPARE:
         case PM_HIBERNATION_PREPARE:
         case PM_RESTORE_PREPARE:

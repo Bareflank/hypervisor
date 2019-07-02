@@ -43,13 +43,6 @@ namespace test
 bfn::once_flag flag;
 ept::mmap g_guest_map;
 
-void
-test_hlt_delegate(bfobject *obj)
-{
-    bfignored(obj);
-    bfdebug_pass(0, "test");
-}
-
 class vcpu : public bfvmm::intel_x64::vcpu
 {
 public:
@@ -63,11 +56,11 @@ public:
             );
         });
 
-        this->add_hlt_delegate(test_hlt_delegate);
         this->set_eptp(g_guest_map);
     }
 
-    ~vcpu() override = default;
+    ~vcpu() override
+    { bfdebug_pass(0, "test"); }
 
 public:
 
@@ -92,9 +85,9 @@ namespace bfvmm
 {
 
 std::unique_ptr<vcpu>
-vcpu_factory::make(vcpuid::type vcpuid, bfobject *obj)
+vcpu_factory::make(vcpuid::type vcpuid, void *data)
 {
-    bfignored(obj);
+    bfignored(data);
     return std::make_unique<test::vcpu>(vcpuid);
 }
 

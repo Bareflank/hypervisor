@@ -41,6 +41,10 @@ extern "C" bool _vmlaunch_demote(void) noexcept;
 extern "C" bool _invept(uint64_t type, void *ptr) noexcept;
 extern "C" bool _invvpid(uint64_t type, void *ptr) noexcept;
 extern "C" uintptr_t _vmcall(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4) noexcept;
+extern "C" uintptr_t _vmcall1(void *r1) noexcept;
+extern "C" uintptr_t _vmcall2(void *r1, void *r2) noexcept;
+extern "C" uintptr_t _vmcall3(void *r1, void *r2, void *r3) noexcept;
+extern "C" uintptr_t _vmcall4(void *r1, void *r2, void *r3, void *r4) noexcept;
 
 // *INDENT-OFF*
 
@@ -136,10 +140,10 @@ namespace vm
         }
     }
 
-    inline void reset(gsl::not_null<void *> ptr)
+    inline void store(gsl::not_null<void *> ptr)
     {
         if (!_vmptrst(ptr)) {
-            throw std::runtime_error("vm::reset failed");
+            throw std::runtime_error("vm::store failed");
         }
     }
 
@@ -179,6 +183,18 @@ namespace vm
 
     inline uintptr_t call(uintptr_t r1 = 0, uintptr_t r2 = 0, uintptr_t r3 = 0, uintptr_t r4 = 0)
     { return _vmcall(r1, r2, r3, r4); }
+
+    inline uintptr_t call(uintptr_t *r1)
+    { return _vmcall1(r1); }
+
+    inline uintptr_t call(uintptr_t *r1, uintptr_t *r2)
+    { return _vmcall2(r1, r2); }
+
+    inline uintptr_t call(uintptr_t *r1, uintptr_t *r2, uintptr_t *r3)
+    { return _vmcall3(r1, r2, r3); }
+
+    inline uintptr_t call(uintptr_t *r1, uintptr_t *r2, uintptr_t *r3, uintptr_t *r4)
+    { return _vmcall4(r1, r2, r3, r4); }
 }
 }
 
