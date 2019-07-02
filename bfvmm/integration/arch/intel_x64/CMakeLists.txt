@@ -19,20 +19,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-add_library(bfvmm_debug)
-
-target_link_libraries(bfvmm_debug PUBLIC ${PREFIX}::bfroot)
-target_include_directories(bfvmm_debug PUBLIC
-    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/include>
-    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfintrinsics/include>
-    $<${BUILD_INCLUDE}:${PROJECT_ROOT}/../bfsdk/include>
-)
-target_sources(bfvmm_debug PRIVATE
-    debug_ring/debug_ring.cpp
-    serial/serial_ns16550a.cpp
-    $<$<STREQUAL:${BUILD_TARGET_ARCH},x86_64>:arch/x64/serial_ns16550a.cpp>
-    $<$<STREQUAL:${BUILD_TARGET_ARCH},aarch64>:arch/aarch64/serial_ns16550a.cpp>
-    $<$<NOT:$<BOOL:${ENABLE_MOCKING}>>:unistd.cpp>
+add_vmm_executable(
+    integration_intel_x64_test_all
+    SOURCES test_all.cpp
 )
 
-install(TARGETS bfvmm_debug DESTINATION lib EXPORT bfvmm-${PREFIX}-targets)
+add_vmm_executable(
+    integration_intel_x64_test_all_inheritance
+    SOURCES test_all_inheritance.cpp
+)
+
+add_subdirectory(efi)
+add_subdirectory(ept)
+add_subdirectory(vmexit/control_register)
+add_subdirectory(vmexit/cpuid)
+# add_subdirectory(vmexit/ept_violation)
+add_subdirectory(vmexit/external_interrupt)
+add_subdirectory(vmexit/io_instruction)
+add_subdirectory(vmexit/monitor_trap)
+add_subdirectory(vmexit/rdmsr)
+add_subdirectory(vmexit/wrmsr)
+add_subdirectory(vpid)

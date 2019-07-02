@@ -150,3 +150,113 @@ _vmcall:
 
     pop rbx
     ret
+
+global _vmcall1
+_vmcall1:
+
+    push rbx
+
+%ifdef MS64
+    mov r8,  rcx
+%else
+    mov r8,  rdi
+%endif
+
+    mov rax, [r8]
+    mov rbx, 0
+    mov rcx, 0
+    mov rdx, 0
+
+    vmcall
+
+    mov [r8], rax
+
+    pop rbx
+    ret
+
+global _vmcall2
+_vmcall2:
+
+    push rbx
+
+%ifdef MS64
+    mov r8,  rcx
+    mov r9,  rdx
+%else
+    mov r8,  rdi
+    mov r9,  rsi
+%endif
+
+    mov rax, [r8]
+    mov rbx, [r9]
+    mov rcx, 0
+    mov rdx, 0
+
+    vmcall
+
+    mov [r8], rax
+    mov [r9], rbx
+
+    pop rbx
+    ret
+
+global _vmcall3
+_vmcall3:
+
+    push rbx
+
+%ifdef MS64
+    mov r10, r8
+    mov r8,  rcx
+    mov r9,  rdx
+%else
+    mov r8,  rdi
+    mov r9,  rsi
+    mov r10, rdx
+%endif
+
+    mov rax, [r8]
+    mov rbx, [r9]
+    mov rcx, [r10]
+    mov rdx, 0
+
+    vmcall
+
+    mov [r8], rax
+    mov [r9], rbx
+    mov [r10], rcx
+
+    pop rbx
+    ret
+
+global _vmcall4
+_vmcall4:
+
+    push rbx
+
+%ifdef MS64
+    mov r10, r8
+    mov r11, r9
+    mov r8,  rcx
+    mov r9,  rdx
+%else
+    mov r8,  rdi
+    mov r9,  rsi
+    mov r10, rdx
+    mov r11, rcx
+%endif
+
+    mov rax, [r8]
+    mov rbx, [r9]
+    mov rcx, [r10]
+    mov rdx, [r11]
+
+    vmcall
+
+    mov [r8], rax
+    mov [r9], rbx
+    mov [r10], rcx
+    mov [r11], rdx
+
+    pop rbx
+    ret

@@ -134,25 +134,16 @@ setup_vcpu(MockRepository &mocks, ::intel_x64::vmcs::value_type reason = 0)
 {
     auto vcpu = mocks.Mock<bfvmm::intel_x64::vcpu>();
 
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::run);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::hlt);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::init);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::fini);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::id).Return(0);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_running).Return(false);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_initialized).Return(false);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_bootstrap_vcpu).Return(true);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_host_vm_vcpu).Return(true);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_guest_vm_vcpu).Return(false);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_run_delegate);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_hlt_delegate);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_init_delegate);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_fini_delegate);
+    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_host_vcpu).Return(true);
+    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::is_guest_vcpu).Return(false);
 
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::run_delegate);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_launch_delegate);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_resume_delegate);
+    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_clear_delegate);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::load);
+    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::clear);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::promote);
 
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::advance).Do([&] {
@@ -160,8 +151,8 @@ setup_vcpu(MockRepository &mocks, ::intel_x64::vmcs::value_type reason = 0)
         return true;
     });
 
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_handler);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_exit_handler);
+    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_exit_handler_for_reason);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::dump);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::halt);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_wrcr0_handler);
@@ -176,7 +167,6 @@ setup_vcpu(MockRepository &mocks, ::intel_x64::vmcs::value_type reason = 0)
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_cpuid_emulator);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::execute_cpuid);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::enable_cpuid_whitelisting);
-    mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_ept_misconfiguration_handler);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_ept_read_violation_handler);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_ept_write_violation_handler);
     mocks.OnCall(vcpu, bfvmm::intel_x64::vcpu::add_ept_execute_violation_handler);

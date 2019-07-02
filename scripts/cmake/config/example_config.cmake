@@ -50,6 +50,21 @@
 # Options
 # ------------------------------------------------------------------------------
 
+# Boxy
+#
+# This option enables the use of the boxy. It assumes that
+# boxy is located in the same directory as this configuration file as stated
+# in the example working directory above.
+#
+set(ENABLE_BOXY OFF)
+
+# Enable EFI
+#
+# This will enable building EFI targets after the VMM has compiled. Note that
+# this only works on Linux (or the Linux subsystem for Windows)
+#
+set(ENABLE_BUILD_EFI OFF)
+
 # Developer Mode
 #
 # Turns on build options useful for developers. If you plan to submit a PR to
@@ -58,29 +73,9 @@
 #
 set(ENABLE_DEVELOPER_MODE OFF)
 
-# Boxy
-#
-# This option enables the use of the boxy. It assumes that
-# boxy is located in the same directory as this configuration file.
-#
-set(ENABLE_BOXY OFF)
-
-# Enable EFI
-#
-# This will enable building EFI targets after the VMM has compiled. Note that
-# this forces static build, disables testing, ASAN, codecov and clang tidy,
-# and requries the VMM be compiled
-#
-set(ENABLE_BUILD_EFI OFF)
-
-# Examples
-#
-# These options enable the examples
-#
-set(ENABLE_EXAMPLE_CPUIDCOUNT OFF)
-set(ENABLE_EXAMPLE_HOOK OFF)
-set(ENABLE_EXAMPLE_RDTSC OFF)
-set(ENABLE_EXAMPLE_VPID OFF)
+# ------------------------------------------------------------------------------
+# Override Options
+# ------------------------------------------------------------------------------
 
 # Override VMM
 #
@@ -102,41 +97,35 @@ set(ENABLE_EXAMPLE_VPID OFF)
 #
 # set(OVERRIDE_VMM_TARGET <name>)
 
-
-
-
-
-
+# Override Linux
+#
+# This is only useful when Boxy is enabled. This allows you to override the
+# Linux repo that you are using. By default, if you do not set this variable,
+# Boxy will download our version of Linux for you. If you are however a
+# developer working on our version of Linux, you will need your own forked
+# version of our Linux. This allows you to specify the location of your forked
+# version so that Boxy will use your version instead of its default version.
+#
+# set(LINUX_DIR <path>)
 
 # ==============================================================================
 # DO NOT MODIFY BELOW
 # ==============================================================================
 
-if(ENABLE_DEVELOPER_MODE)
-    set(CMAKE_BUILD_TYPE Debug)
-else()
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/cache)
-
-# Cache
-#
-# THe build system maintains it's own cache of all external dependencies to
-# eliminate the need to download these dependencies multiple times. The default
-# location is in the build folder, but if you plan to do more than one build,
-# moving this cache outside of the build folder will speed up build times, and
-# prevent needless downloading.
-#
 set(CACHE_DIR ${CMAKE_CURRENT_LIST_DIR}/cache)
 
-if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI)
+if(ENABLE_DEVELOPER_MODE)
     set(ENABLE_BUILD_TEST ON)
+    set(CMAKE_BUILD_TYPE Debug)
+    set(ENABLE_COMPILER_WARNINGS OFF)
 else()
     set(ENABLE_BUILD_TEST OFF)
+    set(CMAKE_BUILD_TYPE Release)
+    set(ENABLE_COMPILER_WARNINGS ON)
 endif()
 
-if(ENABLE_DEVELOPER_MODE AND NOT ENABLE_BUILD_EFI AND NOT WIN32 AND NOT CYGWIN)
+if(ENABLE_DEVELOPER_MODE AND NOT WIN32 AND NOT CYGWIN)
     set(ENABLE_ASAN ON)
     set(ENABLE_TIDY ON)
     set(ENABLE_FORMAT ON)
@@ -148,42 +137,12 @@ else()
     set(ENABLE_CODECOV OFF)
 endif()
 
-set(ENABLE_COMPILER_WARNINGS ON)
-
-# ------------------------------------------------------------------------------
-# Boxy
-# ------------------------------------------------------------------------------
-
 if(ENABLE_BOXY)
-    set_bfm_vmm(boxy_bfvmm)
+    set_bfm_vmm(boxy_vmm)
     list(APPEND EXTENSION
         ${CMAKE_CURRENT_LIST_DIR}/boxy
     )
 endif()
-
-# ------------------------------------------------------------------------------
-# Examples
-# ------------------------------------------------------------------------------
-
-if(ENABLE_EXAMPLE_CPUIDCOUNT)
-    set_bfm_vmm(example_cpuidcount_vmm)
-endif()
-
-if(ENABLE_EXAMPLE_HOOK)
-    set_bfm_vmm(example_hook_vmm)
-endif()
-
-if(ENABLE_EXAMPLE_RDTSC)
-    set_bfm_vmm(example_rdtsc_vmm)
-endif()
-
-if(ENABLE_EXAMPLE_VPID)
-    set_bfm_vmm(example_vpid_vmm)
-endif()
-
-# ------------------------------------------------------------------------------
-# Override VMM
-# ------------------------------------------------------------------------------
 
 if(OVERRIDE_VMM)
     if(OVERRIDE_VMM_TARGET)

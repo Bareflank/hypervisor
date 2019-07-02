@@ -31,8 +31,11 @@
 ept::mmap g_guest_map;
 
 void
-init()
+global_init()
 {
+    bfdebug_info(0, "running test_all integration test");
+    bfdebug_lnbr(0);
+
     ept::identity_map(g_guest_map, MAX_PHYS_ADDR);
 }
 
@@ -45,7 +48,7 @@ test_handler(
 }
 
 void
-init_vcpu(vcpu_t *vcpu)
+vcpu_init_nonroot(vcpu_t *vcpu)
 {
     vcpu->add_external_interrupt_handler(test_handler);
     vcpu->set_eptp(g_guest_map);

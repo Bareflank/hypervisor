@@ -57,7 +57,7 @@ namespace vcpuid
     /// @param id the id to check
     /// @return true if this vCPU belongs to the host VM, false otherwise
     ///
-    constexpr inline bool is_host_vm_vcpu(type id)
+    constexpr inline bool is_host_vcpu(type id)
     { return (id & (vcpuid::guest_mask & ~vcpuid::reserved)) == 0; }
 
     /// Is Guest VM vCPU
@@ -68,8 +68,8 @@ namespace vcpuid
     /// @param id the id to check
     /// @return true if this vCPU belongs to a guest VM, false otherwise
     ///
-    constexpr inline bool is_guest_vm_vcpu(type id)
-    { return !is_host_vm_vcpu(id); }
+    constexpr inline bool is_guest_vcpu(type id)
+    { return !is_host_vcpu(id); }
 }
 
 // *INDENT-ON*

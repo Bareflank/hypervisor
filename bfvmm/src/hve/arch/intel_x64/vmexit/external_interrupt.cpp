@@ -31,7 +31,7 @@ external_interrupt_handler::external_interrupt_handler(
 {
     using namespace vmcs_n;
 
-    vcpu->add_handler(
+    vcpu->add_exit_handler_for_reason(
         exit_reason::basic_exit_reason::external_interrupt,
     {&external_interrupt_handler::handle, this}
     );

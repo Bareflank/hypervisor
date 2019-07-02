@@ -46,9 +46,9 @@ ept::mmap g_guest_map;
 alignas(0x200000) std::array<uint8_t, 0x200000> buffer;
 
 void
-test_hlt_delegate(bfobject *obj)
+vcpu_fini_nonroot_running(vcpu_t *vcpu)
 {
-    bfignored(obj);
+    bfignored(vcpu);
     buffer.at(0) = 42;
 }
 
@@ -65,7 +65,6 @@ public:
             );
         });
 
-        this->add_hlt_delegate(test_hlt_delegate);
         this->add_ept_write_violation_handler(
         {&vcpu::test_write_violation_handler, this});
 
@@ -119,9 +118,9 @@ namespace bfvmm
 {
 
 std::unique_ptr<vcpu>
-vcpu_factory::make(vcpuid::type vcpuid, bfobject *obj)
+vcpu_factory::make(vcpuid::type vcpuid, void *data)
 {
-    bfignored(obj);
+    bfignored(data);
     return std::make_unique<test::vcpu>(vcpuid);
 }
 

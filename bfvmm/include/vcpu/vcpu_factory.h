@@ -37,17 +37,8 @@ namespace bfvmm
 /// This class is used by the vcpu_manager to create vCPUs. Specifically,
 /// this class provides a seem that allows users of Bareflank to replace the
 /// default vCPU with their own, custom vCPUs that extend the functionality
-/// of Bareflank above and beyond what is already provided. This seems also
+/// of Bareflank above and beyond what is already provided. This seem also
 /// provides a means to unit test the vcpu_manager.
-///
-/// To provide custom logic, define your own make_vcpu function, in your
-/// own vcpu_factory module, and load your module instead of the module that
-/// is provided by Bareflank. For an example of how to do this, please
-/// see:
-///
-/// <a href="https://github.com/Bareflank/hypervisor_example_vpid">Bareflank Hypervisor VPID Example</a>
-/// <br>
-/// <a href="https://github.com/Bareflank/hypervisor_example_cpuidcount">Bareflank Hypervisor CPUID Example</a>
 ///
 class vcpu_factory
 {
@@ -73,11 +64,11 @@ public:
     /// @ensures none
     ///
     /// @param vcpuid the vcpuid for the vcpu to create
-    /// @param obj object passed to the vcpu
+    /// @param data a pointer to user defined data
     /// @return returns a pointer to a newly created vCPU.
     ///
     virtual std::unique_ptr<vcpu> make(
-        vcpuid::type vcpuid, bfobject *obj = nullptr);
+        vcpuid::type vcpuid, void *data);
 
 public:
 
