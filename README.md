@@ -99,12 +99,10 @@ sudo apt-get install git build-essential linux-headers-$(uname -r) nasm clang cm
 ```
 
 #### Windows (Visual Studio):
-- [Visual Studio 2017 / WDK 10](https://docs.microsoft.com/en-us/windows-hardware/drivers/)
+- [Visual Studio 2019 / WDK 10](https://docs.microsoft.com/en-us/windows-hardware/drivers/)
   - Check "Desktop development with C++"
   - Check "C++ CLI / Support"
-  - Check "VC++ 2017 version xxx Libs for Spectre (ARM)"
-  - Check "VC++ 2017 version xxx Libs for Spectre (ARM64)"
-  - Check "VC++ 2017 version xxx Libs for Spectre (x86 and x64)"
+  - Check "VC++ 2019 version xxx Libs for Spectre (x86 and x64)"
 
 After installing the above packages, you must enable test signing mode. This can be done from a
 command prompt with admin privileges:
@@ -112,18 +110,6 @@ command prompt with admin privileges:
 bcdedit.exe /set testsigning ON
 <reboot>
 ```
-
-Once the build environment is set up, Bareflank can be configured using the following
-instead of the cmake configure commands listed below which assume Linux:
-```
-cmake -G "Visual Studio 15 2017 Win64" -DENABLE_BUILD_VMM=OFF ..
-```
-
-Note that this version of Bareflank cannot be used to compile hypervisor as Visual Studio currently
-cannot build the needed ELF files that Bareflank relies on. This build environment also relies on
-msbuild, which doesn't support any of the build targets so compiling the drivers must be done
-manually. This environment, however, will compile the userspace applications natively which is
-needed for deployment to remove dependencies on Cygwin.
 
 #### Windows (Cygwin):
 - All of the Windows (Visual Studio) instructions
@@ -140,36 +126,6 @@ setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python
 This build environment provides a complete toolchain for building and running Bareflank. Most
 developers using Bareflank on Windows will need Cygwin for this reason. The remaining compilation
 instructions follow below.
-
-#### Windows (WSL):
-- Ubuntu 18.04 LTS (Windows Store)
-
-In a powershell terminal with admin right, run the following:
-
-```
-Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
-```
-
-Then run the following in the WSL command prompt that is created:
-
-```
-sudo apt-get update
-sudo apt-get install git build-essential nasm clang cmake libelf-dev
-```
-
-Do not attempt to access the Linux file system from Windows. Instead, you should access the
-Windows file system from Linux which can be found here:
-
-```
-/mnt/c/
-```
-
-Note that the WSL cannot be used to compile the Windows drivers or start/stop the hypervisor.
-It can, however, be used to compile the hypervisor including the UEFI version without the
-need for Cygwin. If this is paired with the Visual Studio build environment, and you manually
-compile the drivers, you can piece together a complete build environment for Windows without the
-need for Cygwin. Developers are advised not to use this however as it is cumbersome and instead
-should use the Cygwin environment. The WSL is only supported for deployment purposes.
 
 ## Compilation Instructions
 
