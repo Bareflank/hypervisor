@@ -267,6 +267,12 @@ vmcs_promote:
     vmread rsi, rsi
     call _write_msr wrt ..plt
 
+    mov rsi, 0x00006820
+    vmread rdi, rsi
+    and rdi, 0xFFFFFFFFFFFFFDFF
+    push rdi
+    popf
+    
     ;
     ; Restore Registers
     ;
