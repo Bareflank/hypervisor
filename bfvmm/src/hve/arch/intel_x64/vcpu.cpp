@@ -891,15 +891,33 @@ vcpu::disable_preemption_timer()
 void
 vcpu::set_eptp(ept::mmap &map)
 {
+    using namespace ::intel_x64::vmcs;
+    using namespace ::intel_x64::cr0;
+
     m_ept_handler.set_eptp(&map);
     m_mmap = &map;
+
+    // Disable exiting on changes to CR0.PG and CR0.PE.
+    //
+    // They were enabled by vCPU constructor for systems not using unrestricted
+    // guests. This led to different treatment of mode changes on BSP than APs,
+    // and as a result to inability to use some modes on BSP (e.g. 32b mode
+    // without PAE).
+    cr0_guest_host_mask::set(cr0_guest_host_mask::get() & ~(paging::mask | protection_enable::mask));
+    m_control_register_handler.enable_wrcr0_exiting(cr0_guest_host_mask::get());
 }
 
 void
 vcpu::disable_ept()
 {
+    using namespace ::intel_x64::vmcs;
+    using namespace ::intel_x64::cr0;
+
     m_ept_handler.set_eptp(nullptr);
     m_mmap = nullptr;
+
+    cr0_guest_host_mask::set(cr0_guest_host_mask::get() | (paging::mask | protection_enable::mask));
+    m_control_register_handler.enable_wrcr0_exiting(cr0_guest_host_mask::get());
 }
 
 //==========================================================================
