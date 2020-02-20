@@ -1,20 +1,13 @@
 cmake_minimum_required(VERSION 3.13)
-project(hypervisor NONE)
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/init_project.cmake)
+project(hypervisor CXX ASM-ATT)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/init_build.cmake)
 
 print_banner()
 
-add_subproject(
-    vmm
-    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/vmm
-    INSTALL_PREFIX ${VMM_PREFIX_PATH}
-    # DEPENDS bsl pal
-)
+add_subdirectory(vmm)
+add_subdirectory(vmmctl)
+add_subdirectory(example)
 
-add_subproject(
-    vmmctl
-    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/vmmctl
-    INSTALL_PREFIX ${HOST_PREFIX_PATH}
-)
+export(PACKAGE hypervisor)
 
 print_usage()
