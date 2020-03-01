@@ -7,7 +7,7 @@
 [![Build Status](https://ci.appveyor.com/api/projects/status/r82c37nc634tnsv9/branch/master?svg=true)](https://ci.appveyor.com/project/rianquinn/hypervisor-13oyg/branch/master)
 [![Codacy Status](https://api.codacy.com/project/badge/Grade/28ec616803cb4800a4b727b70a3b112f)](https://www.codacy.com/app/rianquinn/hypervisor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Bareflank/hypervisor&amp;utm_campaign=Badge_Grade)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/325/badge)](https://bestpractices.coreinfrastructure.org/projects/325)
-[![Join the chat](https://img.shields.io/badge/chat-on%20Slack-brightgreen.svg)](https://join.slack.com/t/bareflank/shared_invite/enQtOTY1Nzg4NDIyODAxLWJhMWQ5YTlkMWNlMjA3MTRiNjI3ZjA1NTJmZjU0NmY0OGU2MGNhMTkyM2YxYzBmZTQ5ZTRhM2ViZDcwYzllMGI)
+[![Join the chat](https://img.shields.io/badge/chat-on%20Slack-brightgreen.svg)](https://bareflank.herokuapp.com/)
 
 ## Description
 
