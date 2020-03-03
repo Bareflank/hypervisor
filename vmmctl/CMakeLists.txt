@@ -1,7 +1,19 @@
-cmake_minimum_required(VERSION 3.13)
-project(vmmctl CXX ASM)
-include(${HYPERVISOR_PROJECT_DIR}/cmake/init_subproject.cmake)
+add_executable(vmmctl)
 
-add_subdirectory(src)
+target_sources(vmmctl PRIVATE
+    src/main.cpp
+)
 
-install(DIRECTORY include/ DESTINATION include)
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+    set_target_properties(vmmctl PROPERTIES
+        SUFFIX ".exe"
+    )
+endif()
+
+if(NOT BUILD_VMMCTL)
+    set_target_properties(vmmctl PROPERTIES
+        EXCLUDE_FROM_ALL ON
+    )
+endif()
+
+install(TARGETS vmmctl DESTINATION bin)
