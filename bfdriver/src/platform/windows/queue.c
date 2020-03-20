@@ -22,6 +22,8 @@
 
 #include <driver.h>
 
+uint64_t _vmcall(uint64_t r1, uint64_t r2, uint64_t r3, uint64_t r4);
+
 /* -------------------------------------------------------------------------- */
 /* Status                                                                     */
 /* -------------------------------------------------------------------------- */
@@ -220,6 +222,49 @@ ioctl_set_vcpuid(uint64_t *vcpuid)
     return BF_IOCTL_SUCCESS;
 }
 
+static long
+ioctl_vmcall(struct ioctl_vmcall_args_t *args_in, struct ioctl_vmcall_args_t *args_out)
+{
+    struct ioctl_vmcall_args_t args = {0};
+
+    if (args_in == 0) {
+        BFALERT("IOCTL_VMCALL: failed with args in == NULL\n");
+        return BF_IOCTL_FAILURE;
+    }
+
+    if (args_out == 0) {
+        BFALERT("IOCTL_VMCALL: failed with args out == NULL\n");
+        return BF_IOCTL_FAILURE;
+    }
+
+    RtlCopyMemory(&args, args_in, sizeof(struct ioctl_vmcall_args_t));
+
+    ExAcquireFastMutex(&g_status_mutex);
+
+    switch (g_status) {
+        case STATUS_RUNNING:
+            args.reg1 = _vmcall(args.reg1, args.reg2, args.reg3, args.reg4);
+            break;
+
+        case STATUS_SUSPEND:
+            args.reg1 = SUSPEND;
+            break;
+
+        default:
+            args.reg1 = FAILURE;
+            break;
+    };
+
+    ExReleaseFastMutex(&g_status_mutex);
+
+    args.reg2 = 0;
+    args.reg3 = 0;
+    args.reg4 = 0;
+
+    RtlCopyMemory(args_out, &args, sizeof(struct ioctl_vmcall_args_t));
+    return BF_IOCTL_SUCCESS;
+}
+
 NTSTATUS
 bareflankQueueInitialize(
     _In_ WDFDEVICE Device
@@ -324,6 +369,10 @@ bareflankEvtIoDeviceControl(
 
         case IOCTL_SET_VCPUID:
             ret = ioctl_set_vcpuid((uint64_t *)in);
+            break;
+
+        case IOCTL_VMCALL:
+            ret = ioctl_vmcall((struct ioctl_vmcall_args_t *)in, (struct ioctl_vmcall_args_t *)out);
             break;
 
         default:
