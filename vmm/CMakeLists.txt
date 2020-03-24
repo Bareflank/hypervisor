@@ -17,14 +17,14 @@ target_compile_definitions(vmm PUBLIC
 target_compile_options(vmm PUBLIC
     "-c"
     "-fpie"
-    "--target=x86_64-unknown-linux-gnu"
     "$<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fno-builtin>"
     "$<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fno-common>"
     "$<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-ffreestanding>"
-    "$<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fstack-protector-strong>"
-    "$<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-mno-red-zone>"
-    "$<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-mstackrealign>"
+    "$<$<STREQUAL:${TARGET_ARCH},x86_64>:--target=x86_64-unknown-linux-gnu>"
     "$<$<STREQUAL:${TARGET_ARCH},x86_64>:-march=core2>"
+    "$<$<STREQUAL:${TARGET_ARCH},AMD64>:--target=x86_64-unknown-linux-gnu>"
+    "$<$<STREQUAL:${TARGET_ARCH},AMD64>:-march=core2>"
+    "$<$<STREQUAL:${TARGET_ARCH},armv8a>:--target=aarch64-unknown-linux-gnu>"
     "$<$<STREQUAL:${TARGET_ARCH},armv8a>:-march=armv8a>"
 )
 
@@ -46,6 +46,8 @@ target_include_directories(vmm PUBLIC
 target_include_directories(vmm PRIVATE
     src
 )
+
+target_link_libraries(vmm bsl)
 
 if(NOT BUILD_VMM)
     set_target_properties(vmm PROPERTIES

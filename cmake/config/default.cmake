@@ -15,6 +15,14 @@ add_config(
 )
 
 add_config(
+    CONFIG_NAME TARGET_PLATFORM
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ${CMAKE_HOST_SYSTEM_NAME}
+    DESCRIPTION "The target platform for the build"
+    OPTIONS Windows Linux UEFI
+)
+
+add_config(
     CONFIG_NAME BUILD_VMMCTL
     CONFIG_TYPE BOOL
     DEFAULT_VAL ON
