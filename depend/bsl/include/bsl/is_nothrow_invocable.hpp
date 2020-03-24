@@ -1,0 +1,55 @@
+/// @copyright
+/// Copyright (C) 2019 Assured Information Security, Inc.
+///
+/// @copyright
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to deal
+/// in the Software without restriction, including without limitation the rights
+/// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+/// copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+///
+/// @copyright
+/// The above copyright notice and this permission notice shall be included in
+/// all copies or substantial portions of the Software.
+///
+/// @copyright
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+/// SOFTWARE.
+///
+/// @file is_nothrow_invocable.hpp
+///
+
+#ifndef BSL_IS_NOTHROW_INVOCABLE_HPP
+#define BSL_IS_NOTHROW_INVOCABLE_HPP
+
+#include "details/invoke_traits.hpp"
+#include "bool_constant.hpp"
+
+namespace bsl
+{
+    /// @class bsl::is_nothrow_invocable
+    ///
+    /// <!-- description -->
+    ///   @brief If the provided args form a nothrow callable, provides the
+    ///     member constant value equal to true. Otherwise the member constant
+    ///     value is false.
+    ///   @include example_is_nothrow_invocable_overview.hpp
+    ///
+    /// <!-- template parameters -->
+    ///   @tparam FUNC the type that defines the function being called
+    ///   @tparam TN the types that define the arguments passed to the
+    ///     provided function when called.
+    ///
+    template<typename FUNC, typename... TN>
+    class is_nothrow_invocable final :
+        public bool_constant<details::invoke_traits<void, FUNC, TN...>::m_is_nothrow_invocable>
+    {};
+}
+
+#endif

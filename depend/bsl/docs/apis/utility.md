@@ -1,0 +1,2 @@
+discard
+narrow_cast
