@@ -1,0 +1,50 @@
+[[rules]]
+name      = "check for signed hex constants"
+pattern   = "0[xX][0-9a-fA-F']+"
+required  = "0[xX][0-9a-fA-F']+U"
+ignore    = '(/\*/?([^/]|[^*]/)*\*/)|(//.*\n)|(".*")'
+hint      = "hex constants must end in U"
+includes  = ["**/*.hpp", "**/*.cpp"]
+excludes  = ["include/bsl/numeric_limits.hpp"]
+
+[[rules]]
+name      = "check for lowercase hex"
+pattern   = '0[xX][0-9a-fA-F]*'
+forbidden = '0[xX][0-9a-fA-F]*[a-f][0-9a-fA-F]*'
+ignore    = '(/\*/?([^/]|[^*]/)*\*/)|(//.*\n)|(".*")'
+hint      = "hex constants must be in uppercase"
+includes  = ["**/*.hpp", "**/*.cpp"]
+
+[[rules]]
+name      = "check for wchar_t"
+pattern   = 'wchar_t|[\t ]L"'
+forbidden = 'wchar_t|[\t ]L"'
+ignore    = '(/\*/?([^/]|[^*]/)*\*/)|(//.*\n)'
+hint      = 'wchar_t, L<string> and L<char> are not allowed'
+includes  = ["**/*.hpp", "**/*.cpp"]
+
+[[rules]]
+name      = "check for wchar_t"
+pattern   = "[\t ]L'"
+forbidden = "[\t ]L'"
+ignore    = '(/\*/?([^/]|[^*]/)*\*/)|(//.*\n)'
+hint      = 'wchar_t, L<string> and L<char> are not allowed'
+includes  = ["**/*.hpp", "**/*.cpp"]
+
+[[rules]]
+name      = "check for proper use of BSL fixed width types"
+pattern   = 'int[0-9_]+[a-zA-Z_]*_t|[u]*intmax_t|[u]*intptr_t'
+forbidden = 'int[0-9_]+[a-zA-Z_]*_t|[u]*intmax_t|[u]*intptr_t'
+ignore    = '(/\*/?([^/]|[^*]/)*\*/)|(//.*\n)|(".*")'
+hint      = 'use BSL fixed width types instead of STD fixed width types'
+includes  = ["**/*.hpp", "**/*.cpp"]
+excludes  = ["include/bsl/cstdint.hpp"]
+
+[[rules]]
+name      = "check for proper use of fixed width types"
+pattern   = '(?m)(^|[^:u])[u]*int([0-9_]+[a-zA-Z_]*|max|ptr)'
+forbidden = '(?m)(^|[^:u])[u]*int([0-9_]+[a-zA-Z_]*|max|ptr)'
+ignore    = '(/\*/?([^/]|[^*]/)*\*/)|(//.*\n)|(".*")'
+hint      = 'prefix fixed width types with bsl::'
+includes  = ["**/*.hpp", "**/*.cpp"]
+excludes  = ["include/bsl/cstdint.hpp"]

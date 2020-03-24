@@ -1,0 +1,393 @@
+#
+# Copyright (C) 2019 Assured Information Security, Inc.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-16.04'
+
+jobs:
+
+# ------------------------------------------------------------------------------
+# Git Check
+# ------------------------------------------------------------------------------
+
+- job: Git_Check
+  steps:
+  - checkout: self
+    path: working/bsl
+
+  - script: |
+      if [[ -n $(git diff --check HEAD^) ]]; then
+        echo "You must remove whitespace before submitting a pull request"
+        echo ""
+        git diff --check HEAD^
+        exit -1
+      fi
+    displayName: 'Test'
+
+# ------------------------------------------------------------------------------
+# Doxygen
+# ------------------------------------------------------------------------------
+
+- job: Doxygen
+  steps:
+  - checkout: self
+    path: working/bsl
+
+  - script: |
+      sudo apt-get update
+      sudo apt-get install -y doxygen
+
+      doxygen .doxygen
+    displayName: 'Test'
+
+# ------------------------------------------------------------------------------
+# Format
+# ------------------------------------------------------------------------------
+
+- job: Format
+  steps:
+  - checkout: self
+    path: working/bsl
+    fetchDepth: 1
+
+  - script: |
+      cd ..
+
+      CMAKE_URL="http://www.cmake.org/files/v3.13/cmake-3.13.4-Linux-x86_64.tar.gz"
+      mkdir custom_cmake
+      wget --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C custom_cmake
+      export PATH=$(pwd)/custom_cmake/bin:${PATH}
+
+      wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+      sudo apt-add-repository -y "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main"
+
+      sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+      sudo apt-get update
+      sudo apt-get install -y gcc-8 g++-8 clang-format-8
+
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 100
+      sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-8 100
+
+      mkdir build; cd build
+      cmake ../bsl
+    displayName: 'Configure'
+
+  - script: |
+      cd ../build
+    displayName: 'Build'
+
+  - script: |
+      cd ../build
+      make format
+      cd ../bsl
+      if [[ -n $(git diff) ]]; then
+        echo "You must run make format before submitting a pull request"
+        echo ""
+        git diff
+        exit -1
+      fi
+    displayName: 'Test'
+
+# ------------------------------------------------------------------------------
+# Tidy
+# ------------------------------------------------------------------------------
+
+- job: Tidy
+  steps:
+  - checkout: self
+    path: working/bsl
+    fetchDepth: 1
+
+  - script: |
+      cd ..
+
+      CMAKE_URL="http://www.cmake.org/files/v3.13/cmake-3.13.4-Linux-x86_64.tar.gz"
+      mkdir custom_cmake
+      wget --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C custom_cmake
+      export PATH=$(pwd)/custom_cmake/bin:${PATH}
+
+      wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+      sudo apt-add-repository -y "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main"
+
+      sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+      sudo apt-get update
+      sudo apt-get install -y gcc-8 g++-8 clang-tidy-8
+
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 100
+      sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-8 100
+
+      mkdir build; cd build
+      cmake ../bsl -DENABLE_CLANG_TIDY=ON
+    displayName: 'Configure'
+
+  - script: |
+      cd ../build
+      make -j2
+    displayName: 'Build'
+
+  - script: |
+      cd ../build
+      make unittest
+    displayName: 'Test'
+
+# ------------------------------------------------------------------------------
+# CppCheck
+# ------------------------------------------------------------------------------
+
+- job: CppCheck
+  steps:
+  - checkout: self
+    path: working/bsl
+    fetchDepth: 1
+
+  - script: |
+      cd ..
+
+      CMAKE_URL="http://www.cmake.org/files/v3.13/cmake-3.13.4-Linux-x86_64.tar.gz"
+      mkdir custom_cmake
+      wget --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C custom_cmake
+      export PATH=$(pwd)/custom_cmake/bin:${PATH}
+
+      sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+      sudo apt-get update
+      sudo apt-get install -y gcc-8 g++-8 cppcheck
+
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 100
+
+      mkdir build; cd build
+      cmake ../bsl -DENABLE_CPPCHECK=ON
+    displayName: 'Configure'
+
+  - script: |
+      cd ../build
+      make -j2
+    displayName: 'Build'
+
+  - script: |
+      cd ../build
+      make unittest
+    displayName: 'Test'
+
+# ------------------------------------------------------------------------------
+# ASAN
+# ------------------------------------------------------------------------------
+
+- job: ASAN
+  steps:
+  - checkout: self
+    path: working/bsl
+    fetchDepth: 1
+
+  - script: |
+      cd ..
+
+      CMAKE_URL="http://www.cmake.org/files/v3.13/cmake-3.13.4-Linux-x86_64.tar.gz"
+      mkdir custom_cmake
+      wget --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C custom_cmake
+      export PATH=$(pwd)/custom_cmake/bin:${PATH}
+
+      sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+      sudo apt-get update
+      sudo apt-get install -y gcc-8 g++-8
+
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 100
+
+      mkdir build; cd build
+      cmake ../bsl -DCMAKE_BUILD_TYPE=ASAN
+    displayName: 'Configure'
+
+  - script: |
+      cd ../build
+      make -j2
+    displayName: 'Build'
+
+  - script: |
+      cd ../build
+      make unittest
+    displayName: 'Test'
+
+# ------------------------------------------------------------------------------
+# UBSAN
+# ------------------------------------------------------------------------------
+
+- job: UBSAN
+  steps:
+  - checkout: self
+    path: working/bsl
+    fetchDepth: 1
+
+  - script: |
+      cd ..
+
+      CMAKE_URL="http://www.cmake.org/files/v3.13/cmake-3.13.4-Linux-x86_64.tar.gz"
+      mkdir custom_cmake
+      wget --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C custom_cmake
+      export PATH=$(pwd)/custom_cmake/bin:${PATH}
+
+      sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+      sudo apt-get update
+      sudo apt-get install -y gcc-8 g++-8
+
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 100
+
+      mkdir build; cd build
+      cmake ../bsl -DCMAKE_BUILD_TYPE=UBSAN -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold
+    displayName: 'Configure'
+
+  - script: |
+      cd ../build
+      make -j2
+    displayName: 'Build'
+
+  - script: |
+      cd ../build
+      make unittest
+    displayName: 'Test'
+
+# ------------------------------------------------------------------------------
+# CodeCov
+# ------------------------------------------------------------------------------
+
+- job: CodeCov
+  steps:
+  - checkout: self
+    path: working/bsl
+    fetchDepth: 1
+
+  - script: |
+      cd ..
+
+      CMAKE_URL="http://www.cmake.org/files/v3.13/cmake-3.13.4-Linux-x86_64.tar.gz"
+      mkdir custom_cmake
+      wget --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C custom_cmake
+      export PATH=$(pwd)/custom_cmake/bin:${PATH}
+
+      wget https://github.com/linux-test-project/lcov/releases/download/v1.14/lcov-1.14.tar.gz
+      tar xvfz lcov-1.14.tar.gz
+      sudo make -C lcov-1.14 install
+
+      sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+      sudo apt-get update
+      sudo apt-get install -y gcc-8 g++-8
+
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 100
+      sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 100
+
+      mkdir build; cd build
+      cmake ../bsl -DCMAKE_BUILD_TYPE=COVERAGE -DBUILD_EXAMPLES=OFF
+    displayName: 'Configure'
+
+  - script: |
+      cd ../build
+      make -j2
+    displayName: 'Build'
+
+  - script: |
+      cd ../build
+      export PATH="$PWD/external/bin:$PATH"
+      which geninfo
+      make coverage_upload
+    displayName: 'Test'
+
+# ------------------------------------------------------------------------------
+# GCC 8
+# ------------------------------------------------------------------------------
+
+- job: GCC_8
+  steps:
+  - checkout: self
+    path: working/bsl
+    fetchDepth: 1
+
+  - script: |
+      cd ..
+
+      CMAKE_URL="http://www.cmake.org/files/v3.13/cmake-3.13.4-Linux-x86_64.tar.gz"
+      mkdir custom_cmake
+      wget --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C custom_cmake
+      export PATH=$(pwd)/custom_cmake/bin:${PATH}
+
+      sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+      sudo apt-get update
+      sudo apt-get install -y gcc-8 g++-8
+
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 100
+
+      mkdir build; cd build
+      cmake ../bsl -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+    displayName: 'Configure'
+
+  - script: |
+      cd ../build
+      make -j2
+    displayName: 'Build'
+
+# ------------------------------------------------------------------------------
+# GCC 9
+# ------------------------------------------------------------------------------
+
+- job: GCC_9
+  steps:
+  - checkout: self
+    path: working/bsl
+    fetchDepth: 1
+
+  - script: |
+      cd ..
+
+      CMAKE_URL="http://www.cmake.org/files/v3.13/cmake-3.13.4-Linux-x86_64.tar.gz"
+      mkdir custom_cmake
+      wget --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C custom_cmake
+      export PATH=$(pwd)/custom_cmake/bin:${PATH}
+
+      sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+      sudo apt-get update
+      sudo apt-get install -y gcc-9 g++-9
+
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 100
+
+      mkdir build; cd build
+      cmake ../bsl -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+    displayName: 'Configure'
+
+  - script: |
+      cd ../build
+      make -j2
+    displayName: 'Build'
