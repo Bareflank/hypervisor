@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
 #
 # Copyright (C) 2019 Assured Information Security, Inc.
@@ -24,7 +23,6 @@
 
 # Visual Studio 15
 -->
-
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Inf Include="bareflank.inf" />
@@ -46,5 +44,8 @@
     <ClCompile Include="driver.c" />
     <ClCompile Include="platform.c" />
     <ClCompile Include="queue.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="intrinsics.asm" />
   </ItemGroup>
 </Project>

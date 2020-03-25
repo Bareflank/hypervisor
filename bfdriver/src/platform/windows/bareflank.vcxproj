@@ -98,6 +98,9 @@
     <ClInclude Include="driver.h" />
     <ClInclude Include="queue.h" />
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="intrinsics.asm" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
