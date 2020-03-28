@@ -10,7 +10,7 @@ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
     )
 endif()
 
-if(NOT BUILD_VMMCTL)
+if(NOT HYPERVISOR_BUILD_VMMCTL)
     set_target_properties(vmmctl PROPERTIES
         EXCLUDE_FROM_ALL ON
     )
