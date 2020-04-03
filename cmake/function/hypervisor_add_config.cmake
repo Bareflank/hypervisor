@@ -12,7 +12,7 @@
 # @param OPTIONS Possible values for the the variable. Only applies to STRING
 #    type variables.
 #
-function(add_config)
+function(hypervisor_add_config)
     set(options ADVANCED SKIP_VALIDATION)
     set(oneVal CONFIG_NAME CONFIG_TYPE DEFAULT_VAL DESCRIPTION)
     set(multiVal OPTIONS)
@@ -61,5 +61,5 @@ function(add_config)
     if(ARG_ADVANCED)
         mark_as_advanced(${ARG_CONFIG_NAME})
     endif()
-endfunction(add_config)
+endfunction(hypervisor_add_config)
 
