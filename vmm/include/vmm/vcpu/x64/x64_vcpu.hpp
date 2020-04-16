@@ -7,9 +7,9 @@
 #include <vmm/vcpu/x64/cr0.hpp>
 #include <vmm/vcpu/x64/cr3.hpp>
 #include <vmm/vcpu/x64/cr4.hpp>
-#include <vmm/vcpu/x64/external_interrupt.hpp>
 #include <vmm/vcpu/x64/general_register_x64.hpp>
 #include <vmm/vcpu/x64/init_signal.hpp>
+#include <vmm/vcpu/x64/interrupt.hpp>
 #include <vmm/vcpu/x64/interrupt_window.hpp>
 #include <vmm/vcpu/x64/io_port.hpp>
 #include <vmm/vcpu/x64/monitor_trap.hpp>
@@ -32,9 +32,9 @@ class x64_vcpu :
     public cr0,
     public cr3,
     public cr4,
-    public external_interrupt,
     public general_register_x64,
     public init_signal,
+    public interrupt,
     public interrupt_window,
     public io_port,
     public monitor_trap,

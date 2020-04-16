@@ -16,9 +16,9 @@
 #include <vcpu/x64/intel/intel_cr0.hpp>
 #include <vcpu/x64/intel/intel_cr3.hpp>
 #include <vcpu/x64/intel/intel_cr4.hpp>
-#include <vcpu/x64/intel/intel_external_interrupt.hpp>
 #include <vcpu/x64/intel/intel_general_register_x64.hpp>
 #include <vcpu/x64/intel/intel_init_signal.hpp>
+#include <vcpu/x64/intel/intel_interrupt.hpp>
 #include <vcpu/x64/intel/intel_interrupt_window.hpp>
 #include <vcpu/x64/intel/intel_io_port.hpp>
 #include <vcpu/x64/intel/intel_monitor_trap.hpp>
@@ -46,9 +46,9 @@ namespace vmm
         intel_cr0,
         intel_cr3,
         intel_cr4,
-        intel_external_interrupt,
         intel_general_register_x64,
         intel_init_signal,
+        intel_interrupt,
         intel_interrupt_window,
         intel_io_port,
         intel_monitor_trap,

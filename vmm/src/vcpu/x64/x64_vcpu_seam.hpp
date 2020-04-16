@@ -18,9 +18,9 @@ template<
     class cr0_type,
     class cr3_type,
     class cr4_type,
-    class external_interrupt_type,
     class general_register_x64_type,
     class init_signal_type,
+    class interrupt_type,
     class interrupt_window_type,
     class io_port_type,
     class monitor_trap_type,
@@ -145,19 +145,6 @@ public:
     void write_cr4_emulate(uint64_t cr4_value) noexcept final
     { return m_cr4.write_cr4_emulate(cr4_value); }
 
-    // ---------------------- external interrupt seam --------------------------
-    void external_interrupt_vmexit_enable() noexcept final
-    { return m_external_interrupt.external_interrupt_vmexit_enable(); }
-
-    void external_interrupt_vmexit_disable() noexcept final
-    { return m_external_interrupt.external_interrupt_vmexit_disable(); }
-
-    void external_interrupt_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
-    { return m_external_interrupt.external_interrupt_vmexit_handler_set(func); }
-
-    void external_interrupt_inject(uint64_t vector) noexcept final
-    { return m_external_interrupt.external_interrupt_inject(vector); }
-
     // ----------------------- general register seam ---------------------------
     uint64_t rax_get() noexcept
     { return m_general_register_x64.rax_get(); }
@@ -264,6 +251,19 @@ public:
     // ------------------------- init signal seam ------------------------------
     void init_signal_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
     { return m_init_signal.init_signal_vmexit_handler_set(func); }
+
+    // ---------------------- interrupt seam --------------------------
+    void interrupt_vmexit_enable() noexcept final
+    { return m_interrupt.interrupt_vmexit_enable(); }
+
+    void interrupt_vmexit_disable() noexcept final
+    { return m_interrupt.interrupt_vmexit_disable(); }
+
+    void interrupt_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    { return m_interrupt.interrupt_vmexit_handler_set(func); }
+
+    void interrupt_inject(uint64_t vector) noexcept final
+    { return m_interrupt.interrupt_inject(vector); }
 
     // ---------------------- interrupt window seam ----------------------------
     void interrupt_window_vmexit_enable() noexcept final
@@ -452,7 +452,7 @@ private:
     cr0_type m_cr0{};
     cr3_type m_cr3{};
     cr4_type m_cr4{};
-    external_interrupt_type m_external_interrupt{};
+    interrupt_type m_interrupt{};
     general_register_x64_type m_general_register_x64{};
     init_signal_type m_init_signal{};
     interrupt_window_type m_interrupt_window{};
