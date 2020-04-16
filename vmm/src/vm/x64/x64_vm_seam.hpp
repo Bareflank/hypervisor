@@ -8,7 +8,7 @@ namespace vmm
 {
 
 template<
-    class vm_id_type,
+    class vm_property_type,
     class vcpu_op_type
 >
 class x64_vm_seam :
@@ -16,9 +16,9 @@ class x64_vm_seam :
 {
 public:
 
-    // ---------------------------- vm_id seam ---------------------------------
-    uint32_t id() noexcept final
-    { return m_vm_id_type.id(); }
+    // ------------------------- vm_property seam ------------------------------
+    uint32_t id_get() noexcept final
+    { return m_vm_property_type.id_get(); }
 
     // ------------------------- x64_vcpu_op seam ------------------------------
     void vcpu_init_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
@@ -27,9 +27,8 @@ public:
     void vcpu_fini_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
     { return m_vcpu_ops.vcpu_fini_handler_set(func); }
 
-
 private:
-    vm_id_type m_vm_id_type;
+    vm_property_type m_vm_property_type;
     vcpu_op_type m_vcpu_ops;
 };
 

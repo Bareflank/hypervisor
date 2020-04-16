@@ -41,7 +41,7 @@ public:
         return;
     }
 
-    uint32_t rdmsr_vmexit_address() noexcept
+    uint32_t rdmsr_vmexit_address_get() noexcept
     {
         // TODO: Implement Me!
         return 0;

@@ -53,14 +53,14 @@ public:
     ///
     /// @return The msr address used in a wrmsr instruction that caused a
     ///     vmexit to occur
-    virtual uint32_t wrmsr_vmexit_address() noexcept = 0;
+    virtual uint32_t wrmsr_vmexit_address_get() noexcept = 0;
 
     /// @brief Returns the value of a wrmsr instruction that caused a
     ///     vmexit to occur while a vcpu was executing
     ///
     /// @return The value used in a wrmsr instruction that caused a
     ///     vmexit to occur
-    virtual uint64_t wrmsr_vmexit_value() noexcept = 0;
+    virtual uint64_t wrmsr_vmexit_value_get() noexcept = 0;
 
     /// @brief Execute (on the vcpu) a wrmsr instruction that caused a vmexit
     ///     to occur, using the vcpu's registers as the source registers for

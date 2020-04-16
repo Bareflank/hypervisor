@@ -21,7 +21,7 @@ bsl::errc_type
 root_vm_init(x64_vm &root_vm) noexcept
 {
     uint32_t n_vcpus = 1;
-    x64_vm &child_vm = vmm::create_x64_vm(n_vcpus);
+    x64_vm &child_vm = vmm::x64_vm_create(n_vcpus);
 
     // How to give memory to the vm?
     // TODO

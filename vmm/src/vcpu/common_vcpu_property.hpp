@@ -1,23 +1,23 @@
 #ifndef VMM_VCPU_VCPU_PROPERTY_HPP
 #define VMM_VCPU_VCPU_PROPERTY_HPP
 
-#include <vmm/vcpu/property.hpp>
+#include <vmm/vcpu/vcpu_property.hpp>
 
 namespace vmm
 {
 
-class vcpu_property :
-    public property
+class common_vcpu_property :
+    public vcpu_property
 {
 public:
 
-    id_type id() noexcept
+    id_type id_get() noexcept
     {
         // TODO: Implement me!
         return 0;
     }
 
-    void set_id(id_type value) noexcept
+    void id_set(id_type value) noexcept
     {
         // TODO: Implement me!
         return;
@@ -29,7 +29,7 @@ public:
         return false;
     }
 
-    void set_is_bootstrap_vcpu(bool value) noexcept
+    void is_bootstrap_vcpu_set(bool value) noexcept
     {
         // TODO: Implement me!
         return;
@@ -41,13 +41,13 @@ public:
         return false;
     }
 
-    void set_is_root_vcpu(bool value) noexcept
+    void is_root_vcpu_set(bool value) noexcept
     {
         // TODO: Implement me!
         return;
     }
 
-    vcpu_property() noexcept = default;
+    common_vcpu_property() noexcept = default;
 };
 
 }

@@ -41,7 +41,7 @@ public:
         return;
     }
 
-    uint64_t io_port_vmexit_size() noexcept
+    uint64_t io_port_vmexit_size_get() noexcept
     {
         // TODO: Implement Me!
         return 0;
@@ -59,13 +59,13 @@ public:
         return false;
     }
 
-    uint16_t io_port_vmexit_port_number() noexcept
+    uint16_t io_port_vmexit_port_number_get() noexcept
     {
         // TODO: Implement Me!
         return 0;
     }
 
-    uint64_t io_port_vmexit_value() noexcept
+    uint64_t io_port_vmexit_value_get() noexcept
     {
         // TODO: Implement Me!
         return 0;

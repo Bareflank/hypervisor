@@ -16,13 +16,13 @@ public:
     ///     vcpu was running
     ///
     /// @return The basic vm exit reason
-    virtual uint32_t vmexit_reason() noexcept = 0;
+    virtual uint32_t vmexit_reason_get() noexcept = 0;
 
     /// @brief Returns the basic vm exit qualification that caused a vmexit
     ///     while a vcpu was running
     ///
     /// @return The basic vm exit qualification
-    virtual uint32_t vmexit_qualification() noexcept = 0;
+    virtual uint32_t vmexit_qualification_get() noexcept = 0;
 
     /// @brief Set a vmexit handler that will be called for all vmexits that
     ///     occur while a vcpu is executing. This handler is called before

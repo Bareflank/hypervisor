@@ -10,11 +10,24 @@
 namespace vmm
 {
 
-bsl::errc_type
-root_vm_init(vmm::x64_vm &vm) noexcept;
+/// @brief The user-defined entry point into the Bareflank Hypervisor SDK.
+///     This function gets called on the vmm's bootstrap cpu (i.e. the cpu that
+///     initilizes the vmm first), and provides a way to configure additional
+///     entry points for the given platform root virutal machine.
+///
+/// @param root_vm A virtual machine that represents the host system on which
+///     the Bareflank Hypervisor SDK was loaded.
+///
+/// @return User returns 0 to indicate success, all other values indicate
+///     failure
+bsl::errc_type root_vm_init(vmm::x64_vm &root_vm) noexcept;
 
-x64_vm &
-create_x64_vm(uint32_t n_vcpus) noexcept;
+/// @brief Create a x64 based virtual machine, with the given number of vcpus
+///
+/// @param n_vpus The number of vcpus to be given to the virtual machine
+///
+/// @return An x64_vm instance
+x64_vm & x64_vm_create(uint32_t n_vcpus) noexcept;
 
 }
 

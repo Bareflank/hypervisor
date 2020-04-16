@@ -26,7 +26,7 @@ public:
         return;
     }
 
-    uint64_t write_cr4_vmexit_value() noexcept
+    uint64_t write_cr4_vmexit_value_get() noexcept
     {
         return 0;
     }

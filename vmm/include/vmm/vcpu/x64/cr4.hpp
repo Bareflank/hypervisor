@@ -26,7 +26,7 @@ public:
     ///     caused a vmexit to occur while a vcpu was executing
     ///
     /// @return The value written to cr4
-    virtual uint64_t write_cr4_vmexit_value() noexcept = 0;
+    virtual uint64_t write_cr4_vmexit_value_get() noexcept = 0;
 
     /// @brief Execute (on the vcpu) a write to cr4 that caused a vmexit
     ///     to occur, using the vcpu's registers as the source and destination

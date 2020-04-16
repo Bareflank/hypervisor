@@ -51,7 +51,7 @@ public:
     ///
     /// @return The size (in bytes) of the value read from or written to an io
     ///     port when a vmexit occurred
-    virtual uint64_t io_port_vmexit_size() noexcept = 0;
+    virtual uint64_t io_port_vmexit_size_get() noexcept = 0;
 
     /// @brief Returns true if the current vmexit execution context was
     ///     triggered as a result of a read operation from an io port
@@ -69,14 +69,14 @@ public:
     ///     vmexit to occur while a vcpu was executing
     ///
     /// @return The io port number that caused a vmexit to occur
-    virtual uint16_t io_port_vmexit_port_number() noexcept = 0;
+    virtual uint16_t io_port_vmexit_port_number_get() noexcept = 0;
 
     /// @brief Returns the value being read from or written to an io port, that
     ///     caused a vmexit to occur while a vcpu was executing
     ///
     /// @return The value read from or written to an io port when a vmexit
     ///     occurred
-    virtual uint64_t io_port_vmexit_value() noexcept = 0;
+    virtual uint64_t io_port_vmexit_value_get() noexcept = 0;
 
     /// @brief Execute (on the vcpu) a write to an io port that caused a vmexit
     ///     to occur, using the vcpu's registers as the source registers for
