@@ -158,6 +158,109 @@ public:
     void external_interrupt_inject(uint64_t vector) noexcept final
     { return m_external_interrupt.external_interrupt_inject(vector); }
 
+    // ----------------------- general register seam ---------------------------
+    uint64_t rax_get() noexcept
+    { return m_general_register_x64.rax_get(); }
+
+    void rax_set(uint64_t value) noexcept
+    { return m_general_register_x64.rax_set(value); }
+
+    uint64_t rbx_get() noexcept
+    { return m_general_register_x64.rbx_get(); }
+
+    void rbx_set(uint64_t value) noexcept
+    { return m_general_register_x64.rbx_set(value); }
+
+    uint64_t rcx_get() noexcept
+    { return m_general_register_x64.rcx_get(); }
+
+    void rcx_set(uint64_t value) noexcept
+    { return m_general_register_x64.rcx_set(value); }
+
+    uint64_t rdx_get() noexcept
+    { return m_general_register_x64.rdx_get(); }
+
+    void rdx_set(uint64_t value) noexcept
+    { return m_general_register_x64.rdx_set(value); }
+
+    uint64_t rbp_get() noexcept
+    { return m_general_register_x64.rbp_get(); }
+
+    void rbp_set(uint64_t value) noexcept
+    { return m_general_register_x64.rbp_set(value); }
+
+    uint64_t rsi_get() noexcept
+    { return m_general_register_x64.rsi_get(); }
+
+    void rsi_set(uint64_t value) noexcept
+    { return m_general_register_x64.rsi_set(value); }
+
+    uint64_t rdi_get() noexcept
+    { return m_general_register_x64.rdi_get(); }
+
+    void rdi_set(uint64_t value) noexcept
+    { return m_general_register_x64.rdi_set(value); }
+
+    uint64_t r8_get() noexcept
+    { return m_general_register_x64.r8_get(); }
+
+    void r8_set(uint64_t value) noexcept
+    { return m_general_register_x64.r8_set(value); }
+
+    uint64_t r9_get() noexcept
+    { return m_general_register_x64.r9_get(); }
+
+    void r9_set(uint64_t value) noexcept
+    { return m_general_register_x64.r9_set(value); }
+
+    uint64_t r10_get() noexcept
+    { return m_general_register_x64.r10_get(); }
+
+    void r10_set(uint64_t value) noexcept
+    { return m_general_register_x64.r10_set(value); }
+
+    uint64_t r11_get() noexcept
+    { return m_general_register_x64.r11_get(); }
+
+    void r11_set(uint64_t value) noexcept
+    { return m_general_register_x64.r11_set(value); }
+
+    uint64_t r12_get() noexcept
+    { return m_general_register_x64.r12_get(); }
+
+    void r12_set(uint64_t value) noexcept
+    { return m_general_register_x64.r12_set(value); }
+
+    uint64_t r13_get() noexcept
+    { return m_general_register_x64.r13_get(); }
+
+    void r13_set(uint64_t value) noexcept
+    { return m_general_register_x64.r13_set(value); }
+
+    uint64_t r14_get() noexcept
+    { return m_general_register_x64.r14_get(); }
+
+    void r14_set(uint64_t value) noexcept
+    { return m_general_register_x64.r14_set(value); }
+
+    uint64_t r15_get() noexcept
+    { return m_general_register_x64.r15_get(); }
+
+    void r15_set(uint64_t value) noexcept
+    { return m_general_register_x64.r15_set(value); }
+
+    uint64_t rip_get() noexcept
+    { return m_general_register_x64.rip_get(); }
+
+    void rip_set(uint64_t value) noexcept
+    { return m_general_register_x64.rip_set(value); }
+
+    uint64_t rsp_get() noexcept
+    { return m_general_register_x64.rsp_get(); }
+
+    void rsp_set(uint64_t value) noexcept
+    { return m_general_register_x64.rsp_set(value); }
+
     // ------------------------- init signal seam ------------------------------
     void init_signal_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
     { return m_init_signal.init_signal_vmexit_handler_set(func); }
