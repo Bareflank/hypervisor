@@ -41,13 +41,13 @@ public:
         return;
     }
 
-    uint32_t wrmsr_vmexit_address() noexcept
+    uint32_t wrmsr_vmexit_address_get() noexcept
     {
         // TODO: Implement Me!
         return 0;
     }
 
-    uint64_t wrmsr_vmexit_value() noexcept
+    uint64_t wrmsr_vmexit_value_get() noexcept
     {
         // TODO: Implement Me!
         return 0;

@@ -6,8 +6,8 @@ namespace vmm
 void my_vmexit_handler(x64_vcpu &vcpu) noexcept
 {
     // This handler gets called on every vmexit that occurs on the given vcpu
-    auto reason = vcpu.vmexit_reason();
-    auto qualification = vcpu.vmexit_qualification();
+    auto reason = vcpu.vmexit_reason_get();
+    auto qualification = vcpu.vmexit_qualification_get();
 
     // You get to choose if the instruction pointer gets advanced or not.
     // The base won't do anything on your behalf

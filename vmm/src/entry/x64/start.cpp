@@ -3,12 +3,12 @@
 #include <vmm/x64.hpp>
 
 #include <vm/x64/x64_vm_seam.hpp>
-#include <vm/vm_id_null.hpp>
+#include <vm/common_vm_property.hpp>
 #include <vm/x64/x64_vcpu_op.hpp>
 
 #include <vcpu/x64/x64_vcpu_seam.hpp>
-#include <vcpu/vcpu_property.hpp>
-#include <vcpu/vcpu_virtual_register.hpp>
+#include <vcpu/common_vcpu_property.hpp>
+#include <vcpu/common_virtual_register.hpp>
 #include <vcpu/x64/intel/intel_execute.hpp>
 #include <vcpu/x64/intel/intel_instruction_pointer.hpp>
 #include <vcpu/x64/intel/intel_nested_paging.hpp>
@@ -35,13 +35,13 @@
 namespace vmm
 {
     typedef x64_vcpu_seam<
-        // Generic vcpu implementations:
+        // Generic vcpu interfaces:
         intel_execute,
         intel_instruction_pointer,
         intel_nested_paging,
-        vcpu_property,
-        vcpu_virtual_register,
-        // x64 vcpu implementations:
+        common_vcpu_property,
+        common_virtual_register,
+        // x64 vcpu interfaces:
         intel_cpuid,
         intel_cr0,
         intel_cr3,
@@ -64,7 +64,7 @@ namespace vmm
     > vcpu_type;
 
     typedef x64_vm_seam<
-        vm_id_null,
+        common_vm_property,
         x64_vcpu_op
     > vm_type;
 
@@ -74,7 +74,7 @@ namespace vmm
     > g_vmm{};
 
     x64_vm &
-    create_x64_vm(uint32_t n_vcpus) noexcept
+    x64_vm_create(uint32_t n_vcpus) noexcept
     { return g_vmm.make_virtual_machine(n_vcpus); }
 
     bsl::errc_type

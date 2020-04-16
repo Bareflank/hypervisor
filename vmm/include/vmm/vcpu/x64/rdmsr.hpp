@@ -53,7 +53,7 @@ public:
     ///
     /// @return The msr address used in a rdmsr instruction that caused a
     ///     vmexit to occur
-    virtual uint32_t rdmsr_vmexit_address() noexcept = 0;
+    virtual uint32_t rdmsr_vmexit_address_get() noexcept = 0;
 
     /// @brief Execute (on the vcpu) a rdmsr instruction that caused a vmexit
     ///     to occur, using the vcpu's registers as the destination registers

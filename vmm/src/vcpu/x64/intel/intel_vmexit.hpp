@@ -11,13 +11,13 @@ class intel_vmexit :
 {
 public:
 
-    uint32_t vmexit_reason() noexcept
+    uint32_t vmexit_reason_get() noexcept
     {
         // TODO: Implement me!
         return 0;
     }
     
-    uint32_t vmexit_qualification() noexcept
+    uint32_t vmexit_qualification_get() noexcept
     {
         // TODO: Implement me!
         return 0;

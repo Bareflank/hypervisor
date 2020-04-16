@@ -1,14 +1,14 @@
 #ifndef VMM_VM_HPP
 #define VMM_VM_HPP
 
-#include <vmm/vm/vm_id.hpp>
+#include <vmm/vm/vm_property.hpp>
 #include <bsl/errc_type.hpp>
 
 namespace vmm
 {
 
 class vm :
-    public vm_id
+    public vm_property
 {
 public:
     ~vm() noexcept override = default;

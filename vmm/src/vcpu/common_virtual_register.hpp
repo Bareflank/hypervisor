@@ -6,12 +6,12 @@
 namespace vmm
 {
 
-class vcpu_virtual_register :
+class common_virtual_register :
     public virtual_register
 {
 public:
 
-    vcpu_virtual_register() noexcept = default;
+    common_virtual_register() noexcept = default;
 
     // TODO: Implement Me!
 };

@@ -29,7 +29,7 @@ public:
         return;
     }
 
-    uint64_t write_cr0_vmexit_value() noexcept
+    uint64_t write_cr0_vmexit_value_get() noexcept
     {
         // TODO: Implement Me!
         return 0;

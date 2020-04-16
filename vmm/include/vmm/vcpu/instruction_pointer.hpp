@@ -10,7 +10,7 @@ class instruction_pointer
 {
 public:
 
-    /// @brief Advance a vCPU's instruciton pointer to the next instruction
+    /// @brief Advance a vcpu's instruciton pointer to the next instruction
     ///
     /// @return 0 on success, non-0 on failure
     virtual bsl::errc_type instruction_pointer_advance() noexcept = 0;

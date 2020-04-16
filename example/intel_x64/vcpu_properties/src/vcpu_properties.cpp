@@ -6,7 +6,7 @@ namespace vmm
 void
 root_vcpu_init(x64_vcpu &vcpu) noexcept
 {
-    auto id = vcpu.id();
+    auto id = vcpu.id_get();
 
     if(vcpu.is_root_vcpu()) {
         return;
