@@ -1,8 +1,6 @@
 #ifndef VMM_VCPU_X64_GENERAL_REGISTER_X64_HPP
 #define VMM_VCPU_X64_GENERAL_REGISTER_X64_HPP
 
-#include <bsl/errc_type.hpp>
-
 namespace vmm
 {
 

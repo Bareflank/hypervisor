@@ -1,7 +1,7 @@
 #ifndef VMM_VCPU_X64_EXTERNAL_INTERRUPT_HPP
 #define VMM_VCPU_X64_EXTERNAL_INTERRUPT_HPP
 
-#include <bsl/errc_type.hpp>
+#include <vmm/vcpu/x64/x64_vcpu_delegate.hpp>
 
 namespace vmm
 {
@@ -22,7 +22,7 @@ public:
     ///     by arrival of an external interrupt while a vcpu is executing.
     ///
     /// @param func The delegate function to be called
-    virtual void interrupt_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept = 0;
+    virtual void interrupt_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
 
     /// @brief Inject an external interrupt into a vcpu
     ///

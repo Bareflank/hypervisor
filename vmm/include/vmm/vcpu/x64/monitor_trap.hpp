@@ -1,7 +1,7 @@
 #ifndef VMM_VCPU_X64_MONITOR_TRAP_HPP
 #define VMM_VCPU_X64_MONITOR_TRAP_HPP
 
-#include <bsl/errc_type.hpp>
+#include <vmm/vcpu/x64/x64_vcpu_delegate.hpp>
 
 namespace vmm
 {
@@ -20,7 +20,7 @@ public:
     ///     vmexits caused by exectuion of a vcpu
     ///
     /// @param func The delegate function to be called
-    virtual void monitor_trap_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept = 0;
+    virtual void monitor_trap_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
 
     virtual ~monitor_trap() noexcept = default;
 protected:

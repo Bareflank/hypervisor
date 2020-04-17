@@ -2,6 +2,7 @@
 #define VMM_X64_VCPU_SEAM_HPP
 
 #include <vmm/vcpu/x64/x64_vcpu.hpp>
+#include <vmm/vcpu/x64/x64_vcpu_delegate.hpp>
 
 namespace vmm
 {
@@ -64,7 +65,7 @@ public:
     { return m_vcpu_property.is_root_vcpu(); }
 
     // ----------------------------- cpuid seam --------------------------------
-    void cpuid_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void cpuid_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_cpuid.cpuid_vmexit_handler_set(func); }
 
     void cpuid_execute() noexcept final
@@ -80,7 +81,7 @@ public:
     void write_cr0_vmexit_disable() noexcept final
     { return m_cr0.write_cr0_vmexit_disable(); }
 
-    void write_cr0_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void write_cr0_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_cr0.write_cr0_vmexit_handler_set(func); }
 
     uint64_t write_cr0_vmexit_value_get() noexcept final
@@ -99,7 +100,7 @@ public:
     void read_cr3_vmexit_disable() noexcept final
     { return m_cr3.read_cr3_vmexit_disable(); }
 
-    void read_cr3_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void read_cr3_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_cr3.read_cr3_vmexit_handler_set(func); }
 
     void read_cr3_execute() noexcept final
@@ -114,7 +115,7 @@ public:
     void write_cr3_vmexit_disable() noexcept final
     { return m_cr3.write_cr3_vmexit_disable(); }
 
-    void write_cr3_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void write_cr3_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_cr3.write_cr3_vmexit_handler_set(func); }
 
     uint64_t write_cr3_vmexit_value_get() noexcept final
@@ -133,7 +134,7 @@ public:
     void write_cr4_vmexit_disable() noexcept final
     { return m_cr4.write_cr4_vmexit_disable(); }
 
-    void write_cr4_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void write_cr4_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_cr4.write_cr4_vmexit_handler_set(func); }
 
     uint64_t write_cr4_vmexit_value_get() noexcept final
@@ -249,7 +250,7 @@ public:
     { return m_general_register_x64.rsp_set(value); }
 
     // ------------------------- init signal seam ------------------------------
-    void init_signal_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void init_signal_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_init_signal.init_signal_vmexit_handler_set(func); }
 
     // ---------------------- interrupt seam --------------------------
@@ -259,7 +260,7 @@ public:
     void interrupt_vmexit_disable() noexcept final
     { return m_interrupt.interrupt_vmexit_disable(); }
 
-    void interrupt_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void interrupt_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_interrupt.interrupt_vmexit_handler_set(func); }
 
     void interrupt_inject(uint64_t vector) noexcept final
@@ -272,7 +273,7 @@ public:
     void interrupt_window_vmexit_disable() noexcept final
     { return m_interrupt_window.interrupt_window_vmexit_disable(); }
 
-    void interrupt_window_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void interrupt_window_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_interrupt_window.interrupt_window_vmexit_handler_set(func); }
 
     // --------------------------- io port seam --------------------------------
@@ -288,7 +289,7 @@ public:
     void io_port_vmexit_range_disable(uint16_t begin, uint16_t end) noexcept final
     { return m_io_port.io_port_vmexit_range_disable(begin, end); }
 
-    void io_port_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void io_port_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_io_port.io_port_vmexit_handler_set(func); }
 
     uint64_t io_port_vmexit_size_get() noexcept final
@@ -325,7 +326,7 @@ public:
     void monitor_trap_vmexit_disable() noexcept final
     { return m_monitor_trap.monitor_trap_vmexit_disable(); }
 
-    void monitor_trap_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void monitor_trap_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_monitor_trap.monitor_trap_vmexit_handler_set(func); }
 
     // ----------------------------- nmi seam ----------------------------------
@@ -335,7 +336,7 @@ public:
     void nmi_vmexit_disable() noexcept final
     { return m_nmi.nmi_vmexit_disable(); }
 
-    void nmi_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void nmi_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_nmi.nmi_vmexit_handler_set(func); }
 
     void nmi_inject() noexcept final
@@ -348,7 +349,7 @@ public:
     void nmi_window_vmexit_disable() noexcept final
     { return m_nmi_window.nmi_window_vmexit_disable(); }
 
-    void nmi_window_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void nmi_window_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_nmi_window.nmi_window_vmexit_handler_set(func); }
 
     // ----------------------- preemption timer seam ---------------------------
@@ -358,7 +359,7 @@ public:
     void preemption_timer_vmexit_disable() noexcept final
     { return m_preemption_timer.preemption_timer_vmexit_disable(); }
 
-    void preemption_timer_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void preemption_timer_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_preemption_timer.preemption_timer_vmexit_handler_set(func); }
 
     void preemption_timer_set(uint64_t value) noexcept final
@@ -377,7 +378,7 @@ public:
     void rdmsr_vmexit_range_disable(uint32_t begin, uint32_t end) noexcept final
     { return m_rdmsr.rdmsr_vmexit_range_disable(begin, end); }
 
-    void rdmsr_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void rdmsr_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_rdmsr.rdmsr_vmexit_handler_set(func); }
 
     uint32_t rdmsr_vmexit_address_get() noexcept final
@@ -390,7 +391,7 @@ public:
     { return m_rdmsr.rdmsr_emulate(value); }
 
     // ------------------------- sipi signal seam ------------------------------
-    void sipi_signal_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void sipi_signal_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_sipi_signal.sipi_signal_vmexit_handler_set(func); }
 
     // ----------------------------- vmexit seam -------------------------------
@@ -400,10 +401,10 @@ public:
     uint32_t vmexit_qualification_get() noexcept final
     { return m_vmexit.vmexit_qualification_get(); }
 
-    void vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_vmexit.vmexit_handler_set(func); }
 
-    void post_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void post_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_vmexit.post_vmexit_handler_set(func); }
 
     // ------------------------------ vpid seam --------------------------------
@@ -423,7 +424,7 @@ public:
     void wrmsr_vmexit_range_disable(uint32_t begin, uint32_t end) noexcept final
     { return m_wrmsr.wrmsr_vmexit_range_disable(begin, end); }
 
-    void wrmsr_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept final
+    void wrmsr_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_wrmsr.wrmsr_vmexit_handler_set(func); }
 
     uint32_t wrmsr_vmexit_address_get() noexcept final
@@ -439,7 +440,7 @@ public:
     { return m_wrmsr.wrmsr_emulate(value); }
 
     // ------------------------------ xcr0 seam --------------------------------
-    void write_xcr0_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func)
+    void write_xcr0_vmexit_handler_set(x64_vcpu_delegate func)
     { return m_xcr0.write_xcr0_vmexit_handler_set(func); }
 
 private:

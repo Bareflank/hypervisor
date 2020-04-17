@@ -21,7 +21,7 @@ public:
         return;
     }
 
-    void nmi_window_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func)
+    void nmi_window_vmexit_handler_set(x64_vcpu_delegate func)
     {
         return;
     }

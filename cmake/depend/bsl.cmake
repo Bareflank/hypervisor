@@ -2,8 +2,8 @@ message(STATUS "Adding dependency: bsl")
 
 FetchContent_Declare(
     bsl
-    GIT_REPOSITORY  https://github.com/rianquinn/bsl.git
-    GIT_TAG         master
+    GIT_REPOSITORY  https://github.com/bareflank/bsl.git
+    GIT_TAG         55b98dc7c1d12a79e325d2a0bcd55b7b7e783ea3
 )
 
 FetchContent_GetProperties(bsl)

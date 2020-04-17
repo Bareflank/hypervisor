@@ -1,7 +1,7 @@
 #ifndef VMM_VCPU_X64_INIT_SIGNAL_HPP
 #define VMM_VCPU_X64_INIT_SIGNAL_HPP
 
-#include <bsl/delegate.hpp>
+#include <vmm/vcpu/x64/x64_vcpu_delegate.hpp>
 
 namespace vmm
 {
@@ -14,7 +14,7 @@ public:
     ///     by an init signal while a vcpu is executing.
     ///
     /// @param func The delegate function to be called
-    virtual void init_signal_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept = 0;
+    virtual void init_signal_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
 
     virtual ~init_signal() noexcept = default;
 protected:

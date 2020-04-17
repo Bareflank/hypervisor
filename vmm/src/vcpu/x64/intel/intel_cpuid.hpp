@@ -11,7 +11,7 @@ class intel_cpuid :
 {
 public:
 
-    void cpuid_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func)
+    void cpuid_vmexit_handler_set(x64_vcpu_delegate func)
     {
         return;
     }

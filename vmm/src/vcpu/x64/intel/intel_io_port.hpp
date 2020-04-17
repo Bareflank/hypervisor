@@ -35,7 +35,7 @@ public:
         return;
     }
 
-    void io_port_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept
+    void io_port_vmexit_handler_set(x64_vcpu_delegate func) noexcept
     {
         // TODO: Implement Me!
         return;

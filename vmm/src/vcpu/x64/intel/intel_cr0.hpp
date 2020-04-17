@@ -23,7 +23,7 @@ public:
         return;
     }
 
-    void write_cr0_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func)
+    void write_cr0_vmexit_handler_set(x64_vcpu_delegate func)
     {
         // TODO: Implement Me!
         return;
