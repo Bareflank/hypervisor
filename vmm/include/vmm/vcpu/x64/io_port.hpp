@@ -1,7 +1,7 @@
 #ifndef VMM_VCPU_X64_IO_PORT_HPP
 #define VMM_VCPU_X64_IO_PORT_HPP
 
-#include <bsl/errc_type.hpp>
+#include <vmm/vcpu/x64/x64_vcpu_delegate.hpp>
 
 namespace vmm
 {
@@ -44,7 +44,7 @@ public:
     ///     by an io port access while a vcpu is executing.
     ///
     /// @param func The delegate function to be called
-    virtual void io_port_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept = 0;
+    virtual void io_port_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
 
     /// @brief Returns the size of the value being read from or written to an
     ///     io port, that caused a vmexit to occur while a vcpu was executing

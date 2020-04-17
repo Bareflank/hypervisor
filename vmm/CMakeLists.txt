@@ -37,6 +37,7 @@ target_compile_options(vmm PUBLIC
     "$<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fno-exceptions>"
     "$<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fno-rtti>"
     "$<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-nostdlib>"
+    "$<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-nostdlibinc>"
     "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},x86_64>:--target=x86_64-unknown-linux-gnu>"
     "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},x86_64>:-march=core2>"
     "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},AMD64>:--target=x86_64-unknown-linux-gnu>"

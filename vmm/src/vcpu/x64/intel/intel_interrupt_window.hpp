@@ -21,7 +21,7 @@ public:
         return;
     }
 
-    void interrupt_window_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func)
+    void interrupt_window_vmexit_handler_set(x64_vcpu_delegate func)
     {
         return;
     }

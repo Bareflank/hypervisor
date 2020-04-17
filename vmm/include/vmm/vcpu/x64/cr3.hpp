@@ -1,7 +1,7 @@
 #ifndef VMM_VCPU_X64_CR3_HPP
 #define VMM_VCPU_X64_CR3_HPP
 
-#include <bsl/errc_type.hpp>
+#include <vmm/vcpu/x64/x64_vcpu_delegate.hpp>
 
 namespace vmm
 {
@@ -20,7 +20,7 @@ public:
     ///     by a read to control register cr3 while a vcpu is executing.
     ///
     /// @param func The delegate function to be called
-    virtual void read_cr3_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept = 0;
+    virtual void read_cr3_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
 
     /// @brief Execute (on the vcpu) a read from cr3 that caused a vmexit
     ///     to occur, using the vcpu's registers as the source and destination
@@ -45,7 +45,7 @@ public:
     ///     by a write to control register cr3 while a vcpu is executing.
     ///
     /// @param func The delegate function to be called
-    virtual void write_cr3_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept = 0;
+    virtual void write_cr3_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
 
     /// @brief Returns the value being written to control register cr3 that
     ///     caused a vmexit to occur while a vcpu was executing

@@ -46,7 +46,7 @@ public:
     ///     by a wrmsr instruction while a vcpu is executing.
     ///
     /// @param func The delegate function to be called
-    virtual void wrmsr_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept = 0;
+    virtual void wrmsr_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
 
     /// @brief Returns the msr address of a wrmsr instruction that caused a
     ///     vmexit to occur while a vcpu was executing

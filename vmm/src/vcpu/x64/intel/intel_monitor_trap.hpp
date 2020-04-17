@@ -21,7 +21,7 @@ public:
         return;
     }
 
-    void monitor_trap_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func)
+    void monitor_trap_vmexit_handler_set(x64_vcpu_delegate func)
     {
         return;
     }

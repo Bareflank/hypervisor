@@ -21,7 +21,7 @@ public:
         return;
     }
 
-    void read_cr3_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func)
+    void read_cr3_vmexit_handler_set(x64_vcpu_delegate func)
     {
         return;
     }
@@ -46,7 +46,7 @@ public:
         return;
     }
 
-    void write_cr3_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func)
+    void write_cr3_vmexit_handler_set(x64_vcpu_delegate func)
     {
         return;
     }

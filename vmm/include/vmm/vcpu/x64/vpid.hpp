@@ -1,8 +1,6 @@
 #ifndef VMM_VCPU_X64_VPID_HPP
 #define VMM_VCPU_X64_VPID_HPP
 
-#include <bsl/errc_type.hpp>
-
 namespace vmm
 {
 

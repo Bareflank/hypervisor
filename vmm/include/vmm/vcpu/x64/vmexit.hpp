@@ -1,7 +1,7 @@
 #ifndef VMM_VCPU_X64_VMEXIT_HPP
 #define VMM_VCPU_X64_VMEXIT_HPP
 
-#include <bsl/delegate.hpp>
+#include <vmm/vcpu/x64/x64_vcpu_delegate.hpp>
 
 namespace vmm
 {
@@ -29,7 +29,7 @@ public:
     ///     execution of all other user defined vmexit handlers.
     ///
     /// @param func The delegate function to be called
-    virtual void vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept = 0;
+    virtual void vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
 
     /// @brief Set a vmexit handler that gets called in the event that no user
     ///     defined vmexit handlers serviced a vmexit. This handler will get
@@ -37,7 +37,7 @@ public:
     ///     specific exit reason.
     ///
     /// @param func The delegate function to be called
-    virtual void post_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept = 0;
+    virtual void post_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
 
     virtual ~vmexit() noexcept = default;
 protected:

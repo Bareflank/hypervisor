@@ -1,7 +1,7 @@
 #ifndef VMM_VCPU_X64_CR0_HPP
 #define VMM_VCPU_X64_CR0_HPP
 
-#include <bsl/delegate.hpp>
+#include <vmm/vcpu/x64/x64_vcpu_delegate.hpp>
 
 namespace vmm
 {
@@ -22,7 +22,7 @@ public:
     ///     by a write to control register cr0 while a vcpu is executing.
     ///
     /// @param func The delegate function to be called
-    virtual void write_cr0_vmexit_handler_set(bsl::delegate<void (x64_vcpu &)> func) noexcept = 0;
+    virtual void write_cr0_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
 
     /// @brief Returns the value being written to control register cr0 that
     ///     caused a vmexit to occur while a vcpu was executing
