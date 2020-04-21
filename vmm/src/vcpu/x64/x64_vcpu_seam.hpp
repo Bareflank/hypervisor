@@ -11,7 +11,6 @@ template<
     // Generic vcpu interfaces:
     class execute_type,
     class instruction_pointer_type,
-    class nested_paging_type,
     class vcpu_property_type,
     class virtual_register_type,
     // x64 vcpu interfaces:
@@ -25,6 +24,7 @@ template<
     class interrupt_window_type,
     class io_port_type,
     class monitor_trap_type,
+    class nested_paging_type,
     class nmi_type,
     class nmi_window_type,
     class preemption_timer_type,
@@ -54,7 +54,7 @@ public:
     bsl::errc_type instruction_pointer_advance() noexcept final
     { return m_instruction_pointer.instruction_pointer_advance(); }
 
-    // ------------------------ vcpu property seam -----------------------------
+    // ------------------------- vcpu property seam ----------------------------
     vcpu_property::id_type id_get() noexcept final
     { return m_vcpu_property.id_get(); }
 
@@ -328,6 +328,37 @@ public:
 
     void monitor_trap_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_monitor_trap.monitor_trap_vmexit_handler_set(func); }
+
+    // ------------------------- nested paging seam ----------------------------
+    void nested_paging_enable() noexcept final
+    { return m_nested_paging.nested_paging_enable(); }
+
+    void nested_paging_disable() noexcept final
+    { return m_nested_paging.nested_paging_disable(); }
+
+    void nested_paging_base_address_set(uintptr_t phys_addr) noexcept final
+    { return m_nested_paging.nested_paging_base_address_set(phys_addr); }
+
+    void nested_paging_violation_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
+    { return m_nested_paging.nested_paging_violation_vmexit_handler_set(func); }
+
+    void nested_paging_misconfiguration_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
+    { return m_nested_paging.nested_paging_misconfiguration_vmexit_handler_set(func); }
+
+    bool nested_paging_vmexit_is_read() noexcept final
+    { return m_nested_paging.nested_paging_vmexit_is_read(); }
+
+    bool nested_paging_vmexit_is_write() noexcept final
+    { return m_nested_paging.nested_paging_vmexit_is_write(); }
+
+    bool nested_paging_vmexit_is_execute() noexcept final
+    { return m_nested_paging.nested_paging_vmexit_is_execute(); }
+
+    bool nested_paging_vmexit_is_violation() noexcept final
+    { return m_nested_paging.nested_paging_vmexit_is_violation(); }
+
+    bool nested_paging_vmexit_is_misconfiguration() noexcept final
+    { return m_nested_paging.nested_paging_vmexit_is_misconfiguration(); }
 
     // ----------------------------- nmi seam ----------------------------------
     void nmi_vmexit_enable() noexcept final

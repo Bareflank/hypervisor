@@ -13,6 +13,7 @@
 #include <vmm/vcpu/x64/interrupt_window.hpp>
 #include <vmm/vcpu/x64/io_port.hpp>
 #include <vmm/vcpu/x64/monitor_trap.hpp>
+#include <vmm/vcpu/x64/nested_paging.hpp>
 #include <vmm/vcpu/x64/nmi.hpp>
 #include <vmm/vcpu/x64/nmi_window.hpp>
 #include <vmm/vcpu/x64/preemption_timer.hpp>
@@ -38,6 +39,7 @@ class x64_vcpu :
     public interrupt_window,
     public io_port,
     public monitor_trap,
+    public nested_paging,
     public nmi,
     public nmi_window,
     public preemption_timer,

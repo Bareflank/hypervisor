@@ -11,7 +11,6 @@
 #include <vcpu/common_virtual_register.hpp>
 #include <vcpu/x64/intel/intel_execute.hpp>
 #include <vcpu/x64/intel/intel_instruction_pointer.hpp>
-#include <vcpu/x64/intel/intel_nested_paging.hpp>
 #include <vcpu/x64/intel/intel_cpuid.hpp>
 #include <vcpu/x64/intel/intel_cr0.hpp>
 #include <vcpu/x64/intel/intel_cr3.hpp>
@@ -22,6 +21,7 @@
 #include <vcpu/x64/intel/intel_interrupt_window.hpp>
 #include <vcpu/x64/intel/intel_io_port.hpp>
 #include <vcpu/x64/intel/intel_monitor_trap.hpp>
+#include <vcpu/x64/intel/intel_nested_paging.hpp>
 #include <vcpu/x64/intel/intel_nmi.hpp>
 #include <vcpu/x64/intel/intel_nmi_window.hpp>
 #include <vcpu/x64/intel/intel_preemption_timer.hpp>
@@ -38,7 +38,6 @@ namespace vmm
         // Generic vcpu interfaces:
         intel_execute,
         intel_instruction_pointer,
-        intel_nested_paging,
         common_vcpu_property,
         common_virtual_register,
         // x64 vcpu interfaces:
@@ -52,6 +51,7 @@ namespace vmm
         intel_interrupt_window,
         intel_io_port,
         intel_monitor_trap,
+        intel_nested_paging,
         intel_nmi,
         intel_nmi_window,
         intel_preemption_timer,
