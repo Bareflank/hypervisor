@@ -3,7 +3,6 @@
 
 #include <vmm/vcpu/execute.hpp>
 #include <vmm/vcpu/instruction_pointer.hpp>
-#include <vmm/vcpu/nested_paging.hpp>
 #include <vmm/vcpu/vcpu_property.hpp>
 #include <vmm/vcpu/virtual_register.hpp>
 
@@ -14,8 +13,7 @@ class vcpu :
     public execute,
     public instruction_pointer,
     public vcpu_property,
-    public virtual_register,
-    public nested_paging
+    public virtual_register
 {
 public:
     ~vcpu() noexcept override = default;
