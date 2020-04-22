@@ -69,11 +69,17 @@ public:
     void cpuid_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_cpuid.cpuid_vmexit_handler_set(func); }
 
+    uint32_t cpuid_vmexit_leaf_get() noexcept final
+    { return m_cpuid.cpuid_vmexit_leaf_get(); }
+
+    uint32_t cpuid_vmexit_subleaf_get() noexcept final
+    { return m_cpuid.cpuid_vmexit_subleaf_get(); }
+
     void cpuid_execute() noexcept final
     { return m_cpuid.cpuid_execute(); }
 
-    void cpuid_emulate(uint64_t cpuid_value) noexcept final
-    { return m_cpuid.cpuid_emulate(cpuid_value); }
+    void cpuid_emulate(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx) noexcept final
+    { return m_cpuid.cpuid_emulate(eax, ebx, ecx, edx); }
 
     // ------------------------------ cr0 seam ---------------------------------
     void write_cr0_vmexit_enable() noexcept final

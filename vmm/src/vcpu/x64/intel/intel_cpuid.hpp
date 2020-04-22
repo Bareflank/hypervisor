@@ -13,16 +13,31 @@ public:
 
     void cpuid_vmexit_handler_set(x64_vcpu_delegate func)
     {
+        // TODO: Implement Me!
         return;
+    }
+
+    uint32_t cpuid_vmexit_leaf_get() noexcept
+    {
+        // TODO: Implement Me!
+        return 0;
+    }
+
+    uint32_t cpuid_vmexit_subleaf_get() noexcept
+    {
+        // TODO: Implement Me!
+        return 0;
     }
 
     void cpuid_execute() noexcept
     {
+        // TODO: Implement Me!
         return;
     }
 
-    void cpuid_emulate(uint64_t cpuid_value) noexcept
+    void cpuid_emulate(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx) noexcept
     {
+        // TODO: Implement Me!
         return;
     }
 
