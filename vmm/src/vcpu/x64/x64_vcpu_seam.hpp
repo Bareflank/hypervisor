@@ -302,11 +302,11 @@ public:
     uint64_t io_port_vmexit_size_get() noexcept final
     { return m_io_port.io_port_vmexit_size_get(); }
 
-    bool io_port_vmexit_is_read() noexcept final
-    { return m_io_port.io_port_vmexit_is_read(); }
+    bool io_port_vmexit_is_in() noexcept final
+    { return m_io_port.io_port_vmexit_is_in(); }
 
-    bool io_port_vmexit_is_write() noexcept final
-    { return m_io_port.io_port_vmexit_is_write(); }
+    bool io_port_vmexit_is_out() noexcept final
+    { return m_io_port.io_port_vmexit_is_out(); }
 
     uint16_t io_port_vmexit_port_number_get() noexcept final
     { return m_io_port.io_port_vmexit_port_number_get(); }
@@ -314,17 +314,17 @@ public:
     uint64_t io_port_vmexit_value_get() noexcept final
     { return m_io_port.io_port_vmexit_value_get(); }
 
-    void write_io_port_execute() noexcept final
-    { return m_io_port.write_io_port_execute(); }
+    void io_port_out_execute() noexcept final
+    { return m_io_port.io_port_out_execute(); }
 
-    void write_io_port_emulate(uint64_t value) noexcept final
-    { return m_io_port.write_io_port_emulate(value); }
+    void io_port_out_emulate(uint64_t value) noexcept final
+    { return m_io_port.io_port_out_emulate(value); }
 
-    void read_io_port_execute() noexcept final
-    { return m_io_port.read_io_port_execute(); }
+    void io_port_in_execute() noexcept final
+    { return m_io_port.io_port_in_execute(); }
 
-    void read_io_port_emulate(uint64_t value) noexcept final
-    { return m_io_port.read_io_port_emulate(value); }
+    void io_port_in_emulate(uint64_t value) noexcept final
+    { return m_io_port.io_port_in_emulate(value); }
 
     // ------------------------ monitor trap seam ------------------------------
     void monitor_trap_vmexit_enable() noexcept final
