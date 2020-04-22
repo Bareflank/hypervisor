@@ -7,8 +7,9 @@ namespace vmm
 {
 
 template<
-    class vm_type,
-    class vcpu_type
+    class platform_type,
+    class vcpu_type,
+    class vm_type
 >
 class virtual_machine_monitor_instance
 {
@@ -30,9 +31,16 @@ public:
         return m_vcpu_pool[0];
     }
 
+    platform_type &
+    platform_instance() noexcept
+    {
+        return m_platform;
+    }
+
 private:
-    vm_type m_vm_pool[64]{};
+    platform_type m_platform{};
     vcpu_type m_vcpu_pool[1024]{};
+    vm_type m_vm_pool[64]{};
 };
 
 }

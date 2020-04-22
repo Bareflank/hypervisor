@@ -8,8 +8,7 @@ constexpr const uint32_t SIZE_16KB = 0x4000;
 constexpr const uint32_t SIZE_4MB = 0x400000;
 constexpr const uint32_t SIZE_1GB = 0x40000000;
 
-bsl::errc_type
-root_vm_init(x64_vm &root_vm) noexcept
+bsl::errc_type vmm_init(x64_vm &root_vm, x64_platform &platform) noexcept
 {
     // Allocate 1GB of memory
     void * bytes_1 = hva_alloc(SIZE_1GB);

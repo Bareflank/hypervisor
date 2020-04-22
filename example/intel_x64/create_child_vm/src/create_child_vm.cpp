@@ -3,22 +3,19 @@
 namespace vmm
 {
 
-void
-root_vcpu_init(x64_vcpu &vcpu) noexcept
+void root_vcpu_init(x64_vcpu &vcpu) noexcept
 {
     // Initilize the root vm's vcpus here
     return;
 }
 
-void
-child_vcpu_init(x64_vcpu &vcpu) noexcept
+void child_vcpu_init(x64_vcpu &vcpu) noexcept
 {
     // Initilize the child vm's vcpus here
     return;
 }
 
-bsl::errc_type
-root_vm_init(x64_vm &root_vm) noexcept
+bsl::errc_type vmm_init(x64_vm &root_vm, x64_platform &platform) noexcept
 {
     uint32_t n_vcpus = 1;
     x64_vm &child_vm = vmm::x64_vm_create(n_vcpus);

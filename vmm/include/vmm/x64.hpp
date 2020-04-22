@@ -1,6 +1,7 @@
 #ifndef VMM_X64_HPP
 #define VMM_X64_HPP
 
+#include <vmm/platform/x64/x64_platform.hpp>
 #include <vmm/vcpu/x64/x64_vcpu.hpp>
 #include <vmm/vm/x64/x64_vm.hpp>
 #include <bsl/errc_type.hpp>
@@ -16,10 +17,12 @@ namespace vmm
 ///
 /// @param root_vm A virtual machine that represents the host system on which
 ///     the Bareflank Hypervisor SDK was loaded.
+/// @param platform A platform object that represents the host system on which
+///     the Bareflank Hypervisor SDK was loaded.
 ///
 /// @return User returns 0 to indicate success, all other values indicate
 ///     failure
-bsl::errc_type root_vm_init(vmm::x64_vm &root_vm) noexcept;
+bsl::errc_type vmm_init(x64_vm &root_vm, x64_platform &platform) noexcept;
 
 /// @brief Create a x64 based virtual machine, with the given number of vcpus
 ///
