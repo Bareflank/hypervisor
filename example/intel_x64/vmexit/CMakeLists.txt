@@ -1,3 +1,6 @@
+cmake_minimum_required(VERSION 3.13)
+project(vmexit_vmm_example CXX)
+
 add_executable(vmexit)
 
 target_sources(vmexit PRIVATE

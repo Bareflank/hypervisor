@@ -1,3 +1,6 @@
+cmake_minimum_required(VERSION 3.13)
+project(properties_vmm_example CXX)
+
 add_executable(properties)
 
 target_sources(properties PRIVATE

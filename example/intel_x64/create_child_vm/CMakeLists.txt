@@ -1,3 +1,6 @@
+cmake_minimum_required(VERSION 3.13)
+project(create_child_vm_vmm_example CXX)
+
 add_executable(create_child_vm)
 
 target_sources(create_child_vm PRIVATE
