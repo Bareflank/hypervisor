@@ -24,8 +24,7 @@ void root_vcpu_init(x64_vcpu &vcpu) noexcept
     vcpu.vmexit_handler_set(my_vmexit_handler);
 }
 
-bsl::errc_type
-root_vm_init(x64_vm &root_vm) noexcept
+bsl::errc_type vmm_init(x64_vm &root_vm, x64_platform &platform) noexcept
 {
     root_vm.vcpu_init_handler_set(root_vcpu_init);
     return 0;

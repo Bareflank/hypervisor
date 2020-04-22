@@ -1,3 +1,6 @@
+cmake_minimum_required(VERSION 3.13)
+project(memory_vmm_example CXX)
+
 add_executable(memory)
 
 target_sources(memory PRIVATE

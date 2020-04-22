@@ -2,6 +2,10 @@
 #include <virtual_machine_monitor_instance.hpp>
 #include <vmm/x64.hpp>
 
+#include <platform/x64/x64_platform_seam.hpp>
+#include <platform/common_acpi.hpp>
+#include <platform/common_loader.hpp>
+
 #include <vm/x64/x64_vm_seam.hpp>
 #include <vm/common_vm_property.hpp>
 #include <vm/x64/x64_vcpu_op.hpp>
@@ -34,6 +38,11 @@
 
 namespace vmm
 {
+    typedef x64_platform_seam<
+        common_acpi,
+        common_loader
+    > platform_type;
+
     typedef x64_vcpu_seam<
         // Generic vcpu interfaces:
         intel_execute,
@@ -69,8 +78,9 @@ namespace vmm
     > vm_type;
 
     static virtual_machine_monitor_instance<
-        vm_type,
-        vcpu_type
+        platform_type,
+        vcpu_type,
+        vm_type
     > g_vmm{};
 
     x64_vm &
@@ -84,7 +94,9 @@ namespace vmm
         x64_vm &root_vm = g_vmm.make_virtual_machine(n_physical_cpus);
         // TODO: Configure the root vm and root vcpus
 
-        root_vm_init(root_vm);
+        x64_platform &platform = g_vmm.platform_instance();
+
+        vmm_init(root_vm, platform);
         return bsl::exit_failure;
     }
 

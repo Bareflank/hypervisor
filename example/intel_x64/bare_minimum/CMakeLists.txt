@@ -1,3 +1,6 @@
+cmake_minimum_required(VERSION 3.13)
+project(bare_minimum_vmm_example CXX)
+
 add_executable(bare_minimum)
 
 target_sources(bare_minimum PRIVATE

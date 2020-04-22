@@ -1,3 +1,6 @@
+cmake_minimum_required(VERSION 3.13)
+project(hello_world_vmm_example CXX)
+
 add_executable(intel_hello_world)
 
 target_sources(intel_hello_world PRIVATE
