@@ -47,13 +47,13 @@ public:
         return 0;
     }
 
-    bool io_port_vmexit_is_read() noexcept
+    bool io_port_vmexit_is_in() noexcept
     {
         // TODO: Implement Me!
         return false;
     }
 
-    bool io_port_vmexit_is_write() noexcept
+    bool io_port_vmexit_is_out() noexcept
     {
         // TODO: Implement Me!
         return false;
@@ -71,25 +71,25 @@ public:
         return 0;
     }
 
-    void write_io_port_execute() noexcept
+    void io_port_out_execute() noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void write_io_port_emulate(uint64_t value) noexcept
+    void io_port_out_emulate(uint64_t value) noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void read_io_port_execute() noexcept
+    void io_port_in_execute() noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void read_io_port_emulate(uint64_t value) noexcept
+    void io_port_in_emulate(uint64_t value) noexcept
     {
         // TODO: Implement Me!
         return;

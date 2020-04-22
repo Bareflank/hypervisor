@@ -31,6 +31,7 @@
 #include <vcpu/x64/intel/intel_preemption_timer.hpp>
 #include <vcpu/x64/intel/intel_rdmsr.hpp>
 #include <vcpu/x64/intel/intel_sipi_signal.hpp>
+#include <vcpu/x64/intel/intel_vmcall.hpp>
 #include <vcpu/x64/intel/intel_vmexit.hpp>
 #include <vcpu/x64/intel/intel_vpid.hpp>
 #include <vcpu/x64/intel/intel_wrmsr.hpp>
@@ -66,6 +67,7 @@ namespace vmm
         intel_preemption_timer,
         intel_rdmsr,
         intel_sipi_signal,
+        intel_vmcall,
         intel_vmexit,
         intel_vpid,
         intel_wrmsr,

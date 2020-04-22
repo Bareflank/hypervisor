@@ -30,6 +30,7 @@ template<
     class preemption_timer_type,
     class rdmsr_type,
     class sipi_signal_type,
+    class vmcall_type,
     class vmexit_type,
     class vpid_type,
     class wrmsr_type,
@@ -68,11 +69,17 @@ public:
     void cpuid_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_cpuid.cpuid_vmexit_handler_set(func); }
 
+    uint32_t cpuid_vmexit_leaf_get() noexcept final
+    { return m_cpuid.cpuid_vmexit_leaf_get(); }
+
+    uint32_t cpuid_vmexit_subleaf_get() noexcept final
+    { return m_cpuid.cpuid_vmexit_subleaf_get(); }
+
     void cpuid_execute() noexcept final
     { return m_cpuid.cpuid_execute(); }
 
-    void cpuid_emulate(uint64_t cpuid_value) noexcept final
-    { return m_cpuid.cpuid_emulate(cpuid_value); }
+    void cpuid_emulate(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx) noexcept final
+    { return m_cpuid.cpuid_emulate(eax, ebx, ecx, edx); }
 
     // ------------------------------ cr0 seam ---------------------------------
     void write_cr0_vmexit_enable() noexcept final
@@ -295,11 +302,11 @@ public:
     uint64_t io_port_vmexit_size_get() noexcept final
     { return m_io_port.io_port_vmexit_size_get(); }
 
-    bool io_port_vmexit_is_read() noexcept final
-    { return m_io_port.io_port_vmexit_is_read(); }
+    bool io_port_vmexit_is_in() noexcept final
+    { return m_io_port.io_port_vmexit_is_in(); }
 
-    bool io_port_vmexit_is_write() noexcept final
-    { return m_io_port.io_port_vmexit_is_write(); }
+    bool io_port_vmexit_is_out() noexcept final
+    { return m_io_port.io_port_vmexit_is_out(); }
 
     uint16_t io_port_vmexit_port_number_get() noexcept final
     { return m_io_port.io_port_vmexit_port_number_get(); }
@@ -307,17 +314,17 @@ public:
     uint64_t io_port_vmexit_value_get() noexcept final
     { return m_io_port.io_port_vmexit_value_get(); }
 
-    void write_io_port_execute() noexcept final
-    { return m_io_port.write_io_port_execute(); }
+    void io_port_out_execute() noexcept final
+    { return m_io_port.io_port_out_execute(); }
 
-    void write_io_port_emulate(uint64_t value) noexcept final
-    { return m_io_port.write_io_port_emulate(value); }
+    void io_port_out_emulate(uint64_t value) noexcept final
+    { return m_io_port.io_port_out_emulate(value); }
 
-    void read_io_port_execute() noexcept final
-    { return m_io_port.read_io_port_execute(); }
+    void io_port_in_execute() noexcept final
+    { return m_io_port.io_port_in_execute(); }
 
-    void read_io_port_emulate(uint64_t value) noexcept final
-    { return m_io_port.read_io_port_emulate(value); }
+    void io_port_in_emulate(uint64_t value) noexcept final
+    { return m_io_port.io_port_in_emulate(value); }
 
     // ------------------------ monitor trap seam ------------------------------
     void monitor_trap_vmexit_enable() noexcept final
@@ -425,6 +432,10 @@ public:
     void sipi_signal_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_sipi_signal.sipi_signal_vmexit_handler_set(func); }
 
+    // ----------------------------- vmcall seam -------------------------------
+    void vmcall_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
+    { return m_vmcall.vmcall_vmexit_handler_set(func); }
+
     // ----------------------------- vmexit seam -------------------------------
     uint32_t vmexit_reason_get() noexcept final
     { return m_vmexit.vmexit_reason_get(); }
@@ -495,6 +506,7 @@ private:
     preemption_timer_type m_preemption_timer{};
     rdmsr_type m_rdmsr{};
     sipi_signal_type m_sipi_signal{};
+    vmcall_type m_vmcall{};
     vmexit_type m_vmexit{};
     vpid_type m_vpid{};
     wrmsr_type m_wrmsr{};
