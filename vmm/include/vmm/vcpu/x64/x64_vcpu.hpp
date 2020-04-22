@@ -19,6 +19,7 @@
 #include <vmm/vcpu/x64/preemption_timer.hpp>
 #include <vmm/vcpu/x64/rdmsr.hpp>
 #include <vmm/vcpu/x64/sipi_signal.hpp>
+#include <vmm/vcpu/x64/vmcall.hpp>
 #include <vmm/vcpu/x64/vmexit.hpp>
 #include <vmm/vcpu/x64/vpid.hpp>
 #include <vmm/vcpu/x64/wrmsr.hpp>
@@ -45,6 +46,7 @@ class x64_vcpu :
     public preemption_timer,
     public rdmsr,
     public sipi_signal,
+    public vmcall,
     public vmexit,
     public vpid,
     public wrmsr,

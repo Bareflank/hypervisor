@@ -30,6 +30,7 @@ template<
     class preemption_timer_type,
     class rdmsr_type,
     class sipi_signal_type,
+    class vmcall_type,
     class vmexit_type,
     class vpid_type,
     class wrmsr_type,
@@ -425,6 +426,10 @@ public:
     void sipi_signal_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
     { return m_sipi_signal.sipi_signal_vmexit_handler_set(func); }
 
+    // ----------------------------- vmcall seam -------------------------------
+    void vmcall_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
+    { return m_vmcall.vmcall_vmexit_handler_set(func); }
+
     // ----------------------------- vmexit seam -------------------------------
     uint32_t vmexit_reason_get() noexcept final
     { return m_vmexit.vmexit_reason_get(); }
@@ -495,6 +500,7 @@ private:
     preemption_timer_type m_preemption_timer{};
     rdmsr_type m_rdmsr{};
     sipi_signal_type m_sipi_signal{};
+    vmcall_type m_vmcall{};
     vmexit_type m_vmexit{};
     vpid_type m_vpid{};
     wrmsr_type m_wrmsr{};
