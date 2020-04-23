@@ -21,7 +21,7 @@ void root_vcpu_init(x64_vcpu &vcpu) noexcept
     // Or you can read and write using intermediate integer values:
     auto reason = pal::exit_reason::get();
     auto basic_reason = pal::exit_reason::basic_exit_reason::get(reason);
-    auto vmentry_failure = pal::exit_reason::vm_entry_failure::get(reason);
+    auto vmentry_failure = pal::exit_reason::vm_entry_failure::is_enabled(reason);
 
     return;
 }

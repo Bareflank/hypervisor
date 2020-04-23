@@ -14,9 +14,7 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "x86_64")
         add_subdirectory(intel_x64/properties)
         add_subdirectory(intel_x64/vmcall)
         add_subdirectory(intel_x64/vmexit)
-
-        # PAL needs a few bug fixes before this example will compile:
-        # add_subdirectory(intel_x64/vmcs)
+        add_subdirectory(intel_x64/vmcs)
     endif()
 endif()
 
