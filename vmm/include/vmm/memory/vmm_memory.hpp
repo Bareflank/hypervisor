@@ -2,6 +2,7 @@
 #define VMM_MEMORY_VMM_MEMORY_HPP
 
 #include <vmm/memory/page_size.hpp>
+#include <vmm/memory/memory_type.hpp>
 #include <bsl/cstdint.hpp>
 #include <bsl/errc_type.hpp>
 
@@ -26,15 +27,19 @@ T * hva_alloc(uintmax_t size)
 
 /// @brief Allocate a host virtual address mapping of @param size bytes to the
 ///     given host physical address, using the optional page size as a
-///     granularity for the mapping (defaults to 4 KB)
+///     granularity for the mapping (defaults to 4 KB), and optional memory
+///     type (defaults to write-back)
 ///
 /// @param hpa The host physical address to a create a mapping to
 /// @param size The size of the mapping, in bytes
 /// @param ps The page size (granularity) to be used for the mapping.
+/// @param mt The memory type (caching method) to be used for the mapping.
 ///
 /// @return A host virtual address that may be used to access the mapped host
 ///     physical address range
-void * hva_map_alloc(uintptr_t hpa, uintmax_t size, page_size ps=page_size::page_4k);
+void * hva_map_alloc(uintptr_t hpa, uintmax_t size,
+                        page_size ps=page_size::page_4k,
+                        memory_type mt=memory_type::write_back);
 
 /// @brief Allocate a host virtual address mapping of @param size bytes to the
 ///     given host physical address, using the optional page size as a
@@ -47,8 +52,10 @@ void * hva_map_alloc(uintptr_t hpa, uintmax_t size, page_size ps=page_size::page
 /// @return A host virtual address that may be used to access the mapped host
 ///     physical address range
 template<typename T>
-T * hva_map_alloc(uintptr_t hpa, uintmax_t size, page_size ps=page_size::page_4k)
-{ return static_cast<T*>(hva_map_alloc(hpa, size, ps)); }
+T * hva_map_alloc(uintptr_t hpa, uintmax_t size,
+                    page_size ps=page_size::page_4k,
+                    memory_type mt=memory_type::write_back)
+{ return static_cast<T*>(hva_map_alloc(hpa, size, ps, mt)); }
   
 /// @brief Free the given host virtual address
 ///

@@ -3,7 +3,7 @@ message(STATUS "Adding dependency: pal")
 FetchContent_Declare(
     pal
     GIT_REPOSITORY  https://github.com/bareflank/pal.git
-    GIT_TAG         20.03.1
+    GIT_TAG         20.04.1
 )
 
 FetchContent_GetProperties(pal)
