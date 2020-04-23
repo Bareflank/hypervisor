@@ -9,7 +9,7 @@ void * hva_alloc(uintmax_t size)
     return static_cast<void *>(nullptr);
 }
 
-void * hva_map_alloc(uintptr_t hpa, uintmax_t size, page_size ps)
+void * hva_map_alloc(uintptr_t hpa, uintmax_t size, page_size ps, memory_type mt)
 {
     // TODO: Implement Me!
     return static_cast<void *>(nullptr);
