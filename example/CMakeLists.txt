@@ -6,6 +6,7 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "x86_64")
         # TODO: Add other examples here
         add_subdirectory(intel_x64/bare_minimum)
         add_subdirectory(intel_x64/cpuid)
+        add_subdirectory(intel_x64/control_register)
         add_subdirectory(intel_x64/create_child_vm)
         add_subdirectory(intel_x64/io_port)
         add_subdirectory(intel_x64/memory)
