@@ -11,32 +11,32 @@ class intel_cr4 :
 {
 public:
 
-    void write_cr4_vmexit_enable() noexcept
+    void cr4_write_vmexit_enable() noexcept
     {
         return;
     }
 
-    void write_cr4_vmexit_disable() noexcept
+    void cr4_write_vmexit_disable() noexcept
     {
         return;
     }
 
-    void write_cr4_vmexit_handler_set(x64_vcpu_delegate func)
+    void cr4_write_vmexit_handler_set(x64_vcpu_delegate func)
     {
         return;
     }
 
-    uint64_t write_cr4_vmexit_value_get() noexcept
+    uint64_t cr4_write_vmexit_value_get() noexcept
     {
         return 0;
     }
 
-    void write_cr4_execute() noexcept
+    void cr4_write_execute() noexcept
     {
         return;
     }
 
-    void write_cr4_emulate(uint64_t cr4_value) noexcept
+    void cr4_write_emulate(uint64_t cr4_value) noexcept
     {
         return;
     }

@@ -13,7 +13,7 @@ public:
     ///     instruction while a vcpu is executing.
     ///
     /// @param func The delegate function to be called
-    virtual void write_xcr0_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
+    virtual void xcr0_write_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
 
     virtual ~xcr0() noexcept = default;
 protected:

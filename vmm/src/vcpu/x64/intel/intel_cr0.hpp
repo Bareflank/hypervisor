@@ -11,37 +11,37 @@ class intel_cr0 :
 {
 public:
 
-    void write_cr0_vmexit_enable() noexcept
+    void cr0_write_vmexit_enable() noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void write_cr0_vmexit_disable() noexcept
+    void cr0_write_vmexit_disable() noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void write_cr0_vmexit_handler_set(x64_vcpu_delegate func)
+    void cr0_write_vmexit_handler_set(x64_vcpu_delegate func)
     {
         // TODO: Implement Me!
         return;
     }
 
-    uint64_t write_cr0_vmexit_value_get() noexcept
+    uint64_t cr0_write_vmexit_value_get() noexcept
     {
         // TODO: Implement Me!
         return 0;
     }
 
-    void write_cr0_execute() noexcept
+    void cr0_write_execute() noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void write_cr0_emulate(uint64_t cr0_value) noexcept
+    void cr0_write_emulate(uint64_t cr0_value) noexcept
     {
         // TODO: Implement Me!
         return;

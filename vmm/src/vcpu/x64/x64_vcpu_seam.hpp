@@ -82,76 +82,76 @@ public:
     { return m_cpuid.cpuid_emulate(eax, ebx, ecx, edx); }
 
     // ------------------------------ cr0 seam ---------------------------------
-    void write_cr0_vmexit_enable() noexcept final
-    { return m_cr0.write_cr0_vmexit_enable(); }
+    void cr0_write_vmexit_enable() noexcept final
+    { return m_cr0.cr0_write_vmexit_enable(); }
 
-    void write_cr0_vmexit_disable() noexcept final
-    { return m_cr0.write_cr0_vmexit_disable(); }
+    void cr0_write_vmexit_disable() noexcept final
+    { return m_cr0.cr0_write_vmexit_disable(); }
 
-    void write_cr0_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_cr0.write_cr0_vmexit_handler_set(func); }
+    void cr0_write_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
+    { return m_cr0.cr0_write_vmexit_handler_set(func); }
 
-    uint64_t write_cr0_vmexit_value_get() noexcept final
-    { return m_cr0.write_cr0_vmexit_value_get(); }
+    uint64_t cr0_write_vmexit_value_get() noexcept final
+    { return m_cr0.cr0_write_vmexit_value_get(); }
 
-    void write_cr0_execute() noexcept final
-    { return m_cr0.write_cr0_execute(); }
+    void cr0_write_execute() noexcept final
+    { return m_cr0.cr0_write_execute(); }
 
-    void write_cr0_emulate(uint64_t cr0_value) noexcept final
-    { return m_cr0.write_cr0_emulate(cr0_value); }
+    void cr0_write_emulate(uint64_t cr0_value) noexcept final
+    { return m_cr0.cr0_write_emulate(cr0_value); }
 
     // ------------------------------ cr3 seam ---------------------------------
-    void read_cr3_vmexit_enable() noexcept final
-    { return m_cr3.read_cr3_vmexit_enable(); }
+    void cr3_read_vmexit_enable() noexcept final
+    { return m_cr3.cr3_read_vmexit_enable(); }
 
-    void read_cr3_vmexit_disable() noexcept final
-    { return m_cr3.read_cr3_vmexit_disable(); }
+    void cr3_read_vmexit_disable() noexcept final
+    { return m_cr3.cr3_read_vmexit_disable(); }
 
-    void read_cr3_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_cr3.read_cr3_vmexit_handler_set(func); }
+    void cr3_read_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
+    { return m_cr3.cr3_read_vmexit_handler_set(func); }
 
-    void read_cr3_execute() noexcept final
-    { return m_cr3.read_cr3_execute(); }
+    void cr3_read_execute() noexcept final
+    { return m_cr3.cr3_read_execute(); }
 
-    void read_cr3_emulate(uint64_t cr3_value) noexcept final
-    { return m_cr3.read_cr3_emulate(cr3_value); }
+    void cr3_read_emulate(uint64_t cr3_value) noexcept final
+    { return m_cr3.cr3_read_emulate(cr3_value); }
 
-    void write_cr3_vmexit_enable() noexcept final
-    { return m_cr3.write_cr3_vmexit_enable(); }
+    void cr3_write_vmexit_enable() noexcept final
+    { return m_cr3.cr3_write_vmexit_enable(); }
 
-    void write_cr3_vmexit_disable() noexcept final
-    { return m_cr3.write_cr3_vmexit_disable(); }
+    void cr3_write_vmexit_disable() noexcept final
+    { return m_cr3.cr3_write_vmexit_disable(); }
 
-    void write_cr3_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_cr3.write_cr3_vmexit_handler_set(func); }
+    void cr3_write_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
+    { return m_cr3.cr3_write_vmexit_handler_set(func); }
 
-    uint64_t write_cr3_vmexit_value_get() noexcept final
-    { return m_cr3.write_cr3_vmexit_value_get(); }
+    uint64_t cr3_write_vmexit_value_get() noexcept final
+    { return m_cr3.cr3_write_vmexit_value_get(); }
 
-    void write_cr3_execute() noexcept final
-    { return m_cr3.write_cr3_execute(); }
+    void cr3_write_execute() noexcept final
+    { return m_cr3.cr3_write_execute(); }
 
-    void write_cr3_emulate(uint64_t cr3_value) noexcept final
-    { return m_cr3.write_cr3_emulate(cr3_value); }
+    void cr3_write_emulate(uint64_t cr3_value) noexcept final
+    { return m_cr3.cr3_write_emulate(cr3_value); }
 
     // ------------------------------ cr4 seam ---------------------------------
-    void write_cr4_vmexit_enable() noexcept final
-    { return m_cr4.write_cr4_vmexit_enable(); }
+    void cr4_write_vmexit_enable() noexcept final
+    { return m_cr4.cr4_write_vmexit_enable(); }
 
-    void write_cr4_vmexit_disable() noexcept final
-    { return m_cr4.write_cr4_vmexit_disable(); }
+    void cr4_write_vmexit_disable() noexcept final
+    { return m_cr4.cr4_write_vmexit_disable(); }
 
-    void write_cr4_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_cr4.write_cr4_vmexit_handler_set(func); }
+    void cr4_write_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
+    { return m_cr4.cr4_write_vmexit_handler_set(func); }
 
-    uint64_t write_cr4_vmexit_value_get() noexcept final
-    { return m_cr4.write_cr4_vmexit_value_get(); }
+    uint64_t cr4_write_vmexit_value_get() noexcept final
+    { return m_cr4.cr4_write_vmexit_value_get(); }
 
-    void write_cr4_execute() noexcept final
-    { return m_cr4.write_cr4_execute(); }
+    void cr4_write_execute() noexcept final
+    { return m_cr4.cr4_write_execute(); }
 
-    void write_cr4_emulate(uint64_t cr4_value) noexcept final
-    { return m_cr4.write_cr4_emulate(cr4_value); }
+    void cr4_write_emulate(uint64_t cr4_value) noexcept final
+    { return m_cr4.cr4_write_emulate(cr4_value); }
 
     // ----------------------- general register seam ---------------------------
     uint64_t rax_get() noexcept
@@ -482,8 +482,8 @@ public:
     { return m_wrmsr.wrmsr_emulate(value); }
 
     // ------------------------------ xcr0 seam --------------------------------
-    void write_xcr0_vmexit_handler_set(x64_vcpu_delegate func)
-    { return m_xcr0.write_xcr0_vmexit_handler_set(func); }
+    void xcr0_write_vmexit_handler_set(x64_vcpu_delegate func)
+    { return m_xcr0.xcr0_write_vmexit_handler_set(func); }
 
 private:
     execute_type m_execute{};
