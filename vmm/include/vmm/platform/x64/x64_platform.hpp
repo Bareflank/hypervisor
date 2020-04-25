@@ -2,13 +2,14 @@
 #define VMM_X64_PLATFORM_HPP
 
 #include <vmm/platform/platform.hpp>
+#include <vmm/platform/x64/memory.hpp>
 
 namespace vmm
 {
 
 class x64_platform :
-    public platform
-    // TODO: Expose x64 specific platform interfaces here
+    public platform,
+    public memory
 {
 public:
     ~x64_platform() noexcept override = default;

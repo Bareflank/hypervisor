@@ -5,6 +5,7 @@
 #include <platform/x64/x64_platform_seam.hpp>
 #include <platform/common_acpi.hpp>
 #include <platform/common_loader.hpp>
+#include <platform/x64/x64_memory.hpp>
 
 #include <vm/x64/x64_vm_seam.hpp>
 #include <vm/common_vm_property.hpp>
@@ -41,7 +42,8 @@ namespace vmm
 {
     typedef x64_platform_seam<
         common_acpi,
-        common_loader
+        common_loader,
+        x64_memory
     > platform_type;
 
     typedef x64_vcpu_seam<

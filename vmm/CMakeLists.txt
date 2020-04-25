@@ -8,7 +8,6 @@ if(${HYPERVISOR_TARGET_ARCH} STREQUAL "x86_64")
     target_sources(vmm PRIVATE
         src/entry/x64/start.s
         src/entry/x64/start.cpp
-        src/memory/x64/x64_vmm_memory.cpp
     )
 endif()
 
