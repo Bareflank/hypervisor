@@ -11,21 +11,21 @@ class preemption_timer
 public:
 
     /// @brief Enable vmexits from a preemption timer
-    virtual void preemption_timer_vmexit_enable() noexcept = 0;
+    virtual void enable_preemption_timer_vmexit() noexcept = 0;
 
     /// @brief Disables vmexits from a preemption timer
-    virtual void preemption_timer_vmexit_disable() noexcept = 0;
+    virtual void disable_preemption_timer_vmexit() noexcept = 0;
 
     /// @brief Set a vmexit handler that will be called for all vmexits caused
     ///     by the preemption timer while a vcpu is executing.
     ///
     /// @param func The delegate function to be called
-    virtual void preemption_timer_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
+    virtual void set_preemption_timer_vmexit_handler(x64_vcpu_delegate func) noexcept = 0;
 
     /// @brief Set the preemption timer to the specified value
     ///
     /// @param value The value set the preemption timer to
-    virtual void preemption_timer_set(uint64_t value) noexcept = 0;
+    virtual void set_preemption_timer(uint64_t value) noexcept = 0;
 
     virtual ~preemption_timer() noexcept = default;
 protected:

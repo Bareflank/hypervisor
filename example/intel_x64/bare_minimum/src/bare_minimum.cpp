@@ -3,7 +3,7 @@
 namespace vmm
 {
 
-bsl::errc_type vmm_init(x64_vm &root_vm, x64_platform &platform) noexcept
+bsl::errc_type init_vmm(x64_vm &root_vm, x64_platform &platform) noexcept
 {
     return 0;
 }

@@ -11,13 +11,13 @@ class common_acpi:
 {
 public:
 
-    uintptr_t acpi_rsdp_hpa_get() noexcept final
+    uintptr_t get_acpi_rsdp_hpa() noexcept final
     {
         // TODO: Implement Me!
         return 0;
     }
 
-    uintptr_t acpi_dmar_hpa_get() noexcept final
+    uintptr_t get_acpi_dmar_hpa() noexcept final
     {
         // TODO: Implement Me!
         return 0;

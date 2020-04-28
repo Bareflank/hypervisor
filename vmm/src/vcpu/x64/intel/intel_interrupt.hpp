@@ -11,22 +11,22 @@ class intel_interrupt :
 {
 public:
 
-    void interrupt_vmexit_enable() noexcept
+    void enable_interrupt_vmexit() noexcept
     {
         return;
     }
 
-    void interrupt_vmexit_disable() noexcept
+    void disable_interrupt_vmexit() noexcept
     {
         return;
     }
 
-    void interrupt_vmexit_handler_set(x64_vcpu_delegate func)
+    void set_interrupt_vmexit_handler(x64_vcpu_delegate func)
     {
         return;
     }
 
-    void interrupt_inject(uint64_t vector) noexcept
+    void inject_interrupt(uint64_t vector) noexcept
     {
         return;
     }

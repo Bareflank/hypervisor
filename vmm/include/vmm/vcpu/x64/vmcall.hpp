@@ -14,7 +14,7 @@ public:
     ///     by a vmcall instruction while a vcpu is executing.
     ///
     /// @param func The delegate function to be called
-    virtual void vmcall_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
+    virtual void set_vmcall_vmexit_handler(x64_vcpu_delegate func) noexcept = 0;
 
     virtual ~vmcall() noexcept = default;
 protected:

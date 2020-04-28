@@ -12,7 +12,7 @@ class intel_instruction_pointer :
 public:
 
     bsl::errc_type
-    instruction_pointer_advance() noexcept final
+    advance_instruction_pointer() noexcept final
     {
         // TODO: Implement Me!
         return -1;

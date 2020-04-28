@@ -11,17 +11,17 @@ class intel_monitor_trap :
 {
 public:
 
-    void monitor_trap_vmexit_enable() noexcept
+    void enable_monitor_trap_vmexit() noexcept
     {
         return;
     }
 
-    void monitor_trap_vmexit_disable() noexcept
+    void disable_monitor_trap_vmexit() noexcept
     {
         return;
     }
 
-    void monitor_trap_vmexit_handler_set(x64_vcpu_delegate func)
+    void set_monitor_trap_vmexit_handler(x64_vcpu_delegate func)
     {
         return;
     }

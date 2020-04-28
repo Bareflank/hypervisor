@@ -22,14 +22,14 @@ namespace vmm
 ///
 /// @return User returns 0 to indicate success, all other values indicate
 ///     failure
-bsl::errc_type vmm_init(x64_vm &root_vm, x64_platform &platform) noexcept;
+bsl::errc_type init_vmm(x64_vm &root_vm, x64_platform &platform) noexcept;
 
 /// @brief Create a x64 based virtual machine, with the given number of vcpus
 ///
 /// @param n_vpus The number of vcpus to be given to the virtual machine
 ///
 /// @return An x64_vm instance
-x64_vm & x64_vm_create(uint32_t n_vcpus) noexcept;
+x64_vm & create_x64_vm(uint32_t n_vcpus) noexcept;
 
 }
 

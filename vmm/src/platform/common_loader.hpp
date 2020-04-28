@@ -11,13 +11,13 @@ class common_loader:
 {
 public:
 
-    uintptr_t loader_wakeup_entry_point_hpa_get() noexcept final
+    uintptr_t get_loader_wakeup_entry_point_hpa() noexcept final
     {
         // TODO: Implement Me!
         return 0;
     }
 
-    bool loader_is_late_launch() noexcept final
+    bool is_late_launch() noexcept final
     {
         // TODO: Implement Me!
         return false;

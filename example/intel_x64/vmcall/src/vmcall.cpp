@@ -9,29 +9,29 @@
 namespace vmm
 {
 
-void vmcall_handler(x64_vcpu &vcpu) noexcept
+void handle_vmcall(x64_vcpu &vcpu) noexcept
 {
-    auto rax = vcpu.rax_get();
+    auto rax = vcpu.get_rax();
 
     if (rax == 0xF00D) {
-        vcpu.rax_set(0xBEEF);
+        vcpu.set_rax(0xBEEF);
     }
     else {
-        vcpu.rax_set(0xBADC0FFEE);
+        vcpu.set_rax(0xBADC0FFEE);
     }
 
-    vcpu.instruction_pointer_advance();
+    vcpu.advance_instruction_pointer();
     vcpu.run();
 }
 
-void root_vcpu_init(x64_vcpu &vcpu) noexcept
+void init_root_vcpu(x64_vcpu &vcpu) noexcept
 {
-    vcpu.vmexit_handler_set(vmcall_handler);
+    vcpu.set_vmexit_handler(handle_vmcall);
 }
 
-bsl::errc_type vmm_init(x64_vm &root_vm, x64_platform &platform) noexcept
+bsl::errc_type init_vmm(x64_vm &root_vm, x64_platform &platform) noexcept
 {
-    root_vm.vcpu_init_handler_set(root_vcpu_init);
+    root_vm.set_vcpu_init_handler(init_root_vcpu);
     return 0;
 }
 

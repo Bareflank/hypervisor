@@ -52,12 +52,12 @@ public:
     { return m_execute.run(); }
 
     // ---------------------- instruction pointer seam -------------------------
-    bsl::errc_type instruction_pointer_advance() noexcept final
-    { return m_instruction_pointer.instruction_pointer_advance(); }
+    bsl::errc_type advance_instruction_pointer() noexcept final
+    { return m_instruction_pointer.advance_instruction_pointer(); }
 
     // ------------------------- vcpu property seam ----------------------------
-    vcpu_property::id_type id_get() noexcept final
-    { return m_vcpu_property.id_get(); }
+    vcpu_property::id_type get_id() noexcept final
+    { return m_vcpu_property.get_id(); }
 
     bool is_bootstrap_vcpu() noexcept final
     { return m_vcpu_property.is_bootstrap_vcpu(); }
@@ -66,424 +66,424 @@ public:
     { return m_vcpu_property.is_root_vcpu(); }
 
     // ----------------------------- cpuid seam --------------------------------
-    void cpuid_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_cpuid.cpuid_vmexit_handler_set(func); }
+    void set_cpuid_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_cpuid.set_cpuid_vmexit_handler(func); }
 
-    uint32_t cpuid_vmexit_leaf_get() noexcept final
-    { return m_cpuid.cpuid_vmexit_leaf_get(); }
+    uint32_t get_cpuid_vmexit_leaf() noexcept final
+    { return m_cpuid.get_cpuid_vmexit_leaf(); }
 
-    uint32_t cpuid_vmexit_subleaf_get() noexcept final
-    { return m_cpuid.cpuid_vmexit_subleaf_get(); }
+    uint32_t get_cpuid_vmexit_subleaf() noexcept final
+    { return m_cpuid.get_cpuid_vmexit_subleaf(); }
 
-    void cpuid_execute() noexcept final
-    { return m_cpuid.cpuid_execute(); }
+    void execute_cpuid() noexcept final
+    { return m_cpuid.execute_cpuid(); }
 
-    void cpuid_emulate(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx) noexcept final
-    { return m_cpuid.cpuid_emulate(eax, ebx, ecx, edx); }
+    void emulate_cpuid(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx) noexcept final
+    { return m_cpuid.emulate_cpuid(eax, ebx, ecx, edx); }
 
     // ------------------------------ cr0 seam ---------------------------------
-    void cr0_write_vmexit_enable() noexcept final
-    { return m_cr0.cr0_write_vmexit_enable(); }
+    void enable_cr0_write_vmexit() noexcept final
+    { return m_cr0.enable_cr0_write_vmexit(); }
 
-    void cr0_write_vmexit_disable() noexcept final
-    { return m_cr0.cr0_write_vmexit_disable(); }
+    void disable_cr0_write_vmexit() noexcept final
+    { return m_cr0.disable_cr0_write_vmexit(); }
 
-    void cr0_write_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_cr0.cr0_write_vmexit_handler_set(func); }
+    void set_cr0_write_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_cr0.set_cr0_write_vmexit_handler(func); }
 
-    uint64_t cr0_write_vmexit_value_get() noexcept final
-    { return m_cr0.cr0_write_vmexit_value_get(); }
+    uint64_t get_cr0_write_vmexit_value() noexcept final
+    { return m_cr0.get_cr0_write_vmexit_value(); }
 
-    void cr0_write_execute() noexcept final
-    { return m_cr0.cr0_write_execute(); }
+    void execute_cr0_write() noexcept final
+    { return m_cr0.execute_cr0_write(); }
 
-    void cr0_write_emulate(uint64_t cr0_value) noexcept final
-    { return m_cr0.cr0_write_emulate(cr0_value); }
+    void emulate_cr0_write(uint64_t cr0_value) noexcept final
+    { return m_cr0.emulate_cr0_write(cr0_value); }
 
     // ------------------------------ cr3 seam ---------------------------------
-    void cr3_read_vmexit_enable() noexcept final
-    { return m_cr3.cr3_read_vmexit_enable(); }
+    void enable_cr3_read_vmexit() noexcept final
+    { return m_cr3.enable_cr3_read_vmexit(); }
 
-    void cr3_read_vmexit_disable() noexcept final
-    { return m_cr3.cr3_read_vmexit_disable(); }
+    void disable_cr3_read_vmexit() noexcept final
+    { return m_cr3.disable_cr3_read_vmexit(); }
 
-    void cr3_read_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_cr3.cr3_read_vmexit_handler_set(func); }
+    void set_cr3_read_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_cr3.set_cr3_read_vmexit_handler(func); }
 
-    void cr3_read_execute() noexcept final
-    { return m_cr3.cr3_read_execute(); }
+    void execute_cr3_read() noexcept final
+    { return m_cr3.execute_cr3_read(); }
 
-    void cr3_read_emulate(uint64_t cr3_value) noexcept final
-    { return m_cr3.cr3_read_emulate(cr3_value); }
+    void emulate_cr3_read(uint64_t cr3_value) noexcept final
+    { return m_cr3.emulate_cr3_read(cr3_value); }
 
-    void cr3_write_vmexit_enable() noexcept final
-    { return m_cr3.cr3_write_vmexit_enable(); }
+    void enable_cr3_write_vmexit() noexcept final
+    { return m_cr3.enable_cr3_write_vmexit(); }
 
-    void cr3_write_vmexit_disable() noexcept final
-    { return m_cr3.cr3_write_vmexit_disable(); }
+    void disable_cr3_write_vmexit() noexcept final
+    { return m_cr3.disable_cr3_write_vmexit(); }
 
-    void cr3_write_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_cr3.cr3_write_vmexit_handler_set(func); }
+    void set_cr3_write_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_cr3.set_cr3_write_vmexit_handler(func); }
 
-    uint64_t cr3_write_vmexit_value_get() noexcept final
-    { return m_cr3.cr3_write_vmexit_value_get(); }
+    uint64_t get_cr3_write_vmexit_value() noexcept final
+    { return m_cr3.get_cr3_write_vmexit_value(); }
 
-    void cr3_write_execute() noexcept final
-    { return m_cr3.cr3_write_execute(); }
+    void execute_cr3_write() noexcept final
+    { return m_cr3.execute_cr3_write(); }
 
-    void cr3_write_emulate(uint64_t cr3_value) noexcept final
-    { return m_cr3.cr3_write_emulate(cr3_value); }
+    void emulate_cr3_write(uint64_t cr3_value) noexcept final
+    { return m_cr3.emulate_cr3_write(cr3_value); }
 
     // ------------------------------ cr4 seam ---------------------------------
-    void cr4_write_vmexit_enable() noexcept final
-    { return m_cr4.cr4_write_vmexit_enable(); }
+    void enable_cr4_write_vmexit() noexcept final
+    { return m_cr4.enable_cr4_write_vmexit(); }
 
-    void cr4_write_vmexit_disable() noexcept final
-    { return m_cr4.cr4_write_vmexit_disable(); }
+    void disable_cr4_write_vmexit() noexcept final
+    { return m_cr4.disable_cr4_write_vmexit(); }
 
-    void cr4_write_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_cr4.cr4_write_vmexit_handler_set(func); }
+    void set_cr4_write_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_cr4.set_cr4_write_vmexit_handler(func); }
 
-    uint64_t cr4_write_vmexit_value_get() noexcept final
-    { return m_cr4.cr4_write_vmexit_value_get(); }
+    uint64_t get_cr4_write_vmexit_value() noexcept final
+    { return m_cr4.get_cr4_write_vmexit_value(); }
 
-    void cr4_write_execute() noexcept final
-    { return m_cr4.cr4_write_execute(); }
+    void execute_cr4_write() noexcept final
+    { return m_cr4.execute_cr4_write(); }
 
-    void cr4_write_emulate(uint64_t cr4_value) noexcept final
-    { return m_cr4.cr4_write_emulate(cr4_value); }
+    void emulate_cr4_write(uint64_t cr4_value) noexcept final
+    { return m_cr4.emulate_cr4_write(cr4_value); }
 
     // ----------------------- general register seam ---------------------------
-    uint64_t rax_get() noexcept
-    { return m_general_register_x64.rax_get(); }
+    uint64_t get_rax() noexcept
+    { return m_general_register_x64.get_rax(); }
 
-    void rax_set(uint64_t value) noexcept
-    { return m_general_register_x64.rax_set(value); }
+    void set_rax(uint64_t value) noexcept
+    { return m_general_register_x64.set_rax(value); }
 
-    uint64_t rbx_get() noexcept
-    { return m_general_register_x64.rbx_get(); }
+    uint64_t get_rbx() noexcept
+    { return m_general_register_x64.get_rbx(); }
 
-    void rbx_set(uint64_t value) noexcept
-    { return m_general_register_x64.rbx_set(value); }
+    void set_rbx(uint64_t value) noexcept
+    { return m_general_register_x64.set_rbx(value); }
 
-    uint64_t rcx_get() noexcept
-    { return m_general_register_x64.rcx_get(); }
+    uint64_t get_rcx() noexcept
+    { return m_general_register_x64.get_rcx(); }
 
-    void rcx_set(uint64_t value) noexcept
-    { return m_general_register_x64.rcx_set(value); }
+    void set_rcx(uint64_t value) noexcept
+    { return m_general_register_x64.set_rcx(value); }
 
-    uint64_t rdx_get() noexcept
-    { return m_general_register_x64.rdx_get(); }
+    uint64_t get_rdx() noexcept
+    { return m_general_register_x64.get_rdx(); }
 
-    void rdx_set(uint64_t value) noexcept
-    { return m_general_register_x64.rdx_set(value); }
+    void set_rdx(uint64_t value) noexcept
+    { return m_general_register_x64.set_rdx(value); }
 
-    uint64_t rbp_get() noexcept
-    { return m_general_register_x64.rbp_get(); }
+    uint64_t get_rbp() noexcept
+    { return m_general_register_x64.get_rbp(); }
 
-    void rbp_set(uint64_t value) noexcept
-    { return m_general_register_x64.rbp_set(value); }
+    void set_rbp(uint64_t value) noexcept
+    { return m_general_register_x64.set_rbp(value); }
 
-    uint64_t rsi_get() noexcept
-    { return m_general_register_x64.rsi_get(); }
+    uint64_t get_rsi() noexcept
+    { return m_general_register_x64.get_rsi(); }
 
-    void rsi_set(uint64_t value) noexcept
-    { return m_general_register_x64.rsi_set(value); }
+    void set_rsi(uint64_t value) noexcept
+    { return m_general_register_x64.set_rsi(value); }
 
-    uint64_t rdi_get() noexcept
-    { return m_general_register_x64.rdi_get(); }
+    uint64_t get_rdi() noexcept
+    { return m_general_register_x64.get_rdi(); }
 
-    void rdi_set(uint64_t value) noexcept
-    { return m_general_register_x64.rdi_set(value); }
+    void set_rdi(uint64_t value) noexcept
+    { return m_general_register_x64.set_rdi(value); }
 
-    uint64_t r8_get() noexcept
-    { return m_general_register_x64.r8_get(); }
+    uint64_t get_r8() noexcept
+    { return m_general_register_x64.get_r8(); }
 
-    void r8_set(uint64_t value) noexcept
-    { return m_general_register_x64.r8_set(value); }
+    void set_r8(uint64_t value) noexcept
+    { return m_general_register_x64.set_r8(value); }
 
-    uint64_t r9_get() noexcept
-    { return m_general_register_x64.r9_get(); }
+    uint64_t get_r9() noexcept
+    { return m_general_register_x64.get_r9(); }
 
-    void r9_set(uint64_t value) noexcept
-    { return m_general_register_x64.r9_set(value); }
+    void set_r9(uint64_t value) noexcept
+    { return m_general_register_x64.set_r9(value); }
 
-    uint64_t r10_get() noexcept
-    { return m_general_register_x64.r10_get(); }
+    uint64_t get_r10() noexcept
+    { return m_general_register_x64.get_r10(); }
 
-    void r10_set(uint64_t value) noexcept
-    { return m_general_register_x64.r10_set(value); }
+    void set_r10(uint64_t value) noexcept
+    { return m_general_register_x64.set_r10(value); }
 
-    uint64_t r11_get() noexcept
-    { return m_general_register_x64.r11_get(); }
+    uint64_t get_r11() noexcept
+    { return m_general_register_x64.get_r11(); }
 
-    void r11_set(uint64_t value) noexcept
-    { return m_general_register_x64.r11_set(value); }
+    void set_r11(uint64_t value) noexcept
+    { return m_general_register_x64.set_r11(value); }
 
-    uint64_t r12_get() noexcept
-    { return m_general_register_x64.r12_get(); }
+    uint64_t get_r12() noexcept
+    { return m_general_register_x64.get_r12(); }
 
-    void r12_set(uint64_t value) noexcept
-    { return m_general_register_x64.r12_set(value); }
+    void set_r12(uint64_t value) noexcept
+    { return m_general_register_x64.set_r12(value); }
 
-    uint64_t r13_get() noexcept
-    { return m_general_register_x64.r13_get(); }
+    uint64_t get_r13() noexcept
+    { return m_general_register_x64.get_r13(); }
 
-    void r13_set(uint64_t value) noexcept
-    { return m_general_register_x64.r13_set(value); }
+    void set_r13(uint64_t value) noexcept
+    { return m_general_register_x64.set_r13(value); }
 
-    uint64_t r14_get() noexcept
-    { return m_general_register_x64.r14_get(); }
+    uint64_t get_r14() noexcept
+    { return m_general_register_x64.get_r14(); }
 
-    void r14_set(uint64_t value) noexcept
-    { return m_general_register_x64.r14_set(value); }
+    void set_r14(uint64_t value) noexcept
+    { return m_general_register_x64.set_r14(value); }
 
-    uint64_t r15_get() noexcept
-    { return m_general_register_x64.r15_get(); }
+    uint64_t get_r15() noexcept
+    { return m_general_register_x64.get_r15(); }
 
-    void r15_set(uint64_t value) noexcept
-    { return m_general_register_x64.r15_set(value); }
+    void set_r15(uint64_t value) noexcept
+    { return m_general_register_x64.set_r15(value); }
 
-    uint64_t rip_get() noexcept
-    { return m_general_register_x64.rip_get(); }
+    uint64_t get_rip() noexcept
+    { return m_general_register_x64.get_rip(); }
 
-    void rip_set(uint64_t value) noexcept
-    { return m_general_register_x64.rip_set(value); }
+    void set_rip(uint64_t value) noexcept
+    { return m_general_register_x64.set_rip(value); }
 
-    uint64_t rsp_get() noexcept
-    { return m_general_register_x64.rsp_get(); }
+    uint64_t get_rsp() noexcept
+    { return m_general_register_x64.get_rsp(); }
 
-    void rsp_set(uint64_t value) noexcept
-    { return m_general_register_x64.rsp_set(value); }
+    void set_rsp(uint64_t value) noexcept
+    { return m_general_register_x64.set_rsp(value); }
 
     // ------------------------- init signal seam ------------------------------
-    void init_signal_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_init_signal.init_signal_vmexit_handler_set(func); }
+    void set_init_signal_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_init_signal.set_init_signal_vmexit_handler(func); }
 
     // ---------------------- interrupt seam --------------------------
-    void interrupt_vmexit_enable() noexcept final
-    { return m_interrupt.interrupt_vmexit_enable(); }
+    void enable_interrupt_vmexit() noexcept final
+    { return m_interrupt.enable_interrupt_vmexit(); }
 
-    void interrupt_vmexit_disable() noexcept final
-    { return m_interrupt.interrupt_vmexit_disable(); }
+    void disable_interrupt_vmexit() noexcept final
+    { return m_interrupt.disable_interrupt_vmexit(); }
 
-    void interrupt_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_interrupt.interrupt_vmexit_handler_set(func); }
+    void set_interrupt_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_interrupt.set_interrupt_vmexit_handler(func); }
 
-    void interrupt_inject(uint64_t vector) noexcept final
-    { return m_interrupt.interrupt_inject(vector); }
+    void inject_interrupt(uint64_t vector) noexcept final
+    { return m_interrupt.inject_interrupt(vector); }
 
     // ---------------------- interrupt window seam ----------------------------
-    void interrupt_window_vmexit_enable() noexcept final
-    { return m_interrupt_window.interrupt_window_vmexit_enable(); }
+    void enable_interrupt_window_vmexit() noexcept final
+    { return m_interrupt_window.enable_interrupt_window_vmexit(); }
 
-    void interrupt_window_vmexit_disable() noexcept final
-    { return m_interrupt_window.interrupt_window_vmexit_disable(); }
+    void disable_interrupt_window_vmexit() noexcept final
+    { return m_interrupt_window.disable_interrupt_window_vmexit(); }
 
-    void interrupt_window_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_interrupt_window.interrupt_window_vmexit_handler_set(func); }
+    void set_interrupt_window_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_interrupt_window.set_interrupt_window_vmexit_handler(func); }
 
     // --------------------------- io port seam --------------------------------
-    void io_port_vmexit_enable(uint16_t port_number) noexcept final
-    { return m_io_port.io_port_vmexit_enable(port_number); }
+    void enable_io_port_vmexit(uint16_t port_number) noexcept final
+    { return m_io_port.enable_io_port_vmexit(port_number); }
 
-    void io_port_vmexit_range_enable(uint16_t begin, uint16_t end) noexcept final
-    { return m_io_port.io_port_vmexit_range_enable(begin, end); }
+    void enable_io_port_vmexit_range(uint16_t begin, uint16_t end) noexcept final
+    { return m_io_port.enable_io_port_vmexit_range(begin, end); }
 
-    void io_port_vmexit_disable(uint16_t port_number) noexcept final
-    { return m_io_port.io_port_vmexit_disable(port_number); }
+    void disable_io_port_vmexit(uint16_t port_number) noexcept final
+    { return m_io_port.disable_io_port_vmexit(port_number); }
 
-    void io_port_vmexit_range_disable(uint16_t begin, uint16_t end) noexcept final
-    { return m_io_port.io_port_vmexit_range_disable(begin, end); }
+    void disable_io_port_vmexit_range(uint16_t begin, uint16_t end) noexcept final
+    { return m_io_port.disable_io_port_vmexit_range(begin, end); }
 
-    void io_port_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_io_port.io_port_vmexit_handler_set(func); }
+    void set_io_port_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_io_port.set_io_port_vmexit_handler(func); }
 
-    uint64_t io_port_vmexit_size_get() noexcept final
-    { return m_io_port.io_port_vmexit_size_get(); }
+    uint64_t get_io_port_vmexit_size() noexcept final
+    { return m_io_port.get_io_port_vmexit_size(); }
 
-    bool io_port_vmexit_is_in() noexcept final
-    { return m_io_port.io_port_vmexit_is_in(); }
+    bool is_io_port_vmexit_in() noexcept final
+    { return m_io_port.is_io_port_vmexit_in(); }
 
-    bool io_port_vmexit_is_out() noexcept final
-    { return m_io_port.io_port_vmexit_is_out(); }
+    bool is_io_port_vmexit_out() noexcept final
+    { return m_io_port.is_io_port_vmexit_out(); }
 
-    uint16_t io_port_vmexit_port_number_get() noexcept final
-    { return m_io_port.io_port_vmexit_port_number_get(); }
+    uint16_t get_io_port_vmexit_port_number() noexcept final
+    { return m_io_port.get_io_port_vmexit_port_number(); }
 
-    uint64_t io_port_vmexit_value_get() noexcept final
-    { return m_io_port.io_port_vmexit_value_get(); }
+    uint64_t get_io_port_vmexit_value() noexcept final
+    { return m_io_port.get_io_port_vmexit_value(); }
 
-    void io_port_out_execute() noexcept final
-    { return m_io_port.io_port_out_execute(); }
+    void execute_io_port_out() noexcept final
+    { return m_io_port.execute_io_port_out(); }
 
-    void io_port_out_emulate(uint64_t value) noexcept final
-    { return m_io_port.io_port_out_emulate(value); }
+    void emulate_io_port_out(uint64_t value) noexcept final
+    { return m_io_port.emulate_io_port_out(value); }
 
-    void io_port_in_execute() noexcept final
-    { return m_io_port.io_port_in_execute(); }
+    void execute_io_port_in() noexcept final
+    { return m_io_port.execute_io_port_in(); }
 
-    void io_port_in_emulate(uint64_t value) noexcept final
-    { return m_io_port.io_port_in_emulate(value); }
+    void emulate_io_port_in(uint64_t value) noexcept final
+    { return m_io_port.emulate_io_port_in(value); }
 
     // ------------------------ monitor trap seam ------------------------------
-    void monitor_trap_vmexit_enable() noexcept final
-    { return m_monitor_trap.monitor_trap_vmexit_enable(); }
+    void enable_monitor_trap_vmexit() noexcept final
+    { return m_monitor_trap.enable_monitor_trap_vmexit(); }
 
-    void monitor_trap_vmexit_disable() noexcept final
-    { return m_monitor_trap.monitor_trap_vmexit_disable(); }
+    void disable_monitor_trap_vmexit() noexcept final
+    { return m_monitor_trap.disable_monitor_trap_vmexit(); }
 
-    void monitor_trap_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_monitor_trap.monitor_trap_vmexit_handler_set(func); }
+    void set_monitor_trap_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_monitor_trap.set_monitor_trap_vmexit_handler(func); }
 
     // ------------------------- nested paging seam ----------------------------
-    void nested_paging_enable() noexcept final
-    { return m_nested_paging.nested_paging_enable(); }
+    void enable_nested_paging() noexcept final
+    { return m_nested_paging.enable_nested_paging(); }
 
-    void nested_paging_disable() noexcept final
-    { return m_nested_paging.nested_paging_disable(); }
+    void disable_nested_paging() noexcept final
+    { return m_nested_paging.disable_nested_paging(); }
 
-    void nested_paging_base_address_set(uintptr_t phys_addr) noexcept final
-    { return m_nested_paging.nested_paging_base_address_set(phys_addr); }
+    void set_nested_paging_base_address(uintptr_t phys_addr) noexcept final
+    { return m_nested_paging.set_nested_paging_base_address(phys_addr); }
 
-    void nested_paging_violation_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_nested_paging.nested_paging_violation_vmexit_handler_set(func); }
+    void set_nested_paging_violation_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_nested_paging.set_nested_paging_violation_vmexit_handler(func); }
 
-    void nested_paging_misconfiguration_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_nested_paging.nested_paging_misconfiguration_vmexit_handler_set(func); }
+    void set_nested_paging_misconfiguration_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_nested_paging.set_nested_paging_misconfiguration_vmexit_handler(func); }
 
-    bool nested_paging_vmexit_is_read() noexcept final
-    { return m_nested_paging.nested_paging_vmexit_is_read(); }
+    bool is_nested_paging_vmexit_read() noexcept final
+    { return m_nested_paging.is_nested_paging_vmexit_read(); }
 
-    bool nested_paging_vmexit_is_write() noexcept final
-    { return m_nested_paging.nested_paging_vmexit_is_write(); }
+    bool is_nested_paging_vmexit_write() noexcept final
+    { return m_nested_paging.is_nested_paging_vmexit_write(); }
 
-    bool nested_paging_vmexit_is_execute() noexcept final
-    { return m_nested_paging.nested_paging_vmexit_is_execute(); }
+    bool is_nested_paging_vmexit_execute() noexcept final
+    { return m_nested_paging.is_nested_paging_vmexit_execute(); }
 
-    bool nested_paging_vmexit_is_violation() noexcept final
-    { return m_nested_paging.nested_paging_vmexit_is_violation(); }
+    bool is_nested_paging_vmexit_violation() noexcept final
+    { return m_nested_paging.is_nested_paging_vmexit_violation(); }
 
-    bool nested_paging_vmexit_is_misconfiguration() noexcept final
-    { return m_nested_paging.nested_paging_vmexit_is_misconfiguration(); }
+    bool is_nested_paging_vmexit_misconfiguration() noexcept final
+    { return m_nested_paging.is_nested_paging_vmexit_misconfiguration(); }
 
     // ----------------------------- nmi seam ----------------------------------
-    void nmi_vmexit_enable() noexcept final
-    { return m_nmi.nmi_vmexit_enable(); }
+    void enable_nmi_vmexit() noexcept final
+    { return m_nmi.enable_nmi_vmexit(); }
 
-    void nmi_vmexit_disable() noexcept final
-    { return m_nmi.nmi_vmexit_disable(); }
+    void disable_nmi_vmexit() noexcept final
+    { return m_nmi.disable_nmi_vmexit(); }
 
-    void nmi_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_nmi.nmi_vmexit_handler_set(func); }
+    void set_nmi_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_nmi.set_nmi_vmexit_handler(func); }
 
-    void nmi_inject() noexcept final
-    { return m_nmi.nmi_inject(); }
+    void inject_nmi() noexcept final
+    { return m_nmi.inject_nmi(); }
 
     // -------------------------- nmi window seam ------------------------------
-    void nmi_window_vmexit_enable() noexcept final
-    { return m_nmi_window.nmi_window_vmexit_enable(); }
+    void enable_nmi_window_vmexit() noexcept final
+    { return m_nmi_window.enable_nmi_window_vmexit(); }
 
-    void nmi_window_vmexit_disable() noexcept final
-    { return m_nmi_window.nmi_window_vmexit_disable(); }
+    void disable_nmi_window_vmexit() noexcept final
+    { return m_nmi_window.disable_nmi_window_vmexit(); }
 
-    void nmi_window_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_nmi_window.nmi_window_vmexit_handler_set(func); }
+    void set_nmi_window_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_nmi_window.set_nmi_window_vmexit_handler(func); }
 
     // ----------------------- preemption timer seam ---------------------------
-    void preemption_timer_vmexit_enable() noexcept final
-    { return m_preemption_timer.preemption_timer_vmexit_enable(); }
+    void enable_preemption_timer_vmexit() noexcept final
+    { return m_preemption_timer.enable_preemption_timer_vmexit(); }
 
-    void preemption_timer_vmexit_disable() noexcept final
-    { return m_preemption_timer.preemption_timer_vmexit_disable(); }
+    void disable_preemption_timer_vmexit() noexcept final
+    { return m_preemption_timer.disable_preemption_timer_vmexit(); }
 
-    void preemption_timer_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_preemption_timer.preemption_timer_vmexit_handler_set(func); }
+    void set_preemption_timer_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_preemption_timer.set_preemption_timer_vmexit_handler(func); }
 
-    void preemption_timer_set(uint64_t value) noexcept final
-    { return m_preemption_timer.preemption_timer_set(value); }
+    void set_preemption_timer(uint64_t value) noexcept final
+    { return m_preemption_timer.set_preemption_timer(value); }
 
     // ----------------------------- rdmsr seam --------------------------------
-    void rdmsr_vmexit_enable(uint32_t msr_address) noexcept final
-    { return m_rdmsr.rdmsr_vmexit_enable(msr_address); }
+    void enable_rdmsr_vmexit(uint32_t msr_address) noexcept final
+    { return m_rdmsr.enable_rdmsr_vmexit(msr_address); }
 
-    void rdmsr_vmexit_range_enable(uint32_t begin, uint32_t end) noexcept final
-    { return m_rdmsr.rdmsr_vmexit_range_enable(begin, end); }
+    void enable_rdmsr_vmexit_range(uint32_t begin, uint32_t end) noexcept final
+    { return m_rdmsr.enable_rdmsr_vmexit_range(begin, end); }
 
-    void rdmsr_vmexit_disable(uint32_t msr_address) noexcept final
-    { return m_rdmsr.rdmsr_vmexit_disable(msr_address); }
+    void disable_rdmsr_vmexit(uint32_t msr_address) noexcept final
+    { return m_rdmsr.disable_rdmsr_vmexit(msr_address); }
 
-    void rdmsr_vmexit_range_disable(uint32_t begin, uint32_t end) noexcept final
-    { return m_rdmsr.rdmsr_vmexit_range_disable(begin, end); }
+    void disable_rdmsr_vmexit_range(uint32_t begin, uint32_t end) noexcept final
+    { return m_rdmsr.disable_rdmsr_vmexit_range(begin, end); }
 
-    void rdmsr_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_rdmsr.rdmsr_vmexit_handler_set(func); }
+    void set_rdmsr_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_rdmsr.set_rdmsr_vmexit_handler(func); }
 
-    uint32_t rdmsr_vmexit_address_get() noexcept final
-    { return m_rdmsr.rdmsr_vmexit_address_get(); }
+    uint32_t get_rdmsr_vmexit_address() noexcept final
+    { return m_rdmsr.get_rdmsr_vmexit_address(); }
 
-    void rdmsr_execute() noexcept final
-    { return m_rdmsr.rdmsr_execute(); }
+    void execute_rdmsr() noexcept final
+    { return m_rdmsr.execute_rdmsr(); }
 
-    void rdmsr_emulate(uint64_t value) noexcept final
-    { return m_rdmsr.rdmsr_emulate(value); }
+    void emulate_rdmsr(uint64_t value) noexcept final
+    { return m_rdmsr.emulate_rdmsr(value); }
 
     // ------------------------- sipi signal seam ------------------------------
-    void sipi_signal_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_sipi_signal.sipi_signal_vmexit_handler_set(func); }
+    void set_sipi_signal_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_sipi_signal.set_sipi_signal_vmexit_handler(func); }
 
     // ----------------------------- vmcall seam -------------------------------
-    void vmcall_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_vmcall.vmcall_vmexit_handler_set(func); }
+    void set_vmcall_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_vmcall.set_vmcall_vmexit_handler(func); }
 
     // ----------------------------- vmexit seam -------------------------------
-    uint32_t vmexit_reason_get() noexcept final
-    { return m_vmexit.vmexit_reason_get(); }
+    uint32_t get_vmexit_reason() noexcept final
+    { return m_vmexit.get_vmexit_reason(); }
 
-    uint32_t vmexit_qualification_get() noexcept final
-    { return m_vmexit.vmexit_qualification_get(); }
+    uint32_t get_vmexit_qualification() noexcept final
+    { return m_vmexit.get_vmexit_qualification(); }
 
-    void vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_vmexit.vmexit_handler_set(func); }
+    void set_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_vmexit.set_vmexit_handler(func); }
 
-    void post_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_vmexit.post_vmexit_handler_set(func); }
+    void set_post_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_vmexit.set_post_vmexit_handler(func); }
 
     // ------------------------------ vpid seam --------------------------------
-    void vpid_enable() noexcept final
-    { return m_vpid.vpid_enable(); }
+    void enable_vpid() noexcept final
+    { return m_vpid.enable_vpid(); }
 
     // ----------------------------- wrmsr seam --------------------------------
-    void wrmsr_vmexit_enable(uint32_t msr_address) noexcept final
-    { return m_wrmsr.wrmsr_vmexit_enable(msr_address); }
+    void enable_wrmsr_vmexit(uint32_t msr_address) noexcept final
+    { return m_wrmsr.enable_wrmsr_vmexit(msr_address); }
 
-    void wrmsr_vmexit_range_enable(uint32_t begin, uint32_t end) noexcept final
-    { return m_wrmsr.wrmsr_vmexit_range_enable(begin, end); }
+    void enable_wrmsr_vmexit_range(uint32_t begin, uint32_t end) noexcept final
+    { return m_wrmsr.enable_wrmsr_vmexit_range(begin, end); }
 
-    void wrmsr_vmexit_disable(uint32_t msr_address) noexcept final
-    { return m_wrmsr.wrmsr_vmexit_disable(msr_address); }
+    void disable_wrmsr_vmexit(uint32_t msr_address) noexcept final
+    { return m_wrmsr.disable_wrmsr_vmexit(msr_address); }
 
-    void wrmsr_vmexit_range_disable(uint32_t begin, uint32_t end) noexcept final
-    { return m_wrmsr.wrmsr_vmexit_range_disable(begin, end); }
+    void disable_wrmsr_vmexit_range(uint32_t begin, uint32_t end) noexcept final
+    { return m_wrmsr.disable_wrmsr_vmexit_range(begin, end); }
 
-    void wrmsr_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_wrmsr.wrmsr_vmexit_handler_set(func); }
+    void set_wrmsr_vmexit_handler(x64_vcpu_delegate func) noexcept final
+    { return m_wrmsr.set_wrmsr_vmexit_handler(func); }
 
-    uint32_t wrmsr_vmexit_address_get() noexcept final
-    { return m_wrmsr.wrmsr_vmexit_address_get(); }
+    uint32_t get_wrmsr_vmexit_address() noexcept final
+    { return m_wrmsr.get_wrmsr_vmexit_address(); }
 
-    uint64_t wrmsr_vmexit_value_get() noexcept final
-    { return m_wrmsr.wrmsr_vmexit_value_get(); }
+    uint64_t get_wrmsr_vmexit_value() noexcept final
+    { return m_wrmsr.get_wrmsr_vmexit_value(); }
 
-    void wrmsr_execute() noexcept final
-    { return m_wrmsr.wrmsr_execute(); }
+    void execute_wrmsr() noexcept final
+    { return m_wrmsr.execute_wrmsr(); }
 
-    void wrmsr_emulate(uint64_t value) noexcept final
-    { return m_wrmsr.wrmsr_emulate(value); }
+    void emulate_wrmsr(uint64_t value) noexcept final
+    { return m_wrmsr.emulate_wrmsr(value); }
 
     // ------------------------------ xcr0 seam --------------------------------
-    void xcr0_write_vmexit_handler_set(x64_vcpu_delegate func)
-    { return m_xcr0.xcr0_write_vmexit_handler_set(func); }
+    void set_xcr0_write_vmexit_handler(x64_vcpu_delegate func)
+    { return m_xcr0.set_xcr0_write_vmexit_handler(func); }
 
 private:
     execute_type m_execute{};

@@ -21,58 +21,58 @@ void emulate_ia32_efer_read(x64_vcpu &vcpu) noexcept
 {
     uint64_t emulated_msr = pal::ia32_efer::get();
     pal::ia32_efer::lma::disable(emulated_msr);
-    vcpu.rdmsr_emulate(emulated_msr);
+    vcpu.emulate_rdmsr(emulated_msr);
 }
 
 void emulate_ia32_efer_write(x64_vcpu &vcpu) noexcept
 {
-    uint64_t emulated_value = vcpu.wrmsr_vmexit_value_get();
+    uint64_t emulated_value = vcpu.get_wrmsr_vmexit_value();
     pal::ia32_efer::lme::disable(emulated_value);
-    vcpu.wrmsr_emulate(emulated_value);
+    vcpu.emulate_wrmsr(emulated_value);
 }
 
-void rdmsr_vmexit_handler(x64_vcpu &vcpu) noexcept
+void handle_rdmsr_vmexit(x64_vcpu &vcpu) noexcept
 {
-    uint64_t msr_address = vcpu.rdmsr_vmexit_address_get(); 
+    uint64_t msr_address = vcpu.get_rdmsr_vmexit_address(); 
 
     switch(msr_address) {
         case pal::ia32_efer::address:
             emulate_ia32_efer_read(vcpu);
         default:
-            vcpu.rdmsr_execute();
+            vcpu.execute_rdmsr();
     }
 
-    vcpu.instruction_pointer_advance();
+    vcpu.advance_instruction_pointer();
     vcpu.run();
 }
 
-void wrmsr_vmexit_handler(x64_vcpu &vcpu) noexcept
+void handle_wrmsr_vmexit(x64_vcpu &vcpu) noexcept
 {
-    uint64_t msr_address = vcpu.wrmsr_vmexit_address_get(); 
+    uint64_t msr_address = vcpu.get_wrmsr_vmexit_address(); 
 
     switch(msr_address) {
         case pal::ia32_efer::address:
             emulate_ia32_efer_write(vcpu);
         default:
-            vcpu.wrmsr_execute();
+            vcpu.execute_wrmsr();
     }
 
-    vcpu.instruction_pointer_advance();
+    vcpu.advance_instruction_pointer();
     vcpu.run();
 }
 
-void root_vcpu_init(x64_vcpu &vcpu) noexcept
+void init_root_vcpu(x64_vcpu &vcpu) noexcept
 {
-    vcpu.rdmsr_vmexit_handler_set(rdmsr_vmexit_handler);
-    vcpu.rdmsr_vmexit_enable(pal::ia32_efer::address);
+    vcpu.set_rdmsr_vmexit_handler(handle_rdmsr_vmexit);
+    vcpu.enable_rdmsr_vmexit(pal::ia32_efer::address);
 
-    vcpu.wrmsr_vmexit_handler_set(wrmsr_vmexit_handler);
-    vcpu.wrmsr_vmexit_enable(pal::ia32_efer::address);
+    vcpu.set_wrmsr_vmexit_handler(handle_wrmsr_vmexit);
+    vcpu.enable_wrmsr_vmexit(pal::ia32_efer::address);
 }
 
-bsl::errc_type vmm_init(x64_vm &root_vm, x64_platform &platform) noexcept
+bsl::errc_type init_vmm(x64_vm &root_vm, x64_platform &platform) noexcept
 {
-    root_vm.vcpu_init_handler_set(root_vcpu_init);
+    root_vm.set_vcpu_init_handler(init_root_vcpu);
     return 0;
 }
 

@@ -11,25 +11,25 @@ class intel_preemption_timer :
 {
 public:
 
-    void preemption_timer_vmexit_enable() noexcept
+    void enable_preemption_timer_vmexit() noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void preemption_timer_vmexit_disable() noexcept
+    void disable_preemption_timer_vmexit() noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void preemption_timer_vmexit_handler_set(x64_vcpu_delegate func)
+    void set_preemption_timer_vmexit_handler(x64_vcpu_delegate func)
     {
         // TODO: Implement Me!
         return;
     }
 
-    void preemption_timer_set(uint64_t value) noexcept
+    void set_preemption_timer(uint64_t value) noexcept
     {
         // TODO: Implement Me!
         return;

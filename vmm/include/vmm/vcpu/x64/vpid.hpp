@@ -8,7 +8,7 @@ class vpid
 {
 public:
 
-    virtual void vpid_enable() noexcept = 0;
+    virtual void enable_vpid() noexcept = 0;
 
     virtual ~vpid() noexcept = default;
 protected:

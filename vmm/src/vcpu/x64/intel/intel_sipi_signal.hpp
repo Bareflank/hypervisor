@@ -11,7 +11,7 @@ class intel_sipi_signal :
 {
 public:
 
-    void sipi_signal_vmexit_handler_set(x64_vcpu_delegate func)
+    void set_sipi_signal_vmexit_handler(x64_vcpu_delegate func)
     {
         // TODO: Implement Me!
         return;

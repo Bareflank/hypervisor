@@ -12,20 +12,20 @@ public:
 
     /// @brief Enable vmexits for all non-maskable interrupts that arrive
     ///     during execution of a vcpu
-    virtual void nmi_vmexit_enable() noexcept = 0;
+    virtual void enable_nmi_vmexit() noexcept = 0;
 
     /// @brief Disable vmexits for all non-maskable interrupts that arrive
     ///     during execution of a vcpu
-    virtual void nmi_vmexit_disable() noexcept = 0;
+    virtual void disable_nmi_vmexit() noexcept = 0;
 
     /// @brief Set a vmexit handler that will be called for all vmexits caused
     ///     by arrival of a non-maskable interrupt while a vcpu is executing.
     ///
     /// @param func The delegate function to be called
-    virtual void nmi_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
+    virtual void set_nmi_vmexit_handler(x64_vcpu_delegate func) noexcept = 0;
 
     /// @brief Inject a non-maskable interrupt into a vcpu
-    virtual void nmi_inject() noexcept = 0;
+    virtual void inject_nmi() noexcept = 0;
 
     virtual ~nmi() noexcept = default;
 protected:

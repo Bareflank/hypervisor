@@ -18,15 +18,15 @@ class x64_vm_seam :
 public:
 
     // ------------------------- vm_property seam ------------------------------
-    uint32_t id_get() noexcept final
-    { return m_vm_property_type.id_get(); }
+    uint32_t get_id() noexcept final
+    { return m_vm_property_type.get_id(); }
 
     // ------------------------- x64_vcpu_op seam ------------------------------
-    void vcpu_init_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_vcpu_ops.vcpu_init_handler_set(func); }
+    void set_vcpu_init_handler(x64_vcpu_delegate func) noexcept final
+    { return m_vcpu_ops.set_vcpu_init_handler(func); }
 
-    void vcpu_fini_handler_set(x64_vcpu_delegate func) noexcept final
-    { return m_vcpu_ops.vcpu_fini_handler_set(func); }
+    void set_vcpu_fini_handler(x64_vcpu_delegate func) noexcept final
+    { return m_vcpu_ops.set_vcpu_fini_handler(func); }
 
 private:
     vm_property_type m_vm_property_type;

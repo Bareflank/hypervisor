@@ -11,24 +11,24 @@ class intel_vmexit :
 {
 public:
 
-    uint32_t vmexit_reason_get() noexcept
+    uint32_t get_vmexit_reason() noexcept
     {
         // TODO: Implement me!
         return 0;
     }
     
-    uint32_t vmexit_qualification_get() noexcept
+    uint32_t get_vmexit_qualification() noexcept
     {
         // TODO: Implement me!
         return 0;
     }
     
-    void vmexit_handler_set(x64_vcpu_delegate func)
+    void set_vmexit_handler(x64_vcpu_delegate func)
     {
         // TODO: Implement me!
     }
 
-    void post_vmexit_handler_set(x64_vcpu_delegate func)
+    void set_post_vmexit_handler(x64_vcpu_delegate func)
     {
         // TODO: Implement me!
     }

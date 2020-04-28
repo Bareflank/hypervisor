@@ -5,6 +5,7 @@
 #include <platform/x64/x64_platform_seam.hpp>
 #include <platform/common_acpi.hpp>
 #include <platform/common_loader.hpp>
+#include <platform/x64/x64_memory.hpp>
 
 #include <vm/x64/x64_vm_seam.hpp>
 #include <vm/common_vm_property.hpp>
@@ -41,7 +42,8 @@ namespace vmm
 {
     typedef x64_platform_seam<
         common_acpi,
-        common_loader
+        common_loader,
+        x64_memory
     > platform_type;
 
     typedef x64_vcpu_seam<
@@ -86,7 +88,7 @@ namespace vmm
     > g_vmm{};
 
     x64_vm &
-    x64_vm_create(uint32_t n_vcpus) noexcept
+    create_x64_vm(uint32_t n_vcpus) noexcept
     { return g_vmm.make_virtual_machine(n_vcpus); }
 
     bsl::errc_type
@@ -98,7 +100,7 @@ namespace vmm
 
         x64_platform &platform = g_vmm.platform_instance();
 
-        vmm_init(root_vm, platform);
+        init_vmm(root_vm, platform);
         return bsl::exit_failure;
     }
 

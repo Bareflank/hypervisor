@@ -11,22 +11,22 @@ class intel_nmi :
 {
 public:
 
-    void nmi_vmexit_enable() noexcept
+    void enable_nmi_vmexit() noexcept
     {
         return;
     }
 
-    void nmi_vmexit_disable() noexcept
+    void disable_nmi_vmexit() noexcept
     {
         return;
     }
 
-    void nmi_vmexit_handler_set(x64_vcpu_delegate func)
+    void set_nmi_vmexit_handler(x64_vcpu_delegate func)
     {
         return;
     }
 
-    void nmi_inject() noexcept
+    void inject_nmi() noexcept
     {
         return;
     }

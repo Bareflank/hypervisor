@@ -11,14 +11,14 @@ class x64_vcpu_op:
 {
 public:
 
-    void vcpu_init_handler_set(x64_vcpu_delegate func) noexcept final
+    void set_vcpu_init_handler(x64_vcpu_delegate func) noexcept final
     {
         // TODO: Implement Me!
         return;
     }
 
     void
-    vcpu_fini_handler_set(x64_vcpu_delegate func) noexcept final
+    set_vcpu_fini_handler(x64_vcpu_delegate func) noexcept final
     {
         // TODO: Implement Me!
         return;

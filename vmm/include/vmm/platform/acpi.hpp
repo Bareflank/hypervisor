@@ -14,13 +14,13 @@ public:
     ///     Descriptor Table (RSDP), or 0 if it does not exist
     ///
     /// @return The host physical address of the RSDP, or 0 if it does not exist
-    virtual uintptr_t acpi_rsdp_hpa_get() noexcept = 0;
+    virtual uintptr_t get_acpi_rsdp_hpa() noexcept = 0;
 
     /// @brief Returns the base host physical address of the ACPI DMA Remapping
     ///     Reporting Structure (DMAR), or 0 if it does not exist
     ///
     /// @return The host physical address of the DMAR, or 0 if it does not exist
-    virtual uintptr_t acpi_dmar_hpa_get() noexcept = 0;
+    virtual uintptr_t get_acpi_dmar_hpa() noexcept = 0;
 
     virtual ~acpi() noexcept = default;
 protected:
