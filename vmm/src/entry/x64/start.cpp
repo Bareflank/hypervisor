@@ -88,7 +88,7 @@ namespace vmm
     > g_vmm{};
 
     x64_vm &
-    x64_vm_create(uint32_t n_vcpus) noexcept
+    create_x64_vm(uint32_t n_vcpus) noexcept
     { return g_vmm.make_virtual_machine(n_vcpus); }
 
     bsl::errc_type
@@ -100,7 +100,7 @@ namespace vmm
 
         x64_platform &platform = g_vmm.platform_instance();
 
-        vmm_init(root_vm, platform);
+        init_vmm(root_vm, platform);
         return bsl::exit_failure;
     }
 

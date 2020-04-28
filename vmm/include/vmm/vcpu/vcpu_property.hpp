@@ -14,7 +14,7 @@ public:
     /// @brief Returns the vcpu's id
     ///
     /// @return The vcpu's id
-    virtual id_type id_get() noexcept = 0;
+    virtual id_type get_id() noexcept = 0;
 
     /// @brief Returns true if this is the vcpu used to bootstrap the rest of
     /// the vmm (i.e. the vcpu that runs first when the vmm is loading)

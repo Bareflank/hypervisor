@@ -12,7 +12,7 @@ class intel_vpid :
 public:
 
     void
-    vpid_enable() noexcept final
+    enable_vpid() noexcept final
     {
         // TODO: Implement Me!
     }

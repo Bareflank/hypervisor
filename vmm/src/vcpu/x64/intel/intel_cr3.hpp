@@ -11,57 +11,57 @@ class intel_cr3 :
 {
 public:
 
-    void cr3_read_vmexit_enable() noexcept
+    void enable_cr3_read_vmexit() noexcept
     {
         return;
     }
 
-    void cr3_read_vmexit_disable() noexcept
+    void disable_cr3_read_vmexit() noexcept
     {
         return;
     }
 
-    void cr3_read_vmexit_handler_set(x64_vcpu_delegate func)
+    void set_cr3_read_vmexit_handler(x64_vcpu_delegate func)
     {
         return;
     }
 
-    void cr3_read_execute() noexcept
+    void execute_cr3_read() noexcept
     {
         return;
     }
 
-    void cr3_read_emulate(uint64_t cr3_value) noexcept
+    void emulate_cr3_read(uint64_t cr3_value) noexcept
     {
         return;
     }
 
-    void cr3_write_vmexit_enable() noexcept
+    void enable_cr3_write_vmexit() noexcept
     {
         return;
     }
 
-    void cr3_write_vmexit_disable() noexcept
+    void disable_cr3_write_vmexit() noexcept
     {
         return;
     }
 
-    void cr3_write_vmexit_handler_set(x64_vcpu_delegate func)
+    void set_cr3_write_vmexit_handler(x64_vcpu_delegate func)
     {
         return;
     }
 
-    uint64_t cr3_write_vmexit_value_get() noexcept
+    uint64_t get_cr3_write_vmexit_value() noexcept
     {
         return 0;
     }
 
-    void cr3_write_execute() noexcept
+    void execute_cr3_write() noexcept
     {
         return;
     }
 
-    void cr3_write_emulate(uint64_t cr3_value) noexcept
+    void emulate_cr3_write(uint64_t cr3_value) noexcept
     {
         return;
     }

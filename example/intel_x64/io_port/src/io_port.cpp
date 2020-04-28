@@ -21,47 +21,47 @@ constexpr const uint16_t emulated_range_high = 0xBFF;
 
 void handle_in(x64_vcpu &vcpu) noexcept
 {
-    uint64_t port = vcpu.io_port_vmexit_port_number_get(); 
+    uint64_t port = vcpu.get_io_port_vmexit_port_number(); 
 
     if ((port > emulated_range_low) && (port < emulated_range_high)) {
-        vcpu.io_port_in_emulate(0xBFBFBFBF);
+        vcpu.emulate_io_port_in(0xBFBFBFBF);
     }
     else {
-        vcpu.io_port_in_execute();
+        vcpu.execute_io_port_in();
     }
 }
 
 void handle_out(x64_vcpu &vcpu) noexcept
 {
-    uint64_t port = vcpu.io_port_vmexit_port_number_get(); 
+    uint64_t port = vcpu.get_io_port_vmexit_port_number(); 
 
     if ((port < emulated_range_low) || (port > emulated_range_high)) {
-        vcpu.io_port_out_execute();
+        vcpu.execute_io_port_out();
     }
 }
 
-void io_port_vmexit_handler(x64_vcpu &vcpu) noexcept
+void handle_io_port_vmexit(x64_vcpu &vcpu) noexcept
 {
-    if (vcpu.io_port_vmexit_is_in()) {
+    if (vcpu.is_io_port_vmexit_in()) {
         handle_in(vcpu);
     }
-    else if(vcpu.io_port_vmexit_is_out()) {
+    else if(vcpu.is_io_port_vmexit_out()) {
         handle_out(vcpu);
     }
 
-    vcpu.instruction_pointer_advance();
+    vcpu.advance_instruction_pointer();
     vcpu.run();
 }
 
-void root_vcpu_init(x64_vcpu &vcpu) noexcept
+void init_root_vcpu(x64_vcpu &vcpu) noexcept
 {
-    vcpu.io_port_vmexit_handler_set(io_port_vmexit_handler);
-    vcpu.io_port_vmexit_range_enable(emulated_range_low, emulated_range_high);
+    vcpu.set_io_port_vmexit_handler(handle_io_port_vmexit);
+    vcpu.enable_io_port_vmexit_range(emulated_range_low, emulated_range_high);
 }
 
-bsl::errc_type vmm_init(x64_vm &root_vm, x64_platform &platform) noexcept
+bsl::errc_type init_vmm(x64_vm &root_vm, x64_platform &platform) noexcept
 {
-    root_vm.vcpu_init_handler_set(root_vcpu_init);
+    root_vm.set_vcpu_init_handler(init_root_vcpu);
     return 0;
 }
 

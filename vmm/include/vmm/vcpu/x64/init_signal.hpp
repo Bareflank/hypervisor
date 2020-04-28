@@ -14,7 +14,7 @@ public:
     ///     by an init signal while a vcpu is executing.
     ///
     /// @param func The delegate function to be called
-    virtual void init_signal_vmexit_handler_set(x64_vcpu_delegate func) noexcept = 0;
+    virtual void set_init_signal_vmexit_handler(x64_vcpu_delegate func) noexcept = 0;
 
     virtual ~init_signal() noexcept = default;
 protected:

@@ -11,7 +11,7 @@ class intel_vmcall :
 {
 public:
 
-    void vmcall_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
+    void set_vmcall_vmexit_handler(x64_vcpu_delegate func) noexcept final
     {
         // TODO: Implement Me!
         return;

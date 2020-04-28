@@ -17,22 +17,22 @@ class x64_platform_seam :
 public:
 
     // ---------------------------- acpi seam ----------------------------------
-    uintptr_t acpi_rsdp_hpa_get() noexcept final
-    { return m_acpi_type.acpi_rsdp_hpa_get(); }
+    uintptr_t get_acpi_rsdp_hpa() noexcept final
+    { return m_acpi_type.get_acpi_rsdp_hpa(); }
 
-    uintptr_t acpi_dmar_hpa_get() noexcept final
-    { return m_acpi_type.acpi_dmar_hpa_get(); }
+    uintptr_t get_acpi_dmar_hpa() noexcept final
+    { return m_acpi_type.get_acpi_dmar_hpa(); }
 
     // --------------------------- loader seam ---------------------------------
-    uintptr_t loader_wakeup_entry_point_hpa_get() noexcept final
-    { return m_loader_type.loader_wakeup_entry_point_hpa_get(); }
+    uintptr_t get_loader_wakeup_entry_point_hpa() noexcept final
+    { return m_loader_type.get_loader_wakeup_entry_point_hpa(); }
 
-    bool loader_is_late_launch() noexcept final
-    { return m_loader_type.loader_is_late_launch(); }
+    bool is_late_launch() noexcept final
+    { return m_loader_type.is_late_launch(); }
 
     // --------------------------- memory seam ---------------------------------
-    void * hva_map_alloc(uintptr_t hpa, uintmax_t size, page_size ps, memory_type mt) noexcept final
-    { return m_memory_type.hva_map_alloc(hpa, size, ps, mt); }
+    void * alloc_hva_map(uintptr_t hpa, uintmax_t size, page_size ps, memory_type mt) noexcept final
+    { return m_memory_type.alloc_hva_map(hpa, size, ps, mt); }
 
     uintptr_t hva_to_hpa(void * hva) noexcept final
     { return m_memory_type.hva_to_hpa(hva); }

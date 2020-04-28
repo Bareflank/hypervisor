@@ -4,7 +4,7 @@
 namespace vmm
 {
 
-void hello_world_vcpu_init(x64_vcpu &vcpu) noexcept
+void init_hello_world_vcpu(x64_vcpu &vcpu) noexcept
 {
     // The following would print once on each host vcpu right after it is
     // initilized
@@ -13,7 +13,7 @@ void hello_world_vcpu_init(x64_vcpu &vcpu) noexcept
     return;
 }
 
-void hello_world_vcpu_fini(x64_vcpu &vcpu) noexcept
+void fini_hello_world_vcpu(x64_vcpu &vcpu) noexcept
 {
     // The following would print once on each host vcpu right before it is
     // destroyed
@@ -22,10 +22,10 @@ void hello_world_vcpu_fini(x64_vcpu &vcpu) noexcept
     return;
 }
 
-bsl::errc_type vmm_init(x64_vm &root_vm, x64_platform &platform) noexcept
+bsl::errc_type init_vmm(x64_vm &root_vm, x64_platform &platform) noexcept
 {
-    root_vm.vcpu_init_handler_set(hello_world_vcpu_init);
-    root_vm.vcpu_fini_handler_set(hello_world_vcpu_fini);
+    root_vm.set_vcpu_init_handler(init_hello_world_vcpu);
+    root_vm.set_vcpu_fini_handler(fini_hello_world_vcpu);
 
     // The following would print once from a vmx-root context on the bootstrap
     // vcpu, before any of the other print statements

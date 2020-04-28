@@ -11,7 +11,7 @@ class intel_xcr0 :
 {
 public:
 
-    void xcr0_write_vmexit_handler_set(x64_vcpu_delegate func)
+    void set_xcr0_write_vmexit_handler(x64_vcpu_delegate func)
     {
         // TODO: Implement Me!
         return;

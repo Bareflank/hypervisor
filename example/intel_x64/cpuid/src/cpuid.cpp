@@ -9,29 +9,29 @@
 namespace vmm
 {
 
-void cpuid_vmexit_handler(x64_vcpu &vcpu) noexcept
+void handle_cpuid_vmexit(x64_vcpu &vcpu) noexcept
 {
-    uint64_t leaf = vcpu.cpuid_vmexit_leaf_get(); 
+    uint64_t leaf = vcpu.get_cpuid_vmexit_leaf(); 
 
     switch(leaf) {
         case 0xBF000000:
-            vcpu.cpuid_emulate(0xBFBFBFBF, 0, 0xFFFFFFFF, 0xA55A5AA5);
+            vcpu.emulate_cpuid(0xBFBFBFBF, 0, 0xFFFFFFFF, 0xA55A5AA5);
         default:
-            vcpu.cpuid_execute();
+            vcpu.execute_cpuid();
     }
 
-    vcpu.instruction_pointer_advance();
+    vcpu.advance_instruction_pointer();
     vcpu.run();
 }
 
-void root_vcpu_init(x64_vcpu &vcpu) noexcept
+void init_root_vcpu(x64_vcpu &vcpu) noexcept
 {
-    vcpu.cpuid_vmexit_handler_set(cpuid_vmexit_handler);
+    vcpu.set_cpuid_vmexit_handler(handle_cpuid_vmexit);
 }
 
-bsl::errc_type vmm_init(x64_vm &root_vm, x64_platform &platform) noexcept
+bsl::errc_type init_vmm(x64_vm &root_vm, x64_platform &platform) noexcept
 {
-    root_vm.vcpu_init_handler_set(root_vcpu_init);
+    root_vm.set_vcpu_init_handler(init_root_vcpu);
     return 0;
 }
 

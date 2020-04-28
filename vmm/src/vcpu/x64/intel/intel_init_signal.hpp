@@ -11,7 +11,7 @@ class intel_init_signal :
 {
 public:
 
-    void init_signal_vmexit_handler_set(x64_vcpu_delegate func)
+    void set_init_signal_vmexit_handler(x64_vcpu_delegate func)
     {
         // TODO: Implement Me!
         return;

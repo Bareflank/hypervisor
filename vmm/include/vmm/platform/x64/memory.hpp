@@ -23,7 +23,7 @@ public:
     ///
     /// @return A host virtual address that may be used to access the mapped host
     ///     physical address range
-    virtual void * hva_map_alloc(uintptr_t hpa, uintmax_t size,
+    virtual void * alloc_hva_map(uintptr_t hpa, uintmax_t size,
                             page_size ps=page_size::page_4k,
                             memory_type mt=memory_type::write_back) = 0;
 
@@ -38,10 +38,10 @@ public:
     /// @return A host virtual address that may be used to access the mapped host
     ///     physical address range
     template<typename T>
-    T * hva_map_alloc(uintptr_t hpa, uintmax_t size,
+    T * alloc_hva_map(uintptr_t hpa, uintmax_t size,
                         page_size ps=page_size::page_4k,
                         memory_type mt=memory_type::write_back)
-    { return static_cast<T*>(hva_map_alloc(hpa, size, ps, mt)); }
+    { return static_cast<T*>(alloc_hva_map(hpa, size, ps, mt)); }
       
     /// @brief Resolve the mapping for the given host virtual address to the host
     ///     physical address it is mapped to.

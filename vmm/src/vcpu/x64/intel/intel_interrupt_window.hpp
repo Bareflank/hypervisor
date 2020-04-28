@@ -11,17 +11,17 @@ class intel_interrupt_window :
 {
 public:
 
-    void interrupt_window_vmexit_enable() noexcept
+    void enable_interrupt_window_vmexit() noexcept
     {
         return;
     }
 
-    void interrupt_window_vmexit_disable() noexcept
+    void disable_interrupt_window_vmexit() noexcept
     {
         return;
     }
 
-    void interrupt_window_vmexit_handler_set(x64_vcpu_delegate func)
+    void set_interrupt_window_vmexit_handler(x64_vcpu_delegate func)
     {
         return;
     }

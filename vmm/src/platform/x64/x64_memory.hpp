@@ -11,7 +11,7 @@ class x64_memory:
 {
 public:
 
-    void * hva_map_alloc(uintptr_t hpa, uintmax_t size, page_size ps, memory_type mt)
+    void * alloc_hva_map(uintptr_t hpa, uintmax_t size, page_size ps, memory_type mt)
     {
         // TODO: Implement Me!
         return static_cast<void *>(nullptr);

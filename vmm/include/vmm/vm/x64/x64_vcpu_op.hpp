@@ -11,8 +11,8 @@ class vcpu_op
 {
 public:
 
-    virtual void vcpu_init_handler_set(x64_vcpu_delegate func) noexcept = 0;
-    virtual void vcpu_fini_handler_set(x64_vcpu_delegate func) noexcept = 0;
+    virtual void set_vcpu_init_handler(x64_vcpu_delegate func) noexcept = 0;
+    virtual void set_vcpu_fini_handler(x64_vcpu_delegate func) noexcept = 0;
 
     virtual ~vcpu_op() noexcept = default;
 protected:

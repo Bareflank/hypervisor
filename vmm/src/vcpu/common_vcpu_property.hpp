@@ -11,13 +11,13 @@ class common_vcpu_property :
 {
 public:
 
-    id_type id_get() noexcept
+    id_type get_id() noexcept
     {
         // TODO: Implement me!
         return 0;
     }
 
-    void id_set(id_type value) noexcept
+    void set_id(id_type value) noexcept
     {
         // TODO: Implement me!
         return;

@@ -11,85 +11,85 @@ class intel_io_port :
 {
 public:
 
-    void io_port_vmexit_enable(uint16_t port_number) noexcept
+    void enable_io_port_vmexit(uint16_t port_number) noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void io_port_vmexit_range_enable(uint16_t begin, uint16_t end) noexcept
+    void enable_io_port_vmexit_range(uint16_t begin, uint16_t end) noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void io_port_vmexit_disable(uint16_t port_number) noexcept
+    void disable_io_port_vmexit(uint16_t port_number) noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void io_port_vmexit_range_disable(uint16_t begin, uint16_t end) noexcept
+    void disable_io_port_vmexit_range(uint16_t begin, uint16_t end) noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void io_port_vmexit_handler_set(x64_vcpu_delegate func) noexcept
+    void set_io_port_vmexit_handler(x64_vcpu_delegate func) noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    uint64_t io_port_vmexit_size_get() noexcept
+    uint64_t get_io_port_vmexit_size() noexcept
     {
         // TODO: Implement Me!
         return 0;
     }
 
-    bool io_port_vmexit_is_in() noexcept
+    bool is_io_port_vmexit_in() noexcept
     {
         // TODO: Implement Me!
         return false;
     }
 
-    bool io_port_vmexit_is_out() noexcept
+    bool is_io_port_vmexit_out() noexcept
     {
         // TODO: Implement Me!
         return false;
     }
 
-    uint16_t io_port_vmexit_port_number_get() noexcept
+    uint16_t get_io_port_vmexit_port_number() noexcept
     {
         // TODO: Implement Me!
         return 0;
     }
 
-    uint64_t io_port_vmexit_value_get() noexcept
+    uint64_t get_io_port_vmexit_value() noexcept
     {
         // TODO: Implement Me!
         return 0;
     }
 
-    void io_port_out_execute() noexcept
+    void execute_io_port_out() noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void io_port_out_emulate(uint64_t value) noexcept
+    void emulate_io_port_out(uint64_t value) noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void io_port_in_execute() noexcept
+    void execute_io_port_in() noexcept
     {
         // TODO: Implement Me!
         return;
     }
 
-    void io_port_in_emulate(uint64_t value) noexcept
+    void emulate_io_port_in(uint64_t value) noexcept
     {
         // TODO: Implement Me!
         return;

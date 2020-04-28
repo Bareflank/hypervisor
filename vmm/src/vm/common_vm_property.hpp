@@ -13,13 +13,13 @@ public:
 
     common_vm_property() noexcept = default;
 
-    uint32_t id_get() noexcept final
+    uint32_t get_id() noexcept final
     {
         // TODO: Implement Me!
         return 0;
     }
 
-    void id_set(uint32_t id) noexcept
+    void set_id(uint32_t id) noexcept
     {
         // TODO: Implement Me!
         return;

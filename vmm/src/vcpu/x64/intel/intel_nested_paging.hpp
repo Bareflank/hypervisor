@@ -11,61 +11,61 @@ class intel_nested_paging :
 {
 public:
 
-    void nested_paging_enable() noexcept final
+    void enable_nested_paging() noexcept final
     {
         // TODO: Implement Me!
         return;
     }
 
-    void nested_paging_disable() noexcept final
+    void disable_nested_paging() noexcept final
     {
         // TODO: Implement Me!
         return;
     }
 
-    void nested_paging_base_address_set(uintptr_t phys_addr) noexcept final
+    void set_nested_paging_base_address(uintptr_t phys_addr) noexcept final
     {
         // TODO: Implement Me!
         return;
     }
 
-    void nested_paging_violation_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
+    void set_nested_paging_violation_vmexit_handler(x64_vcpu_delegate func) noexcept final
     {
         // TODO: Implement Me!
         return;
     }
 
-    void nested_paging_misconfiguration_vmexit_handler_set(x64_vcpu_delegate func) noexcept final
+    void set_nested_paging_misconfiguration_vmexit_handler(x64_vcpu_delegate func) noexcept final
     {
         // TODO: Implement Me!
         return;
     }
 
-    bool nested_paging_vmexit_is_read() noexcept final
+    bool is_nested_paging_vmexit_read() noexcept final
     {
         // TODO: Implement Me!
         return false;
     }
 
-    bool nested_paging_vmexit_is_write() noexcept final
+    bool is_nested_paging_vmexit_write() noexcept final
     {
         // TODO: Implement Me!
         return false;
     }
 
-    bool nested_paging_vmexit_is_execute() noexcept final
+    bool is_nested_paging_vmexit_execute() noexcept final
     {
         // TODO: Implement Me!
         return false;
     }
 
-    bool nested_paging_vmexit_is_violation() noexcept final
+    bool is_nested_paging_vmexit_violation() noexcept final
     {
         // TODO: Implement Me!
         return false;
     }
 
-    bool nested_paging_vmexit_is_misconfiguration() noexcept final
+    bool is_nested_paging_vmexit_misconfiguration() noexcept final
     {
         // TODO: Implement Me!
         return false;

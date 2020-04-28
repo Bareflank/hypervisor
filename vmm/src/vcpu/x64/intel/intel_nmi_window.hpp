@@ -11,17 +11,17 @@ class intel_nmi_window :
 {
 public:
 
-    void nmi_window_vmexit_enable() noexcept
+    void enable_nmi_window_vmexit() noexcept
     {
         return;
     }
 
-    void nmi_window_vmexit_disable() noexcept
+    void disable_nmi_window_vmexit() noexcept
     {
         return;
     }
 
-    void nmi_window_vmexit_handler_set(x64_vcpu_delegate func)
+    void set_nmi_window_vmexit_handler(x64_vcpu_delegate func)
     {
         return;
     }

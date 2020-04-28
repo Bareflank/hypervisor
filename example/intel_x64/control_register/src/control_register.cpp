@@ -23,63 +23,63 @@
 namespace vmm
 {
 
-void cr0_write_vmexit_handler(x64_vcpu &vcpu) noexcept
+void handle_cr0_write_vmexit(x64_vcpu &vcpu) noexcept
 {
-    uint64_t emulated_cr0 = vcpu.cr0_write_vmexit_value_get();
+    uint64_t emulated_cr0 = vcpu.get_cr0_write_vmexit_value();
     pal::cr0::pe::enable(emulated_cr0);
     pal::cr0::pg::enable(emulated_cr0);
-    vcpu.cr0_write_emulate(emulated_cr0);
+    vcpu.emulate_cr0_write(emulated_cr0);
 
-    vcpu.instruction_pointer_advance();
+    vcpu.advance_instruction_pointer();
     vcpu.run();
 }
 
-void cr3_read_vmexit_handler(x64_vcpu &vcpu) noexcept
+void handle_cr3_read_vmexit(x64_vcpu &vcpu) noexcept
 {
-    vcpu.cr3_read_emulate(0xBADC0FFEE);
+    vcpu.emulate_cr3_read(0xBADC0FFEE);
 
-    vcpu.instruction_pointer_advance();
+    vcpu.advance_instruction_pointer();
     vcpu.run();
 }
 
-void cr3_write_vmexit_handler(x64_vcpu &vcpu) noexcept
+void handle_cr3_write_vmexit(x64_vcpu &vcpu) noexcept
 {
-    uint64_t cr3_value = vcpu.cr3_write_vmexit_value_get();
+    uint64_t cr3_value = vcpu.get_cr3_write_vmexit_value();
     if (cr3_value == 0x1337) {
         pal::cr3::dump();
     }
 
-    vcpu.instruction_pointer_advance();
+    vcpu.advance_instruction_pointer();
     vcpu.run();
 }
 
-void cr4_write_vmexit_handler(x64_vcpu &vcpu) noexcept
+void handle_cr4_write_vmexit(x64_vcpu &vcpu) noexcept
 {
-    uint64_t emulated_cr4 = vcpu.cr4_write_vmexit_value_get();
+    uint64_t emulated_cr4 = vcpu.get_cr4_write_vmexit_value();
     pal::cr4::vmxe::disable(emulated_cr4);
-    vcpu.cr4_write_emulate(emulated_cr4);
+    vcpu.emulate_cr4_write(emulated_cr4);
 
-    vcpu.instruction_pointer_advance();
+    vcpu.advance_instruction_pointer();
     vcpu.run();
 }
 
-void root_vcpu_init(x64_vcpu &vcpu) noexcept
+void init_root_vcpu(x64_vcpu &vcpu) noexcept
 {
-    vcpu.cr0_write_vmexit_handler_set(cr0_write_vmexit_handler);
-    vcpu.cr0_write_vmexit_enable();
+    vcpu.set_cr0_write_vmexit_handler(handle_cr0_write_vmexit);
+    vcpu.enable_cr0_write_vmexit();
 
-    vcpu.cr3_read_vmexit_handler_set(cr0_write_vmexit_handler);
-    vcpu.cr3_read_vmexit_enable();
-    vcpu.cr3_write_vmexit_handler_set(cr0_write_vmexit_handler);
-    vcpu.cr3_write_vmexit_enable();
+    vcpu.set_cr3_read_vmexit_handler(handle_cr3_write_vmexit);
+    vcpu.set_cr3_write_vmexit_handler(handle_cr3_write_vmexit);
+    vcpu.enable_cr3_read_vmexit();
+    vcpu.enable_cr3_write_vmexit();
 
-    vcpu.cr4_write_vmexit_handler_set(cr0_write_vmexit_handler);
-    vcpu.cr4_write_vmexit_enable();
+    vcpu.set_cr4_write_vmexit_handler(handle_cr4_write_vmexit);
+    vcpu.enable_cr4_write_vmexit();
 }
 
-bsl::errc_type vmm_init(x64_vm &root_vm, x64_platform &platform) noexcept
+bsl::errc_type init_vmm(x64_vm &root_vm, x64_platform &platform) noexcept
 {
-    root_vm.vcpu_init_handler_set(root_vcpu_init);
+    root_vm.set_vcpu_init_handler(init_root_vcpu);
     return 0;
 }
 

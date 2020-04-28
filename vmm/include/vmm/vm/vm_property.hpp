@@ -10,7 +10,7 @@ class vm_property
 {
 public:
 
-    virtual uint32_t id_get() noexcept = 0;
+    virtual uint32_t get_id() noexcept = 0;
 
     virtual ~vm_property() noexcept = default;
 protected:
