@@ -1,0 +1,15 @@
+if(HYPERVISOR_TARGET_ARCH STREQUAL "x86_64")
+    add_subdirectory(intel_x64/bare_minimum)
+    add_subdirectory(intel_x64/cpuid)
+    # TODO: translate the below examples over to the vmexit_context style APIs
+    # add_subdirectory(intel_x64/control_register)
+    # add_subdirectory(intel_x64/create_child_vm)
+    # add_subdirectory(intel_x64/io_port)
+    # add_subdirectory(intel_x64/memory)
+    # add_subdirectory(intel_x64/msr)
+    # add_subdirectory(intel_x64/properties)
+    # add_subdirectory(intel_x64/vmcall)
+    # add_subdirectory(intel_x64/vmexit)
+    # add_subdirectory(intel_x64/vmcs)
+endif()
+

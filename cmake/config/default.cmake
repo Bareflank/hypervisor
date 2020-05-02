@@ -32,10 +32,17 @@ hypervisor_add_config(
 )
 
 hypervisor_add_config(
-    CONFIG_NAME HYPERVISOR_BUILD_VMM
+    CONFIG_NAME HYPERVISOR_BUILD_MICROV_PLACEHOLDER
     CONFIG_TYPE BOOL
     DEFAULT_VAL ON
-    DESCRIPTION "Set true to build the vmm component"
+    DESCRIPTION "Set true to build the MicroV placeholder component"
+)
+
+hypervisor_add_config(
+    CONFIG_NAME HYPERVISOR_BUILD_KERNEL
+    CONFIG_TYPE BOOL
+    DEFAULT_VAL ON
+    DESCRIPTION "Set true to build the hypervisor kernel component"
 )
 
 hypervisor_add_config(
