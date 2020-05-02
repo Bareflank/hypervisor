@@ -7,7 +7,7 @@ target_sources(cpuid PRIVATE
     src/cpuid.cpp
 )
 
-target_link_libraries(cpuid vmm)
+target_link_libraries(cpuid microv)
 
 set_target_properties(cpuid PROPERTIES
     SUFFIX ".vmm"
