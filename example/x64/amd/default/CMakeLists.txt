@@ -18,3 +18,35 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+add_executable(example_x64_amd_default)
+
+target_include_directories(example_x64_amd_default PRIVATE
+    src
+)
+
+target_sources(example_x64_amd_default PRIVATE
+    src/start.s
+    src/main.cpp
+)
+
+target_link_libraries(example_x64_amd_default PRIVATE
+    bsl
+    pal
+    extension
+)
+
+target_compile_options(example_x64_amd_default PRIVATE
+    "-c"
+    "-Wno-unused-command-line-argument"
+    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},x86_64>:--target=x86_64-unknown-linux-gnu>"
+    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},AMD64>:--target=amd64-unknown-linux-gnu>"
+    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},armv8a>:--target=aarch64-unknown-linux-gnu>"
+)
+
+target_link_options(example_x64_amd_default PRIVATE
+    "-Wno-unused-command-line-argument"
+    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},x86_64>:--target=x86_64-unknown-linux-gnu>"
+    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},AMD64>:--target=amd64-unknown-linux-gnu>"
+    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},armv8a>:--target=aarch64-unknown-linux-gnu>"
+)

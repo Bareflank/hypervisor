@@ -22,14 +22,30 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef KERNEL_VMEXIT_CONTEXT_HPP
-#define KERNEL_VMEXIT_CONTEXT_HPP
+#include <bsl/cstdint.hpp>
+#include <bsl/climits.hpp>
+#include <bsl/main.hpp>
 
-namespace kernel
+extern "C"
 {
+    extern bsl::uintptr __stack_chk_guard;
+    [[noreturn]] void __stack_chk_fail(void);
 
-    // TODO: Define the interface to a vmexit context!
+#if UINT32_MAX == UINTPTR_MAX
+    bsl::uintptr __stack_chk_guard{0xBFBFBFBFU};
+#else
+    bsl::uintptr __stack_chk_guard{0xBFBFBFBFBFBFBFBFU};
+#endif
 
+    [[noreturn]] void
+    __stack_chk_fail(void)
+    {
+        while(1);
+    }
 }
 
-#endif
+bsl::exit_code
+main() noexcept
+{
+    return bsl::exit_success;
+}

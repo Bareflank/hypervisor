@@ -22,14 +22,10 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef KERNEL_VMEXIT_CONTEXT_HPP
-#define KERNEL_VMEXIT_CONTEXT_HPP
+#include <bsl/main.hpp>
 
-namespace kernel
+bsl::exit_code
+main() noexcept
 {
-
-    // TODO: Define the interface to a vmexit context!
-
+    return bsl::exit_success;
 }
-
-#endif
