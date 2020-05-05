@@ -18,3 +18,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+include(${bsl_SOURCE_DIR}/cmake/function/bf_add_info.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../function/hypervisor_add_info.cmake)
+
+if(NOT HYPERVISOR_INCLUDE_INFO_OVERRIDE)
+    bf_add_info(hypervisor)
+    hypervisor_add_info()
+endif()

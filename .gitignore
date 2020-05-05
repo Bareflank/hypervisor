@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019 Assured Information Security, Inc.
+# Copyright (C) 2020 Assured Information Security, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,47 +19,40 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Others
 build/
-build_ubuntu17_10/
-ubuntu-artful-17.10-cloudimg-console.log
-doc
-doxygen_warnings.txt
-.vagrant
-.astyle_results.txt
-.clang_tidy_results.txt
-.vscode/
-.DS_Store
-._.DS_Store
-config.cmake
-
-bfdriver/src/.common.o.cmd
-bfdriver/src/platform/linux/.bareflank.ko.cmd
-bfdriver/src/platform/linux/.bareflank.mod.o.cmd
-bfdriver/src/platform/linux/.bareflank.o.cmd
-bfdriver/src/platform/linux/.cache.mk
-bfdriver/src/platform/linux/.entry.o.cmd
-bfdriver/src/platform/linux/.intrinsics.o.cmd
-bfdriver/src/platform/linux/.platform.o.cmd
-bfdriver/src/platform/linux/.tmp_versions/
-bfdriver/src/platform/linux/.vmcall.o.cmd
-bfdriver/src/platform/linux/Module.symvers
-bfdriver/src/platform/linux/bareflank.ko
-bfdriver/src/platform/linux/bareflank.mod.c
-bfdriver/src/platform/linux/bareflank.mod.o
-bfdriver/src/platform/linux/bareflank.o
-bfdriver/src/platform/linux/entry.o
-bfdriver/src/platform/linux/modules.order
-bfdriver/src/platform/linux/intrinsics.o
-bfdriver/src/platform/linux/platform.o
-bfdriver/src/platform/linux/vmcall.o
-bfdriver/src/platform/linux/.cache.mk
-bfdriver/src/common.o
-
-bfdriver/src/platform/windows/.vs/
-bfdriver/src/platform/windows/bareflank.VC.db
-bfdriver/src/platform/windows/x64/
-
-bfdriver/src/platform/efi/*.efi
-bfdriver/src/platform/efi/src/*.o
-bfdriver/src/platform/efi/src/gnuefi/*.o
-bfdriver/src/platform/efi/module/*
+site/
+doxygen_output/

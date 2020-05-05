@@ -19,57 +19,53 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-add_executable(kernel)
+add_library(runtime)
 
-target_include_directories(kernel PRIVATE
-    include
-    src
-)
-
-target_sources(kernel PRIVATE
+target_sources(runtime PRIVATE
     src/start.s
-    src/main.cpp
 )
 
-target_link_libraries(kernel PRIVATE
+target_link_libraries(runtime PUBLIC
     bsl
     pal
 )
 
-target_compile_options(kernel PRIVATE
+target_compile_options(runtime PRIVATE
     "-c"
     "-Wno-unused-command-line-argument"
-    "-nostdlib"                  # Required
-    "-ffreestanding"             # Required
-    "-static"                    # Required
-    "-fpie"                      # Required
-    "-fpic"                      # Required
-    "-fuse-ld=lld"               # Required
-    "-D__bareflank__"            # Required
-    "-Wl,--no-dynamic-linker"    # Required
-    "-Wl,-zmax-page-size=0x1000" # Required
-    "-Wl,-znoexecstack"          # Required
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},x86_64>:-mno-red-zone>"
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},AMD64>:-mno-red-zone>"
+)
+
+target_link_options(runtime PRIVATE
+    "-Wno-unused-command-line-argument"
+)
+
+target_compile_options(runtime PUBLIC
+    "-nostdlib"                  # TODO: Move to Clang
+    "-ffreestanding"             # TODO: Move to Clang
+    "-static"                    # TODO: Move to Clang
+    "-fpie"                      # TODO: Move to Clang
+    "-fpic"                      # TODO: Move to Clang
+    "-fuse-ld=lld"               # TODO: Move to Clang
+    "-D__bareflank__"            # TODO: Move to Clang
+    "-Wl,--no-dynamic-linker"    # TODO: Move to Clang
+    "-Wl,-zmax-page-size=0x1000" # TODO: Move to Clang
+    "-Wl,-znoexecstack"          # TODO: Move to Clang
     "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},x86_64>:--target=x86_64-unknown-linux-gnu>"
     "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},AMD64>:--target=amd64-unknown-linux-gnu>"
     "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},armv8a>:--target=aarch64-unknown-linux-gnu>"
 )
 
-target_link_options(kernel PRIVATE
-    "-Wno-unused-command-line-argument"
-    "-nostdlib"                  # Required
-    "-ffreestanding"             # Required
-    "-static"                    # Required
-    "-fpie"                      # Required
-    "-fpic"                      # Required
-    "-fuse-ld=lld"               # Required
-    "-D__bareflank__"            # Required
-    "-Wl,--no-dynamic-linker"    # Required
-    "-Wl,-zmax-page-size=0x1000" # Required
-    "-Wl,-znoexecstack"          # Required
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},x86_64>:-mno-red-zone>"
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},AMD64>:-mno-red-zone>"
+target_link_options(runtime PUBLIC
+    "-nostdlib"                  # TODO: Move to Clang
+    "-ffreestanding"             # TODO: Move to Clang
+    "-static"                    # TODO: Move to Clang
+    "-fpie"                      # TODO: Move to Clang
+    "-fpic"                      # TODO: Move to Clang
+    "-fuse-ld=lld"               # TODO: Move to Clang
+    "-D__bareflank__"            # TODO: Move to Clang
+    "-Wl,--no-dynamic-linker"    # TODO: Move to Clang
+    "-Wl,-zmax-page-size=0x1000" # TODO: Move to Clang
+    "-Wl,-znoexecstack"          # TODO: Move to Clang
     "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},x86_64>:--target=x86_64-unknown-linux-gnu>"
     "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},AMD64>:--target=amd64-unknown-linux-gnu>"
     "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},armv8a>:--target=aarch64-unknown-linux-gnu>"
