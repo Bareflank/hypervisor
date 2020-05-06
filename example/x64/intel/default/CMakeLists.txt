@@ -18,3 +18,29 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+add_executable(example_x64_intel_default)
+
+target_include_directories(example_x64_intel_default PRIVATE
+    src
+)
+
+target_sources(example_x64_intel_default PRIVATE
+    src/main.cpp
+)
+
+target_link_libraries(example_x64_intel_default PRIVATE
+    bsl
+    pal
+    runtime
+    syscall
+)
+
+target_compile_options(example_x64_intel_default PRIVATE
+    "-c"
+    "-Wno-unused-command-line-argument"
+)
+
+target_link_options(example_x64_intel_default PRIVATE
+    "-Wno-unused-command-line-argument"
+)

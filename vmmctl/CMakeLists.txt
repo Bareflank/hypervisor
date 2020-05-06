@@ -1,42 +1,34 @@
+#
+# Copyright (C) 2020 Assured Information Security, Inc.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 add_executable(vmmctl)
-
-if (HYPERVISOR_TARGET_PLATFORM STREQUAL Windows)
-    target_sources(vmmctl PRIVATE main/windows/main.cpp)
-elseif (HYPERVISOR_TARGET_PLATFORM STREQUAL Linux)
-    target_sources(vmmctl PRIVATE main/linux/main.cpp)
-else()
-    target_sources(vmmctl PRIVATE main/unsupported/null.cpp)
-
-    message(WARNING
-        "Excluding vmmctl component for unsupported target platform: "
-        "${HYPERVISOR_TARGET_PLATFORM}"
-    )
-
-    set_target_properties(vmmctl PROPERTIES
-        EXCLUDE_FROM_ALL ON
-    )
-endif()
-
-target_link_libraries(vmmctl bsl)
-
-target_include_directories(vmmctl PUBLIC
-    include
-)
 
 target_include_directories(vmmctl PRIVATE
     src
 )
 
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-    set_target_properties(vmmctl PROPERTIES
-        SUFFIX ".exe"
-    )
-endif()
+target_sources(vmmctl PRIVATE
+    src/main.cpp
+)
 
-if(NOT HYPERVISOR_BUILD_VMMCTL)
-    set_target_properties(vmmctl PROPERTIES
-        EXCLUDE_FROM_ALL ON
-    )
-endif()
-
-install(TARGETS vmmctl DESTINATION bin)
+target_link_libraries(vmmctl PRIVATE
+    bsl
+)
