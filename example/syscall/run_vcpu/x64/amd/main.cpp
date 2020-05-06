@@ -22,14 +22,10 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef KERNEL_EVENT_HPP
-#define KERNEL_EVENT_HPP
+#include <bsl/main.hpp>
 
-namespace kernel
+bsl::exit_code
+main() noexcept
 {
-
-    // TODO: Define the interface to event syscalls!
-
+    return bsl::exit_success;
 }
-
-#endif

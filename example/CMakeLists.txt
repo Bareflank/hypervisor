@@ -20,18 +20,18 @@
 # SOFTWARE.
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "x86_64")
-    add_subdirectory(x64/intel/default)
+    add_subdirectory(default/x64/intel)
 
     if(BUILD_EXAMPLES)
-        # TODO: Add other examples here
+        add_subdirectory(syscall/run_vcpu/x64/intel)
     endif()
 endif()
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AMD64")
-    add_subdirectory(x64/amd/default)
+    add_subdirectory(default/x64/amd)
 
     if(BUILD_EXAMPLES)
-        # TODO: Add other examples here
+        add_subdirectory(syscall/run_vcpu/x64/amd)
     endif()
 endif()
 

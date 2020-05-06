@@ -19,4 +19,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set(CMAKE_SYSTEM_NAME Generic)
+add_executable(example_syscall_run_vcpu_x64_intel)
+
+target_sources(example_syscall_run_vcpu_x64_intel PRIVATE
+    main.cpp
+)
+
+target_link_libraries(example_syscall_run_vcpu_x64_intel PRIVATE
+    runtime
+    syscall
+)
+
+install(TARGETS example_syscall_run_vcpu_x64_intel DESTINATION bin)

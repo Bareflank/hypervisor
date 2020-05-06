@@ -20,7 +20,7 @@
 # SOFTWARE.
 
 cmake_minimum_required(VERSION 3.13)
-project(hypervisor CXX ASM-ATT)
+project(hypervisor CXX)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/init_build.cmake)
 
@@ -32,10 +32,4 @@ if(HYPERVISOR_BUILD_VMMCTL)
     add_subdirectory(vmmctl)
 endif()
 
-add_subdirectory(kernel)
-add_subdirectory(runtime)
-add_subdirectory(syscall)
-
-if(NOT HYPERVISOR_BUILD_EXAMPLES_OVERRIDE)
-    add_subdirectory(example)
-endif()
+hypervisor_add_cross_compile(cmake/cross_compile)
