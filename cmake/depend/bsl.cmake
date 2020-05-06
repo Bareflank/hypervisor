@@ -19,12 +19,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-message(STATUS "Adding dependency: bsl")
-
 FetchContent_Declare(
     bsl
     GIT_REPOSITORY  https://github.com/bareflank/bsl.git
-    GIT_TAG         d043abb8ae06d9bde25bd355b1665f35d03a3849
+    GIT_TAG         d30cd0282e95072808b987e149926bad7dd0b960
 )
 
 FetchContent_GetProperties(bsl)

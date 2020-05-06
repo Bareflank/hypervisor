@@ -18,3 +18,16 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+cmake_minimum_required(VERSION 3.13)
+project(hypervisor CXX ASM)
+
+include(${CMAKE_CURRENT_LIST_DIR}/../init_build.cmake)
+
+add_subdirectory(../../kernel kernel)
+add_subdirectory(../../runtime runtime)
+add_subdirectory(../../syscall syscall)
+
+if(NOT HYPERVISOR_BUILD_EXAMPLES_OVERRIDE)
+    add_subdirectory(../../example example)
+endif()

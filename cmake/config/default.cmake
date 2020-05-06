@@ -34,3 +34,11 @@ bf_add_config(
     DESCRIPTION "The target architecture for the build"
     OPTIONS x86_64 AMD64 armv8a
 )
+
+bf_add_config(
+    CONFIG_NAME HYPERVISOR_CXX_LINKER
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "ld.lld"
+    DESCRIPTION "Define the linker to use for cross-compiling. Does not effect native linking"
+    SKIP_VALIDATION
+)

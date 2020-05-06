@@ -19,28 +19,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-add_executable(example_x64_intel_default)
+add_executable(example_default_x64_intel)
 
-target_include_directories(example_x64_intel_default PRIVATE
-    src
+target_sources(example_default_x64_intel PRIVATE
+    main.cpp
 )
 
-target_sources(example_x64_intel_default PRIVATE
-    src/main.cpp
-)
-
-target_link_libraries(example_x64_intel_default PRIVATE
-    bsl
-    pal
+target_link_libraries(example_default_x64_intel PRIVATE
     runtime
     syscall
 )
 
-target_compile_options(example_x64_intel_default PRIVATE
-    "-c"
-    "-Wno-unused-command-line-argument"
-)
-
-target_link_options(example_x64_intel_default PRIVATE
-    "-Wno-unused-command-line-argument"
-)
+install(TARGETS example_default_x64_intel DESTINATION bin)
