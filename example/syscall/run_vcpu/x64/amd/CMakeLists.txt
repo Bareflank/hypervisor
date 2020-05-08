@@ -18,3 +18,16 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+add_executable(example_syscall_run_vcpu_x64_amd)
+
+target_sources(example_syscall_run_vcpu_x64_amd PRIVATE
+    main.cpp
+)
+
+target_link_libraries(example_syscall_run_vcpu_x64_amd PRIVATE
+    runtime
+    syscall
+)
+
+install(TARGETS example_syscall_run_vcpu_x64_amd DESTINATION bin)

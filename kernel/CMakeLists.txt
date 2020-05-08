@@ -27,7 +27,7 @@ target_include_directories(kernel PRIVATE
 )
 
 target_sources(kernel PRIVATE
-    src/start.s
+    src/start.S
     src/main.cpp
 )
 
@@ -36,41 +36,4 @@ target_link_libraries(kernel PRIVATE
     pal
 )
 
-target_compile_options(kernel PRIVATE
-    "-c"
-    "-Wno-unused-command-line-argument"
-    "-nostdlib"                  # Required
-    "-ffreestanding"             # Required
-    "-static"                    # Required
-    "-fpie"                      # Required
-    "-fpic"                      # Required
-    "-fuse-ld=lld"               # Required
-    "-D__bareflank__"            # Required
-    "-Wl,--no-dynamic-linker"    # Required
-    "-Wl,-zmax-page-size=0x1000" # Required
-    "-Wl,-znoexecstack"          # Required
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},x86_64>:-mno-red-zone>"
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},AMD64>:-mno-red-zone>"
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},x86_64>:--target=x86_64-unknown-linux-gnu>"
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},AMD64>:--target=amd64-unknown-linux-gnu>"
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},armv8a>:--target=aarch64-unknown-linux-gnu>"
-)
-
-target_link_options(kernel PRIVATE
-    "-Wno-unused-command-line-argument"
-    "-nostdlib"                  # Required
-    "-ffreestanding"             # Required
-    "-static"                    # Required
-    "-fpie"                      # Required
-    "-fpic"                      # Required
-    "-fuse-ld=lld"               # Required
-    "-D__bareflank__"            # Required
-    "-Wl,--no-dynamic-linker"    # Required
-    "-Wl,-zmax-page-size=0x1000" # Required
-    "-Wl,-znoexecstack"          # Required
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},x86_64>:-mno-red-zone>"
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},AMD64>:-mno-red-zone>"
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},x86_64>:--target=x86_64-unknown-linux-gnu>"
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},AMD64>:--target=amd64-unknown-linux-gnu>"
-    "$<$<STREQUAL:${HYPERVISOR_TARGET_ARCH},armv8a>:--target=aarch64-unknown-linux-gnu>"
-)
+install(TARGETS kernel DESTINATION bin)

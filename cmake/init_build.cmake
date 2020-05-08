@@ -35,3 +35,9 @@ include(${bsl_SOURCE_DIR}/cmake/perforce.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/depend/pal.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/target/info.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/validate.cmake)
+
+if(DEFINED CMAKE_TOOLCHAIN_FILE)
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE})
+endif()
+
+include(${CMAKE_CURRENT_LIST_DIR}/function/hypervisor_add_cross_compile.cmake)

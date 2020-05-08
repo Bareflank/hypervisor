@@ -22,14 +22,31 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef KERNEL_VMEXIT_CONTEXT_HPP
-#define KERNEL_VMEXIT_CONTEXT_HPP
+    .code64
+    .intel_syntax noprefix
 
-namespace kernel
-{
+    /// TODO: Include the index file from the kernel which should have
+    ///       the #defines for the indexes that are used.
 
-    // TODO: Define the interface to a vmexit context!
 
-}
+    /// <!-- description -->
+    ///   @brief Tells the microkernel to execute a vCPU. This can be used
+    ///     to return from a VMExit, or to switch the vCPU to a new one.
+    ///     This syscall does not return on success, and instead executes
+    ///     the desired vCPU. On failure, this function will return a
+    ///     bsl::errc_type.
+    ///   @include example/syscall/run_vcpu/x64/intel/main.cpp
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param vc (rdi) a pointer to the vcpu_context associated with the
+    ///     vCPU you wish to run.
+    ///   @return Does not return on success. Returns a bsl::errc_type
+    ///     on failure.
+    ///
+    .globl  run_vcpu
+    .type   run_vcpu, @function
+run_vcpu:
 
-#endif
+    mov rax, 0xBFBFBFBF00000000    # magic number + index
+    syscall
+    ret

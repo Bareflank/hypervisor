@@ -19,12 +19,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-message(STATUS "Adding dependency: pal")
-
 FetchContent_Declare(
     pal
     GIT_REPOSITORY  https://github.com/bareflank/pal.git
-    GIT_TAG         20.04.1
+    GIT_TAG         adc6d5199a5bdc06c95b9514566872c661cdf831
 )
 
 FetchContent_GetProperties(pal)
