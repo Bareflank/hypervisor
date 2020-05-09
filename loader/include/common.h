@@ -27,6 +27,11 @@
 #ifndef LOADER_COMMON_H
 #define LOADER_COMMON_H
 
+#ifdef __cplusplus
+#include <bsl/cstdint.hpp>
+constexpr bsl::uint32 MAX_NUM_BINARIES{10U};
+#else
 #define MAX_NUM_BINARIES 10U
+#endif
 
 #endif

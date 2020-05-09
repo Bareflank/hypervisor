@@ -56,3 +56,13 @@
 build/
 site/
 doxygen_output/
+
+# Ignore the object files from the Linux loader
+loader/linux/.bareflank_loader.ko.cmd
+loader/linux/.bareflank_loader.mod.o.cmd
+loader/linux/.bareflank_loader.o.cmd
+loader/linux/Module.symvers
+loader/linux/bareflank_loader.ko
+loader/linux/bareflank_loader.mod.c
+loader/linux/modules.order
+loader/linux/src/.entry.o.cmd
