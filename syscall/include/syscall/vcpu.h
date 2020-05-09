@@ -46,8 +46,7 @@ namespace syscall
     ///   @return Does not return on success. Returns a bsl::errc_type
     ///     on failure.
     ///
-    extern "C" [[nodiscard]] bsl::errc_type
-    run_vcpu(vcpu_context * const vc) noexcept;
+    extern "C" [[nodiscard]] bsl::errc_type run_vcpu(vcpu_context *const vc) noexcept;
 }
 
 #endif

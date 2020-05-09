@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020 Assured Information Security, Inc.
+# Copyright (C) 2019 Assured Information Security, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,18 +19,41 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-add_executable(vmmctl)
+TARGET_MODULE:=bareflank_loader
 
-target_include_directories(vmmctl PRIVATE
-    src
-)
+ifneq ($(KERNELRELEASE),)
+	obj-m := $(TARGET_MODULE).o
 
-target_sources(vmmctl PRIVATE
-    src/main.cpp
-)
+	$(TARGET_MODULE)-objs += src/entry.o
+	# $(TARGET_MODULE)-objs += platform.o
+	# $(TARGET_MODULE)-objs += intrinsics.o
+	# $(TARGET_MODULE)-objs += ../../common.o
 
-target_link_libraries(vmmctl PRIVATE
-    bsl
-    loader
-    $<$<PLATFORM_ID:Windows>:libcmt.lib>
-)
+	# EXTRA_CFLAGS += -DKERNEL
+	# EXTRA_CFLAGS += -DLINUX_KERNEL
+	EXTRA_CFLAGS += -I$(src)/include/
+	# EXTRA_CFLAGS += -I$(src)/../../../include/
+	# EXTRA_CFLAGS += -I$(src)/../../../../bfsdk/include/
+	# EXTRA_CFLAGS += -I$(src)/../../../../bfelf_loader/include/
+
+else
+	BUILDSYSTEM_DIR:=/lib/modules/$(shell uname -r)/build
+	PWD:=$(shell pwd)
+
+all:
+	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD) modules
+
+clean:
+	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD) clean
+
+load:
+	insmod ./$(TARGET_MODULE).ko
+
+unload:
+	-rmmod ./$(TARGET_MODULE).ko
+
+quick:
+	-rmmod ./$(TARGET_MODULE).ko
+	insmod ./$(TARGET_MODULE).ko
+
+endif

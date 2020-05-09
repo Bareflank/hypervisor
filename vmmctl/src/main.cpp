@@ -22,10 +22,16 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include <bsl/main.hpp>
+#include "vmmctl_main.hpp"
+
+#include <bsl/cstr_type.hpp>
+#include "bsl/exit_code.hpp"
+#include <bsl/ioctl.hpp>
+#include <bsl/ifmap.hpp>
 
 bsl::exit_code
-main() noexcept
+main(bsl::int32 const argc, bsl::cstr_type const argv[]) noexcept
 {
-    return bsl::exit_success;
+    vmmctl::vmmctl_main<bsl::ioctl, bsl::ifmap> ctl{};
+    return ctl.process({argc, argv});
 }
