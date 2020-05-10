@@ -32,8 +32,14 @@ include(${bsl_SOURCE_DIR}/cmake/build_types.cmake)
 include(${bsl_SOURCE_DIR}/cmake/find_programs.cmake)
 include(${bsl_SOURCE_DIR}/cmake/perforce.cmake)
 
-include(${CMAKE_CURRENT_LIST_DIR}/depend/pal.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/target/info.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/target/loader_build.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/target/loader_clean.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/target/loader_load.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/target/loader_unload.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/target/loader_quick.cmake)
+
+include(${CMAKE_CURRENT_LIST_DIR}/depend/pal.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/validate.cmake)
 
 if(DEFINED CMAKE_TOOLCHAIN_FILE)
