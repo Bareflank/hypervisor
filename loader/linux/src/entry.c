@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
+
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -85,14 +87,16 @@ dev_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
     return 0;
 }
 
-static struct file_operations fops = {
-    .open = dev_open,
-    .release = dev_release,
-    .unlocked_ioctl = dev_unlocked_ioctl,
-};
+static struct file_operations fops = {    // --
+    .open = dev_open,                     // --
+    .release = dev_release,               // --
+    .unlocked_ioctl = dev_unlocked_ioctl};
 
-static struct miscdevice bareflank_dev = {
-    .minor = MISC_DYNAMIC_MINOR, .name = BAREFLANK_LOADER_NAME, .fops = &fops, .mode = 0666};
+static struct miscdevice bareflank_dev = {    // --
+    .minor = MISC_DYNAMIC_MINOR,              // --
+    .name = BAREFLANK_LOADER_NAME,            // --
+    .fops = &fops,                            // --
+    .mode = 0666};
 
 /* -------------------------------------------------------------------------- */
 /* Entry / Exit                                                               */
@@ -180,4 +184,4 @@ dev_exit(void)
 module_init(dev_init);
 module_exit(dev_exit);
 
-MODULE_LICENSE("GPL");
+MODULE_LICENSE("Dual MIT/GPL");

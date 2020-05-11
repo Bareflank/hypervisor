@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
+
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
