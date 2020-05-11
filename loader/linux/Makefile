@@ -26,7 +26,6 @@ ifneq ($(KERNELRELEASE),)
 	obj-m := $(TARGET_MODULE).o
 
 	$(TARGET_MODULE)-objs += src/entry.o
-	$(TARGET_MODULE)-objs += src/intrinsics.o
 	$(TARGET_MODULE)-objs += ../src/common_dump_vmm.o
 	$(TARGET_MODULE)-objs += ../src/common_fini.o
 	$(TARGET_MODULE)-objs += ../src/common_init.o
@@ -37,17 +36,24 @@ ifneq ($(KERNELRELEASE),)
 	EXTRA_CFLAGS += -I$(src)/../include
 
 	ifneq (,$(findstring AuthenticAMD,$(VENDOR_ID)))
+		$(TARGET_MODULE)-objs += src/x64/amd/intrinsics.o
+		$(TARGET_MODULE)-objs += ../src/x64/amd/common_arch_check_svm_support.o
 		$(TARGET_MODULE)-objs += ../src/x64/amd/common_arch_fini.o
 		$(TARGET_MODULE)-objs += ../src/x64/amd/common_arch_init.o
 		$(TARGET_MODULE)-objs += ../src/x64/amd/common_arch_start_vmm.o
 		$(TARGET_MODULE)-objs += ../src/x64/amd/common_arch_stop_vmm.o
+
+		EXTRA_CFLAGS += -I$(src)/../include/x64/amd
 	endif
 
 	ifneq (,$(findstring GenuineIntel,$(VENDOR_ID)))
+		$(TARGET_MODULE)-objs += src/x64/intel/intrinsics.o
 		$(TARGET_MODULE)-objs += ../src/x64/intel/common_arch_fini.o
 		$(TARGET_MODULE)-objs += ../src/x64/intel/common_arch_init.o
 		$(TARGET_MODULE)-objs += ../src/x64/intel/common_arch_start_vmm.o
 		$(TARGET_MODULE)-objs += ../src/x64/intel/common_arch_stop_vmm.o
+
+		EXTRA_CFLAGS += -I$(src)/../include/x64/intel
 	endif
 
 else

@@ -25,12 +25,3 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-#ifndef LOADER_TYPES_H
-#define LOADER_TYPES_H
-
-#include <linux/types.h>
-#define PRId64 "lld"
-#define FAILURE ((int64_t)-1)
-
-#endif

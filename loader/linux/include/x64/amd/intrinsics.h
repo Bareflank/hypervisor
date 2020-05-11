@@ -26,11 +26,37 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_TYPES_H
-#define LOADER_TYPES_H
+#ifndef LOADER_INTRINSICS_H
+#define LOADER_INTRINSICS_H
 
-#include <linux/types.h>
-#define PRId64 "lld"
-#define FAILURE ((int64_t)-1)
+#include <loader_types.h>
+
+#define CPUID_MAXIMUM_STANDARD_FUNCTION_NUMBER_AND_VENDOR_STRING 0x0U
+
+/// @class cpuid_result
+///
+/// <!-- description -->
+///   @brief Defines the return registers associated with the CPUID
+///     instruction.
+///
+struct cpuid_result
+{
+    uint32_t eax;
+    uint32_t ebx;
+    uint32_t ecx;
+    uint32_t edx;
+};
+
+/// <!-- description -->
+///   @brief Executes the CPUID instruction given the provided EAX and ECX
+///     and returns the results in the cpuid_result structure.
+///
+/// <!-- inputs/outputs -->
+///   @param eax the index used by the CPUID instruction
+///   @param ecx the subindex used by the CPUID instruction
+///   @param res a pointer to the structure to return the results of CPUID
+///     to.
+///
+void arch_cpuid(uint32_t const eax, uint32_t const ecx, struct cpuid_result *res);
 
 #endif

@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
-
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -26,11 +24,34 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_TYPES_H
-#define LOADER_TYPES_H
+#include <loader_debug.h>
+#include <loader_types.h>
+#include <x64/amd/intrinsics.h>
 
-#include <linux/types.h>
-#define PRId64 "lld"
-#define FAILURE ((int64_t)-1)
+/**
+ * <!-- description -->
+ *   @brief This function contains all of the code that is arch specific
+ *     while common between all platforms for starting the VMM. This function
+ *     will call platform specific functions as needed.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success
+ */
+int64_t
+common_arch_check_svm_support(void)
+{
+    struct cpuid_result regs;
 
-#endif
+    arch_cpuid(CPUID_MAXIMUM_STANDARD_FUNCTION_NUMBER_AND_VENDOR_STRING, 0U, &regs);
+    if ((regs.ebx != 0x68747541U) ||
+        (regs.ecx != 0x69746E650AU) ||
+        (regs.edx != 0x444D41630A))
+    {
+        BFERROR("CPUID vendor not supported\n");
+        return FAILURE;
+    }
+
+    BFDEBUG("common_arch_check_svm_support: CPU supports SVM\n");
+    return 0;
+}
+

@@ -26,11 +26,35 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_TYPES_H
-#define LOADER_TYPES_H
+     .code64
+    .intel_syntax noprefix
 
-#include <linux/types.h>
-#define PRId64 "lld"
-#define FAILURE ((int64_t)-1)
+    /// <!-- description -->
+    ///   @brief Executes the CPUID instruction given the provided EAX and ECX
+    ///     and returns the results in the cpuid_result structure.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param eax the index used by the CPUID instruction
+    ///   @param ecx the subindex used by the CPUID instruction
+    ///   @param res a pointer to the structure to return the results of CPUID
+    ///     to.
+    ///
+    .globl  arch_cpuid
+    .type   arch_cpuid, @function
+arch_cpuid:
 
-#endif
+    push rbx
+
+    mov r11, rdx
+
+    mov rax, rdi
+    mov rcx, rsi
+    cpuid
+
+    mov [rdx + 0x00], rax
+    mov [rdx + 0x08], rbx
+    mov [rdx + 0x10], rcx
+    mov [rdx + 0x18], rdx
+
+    pop rbx
+    ret
