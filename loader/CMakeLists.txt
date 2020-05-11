@@ -21,7 +21,7 @@
 
 add_library(loader INTERFACE)
 
-target_include_directories(loader INTERFACE
+target_include_directories(loader SYSTEM INTERFACE
     $<$<PLATFORM_ID:Windows>:${CMAKE_CURRENT_LIST_DIR}/windows/include>
     $<$<PLATFORM_ID:Linux>:${CMAKE_CURRENT_LIST_DIR}/linux/include>
 )

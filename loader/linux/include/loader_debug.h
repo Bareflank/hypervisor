@@ -24,27 +24,14 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_INTERFACE_H
-#define LOADER_INTERFACE_H
+#ifndef LOADER_DEBUG_H
+#define LOADER_DEBUG_H
 
-#include "../../include/loader_interface_common.h"
+#include <linux/printk.h>
 
-#define BAREFLANK_LOADER_NAME "bareflank_loader"
-#define BAREFLANK_LOADER_DEVICE_NAME "/dev/" BAREFLANK_LOADER_NAME
-
-#include <linux/ioctl.h>
-
-#define BAREFLANK_LOADER_MAGIC_NUMBER 0x42
-
-#define BAREFLANK_LOADER_IOCTL_START_VMM_CMD 0xBF01U
-#define BAREFLANK_LOADER_IOCTL_STOP_VMM_CMD 0xBF02U
-#define BAREFLANK_LOADER_IOCTL_DUMP_VMM_CMD 0xBF03U
-
-#define BAREFLANK_LOADER_START_VMM                                                                 \
-    _IO(BAREFLANK_LOADER_MAGIC_NUMBER, BAREFLANK_LOADER_IOCTL_START_VMM_CMD)    // NOLINT
-#define BAREFLANK_LOADER_STOP_VMM                                                                  \
-    _IO(BAREFLANK_LOADER_MAGIC_NUMBER, BAREFLANK_LOADER_IOCTL_STOP_VMM_CMD)    // NOLINT
-#define BAREFLANK_LOADER_DUMP_VMM                                                                  \
-    _IO(BAREFLANK_LOADER_MAGIC_NUMBER, BAREFLANK_LOADER_IOCTL_DUMP_VMM_CMD)    // NOLINT
+#define BFINFO(...) printk(KERN_INFO __VA_ARGS__)
+#define BFDEBUG(...) printk(KERN_INFO "[BAREFLANK DEBUG]: " __VA_ARGS__)
+#define BFALERT(...) printk(KERN_INFO "[BAREFLANK ALERT]: " __VA_ARGS__)
+#define BFERROR(...) printk(KERN_ALERT "[BAREFLANK ERROR]: " __VA_ARGS__)
 
 #endif

@@ -24,14 +24,28 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_COMMON_H
-#define LOADER_COMMON_H
+#include <loader_arch_common.h>
+#include <loader_types.h>
 
-#ifdef __cplusplus
-#include <bsl/cstdint.hpp>
-constexpr bsl::uint32 MAX_NUM_BINARIES{10U};
-#else
-#define MAX_NUM_BINARIES 10U
-#endif
+/**
+ * <!-- description -->
+ *   @brief This function contains all of the code that is common between
+ *     all archiectures and all platforms for starting the VMM. This function
+ *     will call platform and architecture specific functions as needed.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success
+ */
+int64_t
+common_start_vmm(void)
+{
+    /**
+     * TODO: This function will actually be given a struct that has a bunch
+     *       of information about the ELF binaries that need to be loaded. It
+     *       will then need to use platform specific functions to load the
+     *       binaries into memory before handing them to the arch code to
+     *       actually be loaded and executed.
+     */
 
-#endif
+    return common_arch_start_vmm();
+}

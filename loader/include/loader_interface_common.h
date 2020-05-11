@@ -24,27 +24,14 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_INTERFACE_H
-#define LOADER_INTERFACE_H
+#ifndef LOADER_INTERFACE_COMMON_H
+#define LOADER_INTERFACE_COMMON_H
 
-#include "../../include/loader_interface_common.h"
-
-#define BAREFLANK_LOADER_NAME "bareflank_loader"
-#define BAREFLANK_LOADER_DEVICE_NAME "/dev/" BAREFLANK_LOADER_NAME
-
-#include <linux/ioctl.h>
-
-#define BAREFLANK_LOADER_MAGIC_NUMBER 0x42
-
-#define BAREFLANK_LOADER_IOCTL_START_VMM_CMD 0xBF01U
-#define BAREFLANK_LOADER_IOCTL_STOP_VMM_CMD 0xBF02U
-#define BAREFLANK_LOADER_IOCTL_DUMP_VMM_CMD 0xBF03U
-
-#define BAREFLANK_LOADER_START_VMM                                                                 \
-    _IO(BAREFLANK_LOADER_MAGIC_NUMBER, BAREFLANK_LOADER_IOCTL_START_VMM_CMD)    // NOLINT
-#define BAREFLANK_LOADER_STOP_VMM                                                                  \
-    _IO(BAREFLANK_LOADER_MAGIC_NUMBER, BAREFLANK_LOADER_IOCTL_STOP_VMM_CMD)    // NOLINT
-#define BAREFLANK_LOADER_DUMP_VMM                                                                  \
-    _IO(BAREFLANK_LOADER_MAGIC_NUMBER, BAREFLANK_LOADER_IOCTL_DUMP_VMM_CMD)    // NOLINT
+#ifdef __cplusplus
+#include <bsl/cstdint.hpp>
+constexpr bsl::uint32 MAX_NUM_BINARIES{10U};
+#else
+#define MAX_NUM_BINARIES 10U
+#endif
 
 #endif

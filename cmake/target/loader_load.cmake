@@ -19,17 +19,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FetchContent_Declare(
-    bsl
-    GIT_REPOSITORY  https://github.com/bareflank/bsl.git
-    GIT_TAG         7bd8ebe2f21342116a58a8fffa36513c60c09d79
-)
-
-FetchContent_GetProperties(bsl)
-if(NOT bsl_POPULATED)
-    set(BSL_BUILD_EXAMPLES_OVERRIDE ON)
-    set(BSL_BUILD_TESTS_OVERRIDE ON)
-    set(BSL_INCLUDE_INFO_OVERRIDE ON)
-    FetchContent_Populate(bsl)
-    add_subdirectory(${bsl_SOURCE_DIR} ${bsl_BINARY_DIR})
+if(HYPERVISOR_BUILD_LOADER)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_custom_target(loader_load
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux sudo make load
+            VERBATIM
+        )
+        add_custom_target(driver_load
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux sudo make load
+            VERBATIM
+        )
+    endif()
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    endif()
 endif()

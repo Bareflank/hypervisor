@@ -19,32 +19,52 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-TARGET_MODULE:=bareflank_loader
+TARGET_MODULE := bareflank_loader
+VENDOR_ID := $(shell lscpu | grep 'Vendor ID')
 
 ifneq ($(KERNELRELEASE),)
 	obj-m := $(TARGET_MODULE).o
 
 	$(TARGET_MODULE)-objs += src/entry.o
-	# $(TARGET_MODULE)-objs += platform.o
-	# $(TARGET_MODULE)-objs += intrinsics.o
-	# $(TARGET_MODULE)-objs += ../../common.o
+	$(TARGET_MODULE)-objs += src/intrinsics.o
+	$(TARGET_MODULE)-objs += ../src/common_dump_vmm.o
+	$(TARGET_MODULE)-objs += ../src/common_fini.o
+	$(TARGET_MODULE)-objs += ../src/common_init.o
+	$(TARGET_MODULE)-objs += ../src/common_start_vmm.o
+	$(TARGET_MODULE)-objs += ../src/common_stop_vmm.o
 
-	# EXTRA_CFLAGS += -DKERNEL
-	# EXTRA_CFLAGS += -DLINUX_KERNEL
-	EXTRA_CFLAGS += -I$(src)/include/
-	# EXTRA_CFLAGS += -I$(src)/../../../include/
-	# EXTRA_CFLAGS += -I$(src)/../../../../bfsdk/include/
-	# EXTRA_CFLAGS += -I$(src)/../../../../bfelf_loader/include/
+	EXTRA_CFLAGS += -I$(src)/include
+	EXTRA_CFLAGS += -I$(src)/../include
+
+	ifneq (,$(findstring AuthenticAMD,$(VENDOR_ID)))
+		$(TARGET_MODULE)-objs += ../src/x64/amd/common_arch_fini.o
+		$(TARGET_MODULE)-objs += ../src/x64/amd/common_arch_init.o
+		$(TARGET_MODULE)-objs += ../src/x64/amd/common_arch_start_vmm.o
+		$(TARGET_MODULE)-objs += ../src/x64/amd/common_arch_stop_vmm.o
+	endif
+
+	ifneq (,$(findstring GenuineIntel,$(VENDOR_ID)))
+		$(TARGET_MODULE)-objs += ../src/x64/intel/common_arch_fini.o
+		$(TARGET_MODULE)-objs += ../src/x64/intel/common_arch_init.o
+		$(TARGET_MODULE)-objs += ../src/x64/intel/common_arch_start_vmm.o
+		$(TARGET_MODULE)-objs += ../src/x64/intel/common_arch_stop_vmm.o
+	endif
 
 else
-	BUILDSYSTEM_DIR:=/lib/modules/$(shell uname -r)/build
-	PWD:=$(shell pwd)
+	BUILDSYSTEM_DIR := /lib/modules/$(shell uname -r)/build
+	PWD := $(shell pwd)
 
 all:
 	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD) modules
 
 clean:
 	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD) clean
+	rm -f ../src/*.o*
+	rm -f ../src/.*.o*
+	rm -f ../src/x64/amd/*.o*
+	rm -f ../src/x64/amd/.*.o*
+	rm -f ../src/x64/intel/*.o*
+	rm -f ../src/x64/intel/.*.o*
 
 load:
 	insmod ./$(TARGET_MODULE).ko
