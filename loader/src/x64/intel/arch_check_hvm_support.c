@@ -24,19 +24,25 @@
  * SOFTWARE.
  */
 
+#include <intrinsics.h>
+#include <loader_debug.h>
 #include <loader_types.h>
 
 /**
  * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for initializing the loader. This
- *     function will call platform specific functions as needed.
+ *   @brief This function checks to see if Intel VT-x support is available on
+ *     the currently running CPU
  *
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
 int64_t
-common_arch_init(void)
+arch_check_hvm_support(void)
 {
+    /**
+     * See AMD arch_check_svm_support() for details on how to implement
+     * this function
+     */
+
     return 0;
 }

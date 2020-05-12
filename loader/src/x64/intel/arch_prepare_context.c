@@ -24,19 +24,25 @@
  * SOFTWARE.
  */
 
+#include <loader_arch.h>
+#include <loader_arch_context.h>
+#include <loader_debug.h>
+#include <loader_platform.h>
 #include <loader_types.h>
 
 /**
  * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for stoping the VMM. This function
- *     will call platform specific functions as needed.
+ *   @brief This function prepares the context structure. The context
+ *     structure stores all of the pre-vcpu state that the loader is
+ *     responsible for setting up. This context structure will be shared
+ *     with the kernel which will use it to virtualize the root vCPUs.
  *
  * <!-- inputs/outputs -->
- *   @return Returns 0 on success
+ *   @return Returns a pointer to a loader_arch_content structure on
+ *     success. Returns NULL on failure.
  */
 int64_t
-common_arch_stop_vmm(void)
+arch_prepare_context(struct loader_arch_context *context)
 {
     return 0;
 }

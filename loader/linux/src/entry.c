@@ -30,8 +30,9 @@
 #include <loader_interface.h>
 #include <loader_types.h>
 
-#include <loader_common.h>
+#include <loader.h>
 
+#include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/miscdevice.h>
 #include <linux/notifier.h>
@@ -55,25 +56,25 @@ dev_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
     switch (cmd) {
         case BAREFLANK_LOADER_START_VMM: {
-            int64_t ret = common_start_vmm();
-            if (ret != 0) {
-                return ret;
+            int64_t ret = start_vmm();
+            if (0 != ret) {
+                return -EPERM;
             }
             break;
         }
 
         case BAREFLANK_LOADER_STOP_VMM: {
-            int64_t ret = common_stop_vmm();
-            if (ret != 0) {
-                return ret;
+            int64_t ret = stop_vmm();
+            if (0 != ret) {
+                return -EPERM;
             }
             break;
         }
 
         case BAREFLANK_LOADER_DUMP_VMM: {
-            int64_t ret = common_dump_vmm();
-            if (ret != 0) {
-                return ret;
+            int64_t ret = dump_vmm();
+            if (0 != ret) {
+                return -EPERM;
             }
             break;
         }
@@ -151,18 +152,25 @@ int
 dev_init(void)
 {
     int64_t ret = 0;
+    BFDEBUG("dev_init\n");
 
     register_reboot_notifier(&reboot_notifier_block);
     register_pm_notifier(&pm_notifier_block);
 
     if (misc_register(&bareflank_dev) != 0) {
-        BFERROR("misc_register failed\n");
+        unregister_pm_notifier(&pm_notifier_block);
+        unregister_reboot_notifier(&reboot_notifier_block);
+
         return -EPERM;
     }
 
-    ret = common_init();
-    if (ret != 0) {
-        return ret;
+    ret = loader_init();
+    if (0 != ret) {
+        misc_deregister(&bareflank_dev);
+        unregister_pm_notifier(&pm_notifier_block);
+        unregister_reboot_notifier(&reboot_notifier_block);
+
+        return -EPERM;
     }
 
     return 0;
@@ -173,7 +181,7 @@ dev_exit(void)
 {
     BFDEBUG("dev_exit\n");
 
-    common_fini();
+    loader_fini();
     misc_deregister(&bareflank_dev);
     unregister_pm_notifier(&pm_notifier_block);
     unregister_reboot_notifier(&reboot_notifier_block);

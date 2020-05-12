@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_ARCH_COMMON_H
-#define LOADER_ARCH_COMMON_H
+#ifndef LOADER_ARCH_H
+#define LOADER_ARCH_H
 
 #include <loader_types.h>
 
@@ -38,7 +38,7 @@
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t common_arch_init(void);
+int64_t arch_loader_init(void);
 
 /**
  * <!-- description -->
@@ -49,7 +49,7 @@ int64_t common_arch_init(void);
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t common_arch_fini(void);
+int64_t arch_loader_fini(void);
 
 /**
  * <!-- description -->
@@ -60,7 +60,7 @@ int64_t common_arch_fini(void);
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t common_arch_start_vmm(void);
+int64_t arch_start_vmm(void);
 
 /**
  * <!-- description -->
@@ -71,6 +71,16 @@ int64_t common_arch_start_vmm(void);
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t common_arch_stop_vmm(void);
+int64_t arch_stop_vmm(void);
+
+/**
+ * <!-- description -->
+ *   @brief This function checks to see if Intel VT-x support is available on
+ *     the currently running CPU
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success
+ */
+int64_t arch_check_hvm_support(void);
 
 #endif

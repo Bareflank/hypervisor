@@ -24,34 +24,25 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_COMMON_H
-#define LOADER_COMMON_H
-
+#include <loader_arch.h>
+#include <loader_platform.h>
 #include <loader_types.h>
 
 /**
  * <!-- description -->
  *   @brief This function contains all of the code that is common between
- *     all archiectures and all platforms that is needed for initializing
- *     the loader. This function will call platform and architecture specific
- *     functions as needed.
+ *     all archiectures and all platforms for starting the VMM. This function
+ *     will call platform and architecture specific functions as needed.
+ *     Unlike start_vmm, this function is called on each CPU.
  *
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t common_init(void);
-
-/**
- * <!-- description -->
- *   @brief This function contains all of the code that is common between
- *     all archiectures and all platforms that is needed for finalizing
- *     the loader. This function will call platform and architecture specific
- *     functions as needed.
- *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success
- */
-int64_t common_fini(void);
+static int64_t
+start_vmm_per_cpu(uint64_t const cpu)
+{
+    return 0;
+}
 
 /**
  * <!-- description -->
@@ -62,28 +53,26 @@ int64_t common_fini(void);
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t common_start_vmm(void);
+int64_t
+start_vmm(void)
+{
+    /**
+     * TODO: This function will eventually be given all of the ELF binaries
+     *       that make up the kernel and it will need to load each of these
+     *       binaries into memory using an ELF loader into a contiguous
+     *       block of memory that is given to the arch specific logic as
+     *       that code will be responsible for jumping into the actual c++
+     *       logic
+     *
+     * TODO: This code will also need to allocate memory for both a page
+     *       pool and a physically contiguous memory block that the kernel
+     *       can use as needed. This memory will also need to be given to
+     *       the arch code so that it can load the kernel as needed.
+     */
 
-/**
- * <!-- description -->
- *   @brief This function contains all of the code that is common between
- *     all archiectures and all platforms for stoping the VMM. This function
- *     will call platform and architecture specific functions as needed.
- *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success
- */
-int64_t common_stop_vmm(void);
+    if (platform_on_each_cpu(start_vmm_per_cpu) != 0) {
+        return FAILURE;
+    }
 
-/**
- * <!-- description -->
- *   @brief This function contains all of the code that is common between
- *     all archiectures and all platforms for dumping the VMM. This function
- *     will call platform and architecture specific functions as needed.
- *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success
- */
-int64_t common_dump_vmm(void);
-
-#endif
+    return arch_start_vmm();
+}

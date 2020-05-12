@@ -24,53 +24,66 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_ARCH_COMMON_H
-#define LOADER_ARCH_COMMON_H
+#ifndef LOADER_H
+#define LOADER_H
 
 #include <loader_types.h>
 
 /**
  * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for initializing the loader. This
- *     function will call platform specific functions as needed.
+ *   @brief This function contains all of the code that is common between
+ *     all archiectures and all platforms that is needed for initializing
+ *     the loader. This function will call platform and architecture specific
+ *     functions as needed.
  *
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t common_arch_init(void);
+int64_t loader_init(void);
 
 /**
  * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for finalizing the loader. This
- *     function will call platform specific functions as needed.
+ *   @brief This function contains all of the code that is common between
+ *     all archiectures and all platforms that is needed for finalizing
+ *     the loader. This function will call platform and architecture specific
+ *     functions as needed.
  *
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t common_arch_fini(void);
+int64_t loader_fini(void);
 
 /**
  * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for starting the VMM. This function
- *     will call platform specific functions as needed.
+ *   @brief This function contains all of the code that is common between
+ *     all archiectures and all platforms for starting the VMM. This function
+ *     will call platform and architecture specific functions as needed.
  *
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t common_arch_start_vmm(void);
+int64_t start_vmm(void);
 
 /**
  * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for stoping the VMM. This function
- *     will call platform specific functions as needed.
+ *   @brief This function contains all of the code that is common between
+ *     all archiectures and all platforms for stoping the VMM. This function
+ *     will call platform and architecture specific functions as needed.
  *
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t common_arch_stop_vmm(void);
+int64_t stop_vmm(void);
+
+/**
+ * <!-- description -->
+ *   @brief This function contains all of the code that is common between
+ *     all archiectures and all platforms for dumping the VMM. This function
+ *     will call platform and architecture specific functions as needed.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success
+ */
+int64_t dump_vmm(void);
 
 #endif

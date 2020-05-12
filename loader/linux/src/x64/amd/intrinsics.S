@@ -31,7 +31,7 @@
 
     /// <!-- description -->
     ///   @brief Executes the CPUID instruction given the provided EAX and ECX
-    ///     and returns the results in the cpuid_result structure.
+    ///     and returns the results.
     ///
     /// <!-- inputs/outputs -->
     ///   @param eax the index used by the CPUID instruction
@@ -42,19 +42,61 @@
     .globl  arch_cpuid
     .type   arch_cpuid, @function
 arch_cpuid:
-
     push rbx
 
-    mov r11, rdx
+    mov r10, rdx
+    mov r11, rcx
 
-    mov rax, rdi
-    mov rcx, rsi
+    mov eax, [rdi]
+    mov ecx, [rdx]
     cpuid
-
-    mov [rdx + 0x00], rax
-    mov [rdx + 0x08], rbx
-    mov [rdx + 0x10], rcx
-    mov [rdx + 0x18], rdx
+    mov [rdi], eax
+    mov [rsi], ebx
+    mov [r10], ecx
+    mov [r11], edx
 
     pop rbx
+    ret
+
+
+
+    /// <!-- description -->
+    ///   @brief Executes the RDMSR instruction given the provided MSR
+    ///     and returns the results
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param ecx the MSR to read
+    ///   @return Returns the resulting MSR value
+    ///
+    .globl  arch_rdmsr
+    .type   arch_rdmsr, @function
+arch_rdmsr:
+
+    mov ecx, edi
+    rdmsr
+    shl rdx, 32
+    or rax, rdx
+
+    ret
+
+
+
+    /// <!-- description -->
+    ///   @brief Executes the WRMSR instruction given the provided MSR
+    ///     and value
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param ecx the MSR to write to the value
+    ///   @param val the value to write to the given MSR
+    ///
+    .globl  arch_wrmsr
+    .type   arch_wrmsr, @function
+arch_wrmsr:
+
+    mov rax, rsi
+    mov rdx, rsi
+    shr rdx, 32
+    mov ecx, edi
+    wrmsr
+
     ret

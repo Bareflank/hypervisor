@@ -24,19 +24,49 @@
  * SOFTWARE.
  */
 
+#include <intrinsics.h>
+#include <loader_debug.h>
 #include <loader_types.h>
 
 /**
  * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for starting the VMM. This function
- *     will call platform specific functions as needed.
+ *   @brief This function checks to see if AMD SVM support is available on
+ *     the currently running CPU
  *
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
 int64_t
-common_arch_start_vmm(void)
+arch_check_hvm_support(void)
 {
+    uint32_t eax;
+    uint32_t ebx;
+    uint32_t ecx;
+    uint32_t edx;
+    uint64_t msr;
+
+    eax = CPUID_FN0000_0000;
+    ecx = 0U;
+    arch_cpuid(&eax, &ebx, &ecx, &edx);
+    if ((ebx != CPUID_FN0000_0000_EBX_VENDOR_ID) || (ecx != CPUID_FN0000_0000_ECX_VENDOR_ID) ||
+        (edx != CPUID_FN0000_0000_EDX_VENDOR_ID)) {
+        BFERROR("CPUID vendor not supported\n");
+        return FAILURE;
+    }
+
+    eax = CPUID_FN8000_0001;
+    ecx = 0U;
+    arch_cpuid(&eax, &ebx, &ecx, &edx);
+    if ((ecx & CPUID_FN8000_0001_ECX_SVM) == 0) {
+        BFERROR("This CPU does not support SVM\n");
+        return FAILURE;
+    }
+
+    msr = arch_rdmsr(MSR_VM_CR);
+    if ((msr & MSR_VM_CR_SVMDIS) != 0) {
+        BFERROR("SVM has been disabled in BIOS. SVM not supported\n");
+        return FAILURE;
+    }
+
     return 0;
 }

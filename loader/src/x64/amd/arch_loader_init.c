@@ -24,20 +24,27 @@
  * SOFTWARE.
  */
 
-#include <loader_arch_common.h>
+#include <loader_arch.h>
 #include <loader_types.h>
 
 /**
  * <!-- description -->
- *   @brief This function contains all of the code that is common between
- *     all archiectures and all platforms for stoping the VMM. This function
- *     will call platform and architecture specific functions as needed.
+ *   @brief This function contains all of the code that is arch specific
+ *     while common between all platforms for initializing the loader. This
+ *     function will call platform specific functions as needed.
  *
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
 int64_t
-common_stop_vmm(void)
+arch_loader_init(void)
 {
-    return common_arch_stop_vmm();
+    int64_t ret = 0;
+
+    ret = arch_check_hvm_support();
+    if (0 != ret) {
+        return FAILURE;
+    }
+
+    return 0;
 }

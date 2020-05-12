@@ -24,21 +24,23 @@
  * SOFTWARE.
  */
 
-#include <loader_arch_common.h>
+#ifndef LOADER_ARCH_CONTEXT_H
+#define LOADER_ARCH_CONTEXT_H
+
 #include <loader_types.h>
 
 /**
- * <!-- description -->
- *   @brief This function contains all of the code that is common between
- *     all archiectures and all platforms that is needed for finalizing
- *     the loader. This function will call platform and architecture specific
- *     functions as needed.
+ * @class loader_arch_context
  *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success
+ * <!-- description -->
+ *   @brief Provides all of the information that is needed by the kernel to
+ *     start the hypervisor and return back to the root OS once the
+ *     hypevisor is running on a specific CPU (meaning each CPU has its own
+ *     version of this structure). This structure will eventually be given
+ *     to the kernel, and the kernel will use this information to properly
+ *     configure hardware virtualization extensions for a given CPU arch.
  */
-int64_t
-common_fini(void)
-{
-    return common_arch_fini();
-}
+struct loader_arch_context
+{};
+
+#endif

@@ -22,10 +22,12 @@
 if(HYPERVISOR_BUILD_LOADER)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_custom_target(loader_clean
+            COMMAND ${CMAKE_COMMAND} --build . --target loader_unload
             COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux make clean
             VERBATIM
         )
         add_custom_target(driver_clean
+            COMMAND ${CMAKE_COMMAND} --build . --target loader_unload
             COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux make clean
             VERBATIM
         )

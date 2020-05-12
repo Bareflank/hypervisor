@@ -22,16 +22,12 @@
 if(HYPERVISOR_BUILD_LOADER)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_custom_target(loader_quick
-            COMMAND ${CMAKE_COMMAND} --build . --target loader_unload
             COMMAND ${CMAKE_COMMAND} --build . --target loader_clean
-            COMMAND ${CMAKE_COMMAND} --build . --target loader_build
             COMMAND ${CMAKE_COMMAND} --build . --target loader_load
             VERBATIM
         )
         add_custom_target(driver_quick
-            COMMAND ${CMAKE_COMMAND} --build . --target loader_unload
             COMMAND ${CMAKE_COMMAND} --build . --target loader_clean
-            COMMAND ${CMAKE_COMMAND} --build . --target loader_build
             COMMAND ${CMAKE_COMMAND} --build . --target loader_load
             VERBATIM
         )

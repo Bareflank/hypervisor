@@ -31,32 +31,60 @@
 
 #include <loader_types.h>
 
-#define CPUID_MAXIMUM_STANDARD_FUNCTION_NUMBER_AND_VENDOR_STRING 0x0U
+/* -------------------------------------------------------------------------- */
+/* - CPUID                                                                  - */
+/* -------------------------------------------------------------------------- */
 
-/// @class cpuid_result
-///
-/// <!-- description -->
-///   @brief Defines the return registers associated with the CPUID
-///     instruction.
-///
-struct cpuid_result
-{
-    uint32_t eax;
-    uint32_t ebx;
-    uint32_t ecx;
-    uint32_t edx;
-};
+#define CPUID_FN0000_0000 0x00000000U
+#define CPUID_FN0000_0000_EBX_VENDOR_ID (0x68747541U)
+#define CPUID_FN0000_0000_ECX_VENDOR_ID (0x444d4163U)
+#define CPUID_FN0000_0000_EDX_VENDOR_ID (0x69746e65U)
+
+#define CPUID_FN8000_0001 0x80000001U
+#define CPUID_FN8000_0001_ECX_SVM (1U << 2U)
 
 /// <!-- description -->
 ///   @brief Executes the CPUID instruction given the provided EAX and ECX
-///     and returns the results in the cpuid_result structure.
+///     and returns the results
 ///
 /// <!-- inputs/outputs -->
-///   @param eax the index used by the CPUID instruction
-///   @param ecx the subindex used by the CPUID instruction
-///   @param res a pointer to the structure to return the results of CPUID
+///   @param eax the index used by CPUID, returns resulting eax
+///   @param ebx returns resulting ebx
+///   @param ecx the subindex used by CPUID, returns the resulting ecx
+///   @param edx returns resulting edx
 ///     to.
 ///
-void arch_cpuid(uint32_t const eax, uint32_t const ecx, struct cpuid_result *res);
+void arch_cpuid(uint32_t *const eax, uint32_t *const ebx, uint32_t *const ecx, uint32_t *const edx);
+
+/* -------------------------------------------------------------------------- */
+/* - MSRS                                                                   - */
+/* -------------------------------------------------------------------------- */
+
+#define MSR_VM_CR (0xC0010114U)
+#define MSR_VM_CR_SVMDIS ((uint64_t)1 << 4U)
+#define MSR_VM_CR_LOCK ((uint64_t)1 << 3U)
+#define MSR_VM_CR_DIS_A20M ((uint64_t)1 << 2U)
+#define MSR_VM_CR_R_INIT ((uint64_t)1 << 1U)
+#define MSR_VM_CR_DPD ((uint64_t)1 << 0U)
+
+/// <!-- description -->
+///   @brief Executes the RDMSR instruction given the provided MSR
+///     and returns the results
+///
+/// <!-- inputs/outputs -->
+///   @param ecx the MSR to read
+///   @return Returns the resulting MSR value
+///
+uint64_t arch_rdmsr(uint32_t const ecx);
+
+/// <!-- description -->
+///   @brief Executes the WRMSR instruction given the provided MSR
+///     and value
+///
+/// <!-- inputs/outputs -->
+///   @param ecx the MSR to write to the value
+///   @param val the value to write to the given MSR
+///
+void arch_wrmsr(uint32_t const ecx, uint64_t val);
 
 #endif

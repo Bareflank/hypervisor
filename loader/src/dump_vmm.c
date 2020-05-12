@@ -24,14 +24,19 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_INTERFACE_COMMON_H
-#define LOADER_INTERFACE_COMMON_H
+#include <loader_types.h>
 
-#ifdef __cplusplus
-#include <bsl/cstdint.hpp>
-constexpr bsl::uint32 MAX_NUM_BINARIES{10U};
-#else
-#define MAX_NUM_BINARIES 10U
-#endif
-
-#endif
+/**
+ * <!-- description -->
+ *   @brief This function contains all of the code that is common between
+ *     all archiectures and all platforms for dumping the VMM. This function
+ *     will call platform and architecture specific functions as needed.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success
+ */
+int64_t
+dump_vmm(void)
+{
+    return 0;
+}

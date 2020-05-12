@@ -24,28 +24,19 @@
  * SOFTWARE.
  */
 
-#include <loader_arch_common.h>
 #include <loader_types.h>
 
 /**
  * <!-- description -->
- *   @brief This function contains all of the code that is common between
- *     all archiectures and all platforms for starting the VMM. This function
- *     will call platform and architecture specific functions as needed.
+ *   @brief This function contains all of the code that is arch specific
+ *     while common between all platforms for finalizing the loader. This
+ *     function will call platform specific functions as needed.
  *
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
 int64_t
-common_start_vmm(void)
+arch_loader_fini(void)
 {
-    /**
-     * TODO: This function will actually be given a struct that has a bunch
-     *       of information about the ELF binaries that need to be loaded. It
-     *       will then need to use platform specific functions to load the
-     *       binaries into memory before handing them to the arch code to
-     *       actually be loaded and executed.
-     */
-
-    return common_arch_start_vmm();
+    return 0;
 }

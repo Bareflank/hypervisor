@@ -31,6 +31,7 @@
 
 #include <linux/types.h>
 #define PRId64 "lld"
+#define PRIu64 "llu"
 #define FAILURE ((int64_t)-1)
 
 #endif

@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
-
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -26,25 +24,27 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_INTERFACE_H
-#define LOADER_INTERFACE_H
+#include <loader_arch.h>
+#include <loader_types.h>
 
-#include <linux/ioctl.h>
+/**
+ * <!-- description -->
+ *   @brief This function contains all of the code that is arch specific
+ *     while common between all platforms for initializing the loader. This
+ *     function will call platform specific functions as needed.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success
+ */
+int64_t
+arch_loader_init(void)
+{
+    int64_t ret = 0;
 
-#define BAREFLANK_LOADER_NAME "bareflank_loader"
-#define BAREFLANK_LOADER_DEVICE_NAME "/dev/" BAREFLANK_LOADER_NAME
+    ret = arch_check_hvm_support();
+    if (0 != ret) {
+        return FAILURE;
+    }
 
-#define BAREFLANK_LOADER_MAGIC_NUMBER 0x42
-
-#define BAREFLANK_LOADER_IOCTL_START_VMM_CMD 0xBF01U
-#define BAREFLANK_LOADER_IOCTL_STOP_VMM_CMD 0xBF02U
-#define BAREFLANK_LOADER_IOCTL_DUMP_VMM_CMD 0xBF03U
-
-#define BAREFLANK_LOADER_START_VMM                                                                 \
-    _IO(BAREFLANK_LOADER_MAGIC_NUMBER, BAREFLANK_LOADER_IOCTL_START_VMM_CMD)    // NOLINT
-#define BAREFLANK_LOADER_STOP_VMM                                                                  \
-    _IO(BAREFLANK_LOADER_MAGIC_NUMBER, BAREFLANK_LOADER_IOCTL_STOP_VMM_CMD)    // NOLINT
-#define BAREFLANK_LOADER_DUMP_VMM                                                                  \
-    _IO(BAREFLANK_LOADER_MAGIC_NUMBER, BAREFLANK_LOADER_IOCTL_DUMP_VMM_CMD)    // NOLINT
-
-#endif
+    return 0;
+}

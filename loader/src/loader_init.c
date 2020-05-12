@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-#include <loader_arch_common.h>
+#include <loader_arch.h>
 #include <loader_types.h>
 
 /**
@@ -38,7 +38,7 @@
  *   @return Returns 0 on success
  */
 int64_t
-common_init(void)
+loader_init(void)
 {
-    return common_arch_init();
+    return arch_loader_init();
 }

@@ -24,34 +24,33 @@
  * SOFTWARE.
  */
 
-#include <loader_debug.h>
+#ifndef LOADER_ARCH_CONTEXT_H
+#define LOADER_ARCH_CONTEXT_H
+
 #include <loader_types.h>
-#include <x64/amd/intrinsics.h>
 
 /**
- * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for starting the VMM. This function
- *     will call platform specific functions as needed.
+ * @class loader_arch_context
  *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success
+ * <!-- description -->
+ *   @brief Provides all of the information that is needed by the kernel to
+ *     start the hypervisor and return back to the root OS once the
+ *     hypevisor is running on a specific CPU (meaning each CPU has its own
+ *     version of this structure). This structure will eventually be given
+ *     to the kernel, and the kernel will use this information to properly
+ *     configure hardware virtualization extensions for a given CPU arch.
  */
-int64_t
-common_arch_check_svm_support(void)
+struct loader_arch_context
 {
-    struct cpuid_result regs;
+    /** @brief tmp_ will be removed once the kernel is in place */
+    void *host_vmcb_virt;
+    /** @brief tmp_ will be removed once the kernel is in place */
+    uintptr_t host_vmcb_phys;
 
-    arch_cpuid(CPUID_MAXIMUM_STANDARD_FUNCTION_NUMBER_AND_VENDOR_STRING, 0U, &regs);
-    if ((regs.ebx != 0x68747541U) ||
-        (regs.ecx != 0x69746E650AU) ||
-        (regs.edx != 0x444D41630A))
-    {
-        BFERROR("CPUID vendor not supported\n");
-        return FAILURE;
-    }
+    /** @brief tmp_ will be removed once the kernel is in place */
+    void *guest_vmcb_virt;
+    /** @brief tmp_ will be removed once the kernel is in place */
+    uintptr_t guest_vmcb_phys;
+};
 
-    BFDEBUG("common_arch_check_svm_support: CPU supports SVM\n");
-    return 0;
-}
-
+#endif
