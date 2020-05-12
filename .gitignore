@@ -37,22 +37,24 @@
 *.dylib
 *.dll
 
-# Fortran module files
-*.mod
-*.smod
-
 # Compiled Static libraries
 *.lai
 *.la
 *.a
 *.lib
+*.ko
 
 # Executables
 *.exe
 *.out
 *.app
 
+# Generated Files
+.*.cmd
+*.mod*
+*.order
+*.symvers
+
 # Others
 build/
-site/
 doxygen_output/

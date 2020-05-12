@@ -31,5 +31,6 @@ target_sources(vmmctl PRIVATE
 
 target_link_libraries(vmmctl PRIVATE
     bsl
+    loader
     $<$<PLATFORM_ID:Windows>:libcmt.lib>
 )
