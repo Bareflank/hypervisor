@@ -37,7 +37,7 @@
  *   @return Returns 0 on success
  */
 int64_t
-arch_check_hvm_support(void)
+arch_check_hve_support(void)
 {
     uint32_t eax;
     uint32_t ebx;

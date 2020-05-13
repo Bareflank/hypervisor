@@ -68,7 +68,7 @@ ifneq ($(KERNELRELEASE),)
 		$(TARGET_MODULE)-objs += src/x64/amd/arch_vmload.o
 		$(TARGET_MODULE)-objs += src/x64/amd/arch_vmrun.o
 		$(TARGET_MODULE)-objs += src/x64/amd/arch_vmsave.o
-		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_check_hvm_support.o
+		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_check_hve_support.o
 		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_loader_fini.o
 		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_loader_init.o
 		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_start_vmm_per_cpu.o
@@ -105,7 +105,7 @@ ifneq ($(KERNELRELEASE),)
 		$(TARGET_MODULE)-objs += src/x64/arch_sgdt.o
 		$(TARGET_MODULE)-objs += src/x64/arch_sidt.o
 		$(TARGET_MODULE)-objs += src/x64/arch_wrmsr.o
-		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_check_hvm_support.o
+		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_check_hve_support.o
 		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_loader_fini.o
 		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_loader_init.o
 		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_start_vmm_per_cpu.o
