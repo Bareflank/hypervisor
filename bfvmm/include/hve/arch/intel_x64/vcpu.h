@@ -156,7 +156,7 @@ public:
     /// @param d the delegate to add to the vcpu
     ///
     VIRTUAL void add_clear_delegate(const vcpu_delegate_t &d) noexcept
-    { m_resume_delegates.push_front(std::move(d)); }
+    { m_clear_delegates.push_front(std::move(d)); }
 
 private:
 
