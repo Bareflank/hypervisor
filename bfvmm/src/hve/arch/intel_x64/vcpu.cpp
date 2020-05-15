@@ -148,6 +148,7 @@ vcpu::vcpu(
     m_control_register_handler{this},
     m_cpuid_handler{this},
     m_ept_violation_handler{this},
+    m_exception_handler{this},
     m_external_interrupt_handler{this},
     m_init_signal_handler{this},
     m_interrupt_window_handler{this},
@@ -679,6 +680,17 @@ void
 vcpu::add_default_ept_execute_violation_handler(
     const ::handler_delegate_t &d)
 { m_ept_violation_handler.set_default_execute_handler(d); }
+
+//--------------------------------------------------------------------------
+// Exception
+//--------------------------------------------------------------------------
+
+void
+vcpu::add_exception_handler(
+    vmcs_n::value_type vector, const exception_handler::handler_delegate_t &d)
+{
+    m_exception_handler.add_handler(vector, d);
+}
 
 //--------------------------------------------------------------------------
 // External Interrupt

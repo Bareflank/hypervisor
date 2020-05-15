@@ -24,14 +24,7 @@
 namespace bfvmm::intel_x64
 {
 
-static bool
-handle_nmi(vcpu *vcpu)
-{
-    vcpu->queue_nmi();
-    return true;
-}
-
-nmi_handler::nmi_handler(
+exception_handler::exception_handler(
     gsl::not_null<vcpu *> vcpu
 ) :
     m_vcpu{vcpu}
@@ -40,10 +33,8 @@ nmi_handler::nmi_handler(
 
     vcpu->add_exit_handler_for_reason(
         exit_reason::basic_exit_reason::exception_or_non_maskable_interrupt,
-    {&nmi_handler::handle, this}
+    {&exception_handler::handle, this}
     );
-
-    this->add_handler(handle_nmi);
 }
 
 // -----------------------------------------------------------------------------
@@ -51,22 +42,14 @@ nmi_handler::nmi_handler(
 // -----------------------------------------------------------------------------
 
 void
-nmi_handler::add_handler(
-    const handler_delegate_t &d)
-{ m_handlers.push_front(d); }
-
-void
-nmi_handler::enable_exiting()
+exception_handler::add_handler(
+    vmcs_n::value_type vector, const handler_delegate_t &d)
 {
-    vmcs_n::pin_based_vm_execution_controls::nmi_exiting::enable();
-    vmcs_n::pin_based_vm_execution_controls::virtual_nmis::enable();
-}
+    m_handlers[vector].push_front(d);
 
-void
-nmi_handler::disable_exiting()
-{
-    vmcs_n::pin_based_vm_execution_controls::nmi_exiting::disable();
-    vmcs_n::pin_based_vm_execution_controls::virtual_nmis::disable();
+    auto bitmap = vmcs_n::exception_bitmap::get();
+    bitmap |= (1U << vector);
+    vmcs_n::exception_bitmap::set(bitmap);
 }
 
 // -----------------------------------------------------------------------------
@@ -74,21 +57,35 @@ nmi_handler::disable_exiting()
 // -----------------------------------------------------------------------------
 
 bool
-nmi_handler::handle(vcpu *vcpu)
+exception_handler::handle(vcpu *vcpu)
 {
     using namespace vmcs_n::vm_exit_interruption_information;
+    auto interrupt_info = vmcs_n::vm_exit_interruption_information::get();
 
-    if (interruption_type::get() != interruption_type::non_maskable_interrupt) {
+    if (interruption_type::get(interrupt_info) == interruption_type::non_maskable_interrupt) {
         return false;
     }
 
-    for (const auto &d : m_handlers) {
-        if (d(vcpu)) {
-            break;
+    struct info_t info = {
+        vector::get(interrupt_info)
+    };
+
+    const auto &hdlrs =
+        m_handlers.find(
+            info.vector
+        );
+
+    if (GSL_LIKELY(hdlrs != m_handlers.end())) {
+        for (const auto &d : hdlrs->second) {
+            if (d(vcpu, info)) {
+                return true;
+            }
         }
     }
 
-    return true;
+    throw std::runtime_error(
+        "Unhandled exception vector: " + std::to_string(info.vector)
+    );
 }
 
 }

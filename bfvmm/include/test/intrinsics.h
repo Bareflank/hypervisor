@@ -200,8 +200,20 @@ _cpuid_eax(uint32_t val) noexcept
 { return g_eax_cpuid[val]; }
 
 extern "C" uint32_t
+_cpuid_subeax(uint32_t val, uint32_t sub) noexcept
+{ bfignored(sub); return g_eax_cpuid[val]; }
+
+extern "C" uint32_t
 _cpuid_subebx(uint32_t val, uint32_t sub) noexcept
 { bfignored(sub); return g_ebx_cpuid[val]; }
+
+extern "C" uint32_t
+_cpuid_subecx(uint32_t val, uint32_t sub) noexcept
+{ bfignored(sub); return g_ecx_cpuid[val]; }
+
+extern "C" uint32_t
+_cpuid_subedx(uint32_t val, uint32_t sub) noexcept
+{ bfignored(sub); return g_edx_cpuid[val]; }
 
 extern "C" uint32_t
 _cpuid_ecx(uint32_t val) noexcept

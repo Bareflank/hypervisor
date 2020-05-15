@@ -25,6 +25,7 @@
 #include "vmexit/control_register.h"
 #include "vmexit/cpuid.h"
 #include "vmexit/ept_violation.h"
+#include "vmexit/exception.h"
 #include "vmexit/external_interrupt.h"
 #include "vmexit/init_signal.h"
 #include "vmexit/interrupt_window.h"
@@ -479,6 +480,24 @@ public:
     ///
     VIRTUAL void add_default_ept_execute_violation_handler(
         const ::handler_delegate_t &d);
+
+    //--------------------------------------------------------------------------
+    // Exception
+    //--------------------------------------------------------------------------
+
+    /// Add Exceptin Handler
+    ///
+    /// Turns on exception handling for the given vector and adds an exception
+    /// handler to handle exceptions
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param vector the exception vector to enable
+    /// @param d the delegate to call when an exit occurs
+    ///
+    VIRTUAL void add_exception_handler(
+        vmcs_n::value_type vector, const exception_handler::handler_delegate_t &d);
 
     //--------------------------------------------------------------------------
     // External Interrupt
@@ -1943,6 +1962,7 @@ private:
     control_register_handler m_control_register_handler;
     cpuid_handler m_cpuid_handler;
     ept_violation_handler m_ept_violation_handler;
+    exception_handler m_exception_handler;
     external_interrupt_handler m_external_interrupt_handler;
     init_signal_handler m_init_signal_handler;
     interrupt_window_handler m_interrupt_window_handler;

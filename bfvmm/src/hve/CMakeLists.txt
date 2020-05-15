@@ -33,6 +33,7 @@ target_sources(bfvmm_hve PRIVATE
     $<${X64}:arch/intel_x64/vmexit/control_register.cpp>
     $<${X64}:arch/intel_x64/vmexit/cpuid.cpp>
     $<${X64}:arch/intel_x64/vmexit/ept_violation.cpp>
+    $<${X64}:arch/intel_x64/vmexit/exception.cpp>
     $<${X64}:arch/intel_x64/vmexit/external_interrupt.cpp>
     $<${X64}:arch/intel_x64/vmexit/init_signal.cpp>
     $<${X64}:arch/intel_x64/vmexit/interrupt_window.cpp>
