@@ -80,6 +80,22 @@ _start:
     movdqa [rsp], xmm6
     sub rsp, 0x20
     movdqa [rsp], xmm7
+    sub rsp, 0x20
+    movdqa [rsp], xmm8
+    sub rsp, 0x20
+    movdqa [rsp], xmm9
+    sub rsp, 0x20
+    movdqa [rsp], xmm10
+    sub rsp, 0x20
+    movdqa [rsp], xmm11
+    sub rsp, 0x20
+    movdqa [rsp], xmm12
+    sub rsp, 0x20
+    movdqa [rsp], xmm13
+    sub rsp, 0x20
+    movdqa [rsp], xmm14
+    sub rsp, 0x20
+    movdqa [rsp], xmm15
 
     mov rax, 0xABCDEF1234567890
     push rax
@@ -93,21 +109,37 @@ _start:
     cmp rax, rbx
     jne stack_overflow
 
-    movdqa [rsp], xmm7
+    movdqa xmm15, [rsp]
     add rsp, 0x20
-    movdqa [rsp], xmm6
+    movdqa xmm14, [rsp]
     add rsp, 0x20
-    movdqa [rsp], xmm5
+    movdqa xmm13, [rsp]
     add rsp, 0x20
-    movdqa [rsp], xmm4
+    movdqa xmm12, [rsp]
     add rsp, 0x20
-    movdqa [rsp], xmm3
+    movdqa xmm11, [rsp]
     add rsp, 0x20
-    movdqa [rsp], xmm2
+    movdqa xmm10, [rsp]
     add rsp, 0x20
-    movdqa [rsp], xmm1
+    movdqa xmm9, [rsp]
     add rsp, 0x20
-    movdqa [rsp], xmm0
+    movdqa xmm8, [rsp]
+    add rsp, 0x20
+    movdqa xmm7, [rsp]
+    add rsp, 0x20
+    movdqa xmm6, [rsp]
+    add rsp, 0x20
+    movdqa xmm5, [rsp]
+    add rsp, 0x20
+    movdqa xmm4, [rsp]
+    add rsp, 0x20
+    movdqa xmm3, [rsp]
+    add rsp, 0x20
+    movdqa xmm2, [rsp]
+    add rsp, 0x20
+    movdqa xmm1, [rsp]
+    add rsp, 0x20
+    movdqa xmm0, [rsp]
     add rsp, 0x20
 
     mov rax, r11

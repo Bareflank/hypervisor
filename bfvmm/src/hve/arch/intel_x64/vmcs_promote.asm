@@ -44,6 +44,7 @@ default rel
 %define IA32_SYSENTER_EIP_MSR                                     0x00000176
 %define IA32_FS_BASE_MSR                                          0xC0000100
 %define IA32_GS_BASE_MSR                                          0xC0000101
+%define IA32_XSS_MSR                                              0x00000DA0
 
 %define VMCS_GUEST_ES_SELECTOR                                    0x00000800
 %define VMCS_GUEST_CS_SELECTOR                                    0x00000802
@@ -272,42 +273,65 @@ vmcs_promote:
     and rdi, 0xFFFFFFFFFFFFFDFF
     push rdi
     popf
-    
+
     ;
     ; Restore Registers
     ;
 
     mov rdi, r15
 
-    movdqa xmm7,   [rdi + 0x1A0]
-    movdqa xmm6,   [rdi + 0x180]
-    movdqa xmm5,   [rdi + 0x160]
-    movdqa xmm4,   [rdi + 0x140]
-    movdqa xmm3,   [rdi + 0x120]
-    movdqa xmm2,   [rdi + 0x100]
-    movdqa xmm1,   [rdi + 0x0E0]
-    movdqa xmm0,   [rdi + 0x0C0]
+    mov rsi, [rdi + 0x108]
+    mov dr6, rsi
+    mov rsi, [rdi + 0x100]
+    mov dr3, rsi
+    mov rsi, [rdi + 0x0F8]
+    mov dr2, rsi
+    mov rsi, [rdi + 0x0F0]
+    mov dr1, rsi
+    mov rsi, [rdi + 0x0E8]
+    mov dr0, rsi
+    mov rsi, [rdi + 0x0E0]
+    mov cr8, rsi
+    mov rsi, [rdi + 0x0D8]
+    mov cr2, rsi
 
-    mov rsp,       [rdi + 0x080]
-    mov rax,       [rdi + 0x078]
+    ; See the exit handler and resume logic for comments.
+
+    mov rsi, [rdi + 0x0C8]
+    xor edx, edx
+    mov eax, 0xFFFFFFFF
+    xrstors64 [rsi]
+
+    mov eax, [rdi + 0x0B8]
+    xor edx, edx
+    mov ecx, IA32_XSS_MSR
+    wrmsr
+
+    mov eax, [rdi + 0x0A8]
+    xor edx, edx
+    xor ecx, ecx
+    xsetbv
+
+    mov rsp, [rdi + 0x080]
+    mov rax, [rdi + 0x078]
     push rax
 
-    mov r15,       [rdi + 0x070]
-    mov r14,       [rdi + 0x068]
-    mov r13,       [rdi + 0x060]
-    mov r12,       [rdi + 0x058]
-    mov r11,       [rdi + 0x050]
-    mov r10,       [rdi + 0x048]
-    mov r9,        [rdi + 0x040]
-    mov r8,        [rdi + 0x038]
-    mov rsi,       [rdi + 0x028]
-    mov rbp,       [rdi + 0x020]
-    mov rdx,       [rdi + 0x018]
-    mov rcx,       [rdi + 0x010]
-    mov rbx,       [rdi + 0x008]
-    mov rax,       [rdi + 0x000]
+    mov r15, [rdi + 0x070]
+    mov r14, [rdi + 0x068]
+    mov r13, [rdi + 0x060]
+    mov r12, [rdi + 0x058]
+    mov r11, [rdi + 0x050]
+    mov r10, [rdi + 0x048]
+    mov r9,  [rdi + 0x040]
+    mov r8,  [rdi + 0x038]
+    mov rsi, [rdi + 0x028]
+    mov rbp, [rdi + 0x020]
+    mov rdx, [rdi + 0x018]
+    mov rcx, [rdi + 0x010]
+    mov rbx, [rdi + 0x008]
+    mov rax, [rdi + 0x000]
 
-    mov rdi,       [rdi + 0x030]
+    mov rdi, [rdi + 0x030]
 
     sti
     ret

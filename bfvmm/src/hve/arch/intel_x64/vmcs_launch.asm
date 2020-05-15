@@ -22,6 +22,7 @@
 bits 64
 default rel
 
+%define IA32_XSS_MSR   0xDA0
 %define VMCS_GUEST_RSP 0x0000681C
 %define VMCS_GUEST_RIP 0x0000681E
 
@@ -43,19 +44,51 @@ vmcs_launch:
     push r15
     push rbp
 
+    mov rsi, [rdi + 0x108]
+    mov dr6, rsi
+    mov rsi, [rdi + 0x100]
+    mov dr3, rsi
+    mov rsi, [rdi + 0x0F8]
+    mov dr2, rsi
+    mov rsi, [rdi + 0x0F0]
+    mov dr1, rsi
+    mov rsi, [rdi + 0x0E8]
+    mov dr0, rsi
+    mov rsi, [rdi + 0x0E0]
+    mov cr8, rsi
+    mov rsi, [rdi + 0x0D8]
+    mov cr2, rsi
+
+    ; See the exit handler and resume logic for comments. Note that we do
+    ; add one thing here which is we have to tell xrstors that the save
+    ; area is compressed. When the launch occurs, it is likely that a guest
+    ; is being started for the first time (but not always, as is the case
+    ; with VMCS migration and sleep/resume). When this happens, xsaves has
+    ; not been run on the save area, which means it has not been properly
+    ; configured to be used with xrstors (not sure why Intel didn't include
+    ; an init instruction for xsave, but this basically emulates it).
+
+    mov rsi, [rdi + 0x0C8]
+    mov al, 0x80
+    mov [rsi + 0x20f], al
+    xor edx, edx
+    mov eax, 0xFFFFFFFF
+    xrstors64 [rsi]
+
+    mov eax, [rdi + 0x0B8]
+    xor edx, edx
+    mov ecx, IA32_XSS_MSR
+    wrmsr
+
+    mov eax, [rdi + 0x0A8]
+    xor edx, edx
+    xor ecx, ecx
+    xsetbv
+
     mov rsi, VMCS_GUEST_RSP
     vmwrite rsi, [rdi + 0x080]
     mov rsi, VMCS_GUEST_RIP
     vmwrite rsi, [rdi + 0x078]
-
-    movdqa xmm7,  [rdi + 0x1A0]
-    movdqa xmm6,  [rdi + 0x180]
-    movdqa xmm5,  [rdi + 0x160]
-    movdqa xmm4,  [rdi + 0x140]
-    movdqa xmm3,  [rdi + 0x120]
-    movdqa xmm2,  [rdi + 0x100]
-    movdqa xmm1,  [rdi + 0x0E0]
-    movdqa xmm0,  [rdi + 0x0C0]
 
     mov r15, [rdi + 0x070]
     mov r14, [rdi + 0x068]

@@ -54,26 +54,20 @@ struct vcpu_state_t {
     uint64_t vcpu_ptr;              // 0x098
     uint64_t exit_handler_ptr;      // 0x0A0
 
-    uint64_t reserved1;             // 0x0A8
-    uint64_t reserved2;             // 0x0B0
-    uint64_t reserved3;             // 0x0B8
+    uint64_t xcr0;                  // 0x0A8
+    uint64_t xcr0_cpuid;            // 0x0B0
+    uint64_t ia32_xss;              // 0x0B8
+    uint64_t ia32_xss_cpuid;        // 0x0C0
+    uint64_t guest_xsaves_area_ptr; // 0x0C8
+    uint64_t host_xsaves_area_ptr;  // 0x0D0
 
-    uint64_t ymm00[4];              // 0x0C0
-    uint64_t ymm01[4];              // 0x0E0
-    uint64_t ymm02[4];              // 0x100
-    uint64_t ymm03[4];              // 0x120
-    uint64_t ymm04[4];              // 0x140
-    uint64_t ymm05[4];              // 0x160
-    uint64_t ymm06[4];              // 0x180
-    uint64_t ymm07[4];              // 0x1A0
-    uint64_t ymm08[4];              // 0x1C0
-    uint64_t ymm09[4];              // 0x1E0
-    uint64_t ymm10[4];              // 0x200
-    uint64_t ymm11[4];              // 0x220
-    uint64_t ymm12[4];              // 0x240
-    uint64_t ymm13[4];              // 0x260
-    uint64_t ymm14[4];              // 0x280
-    uint64_t ymm15[4];              // 0x2A0
+    uint64_t cr2;                   // 0x0D8
+    uint64_t cr8;                   // 0x0E0
+    uint64_t dr0;                   // 0x0E8
+    uint64_t dr1;                   // 0x0F0
+    uint64_t dr2;                   // 0x0F8
+    uint64_t dr3;                   // 0x100
+    uint64_t dr6;                   // 0x108
 };
 
 }

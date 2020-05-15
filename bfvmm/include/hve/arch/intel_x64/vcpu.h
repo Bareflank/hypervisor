@@ -1789,10 +1789,30 @@ public:
     VIRTUAL void set_idt_limit(uint64_t val) noexcept;
     VIRTUAL uint64_t cr0() const noexcept;
     VIRTUAL void set_cr0(uint64_t val) noexcept;
+    VIRTUAL uint64_t cr2() const noexcept;
+    VIRTUAL void set_cr2(uint64_t val) noexcept;
     VIRTUAL uint64_t cr3() const noexcept;
     VIRTUAL void set_cr3(uint64_t val) noexcept;
     VIRTUAL uint64_t cr4() const noexcept;
     VIRTUAL void set_cr4(uint64_t val) noexcept;
+    VIRTUAL uint64_t cr8() const noexcept;
+    VIRTUAL void set_cr8(uint64_t val) noexcept;
+    VIRTUAL uint64_t dr0() const noexcept;
+    VIRTUAL void set_dr0(uint64_t val) noexcept;
+    VIRTUAL uint64_t dr1() const noexcept;
+    VIRTUAL void set_dr1(uint64_t val) noexcept;
+    VIRTUAL uint64_t dr2() const noexcept;
+    VIRTUAL void set_dr2(uint64_t val) noexcept;
+    VIRTUAL uint64_t dr3() const noexcept;
+    VIRTUAL void set_dr3(uint64_t val) noexcept;
+    VIRTUAL uint64_t dr6() const noexcept;
+    VIRTUAL void set_dr6(uint64_t val) noexcept;
+    VIRTUAL uint64_t dr7() const noexcept;
+    VIRTUAL void set_dr7(uint64_t val) noexcept;
+    VIRTUAL uint64_t xcr0() const noexcept;
+    VIRTUAL void set_xcr0(uint64_t val) noexcept;
+    VIRTUAL uint64_t ia32_xss() const noexcept;
+    VIRTUAL void set_ia32_xss(uint64_t val) noexcept;
     VIRTUAL uint64_t ia32_efer() const noexcept;
     VIRTUAL void set_ia32_efer(uint64_t val) noexcept;
     VIRTUAL uint64_t ia32_pat() const noexcept;
@@ -1906,6 +1926,8 @@ private:
 
     std::unique_ptr<gsl::byte[]> m_ist1;
     std::unique_ptr<gsl::byte[]> m_stack;
+    std::unique_ptr<gsl::byte[]> m_guest_xsaves_area;
+    std::unique_ptr<gsl::byte[]> m_host_xsaves_area;
 
     x64::tss m_host_tss{};
     x64::gdt m_host_gdt{512};

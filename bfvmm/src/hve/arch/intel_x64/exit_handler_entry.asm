@@ -22,6 +22,7 @@
 bits 64
 default rel
 
+%define IA32_XSS_MSR   0xDA0
 %define VMCS_GUEST_RSP 0x0000681C
 %define VMCS_GUEST_RIP 0x0000681E
 
@@ -57,19 +58,99 @@ exit_handler_entry:
     mov [gs:0x068], r14
     mov [gs:0x070], r15
 
-    movdqa [gs:0x0C0], xmm0
-    movdqa [gs:0x0E0], xmm1
-    movdqa [gs:0x100], xmm2
-    movdqa [gs:0x120], xmm3
-    movdqa [gs:0x140], xmm4
-    movdqa [gs:0x160], xmm5
-    movdqa [gs:0x180], xmm6
-    movdqa [gs:0x1A0], xmm7
+    mov rsi, VMCS_GUEST_RIP
+    vmread [gs:0x078], rsi
+    mov rsi, VMCS_GUEST_RSP
+    vmread [gs:0x080], rsi
 
-    mov rdi, VMCS_GUEST_RIP
-    vmread [gs:0x078], rdi
-    mov rdi, VMCS_GUEST_RSP
-    vmread [gs:0x080], rdi
+    ; To handle the XSAVE data, we do not know what the guest is currently
+    ; using. One approach would be to save all state and then restore all
+    ; of that state. The problem with that approach is if the guest is only
+    ; using a small amount of state, this would be wasteful. To prevent
+    ; that we use the second approach. In this approach you save what the
+    ; guest is using (i.e., save based on the guest's values for xcr0 and
+    ; xss), and then restore all state. Any bits that are not saved here
+    ; will be initialized to their defaults on restore during a resume.
+    ; This ensures that we reduce how much we save (if possible) while still
+    ; ensuring the state on resume does not include data from other guest VMs
+
+    xor ecx, ecx
+    xgetbv
+    mov [gs:0x0A8], eax
+
+    mov rcx, IA32_XSS_MSR
+    rdmsr
+    mov [gs:0x0B8], eax
+
+    mov rsi, [gs:0x0C8]
+    xor edx, edx
+    mov eax, 0xFFFFFFFF
+    xsaves64 [rsi]
+
+    ; Now that we have saved the guest state based on what the guest was
+    ; using, we need to set the xcr0 and xss to all bits (based on what the
+    ; cpuid instruction reports). Once that is done, we will restore the
+    ; state using a black save area. This ensures that the hypervisor always
+    ; have initialized state when it executes. In addition, on resume, this
+    ; will ensure that the restore of the state uses all bits as well. Any
+    ; state that was not saved by the guest above will be initialized on
+    ; resume. Note that since the host state that we restore above never
+    ; gets saved (i.e., we never run xsave on it, we only use it for xrstor
+    ; to initialize state), we need to flip the bit in the header that tells
+    ; xrstor that it is compressed. This ensures we can use the xrstors
+    ; instruction which is needed to include xss.
+
+    mov eax, [gs:0x0B0]
+    xor edx, edx
+    xor ecx, ecx
+    xsetbv
+
+    mov eax, [gs:0x0C0]
+    xor edx, edx
+    mov ecx, IA32_XSS_MSR
+    wrmsr
+
+    mov rsi, [gs:0x0D0]
+    mov al, 0x80
+    mov [rsi + 0x20f], al
+    xor edx, edx
+    mov eax, 0xFFFFFFFF
+    xrstors64 [rsi]
+
+    ; Finally, we need to initialize the remaining control and debug
+    ; registers that are not handled by the VMCS. This ensures that the
+    ; hypervisor has a clean control and debug register state as it
+    ; executes.
+
+    mov rsi, cr2
+    mov [gs:0x0D8], rsi
+    mov rsi, cr8
+    mov [gs:0x0E0], rsi
+    mov rsi, dr0
+    mov [gs:0x0E8], rsi
+    mov rsi, dr1
+    mov [gs:0x0F0], rsi
+    mov rsi, dr2
+    mov [gs:0x0F8], rsi
+    mov rsi, dr3
+    mov [gs:0x100], rsi
+    mov rsi, dr6
+    mov [gs:0x108], rsi
+
+    mov rsi, 0x0
+    mov cr2, rsi
+    mov rsi, 0xF
+    mov cr8, rsi
+    mov rsi, 0x0
+    mov dr0, rsi
+    mov rsi, 0x0
+    mov dr1, rsi
+    mov rsi, 0x0
+    mov dr2, rsi
+    mov rsi, 0x0
+    mov dr3, rsi
+    mov rsi, 0x0
+    mov dr6, rsi
 
     mov rdi, [gs:0x0098]
     mov rsi, [gs:0x00A0]

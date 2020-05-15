@@ -22,6 +22,7 @@
 bits 64
 default rel
 
+%define IA32_XSS_MSR   0xDA0
 %define VMCS_GUEST_RSP 0x0000681C
 %define VMCS_GUEST_RIP 0x0000681E
 
@@ -43,19 +44,53 @@ vmcs_resume:
     push r15
     push rbp
 
+    mov rsi, [rdi + 0x108]
+    mov dr6, rsi
+    mov rsi, [rdi + 0x100]
+    mov dr3, rsi
+    mov rsi, [rdi + 0x0F8]
+    mov dr2, rsi
+    mov rsi, [rdi + 0x0F0]
+    mov dr1, rsi
+    mov rsi, [rdi + 0x0E8]
+    mov dr0, rsi
+    mov rsi, [rdi + 0x0E0]
+    mov cr8, rsi
+    mov rsi, [rdi + 0x0D8]
+    mov cr2, rsi
+
+    ; In the exit handler entry point, we set xcr0 and xss to all enabled
+    ; bits, which means that the entire CPU state that is supported by
+    ; xsave will be reset with the instructions below. If the OS sets any
+    ; of these bits, they will be restored by xrstors, otherwise they will
+    ; be initialized. When working with multiple guest VMs, it is possible
+    ; that some guest VMs will only use a small portion of the xsave state
+    ; while others will use all of it. When a world switch occurs (i.e.,
+    ; swapping from one VM to another), we need to make sure that none of
+    ; this state leaks between guests. This scheme ensures that. Once we
+    ; restore the state, we then set the xcr0 and xss to the value the
+    ; guest VM expects. Not that this scheme is repeated in the promote and
+    ; launch logic.
+
+    mov rsi, [rdi + 0x0C8]
+    xor edx, edx
+    mov eax, 0xFFFFFFFF
+    xrstors64 [rsi]
+
+    mov eax, [rdi + 0x0B8]
+    xor edx, edx
+    mov ecx, IA32_XSS_MSR
+    wrmsr
+
+    mov eax, [rdi + 0x0A8]
+    xor edx, edx
+    xor ecx, ecx
+    xsetbv
+
     mov rsi, VMCS_GUEST_RSP
     vmwrite rsi, [rdi + 0x080]
     mov rsi, VMCS_GUEST_RIP
     vmwrite rsi, [rdi + 0x078]
-
-    movdqa xmm7,  [rdi + 0x1A0]
-    movdqa xmm6,  [rdi + 0x180]
-    movdqa xmm5,  [rdi + 0x160]
-    movdqa xmm4,  [rdi + 0x140]
-    movdqa xmm3,  [rdi + 0x120]
-    movdqa xmm2,  [rdi + 0x100]
-    movdqa xmm1,  [rdi + 0x0E0]
-    movdqa xmm0,  [rdi + 0x0C0]
 
     mov r15, [rdi + 0x070]
     mov r14, [rdi + 0x068]
