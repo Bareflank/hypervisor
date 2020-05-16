@@ -26,6 +26,7 @@
 
 #include <common.h>
 
+#include <asm/io.h>
 #include <linux/mm.h>
 #include <linux/slab.h>
 #include <linux/string.h>
