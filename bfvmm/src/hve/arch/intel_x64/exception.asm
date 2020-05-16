@@ -28,21 +28,40 @@ section .text
 
 %macro PUSHALL 0
     sub rsp, 16
-    movups [rsp], xmm0
+    movdqa [rsp], xmm0
     sub rsp, 16
-    movups [rsp], xmm1
+    movdqa [rsp], xmm1
     sub rsp, 16
-    movups [rsp], xmm2
+    movdqa [rsp], xmm2
     sub rsp, 16
-    movups [rsp], xmm3
+    movdqa [rsp], xmm3
     sub rsp, 16
-    movups [rsp], xmm4
+    movdqa [rsp], xmm4
     sub rsp, 16
-    movups [rsp], xmm5
+    movdqa [rsp], xmm5
     sub rsp, 16
-    movups [rsp], xmm6
+    movdqa [rsp], xmm6
     sub rsp, 16
-    movups [rsp], xmm7
+    movdqa [rsp], xmm7
+    sub rsp, 16
+    movdqa [rsp], xmm8
+    sub rsp, 16
+    movdqa [rsp], xmm9
+    sub rsp, 16
+    movdqa [rsp], xmm10
+    sub rsp, 16
+    movdqa [rsp], xmm11
+    sub rsp, 16
+    movdqa [rsp], xmm12
+    sub rsp, 16
+    movdqa [rsp], xmm13
+    sub rsp, 16
+    movdqa [rsp], xmm14
+    sub rsp, 16
+    movdqa [rsp], xmm15
+
+    sub rsp, 8
+    stmxcsr [rsp]
 
     push rax
     push rbx
@@ -78,27 +97,65 @@ section .text
     pop rbx
     pop rax
 
-    movups xmm7, [rsp]
+    ldmxcsr [rsp]
+    add rsp, 8
+
+    movdqa xmm15, [rsp]
     add rsp, 16
-    movups xmm6, [rsp]
+    movdqa xmm14, [rsp]
     add rsp, 16
-    movups xmm5, [rsp]
+    movdqa xmm13, [rsp]
     add rsp, 16
-    movups xmm4, [rsp]
+    movdqa xmm12, [rsp]
     add rsp, 16
-    movups xmm3, [rsp]
+    movdqa xmm11, [rsp]
     add rsp, 16
-    movups xmm2, [rsp]
+    movdqa xmm10, [rsp]
     add rsp, 16
-    movups xmm1, [rsp]
+    movdqa xmm9, [rsp]
     add rsp, 16
-    movups xmm0, [rsp]
+    movdqa xmm8, [rsp]
+    add rsp, 16
+    movdqa xmm7, [rsp]
+    add rsp, 16
+    movdqa xmm6, [rsp]
+    add rsp, 16
+    movdqa xmm5, [rsp]
+    add rsp, 16
+    movdqa xmm4, [rsp]
+    add rsp, 16
+    movdqa xmm3, [rsp]
+    add rsp, 16
+    movdqa xmm2, [rsp]
+    add rsp, 16
+    movdqa xmm1, [rsp]
+    add rsp, 16
+    movdqa xmm0, [rsp]
     add rsp, 16
 %endmacro
+
+; The VMM uses the IST mechanism for interrupt handling. One implication
+; of this is that the processor unconditionally pushes 5, 8-byte values
+; onto the 16-byte aligned stack provided in the IST entry as in the following
+; pseudo-code:
+;
+;    (load rsp with value from IST entry)
+;    push ss
+;    push old rsp
+;    push rflags
+;    push cs
+;    push rip
+;
+; If the exception has an error-code, the CPU pushes that too. So if an
+; error code is present, the stack is 16-byte aligned, otherwise it is
+; 8-byte aligned. In order to use the more-performant movdqa (aligned moves)
+; on the XMM registers, we push an extra 8 bytes onto the stack in the
+; non-error-code case.
 
 %macro ESR_NOERRCODE 1
     global _esr%1
     _esr%1:
+        push rax
         PUSHALL
         mov rdi, %1
         mov rsi, 0
@@ -107,6 +164,7 @@ section .text
         mov r8,  [gs:0x098]
         call default_esr wrt ..plt
         POPALL
+        add rsp, 8
         iretq
 %endmacro
 
@@ -115,7 +173,7 @@ section .text
     _esr%1:
         PUSHALL
         mov rdi, %1
-        mov rsi, [rsp + 248]
+        mov rsi, [rsp + 384]
         mov rdx, 1
         mov rcx, rsp
         mov r8,  [gs:0x098]

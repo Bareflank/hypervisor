@@ -293,7 +293,14 @@ vcpu::write_host_state()
     host_gdtr_base::set(m_host_gdt.base());
     host_idtr_base::set(m_host_idt.base());
 
+    // Make sure that the IST is 16-byte aligned. The context switch glue in
+    // exception.asm uses this alignment assumption so that aligned moves can
+    // be used for xmm registers.
+    constexpr uint64_t ist_alignment = 0x10U;
+
     m_host_tss.ist1 = setup_stack(m_ist1.get(), this->id());
+    m_host_tss.ist1 &= ~(ist_alignment - 1);
+
     set_default_esrs(&m_host_idt, 8);
 
     host_rip::set(exit_handler_entry);

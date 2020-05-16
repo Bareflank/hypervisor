@@ -75,7 +75,7 @@ default_esr(
     // -------------------------------------------------------------------------
 
     unlock_write();
-    auto view = gsl::span<uint64_t>(regs, 37);
+    auto view = gsl::span<uint64_t>(regs, 53);
 
     bfdebug_transaction(0, [&](std::string * msg) {
 
@@ -103,6 +103,8 @@ default_esr(
 
         bferror_lnbr(0, msg);
         bferror_info(0, "general purpose registers", msg);
+        bferror_subnhex(0, "rip", view[49], msg);
+        bferror_subnhex(0, "rsp", view[52], msg);
         bferror_subnhex(0, "rax", view[14], msg);
         bferror_subnhex(0, "rbx", view[13], msg);
         bferror_subnhex(0, "rcx", view[12], msg);
@@ -118,14 +120,6 @@ default_esr(
         bferror_subnhex(0, "r13", view[2], msg);
         bferror_subnhex(0, "r14", view[1], msg);
         bferror_subnhex(0, "r15", view[0], msg);
-        if (ec_valid) {
-            bferror_subnhex(0, "rip", view[32], msg);
-            bferror_subnhex(0, "rsp", view[35], msg);
-        }
-        else {
-            bferror_subnhex(0, "rip", view[31], msg);
-            bferror_subnhex(0, "rsp", view[34], msg);
-        }
 
         bferror_lnbr(0, msg);
         bferror_info(0, "control registers", msg);
