@@ -999,6 +999,10 @@ vcpu::disable_ept()
     m_control_register_handler.enable_wrcr0_exiting(cr0_guest_host_mask::get());
 }
 
+void
+vcpu::invept()
+{ m_ept_handler.invept(); }
+
 //==========================================================================
 // VPID
 //==========================================================================

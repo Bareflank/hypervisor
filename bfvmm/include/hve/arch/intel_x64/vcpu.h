@@ -952,6 +952,16 @@ public:
     ///
     VIRTUAL void disable_ept();
 
+    /// Invalidate EPT
+    ///
+    /// Invalidates TLB entries associated with the EPTP managed by the
+    /// m_ept_handler of this vcpu.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void invept();
+
     //==========================================================================
     // VPID
     //==========================================================================
