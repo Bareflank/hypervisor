@@ -181,6 +181,10 @@ vcpu::vcpu(
         throw std::runtime_error("cpu not supported: xcr0 defines features above 32 bits");
     }
 
+    if (extended_state_enum::subleaf1::edx::get() != 0) {
+        throw std::runtime_error("cpu not supported: ia32_xss defines features above 32 bits");
+    }
+
     bfn::call_once(g_once_flag, setup);
 
     m_state->vcpu_ptr =
