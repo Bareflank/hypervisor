@@ -3100,6 +3100,35 @@ namespace guest_ia32_bndcfgs
     }
 }
 
+namespace guest_ia32_rtit_ctl
+{
+    constexpr const auto addr = 0x0000000000002814ULL;
+    constexpr const auto name = "guest_ia32_rtit_ctl";
+
+    inline auto exists()
+    {
+        return msrs::ia32_vmx_true_entry_ctls::load_ia32_rtit_ctl::is_allowed1() ||
+               msrs::ia32_vmx_true_exit_ctls::clear_ia32_rtit_ctl::is_allowed1();
+    }
+
+    inline auto get()
+    { return get_vmcs_field(addr, name, exists()); }
+
+    inline auto get_if_exists(bool verbose = false)
+    { return get_vmcs_field_if_exists(addr, name, verbose, exists()); }
+
+    inline void set(value_type val)
+    { set_vmcs_field(val, addr, name, exists()); }
+
+    inline void set_if_exists(value_type val, bool verbose = false)
+    { set_vmcs_field_if_exists(val, addr, name, verbose, exists()); }
+
+    inline void dump(int level, std::string *msg = nullptr)
+    {
+        dump_vmcs_nhex(level, msg);
+    }
+}
+
 }
 }
 

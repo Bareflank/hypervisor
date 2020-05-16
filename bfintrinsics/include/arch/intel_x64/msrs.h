@@ -11949,11 +11949,11 @@ namespace ia32_vmx_procbased_ctls2
         { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
-    namespace pt_conceal_nonroot_operation
+    namespace conceal_vmx_from_pt
     {
         constexpr const auto mask = 0x0000000000080000ULL;
         constexpr const auto from = 19ULL;
-        constexpr const auto name = "pt_conceal_nonroot_operation";
+        constexpr const auto name = "conceal_vmx_from_pt";
 
         inline auto is_enabled()
         { return is_bit_set(_read_msr(addr), from); }
@@ -12033,6 +12033,34 @@ namespace ia32_vmx_procbased_ctls2
         { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
+    namespace pt_uses_guest_physical_addresses
+    {
+        constexpr const auto mask = 0x0000000001000000ULL;
+        constexpr const auto from = 24ULL;
+        constexpr const auto name = "pt_uses_guest_physical_addresses";
+
+        inline auto is_enabled()
+        { return is_bit_set(_read_msr(addr), from); }
+
+        inline auto is_enabled(value_type msr)
+        { return is_bit_set(msr, from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(_read_msr(addr), from); }
+
+        inline auto is_disabled(value_type msr)
+        { return is_bit_cleared(msr, from); }
+
+        inline auto is_allowed0() noexcept
+        { return (_read_msr(addr) & mask) == 0; }
+
+        inline auto is_allowed1() noexcept
+        { return (_read_msr(addr) & (mask << 32)) != 0; }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
+    }
+
     namespace use_tsc_scaling
     {
         constexpr const auto mask = 0x0000000002000000ULL;
@@ -12083,9 +12111,10 @@ namespace ia32_vmx_procbased_ctls2
         rdseed_exiting::dump(level, msg);
         enable_pml::dump(level, msg);
         ept_violation_ve::dump(level, msg);
-        pt_conceal_nonroot_operation::dump(level, msg);
+        conceal_vmx_from_pt::dump(level, msg);
         enable_xsaves_xrstors::dump(level, msg);
         ept_mode_based_control::dump(level, msg);
+        pt_uses_guest_physical_addresses::dump(level, msg);
         use_tsc_scaling::dump(level, msg);
     }
 }
@@ -13537,6 +13566,62 @@ namespace ia32_vmx_true_exit_ctls
         { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
+    namespace conceal_vmx_from_pt
+    {
+        constexpr const auto mask = 0x0000000001000000ULL;
+        constexpr const auto from = 24ULL;
+        constexpr const auto name = "conceal_vmx_from_pt";
+
+        inline auto is_enabled()
+        { return is_bit_set(_read_msr(addr), from); }
+
+        inline auto is_enabled(value_type msr)
+        { return is_bit_set(msr, from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(_read_msr(addr), from); }
+
+        inline auto is_disabled(value_type msr)
+        { return is_bit_cleared(msr, from); }
+
+        inline auto is_allowed0() noexcept
+        { return (_read_msr(addr) & mask) == 0; }
+
+        inline auto is_allowed1() noexcept
+        { return (_read_msr(addr) & (mask << 32)) != 0; }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
+    }
+
+    namespace clear_ia32_rtit_ctl
+    {
+        constexpr const auto mask = 0x0000000002000000ULL;
+        constexpr const auto from = 25ULL;
+        constexpr const auto name = "clear_ia32_rtit_ctl";
+
+        inline auto is_enabled()
+        { return is_bit_set(_read_msr(addr), from); }
+
+        inline auto is_enabled(value_type msr)
+        { return is_bit_set(msr, from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(_read_msr(addr), from); }
+
+        inline auto is_disabled(value_type msr)
+        { return is_bit_cleared(msr, from); }
+
+        inline auto is_allowed0() noexcept
+        { return (_read_msr(addr) & mask) == 0; }
+
+        inline auto is_allowed1() noexcept
+        { return (_read_msr(addr) & (mask << 32)) != 0; }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
+    }
+
     inline void dump(int level, std::string *msg = nullptr)
     {
         bfdebug_nhex(level, name, get(), msg);
@@ -13550,6 +13635,8 @@ namespace ia32_vmx_true_exit_ctls
         load_ia32_efer::dump(level, msg);
         save_preemption_timer_value::dump(level, msg);
         clear_ia32_bndcfgs::dump(level, msg);
+        conceal_vmx_from_pt::dump(level, msg);
+        clear_ia32_rtit_ctl::dump(level, msg);
     }
 }
 
@@ -13791,6 +13878,62 @@ namespace ia32_vmx_true_entry_ctls
         { bfdebug_subbool(level, name, is_allowed1(), msg); }
     }
 
+    namespace conceal_vmx_from_pt
+    {
+        constexpr const auto mask = 0x0000000000020000ULL;
+        constexpr const auto from = 17ULL;
+        constexpr const auto name = "conceal_vmx_from_pt";
+
+        inline auto is_enabled()
+        { return is_bit_set(_read_msr(addr), from); }
+
+        inline auto is_enabled(value_type msr)
+        { return is_bit_set(msr, from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(_read_msr(addr), from); }
+
+        inline auto is_disabled(value_type msr)
+        { return is_bit_cleared(msr, from); }
+
+        inline auto is_allowed0() noexcept
+        { return (_read_msr(addr) & mask) == 0; }
+
+        inline auto is_allowed1() noexcept
+        { return (_read_msr(addr) & (mask << 32)) != 0; }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
+    }
+
+    namespace load_ia32_rtit_ctl
+    {
+        constexpr const auto mask = 0x0000000000040000ULL;
+        constexpr const auto from = 18ULL;
+        constexpr const auto name = "load_ia32_rtit_ctl";
+
+        inline auto is_enabled()
+        { return is_bit_set(_read_msr(addr), from); }
+
+        inline auto is_enabled(value_type msr)
+        { return is_bit_set(msr, from); }
+
+        inline auto is_disabled()
+        { return is_bit_cleared(_read_msr(addr), from); }
+
+        inline auto is_disabled(value_type msr)
+        { return is_bit_cleared(msr, from); }
+
+        inline auto is_allowed0() noexcept
+        { return (_read_msr(addr) & mask) == 0; }
+
+        inline auto is_allowed1() noexcept
+        { return (_read_msr(addr) & (mask << 32)) != 0; }
+
+        inline void dump(int level, std::string *msg = nullptr)
+        { bfdebug_subbool(level, name, is_allowed1(), msg); }
+    }
+
     inline void dump(int level, std::string *msg = nullptr)
     {
         bfdebug_nhex(level, name, get(), msg);
@@ -13802,6 +13945,8 @@ namespace ia32_vmx_true_entry_ctls
         load_ia32_pat::dump(level, msg);
         load_ia32_efer::dump(level, msg);
         load_ia32_bndcfgs::dump(level, msg);
+        conceal_vmx_from_pt::dump(level, msg);
+        load_ia32_rtit_ctl::dump(level, msg);
     }
 }
 

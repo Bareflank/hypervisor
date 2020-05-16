@@ -333,9 +333,23 @@ vcpu::write_guest_state()
     guest_ia32_pat::set(::x64::msrs::ia32_pat::get());
     guest_ia32_efer::set(msrs::ia32_efer::get());
 
-    if (arch_perf_monitoring::eax::version_id::get() >= 2) {
+    if (vm_entry_controls::load_ia32_perf_global_ctrl::is_allowed1()) {
         guest_ia32_perf_global_ctrl::set_if_exists(
             msrs::ia32_perf_global_ctrl::get()
+        );
+    }
+
+    if (vm_entry_controls::load_ia32_bndcfgs::is_allowed1()) {
+        bfalert_info(0, "untested: ia32_bndcfgs vmx controls enabled");
+        guest_ia32_bndcfgs::set_if_exists(
+            msrs::ia32_bndcfgs::get()
+        );
+    }
+
+    if (vm_entry_controls::load_ia32_rtit_ctl::is_allowed1()) {
+        bfalert_info(0, "untested: ia32_rtit_ctl vmx controls enabled");
+        guest_ia32_rtit_ctl::set_if_exists(
+            msrs::ia32_rtit_ctl::get()
         );
     }
 
@@ -434,7 +448,9 @@ vcpu::write_control_state()
     if (this->is_host_vcpu()) {
         enable_rdtscp::enable_if_allowed();
         enable_invpcid::enable_if_allowed();
+        conceal_vmx_from_pt::enable_if_allowed();
         enable_xsaves_xrstors::enable_if_allowed();
+        pt_uses_guest_physical_addresses::enable_if_allowed();
     }
 
     vm_exit_controls::save_debug_controls::enable();
@@ -444,12 +460,18 @@ vcpu::write_control_state()
     vm_exit_controls::load_ia32_pat::enable();
     vm_exit_controls::save_ia32_efer::enable();
     vm_exit_controls::load_ia32_efer::enable();
+    vm_exit_controls::clear_ia32_bndcfgs::enable_if_allowed();
+    vm_exit_controls::conceal_vmx_from_pt::enable_if_allowed();
+    vm_exit_controls::clear_ia32_rtit_ctl::enable_if_allowed();
 
     vm_entry_controls::load_debug_controls::enable();
     vm_entry_controls::ia_32e_mode_guest::enable();
     vm_entry_controls::load_ia32_perf_global_ctrl::enable_if_allowed();
     vm_entry_controls::load_ia32_pat::enable();
     vm_entry_controls::load_ia32_efer::enable();
+    vm_entry_controls::load_ia32_bndcfgs::enable_if_allowed();
+    vm_entry_controls::conceal_vmx_from_pt::enable_if_allowed();
+    vm_entry_controls::load_ia32_rtit_ctl::enable_if_allowed();
 }
 
 //==============================================================================
