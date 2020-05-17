@@ -189,12 +189,12 @@ emulate_ia_32e_mode_switch(vcpu *vcpu)
     if (paging::is_enabled(vcpu->gr1())) {
         lma::enable();
         ia_32e_mode_guest::enable();
-        ::intel_x64::vmx::invept_global();
+        vcpu->invept();
     }
     else {
         lma::disable();
         ia_32e_mode_guest::disable();
-        ::intel_x64::vmx::invept_global();
+        vcpu->invept();
     }
 }
 
@@ -226,12 +226,10 @@ default_wrcr3_handler(vcpu *vcpu)
     //
     // Just like with CR0, we need to emulate the entire instruction, including
     // the instruction's side effects. For a write to CR3, this includes
-    // flushing the TLB, minus the global entires. For now we do this using
-    // an EPT global flush. In the future, we should figure out if there is a
-    // more granular way to do this.
+    // flushing the TLB, minus the global entires.
     //
 
-    ::intel_x64::vmx::invept_global();
+    vcpu->invept();
     return false;
 }
 

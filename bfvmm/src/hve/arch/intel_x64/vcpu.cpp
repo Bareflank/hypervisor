@@ -181,6 +181,10 @@ vcpu::vcpu(
         throw std::runtime_error("cpu not supported: xcr0 defines features above 32 bits");
     }
 
+    if (extended_state_enum::subleaf1::edx::get() != 0) {
+        throw std::runtime_error("cpu not supported: ia32_xss defines features above 32 bits");
+    }
+
     bfn::call_once(g_once_flag, setup);
 
     m_state->vcpu_ptr =
@@ -289,7 +293,14 @@ vcpu::write_host_state()
     host_gdtr_base::set(m_host_gdt.base());
     host_idtr_base::set(m_host_idt.base());
 
+    // Make sure that the IST is 16-byte aligned. The context switch glue in
+    // exception.asm uses this alignment assumption so that aligned moves can
+    // be used for xmm registers.
+    constexpr uint64_t ist_alignment = 0x10U;
+
     m_host_tss.ist1 = setup_stack(m_ist1.get(), this->id());
+    m_host_tss.ist1 &= ~(ist_alignment - 1);
+
     set_default_esrs(&m_host_idt, 8);
 
     host_rip::set(exit_handler_entry);
@@ -987,6 +998,10 @@ vcpu::disable_ept()
     cr0_guest_host_mask::set(cr0_guest_host_mask::get() | (paging::mask | protection_enable::mask));
     m_control_register_handler.enable_wrcr0_exiting(cr0_guest_host_mask::get());
 }
+
+void
+vcpu::invept()
+{ m_ept_handler.invept(); }
 
 //==========================================================================
 // VPID

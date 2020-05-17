@@ -34,6 +34,7 @@ config.cmake
 
 bfdriver/src/.common.o.cmd
 bfdriver/src/platform/linux/.bareflank.ko.cmd
+bfdriver/src/platform/linux/.bareflank.mod.cmd
 bfdriver/src/platform/linux/.bareflank.mod.o.cmd
 bfdriver/src/platform/linux/.bareflank.o.cmd
 bfdriver/src/platform/linux/.cache.mk
@@ -44,6 +45,7 @@ bfdriver/src/platform/linux/.tmp_versions/
 bfdriver/src/platform/linux/.vmcall.o.cmd
 bfdriver/src/platform/linux/Module.symvers
 bfdriver/src/platform/linux/bareflank.ko
+bfdriver/src/platform/linux/bareflank.mod
 bfdriver/src/platform/linux/bareflank.mod.c
 bfdriver/src/platform/linux/bareflank.mod.o
 bfdriver/src/platform/linux/bareflank.o

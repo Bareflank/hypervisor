@@ -70,9 +70,18 @@ public:
     ///
     void set_eptp(ept::mmap *map);
 
+    /// Invalidate EPT
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    void invept();
+
 private:
 
     vcpu *m_vcpu;
+    uint64_t m_eptp;
+    void (*m_invept)(uintptr_t);
 
 public:
 

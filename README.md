@@ -121,7 +121,7 @@ setup-x86\_64.exe to C:\\cygwin64\\bin. From there, open a Cygwin terminal and
 run the following:
 
 ```
-setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext,bash-completion
+setup-x86_64.exe -q -P git,make,gcc-core,gcc-g++,nasm,clang,clang++,cmake,python,gettext,bash-completion,flex,bison,texinfo
 ```
 
 This build environment provides a complete toolchain for building and running Bareflank. Most
