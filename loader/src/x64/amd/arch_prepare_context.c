@@ -30,6 +30,80 @@
 #include <loader_platform.h>
 #include <loader_types.h>
 
+int64_t
+prepare_host_vmcb(struct loader_arch_context_t *context)
+{
+    uintptr_t virt;
+    uintptr_t phys;
+
+    virt = (uintptr_t)platform_alloc(sizeof(struct vmcb_t));
+    if (0 == virt) {
+        BFERROR("failed to allocate host vmcb\n");
+        return FAILURE;
+    }
+
+    phys = platform_virt_to_phys(virt);
+    if (0 == phys) {
+        BFERROR("failed to get the host vmcb's physical address\n");
+        platform_free((void *)virt, sizeof(struct vmcb_t));
+        return FAILURE;
+    }
+
+    if ((virt & (sizeof(struct vmcb_t) - 1)) != 0) {
+        BFERROR("host vmcb virt is not properly aligned\n");
+        platform_free((void *)virt, sizeof(struct vmcb_t));
+        return FAILURE;
+    }
+
+    if ((phys & (sizeof(struct vmcb_t) - 1)) != 0) {
+        BFERROR("host vmcb phys is not properly aligned\n");
+        platform_free((void *)virt, sizeof(struct vmcb_t));
+        return FAILURE;
+    }
+
+    context->tmp_host_vmcb_virt = (struct vmcb_t *)virt;
+    context->tmp_host_vmcb_phys = phys;
+
+    return 0;
+}
+
+int64_t
+prepare_guest_vmcb(struct loader_arch_context_t *context)
+{
+    uintptr_t virt;
+    uintptr_t phys;
+
+    virt = (uintptr_t)platform_alloc(sizeof(struct vmcb_t));
+    if (0 == virt) {
+        BFERROR("failed to allocate guest vmcb\n");
+        return FAILURE;
+    }
+
+    phys = platform_virt_to_phys(virt);
+    if (0 == phys) {
+        BFERROR("failed to get the guest vmcb's physical address\n");
+        platform_free((void *)virt, sizeof(struct vmcb_t));
+        return FAILURE;
+    }
+
+    if ((virt & (sizeof(struct vmcb_t) - 1)) != 0) {
+        BFERROR("guest vmcb virt is not properly aligned\n");
+        platform_free((void *)virt, sizeof(struct vmcb_t));
+        return FAILURE;
+    }
+
+    if ((phys & (sizeof(struct vmcb_t) - 1)) != 0) {
+        BFERROR("guest vmcb phys is not properly aligned\n");
+        platform_free((void *)virt, sizeof(struct vmcb_t));
+        return FAILURE;
+    }
+
+    context->tmp_guest_vmcb_virt = (struct vmcb_t *)virt;
+    context->tmp_guest_vmcb_phys = phys;
+
+    return 0;
+}
+
 /**
  * <!-- description -->
  *   @brief This function prepares the context structure. The context
@@ -38,11 +112,20 @@
  *     with the kernel which will use it to virtualize the root vCPUs.
  *
  * <!-- inputs/outputs -->
- *   @return Returns a pointer to a loader_arch_content structure on
- *     success. Returns NULL on failure.
+ *   @return Returns 0 on success, FAILURE otherwise.
  */
 int64_t
-arch_prepare_context(struct loader_arch_context *context)
+arch_prepare_context(struct loader_arch_context_t *context)
 {
+    if (prepare_host_vmcb(context)) {
+        BFERROR("prepare_host_vmcb failed\n");
+        return FAILURE;
+    }
+
+    if (prepare_guest_vmcb(context)) {
+        BFERROR("prepare_guest_vmcb failed\n");
+        return FAILURE;
+    }
+
     return 0;
 }

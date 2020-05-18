@@ -24,25 +24,10 @@
  * SOFTWARE.
  */
 
-#include <loader_arch.h>
+#include <loader.h>
+#include <loader_debug.h>
 #include <loader_platform.h>
 #include <loader_types.h>
-
-/**
- * <!-- description -->
- *   @brief This function contains all of the code that is common between
- *     all archiectures and all platforms for starting the VMM. This function
- *     will call platform and architecture specific functions as needed.
- *     Unlike start_vmm, this function is called on each CPU.
- *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success
- */
-static int64_t
-start_vmm_per_cpu(uint64_t const cpu)
-{
-    return 0;
-}
 
 /**
  * <!-- description -->
@@ -70,9 +55,10 @@ start_vmm(void)
      *       the arch code so that it can load the kernel as needed.
      */
 
-    if (platform_on_each_cpu(start_vmm_per_cpu) != 0) {
+    if (platform_on_each_cpu(start_vmm_per_cpu, 0)) {
+        BFERROR("platform_on_each_cpu failed\n");
         return FAILURE;
     }
 
-    return arch_start_vmm();
+    return 0;
 }

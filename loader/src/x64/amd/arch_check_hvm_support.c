@@ -48,7 +48,8 @@ arch_check_hvm_support(void)
     eax = CPUID_FN0000_0000;
     ecx = 0U;
     arch_cpuid(&eax, &ebx, &ecx, &edx);
-    if ((ebx != CPUID_FN0000_0000_EBX_VENDOR_ID) || (ecx != CPUID_FN0000_0000_ECX_VENDOR_ID) ||
+    if ((ebx != CPUID_FN0000_0000_EBX_VENDOR_ID) ||    // --
+        (ecx != CPUID_FN0000_0000_ECX_VENDOR_ID) ||    // --
         (edx != CPUID_FN0000_0000_EDX_VENDOR_ID)) {
         BFERROR("CPUID vendor not supported\n");
         return FAILURE;

@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
-
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -26,19 +24,18 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_DEBUG_H
-#define LOADER_DEBUG_H
+#ifndef LOADER_GLOBAL_RESOURCES_H
+#define LOADER_GLOBAL_RESOURCES_H
 
-#include <linux/printk.h>
+#include <loader_arch_context.h>
+#include <loader_context.h>
 
-#define BFSTR2(X) #X
-#define BFSTR(X) BFSTR2(X)
+/** @brief defines the max number of root CPUs that the loader supports */
+#define MAX_NUMBER_OF_ROOT_VCPUS 1024
 
-#define BFDEBUG(...)                                                                               \
-    printk(KERN_INFO "[BAREFLANK DEBUG]: " __FILE__ ":" BFSTR(__LINE__) ": " __VA_ARGS__)
-#define BFALERT(...)                                                                               \
-    printk(KERN_INFO "[BAREFLANK ALERT]: " __FILE__ ":" BFSTR(__LINE__) ": " __VA_ARGS__)
-#define BFERROR(...)                                                                               \
-    printk(KERN_ALERT "[BAREFLANK ERROR]: " __FILE__ ":" BFSTR(__LINE__) ": " __VA_ARGS__)
+/** @brief stores the common per cpu context */
+extern struct loader_context_t g_contexts[MAX_NUMBER_OF_ROOT_VCPUS];
+/** @brief stores the architecture specific per cpu context */
+extern struct loader_arch_context_t g_arch_contexts[MAX_NUMBER_OF_ROOT_VCPUS];
 
 #endif

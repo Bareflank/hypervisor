@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
-
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -26,19 +24,31 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_DEBUG_H
-#define LOADER_DEBUG_H
+#include <loader_arch.h>
+#include <loader_arch_context.h>
+#include <loader_debug.h>
+#include <loader_platform.h>
+#include <loader_types.h>
 
-#include <linux/printk.h>
+/**
+ * <!-- description -->
+ *   @brief This function releases the context structure. This is run
+ *     once the hypervisor is stopped, ensuring that all of the resources
+ *     the hypervisor needs remain pinned until the hypevisor is complete.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success, FAILURE otherwise.
+ */
+int64_t
+arch_release_context(struct loader_arch_context_t *context)
+{
+    platform_free(context->tmp_host_vmcb_virt, sizeof(struct vmcb_t));
+    context->tmp_host_vmcb_virt = NULL;
+    context->tmp_host_vmcb_phys = 0;
 
-#define BFSTR2(X) #X
-#define BFSTR(X) BFSTR2(X)
+    platform_free(context->tmp_guest_vmcb_virt, sizeof(struct vmcb_t));
+    context->tmp_guest_vmcb_virt = NULL;
+    context->tmp_guest_vmcb_phys = 0;
 
-#define BFDEBUG(...)                                                                               \
-    printk(KERN_INFO "[BAREFLANK DEBUG]: " __FILE__ ":" BFSTR(__LINE__) ": " __VA_ARGS__)
-#define BFALERT(...)                                                                               \
-    printk(KERN_INFO "[BAREFLANK ALERT]: " __FILE__ ":" BFSTR(__LINE__) ": " __VA_ARGS__)
-#define BFERROR(...)                                                                               \
-    printk(KERN_ALERT "[BAREFLANK ERROR]: " __FILE__ ":" BFSTR(__LINE__) ": " __VA_ARGS__)
-
-#endif
+    return 0;
+}

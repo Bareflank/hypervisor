@@ -24,7 +24,11 @@
  * SOFTWARE.
  */
 
+#include <loader.h>
 #include <loader_arch.h>
+#include <loader_debug.h>
+#include <loader_global_resources.h>
+#include <loader_platform.h>
 #include <loader_types.h>
 
 /**
@@ -40,5 +44,20 @@
 int64_t
 loader_init(void)
 {
-    return arch_loader_init();
+    if (platform_memset(&g_contexts, 0, sizeof(g_contexts))) {
+        BFERROR("platform_memset failed\n");
+        return FAILURE;
+    }
+
+    if (platform_memset(&g_arch_contexts, 0, sizeof(g_arch_contexts))) {
+        BFERROR("platform_memset failed\n");
+        return FAILURE;
+    }
+
+    if (arch_loader_init()) {
+        BFERROR("arch_loader_init failed\n");
+        return FAILURE;
+    }
+
+    return 0;
 }

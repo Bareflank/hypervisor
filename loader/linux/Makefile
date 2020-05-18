@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT
 #
 # Copyright (C) 2019 Assured Information Security, Inc.
 #
@@ -25,16 +26,19 @@ VENDOR_ID := $(shell lscpu | grep 'Vendor ID')
 ifneq ($(KERNELRELEASE),)
 	obj-m := $(TARGET_MODULE).o
 
+	EXTRA_CFLAGS += -I$(src)/include
+	EXTRA_CFLAGS += -I$(src)/../include
+
 	$(TARGET_MODULE)-objs += src/entry.o
 	$(TARGET_MODULE)-objs += src/platform.o
 	$(TARGET_MODULE)-objs += ../src/dump_vmm.o
+	$(TARGET_MODULE)-objs += ../src/global_resources.o
 	$(TARGET_MODULE)-objs += ../src/loader_fini.o
 	$(TARGET_MODULE)-objs += ../src/loader_init.o
+	$(TARGET_MODULE)-objs += ../src/start_vmm_per_cpu.o
 	$(TARGET_MODULE)-objs += ../src/start_vmm.o
+	$(TARGET_MODULE)-objs += ../src/stop_vmm_per_cpu.o
 	$(TARGET_MODULE)-objs += ../src/stop_vmm.o
-
-	EXTRA_CFLAGS += -I$(src)/include
-	EXTRA_CFLAGS += -I$(src)/../include
 
 	ifneq (,$(findstring AuthenticAMD,$(VENDOR_ID)))
 		$(TARGET_MODULE)-objs += src/x64/amd/intrinsics.o
@@ -42,8 +46,9 @@ ifneq ($(KERNELRELEASE),)
 		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_loader_fini.o
 		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_loader_init.o
 		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_prepare_context.o
-		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_start_vmm.o
-		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_stop_vmm.o
+		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_release_context.o
+		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_start_vmm_per_cpu.o
+		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_stop_vmm_per_cpu.o
 
 		EXTRA_CFLAGS += -I$(src)/include/x64/amd
 		EXTRA_CFLAGS += -I$(src)/../include/x64/amd
@@ -55,8 +60,9 @@ ifneq ($(KERNELRELEASE),)
 		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_loader_fini.o
 		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_loader_init.o
 		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_prepare_context.o
-		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_start_vmm.o
-		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_stop_vmm.o
+		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_release_context.o
+		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_start_vmm_per_cpu.o
+		$(TARGET_MODULE)-objs += ../src/x64/intel/arch_stop_vmm_per_cpu.o
 
 		EXTRA_CFLAGS += -I$(src)/include/x64/amd
 		EXTRA_CFLAGS += -I$(src)/../include/x64/intel

@@ -27,6 +27,8 @@
 #ifndef LOADER_ARCH_H
 #define LOADER_ARCH_H
 
+#include <loader_arch_context.h>
+#include <loader_context.h>
 #include <loader_types.h>
 
 /**
@@ -75,12 +77,71 @@ int64_t arch_stop_vmm(void);
 
 /**
  * <!-- description -->
- *   @brief This function checks to see if Intel VT-x support is available on
+ *   @brief This function contains all of the code that is arch specific
+ *     while common between all platforms for starting the VMM. This function
+ *     will call platform specific functions as needed. Unlike start_vmm,
+ *     this function is called on each CPU.
+ *
+ * <!-- inputs/outputs -->
+ *   @param cpu the id of the cpu to start
+ *   @param context the common context for this cpu
+ *   @param arch_context the architecture specific context for this cpu
+ *   @return Returns 0 on success
+ */
+int64_t arch_start_vmm_per_cpu(          // --
+    uint32_t const cpu,                  // --
+    struct loader_context_t *context,    // --
+    struct loader_arch_context_t *arch_context);
+
+/**
+ * <!-- description -->
+ *   @brief This function contains all of the code that is arch specific
+ *     while common between all platforms for stopping the VMM. This function
+ *     will call platform specific functions as needed. Unlike stop_vmm,
+ *     this function is called on each CPU.
+ *
+ * <!-- inputs/outputs -->
+ *   @param cpu the id of the cpu to stop
+ *   @param context the common context for this cpu
+ *   @param arch_context the architecture specific context for this cpu
+ *   @return Returns 0 on success
+ */
+int64_t arch_stop_vmm_per_cpu(           // --
+    uint32_t const cpu,                  // --
+    struct loader_context_t *context,    // --
+    struct loader_arch_context_t *arch_context);
+
+/**
+ * <!-- description -->
+ *   @brief This function checks to see if AMD SVM support is available on
  *     the currently running CPU
  *
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
 int64_t arch_check_hvm_support(void);
+
+/**
+ * <!-- description -->
+ *   @brief This function prepares the context structure. The context
+ *     structure stores all of the pre-vcpu state that the loader is
+ *     responsible for setting up. This context structure will be shared
+ *     with the kernel which will use it to virtualize the root vCPUs.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success, FAILURE otherwise.
+ */
+int64_t arch_prepare_context(struct loader_arch_context_t *context);
+
+/**
+ * <!-- description -->
+ *   @brief This function releases the context structure. This is run
+ *     once the hypervisor is stopped, ensuring that all of the resources
+ *     the hypervisor needs remain pinned until the hypevisor is complete.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success, FAILURE otherwise.
+ */
+int64_t arch_release_context(struct loader_arch_context_t *context);
 
 #endif

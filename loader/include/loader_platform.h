@@ -59,9 +59,49 @@ void *platform_alloc(uint64_t size);
 void platform_free(void *ptr, uint64_t size);
 
 /**
+ * <!-- description -->
+ *   @brief Given a virtual address, this function returns the virtual
+ *     address's physical address. Returns NULL if the conversion failed.
+ *
+ * <!-- inputs/outputs -->
+ *   @param virt the virtual address to convert to a physical address
+ *   @return Given a virtual address, this function returns the virtual
+ *     address's physical address. Returns NULL if the conversion failed.
+ */
+uintptr_t platform_virt_to_phys(uintptr_t virt);
+/**
+ * <!-- description -->
+ *   @brief Sets "num" bytes in the memory pointed to by "ptr" to "val".
+ *     If the provided parameters are valid, returns 0, otherwise
+ *     returns FAILURE.
+ *
+ * <!-- inputs/outputs -->
+ *   @param ptr a pointer to the memory to set
+ *   @param val the value to set each byte to
+ *   @param num the number of bytes in "ptr" to set to "val".
+ *   @return If the provided parameters are valid, returns 0, otherwise
+ *     returns FAILURE.
+ */
+int64_t platform_memset(void *ptr, char val, uint64_t num);
+
+/**
+ * <!-- description -->
+ *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
+ *     NULL, returns FAILURE, otherwise returns 0.
+ *
+ * <!-- inputs/outputs -->
+ *   @param dst a pointer to the memory to copy to
+ *   @param src a pointer to the memory to copy from
+ *   @param num the number of bytes to copy
+ *   @return If "src" or "dst" are NULL, returns FAILURE, otherwise
+ *     returns 0.
+ */
+int64_t platform_memcpy(void *dst, const void *src, uint64_t num);
+
+/**
  * @brief The callback signature for platform_on_each_cpu
  */
-typedef int64_t (*platform_per_cpu_func)(uint64_t);
+typedef int64_t (*platform_per_cpu_func)(uint32_t);
 
 /**
  * <!-- description -->
@@ -74,9 +114,10 @@ typedef int64_t (*platform_per_cpu_func)(uint64_t);
  *
  * <!-- inputs/outputs -->
  *   @param func the function to call on each cpu
+ *   @param reverse if set to 1, will execute the func in reverse order
  *   @return If each callback returns 0, this function returns 0, otherwise
  *     this function returns a non-0 value
  */
-int64_t platform_on_each_cpu(platform_per_cpu_func func);
+int64_t platform_on_each_cpu(platform_per_cpu_func func, int reverse);
 
 #endif

@@ -24,24 +24,55 @@
  * SOFTWARE.
  */
 
+#include <loader.h>
 #include <loader_arch.h>
-#include <loader_arch_context.h>
 #include <loader_debug.h>
+#include <loader_global_resources.h>
 #include <loader_platform.h>
 #include <loader_types.h>
 
 /**
  * <!-- description -->
- *   @brief This function prepares the context structure. The context
- *     structure stores all of the pre-vcpu state that the loader is
- *     responsible for setting up. This context structure will be shared
- *     with the kernel which will use it to virtualize the root vCPUs.
+ *   @brief This function contains all of the code that is common between
+ *     all archiectures and all platforms for starting the VMM. This function
+ *     will call platform and architecture specific functions as needed.
+ *     Unlike start_vmm, this function is called on each CPU.
  *
  * <!-- inputs/outputs -->
- *   @return Returns 0 on success, FAILURE otherwise.
+ *   @param cpu the id of the cpu to start
+ *   @return Returns 0 on success
  */
 int64_t
-arch_prepare_context(struct loader_arch_context_t *context)
+start_vmm_per_cpu(uint32_t const cpu)
 {
+    if (cpu >= MAX_NUMBER_OF_ROOT_VCPUS) {
+        BFERROR("cpu index %u is out of range\n", cpu);
+        return FAILURE;
+    }
+
+    if (VMM_STARTED == g_contexts[cpu].started) {
+        BFALERT("cpu %u was never stopped. stopping now\n", cpu);
+        if (stop_vmm_per_cpu(cpu) != 0) {
+            BFERROR("stop_vmm_per_cpu failed\n");
+            return FAILURE;
+        }
+    }
+
+    if (platform_memset(&g_contexts[cpu], 0, sizeof(g_contexts[cpu]))) {
+        BFERROR("platform_memset failed\n");
+        return FAILURE;
+    }
+
+    if (platform_memset(&g_arch_contexts[cpu], 0, sizeof(g_arch_contexts[cpu]))) {
+        BFERROR("platform_memset failed\n");
+        return FAILURE;
+    }
+
+    if (arch_start_vmm_per_cpu(cpu, &g_contexts[cpu], &g_arch_contexts[cpu])) {
+        BFERROR("arch_start_vmm_per_cpu failed\n");
+        return FAILURE;
+    }
+
+    g_contexts[cpu].started = VMM_STARTED;
     return 0;
 }

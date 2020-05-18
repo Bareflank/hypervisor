@@ -24,13 +24,15 @@
  * SOFTWARE.
  */
 
-#include <loader_arch.h>
+#include <loader.h>
+#include <loader_debug.h>
+#include <loader_platform.h>
 #include <loader_types.h>
 
 /**
  * <!-- description -->
  *   @brief This function contains all of the code that is common between
- *     all archiectures and all platforms for stoping the VMM. This function
+ *     all archiectures and all platforms for stopping the VMM. This function
  *     will call platform and architecture specific functions as needed.
  *
  * <!-- inputs/outputs -->
@@ -39,5 +41,9 @@
 int64_t
 stop_vmm(void)
 {
-    return arch_stop_vmm();
+    if (platform_on_each_cpu(stop_vmm_per_cpu, 1)) {
+        BFALERT("platform_on_each_cpu failed\n");
+    }
+
+    return 0;
 }
