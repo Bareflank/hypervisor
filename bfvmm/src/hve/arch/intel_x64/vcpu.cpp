@@ -137,8 +137,8 @@ vcpu::vcpu(
 
     m_ist1{std::make_unique<gsl::byte[]>(STACK_SIZE * 2)},
     m_stack{std::make_unique<gsl::byte[]>(STACK_SIZE * 2)},
-    m_guest_xsaves_area{std::make_unique<gsl::byte[]>(xsaves_area_size())},
-    m_host_xsaves_area{std::make_unique<gsl::byte[]>(xsaves_area_size())},
+    m_guest_xsaves_area{nullptr},
+    m_host_xsaves_area{nullptr},
 
     m_vmx{is_host_vcpu() ? std::make_unique<vmx>() : nullptr},
 
@@ -169,22 +169,6 @@ vcpu::vcpu(
     using namespace ::intel_x64;
     using namespace ::intel_x64::cpuid;
 
-    if (!feature_information::ecx::xsave::is_enabled()) {
-        throw std::runtime_error("cpu not supported: xsave not supported");
-    }
-
-    if (!extended_state_enum::subleaf1::eax::xsaves_xrstors::is_enabled()) {
-        throw std::runtime_error("cpu not supported: xsaves/xrstors not suppoorted");
-    }
-
-    if (extended_state_enum::mainleaf::edx::get() != 0) {
-        throw std::runtime_error("cpu not supported: xcr0 defines features above 32 bits");
-    }
-
-    if (extended_state_enum::subleaf1::edx::get() != 0) {
-        throw std::runtime_error("cpu not supported: ia32_xss defines features above 32 bits");
-    }
-
     bfn::call_once(g_once_flag, setup);
 
     m_state->vcpu_ptr =
@@ -193,14 +177,7 @@ vcpu::vcpu(
     m_state->exit_handler_ptr =
         reinterpret_cast<uintptr_t>(&m_exit_handler);
 
-    m_state->guest_xsaves_area_ptr =
-        reinterpret_cast<uintptr_t>(m_guest_xsaves_area.get());
-
-    m_state->host_xsaves_area_ptr =
-        reinterpret_cast<uintptr_t>(m_host_xsaves_area.get());
-
-    m_state->xcr0_cpuid = extended_state_enum::mainleaf::eax::get();
-    m_state->ia32_xss_cpuid = extended_state_enum::subleaf1::ecx::get();
+    this->init_xsave();
 
     // Note:
     //
@@ -256,6 +233,58 @@ vcpu::run()
             throw;
         }
     }
+}
+
+//==============================================================================
+// XSAVE Init
+//==============================================================================
+
+void
+vcpu::init_xsave()
+{
+    using namespace ::intel_x64::cpuid;
+
+    if (!feature_information::ecx::xsave::is_enabled()) {
+        throw std::runtime_error("cpu not supported: xsave not supported");
+    }
+
+    if (!extended_state_enum::subleaf1::eax::xsaves_xrstors::is_enabled()) {
+        throw std::runtime_error("cpu not supported: xsaves/xrstors not supported");
+    }
+
+    if (extended_state_enum::mainleaf::edx::get() != 0) {
+        throw std::runtime_error("cpu not supported: xcr0 defines features above 32 bits");
+    }
+
+    if (extended_state_enum::subleaf1::edx::get() != 0) {
+        throw std::runtime_error("cpu not supported: ia32_xss defines features above 32 bits");
+    }
+
+    auto cpuid_xcr0 = extended_state_enum::mainleaf::eax::get();
+    auto cpuid_ia32_xss = extended_state_enum::subleaf1::ecx::get();
+
+    auto old_xcr0 = ::intel_x64::xcr0::get();
+    auto old_ia32_xss = ::intel_x64::msrs::ia32_xss::get();
+
+    ::intel_x64::xcr0::set(cpuid_xcr0);
+    ::intel_x64::msrs::ia32_xss::set(cpuid_ia32_xss);
+
+    auto size = xsaves_area_size();
+
+    m_guest_xsaves_area = std::make_unique<gsl::byte[]>(size);
+    m_host_xsaves_area = std::make_unique<gsl::byte[]>(size);
+
+    m_state->guest_xsaves_area_ptr =
+        reinterpret_cast<uintptr_t>(m_guest_xsaves_area.get());
+
+    m_state->host_xsaves_area_ptr =
+        reinterpret_cast<uintptr_t>(m_host_xsaves_area.get());
+
+    m_state->xcr0_cpuid = cpuid_xcr0;
+    m_state->ia32_xss_cpuid = cpuid_ia32_xss;
+
+    ::intel_x64::xcr0::set(old_xcr0);
+    ::intel_x64::msrs::ia32_xss::set(old_ia32_xss);
 }
 
 //==============================================================================
