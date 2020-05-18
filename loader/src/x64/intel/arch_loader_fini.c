@@ -24,6 +24,7 @@
  * SOFTWARE.
  */
 
+#include <loader_arch.h>
 #include <loader_types.h>
 
 /**

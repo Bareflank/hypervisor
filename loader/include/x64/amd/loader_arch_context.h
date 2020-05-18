@@ -28,29 +28,26 @@
 #define LOADER_ARCH_CONTEXT_H
 
 #include <loader_types.h>
+#include <tmp_vmcb.h>
 
 /**
- * @class loader_arch_context
+ * @class loader_arch_context_t
  *
  * <!-- description -->
- *   @brief Provides all of the information that is needed by the kernel to
- *     start the hypervisor and return back to the root OS once the
- *     hypevisor is running on a specific CPU (meaning each CPU has its own
- *     version of this structure). This structure will eventually be given
- *     to the kernel, and the kernel will use this information to properly
- *     configure hardware virtualization extensions for a given CPU arch.
+ *   @brief Stores per-cpu resources that are needed by the
+ *     arch specific code.
  */
-struct loader_arch_context
+struct loader_arch_context_t
 {
     /** @brief tmp_ will be removed once the kernel is in place */
-    void *host_vmcb_virt;
+    struct vmcb_t *tmp_host_vmcb_virt;
     /** @brief tmp_ will be removed once the kernel is in place */
-    uintptr_t host_vmcb_phys;
+    uintptr_t tmp_host_vmcb_phys;
 
     /** @brief tmp_ will be removed once the kernel is in place */
-    void *guest_vmcb_virt;
+    struct vmcb_t *tmp_guest_vmcb_virt;
     /** @brief tmp_ will be removed once the kernel is in place */
-    uintptr_t guest_vmcb_phys;
+    uintptr_t tmp_guest_vmcb_phys;
 };
 
 #endif

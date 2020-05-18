@@ -24,7 +24,9 @@
  * SOFTWARE.
  */
 
+#include <loader.h>
 #include <loader_arch.h>
+#include <loader_debug.h>
 #include <loader_types.h>
 
 /**
@@ -40,5 +42,13 @@
 int64_t
 loader_fini(void)
 {
-    return arch_loader_fini();
+    if (stop_vmm()) {
+        BFALERT("stop_vmm failed\n");
+    }
+
+    if (arch_loader_fini()) {
+        BFALERT("arch_loader_fini failed\n");
+    }
+
+    return 0;
 }

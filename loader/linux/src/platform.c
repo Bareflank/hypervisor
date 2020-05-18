@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
+
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -28,6 +30,9 @@
 #include <loader_platform.h>
 #include <loader_types.h>
 
+#include <asm/io.h>
+#include <linux/cpu.h>
+#include <linux/mm.h>
 #include <linux/smp.h>
 #include <linux/vmalloc.h>
 
@@ -50,13 +55,13 @@ platform_alloc(uint64_t size)
     void *ptr = NULL;
 
     if (0 == size) {
-        BFALERT("platform_alloc: invalid number of bytes (i.e., size)\n");
+        BFALERT("invalid number of bytes (i.e., size)\n");
         return ptr;
     }
 
     ptr = vmalloc(size);
     if (NULL == ptr) {
-        BFALERT("platform_alloc: vmalloc failed\n");
+        BFALERT("vmalloc failed\n");
     }
 
     return ptr;
@@ -85,19 +90,74 @@ platform_free(void *ptr, uint64_t size)
 }
 
 /**
- * @struct on_cpu_info
- *
  * <!-- description -->
- *   @brief Since the on_each_cpu function does not provide a return type
- *     we use this structure to add a return type. We then call an internal
- *     function that converts the callback function signature that we want
- *     to the Linux callback signature.
+ *   @brief Given a virtual address, this function returns the virtual
+ *     address's physical address. Returns NULL if the conversion failed.
+ *
+ * <!-- inputs/outputs -->
+ *   @param virt the virtual address to convert to a physical address
+ *   @return Given a virtual address, this function returns the virtual
+ *     address's physical address. Returns NULL if the conversion failed.
  */
-struct on_cpu_info
+uintptr_t
+platform_virt_to_phys(uintptr_t virt)
 {
-    platform_per_cpu_func func;
-    int64_t ret;
-};
+    if (is_vmalloc_addr((void *)virt)) {
+        return page_to_phys(vmalloc_to_page((void *)virt));
+    }
+    else {
+        return virt_to_phys((void *)virt);
+    }
+}
+
+/**
+ * <!-- description -->
+ *   @brief Sets "num" bytes in the memory pointed to by "ptr" to "val".
+ *     If the provided parameters are valid, returns 0, otherwise
+ *     returns FAILURE.
+ *
+ * <!-- inputs/outputs -->
+ *   @param ptr a pointer to the memory to set
+ *   @param val the value to set each byte to
+ *   @param num the number of bytes in "ptr" to set to "val".
+ *   @return If the provided parameters are valid, returns 0, otherwise
+ *     returns FAILURE.
+ */
+int64_t
+platform_memset(void *ptr, char val, uint64_t num)
+{
+    if (!ptr) {
+        BFALERT("invalid ptr\n");
+        return FAILURE;
+    }
+
+    memset(ptr, val, num);
+    return 0;
+}
+
+/**
+ * <!-- description -->
+ *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
+ *     NULL, returns FAILURE, otherwise returns 0.
+ *
+ * <!-- inputs/outputs -->
+ *   @param dst a pointer to the memory to copy to
+ *   @param src a pointer to the memory to copy from
+ *   @param num the number of bytes to copy
+ *   @return If "src" or "dst" are NULL, returns FAILURE, otherwise
+ *     returns 0.
+ */
+int64_t
+platform_memcpy(void *dst, const void *src, uint64_t num)
+{
+    if (dst == 0 || src == 0) {
+        BFALERT("invalid dst/src pointers\n");
+        return FAILURE;
+    }
+
+    memcpy(dst, src, num);
+    return 0;
+}
 
 /**
  * <!-- description -->
@@ -107,16 +167,17 @@ struct on_cpu_info
  *     to be compatable with Linux.
  *
  * <!-- inputs/outputs -->
- *   @param info a pointer to a on_cpu_info structure
+ *   @param dummy ignored
  */
-static void
-platform_on_each_cpu_callback(void *info)
+static long
+platform_on_each_cpu_callback(void *arg)
 {
-    struct on_cpu_info *_info = (struct on_cpu_info *)info;
-
-    if (_info->func((uint64_t)smp_processor_id()) != 0) {
-        _info->ret = FAILURE;
+    platform_per_cpu_func func = (platform_per_cpu_func)arg;
+    if (func((uint32_t)smp_processor_id())) {
+        return FAILURE;
     }
+
+    return 0;
 }
 
 /**
@@ -130,14 +191,35 @@ platform_on_each_cpu_callback(void *info)
  *
  * <!-- inputs/outputs -->
  *   @param func the function to call on each cpu
+ *   @param reverse if set to 1, will execute the func in reverse order
  *   @return If each callback returns 0, this function returns 0, otherwise
  *     this function returns a non-0 value
  */
 int64_t
-platform_on_each_cpu(platform_per_cpu_func func)
+platform_on_each_cpu(platform_per_cpu_func func, int reverse)
 {
-    struct on_cpu_info info = {func, 0};
-    on_each_cpu(&platform_on_each_cpu_callback, &info, 1);
+    int cpu;
+    get_online_cpus();
 
-    return info.ret;
+    if (reverse == 0) {
+        for (cpu = 0; cpu < num_online_cpus(); ++cpu) {
+            if (work_on_cpu(cpu, platform_on_each_cpu_callback, func)) {
+                BFERROR("platform_per_cpu_func failed\n");
+                put_online_cpus();
+                return FAILURE;
+            }
+        }
+    }
+    else {
+        for (cpu = num_online_cpus() - 1; cpu >= 0; --cpu) {
+            if (work_on_cpu(cpu, platform_on_each_cpu_callback, func)) {
+                BFERROR("platform_per_cpu_func failed\n");
+                put_online_cpus();
+                return FAILURE;
+            }
+        }
+    }
+
+    put_online_cpus();
+    return 0;
 }

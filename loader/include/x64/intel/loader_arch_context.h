@@ -29,6 +29,9 @@
 
 #include <loader_types.h>
 
+/** @brief used to state that the VMM has been started on a cpu */
+#define VMM_STARTED 1U
+
 /**
  * @class loader_arch_context
  *
@@ -40,7 +43,10 @@
  *     to the kernel, and the kernel will use this information to properly
  *     configure hardware virtualization extensions for a given CPU arch.
  */
-struct loader_arch_context
-{};
+struct loader_arch_context_t
+{
+    /** @brief set to 1 when the VMM is running on this CPU, 0 otherwise */
+    uint8_t started;
+};
 
 #endif

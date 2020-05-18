@@ -26,12 +26,10 @@
 
 #include <loader_arch.h>
 #include <loader_arch_context.h>
+#include <loader_context.h>
 #include <loader_debug.h>
 #include <loader_platform.h>
 #include <loader_types.h>
-
-#define MAX_NUMBER_OF_ROOT_VCPUS 1024
-struct loader_arch_context g_contexts[MAX_NUMBER_OF_ROOT_VCPUS];
 
 /**
  * <!-- description -->
@@ -41,17 +39,24 @@ struct loader_arch_context g_contexts[MAX_NUMBER_OF_ROOT_VCPUS];
  *     this function is called on each CPU.
  *
  * <!-- inputs/outputs -->
+ *   @param cpu the id of the cpu to start
+ *   @param context the common context for this cpu
+ *   @param arch_context the architecture specific context for this cpu
  *   @return Returns 0 on success
  */
-static int64_t
-arch_start_vmm_per_cpu(uint64_t const cpu)
+int64_t
+arch_start_vmm_per_cpu(                  // --
+    uint32_t const cpu,                  // --
+    struct loader_context_t *context,    // --
+    struct loader_arch_context_t *arch_context)
 {
-    if (cpu >= MAX_NUMBER_OF_ROOT_VCPUS) {
-        BFERROR("cpu index out of range: %" PRIu64 "\n", cpu);
+    if (arch_check_hvm_support()) {
+        BFERROR("arch_check_hvm_support failed\n");
         return FAILURE;
     }
 
-    if (arch_prepare_context(&g_contexts[cpu]) != 0) {
+    if (arch_prepare_context(arch_context)) {
+        BFERROR("arch_prepare_context failed\n");
         return FAILURE;
     }
 
@@ -70,25 +75,6 @@ arch_start_vmm_per_cpu(uint64_t const cpu)
      *       which is start the hypervisor. All code that has the "tmp_"
      *       prefix will eventually be removed from the loader
      */
-
-    return 0;
-}
-
-/**
- * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for starting the VMM. This function
- *     will call platform specific functions as needed.
- *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success
- */
-int64_t
-arch_start_vmm(void)
-{
-    if (platform_on_each_cpu(arch_start_vmm_per_cpu) != 0) {
-        return FAILURE;
-    }
 
     return 0;
 }

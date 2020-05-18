@@ -24,19 +24,25 @@
  * SOFTWARE.
  */
 
+#ifndef LOADER_CONTEXT_H
+#define LOADER_CONTEXT_H
+
 #include <loader_types.h>
 
+/** @brief used to state that the VMM has been started on a cpu */
+#define VMM_STARTED 1U
+
 /**
- * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for stoping the VMM. This function
- *     will call platform specific functions as needed.
+ * @class loader_context_t
  *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success
+ * <!-- description -->
+ *   @brief Stores per-cpu resources that are needed by the
+ *     non-arch specific code.
  */
-int64_t
-arch_stop_vmm(void)
+struct loader_context_t
 {
-    return 0;
-}
+    /** @brief set to 1 when the VMM is running on this CPU, 0 otherwise */
+    uint8_t started;
+};
+
+#endif

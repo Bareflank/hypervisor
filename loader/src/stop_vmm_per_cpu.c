@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
-
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -26,19 +24,40 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_DEBUG_H
-#define LOADER_DEBUG_H
+#include <loader.h>
+#include <loader_arch.h>
+#include <loader_debug.h>
+#include <loader_global_resources.h>
+#include <loader_platform.h>
+#include <loader_types.h>
 
-#include <linux/printk.h>
+/**
+ * <!-- description -->
+ *   @brief This function contains all of the code that is common between
+ *     all archiectures and all platforms for stopping the VMM. This function
+ *     will call platform and architecture specific functions as needed.
+ *     Unlike stop_vmm, this function is called on each CPU.
+ *
+ * <!-- inputs/outputs -->
+ *   @param cpu the id of the cpu to stop
+ *   @return Returns 0 on success
+ */
+int64_t
+stop_vmm_per_cpu(uint32_t const cpu)
+{
+    if (cpu >= MAX_NUMBER_OF_ROOT_VCPUS) {
+        BFERROR("cpu index %u is out of range\n", cpu);
+        return FAILURE;
+    }
 
-#define BFSTR2(X) #X
-#define BFSTR(X) BFSTR2(X)
+    if (VMM_STARTED != g_contexts[cpu].started) {
+        return 0;
+    }
 
-#define BFDEBUG(...)                                                                               \
-    printk(KERN_INFO "[BAREFLANK DEBUG]: " __FILE__ ":" BFSTR(__LINE__) ": " __VA_ARGS__)
-#define BFALERT(...)                                                                               \
-    printk(KERN_INFO "[BAREFLANK ALERT]: " __FILE__ ":" BFSTR(__LINE__) ": " __VA_ARGS__)
-#define BFERROR(...)                                                                               \
-    printk(KERN_ALERT "[BAREFLANK ERROR]: " __FILE__ ":" BFSTR(__LINE__) ": " __VA_ARGS__)
+    if (arch_stop_vmm_per_cpu(cpu, &g_contexts[cpu], &g_arch_contexts[cpu])) {
+        BFALERT("arch_stop_vmm_per_cpu failed\n");
+    }
 
-#endif
+    g_contexts[cpu].started = 0;
+    return 0;
+}

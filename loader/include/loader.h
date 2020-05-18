@@ -67,6 +67,19 @@ int64_t start_vmm(void);
 /**
  * <!-- description -->
  *   @brief This function contains all of the code that is common between
+ *     all archiectures and all platforms for starting the VMM. This function
+ *     will call platform and architecture specific functions as needed.
+ *     Unlike start_vmm, this function is called on each CPU.
+ *
+ * <!-- inputs/outputs -->
+ *   @param cpu the id of the cpu to start
+ *   @return Returns 0 on success
+ */
+int64_t start_vmm_per_cpu(uint32_t const cpu);
+
+/**
+ * <!-- description -->
+ *   @brief This function contains all of the code that is common between
  *     all archiectures and all platforms for stoping the VMM. This function
  *     will call platform and architecture specific functions as needed.
  *
@@ -74,6 +87,19 @@ int64_t start_vmm(void);
  *   @return Returns 0 on success
  */
 int64_t stop_vmm(void);
+
+/**
+ * <!-- description -->
+ *   @brief This function contains all of the code that is common between
+ *     all archiectures and all platforms for stopping the VMM. This function
+ *     will call platform and architecture specific functions as needed.
+ *     Unlike stop_vmm, this function is called on each CPU.
+ *
+ * <!-- inputs/outputs -->
+ *   @param cpu the id of the cpu to stop
+ *   @return Returns 0 on success
+ */
+int64_t stop_vmm_per_cpu(uint32_t const cpu);
 
 /**
  * <!-- description -->

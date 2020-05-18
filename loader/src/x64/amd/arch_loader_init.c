@@ -39,12 +39,5 @@
 int64_t
 arch_loader_init(void)
 {
-    int64_t ret = 0;
-
-    ret = arch_check_hvm_support();
-    if (0 != ret) {
-        return FAILURE;
-    }
-
     return 0;
 }

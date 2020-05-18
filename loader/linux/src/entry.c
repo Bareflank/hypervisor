@@ -106,21 +106,21 @@ static struct miscdevice bareflank_dev = {    // --
 int
 dev_reboot(struct notifier_block *nb, unsigned long code, void *unused)
 {
-    BFDEBUG("dev_reboot\n");
+    BFDEBUG("\n");
     return NOTIFY_DONE;
 }
 
 static int
 resume(void)
 {
-    BFDEBUG("resume\n");
+    BFDEBUG("\n");
     return NOTIFY_DONE;
 }
 
 static int
 suspend(void)
 {
-    BFDEBUG("suspend\n");
+    BFDEBUG("\n");
     return NOTIFY_DONE;
 }
 
@@ -152,7 +152,6 @@ int
 dev_init(void)
 {
     int64_t ret = 0;
-    BFDEBUG("dev_init\n");
 
     register_reboot_notifier(&reboot_notifier_block);
     register_pm_notifier(&pm_notifier_block);
@@ -179,8 +178,6 @@ dev_init(void)
 void
 dev_exit(void)
 {
-    BFDEBUG("dev_exit\n");
-
     loader_fini();
     misc_deregister(&bareflank_dev);
     unregister_pm_notifier(&pm_notifier_block);
