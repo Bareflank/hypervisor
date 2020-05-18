@@ -44,6 +44,7 @@ extern "C" void _write_cr4(uint64_t val) noexcept;
 extern "C" uint64_t _read_cr8(void) noexcept;
 extern "C" void _write_cr8(uint64_t val) noexcept;
 
+extern "C" uint64_t _read_xcr0() noexcept;
 extern "C" void _write_xcr0(uint64_t val) noexcept;
 
 // *INDENT-OFF*
@@ -1190,6 +1191,9 @@ namespace xcr0
     constexpr const auto name = "xcr0";
 
     using value_type = uint64_t;
+
+    inline uint64_t get() noexcept
+    { return _read_xcr0(); }
 
     inline void set(value_type val) noexcept
     { _write_xcr0(val); }

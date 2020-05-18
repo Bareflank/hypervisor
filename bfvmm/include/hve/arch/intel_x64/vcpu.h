@@ -161,6 +161,7 @@ public:
 
 private:
 
+    void init_xsave();
     void write_host_state();
     void write_guest_state();
     void write_control_state();

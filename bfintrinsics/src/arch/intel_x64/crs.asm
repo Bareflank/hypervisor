@@ -74,6 +74,15 @@ _write_cr8:
     mov cr8, rdi
     ret
 
+global _read_xcr0
+_read_xcr0:
+    mov rcx, 0
+    xgetbv
+    shl rdx, 32
+    or rax, rdx
+
+    ret
+
 global _write_xcr0
 _write_xcr0:
     mov rax, rdi
