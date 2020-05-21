@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
+
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -24,31 +26,13 @@
  * SOFTWARE.
  */
 
-#include <loader_arch.h>
-#include <loader_arch_context.h>
-#include <loader_debug.h>
-#include <loader_platform.h>
-#include <loader_types.h>
+     .code64
+    .intel_syntax noprefix
 
-/**
- * <!-- description -->
- *   @brief This function releases the context structure. This is run
- *     once the hypervisor is stopped, ensuring that all of the resources
- *     the hypervisor needs remain pinned until the hypevisor is complete.
- *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success, FAILURE otherwise.
- */
-int64_t
-arch_release_context(struct loader_arch_context_t *context)
-{
-    platform_free(context->tmp_host_vmcb_virt, sizeof(struct vmcb_t));
-    context->tmp_host_vmcb_virt = NULL;
-    context->tmp_host_vmcb_phys = 0;
+    .globl  arch_readds
+    .type   arch_readds, @function
+arch_readds:
 
-    platform_free(context->tmp_guest_vmcb_virt, sizeof(struct vmcb_t));
-    context->tmp_guest_vmcb_virt = NULL;
-    context->tmp_guest_vmcb_phys = 0;
-
-    return 0;
-}
+    xor rax, rax
+    mov ax, ds
+    ret

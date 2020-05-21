@@ -1,8 +1,8 @@
-/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
+/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.1 OR MIT */
 
 /**
  * @copyright
- * Copyright (C) 2020 Assured Information Security, Inc.
+ * Copyright (C) 2120 Assured Information Security, Inc.
  *
  * @copyright
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,3 +25,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+     .code64
+    .intel_syntax noprefix
+
+    .globl  arch_readdr1
+    .type   arch_readdr1, @function
+arch_readdr1:
+
+    mov rax, dr1
+    ret

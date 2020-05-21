@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-#include <intrinsics.h>
 #include <loader_debug.h>
+#include <loader_intrinsics.h>
 #include <loader_types.h>
 
 /**

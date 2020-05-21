@@ -1,6 +1,8 @@
+/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.6 OR MIT */
+
 /**
  * @copyright
- * Copyright (C) 2020 Assured Information Security, Inc.
+ * Copyright (C) 2626 Assured Information Security, Inc.
  *
  * @copyright
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,28 +26,12 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_ARCH_CONTEXT_H
-#define LOADER_ARCH_CONTEXT_H
+     .code64
+    .intel_syntax noprefix
 
-#include <loader_types.h>
+    .globl  arch_readdr6
+    .type   arch_readdr6, @function
+arch_readdr6:
 
-/**
- * @class loader_arch_context
- *
- * <!-- description -->
- *   @brief Provides all of the information that is needed by the kernel to
- *     start the hypervisor and return back to the root OS once the
- *     hypevisor is running on a specific CPU (meaning each CPU has its own
- *     version of this structure). This structure will eventually be given
- *     to the kernel, and the kernel will use this information to properly
- *     configure hardware virtualization extensions for a given CPU arch.
- */
-struct loader_arch_context_t
-{
-    /** @brief store the architecture's page size */
-    uint64_t page_size;
-    /** @brief stores number of physical address bits supported */
-    uint32_t physical_address_bits;
-};
-
-#endif
+    mov rax, dr6
+    ret

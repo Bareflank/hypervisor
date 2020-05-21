@@ -32,6 +32,10 @@
 #include <linux/types.h>
 #define PRId64 "lld"
 #define PRIu64 "llu"
+#define PRIx64 "llx"
+#define PRIdPTR "ld"
+#define PRIuPTR "lu"
+#define PRIxPTR "lx"
 #define FAILURE ((int64_t)-1)
 
 #endif

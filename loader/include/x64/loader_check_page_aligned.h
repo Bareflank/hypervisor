@@ -24,42 +24,42 @@
  * SOFTWARE.
  */
 
-#include <loader_arch.h>
+#ifndef LOADER_CHECK_PAGE_ALIGNED_H
+#define LOADER_CHECK_PAGE_ALIGNED_H
+
 #include <loader_arch_context.h>
-#include <loader_context.h>
 #include <loader_debug.h>
-#include <loader_platform.h>
 #include <loader_types.h>
 
 /**
  * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for stoping the VMM. This function
- *     will call platform specific functions as needed. Unlike stop_vmm,
- *     this function is called on each CPU.
+ *   @brief Checks to see if a provided address, given a provided
+ *     context, is a page aligned.
  *
  * <!-- inputs/outputs -->
- *   @param cpu the id of the cpu to stop
- *   @param context the common context for this cpu
+ *   @param virt the address to check
  *   @param arch_context the architecture specific context for this cpu
- *   @return Returns 0 on success
+ *   @return returns 0 if the address is page aligned, FAILURE otherwise
  */
-int64_t
-arch_stop_vmm_per_cpu(                   // --
-    uint32_t const cpu,                  // --
-    struct loader_context_t *context,    // --
-    struct loader_arch_context_t *arch_context)
+static inline int
+check_page_aligned(uintptr_t addr, struct loader_arch_context_t *context)
 {
-
     if (NULL == context) {
         BFERROR("invalid argument\n");
         return FAILURE;
     }
 
-    if (NULL == arch_context) {
-        BFERROR("invalid argument\n");
+    if (0U == context->page_size) {
+        BFERROR("invalid page size\n");
+        return FAILURE;
+    }
+
+    if ((addr & (context->page_size - 1)) != 0) {
+        BFERROR("address not page aligned: 0x%" PRIxPTR "\n", addr);
         return FAILURE;
     }
 
     return 0;
 }
+
+#endif

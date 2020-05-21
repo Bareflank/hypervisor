@@ -28,8 +28,35 @@
 #include <loader_arch_context.h>
 #include <loader_context.h>
 #include <loader_debug.h>
+#include <loader_intrinsics.h>
 #include <loader_platform.h>
 #include <loader_types.h>
+
+/**
+ * <!-- description -->
+ *   @brief This resets the host state save area back to 0. This way, the
+ *     old value is not cached in the MSR which might cause problems later.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success, FAILURE otherwise.
+ */
+void
+reset_host_state_save(void)
+{
+    arch_wrmsr(MSR_VM_HSAVE_PA, 0);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Disable Secure Virtual Machine support. This turns off the
+ *     ability to use the VMRUN, VMLOAD and VMSAVE instructions, as well
+ *     as some other support instructions like stgi and clgi.
+ */
+void
+disable_svm(void)
+{
+    arch_wrmsr(MSR_EFER, arch_rdmsr(MSR_EFER) & (~MSR_EFER_SVME));
+}
 
 /**
  * <!-- description -->
@@ -50,25 +77,33 @@ arch_stop_vmm_per_cpu(                   // --
     struct loader_context_t *context,    // --
     struct loader_arch_context_t *arch_context)
 {
-    BFDEBUG("stopping hypervisor on cpu: %u\n", cpu);
-
-    /**
-     * TODO: This function will have to tell the hypervisor to stop
-     *       execution. To do that, it will have to execute a CPUID call
-     *       that only exists on hypervisors compiled with late launch
-     *       support. This CPUID call will tell the hypervisor to stop,
-     *       and return back to the kernel at the instruction just after
-     *       the call to CPUID. This should be done on both Intel and AMD.
-     *       Currently, Intel uses the vmmoff instruction, which AMD does
-     *       not have. Instead, both should just use CPUID so that the
-     *       protocol is the same. Intel from there can execute the vmmoff
-     *       instruction as needed.
-     */
-
-    if (arch_release_context(arch_context)) {
-        BFERROR("arch_release_context failed\n");
+    if (NULL == context) {
+        BFERROR("invalid argument\n");
         return FAILURE;
     }
+
+    if (NULL == arch_context) {
+        BFERROR("invalid argument\n");
+        return FAILURE;
+    }
+
+    BFDEBUG("stopping hypervisor on cpu: %u\n", cpu);
+
+    reset_host_state_save();
+
+    platform_free(arch_context->host_vmcb_virt, sizeof(struct vmcb_t));
+    arch_context->host_vmcb_virt = NULL;
+    arch_context->host_vmcb_phys = 0;
+
+    platform_free(arch_context->guest_vmcb_virt, sizeof(struct vmcb_t));
+    arch_context->guest_vmcb_virt = NULL;
+    arch_context->guest_vmcb_phys = 0;
+
+    platform_free(arch_context->host_state_save_virt, arch_context->page_size);
+    arch_context->host_state_save_virt = NULL;
+    arch_context->host_state_save_phys = 0;
+
+    disable_svm();
 
     return 0;
 }

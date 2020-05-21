@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
+
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -24,24 +26,12 @@
  * SOFTWARE.
  */
 
-#include <loader_arch.h>
-#include <loader_arch_context.h>
-#include <loader_debug.h>
-#include <loader_platform.h>
-#include <loader_types.h>
+     .code64
+    .intel_syntax noprefix
 
-/**
- * <!-- description -->
- *   @brief This function prepares the context structure. The context
- *     structure stores all of the pre-vcpu state that the loader is
- *     responsible for setting up. This context structure will be shared
- *     with the kernel which will use it to virtualize the root vCPUs.
- *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success, FAILURE otherwise.
- */
-int64_t
-arch_prepare_context(struct loader_arch_context_t *context)
-{
-    return 0;
-}
+    .globl  arch_readcr0
+    .type   arch_readcr0, @function
+arch_readcr0:
+
+    mov rax, cr0
+    ret
