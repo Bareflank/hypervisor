@@ -70,6 +70,7 @@ start_vmm_per_cpu(uint32_t const cpu)
 
     if (arch_start_vmm_per_cpu(cpu, &g_contexts[cpu], &g_arch_contexts[cpu])) {
         BFERROR("arch_start_vmm_per_cpu failed\n");
+        arch_stop_vmm_per_cpu(cpu, &g_contexts[cpu], &g_arch_contexts[cpu]);
         return FAILURE;
     }
 

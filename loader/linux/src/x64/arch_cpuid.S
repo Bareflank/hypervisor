@@ -29,16 +29,6 @@
      .code64
     .intel_syntax noprefix
 
-    /// <!-- description -->
-    ///   @brief Executes the CPUID instruction given the provided EAX and ECX
-    ///     and returns the results.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param eax the index used by the CPUID instruction
-    ///   @param ecx the subindex used by the CPUID instruction
-    ///   @param res a pointer to the structure to return the results of CPUID
-    ///     to.
-    ///
     .globl  arch_cpuid
     .type   arch_cpuid, @function
 arch_cpuid:
@@ -56,47 +46,4 @@ arch_cpuid:
     mov [r11], edx
 
     pop rbx
-    ret
-
-
-
-    /// <!-- description -->
-    ///   @brief Executes the RDMSR instruction given the provided MSR
-    ///     and returns the results
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param ecx the MSR to read
-    ///   @return Returns the resulting MSR value
-    ///
-    .globl  arch_rdmsr
-    .type   arch_rdmsr, @function
-arch_rdmsr:
-
-    mov ecx, edi
-    rdmsr
-    shl rdx, 32
-    or rax, rdx
-
-    ret
-
-
-
-    /// <!-- description -->
-    ///   @brief Executes the WRMSR instruction given the provided MSR
-    ///     and value
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param ecx the MSR to write to the value
-    ///   @param val the value to write to the given MSR
-    ///
-    .globl  arch_wrmsr
-    .type   arch_wrmsr, @function
-arch_wrmsr:
-
-    mov rax, rsi
-    mov rdx, rsi
-    shr rdx, 32
-    mov ecx, edi
-    wrmsr
-
     ret

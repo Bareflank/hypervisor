@@ -50,31 +50,28 @@ arch_start_vmm_per_cpu(                  // --
     struct loader_context_t *context,    // --
     struct loader_arch_context_t *arch_context)
 {
+    if (NULL == context) {
+        BFERROR("invalid argument\n");
+        return FAILURE;
+    }
+
+    if (NULL == arch_context) {
+        BFERROR("invalid argument\n");
+        return FAILURE;
+    }
+
+    /**
+     * TODO:
+     * - We need to get the physical address bit limit value from CPUID
+     *   instead of hardcoding it.
+     */
+    arch_context->page_size = 0x1000U;
+    arch_context->physical_address_bits = 48U;
+
     if (arch_check_hvm_support()) {
         BFERROR("arch_check_hvm_support failed\n");
         return FAILURE;
     }
-
-    if (arch_prepare_context(arch_context)) {
-        BFERROR("arch_prepare_context failed\n");
-        return FAILURE;
-    }
-
-    /**
-     * TODO: Once the context is loaded with the current CPU state, this
-     *       code will need to jump into the C++ code with the ELF binaries
-     *       and memory blocks that non-arch code prepared before this
-     *       function was called. From there, the kernel will actually
-     *       fill out the virtualization related pieces and start the
-     *       hypervisor.
-     */
-
-    /**
-     * NOTE: For now, this code will call from this point on tmp_xxx code
-     *       that will do the same thing the kernel will eventually do
-     *       which is start the hypervisor. All code that has the "tmp_"
-     *       prefix will eventually be removed from the loader
-     */
 
     return 0;
 }

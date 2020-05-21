@@ -39,15 +39,25 @@
  */
 struct loader_arch_context_t
 {
-    /** @brief tmp_ will be removed once the kernel is in place */
-    struct vmcb_t *tmp_host_vmcb_virt;
-    /** @brief tmp_ will be removed once the kernel is in place */
-    uintptr_t tmp_host_vmcb_phys;
+    /** @brief store the architecture's page size */
+    uint64_t page_size;
+    /** @brief stores number of physical address bits supported */
+    uint32_t physical_address_bits;
 
-    /** @brief tmp_ will be removed once the kernel is in place */
-    struct vmcb_t *tmp_guest_vmcb_virt;
-    /** @brief tmp_ will be removed once the kernel is in place */
-    uintptr_t tmp_guest_vmcb_phys;
+    /** @brief stores the virtual address of the host vmcb */
+    struct vmcb_t *host_vmcb_virt;
+    /** @brief stores the physical address of the host vmcb */
+    uintptr_t host_vmcb_phys;
+
+    /** @brief stores the virtual address of the guest vmcb */
+    struct vmcb_t *guest_vmcb_virt;
+    /** @brief stores the physical address of the guest vmcb */
+    uintptr_t guest_vmcb_phys;
+
+    /** @brief stores the virtual address of the host state save */
+    void *host_state_save_virt;
+    /** @brief stores the physical address of the host state save */
+    uintptr_t host_state_save_phys;
 };
 
 #endif

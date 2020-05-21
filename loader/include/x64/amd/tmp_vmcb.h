@@ -31,27 +31,28 @@
 
 #include <loader_types.h>
 
-/// @class vmcb_t
-///
-/// <!-- description -->
-///   @brief The following defines the structure of the VMCB used by AMD's
-///     hypervisor extensions. Note that this is designed to consume a page
-///     in memory, even if SEV is enabled (in which case a portion of this
-///     structure would never get used). For more information about this
-///     structure, please see the AMD SDM.
-///
-/// <!-- notes -->
-///   @note AMD actually defines the VMCB using bit fields and provides
-///     access to the VMCB without the need for vmload/vmsave instructions.
-///     Intel on the other hand provides indexed access to the VMCS using
-///     the vmread/vmwrite instructions and the format of the structure is
-///     opaque, meaning you cannot directly modify it. To ensure that the
-///     implementation of the VMCB and the VMCS is similar, we provide
-///     the VMCB with names and will require extensions to mimic Intel,
-///     by attempting to read/write into this structure using a index and
-///     a vmread/vmwrite function, which is why our version of the VMCB
-///     has non-standard names as we had to logically group of the fields.
-///
+/**
+ * @class vmcb_t
+ *
+ * <!-- description -->
+ *   @brief The following defines the structure of the VMCB used by AMD's
+ *     hypervisor extensions. Note that this is designed to consume a page
+ *     in memory, even if SEV is enabled (in which case a portion of this
+ *     structure would never get used). For more information about this
+ *     structure, please see the AMD SDM.
+ *
+ * <!-- notes -->
+ *   @note AMD actually defines the VMCB using bit fields and provides
+ *     access to the VMCB without the need for vmload/vmsave instructions.
+ *     Intel on the other hand provides indexed access to the VMCS using
+ *     the vmread/vmwrite instructions and the format of the structure is
+ *     opaque, meaning you cannot directly modify it. To ensure that the
+ *     implementation of the VMCB and the VMCS is similar, we provide
+ *     the VMCB with names and will require extensions to mimic Intel,
+ *     by attempting to read/write into this structure using a index and
+ *     a vmread/vmwrite function, which is why our version of the VMCB
+ *     has non-standard names as we had to logically group of the fields.
+ */
 struct vmcb_t
 {
     // -------------------------------------------------------------------------

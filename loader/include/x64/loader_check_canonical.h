@@ -24,42 +24,48 @@
  * SOFTWARE.
  */
 
-#include <loader_arch.h>
+#ifndef LOADER_CHECK_CANONICAL_H
+#define LOADER_CHECK_CANONICAL_H
+
 #include <loader_arch_context.h>
-#include <loader_context.h>
 #include <loader_debug.h>
-#include <loader_platform.h>
 #include <loader_types.h>
 
 /**
  * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for stoping the VMM. This function
- *     will call platform specific functions as needed. Unlike stop_vmm,
- *     this function is called on each CPU.
+ *   @brief Checks to see if a provided virtual address, given a provided
+ *     context, is a canonical address.
  *
  * <!-- inputs/outputs -->
- *   @param cpu the id of the cpu to stop
- *   @param context the common context for this cpu
+ *   @param virt the virtual address to check
  *   @param arch_context the architecture specific context for this cpu
- *   @return Returns 0 on success
+ *   @return returns 0 if the address is canonical, FAILURE otherwise
  */
-int64_t
-arch_stop_vmm_per_cpu(                   // --
-    uint32_t const cpu,                  // --
-    struct loader_context_t *context,    // --
-    struct loader_arch_context_t *arch_context)
+static inline int
+check_canonical(uintptr_t virt, struct loader_arch_context_t *arch_context)
 {
-
-    if (NULL == context) {
-        BFERROR("invalid argument\n");
-        return FAILURE;
-    }
+    uintptr_t upper = ~((uintptr_t)0U);
+    uintptr_t lower = 1U;
 
     if (NULL == arch_context) {
         BFERROR("invalid argument\n");
         return FAILURE;
     }
 
+    if (0U == arch_context->physical_address_bits) {
+        BFERROR("invalid physical address bits\n");
+        return FAILURE;
+    }
+
+    upper = (upper << (arch_context->physical_address_bits - 1U));
+    lower = (lower << (arch_context->physical_address_bits - 1U)) - 1U;
+
+    if (((virt < upper) && (virt > lower))) {
+        BFERROR("virt address not canonical: 0x%" PRIxPTR "\n", virt);
+        return FAILURE;
+    }
+
     return 0;
 }
+
+#endif

@@ -24,42 +24,28 @@
  * SOFTWARE.
  */
 
-#include <loader_arch.h>
-#include <loader_arch_context.h>
-#include <loader_context.h>
-#include <loader_debug.h>
-#include <loader_platform.h>
+#ifndef LOADER_IDT_H
+#define LOADER_IDT_H
+
+#pragma pack(push, 1)
+
 #include <loader_types.h>
 
 /**
- * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for stoping the VMM. This function
- *     will call platform specific functions as needed. Unlike stop_vmm,
- *     this function is called on each CPU.
+ * @class interrupt_descriptor_table_register
  *
- * <!-- inputs/outputs -->
- *   @param cpu the id of the cpu to stop
- *   @param context the common context for this cpu
- *   @param arch_context the architecture specific context for this cpu
- *   @return Returns 0 on success
+ * <!-- description -->
+ *   @brief Defines the structure of the interrupt descriptor table register
+ *     as defined by the AMD SDM.
  */
-int64_t
-arch_stop_vmm_per_cpu(                   // --
-    uint32_t const cpu,                  // --
-    struct loader_context_t *context,    // --
-    struct loader_arch_context_t *arch_context)
+struct interrupt_descriptor_table_register
 {
+    /** @brief stores the size of the idtr in bytes (minus 1) */
+    uint16_t limit;
+    /** @brief stores a pointer to the idtr */
+    uintptr_t base;
+};
 
-    if (NULL == context) {
-        BFERROR("invalid argument\n");
-        return FAILURE;
-    }
+#pragma pack(pop)
 
-    if (NULL == arch_context) {
-        BFERROR("invalid argument\n");
-        return FAILURE;
-    }
-
-    return 0;
-}
+#endif

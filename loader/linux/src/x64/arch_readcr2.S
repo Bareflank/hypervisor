@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
+
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -24,42 +26,12 @@
  * SOFTWARE.
  */
 
-#include <loader_arch.h>
-#include <loader_arch_context.h>
-#include <loader_context.h>
-#include <loader_debug.h>
-#include <loader_platform.h>
-#include <loader_types.h>
+     .code64
+    .intel_syntax noprefix
 
-/**
- * <!-- description -->
- *   @brief This function contains all of the code that is arch specific
- *     while common between all platforms for stoping the VMM. This function
- *     will call platform specific functions as needed. Unlike stop_vmm,
- *     this function is called on each CPU.
- *
- * <!-- inputs/outputs -->
- *   @param cpu the id of the cpu to stop
- *   @param context the common context for this cpu
- *   @param arch_context the architecture specific context for this cpu
- *   @return Returns 0 on success
- */
-int64_t
-arch_stop_vmm_per_cpu(                   // --
-    uint32_t const cpu,                  // --
-    struct loader_context_t *context,    // --
-    struct loader_arch_context_t *arch_context)
-{
+    .globl  arch_readcr2
+    .type   arch_readcr2, @function
+arch_readcr2:
 
-    if (NULL == context) {
-        BFERROR("invalid argument\n");
-        return FAILURE;
-    }
-
-    if (NULL == arch_context) {
-        BFERROR("invalid argument\n");
-        return FAILURE;
-    }
-
-    return 0;
-}
+    mov rax, cr2
+    ret
