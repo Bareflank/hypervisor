@@ -36,3 +36,4 @@ arch_reades:
     xor rax, rax
     mov ax, es
     ret
+    .size arch_reades, .-arch_reades

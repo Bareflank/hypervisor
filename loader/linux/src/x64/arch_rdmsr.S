@@ -39,3 +39,4 @@ arch_rdmsr:
     or rax, rdx
 
     ret
+    .size arch_rdmsr, .-arch_rdmsr

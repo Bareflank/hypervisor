@@ -36,3 +36,4 @@ arch_readgs:
     xor rax, rax
     mov ax, gs
     ret
+    .size arch_readgs, .-arch_readgs

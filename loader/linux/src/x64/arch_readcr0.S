@@ -35,3 +35,4 @@ arch_readcr0:
 
     mov rax, cr0
     ret
+    .size arch_readcr0, .-arch_readcr0

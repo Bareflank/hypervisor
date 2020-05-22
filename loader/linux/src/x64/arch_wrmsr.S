@@ -40,3 +40,4 @@ arch_wrmsr:
     wrmsr
 
     ret
+    .size arch_wrmsr, .-arch_wrmsr

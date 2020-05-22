@@ -36,3 +36,4 @@ arch_vmsave:
     mov rax, rdi
     vmsave rax
     ret
+    .size arch_vmsave, .-arch_vmsave
