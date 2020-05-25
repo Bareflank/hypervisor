@@ -97,6 +97,6 @@ int64_t arch_stop_vmm_per_cpu(           // --
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t arch_check_hvm_support(void);
+int64_t arch_check_hve_support(void);
 
 #endif

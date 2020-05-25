@@ -35,3 +35,4 @@ arch_readdr1:
 
     mov rax, dr1
     ret
+    .size arch_readdr1, .-arch_readdr1

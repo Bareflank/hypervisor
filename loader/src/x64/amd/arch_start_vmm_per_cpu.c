@@ -691,8 +691,8 @@ arch_start_vmm_per_cpu(                  // --
     arch_context->page_size = 0x1000U;
     arch_context->physical_address_bits = 48U;
 
-    if (arch_check_hvm_support()) {
-        BFERROR("arch_check_hvm_support failed\n");
+    if (arch_check_hve_support()) {
+        BFERROR("arch_check_hve_support failed\n");
         return FAILURE;
     }
 

@@ -36,3 +36,4 @@ arch_vmload:
     mov rax, rdi
     vmload rax
     ret
+    .size arch_vmload, .-arch_vmload

@@ -36,3 +36,4 @@ arch_readfs:
     xor rax, rax
     mov ax, fs
     ret
+    .size arch_readfs, .-arch_readfs

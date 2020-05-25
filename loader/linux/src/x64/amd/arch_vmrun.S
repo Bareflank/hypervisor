@@ -34,3 +34,4 @@
 arch_vmrun:
 
     ret
+    .size arch_vmrun, .-arch_vmrun

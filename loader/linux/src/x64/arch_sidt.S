@@ -35,3 +35,4 @@ arch_sidt:
 
     sidt [rdi]
     ret
+    .size arch_sidt, .-arch_sidt

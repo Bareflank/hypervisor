@@ -58,3 +58,6 @@
 # Others
 build/
 doxygen_output/
+
+# Vim Swap Files
+*.swp

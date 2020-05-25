@@ -47,3 +47,4 @@ arch_cpuid:
 
     pop rbx
     ret
+    .size arch_cpuid, .-arch_cpuid

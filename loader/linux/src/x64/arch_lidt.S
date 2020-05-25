@@ -35,3 +35,4 @@ arch_lidt:
 
     lidt [rdi]
     ret
+    .size arch_lidt, .-arch_lidt

@@ -35,3 +35,4 @@ arch_readdr2:
 
     mov rax, dr2
     ret
+    .size arch_readdr2, .-arch_readdr2

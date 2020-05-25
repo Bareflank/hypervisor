@@ -35,3 +35,4 @@ arch_sgdt:
 
     sgdt [rdi]
     ret
+    .size arch_sgdt, .-arch_sgdt
