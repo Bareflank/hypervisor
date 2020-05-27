@@ -22,6 +22,7 @@
 if(HYPERVISOR_BUILD_VMMCTL)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_custom_target(start
+            COMMAND sync
             COMMAND sudo vmmctl/vmmctl start
             VERBATIM
         )

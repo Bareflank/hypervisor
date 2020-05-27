@@ -30,6 +30,7 @@
 #include <loader_arch_context.h>
 #include <loader_debug.h>
 #include <loader_types.h>
+#include <loader.h>
 
 /**
  * <!-- description -->
@@ -39,7 +40,7 @@
  * <!-- inputs/outputs -->
  *   @param virt the physical address to check
  *   @param arch_context the architecture specific context for this cpu
- *   @return returns 0 if the address is valid, FAILURE otherwise
+ *   @return returns 0 if the address is valid, LOADER_FAILURE otherwise
  */
 static inline int
 check_valid_physical(uintptr_t phys, struct loader_arch_context_t *context)
@@ -48,18 +49,18 @@ check_valid_physical(uintptr_t phys, struct loader_arch_context_t *context)
 
     if (NULL == context) {
         BFERROR("invalid argument\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     if (0U == context->physical_address_bits) {
         BFERROR("invalid physical address bits\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     max <<= context->physical_address_bits;
     if (phys >= max) {
         BFERROR("phys address not valid: 0x%" PRIxPTR "\n", phys);
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     return 0;

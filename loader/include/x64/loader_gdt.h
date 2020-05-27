@@ -94,7 +94,7 @@ get_segment_descriptor_attrib(
         return 0xFFFFFFFFU;
     }
 
-    if (0 == index) {
+    if (0U == index) {
         return 0U;
     }
 
@@ -129,7 +129,7 @@ get_segment_descriptor_attrib(
  *   @param index the index of the segment descriptor in the provided gdtr
  *     to get the limit from.
  *   @return Returns the requested limit on success, otherwise returns
- *     0, indicating an invalid limit.
+ *     1, indicating an invalid limit.
  */
 static inline uint32_t
 get_segment_descriptor_limit(
@@ -137,16 +137,16 @@ get_segment_descriptor_limit(
 {
     if (NULL == gdtr) {
         BFERROR("invalid argument: gdtr == NULL\n");
-        return 0;
+        return 1U;
     }
 
-    if (0 == index) {
+    if (0U == index) {
         return 0U;
     }
 
     if (index >= ((gdtr->limit + 1) / sizeof(struct segment_descriptor))) {
         BFERROR("invalid argument: index into GDT is out of range\n");
-        return 0;
+        return 1U;
     }
 
     /**
@@ -194,7 +194,7 @@ get_segment_descriptor_base(
         return 0xFFFFFFFFU;
     }
 
-    if (0 == index) {
+    if (0U == index) {
         return 0U;
     }
 

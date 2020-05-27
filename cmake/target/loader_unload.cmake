@@ -22,10 +22,12 @@
 if(HYPERVISOR_BUILD_LOADER)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_custom_target(loader_unload
+            COMMAND sync
             COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux sudo make unload
             VERBATIM
         )
         add_custom_target(driver_unload
+            COMMAND sync
             COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux sudo make unload
             VERBATIM
         )

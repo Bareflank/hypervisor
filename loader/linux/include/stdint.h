@@ -26,13 +26,11 @@
  * SOFTWARE.
  */
 
-    .code64
-    .intel_syntax noprefix
+#ifndef STDINT_H
+#define STDINT_H
 
-    .globl  arch_sgdt
-    .type   arch_sgdt, @function
-arch_sgdt:
+#include <linux/types.h>
+#define intmax_t intptr_t
+#define uintmax_t uintptr_t
 
-    sgdt [rdi]
-    ret
-    .size arch_sgdt, .-arch_sgdt
+#endif

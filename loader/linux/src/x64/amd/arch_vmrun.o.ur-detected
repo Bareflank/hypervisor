@@ -1,0 +1,1 @@
+/home/user/working/hypervisor/loader/linux/src/x64/amd/arch_vmrun.o-.text-145 /home/user/working/hypervisor/loader/linux/src/x64/amd/arch_vmrun.S .text arch_vmrun_loop callq *%rax

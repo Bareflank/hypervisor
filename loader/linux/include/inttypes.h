@@ -26,13 +26,16 @@
  * SOFTWARE.
  */
 
-    .code64
-    .intel_syntax noprefix
+#ifndef INTTYPES_H
+#define INTTYPES_H
 
-    .globl  arch_sgdt
-    .type   arch_sgdt, @function
-arch_sgdt:
+#include "stdint.h"
 
-    sgdt [rdi]
-    ret
-    .size arch_sgdt, .-arch_sgdt
+#define PRId64 "lld"
+#define PRIu64 "llu"
+#define PRIx64 "llx"
+#define PRIdPTR "ld"
+#define PRIuPTR "lu"
+#define PRIxPTR "lx"
+
+#endif

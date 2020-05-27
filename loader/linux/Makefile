@@ -42,8 +42,10 @@ ifneq ($(KERNELRELEASE),)
 
 	ifneq (,$(findstring AuthenticAMD,$(VENDOR_ID)))
 		$(TARGET_MODULE)-objs += src/x64/arch_cpuid.o
+		$(TARGET_MODULE)-objs += src/x64/arch_inb.o
 		$(TARGET_MODULE)-objs += src/x64/arch_lgdt.o
 		$(TARGET_MODULE)-objs += src/x64/arch_lidt.o
+		$(TARGET_MODULE)-objs += src/x64/arch_outb.o
 		$(TARGET_MODULE)-objs += src/x64/arch_rdmsr.o
 		$(TARGET_MODULE)-objs += src/x64/arch_readcr0.o
 		$(TARGET_MODULE)-objs += src/x64/arch_readcr2.o
@@ -68,6 +70,7 @@ ifneq ($(KERNELRELEASE),)
 		$(TARGET_MODULE)-objs += src/x64/amd/arch_vmload.o
 		$(TARGET_MODULE)-objs += src/x64/amd/arch_vmrun.o
 		$(TARGET_MODULE)-objs += src/x64/amd/arch_vmsave.o
+		$(TARGET_MODULE)-objs += ../src/x64/arch_serial.o
 		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_check_hve_support.o
 		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_loader_fini.o
 		$(TARGET_MODULE)-objs += ../src/x64/amd/arch_loader_init.o
@@ -82,8 +85,10 @@ ifneq ($(KERNELRELEASE),)
 
 	ifneq (,$(findstring GenuineIntel,$(VENDOR_ID)))
 		$(TARGET_MODULE)-objs += src/x64/arch_cpuid.o
+		$(TARGET_MODULE)-objs += src/x64/arch_inb.o
 		$(TARGET_MODULE)-objs += src/x64/arch_lgdt.o
 		$(TARGET_MODULE)-objs += src/x64/arch_lidt.o
+		$(TARGET_MODULE)-objs += src/x64/arch_outb.o
 		$(TARGET_MODULE)-objs += src/x64/arch_rdmsr.o
 		$(TARGET_MODULE)-objs += src/x64/arch_readcr0.o
 		$(TARGET_MODULE)-objs += src/x64/arch_readcr2.o
@@ -127,6 +132,8 @@ clean:
 	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD) clean
 	rm -f ../src/*.o*
 	rm -f ../src/.*.o*
+	rm -f ../src/x64/*.o*
+	rm -f ../src/x64/.*.o*
 	rm -f ../src/x64/amd/*.o*
 	rm -f ../src/x64/amd/.*.o*
 	rm -f ../src/x64/intel/*.o*

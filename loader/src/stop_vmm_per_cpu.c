@@ -24,12 +24,12 @@
  * SOFTWARE.
  */
 
-#include <loader.h>
 #include <loader_arch.h>
 #include <loader_debug.h>
 #include <loader_global_resources.h>
 #include <loader_platform.h>
 #include <loader_types.h>
+#include <loader.h>
 
 /**
  * <!-- description -->
@@ -47,7 +47,7 @@ stop_vmm_per_cpu(uint32_t const cpu)
 {
     if (cpu >= MAX_NUMBER_OF_ROOT_VCPUS) {
         BFERROR("cpu index %u is out of range\n", cpu);
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     if (VMM_STARTED != g_contexts[cpu].started) {

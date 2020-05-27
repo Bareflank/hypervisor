@@ -30,6 +30,7 @@
 #include <loader_arch_context.h>
 #include <loader_debug.h>
 #include <loader_types.h>
+#include <loader.h>
 
 /**
  * <!-- description -->
@@ -39,24 +40,24 @@
  * <!-- inputs/outputs -->
  *   @param virt the address to check
  *   @param arch_context the architecture specific context for this cpu
- *   @return returns 0 if the address is page aligned, FAILURE otherwise
+ *   @return returns 0 if the address is page aligned, LOADER_FAILURE otherwise
  */
 static inline int
 check_page_aligned(uintptr_t addr, struct loader_arch_context_t *context)
 {
     if (NULL == context) {
         BFERROR("invalid argument\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     if (0U == context->page_size) {
         BFERROR("invalid page size\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     if ((addr & (context->page_size - 1)) != 0) {
         BFERROR("address not page aligned: 0x%" PRIxPTR "\n", addr);
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     return 0;

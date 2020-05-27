@@ -42,7 +42,7 @@
  *   @return Returns a pointer to the newly allocated memory on success.
  *     Returns a nullptr on failure.
  */
-void *platform_alloc(uint64_t size);
+void *platform_alloc(uintmax_t const size);
 
 /**
  * <!-- description -->
@@ -56,7 +56,7 @@ void *platform_alloc(uint64_t size);
  *   @param size the number of bytes that were allocated. Note that this
  *     may or may not be ignored depending on the platform.
  */
-void platform_free(void *ptr, uint64_t size);
+void platform_free(void *const ptr, uintmax_t const size);
 
 /**
  * <!-- description -->
@@ -68,7 +68,8 @@ void platform_free(void *ptr, uint64_t size);
  *   @return Given a virtual address, this function returns the virtual
  *     address's physical address. Returns NULL if the conversion failed.
  */
-uintptr_t platform_virt_to_phys(uintptr_t virt);
+uintptr_t platform_virt_to_phys(void const *const virt);
+
 /**
  * <!-- description -->
  *   @brief Sets "num" bytes in the memory pointed to by "ptr" to "val".
@@ -82,7 +83,7 @@ uintptr_t platform_virt_to_phys(uintptr_t virt);
  *   @return If the provided parameters are valid, returns 0, otherwise
  *     returns FAILURE.
  */
-int64_t platform_memset(void *ptr, char val, uint64_t num);
+int64_t platform_memset(void *const ptr, uint8_t const val, uintmax_t const num);
 
 /**
  * <!-- description -->
@@ -96,12 +97,12 @@ int64_t platform_memset(void *ptr, char val, uint64_t num);
  *   @return If "src" or "dst" are NULL, returns FAILURE, otherwise
  *     returns 0.
  */
-int64_t platform_memcpy(void *dst, const void *src, uint64_t num);
+int64_t platform_memcpy(void *const dst, void const *const src, uintmax_t const num);
 
 /**
  * @brief The callback signature for platform_on_each_cpu
  */
-typedef int64_t (*platform_per_cpu_func)(uint32_t);
+typedef int64_t (*platform_per_cpu_func)(uint32_t const);
 
 /**
  * <!-- description -->
@@ -118,6 +119,6 @@ typedef int64_t (*platform_per_cpu_func)(uint32_t);
  *   @return If each callback returns 0, this function returns 0, otherwise
  *     this function returns a non-0 value
  */
-int64_t platform_on_each_cpu(platform_per_cpu_func func, int reverse);
+int64_t platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const reverse);
 
 #endif

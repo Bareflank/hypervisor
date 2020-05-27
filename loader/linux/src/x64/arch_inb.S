@@ -29,10 +29,11 @@
     .code64
     .intel_syntax noprefix
 
-    .globl  arch_sgdt
-    .type   arch_sgdt, @function
-arch_sgdt:
+    .globl  arch_inb
+    .type   arch_inb, @function
+arch_inb:
 
-    sgdt [rdi]
+    xor rax, rax
+    mov rdx, rdi
+    in al, dx
     ret
-    .size arch_sgdt, .-arch_sgdt

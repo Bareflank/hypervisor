@@ -31,14 +31,12 @@
 #include <loader_intrinsics.h>
 #include <loader_platform.h>
 #include <loader_types.h>
+#include <loader.h>
 
 /**
  * <!-- description -->
  *   @brief This resets the host state save area back to 0. This way, the
  *     old value is not cached in the MSR which might cause problems later.
- *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success, FAILURE otherwise.
  */
 void
 reset_host_state_save(void)
@@ -68,40 +66,62 @@ disable_svm(void)
  * <!-- inputs/outputs -->
  *   @param cpu the id of the cpu to stop
  *   @param context the common context for this cpu
- *   @param arch_context the architecture specific context for this cpu
+ *   @param ac the architecture specific context for this cpu
  *   @return Returns 0 on success
  */
 int64_t
 arch_stop_vmm_per_cpu(                   // --
     uint32_t const cpu,                  // --
     struct loader_context_t *context,    // --
-    struct loader_arch_context_t *arch_context)
+    struct loader_arch_context_t *ac)
 {
+    if (0 != cpu) {
+        return 0;
+    }
+
     if (NULL == context) {
         BFERROR("invalid argument\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
-    if (NULL == arch_context) {
+    if (NULL == ac) {
         BFERROR("invalid argument\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
-
-    BFDEBUG("stopping hypervisor on cpu: %u\n", cpu);
 
     reset_host_state_save();
 
-    platform_free(arch_context->host_vmcb_virt, sizeof(struct vmcb_t));
-    arch_context->host_vmcb_virt = NULL;
-    arch_context->host_vmcb_phys = 0;
+    platform_free(ac->guest_xsave, ac->page_size);
+    ac->guest_xsave = NULL;
+    ac->guest_xsave_phys = 0;
 
-    platform_free(arch_context->guest_vmcb_virt, sizeof(struct vmcb_t));
-    arch_context->guest_vmcb_virt = NULL;
-    arch_context->guest_vmcb_phys = 0;
+    platform_free(ac->host_xsave, ac->page_size);
+    ac->host_xsave = NULL;
+    ac->host_xsave_phys = 0;
 
-    platform_free(arch_context->host_state_save_virt, arch_context->page_size);
-    arch_context->host_state_save_virt = NULL;
-    arch_context->host_state_save_phys = 0;
+    platform_free(ac->guest_save, sizeof(struct state_save_t));
+    ac->guest_save = NULL;
+    ac->guest_save_phys = 0;
+
+    platform_free(ac->host_save, sizeof(struct state_save_t));
+    ac->host_save = NULL;
+    ac->host_save_phys = 0;
+
+    platform_free(ac->guest_vmcb, sizeof(struct vmcb_t));
+    ac->guest_vmcb = NULL;
+    ac->guest_vmcb_phys = 0;
+
+    platform_free(ac->host_vmcb, sizeof(struct vmcb_t));
+    ac->host_vmcb = NULL;
+    ac->host_vmcb_phys = 0;
+
+    platform_free(ac->host_stack, ac->host_stack_size);
+    ac->host_stack = NULL;
+    ac->host_stack_size = 0;
+
+    ac->exit_handler = NULL;
+    ac->physical_address_bits = 0;
+    ac->page_size = 0;
 
     disable_svm();
 

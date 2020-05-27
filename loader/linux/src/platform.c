@@ -29,6 +29,7 @@
 #include <loader_debug.h>
 #include <loader_platform.h>
 #include <loader_types.h>
+#include <loader.h>
 
 #include <asm/io.h>
 #include <linux/cpu.h>
@@ -50,7 +51,7 @@
  *     Returns a nullptr on failure.
  */
 void *
-platform_alloc(uint64_t size)
+platform_alloc(uintmax_t const size)
 {
     void *ptr = NULL;
 
@@ -80,7 +81,7 @@ platform_alloc(uint64_t size)
  *     may or may not be ignored depending on the platform.
  */
 void
-platform_free(void *ptr, uint64_t size)
+platform_free(void *const ptr, uintmax_t const size)
 {
     if (NULL == ptr) {
         return;
@@ -100,10 +101,10 @@ platform_free(void *ptr, uint64_t size)
  *     address's physical address. Returns NULL if the conversion failed.
  */
 uintptr_t
-platform_virt_to_phys(uintptr_t virt)
+platform_virt_to_phys(void const *const virt)
 {
-    if (is_vmalloc_addr((void *)virt)) {
-        return page_to_phys(vmalloc_to_page((void *)virt));
+    if (is_vmalloc_addr(virt)) {
+        return page_to_phys(vmalloc_to_page(virt));
     }
     else {
         return virt_to_phys((void *)virt);
@@ -114,21 +115,21 @@ platform_virt_to_phys(uintptr_t virt)
  * <!-- description -->
  *   @brief Sets "num" bytes in the memory pointed to by "ptr" to "val".
  *     If the provided parameters are valid, returns 0, otherwise
- *     returns FAILURE.
+ *     returns LOADER_FAILURE.
  *
  * <!-- inputs/outputs -->
  *   @param ptr a pointer to the memory to set
  *   @param val the value to set each byte to
  *   @param num the number of bytes in "ptr" to set to "val".
  *   @return If the provided parameters are valid, returns 0, otherwise
- *     returns FAILURE.
+ *     returns LOADER_FAILURE.
  */
 int64_t
-platform_memset(void *ptr, char val, uint64_t num)
+platform_memset(void *const ptr, uint8_t const val, uintmax_t const num)
 {
     if (!ptr) {
         BFALERT("invalid ptr\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     memset(ptr, val, num);
@@ -138,21 +139,21 @@ platform_memset(void *ptr, char val, uint64_t num)
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     NULL, returns FAILURE, otherwise returns 0.
+ *     NULL, returns LOADER_FAILURE, otherwise returns 0.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are NULL, returns FAILURE, otherwise
+ *   @return If "src" or "dst" are NULL, returns LOADER_FAILURE, otherwise
  *     returns 0.
  */
 int64_t
-platform_memcpy(void *dst, const void *src, uint64_t num)
+platform_memcpy(void *const dst, void const *const src, uintmax_t const num)
 {
     if (dst == 0 || src == 0) {
         BFALERT("invalid dst/src pointers\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     memcpy(dst, src, num);
@@ -170,11 +171,11 @@ platform_memcpy(void *dst, const void *src, uint64_t num)
  *   @param dummy ignored
  */
 static long
-platform_on_each_cpu_callback(void *arg)
+platform_on_each_cpu_callback(void *const arg)
 {
     platform_per_cpu_func func = (platform_per_cpu_func)arg;
     if (func((uint32_t)smp_processor_id())) {
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     return 0;
@@ -196,9 +197,9 @@ platform_on_each_cpu_callback(void *arg)
  *     this function returns a non-0 value
  */
 int64_t
-platform_on_each_cpu(platform_per_cpu_func func, int reverse)
+platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const reverse)
 {
-    int cpu;
+    uint32_t cpu;
     get_online_cpus();
 
     if (reverse == 0) {
@@ -206,7 +207,7 @@ platform_on_each_cpu(platform_per_cpu_func func, int reverse)
             if (work_on_cpu(cpu, platform_on_each_cpu_callback, func)) {
                 BFERROR("platform_per_cpu_func failed\n");
                 put_online_cpus();
-                return FAILURE;
+                return LOADER_FAILURE;
             }
         }
     }
@@ -215,7 +216,7 @@ platform_on_each_cpu(platform_per_cpu_func func, int reverse)
             if (work_on_cpu(cpu, platform_on_each_cpu_callback, func)) {
                 BFERROR("platform_per_cpu_func failed\n");
                 put_online_cpus();
-                return FAILURE;
+                return LOADER_FAILURE;
             }
         }
     }

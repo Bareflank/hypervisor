@@ -29,7 +29,6 @@
 #include <loader_debug.h>
 #include <loader_interface.h>
 #include <loader_types.h>
-
 #include <loader.h>
 
 #include <linux/kernel.h>
@@ -38,6 +37,14 @@
 #include <linux/notifier.h>
 #include <linux/reboot.h>
 #include <linux/suspend.h>
+
+/******************************************************************************/
+/* REMOVE ME                                                                  */
+/******************************************************************************/
+#include <linux/sched.h>
+/******************************************************************************/
+/* REMOVE ME                                                                  */
+/******************************************************************************/
 
 static int
 dev_open(struct inode *inode, struct file *file)
@@ -56,24 +63,22 @@ dev_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
     switch (cmd) {
         case BAREFLANK_LOADER_START_VMM: {
-            int64_t ret = start_vmm();
-            if (0 != ret) {
+            get_task_mm(current);
+            if (start_vmm()) {
                 return -EPERM;
             }
             break;
         }
 
         case BAREFLANK_LOADER_STOP_VMM: {
-            int64_t ret = stop_vmm();
-            if (0 != ret) {
+            if (stop_vmm()) {
                 return -EPERM;
             }
             break;
         }
 
         case BAREFLANK_LOADER_DUMP_VMM: {
-            int64_t ret = dump_vmm();
-            if (0 != ret) {
+            if (dump_vmm()) {
                 return -EPERM;
             }
             break;
@@ -151,8 +156,6 @@ static struct notifier_block pm_notifier_block = {.notifier_call = dev_pm};
 int
 dev_init(void)
 {
-    int64_t ret = 0;
-
     register_reboot_notifier(&reboot_notifier_block);
     register_pm_notifier(&pm_notifier_block);
 
@@ -163,8 +166,7 @@ dev_init(void)
         return -EPERM;
     }
 
-    ret = loader_init();
-    if (0 != ret) {
+    if (loader_init()) {
         misc_deregister(&bareflank_dev);
         unregister_pm_notifier(&pm_notifier_block);
         unregister_reboot_notifier(&reboot_notifier_block);
