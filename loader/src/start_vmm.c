@@ -24,10 +24,10 @@
  * SOFTWARE.
  */
 
-#include <loader.h>
 #include <loader_debug.h>
 #include <loader_platform.h>
 #include <loader_types.h>
+#include <loader.h>
 
 /**
  * <!-- description -->
@@ -57,7 +57,7 @@ start_vmm(void)
 
     if (platform_on_each_cpu(start_vmm_per_cpu, 0)) {
         BFERROR("platform_on_each_cpu failed\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     return 0;

@@ -30,6 +30,7 @@
 #include <loader_arch_context.h>
 #include <loader_debug.h>
 #include <loader_types.h>
+#include <loader.h>
 
 /**
  * <!-- description -->
@@ -39,7 +40,7 @@
  * <!-- inputs/outputs -->
  *   @param virt the virtual address to check
  *   @param arch_context the architecture specific context for this cpu
- *   @return returns 0 if the address is canonical, FAILURE otherwise
+ *   @return returns 0 if the address is canonical, LOADER_FAILURE otherwise
  */
 static inline int
 check_canonical(uintptr_t virt, struct loader_arch_context_t *arch_context)
@@ -49,12 +50,12 @@ check_canonical(uintptr_t virt, struct loader_arch_context_t *arch_context)
 
     if (NULL == arch_context) {
         BFERROR("invalid argument\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     if (0U == arch_context->physical_address_bits) {
         BFERROR("invalid physical address bits\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     upper = (upper << (arch_context->physical_address_bits - 1U));
@@ -62,7 +63,7 @@ check_canonical(uintptr_t virt, struct loader_arch_context_t *arch_context)
 
     if (((virt < upper) && (virt > lower))) {
         BFERROR("virt address not canonical: 0x%" PRIxPTR "\n", virt);
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     return 0;

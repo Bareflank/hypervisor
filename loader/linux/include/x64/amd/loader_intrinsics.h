@@ -49,13 +49,13 @@
  *     and returns the results
  *
  * <!-- inputs/outputs -->
- *   @param eax the index used by CPUID, returns resulting eax
- *   @param ebx returns resulting ebx
- *   @param ecx the subindex used by CPUID, returns the resulting ecx
- *   @param edx returns resulting edx
+ *   @param rax the index used by CPUID, returns resulting rax
+ *   @param rbx returns resulting rbx
+ *   @param rcx the subindex used by CPUID, returns the resulting rcx
+ *   @param rdx returns resulting rdx
  *     to.
  */
-void arch_cpuid(uint32_t *const eax, uint32_t *const ebx, uint32_t *const ecx, uint32_t *const edx);
+void arch_cpuid(uint64_t *const rax, uint64_t *const rbx, uint64_t *const rcx, uint64_t *const rdx);
 
 /* -------------------------------------------------------------------------- */
 /* - MSRS                                                                   - */
@@ -324,20 +324,55 @@ uint64_t arch_readdr7(void);
 
 /**
  * <!-- description -->
- *   @brief Executes the VMLOAD instruction given a pointer to a VMCB.
+ *   @brief Executes the VMLOAD instruction given a physical address to a VMCB.
  *
  * <!-- inputs/outputs -->
- *   @param vmcb a pointer to a VMCB
+ *   @param vmcbpa a physical address to a VMCB
  */
-void arch_vmload(uintptr_t vmcb);
+void arch_vmload(uintptr_t vmcbpa);
 
 /**
  * <!-- description -->
- *   @brief Executes the VMSAVE instruction given a pointer to a VMCB.
+ *   @brief Executes the VMSAVE instruction given a physical address to a VMCB.
  *
  * <!-- inputs/outputs -->
- *   @param vmcb a pointer to a VMCB
+ *   @param vmcbpa a physical address to a VMCB
  */
-void arch_vmsave(uintptr_t vmcb);
+void arch_vmsave(uintptr_t vmcbpa);
+
+/**
+ * <!-- description -->
+ *   @brief Executes the VMRUN instruction.
+ *
+ * <!-- inputs/outputs -->
+ *   @param ac the architecture specific context for this cpu
+ */
+int64_t arch_vmrun(void *ac);
+
+/* -------------------------------------------------------------------------- */
+/* - Port IO                                                                - */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * <!-- description -->
+ *   @brief Executes the INB instruction given the provided Port
+ *     and returns the results
+ *
+ * <!-- inputs/outputs -->
+ *   @param port the port to read
+ *   @return Returns the resulting port IO value
+ */
+uint8_t arch_inb(uint16_t const port);
+
+/**
+ * <!-- description -->
+ *   @brief Executes the OUTB instruction given the provided Port
+ *     and value
+ *
+ * <!-- inputs/outputs -->
+ *   @param port the port to write to
+ *   @param val the value to write to the given Port
+ */
+void arch_outb(uint16_t const port, uint8_t val);
 
 #endif

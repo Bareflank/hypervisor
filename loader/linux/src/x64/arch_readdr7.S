@@ -26,7 +26,7 @@
  * SOFTWARE.
  */
 
-     .code64
+    .code64
     .intel_syntax noprefix
 
     .globl  arch_readdr7

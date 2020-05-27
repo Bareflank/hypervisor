@@ -26,6 +26,7 @@
 
 #include <loader_arch.h>
 #include <loader_types.h>
+#include <loader.h>
 
 /**
  * <!-- description -->
@@ -39,5 +40,7 @@
 int64_t
 arch_loader_init(void)
 {
+    arch_init_serial();
+
     return 0;
 }

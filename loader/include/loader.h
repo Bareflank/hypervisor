@@ -30,6 +30,13 @@
 #include <loader_types.h>
 
 /**
+ * @brief Returned by a loader function when an error occurs. Note that
+ *   functions that are responsible for stopping the hypervisor, in general,
+ *   should never return an error.
+ */
+#define LOADER_FAILURE (-1)
+
+/**
  * <!-- description -->
  *   @brief This function contains all of the code that is common between
  *     all archiectures and all platforms that is needed for initializing

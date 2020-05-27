@@ -27,6 +27,7 @@
 #include <loader_debug.h>
 #include <loader_intrinsics.h>
 #include <loader_types.h>
+#include <loader.h>
 
 /**
  * <!-- description -->
@@ -39,34 +40,38 @@
 int64_t
 arch_check_hve_support(void)
 {
-    uint32_t eax;
-    uint32_t ebx;
-    uint32_t ecx;
-    uint32_t edx;
+    uint64_t rax;
+    uint64_t rbx;
+    uint64_t rcx;
+    uint64_t rdx;
     uint64_t msr;
 
-    eax = CPUID_FN0000_0000;
-    ecx = 0U;
-    arch_cpuid(&eax, &ebx, &ecx, &edx);
-    if ((ebx != CPUID_FN0000_0000_EBX_VENDOR_ID) ||    // --
-        (ecx != CPUID_FN0000_0000_ECX_VENDOR_ID) ||    // --
-        (edx != CPUID_FN0000_0000_EDX_VENDOR_ID)) {
+    rax = CPUID_FN0000_0000;
+    rbx = 0U;
+    rcx = 0U;
+    rdx = 0U;
+    arch_cpuid(&rax, &rbx, &rcx, &rdx);
+    if ((rbx != CPUID_FN0000_0000_EBX_VENDOR_ID) ||    // --
+        (rcx != CPUID_FN0000_0000_ECX_VENDOR_ID) ||    // --
+        (rdx != CPUID_FN0000_0000_EDX_VENDOR_ID)) {
         BFERROR("CPUID vendor not supported\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
-    eax = CPUID_FN8000_0001;
-    ecx = 0U;
-    arch_cpuid(&eax, &ebx, &ecx, &edx);
-    if ((ecx & CPUID_FN8000_0001_ECX_SVM) == 0) {
+    rax = CPUID_FN8000_0001;
+    rbx = 0U;
+    rcx = 0U;
+    rdx = 0U;
+    arch_cpuid(&rax, &rbx, &rcx, &rdx);
+    if ((rcx & CPUID_FN8000_0001_ECX_SVM) == 0) {
         BFERROR("This CPU does not support SVM\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     msr = arch_rdmsr(MSR_VM_CR);
     if ((msr & MSR_VM_CR_SVMDIS) != 0) {
         BFERROR("SVM has been disabled in BIOS. SVM not supported\n");
-        return FAILURE;
+        return LOADER_FAILURE;
     }
 
     return 0;

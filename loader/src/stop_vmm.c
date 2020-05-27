@@ -24,10 +24,10 @@
  * SOFTWARE.
  */
 
-#include <loader.h>
 #include <loader_debug.h>
 #include <loader_platform.h>
 #include <loader_types.h>
+#include <loader.h>
 
 /**
  * <!-- description -->

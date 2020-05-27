@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
-
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -26,13 +24,26 @@
  * SOFTWARE.
  */
 
-    .code64
-    .intel_syntax noprefix
+#include <loader_debug.h>
+#include <loader_intrinsics.h>
+#include <loader_types.h>
+#include <loader.h>
 
-    .globl  arch_sgdt
-    .type   arch_sgdt, @function
-arch_sgdt:
+/**
+ * <!-- description -->
+ *   @brief This function checks to see if Intel VT-x support is available on
+ *     the currently running CPU
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success
+ */
+int64_t
+arch_check_hvm_support(void)
+{
+    /**
+     * See AMD arch_check_svm_support() for details on how to implement
+     * this function
+     */
 
-    sgdt [rdi]
-    ret
-    .size arch_sgdt, .-arch_sgdt
+    return 0;
+}

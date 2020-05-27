@@ -99,4 +99,19 @@ int64_t arch_stop_vmm_per_cpu(           // --
  */
 int64_t arch_check_hve_support(void);
 
+/**
+ * <!-- description -->
+ *   @brief Remove me
+ */
+void arch_init_serial(void);
+
+/**
+ * <!-- description -->
+ *   @brief Remove me
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the msg to write to serial
+ */
+void arch_write_serial(char const *const str);
+
 #endif

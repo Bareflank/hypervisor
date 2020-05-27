@@ -26,7 +26,7 @@
  * SOFTWARE.
  */
 
-     .code64
+    .code64
     .intel_syntax noprefix
 
     .globl  arch_cpuid
@@ -37,13 +37,15 @@ arch_cpuid:
     mov r10, rdx
     mov r11, rcx
 
-    mov eax, [rdi]
-    mov ecx, [rdx]
+    mov rax, [rdi]
+    mov rbx, [rsi]
+    mov rcx, [r10]
+    mov rdx, [r11]
     cpuid
-    mov [rdi], eax
-    mov [rsi], ebx
-    mov [r10], ecx
-    mov [r11], edx
+    mov [rdi], rax
+    mov [rsi], rbx
+    mov [r10], rcx
+    mov [r11], rdx
 
     pop rbx
     ret

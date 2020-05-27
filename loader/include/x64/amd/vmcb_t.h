@@ -32,7 +32,7 @@
 #include <loader_types.h>
 
 /**
- * @class vmcb_t
+ * @struct vmcb_t
  *
  * <!-- description -->
  *   @brief The following defines the structure of the VMCB used by AMD's
@@ -77,7 +77,7 @@ struct vmcb_t
     uint8_t reserved2[0x3];                  ///< offset 0x005D
     uint64_t virtual_interrupt_a;            ///< offset 0x0060
     uint64_t virtual_interrupt_b;            ///< offset 0x0068
-    uint64_t exitcode;                       ///< offset 0x0070
+    int64_t exitcode;                        ///< offset 0x0070
     uint64_t exitinfo1;                      ///< offset 0x0078
     uint64_t exitinfo2;                      ///< offset 0x0080
     uint64_t exitininfo;                     ///< offset 0x0088
@@ -166,7 +166,7 @@ struct vmcb_t
     uint64_t sfmask;              ///< offset 0x0618
     uint64_t kernel_gs_base;      ///< offset 0x0620
     uint64_t sysenter_cs;         ///< offset 0x0628
-    uint64_t sysetner_esp;        ///< offset 0x0630
+    uint64_t sysenter_esp;        ///< offset 0x0630
     uint64_t sysenter_eip;        ///< offset 0x0638
     uint64_t cr2;                 ///< offset 0x0640
     uint8_t reserved12[0x20];     ///< offset 0x0648
@@ -179,10 +179,10 @@ struct vmcb_t
     uint8_t reserved13[0x968];    ///< offset 0x0698
 };
 
-_Static_assert(sizeof(struct vmcb_t) == 0x1000, "VMCB was not properly packed");
+_Static_assert(sizeof(struct vmcb_t) == 0x1000, "");
 
 // -----------------------------------------------------------------------------
-// Bit Masks
+// Intercept Bit Masks
 // -----------------------------------------------------------------------------
 
 #define VMCB_INTERCEPT_INSTRUCTION1_INTR ((uint64_t)1U << 0U)
@@ -249,6 +249,15 @@ _Static_assert(sizeof(struct vmcb_t) == 0x1000, "VMCB was not properly packed");
 #define VMCB_INTERCEPT_INSTRUCTION1_CR13_WRITE_COMPLETED ((uint64_t)1U << 61U)
 #define VMCB_INTERCEPT_INSTRUCTION1_CR14_WRITE_COMPLETED ((uint64_t)1U << 62U)
 #define VMCB_INTERCEPT_INSTRUCTION1_CR15_WRITE_COMPLETED ((uint64_t)1U << 63U)
+
+// -----------------------------------------------------------------------------
+// VMEXIT Code
+// -----------------------------------------------------------------------------
+
+#define VMEXIT_CPUID ((int64_t)0x072)
+#define VMEXIT_VMRUN ((int64_t)0x080)
+#define VMEXIT_VMMCALL ((int64_t)0x081)
+#define VMEXIT_INVALID ((int64_t)-1)
 
 #pragma pack(pop)
 
