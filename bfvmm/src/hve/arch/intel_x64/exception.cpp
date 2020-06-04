@@ -26,6 +26,7 @@
 #include <hve/arch/intel_x64/exception.h>
 
 #include <intrinsics.h>
+#include <cstring>
 
 extern "C" void unlock_write(void);
 
@@ -57,16 +58,47 @@ vector_to_str(uint64_t vec) noexcept
     }
 }
 
+static inline bool opcode_is_vmlaunch(uintptr_t rip)
+{
+    const uint8_t vmlaunch[3] = {0x0F, 0x01, 0xC2};
+    auto opcode = reinterpret_cast<const uint8_t *>(rip);
+
+    return std::memcmp(opcode, vmlaunch, 3) == 0;
+}
+
+static inline bool opcode_is_vmresume(uintptr_t rip)
+{
+    const uint8_t vmresume[3] = {0x0F, 0x01, 0xC3};
+    auto opcode = reinterpret_cast<const uint8_t *>(rip);
+
+    return std::memcmp(opcode, vmresume, 3) == 0;
+}
+
 extern "C" void
 default_esr(
     uint64_t vector, uint64_t ec, bool ec_valid, uint64_t *regs, void *vcpu) noexcept
 {
+    auto view = gsl::span<uint64_t>(regs, 53);
+    auto rip = view[49];
+
     // -------------------------------------------------------------------------
     // NMIs
     // -------------------------------------------------------------------------
 
     if (vector == 2) {
-        static_cast<bfvmm::intel_x64::vcpu *>(vcpu)->queue_nmi();
+        // For a given exit, GS is constant across every instruction. Therefore
+        // it will always point to the vcpu_state_t of the vcpu on which the exit
+        // occured.
+
+        auto gs_base = ::intel_x64::msrs::ia32_gs_base::get();
+        auto state = reinterpret_cast<bfvmm::intel_x64::vcpu_state_t *>(gs_base);
+
+        if (state->nmi_flag || opcode_is_vmresume(rip) || opcode_is_vmlaunch(rip)) {
+            static_cast<bfvmm::intel_x64::vcpu *>(vcpu)->queue_nmi();
+        } else {
+            state->nmi_count++;
+        }
+
         return;
     }
 
@@ -75,7 +107,6 @@ default_esr(
     // -------------------------------------------------------------------------
 
     unlock_write();
-    auto view = gsl::span<uint64_t>(regs, 53);
 
     bfdebug_transaction(0, [&](std::string * msg) {
 

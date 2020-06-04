@@ -68,6 +68,9 @@ struct vcpu_state_t {
     uint64_t dr2;                   // 0x0F8
     uint64_t dr3;                   // 0x100
     uint64_t dr6;                   // 0x108
+
+    uint64_t nmi_flag;              // 0x110
+    uint64_t nmi_count;             // 0x118
 };
 
 }

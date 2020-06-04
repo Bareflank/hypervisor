@@ -25,6 +25,8 @@ default rel
 %define IA32_XSS_MSR   0xDA0
 %define VMCS_GUEST_RSP 0x0000681C
 %define VMCS_GUEST_RIP 0x0000681E
+%define VMCS_PROC_CTRL 0x00004002
+%define NMI_WINDOW_EXITING 0x400000
 
 global vmcs_launch:function
 
@@ -90,6 +92,23 @@ vmcs_launch:
     mov rsi, VMCS_GUEST_RIP
     vmwrite rsi, [rdi + 0x078]
 
+    ; See vmcs_resume for comments
+
+    mov qword [gs:0x110], 1
+    lfence
+
+    mov rax, [gs:0x118]
+    mov qword [gs:0x118], 0
+    cmp rax, 0
+    je .restore_gprs
+
+    mov rsi, VMCS_PROC_CTRL
+    vmread rax, rsi
+    or rax, NMI_WINDOW_EXITING
+    vmwrite rsi, rax
+
+.restore_gprs:
+
     mov r15, [rdi + 0x070]
     mov r14, [rdi + 0x068]
     mov r13, [rdi + 0x060]
@@ -107,6 +126,8 @@ vmcs_launch:
 
     mov rdi, [rdi + 0x030]
 
+    lfence
+    mov qword [gs:0x110], 0
     vmlaunch
 
     pop rbp
