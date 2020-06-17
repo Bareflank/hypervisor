@@ -207,7 +207,8 @@ endmacro(include_dependency)
 #
 function(download_dependency NAME)
     set(oneVal URL URL_MD5 GIT_REPOSITORY GIT_TAG PREFIX)
-    cmake_parse_arguments(ARG "" "${oneVal}" "" ${ARGN})
+    set(multiVal PATCH_COMMAND)
+    cmake_parse_arguments(ARG "" "${oneVal}" "${multiVal}" ${ARGN})
 
     set(SRC ${CACHE_DIR}/${NAME})
 
@@ -309,6 +310,10 @@ function(download_dependency NAME)
             )
 
             file(REMOVE_RECURSE ${TMP})
+
+            if(ARG_PATCH_COMMAND)
+                execute_process(COMMAND ${ARG_PATCH_COMMAND})
+            endif()
         endif()
     endif()
 
