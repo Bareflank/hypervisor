@@ -41,3 +41,4 @@ _vmcall:
 
         pop rbx
         ret
+        .size _vmcall, .-_vmcall
