@@ -238,6 +238,7 @@ intel_x64::cr2::value_type g_cr2 = 0;
 intel_x64::cr3::value_type g_cr3 = 0;
 intel_x64::cr4::value_type g_cr4 = 0;
 intel_x64::cr8::value_type g_cr8 = 0;
+intel_x64::xcr0::value_type g_xcr0 = 0;
 intel_x64::dr7::value_type g_dr7 = 0;
 
 bool g_vmload_fails = false;
@@ -268,6 +269,10 @@ extern "C" uint64_t
 _read_cr8(void) noexcept
 { return g_cr8; }
 
+extern "C" uint64_t
+_read_xcr0(void) noexcept
+{ return g_xcr0; }
+
 extern "C" void
 _write_cr0(uint64_t val) noexcept
 { g_cr0 = val; }
@@ -296,7 +301,7 @@ _write_cr8(uint64_t val) noexcept
 
 extern "C" void
 _write_xcr0(uint64_t val) noexcept
-{ bfignored(val); }
+{ g_xcr0 = val; }
 
 extern "C" uint64_t
 _read_dr7() noexcept

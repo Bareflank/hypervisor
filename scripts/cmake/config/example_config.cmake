@@ -142,6 +142,10 @@ if(ENABLE_BOXY)
     list(APPEND EXTENSION
         ${CMAKE_CURRENT_LIST_DIR}/boxy
     )
+
+    if (EXISTS ${CMAKE_CURRENT_LIST_DIR}/linux)
+        set(LINUX_DIR ${CMAKE_CURRENT_LIST_DIR}/linux)
+    endif()
 endif()
 
 if(OVERRIDE_VMM)
