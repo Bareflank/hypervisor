@@ -1847,6 +1847,8 @@ public:
     VIRTUAL void set_ia32_efer(uint64_t val) noexcept;
     VIRTUAL uint64_t ia32_pat() const noexcept;
     VIRTUAL void set_ia32_pat(uint64_t val) noexcept;
+    VIRTUAL uint64_t rflags() const noexcept;
+    VIRTUAL void set_rflags(uint64_t val) noexcept;
 
     VIRTUAL uint64_t es_selector() const noexcept;
     VIRTUAL void set_es_selector(uint64_t val) noexcept;

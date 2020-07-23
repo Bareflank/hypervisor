@@ -1572,6 +1572,14 @@ void
 vcpu::set_ia32_pat(uint64_t val) noexcept
 { vmcs_n::guest_ia32_pat::set(val); }
 
+uint64_t
+vcpu::rflags() const noexcept
+{ return vmcs_n::guest_rflags::get(); }
+
+void
+vcpu::set_rflags(uint64_t val) noexcept
+{ vmcs_n::guest_rflags::set(val); }
+
 
 uint64_t
 vcpu::es_selector() const noexcept
