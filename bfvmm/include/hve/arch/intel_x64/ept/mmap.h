@@ -290,6 +290,186 @@ public:
         return map_4k(reinterpret_cast<void *>(virt_addr), phys_addr, attr, cache);
     }
 
+    /// Share Phys Address Between Two 4k Virt Addresses from a Foreign Mmap
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @return Returns the entry that performs the remap
+    ///
+    /// @param virt_addr the virtual address to remap
+    /// @param foreign_virt_addr the virtual address to get the phys addr from
+    /// @param foreign_mmap the foreign mmap to get the phys addr from
+    /// @param attr the remapping permissions applied to virt_addr
+    /// @param cache the memory type applied to virt_addr
+    ///
+    entry_type &
+    share_4k(
+        void *virt_addr,
+        virt_addr_t foreign_virt_addr, mmap &foreign_mmap,
+        attr_type attr = attr_type::read_only,
+        memory_type cache = memory_type::write_back)
+    {
+        std::lock_guard lock(m_mutex);
+        using namespace ::intel_x64::ept;
+
+        auto &saved_phys = m_original_phys_addr[virt_addr];
+        if (saved_phys != 0) {
+            throw std::runtime_error(
+                "share_4k: remapping failed, virt_addr is already remapped " +
+                bfn::to_string(reinterpret_cast<uintptr_t>(virt_addr)));
+        }
+
+        auto [entry, from0] = this->entry(virt_addr, false);
+        saved_phys = pt::entry::phys_addr::get(entry);
+
+        auto [phys_addr, from1] = foreign_mmap.virt_to_phys(foreign_virt_addr);
+        pt::entry::phys_addr::set(entry, phys_addr);
+
+        switch (attr) {
+            case attr_type::none:
+                break;
+
+            case attr_type::read_only:
+                pt::entry::read_access::enable(entry);
+                break;
+
+            case attr_type::write_only:
+                pt::entry::write_access::enable(entry);
+                break;
+
+            case attr_type::execute_only:
+                pt::entry::execute_access::enable(entry);
+                break;
+
+            case attr_type::read_write:
+                pt::entry::read_access::enable(entry);
+                pt::entry::write_access::enable(entry);
+                break;
+
+            case attr_type::read_execute:
+                pt::entry::read_access::enable(entry);
+                pt::entry::execute_access::enable(entry);
+                break;
+
+            case attr_type::read_write_execute:
+                pt::entry::read_access::enable(entry);
+                pt::entry::write_access::enable(entry);
+                pt::entry::execute_access::enable(entry);
+                break;
+        };
+
+        // TODO:
+        //
+        // Take into consideration the foreign cacheability and use cache
+        // combination rules defined by Intel
+
+        switch (cache) {
+            case memory_type::uncacheable:
+                pt::entry::memory_type::set(
+                    entry,
+                    pt::entry::memory_type::uncacheable
+                );
+                break;
+
+            case memory_type::write_combining:
+                pt::entry::memory_type::set(
+                    entry,
+                    pt::entry::memory_type::write_combining
+                );
+                break;
+
+            case memory_type::write_through:
+                pt::entry::memory_type::set(
+                    entry,
+                    pt::entry::memory_type::write_through
+                );
+                break;
+
+            case memory_type::write_protected:
+                pt::entry::memory_type::set(
+                    entry,
+                    pt::entry::memory_type::write_protected
+                );
+                break;
+
+            case memory_type::write_back:
+                pt::entry::memory_type::set(
+                    entry,
+                    pt::entry::memory_type::write_back
+                );
+                break;
+        };
+
+        return entry;
+    }
+
+    /// Share Phys Address Between Two 4k Virt Addresses from a Foreign Mmap
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @return Returns the entry that performs the remap
+    ///
+    /// @param virt_addr the virtual address to remap
+    /// @param foreign_virt_addr the virtual address to get the phys addr from
+    /// @param foreign_mmap the foreign mmap to get the phys addr from
+    /// @param attr the remapping permissions applied to virt_addr
+    /// @param cache the memory type applied to virt_addr
+    ///
+    inline entry_type &
+    share_4k(
+        virt_addr_t virt_addr,
+        virt_addr_t foreign_virt_addr, mmap &foreign_mmap,
+        attr_type attr = attr_type::read_only,
+        memory_type cache = memory_type::write_back)
+
+    {
+        return share_4k(reinterpret_cast<void *>(virt_addr), foreign_virt_addr,
+                        foreign_mmap, attr, cache);
+    }
+
+    /// Restore Original Phys Address
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @return Returns the entry that performs the remap
+    ///
+    /// @param virt_addr the virtual address to remap
+    /// @param attr the remapping permissions applied to virt_addr
+    /// @param cache the memory type applied to virt_addr
+    ///
+    entry_type &
+    unshare_4k(
+        void *virt_addr,
+        attr_type attr = attr_type::read_write_execute,
+        memory_type cache = memory_type::write_back)
+    {
+        std::lock_guard lock(m_mutex);
+        using namespace ::intel_x64::ept;
+
+        auto [entry, from] = this->entry(virt_addr, false);
+        try {
+            pt::entry::phys_addr::set(entry, m_original_phys_addr.at(virt_addr));
+        }
+        catch (std::out_of_range) {
+            bfdebug_nhex(0, "unshare_4k: original phys addr does not exists for virt_addr:",
+                virt_addr);
+            throw;
+        }
+        m_original_phys_addr.erase(virt_addr);
+
+        return entry;
+    }
+
+    inline entry_type &
+    unshare_4k(
+        virt_addr_t virt_addr,
+        attr_type attr = attr_type::read_write_execute,
+        memory_type cache = memory_type::write_back)
+    { return unshare_4k(reinterpret_cast<void *>(virt_addr)); }
+
     /// Unmap Virtual Address
     ///
     /// @expects
@@ -397,43 +577,9 @@ public:
     /// @param virt_addr the virtual address to be converted
     /// @return returns entry for the map
     ///
-    std::pair<std::reference_wrapper<entry_type>, uintptr_t>
+    inline std::pair<std::reference_wrapper<entry_type>, uintptr_t>
     entry(void *virt_addr)
-    {
-        std::lock_guard lock(m_mutex);
-        using namespace ::intel_x64::ept;
-
-        this->map_pdpt(pml4::index(virt_addr));
-        auto &pdpte = m_pdpt.virt_addr.at(pdpt::index(virt_addr));
-
-        if (pdpte == 0) {
-            throw std::runtime_error("entry: pdpte not mapped");
-        }
-
-        if (pdpt::entry::ps::is_enabled(pdpte)) {
-            return {pdpte, pdpt::from};
-        }
-
-        this->map_pd(pdpt::index(virt_addr));
-        auto &pde = m_pd.virt_addr.at(pd::index(virt_addr));
-
-        if (pde == 0) {
-            throw std::runtime_error("entry: pde not mapped");
-        }
-
-        if (pd::entry::ps::is_enabled(pde)) {
-            return {pde, pd::from};
-        }
-
-        this->map_pt(pd::index(virt_addr));
-        auto &pte = m_pt.virt_addr.at(pt::index(virt_addr));
-
-        if (pte == 0) {
-            throw std::runtime_error("entry: pte not mapped");
-        }
-
-        return {pte, pt::from};
-    }
+    { return entry(virt_addr, true); }
 
     /// Virtual Address to Entry
     ///
@@ -678,6 +824,55 @@ private:
     { free_page(virt_addr.data()); }
 
 private:
+
+    std::pair<std::reference_wrapper<entry_type>, uintptr_t>
+    entry(void *virt_addr, bool should_lock)
+    {
+        if (should_lock) {
+            m_mutex.lock();
+        }
+
+        using namespace ::intel_x64::ept;
+
+        this->map_pdpt(pml4::index(virt_addr));
+        auto &pdpte = m_pdpt.virt_addr.at(pdpt::index(virt_addr));
+
+        if (pdpte == 0) {
+            throw std::runtime_error("entry: pdpte not mapped");
+        }
+
+        if (pdpt::entry::ps::is_enabled(pdpte)) {
+            return {pdpte, pdpt::from};
+        }
+
+        this->map_pd(pdpt::index(virt_addr));
+        auto &pde = m_pd.virt_addr.at(pd::index(virt_addr));
+
+        if (pde == 0) {
+            throw std::runtime_error("entry: pde not mapped");
+        }
+
+        if (pd::entry::ps::is_enabled(pde)) {
+            return {pde, pd::from};
+        }
+
+        this->map_pt(pd::index(virt_addr));
+        auto &pte = m_pt.virt_addr.at(pt::index(virt_addr));
+
+        if (pte == 0) {
+            throw std::runtime_error("entry: pte not mapped");
+        }
+
+        if (should_lock) {
+            m_mutex.unlock();
+        }
+
+        return {pte, pt::from};
+    }
+
+    inline std::pair<std::reference_wrapper<entry_type>, uintptr_t>
+    entry(virt_addr_t virt_addr, bool should_lock)
+    { return entry(reinterpret_cast<void *>(virt_addr), should_lock); }
 
     pair
     phys_to_pair(phys_addr_t phys_addr, size_type num_entries)
@@ -1190,6 +1385,8 @@ private:
     pair m_pt;
 
     mutable std::mutex m_mutex;
+
+    std::unordered_map<void *, phys_addr_t> m_original_phys_addr;
 
 public:
 
