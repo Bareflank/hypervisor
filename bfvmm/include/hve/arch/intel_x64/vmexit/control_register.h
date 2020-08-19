@@ -324,6 +324,18 @@ public:
     ///
     void enable_wrcr4_exiting(vmcs_n::value_type mask);
 
+    /// Disable Write CR3 Exiting
+    ///
+    /// Example:
+    /// @code
+    /// this->disable_wrcr3_exiting();
+    /// @endcode
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    void disable_wrcr3_exiting();
+
 public:
 
     /// @cond

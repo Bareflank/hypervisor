@@ -325,6 +325,17 @@ control_register_handler::enable_wrcr4_exiting(
 }
 
 // -----------------------------------------------------------------------------
+// Disablers
+// -----------------------------------------------------------------------------
+
+void
+control_register_handler::disable_wrcr3_exiting()
+{
+    using namespace vmcs_n;
+    primary_processor_based_vm_execution_controls::cr3_load_exiting::disable();
+}
+
+// -----------------------------------------------------------------------------
 // Execute Functions
 // -----------------------------------------------------------------------------
 

@@ -687,6 +687,14 @@ void
 vcpu::execute_wrcr4()
 { m_control_register_handler.execute_wrcr4(this); }
 
+void
+vcpu::enable_wrcr3_exiting()
+{ m_control_register_handler.enable_wrcr3_exiting(); }
+
+void
+vcpu::disable_wrcr3_exiting()
+{ m_control_register_handler.disable_wrcr3_exiting(); }
+
 //--------------------------------------------------------------------------
 // CPUID
 //--------------------------------------------------------------------------

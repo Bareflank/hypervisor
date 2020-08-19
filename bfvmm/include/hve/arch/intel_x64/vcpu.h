@@ -361,6 +361,20 @@ public:
     ///
     VIRTUAL void execute_wrcr4();
 
+    /// Enable wrcr3 Exiting
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void enable_wrcr3_exiting();
+
+    /// Disable wrcr3 Exiting
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    VIRTUAL void disable_wrcr3_exiting();
+
     //--------------------------------------------------------------------------
     // CPUID
     //--------------------------------------------------------------------------
