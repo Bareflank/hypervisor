@@ -788,6 +788,206 @@ public:
     inline auto is_4k(virt_addr_t virt_addr)
     { return is_4k(reinterpret_cast<void *>(virt_addr)); }
 
+    /// Attribute
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to get the attribute from
+    /// @return returns the attribute type of the virtual address
+    ///
+    attr_type
+    attribute(void *virt_addr)
+    {
+        using namespace ::intel_x64::ept;
+        auto [entry, from] = this->entry(virt_addr, true);
+
+        uint64_t rwx;
+
+        switch (from) {
+            case pdpt::from:
+                rwx = pdpt::entry::read_access::is_enabled(entry)    << 0 |
+                      pdpt::entry::write_access::is_enabled(entry)   << 1 |
+                      pdpt::entry::execute_access::is_enabled(entry) << 2 ;
+            case pd::from:
+                rwx = pd::entry::read_access::is_enabled(entry)    << 0 |
+                      pd::entry::write_access::is_enabled(entry)   << 1 |
+                      pd::entry::execute_access::is_enabled(entry) << 2 ;
+            case pt::from:
+                rwx = pt::entry::read_access::is_enabled(entry)    << 0 |
+                      pt::entry::write_access::is_enabled(entry)   << 1 |
+                      pt::entry::execute_access::is_enabled(entry) << 2 ;
+            default:
+                throw std::runtime_error("attribute: from is not valid");
+        }
+
+        switch (rwx) {
+            case 0: return attr_type::none;
+            case 1: return attr_type::read_only;
+            case 2: return attr_type::write_only;
+            case 3: return attr_type::read_write;
+            case 4: return attr_type::execute_only;
+            case 5: return attr_type::read_execute;
+            case 6:
+                throw std::runtime_error(
+                    "attribute: write-execute is not a valid attribute");
+            case 7: return attr_type::read_write_execute;
+        }
+    }
+
+    /// Attribute
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to get the attribute from
+    /// @return returns the attribute type of the virtual address
+    ///
+    inline attr_type
+    attribute(virt_addr_t virt_addr)
+    { return attribute(reinterpret_cast<void *>(virt_addr)); }
+
+    /// Set Attribute
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @param virt_addr the virtual address to set the attribute onto
+    /// @return returns the attribute type of the virtual address
+    ///
+    void
+    set_attribute(void *virt_addr, attr_type attr)
+    {
+        using namespace ::intel_x64::ept;
+        auto [entry, from] = this->entry(virt_addr, true);
+
+        switch (attr) {
+            case attr_type::none:
+                break;
+
+            case attr_type::read_only:
+                pt::entry::read_access::enable(entry);
+                break;
+
+            case attr_type::write_only:
+                pt::entry::write_access::enable(entry);
+                break;
+
+            case attr_type::execute_only:
+                pt::entry::execute_access::enable(entry);
+                break;
+
+            case attr_type::read_write:
+                pt::entry::read_access::enable(entry);
+                pt::entry::write_access::enable(entry);
+                break;
+
+            case attr_type::read_execute:
+                pt::entry::read_access::enable(entry);
+                pt::entry::execute_access::enable(entry);
+                break;
+
+            case attr_type::read_write_execute:
+                pt::entry::read_access::enable(entry);
+                pt::entry::write_access::enable(entry);
+                pt::entry::execute_access::enable(entry);
+                break;
+        };
+    }
+
+    /// set_attribute
+    ///
+    inline void
+    set_attribute(virt_addr_t virt_addr, attr_type attr)
+    { set_attribute(reinterpret_cast<void *>(virt_addr), attr); }
+
+    /// cacheability
+    ///
+    memory_type
+    cacheability(void *virt_addr)
+    {
+        using namespace ::intel_x64::ept;
+        auto [entry, from] = this->entry(virt_addr, true);
+
+        uint64_t cache;
+
+        switch (from) {
+            case pdpt::from:
+                cache = pdpt::entry::memory_type::get(entry);
+            case pd::from:
+                cache = pd::entry::memory_type::get(entry);
+            case pt::from:
+                cache = pt::entry::memory_type::get(entry);
+            default:
+                throw std::runtime_error("cacheability: from is not valid");
+        }
+
+        using namespace ::intel_x64::ept::pt;
+        switch (cache) {
+            case entry::memory_type::uncacheable:
+                return memory_type::uncacheable;
+            case entry::memory_type::write_combining:
+                return memory_type::write_combining;
+            case entry::memory_type::write_through:
+                return memory_type::write_through;
+            case entry::memory_type::write_protected:
+                return memory_type::write_protected;
+            case entry::memory_type::write_back:
+                return memory_type::write_back;
+            default:
+                throw std::runtime_error(
+                    "cacheability: memory type is not valid");
+        };
+    }
+
+    /// cacheability
+    ///
+    inline memory_type
+    cacheability(virt_addr_t virt_addr)
+    { return cacheability(reinterpret_cast<void *>(virt_addr)); }
+
+    /// set_cacheability
+    ///
+    void
+    set_cacheability(void *virt_addr, memory_type cache)
+    {
+        using namespace ::intel_x64::ept;
+        auto [entry, from] = this->entry(virt_addr, true);
+
+        // TODO instead of casting do all the checks
+        uint64_t _cache = static_cast<uint64_t>(cache);
+
+        using namespace ::intel_x64::ept::pt;
+        switch (_cache) {
+            case entry::memory_type::uncacheable:
+            case entry::memory_type::write_combining:
+            case entry::memory_type::write_through:
+            case entry::memory_type::write_protected:
+            case entry::memory_type::write_back:
+                break;
+            default:
+                throw std::runtime_error(
+                    "cacheability: memory type is not valid");
+        };
+
+        switch (from) {
+            case pdpt::from:
+                pdpt::entry::memory_type::set(entry, _cache);
+            case pd::from:
+                pd::entry::memory_type::set(entry, _cache);
+            case pt::from:
+                pt::entry::memory_type::set(entry, _cache);
+            default:
+                throw std::runtime_error("cacheability: from is not valid");
+        };
+    }
+
+    /// set_cacheability
+    ///
+    inline void
+    set_cacheability(virt_addr_t virt_addr, memory_type cache)
+    { set_cacheability(reinterpret_cast<void *>(virt_addr), cache); }
+
 private:
 
     gsl::span<virt_addr_t>
