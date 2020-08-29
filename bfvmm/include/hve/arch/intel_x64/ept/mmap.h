@@ -455,7 +455,7 @@ public:
         }
         catch (std::out_of_range) {
             bfdebug_nhex(0, "unshare_4k: original phys addr does not exists for virt_addr:",
-                virt_addr);
+                         virt_addr);
             throw;
         }
         m_original_phys_addr.erase(virt_addr);
@@ -809,30 +809,46 @@ public:
                 rwx = pdpt::entry::read_access::is_enabled(entry)    << 0 |
                       pdpt::entry::write_access::is_enabled(entry)   << 1 |
                       pdpt::entry::execute_access::is_enabled(entry) << 2 ;
+                break;
             case pd::from:
                 rwx = pd::entry::read_access::is_enabled(entry)    << 0 |
                       pd::entry::write_access::is_enabled(entry)   << 1 |
                       pd::entry::execute_access::is_enabled(entry) << 2 ;
+                break;
             case pt::from:
                 rwx = pt::entry::read_access::is_enabled(entry)    << 0 |
                       pt::entry::write_access::is_enabled(entry)   << 1 |
                       pt::entry::execute_access::is_enabled(entry) << 2 ;
+                break;
             default:
                 throw std::runtime_error("attribute: from is not valid");
         }
 
+        attr_type ret;
         switch (rwx) {
-            case 0: return attr_type::none;
-            case 1: return attr_type::read_only;
-            case 2: return attr_type::write_only;
-            case 3: return attr_type::read_write;
-            case 4: return attr_type::execute_only;
-            case 5: return attr_type::read_execute;
+            case 0: ret = attr_type::none;
+                break;
+            case 1: ret = attr_type::read_only;
+                break;
+            case 2: ret = attr_type::write_only;
+                break;
+            case 3: ret = attr_type::read_write;
+                break;
+            case 4: ret = attr_type::execute_only;
+                break;
+            case 5: ret = attr_type::read_execute;
+                break;
             case 6:
                 throw std::runtime_error(
                     "attribute: write-execute is not a valid attribute");
-            case 7: return attr_type::read_write_execute;
+            case 7: ret = attr_type::read_write_execute;
+                break;
+            default:
+                throw std::runtime_error(
+                    "attribute: not a valid attribute");
         }
+
+        return ret;
     }
 
     /// Attribute
@@ -914,10 +930,13 @@ public:
         switch (from) {
             case pdpt::from:
                 cache = pdpt::entry::memory_type::get(entry);
+                break;
             case pd::from:
                 cache = pd::entry::memory_type::get(entry);
+                break;
             case pt::from:
                 cache = pt::entry::memory_type::get(entry);
+                break;
             default:
                 throw std::runtime_error("cacheability: from is not valid");
         }
@@ -973,10 +992,13 @@ public:
         switch (from) {
             case pdpt::from:
                 pdpt::entry::memory_type::set(entry, _cache);
+                break;
             case pd::from:
                 pd::entry::memory_type::set(entry, _cache);
+                break;
             case pt::from:
                 pt::entry::memory_type::set(entry, _cache);
+                break;
             default:
                 throw std::runtime_error("cacheability: from is not valid");
         };
