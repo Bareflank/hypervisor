@@ -1079,6 +1079,8 @@ private:
             m_mutex.lock();
         }
 
+        auto unlock = gsl::finally([&]() {if (should_lock) m_mutex.unlock();});
+
         using namespace ::intel_x64::ept;
 
         this->map_pdpt(pml4::index(virt_addr));
@@ -1108,10 +1110,6 @@ private:
 
         if (pte == 0) {
             throw std::runtime_error("entry: pte not mapped");
-        }
-
-        if (should_lock) {
-            m_mutex.unlock();
         }
 
         return {pte, pt::from};
