@@ -292,6 +292,9 @@ public:
 
     /// Share Phys Address Between Two 4k Virt Addresses from a Foreign Mmap
     ///
+    /// The caller must invalidate the translations derived from EPT with
+    /// invept.
+    ///
     /// @expects
     /// @ensures
     ///
@@ -406,6 +409,9 @@ public:
 
     /// Share Phys Address Between Two 4k Virt Addresses from a Foreign Mmap
     ///
+    /// The caller must invalidate the translations derived from EPT with
+    /// invept.
+    ///
     /// @expects
     /// @ensures
     ///
@@ -430,6 +436,9 @@ public:
     }
 
     /// Restore Original Phys Address
+    ///
+    /// The caller must invalidate the translations derived from EPT with
+    /// invept.
     ///
     /// @expects
     /// @ensures
@@ -460,9 +469,25 @@ public:
         }
         m_original_phys_addr.erase(virt_addr);
 
+        // TODO: apply attr and cache
+
         return entry;
     }
 
+    /// Restore Original Phys Address
+    ///
+    /// The caller must invalidate the translations derived from EPT with
+    /// invept.
+    ///
+    /// @expects
+    /// @ensures
+    ///
+    /// @return Returns the entry that performs the remap
+    ///
+    /// @param virt_addr the virtual address to remap
+    /// @param attr the remapping permissions applied to virt_addr
+    /// @param cache the memory type applied to virt_addr
+    ///
     inline entry_type &
     unshare_4k(
         virt_addr_t virt_addr,
