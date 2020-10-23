@@ -11,7 +11,7 @@ Instead, Bareflank uses a layered, modular approach, that lets you pick just how
 - [LLVM](https://github.com/Bareflank/llvm-project): provides our custom implementation of the LLVM Clang compiler and associated tools including additional static analysis checks in Clang Tidy to ensure compliance with AUTOSAR.
 - [PAL](https://github.com/Bareflank/pal): provides auto-generated intrinsics APIs for Intel, AMD and ARM on any combination of OS (e.g., Windows and Linux), ABI (e.g., SysV and MS64) and programming language (e.g., C, C++ and Python).
 - [hypervisor](https://github.com/Bareflank/hypervisor): provides the base SDK including the loader, the Bareflank microkernel and support applications. If all you need is host-only hypervisor support, this is the project to start with.
-- [MicroV](https://github.com/Bareflank/boxy): provides support for guest VMs, allowing the user to create an execute additional virtual machines. If you need guest VM support, this is the project to start with.
+- [MicroV](https://github.com/Bareflank/microv): provides support for guest VMs, allowing the user to create an execute additional virtual machines. If you need guest VM support, this is the project to start with.
 
 To support Bareflank's ecosystem, the hypervisor SDK is licensed under MIT, specifically enabling users of the project to both contribute back to the project, but also create proprietary, closed source products that use the Bareflank SDK as their foundation. Feel free to use Bareflank to create your commercial products. All we ask is that if you find a bug or add a feature to the SDK that you consider contributing your changes back to the project.
 
