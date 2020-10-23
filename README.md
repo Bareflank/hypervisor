@@ -97,7 +97,7 @@ To compile the BSL, use the following:
 ``` bash
 git clone https://github.com/bareflank/hypervisor
 mkdir hypervisor/build && cd hypervisor/build
-cmake -DCMAKE_CXX_COMPILER="clang++" -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
 ninja info
 ninja
 ```
