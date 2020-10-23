@@ -1,3 +1,5 @@
+![Bareflank](https://github.com/Bareflank/hypervisor/raw/gh-pages/logo.png)
+
 ## Description
 
 The Bareflank Hypervisor is an open source hypervisor Software Development Toolkit (SDK), led by Assured Information Security, Inc. (AIS), that provides the tools needed to rapidly prototype and create your own hypervisor.
