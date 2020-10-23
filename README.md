@@ -84,6 +84,19 @@ the following videos at [CppCon](https://www.youtube.com/user/CppCon) below:
 [![CppCon 2017](https://i.imgur.com/nBFD6uA.png)](https://www.youtube.com/watch?v=KdJhQuycD78)
 [![CppCon 2016](https://i.imgur.com/fwmlOiJ.png)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
 
+## Interested In Working For AIS?
+  Check out our [Can You Hack It?®](https://www.canyouhackit.com) challenge 
+  and test your skills! Submit your score to show us what you’ve got. We have 
+  offices across the country and offer  competitive pay and outstanding 
+  benefits. Join a team that is not only committed to the future of cyberspace, 
+  but to our employee’s success as well.
+
+<p align="center">
+  <a href="https://www.ainfosec.com/">
+    <img src="https://github.com/Bareflank/MicroV/raw/master/docs/ais.png" alt="cross-platform" height="100" />
+  </a>
+</p>
+
 ## Dependencies
 
 Although Bareflank can be made to run on most systems, the following are the
