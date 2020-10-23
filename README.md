@@ -34,7 +34,7 @@ ninja dump
 ```
 
 ## Interested In Working For AIS?
-Check out our [Can You Hack It?®](https://www.canyouhackit.com) challenge and test your skills! Submit your score to show us what you’ve got. We have offices across the country and offer  competitive pay and outstanding benefits. Join a team that is not only committed to the future of cyberspace, but to our employee’s success as well.
+Check out our [Can You Hack It?®](https://www.canyouhackit.com) challenge and test your skills! Submit your score to show us what you’ve got. We have offices across the country and offer competitive pay and outstanding benefits. Join a team that is not only committed to the future of cyberspace, but to our employee’s success as well.
 
 <p align="center">
   <a href="https://www.ainfosec.com/">
@@ -59,7 +59,7 @@ the following videos at [CppCon](https://www.youtube.com/user/CppCon) below:
 Currently, the Bareflank hypervisor only supports the Clang/LLVM 11+ compiler. This, however, ensures the hypervisor can be natively compiled on Windows including support for cross-compiling. Support for other C++20 compilers can be added if needed, just let us know if that is something you need.
 
 ### **Windows**
-To compile the BSL on Windows, you must first install the following:
+To compile Bareflank on Windows, you must first install the following:
 - [Visual Studio](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=16) (Enable "Desktop development with C++")
 - [LLVM 11+](https://github.com/llvm/llvm-project/releases)
 - [CMake 3.16+](https://cmake.org/download/)
@@ -68,7 +68,7 @@ To compile the BSL on Windows, you must first install the following:
 Visual Studio is needed as it contains Windows specific libraries that are needed during compilation. Instead of using the Clang/LLVM project that natively ships with Visual Studio, we use the standard Clang/LLVM binaries provided by the LLVM project which ensures we get all of the tools including LLD, Clang Tidy and Clang Format. Also note that you must put Ninja somewhere
 in your path (we usually drop into CMake's bin folder).
 
-To compile the BSL, use the following:
+To compile use the following:
 ``` bash
 git clone https://github.com/bareflank/hypervisor
 mkdir hypervisor/build && cd hypervisor/build
@@ -78,7 +78,7 @@ ninja
 ```
 
 ### **Ubuntu Linux**
-To compile the BSL on Ubuntu, you must install the following:
+To compile Bareflank on Ubuntu, you must install the following:
 - [LLVM 11+](https://apt.llvm.org/)
 - [CMake 3.16+](https://cmake.org/download/)
 
@@ -93,7 +93,7 @@ sudo update-alternatives --remove-all clang++
 sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-11 100
 ```
 
-To compile the BSL, use the following:
+To compile use the following:
 ``` bash
 git clone https://github.com/bareflank/hypervisor
 mkdir hypervisor/build && cd hypervisor/build
