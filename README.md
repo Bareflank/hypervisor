@@ -1,5 +1,3 @@
-![Bareflank](https://github.com/Bareflank/hypervisor/raw/gh-pages/logo.png)
-
 ## Description
 
 The Bareflank Hypervisor is an open source hypervisor Software Development Toolkit (SDK), led by Assured Information Security, Inc. (AIS), that provides the tools needed to rapidly prototype and create your own hypervisor.
@@ -29,6 +27,11 @@ ninja
 ```
 
 Enjoy:
+```
+ninja driver_quick
+ninja start
+ninja dump
+```
 
 ## Interested In Working For AIS?
 Check out our [Can You Hack It?®](https://www.canyouhackit.com) challenge and test your skills! Submit your score to show us what you’ve got. We have offices across the country and offer  competitive pay and outstanding benefits. Join a team that is not only committed to the future of cyberspace, but to our employee’s success as well.
@@ -81,7 +84,7 @@ To compile the BSL on Ubuntu, you must install the following:
 
 Once you have the above setup, you can install all dependencies using the following command
 ```bash
-sudo apt-get install -y clang-11 build-essential git
+sudo apt-get install -y clang-11 build-essential git ninja-build
 ```
 
 You might also have to update your build environment to point to the new version of LLVM as follows:
@@ -95,8 +98,8 @@ To compile the BSL, use the following:
 git clone https://github.com/bareflank/hypervisor
 mkdir hypervisor/build && cd hypervisor/build
 cmake -DCMAKE_CXX_COMPILER="clang++" -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
-make info
-make -j<number of cores>
+ninja info
+ninja
 ```
 
 ## Usage Instructions
@@ -104,21 +107,21 @@ make -j<number of cores>
 To use the hypervisor, run the following commands:
 
 ```
-make driver_quick
-make start
+ninja driver_quick
+ninja start
 ```
 
 to get debug information, use the following:
 
 ```
-make dump
+ninja dump
 ```
 
 to reverse this:
 
 ```
-make stop
-make driver_unload
+ninja stop
+ninja driver_unload
 ```
 
 ## **Resources**
