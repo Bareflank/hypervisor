@@ -2,6 +2,8 @@
 
 ## Description
 
+**Warning:** The master branch is under heavy development as we work to complete Bareflank 3.0. For now, you might want to consider one of our offical releases until Bareflank 3.0 is complete
+
 The Bareflank Hypervisor is an open source hypervisor Software Development Toolkit (SDK), led by Assured Information Security, Inc. (AIS), that provides the tools needed to rapidly prototype and create your own hypervisor.
 
 Most people think that hypervisors are meant to virtualize servers and provide a means to run Windows on a Mac, but there is a whole field of research where hypervisors are used without guest virtual machines. Since a hypervisor is capable of controlling the host OS running underneath it (so-called "ring -1"), host-only hypervisors support introspection, reverse engineering, anti-virus, containerization, diversity, and even architectural research like [MoRE](https://github.com/ainfosec/MoRE). All of these use cases start the same way, by spending months standing up the hypervisor itself before you can start working on your actual project. Existing open source hypervisors are burdened with legacy support, only support a single operating system or contain unnecessary complexity that make them painful to work with when conducting hypervisor research.
@@ -24,15 +26,16 @@ Get the latest version of the Bareflank Hypervisor SDK from GitHub:
 ``` bash
 git clone https://github.com/bareflank/hypervisor
 mkdir bsl/build && cd bsl/build
-cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" ..
-ninja
+cmake -DCMAKE_CXX_COMPILER="clang++" ..
+make
 ```
 
 Enjoy:
 ```
-ninja driver_quick
-ninja start
-ninja dump
+make driver_quick
+make start
+make dump
+make stop
 ```
 
 ## Interested In Working For AIS?
@@ -61,47 +64,21 @@ the following videos at [CppCon](https://www.youtube.com/user/CppCon) below:
 Currently, the Bareflank hypervisor only supports the Clang/LLVM 11+ compiler. This, however, ensures the hypervisor can be natively compiled on Windows including support for cross-compiling. Support for other C++20 compilers can be added if needed, just let us know if that is something you need.
 
 ### **Windows**
-To compile Bareflank on Windows, you must first install the following:
-- [Visual Studio](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=16) (Enable "Desktop development with C++")
-- [LLVM 11+](https://github.com/llvm/llvm-project/releases)
-- [CMake 3.16+](https://cmake.org/download/)
-- [Ninja](https://github.com/ninja-build/ninja/releases)
-
-Visual Studio is needed as it contains Windows specific libraries that are needed during compilation. Instead of using the Clang/LLVM project that natively ships with Visual Studio, we use the standard Clang/LLVM binaries provided by the LLVM project which ensures we get all of the tools including LLD, Clang Tidy and Clang Format. Also note that you must put Ninja somewhere
-in your path (we usually drop into CMake's bin folder).
-
-To compile use the following:
-``` bash
-git clone https://github.com/bareflank/hypervisor
-mkdir hypervisor/build && cd hypervisor/build
-cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
-ninja info
-ninja
-```
+TBD
 
 ### **Ubuntu Linux**
-To compile Bareflank on Ubuntu, you must install the following:
-- [LLVM 11+](https://apt.llvm.org/)
-- [CMake 3.16+](https://cmake.org/download/)
-
-Once you have the above setup, you can install all dependencies using the following command
+To compile the BSL on Ubuntu (20.04 or higher) you must first install the following dependencies:
 ```bash
-sudo apt-get install -y clang-11 build-essential git ninja-build
+sudo apt-get install -y clang cmake lld
 ```
 
-You might also have to update your build environment to point to the new version of LLVM as follows:
-```
-sudo update-alternatives --remove-all clang++
-sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-11 100
-```
-
-To compile use the following:
+To compile the BSL, use the following:
 ``` bash
-git clone https://github.com/bareflank/hypervisor
-mkdir hypervisor/build && cd hypervisor/build
-cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
-ninja info
-ninja
+git clone https://github.com/bareflank/bsl
+mkdir bsl/build && cd bsl/build
+cmake -DCMAKE_CXX_COMPILER="clang++" -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+make info
+make
 ```
 
 ## Usage Instructions
@@ -109,21 +86,21 @@ ninja
 To use the hypervisor, run the following commands:
 
 ```
-ninja driver_quick
-ninja start
+make driver_quick
+make start
 ```
 
 to get debug information, use the following:
 
 ```
-ninja dump
+make dump
 ```
 
 to reverse this:
 
 ```
-ninja stop
-ninja driver_unload
+make stop
+make driver_unload
 ```
 
 ## **Resources**
@@ -133,8 +110,8 @@ ninja driver_unload
 The Bareflank Support Library provides a ton of useful resources to learn how to use the library including:
 
 -   **Documentation**: <https://bareflank.github.io/hypervisor/>
--   **Examples**: <https://github.com/Bareflank/hypervisor/tree/master/examples>
--   **Unit Tests**: <https://github.com/Bareflank/hypervisor/tree/master/tests>
+-   **Examples**: <https://github.com/Bareflank/hypervisor/tree/master/example>
+-   **Unit Tests**: <https://github.com/Bareflank/hypervisor/tree/master/test>
 
 If you have any questions, bugs, or feature requests, please feel free to ask on any of the following:
 
