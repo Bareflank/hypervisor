@@ -124,6 +124,9 @@ And as always, we are always looking for more help:
 -   **Contributing Guidelines**: <https://github.com/Bareflank/hypervisor/blob/master/contributing.md>
 
 ## **Testing**
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fbareflank%2Fhypervisor%2Fbadge&style=flat)](https://actions-badge.atrox.dev/bareflank/hypervisor/goto)
+[![codecov](https://codecov.io/gh/Bareflank/hypervisor/branch/master/graph/badge.svg)](https://codecov.io/gh/Bareflank/hypervisor)
+
 The Bareflank hypervisor leverages the following tools to ensure the highest possible code quality. Each pull request undergoes the following rigorous testing and review:
 
 -   **Static Analysis:** [Clang Tidy](https://github.com/Bareflank/llvm-project)
