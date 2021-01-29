@@ -29,12 +29,10 @@ jobs:
     - name: Setup
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang cmake lld
+        sudo apt-get install -y clang cmake lld clang-format
       shell: bash
     - name: Validate Source Formatting
       run: |
-        chmod +x hypervisor/utils/clang-format
-        export PATH="$PWD/hypervisor/utils:$PATH"
         mkdir build && cd build
         cmake -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=DEBUG -DENABLE_CLANG_FORMAT=ON ../hypervisor
         make format
