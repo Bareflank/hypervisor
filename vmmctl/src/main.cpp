@@ -24,19 +24,20 @@
 
 #include "vmmctl_main.hpp"
 
+#include <ifmap.hpp>
+#include <ioctl.hpp>
+
 #include <bsl/arguments.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
 #include <bsl/cstr_type.hpp>
 #include <bsl/exit_code.hpp>
-#include <bsl/ifmap.hpp>
-#include <bsl/ioctl.hpp>
 #include <bsl/move.hpp>
 
 namespace vmmctl
 {
     /// @brief stores the main app for the VMCTL
-    constinit vmmctl_main<bsl::ioctl, bsl::ifmap> g_app{};
+    constinit vmmctl_main<ioctl, ifmap> g_app{};
 }
 
 /// <!-- description -->
