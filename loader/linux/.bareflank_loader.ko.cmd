@@ -1,1 +1,0 @@
-cmd_/home/user/working/hypervisor/loader/linux/bareflank_loader.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000  --build-id  -T ./scripts/module-common.lds -o /home/user/working/hypervisor/loader/linux/bareflank_loader.ko /home/user/working/hypervisor/loader/linux/bareflank_loader.o /home/user/working/hypervisor/loader/linux/bareflank_loader.mod.o;  true

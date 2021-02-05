@@ -23,6 +23,8 @@ add_executable(vmmctl)
 
 target_include_directories(vmmctl PRIVATE
     src
+    $<$<PLATFORM_ID:Linux>:${CMAKE_CURRENT_LIST_DIR}/src/linux>
+    $<$<PLATFORM_ID:Windows>:${CMAKE_CURRENT_LIST_DIR}/src/windows>
 )
 
 target_include_directories(vmmctl SYSTEM PRIVATE
