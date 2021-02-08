@@ -32,6 +32,11 @@ macro(hypervisor_add_info)
         VERBATIM
     )
 
+    add_custom_command(TARGET info
+        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   BSL                            ${BF_COLOR_CYN}${bsl_SOURCE_DIR}${BF_COLOR_RST}"
+        VERBATIM
+    )
+
     if(HYPERVISOR_BUILD_LOADER)
         add_custom_command(TARGET info
             COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_BUILD_LOADER        ${BF_COLOR_GRN}enabled${BF_COLOR_RST}"

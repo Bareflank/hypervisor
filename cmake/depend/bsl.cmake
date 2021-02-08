@@ -33,5 +33,3 @@ if(NOT bsl_POPULATED)
     FetchContent_Populate(bsl)
     add_subdirectory(${bsl_SOURCE_DIR} ${bsl_BINARY_DIR})
 endif()
-
-message(STATUS "Found BSL: ${bsl_SOURCE_DIR}")

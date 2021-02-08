@@ -37,6 +37,7 @@ string(CONCAT HYPERVISOR_MK_CXX_FLAGS
     "-mno-aes "
     "-mno-sse4a "
     "-mcmodel=large "
+    "-std=c++20 "
 )
 
 string(CONCAT HYPERVISOR_MK_LINK_FLAGS
@@ -55,3 +56,24 @@ set(CMAKE_CXX_COMPILE_OBJECT
 set(CMAKE_CXX_LINK_EXECUTABLE
     "${HYPERVISOR_CXX_LINKER} ${HYPERVISOR_MK_LINK_FLAGS} <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
 )
+
+################################################################################
+# Hack For Windows
+################################################################################
+
+# For some reason, CMake on Windows is adding extra stuff to the compiler
+# includes and flags. The following fixes this issue by telling CMake not
+# to configure the compiler. We need to add C++20 to the command above
+# to make this work.
+# https://gitlab.kitware.com/cmake/cmake/-/issues/21789
+
+set(__COMPILER_CLANG 1)
+
+macro(__compiler_clang lang)
+endmacro()
+
+macro(__compiler_clang_cxx_standards lang)
+endmacro()
+
+macro(__compiler_check_default_language_standard lang)
+endmacro()

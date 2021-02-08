@@ -27,21 +27,13 @@
     .code64
     .intel_syntax noprefix
 
-    .globl  main
-    .type   main, @function
-main:
-
+    .globl  get_vendor
+get_vendor:
     push rbx
 
-    mov rdi, 0x100000
-loop:
-    xor rax, rax
-    xor rcx, rcx
+    mov rax, 0x0
     cpuid
-
-    dec rdi
-    cmp rdi, 0
-    jne loop
+    mov rax, rbx
 
     pop rbx
     ret

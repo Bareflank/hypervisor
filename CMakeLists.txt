@@ -24,20 +24,15 @@ project(hypervisor CXX)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/init_build.cmake)
 
-if(HYPERVISOR_BUILD_LOADER)
-    add_subdirectory(loader)
-endif()
+if(NOT WIN32)
+    if(HYPERVISOR_BUILD_LOADER)
+        add_subdirectory(loader)
+    endif()
 
-if(HYPERVISOR_BUILD_VMMCTL)
-    add_subdirectory(vmmctl)
+    if(HYPERVISOR_BUILD_VMMCTL)
+        add_subdirectory(vmmctl)
+    endif()
 endif()
 
 hypervisor_add_mk_cross_compile(cmake/mk_cross_compile)
 hypervisor_add_ext_cross_compile(cmake/ext_cross_compile)
-
-if(NOT DEFINED FIRST_TIME)
-    message(STATUS "${BF_COLOR_YLW}-----------------------------------------${BF_COLOR_RST}")
-    message(STATUS "run '${BF_COLOR_MAG}make info${BF_COLOR_RST}' for configuration details")
-    message(STATUS "${BF_COLOR_YLW}-----------------------------------------${BF_COLOR_RST}")
-    set(FIRST_TIME ON)
-endif()
