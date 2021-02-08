@@ -41,6 +41,8 @@ namespace loader
     namespace details
     {
         /// @brief the size of reserved #0 in the state_save_t
+        constexpr bsl::safe_uintmax PAD_SIZE{bsl::to_umax(0x6)};
+        /// @brief the size of reserved #0 in the state_save_t
         constexpr bsl::safe_uintmax RESERVED0_SIZE{bsl::to_umax(0xB)};
         /// @brief the size of reserved #1 in the state_save_t
         constexpr bsl::safe_uintmax RESERVED1_SIZE{bsl::to_umax(0x6)};
@@ -133,13 +135,13 @@ namespace loader
         global_descriptor_table_register_t gdtr;
 
         /// @brief added padding for alignment (0x0AA)
-        uint8_t pad1[0x6];
+        bsl::details::carray<bsl::uint8, details::PAD_SIZE.get()> pad1;
 
         /// @brief stores the value of the IDTR (0x0B0)
         interrupt_descriptor_table_register_t idtr;
 
         /// @brief added padding for alignment (0x0BA)
-        uint8_t pad2[0x6];
+        bsl::details::carray<bsl::uint8, details::PAD_SIZE.get()> pad2;
 
         /// @brief stores the value of the ES segment selector (0x0C0)
         bsl::uint16 es_selector;

@@ -27,16 +27,33 @@ option(HYPERVISOR_BUILD_VMMCTL "Turns on/off building the vmmctl" ON)
 if (NOT DEFINED HYPERVISOR_TARGET_ARCH)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         execute_process(
-            COMMAND bash "-c" "lscpu | grep 'Vendor ID' | awk '{ print $3 }'"
+            COMMAND ${CMAKE_CURRENT_LIST_DIR}/../../utils/linux/get_target_arch
             OUTPUT_VARIABLE HYPERVISOR_DEFAULT_TARGET_ARCH
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        execute_process(
+            COMMAND ${CMAKE_CURRENT_LIST_DIR}/../../utils/windows/get_target_arch
+            OUTPUT_VARIABLE HYPERVISOR_DEFAULT_TARGET_ARCH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
     else()
         message(FATAL_ERROR "Unsupported CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
     endif()
 else()
     set(HYPERVISOR_DEFAULT_TARGET_ARCH ${HYPERVISOR_TARGET_ARCH})
+endif()
+
+if (NOT DEFINED HYPERVISOR_CXX_LINKER)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        set(HYPERVISOR_DEFAULT_CXX_LINKER "ld.lld")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        set(HYPERVISOR_DEFAULT_CXX_LINKER "ld.lld")
+    else()
+        message(FATAL_ERROR "Unsupported CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
+    endif()
+else()
+    set(HYPERVISOR_DEFAULT_CXX_LINKER ${HYPERVISOR_CXX_LINKER})
 endif()
 
 bf_add_config(
@@ -50,7 +67,7 @@ bf_add_config(
 bf_add_config(
     CONFIG_NAME HYPERVISOR_CXX_LINKER
     CONFIG_TYPE STRING
-    DEFAULT_VAL "ld.lld"
+    DEFAULT_VAL ${HYPERVISOR_DEFAULT_CXX_LINKER}
     DESCRIPTION "Define the linker to use for cross-compiling. Does not effect native linking"
     SKIP_VALIDATION
 )

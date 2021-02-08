@@ -24,24 +24,20 @@
  * SOFTWARE.
  */
 
-    .code64
-    .intel_syntax noprefix
+#include <stdint.h>
+#include <stdio.h>
 
-    .globl  main
-    .type   main, @function
-main:
+uint32_t get_vendor(void);
 
-    push rbx
+int
+main(int argc, char *argv[])
+{
+    if (get_vendor() == 0x68747541) {
+        printf("AuthenticAMD");
+    }
+    else {
+        printf("GenuineIntel");
+    }
 
-    mov rdi, 0x100000
-loop:
-    xor rax, rax
-    xor rcx, rcx
-    cpuid
-
-    dec rdi
-    cmp rdi, 0
-    jne loop
-
-    pop rbx
-    ret
+    return 0;
+}
