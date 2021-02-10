@@ -37,4 +37,6 @@ intrinsic_str:
     str ax
 
     ret
+    int 3
+
     .size intrinsic_str, .-intrinsic_str

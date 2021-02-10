@@ -37,4 +37,6 @@ bf_vm_op_destroy_vm_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_vm_op_destroy_vm_impl, .-bf_vm_op_destroy_vm_impl

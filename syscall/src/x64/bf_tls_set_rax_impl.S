@@ -35,4 +35,6 @@ bf_tls_set_rax_impl:
 
     mov fs:[0x800], rdi
     ret
+    int 3
+
     .size bf_tls_set_rax_impl, .-bf_tls_set_rax_impl

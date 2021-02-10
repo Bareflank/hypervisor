@@ -36,4 +36,6 @@ intrinsic_sidt:
     sidt [rdi]
 
     ret
+    int 3
+
     .size intrinsic_sidt, .-intrinsic_sidt

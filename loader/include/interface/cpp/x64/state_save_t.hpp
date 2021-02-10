@@ -312,12 +312,19 @@ namespace loader
 
         /// @brief stores whether or not an NMI fired (0x318)
         bsl::uint64 nmi;
+
+        /// --------------------------------------------------------------------
+        /// Map GDT
+        /// --------------------------------------------------------------------
+
+        /// @brief stores whether or not the GDT needs to be mapped (0x320)
+        bsl::uint64 map_gdt;
     };
 
     namespace details
     {
         /// @brief defined the expected size of the state_save_t struct
-        constexpr bsl::safe_uintmax EXPECTED_STATE_SAVE_T_SIZE{bsl::to_umax(0x320)};
+        constexpr bsl::safe_uintmax EXPECTED_STATE_SAVE_T_SIZE{bsl::to_umax(0x328)};
 
         /// Check to make sure the state_save_t is the right size.
         static_assert(sizeof(state_save_t) == EXPECTED_STATE_SAVE_T_SIZE);

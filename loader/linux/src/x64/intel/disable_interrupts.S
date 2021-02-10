@@ -35,5 +35,6 @@ disable_interrupts:
 
     cli
     ret
+    int 3
 
     .size disable_interrupts, .-disable_interrupts

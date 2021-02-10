@@ -28,4 +28,4 @@
 #include <span_t.h>
 
 /** @brief stores ELF files associated with the extensions */
-struct span_t g_ext_elf_files[HYPERVISOR_MAX_EXTENSIONS] = {};
+struct span_t g_ext_elf_files[HYPERVISOR_MAX_EXTENSIONS] = {0};

@@ -56,7 +56,7 @@ alloc_and_copy_mk_elf_file_from_user(
     uint64_t const dst_size = mk_elf_file_from_user->size;
 
     uint8_t *const dst_addr = (uint8_t *)platform_alloc(dst_size);
-    if (NULL == dst_addr) {
+    if (((void *)0) == dst_addr) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_failed;
     }

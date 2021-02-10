@@ -35,4 +35,6 @@ bf_tls_set_r9_impl:
 
     mov fs:[0x840], rdi
     ret
+    int 3
+
     .size bf_tls_set_r9_impl, .-bf_tls_set_r9_impl

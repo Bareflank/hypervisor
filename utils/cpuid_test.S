@@ -45,3 +45,4 @@ loop:
 
     pop rbx
     ret
+    int 3

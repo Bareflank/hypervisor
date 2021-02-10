@@ -37,3 +37,4 @@ get_vendor:
 
     pop rbx
     ret
+    int 3

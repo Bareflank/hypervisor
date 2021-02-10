@@ -19,11 +19,46 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-build/
-.vscode/
-.DS_Store
-._.DS_Store
+# Prerequisites
+*.d
 
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Others
+.vscode/
+build/
+site/
+doxygen_output/
+
+# Linux Loader
 loader/**/*.symvers
 loader/**/*.order
 loader/**/*.ko
@@ -34,3 +69,6 @@ loader/**/*.mod.o
 loader/**/*.mod.cmd
 loader/**/*.o
 loader/**/*.o.cmd
+
+# Windows Loader
+loader/windows/x64/

@@ -39,10 +39,18 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
         x64
         x64/amd
     )
+    set_property(SOURCE main.cpp APPEND PROPERTY OBJECT_DEPENDS
+        ${CMAKE_CURRENT_LIST_DIR}/x64/common_arch_support.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/x64/amd/arch_support.hpp
+    )
 elseif(HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
     target_include_directories(example_default PRIVATE
         x64
         x64/intel
+    )
+    set_property(SOURCE main.cpp APPEND PROPERTY OBJECT_DEPENDS
+        ${CMAKE_CURRENT_LIST_DIR}/x64/common_arch_support.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/x64/intel/arch_support.hpp
     )
 else()
     message(FATAL_ERROR "Unsupported HYPERVISOR_TARGET_ARCH: ${HYPERVISOR_TARGET_ARCH}")

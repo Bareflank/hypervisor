@@ -123,7 +123,6 @@ promote:
     push rax
 
     retfq
-    int3     /** remove straight-line speculation, unreachable */
 
 gdt_and_cs_loaded:
 
@@ -286,5 +285,6 @@ nmis_complete:
 
     call enable_interrupts
     ret
+    int 3
 
     .size promote, 0x1000

@@ -34,14 +34,15 @@
 #include <start_vmm_args_t.h>
 #include <stop_vmm_args_t.h>
 
+/* clang-format off */
+
 /** @brief defines the name of the loader */
 #define LOADER_NAME "bareflank_loader"
 /** @brief defines the /dev name of the loader */
 #define LOADER_DEVICE_NAME "/dev/bareflank_loader"
 
 /** @brief defines IOCTL for starting a VM */
-#define LOADER_START_VMM                                                       \
-    _IOW(0U, LOADER_START_VMM_CMD, struct start_vmm_args_t *)
+#define LOADER_START_VMM _IOW(0U, LOADER_START_VMM_CMD, struct start_vmm_args_t *)
 /** @brief defines IOCTL for stopping a VM */
 #define LOADER_STOP_VMM _IOW(0U, LOADER_STOP_VMM_CMD, struct stop_vmm_args_t *)
 /** @brief defines IOCTL for dumping a VMs debug ring */

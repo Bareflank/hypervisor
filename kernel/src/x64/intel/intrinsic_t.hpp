@@ -38,6 +38,14 @@ namespace mk
     namespace details
     {
         /// <!-- description -->
+        ///   @brief Implements intrinsic_t::invlpg
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param val n/a
+        ///
+        extern "C" void intrinsic_invlpg(bsl::uint64 const val) noexcept;
+
+        /// <!-- description -->
         ///   @brief Implements intrinsic_t::cr3
         ///
         /// <!-- inputs/outputs -->
@@ -257,6 +265,31 @@ namespace mk
         ///
         [[maybe_unused]] constexpr auto operator=(intrinsic_t &&o) &noexcept
             -> intrinsic_t & = delete;
+
+        /// <!-- description -->
+        ///   @brief Invalidates TLB entries given a virtual address
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param val the virtual address to invalidate
+        ///
+        static constexpr void
+        invlpg(bsl::safe_uint64 const &val) noexcept
+        {
+            if (bsl::is_constant_evaluated()) {
+                return;
+            }
+
+            if (bsl::unlikely(!val)) {
+                bsl::error() << "invalid val: "    // --
+                             << bsl::hex(val)      // --
+                             << bsl::endl          // --
+                             << bsl::here();       // --
+
+                return;
+            }
+
+            details::intrinsic_invlpg(val.get());
+        }
 
         /// <!-- description -->
         ///   @brief Returns the value of CR3

@@ -19,6 +19,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/function/hypervisor_add_header_depends.cmake)
+
 add_executable(vmmctl)
 
 target_include_directories(vmmctl PRIVATE
@@ -31,13 +33,24 @@ target_include_directories(vmmctl SYSTEM PRIVATE
     ${CMAKE_BINARY_DIR}/include
 )
 
+list(APPEND HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/src/linux/ifmap.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/linux/ioctl.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/windows/ifmap.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/windows/ioctl.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/vmmctl_main.hpp
+)
+
 target_sources(vmmctl PRIVATE
     src/main.cpp
 )
+
+hypervisor_add_header_depends(src/main.cpp ${HEADERS})
 
 target_link_libraries(vmmctl PRIVATE
     bsl
     loader
     hypervisor
+    $<$<PLATFORM_ID:Windows>:SetupAPI>
     $<$<PLATFORM_ID:Windows>:libcmt.lib>
 )

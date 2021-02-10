@@ -71,16 +71,16 @@ get_gdt_descriptor_base(
     uint64_t idx64_0 = (((uint64_t)selector) >> ((uint64_t)3)) + ((uint64_t)0);
     uint64_t idx64_1 = (((uint64_t)selector) >> ((uint64_t)3)) + ((uint64_t)1);
 
-    if (NULL == gdtr) {
-        BFERROR("invalid argument: gdtr == NULL\n");
+    if (((void *)0) == gdtr) {
+        BFERROR("invalid argument: gdtr == ((void *)0)\n");
         return LOADER_FAILURE;
     }
 
     bytes64_0 = ((uint64_t)gdtr->limit) + ((uint64_t)1);
     bytes64_1 = ((uint64_t)gdtr->limit) + ((uint64_t)1) - sizeof(uint64_t);
 
-    if (NULL == base) {
-        BFERROR("invalid argument: base == NULL\n");
+    if (((void *)0) == base) {
+        BFERROR("invalid argument: base == ((void *)0)\n");
         return LOADER_FAILURE;
     }
 

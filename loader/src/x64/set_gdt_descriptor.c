@@ -106,8 +106,8 @@ set_gdt_descriptor(
     uint64_t limit64 = ((uint64_t)limit);
     uint64_t attrib64 = ((uint64_t)attrib);
 
-    if (NULL == gdtr) {
-        BFERROR("invalid argument: gdtr == NULL\n");
+    if (((void *)0) == gdtr) {
+        BFERROR("invalid argument: gdtr == ((void *)0)\n");
         return LOADER_FAILURE;
     }
 

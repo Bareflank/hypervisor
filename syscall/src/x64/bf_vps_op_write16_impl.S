@@ -39,4 +39,6 @@ bf_vps_op_write16_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_vps_op_write16_impl, .-bf_vps_op_write16_impl

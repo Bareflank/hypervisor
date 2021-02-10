@@ -35,4 +35,6 @@ bf_tls_set_r14_impl:
 
     mov fs:[0x868], rdi
     ret
+    int 3
+
     .size bf_tls_set_r14_impl, .-bf_tls_set_r14_impl

@@ -38,9 +38,11 @@ intrinsic_vmxoff:
 
     xor rax, rax
     ret
+    int 3
 
 intrinsic_vmxoff_failure:
     mov rax, 0x1
     ret
+    int 3
 
     .size intrinsic_vmxoff, .-intrinsic_vmxoff

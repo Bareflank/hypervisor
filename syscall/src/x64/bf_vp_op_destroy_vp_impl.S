@@ -37,4 +37,6 @@ bf_vp_op_destroy_vp_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_vp_op_destroy_vp_impl, .-bf_vp_op_destroy_vp_impl

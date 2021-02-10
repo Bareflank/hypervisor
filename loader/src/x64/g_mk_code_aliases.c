@@ -27,4 +27,4 @@
 #include <code_aliases_t.h>
 
 /** @brief stores the code aliases for the microkernel */
-struct code_aliases_t g_mk_code_aliases = {};
+struct code_aliases_t g_mk_code_aliases = {0};

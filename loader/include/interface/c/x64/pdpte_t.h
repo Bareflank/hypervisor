@@ -29,6 +29,10 @@
 
 #pragma pack(push, 1)
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4214)
+#endif
+
 #include <static_assert.h>
 #include <types.h>
 
@@ -71,6 +75,10 @@ struct pdpte_t
 
 /** @brief Check to make sure the pdpte_t is the right size. */
 STATIC_ASSERT(sizeof(struct pdpte_t) == 8, invalid_size);
+
+#ifdef _MSC_VER
+#pragma warning(default : 4214)
+#endif
 
 #pragma pack(pop)
 

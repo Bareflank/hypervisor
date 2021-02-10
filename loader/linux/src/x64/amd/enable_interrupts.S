@@ -35,5 +35,6 @@ enable_interrupts:
 
     stgi
     ret
+    int 3
 
     .size enable_interrupts, .-enable_interrupts

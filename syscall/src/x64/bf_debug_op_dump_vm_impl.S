@@ -37,4 +37,6 @@ bf_debug_op_dump_vm_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_debug_op_dump_vm_impl, .-bf_debug_op_dump_vm_impl

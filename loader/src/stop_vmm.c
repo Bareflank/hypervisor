@@ -66,8 +66,8 @@ stop_vmm(struct stop_vmm_args_t const *const ioctl_args)
     int64_t ret;
     struct stop_vmm_args_t args;
 
-    if (NULL == ioctl_args) {
-        BFERROR("ioctl_args was NULL\n");
+    if (((void *)0) == ioctl_args) {
+        BFERROR("ioctl_args was ((void *)0)\n");
         return LOADER_FAILURE;
     }
 

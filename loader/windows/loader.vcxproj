@@ -1,0 +1,229 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Device.c" />
+    <ClCompile Include="src\Driver.c" />
+    <ClCompile Include="src\platform.c" />
+    <ClCompile Include="src\Queue.c" />
+    <ClCompile Include="..\src\alloc_and_copy_ext_elf_files_from_user.c" />
+    <ClCompile Include="..\src\alloc_and_copy_mk_elf_file_from_user.c" />
+    <ClCompile Include="..\src\alloc_and_copy_mk_elf_segments.c" />
+    <ClCompile Include="..\src\alloc_mk_args.c" />
+    <ClCompile Include="..\src\alloc_mk_debug_ring.c" />
+    <ClCompile Include="..\src\alloc_mk_huge_pool.c" />
+    <ClCompile Include="..\src\alloc_mk_page_pool.c" />
+    <ClCompile Include="..\src\alloc_mk_stack.c" />
+    <ClCompile Include="..\src\dump_ext_elf_files.c" />
+    <ClCompile Include="..\src\dump_mk_args.c" />
+    <ClCompile Include="..\src\dump_mk_debug_ring.c" />
+    <ClCompile Include="..\src\dump_mk_elf_file.c" />
+    <ClCompile Include="..\src\dump_mk_elf_segments.c" />
+    <ClCompile Include="..\src\dump_mk_huge_pool.c" />
+    <ClCompile Include="..\src\dump_mk_page_pool.c" />
+    <ClCompile Include="..\src\dump_mk_stack.c" />
+    <ClCompile Include="..\src\dump_vmm.c" />
+    <ClCompile Include="..\src\free_ext_elf_files.c" />
+    <ClCompile Include="..\src\free_mk_args.c" />
+    <ClCompile Include="..\src\free_mk_debug_ring.c" />
+    <ClCompile Include="..\src\free_mk_elf_file.c" />
+    <ClCompile Include="..\src\free_mk_elf_segments.c" />
+    <ClCompile Include="..\src\free_mk_huge_pool.c" />
+    <ClCompile Include="..\src\free_mk_page_pool.c" />
+    <ClCompile Include="..\src\free_mk_stack.c" />
+    <ClCompile Include="..\src\g_ext_elf_files.c" />
+    <ClCompile Include="..\src\g_mk_args.c" />
+    <ClCompile Include="..\src\g_mk_debug_ring.c" />
+    <ClCompile Include="..\src\g_mk_elf_file.c" />
+    <ClCompile Include="..\src\g_mk_elf_segments.c" />
+    <ClCompile Include="..\src\g_mk_huge_pool.c" />
+    <ClCompile Include="..\src\g_mk_page_pool.c" />
+    <ClCompile Include="..\src\g_mk_stack.c" />
+    <ClCompile Include="..\src\loader_fini.c" />
+    <ClCompile Include="..\src\loader_init.c" />
+    <ClCompile Include="..\src\start_vmm_per_cpu.c" />
+    <ClCompile Include="..\src\start_vmm.c" />
+    <ClCompile Include="..\src\stop_and_free_the_vmm.c" />
+    <ClCompile Include="..\src\stop_vmm_per_cpu.c" />
+    <ClCompile Include="..\src\stop_vmm.c" />
+    <ClCompile Include="..\src\vmm_status.c" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Platform)'=='x64'">
+		<ClCompile Include="..\src\x64\alloc_and_copy_mk_code_aliases.c" />
+		<ClCompile Include="..\src\x64\alloc_and_copy_mk_state.c" />
+		<ClCompile Include="..\src\x64\alloc_and_copy_root_vp_state.c" />
+		<ClCompile Include="..\src\x64\alloc_mk_root_page_table.c" />
+		<ClCompile Include="..\src\x64\alloc_pdpt.c" />
+		<ClCompile Include="..\src\x64\alloc_pdt.c" />
+		<ClCompile Include="..\src\x64\alloc_pt.c" />
+		<ClCompile Include="..\src\x64\dump_mk_code_aliases.c" />
+		<ClCompile Include="..\src\x64\dump_mk_root_page_table.c" />
+		<ClCompile Include="..\src\x64\dump_mk_state.c" />
+		<ClCompile Include="..\src\x64\dump_root_vp_state.c" />
+		<ClCompile Include="..\src\x64\free_mk_code_aliases.c" />
+		<ClCompile Include="..\src\x64\free_mk_root_page_table.c" />
+		<ClCompile Include="..\src\x64\free_mk_state.c" />
+		<ClCompile Include="..\src\x64\free_pdpt.c" />
+		<ClCompile Include="..\src\x64\free_pdt.c" />
+		<ClCompile Include="..\src\x64\free_pml4t.c" />
+		<ClCompile Include="..\src\x64\free_root_vp_state.c" />
+		<ClCompile Include="..\src\x64\g_mk_code_aliases.c" />
+		<ClCompile Include="..\src\x64\g_mk_root_page_table.c" />
+		<ClCompile Include="..\src\x64\g_mk_state.c" />
+		<ClCompile Include="..\src\x64\g_root_vp_state.c" />
+		<ClCompile Include="..\src\x64\get_gdt_descriptor_attrib.c" />
+		<ClCompile Include="..\src\x64\get_gdt_descriptor_base.c" />
+		<ClCompile Include="..\src\x64\get_gdt_descriptor_limit.c" />
+		<ClCompile Include="..\src\x64\get_mk_huge_pool_addr.c" />
+		<ClCompile Include="..\src\x64\get_mk_page_pool_addr.c" />
+		<ClCompile Include="..\src\x64\map_4k_page_rw.c" />
+		<ClCompile Include="..\src\x64\map_4k_page_rx.c" />
+		<ClCompile Include="..\src\x64\map_4k_page.c" />
+		<ClCompile Include="..\src\x64\map_ext_elf_files.c" />
+		<ClCompile Include="..\src\x64\map_mk_args.c" />
+		<ClCompile Include="..\src\x64\map_mk_debug_ring.c" />
+		<ClCompile Include="..\src\x64\map_mk_code_aliases.c" />
+		<ClCompile Include="..\src\x64\map_mk_elf_file.c" />
+		<ClCompile Include="..\src\x64\map_mk_elf_segments.c" />
+		<ClCompile Include="..\src\x64\map_mk_huge_pool.c" />
+		<ClCompile Include="..\src\x64\map_mk_page_pool.c" />
+		<ClCompile Include="..\src\x64\map_mk_stack.c" />
+		<ClCompile Include="..\src\x64\map_mk_state.c" />
+		<ClCompile Include="..\src\x64\map_root_vp_state.c" />
+		<ClCompile Include="..\src\x64\send_command_report_off.c" />
+		<ClCompile Include="..\src\x64\send_command_report_on.c" />
+		<ClCompile Include="..\src\x64\send_command_stop.c" />
+		<ClCompile Include="..\src\x64\serial_init.c" />
+		<ClCompile Include="..\src\x64\serial_write.c" />
+		<ClCompile Include="..\src\x64\set_gdt_descriptor.c" />
+		<ClCompile Include="..\src\x64\set_idt_descriptor.c" />
+		<MASM Include="src\x64\demote.asm" />
+		<MASM Include="src\x64\esr_default.asm" />
+		<MASM Include="src\x64\esr_df.asm" />
+		<MASM Include="src\x64\esr_gpf.asm" />
+		<MASM Include="src\x64\esr_nmi.asm" />
+		<MASM Include="src\x64\esr_pf.asm" />
+		<MASM Include="src\x64\intrinsic_cpuid.asm" />
+		<MASM Include="src\x64\intrinsic_inb.asm" />
+		<MASM Include="src\x64\intrinsic_lcr4.asm" />
+		<MASM Include="src\x64\intrinsic_outb.asm" />
+		<MASM Include="src\x64\intrinsic_rdmsr.asm" />
+		<MASM Include="src\x64\intrinsic_scr0.asm" />
+		<MASM Include="src\x64\intrinsic_scr4.asm" />
+		<MASM Include="src\x64\intrinsic_scs.asm" />
+		<MASM Include="src\x64\intrinsic_sds.asm" />
+		<MASM Include="src\x64\intrinsic_ses.asm" />
+		<MASM Include="src\x64\intrinsic_sfs.asm" />
+		<MASM Include="src\x64\intrinsic_sgdt.asm" />
+		<MASM Include="src\x64\intrinsic_sgs.asm" />
+		<MASM Include="src\x64\intrinsic_sidt.asm" />
+		<MASM Include="src\x64\intrinsic_sldtr.asm" />
+		<MASM Include="src\x64\intrinsic_sss.asm" />
+		<MASM Include="src\x64\intrinsic_str.asm" />
+		<MASM Include="src\x64\intrinsic_wrmsr.asm" />
+		<MASM Include="src\x64\promote.asm" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Arch)'=='AuthenticAMD'">
+		<ClCompile Include="..\src\x64\amd\enable_hve.c" />
+		<ClCompile Include="..\src\x64\amd\disable_hve.c" />
+		<ClCompile Include="..\src\x64\amd\check_for_hve_support.c" />
+		<MASM Include="src\x64\amd\disable_interrupts.asm" />
+		<MASM Include="src\x64\amd\enable_interrupts.asm" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Arch)'=='GenuineIntel'">
+		<ClCompile Include="..\src\x64\intel\enable_hve.c" />
+		<ClCompile Include="..\src\x64\intel\disable_hve.c" />
+		<ClCompile Include="..\src\x64\intel\check_for_hve_support.c" />
+		<MASM Include="src\x64\intel\disable_interrupts.asm" />
+		<MASM Include="src\x64\intel\enable_interrupts.asm" />
+		<MASM Include="src\x64\intel\intrinsic_vmxoff.asm" />
+		<MASM Include="src\x64\intel\intrinsic_vmxon.asm" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Device.h" />
+    <ClInclude Include="include\Driver.h" />
+    <ClInclude Include="include\Public.h" />
+    <ClInclude Include="include\Queue.h" />
+    <ClInclude Include="include\Trace.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Inf Include="loader.inf" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{88A43C32-6BEF-45BF-81E3-109A654FE401}</ProjectGuid>
+    <TemplateGuid>{497e31cb-056b-4f31-abb8-447fd55ee5a5}</TemplateGuid>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <Configuration>Release</Configuration>
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+    <RootNamespace>loader</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>KMDF</DriverType>
+    <DriverTargetPlatform>Universal</DriverTargetPlatform>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>KMDF</DriverType>
+    <DriverTargetPlatform>Universal</DriverTargetPlatform>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Arch)'=='AuthenticAMD'">
+    <IncludePath>$(IncludePath);$(CMAKE_BINARY_DIR)\include;include;include\std;include\platform_interface\c;..\include;..\include\interface\c;..\include\interface\c\bfelf;include\x64;include\x64\amd;..\include\x64;..\include\x64\amd;..\include\interface\c\x64;..\include\interface\c\x64\amd</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Arch)'=='GenuineIntel'">
+    <IncludePath>$(IncludePath);$(CMAKE_BINARY_DIR)\include;include;include\std;include\platform_interface\c;..\include;..\include\interface\c;..\include\interface\c\bfelf;include\x64;include\x64\intel;..\include\x64;..\include\x64\intel;..\include\interface\c\x64;..\include\interface\c\x64\intel</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WppEnabled>true</WppEnabled>
+      <WppRecorderEnabled>true</WppRecorderEnabled>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\Trace.h</WppScanConfigurationData>
+      <WppKernelMode>true</WppKernelMode>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WppEnabled>true</WppEnabled>
+      <WppRecorderEnabled>true</WppRecorderEnabled>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\Trace.h</WppScanConfigurationData>
+      <WppKernelMode>true</WppKernelMode>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

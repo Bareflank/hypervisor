@@ -151,7 +151,7 @@ namespace vmmctl
         [[nodiscard]] constexpr auto
         start_vmm(loader::start_vmm_args_t const *const ctl_args) const noexcept -> bsl::exit_code
         {
-            IOCTL ctl{loader::DEVICE_NAME.data()};
+            IOCTL ctl{loader::DEVICE_NAME};
             if (ctl) {
                 return this->write(loader::START_VMM, ctl, ctl_args);
             }
@@ -171,7 +171,7 @@ namespace vmmctl
         [[nodiscard]] constexpr auto
         stop_vmm(loader::stop_vmm_args_t const *const ctl_args) const noexcept -> bsl::exit_code
         {
-            IOCTL ctl{loader::DEVICE_NAME.data()};
+            IOCTL ctl{loader::DEVICE_NAME};
             if (ctl) {
                 return this->write(loader::STOP_VMM, ctl, ctl_args);
             }
@@ -191,7 +191,7 @@ namespace vmmctl
         [[nodiscard]] constexpr auto
         dump_vmm(loader::dump_vmm_args_t *const ctl_args) const noexcept -> bsl::exit_code
         {
-            IOCTL ctl{loader::DEVICE_NAME.data()};
+            IOCTL ctl{loader::DEVICE_NAME};
             if (ctl) {
                 if (bsl::exit_success != this->read_write(loader::DUMP_VMM, ctl, ctl_args)) {
                     return bsl::exit_failure;

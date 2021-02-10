@@ -47,4 +47,6 @@ intrinsic_cpuid:
 
     pop rbx
     ret
+    int 3
+
     .size intrinsic_cpuid, .-intrinsic_cpuid

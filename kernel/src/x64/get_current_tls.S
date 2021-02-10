@@ -34,4 +34,6 @@ get_current_tls:
     mov rax, gs:[0x800]
 
     ret
+    int 3
+
     .size get_current_tls, .-get_current_tls

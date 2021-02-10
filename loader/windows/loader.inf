@@ -1,0 +1,79 @@
+;
+; loader.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318}
+Provider=%ManufacturerName%
+CatalogFile=loader.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+loader_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+loader.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%loader.DeviceDesc%=loader_Device, Root\loader
+
+[loader_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+loader.sys
+
+;-------------- Service installation
+[loader_Device.NT.Services]
+AddService = loader,%SPSVCINST_ASSOCSERVICE%, loader_Service_Inst
+
+; -------------- loader driver install sections
+[loader_Service_Inst]
+DisplayName    = %loader.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\loader.sys
+
+;
+;--- loader_Device Coinstaller installation ------
+;
+
+[loader_Device.NT.CoInstallers]
+AddReg=loader_Device_CoInstaller_AddReg
+CopyFiles=loader_Device_CoInstaller_CopyFiles
+
+[loader_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[loader_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[loader_Device.NT.Wdf]
+KmdfService =  loader, loader_wdfsect
+[loader_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="Assured Information Security, Inc."
+DiskName = "Bareflank Hypervisor Loader Disk"
+loader.DeviceDesc = "Bareflank Hypervisor Loader Device"
+loader.SVCDESC = "Bareflank Hypervisor Loader Disk Service"

@@ -41,4 +41,6 @@ bf_vps_op_read32_impl:
     mov [r10], edi
 
     ret
+    int 3
+
     .size bf_vps_op_read32_impl, .-bf_vps_op_read32_impl

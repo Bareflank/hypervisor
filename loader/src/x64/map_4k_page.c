@@ -30,6 +30,7 @@
 #include <bfelf_elf64_phdr_t.h>
 #include <constants.h>
 #include <debug.h>
+#include <map_4k_page.h>
 #include <pdpt_t.h>
 #include <pdpto.h>
 #include <pdt_t.h>
@@ -41,6 +42,46 @@
 #include <pte_t.h>
 #include <pto.h>
 #include <types.h>
+
+/**
+ * <!-- description -->
+ *   @brief The microkernel needs to be able to walk its own page tables and
+ *     to do that, it expects the that all of the page tables are mapped in
+ *     the direct map (allowing the microkernel to look up a virtual address
+ *     given a physical address). When the map function maps a virtual address,
+ *     it might be required to allocate new page tables. These newly allocated
+ *     page tables are recorded and mapped once the map function is complete
+ *     using this function.
+ *
+ * <!-- inputs/outputs -->
+ *   @param virt the virtual address of the page table
+ *   @param pml4t the root page table to place the resulting map
+ *   @return 0 on success, LOADER_FAILURE on failure.
+ */
+int64_t
+map_4k_page_table(void const *const virt, struct pml4t_t *const pml4t)
+{
+    uint64_t phys;
+    uint64_t const base_virt = HYPERVISOR_DIRECT_MAP_ADDR;
+    bfelf_elf64_word const rw = bfelf_pf_w | bfelf_pf_r;
+
+    if (((void *)0) == virt) {
+        return LOADER_SUCCESS;
+    }
+
+    phys = platform_virt_to_phys(virt);
+    if (((uint64_t)0) == phys) {
+        BFERROR("platform_virt_to_phys failed\n");
+        return LOADER_FAILURE;
+    }
+
+    if (map_4k_page(phys + base_virt, phys, rw, pml4t)) {
+        BFERROR("map_4k_page failed\n");
+        return LOADER_FAILURE;
+    }
+
+    return LOADER_SUCCESS;
+}
 
 /**
  * <!-- description -->
@@ -66,10 +107,14 @@ map_4k_page(
     uint32_t const flags,
     struct pml4t_t *const pml4t)
 {
-    struct pdpt_t *pdpt;
-    struct pdt_t *pdt;
-    struct pt_t *pt;
-    struct pte_t *pte;
+    struct pdpt_t *pdpt = ((void *)0);
+    struct pdt_t *pdt = ((void *)0);
+    struct pt_t *pt = ((void *)0);
+    struct pte_t *pte = ((void *)0);
+
+    void *pdpt_to_map = ((void *)0);
+    void *pdt_to_map = ((void *)0);
+    void *pt_to_map = ((void *)0);
 
     if ((virt & (HYPERVISOR_PAGE_SIZE - ((uint64_t)1))) != ((uint64_t)0)) {
         BFERROR("virt is not page aligned: 0x%" PRIx64 "\n", virt);
@@ -90,24 +135,26 @@ map_4k_page(
     }
 
     pdpt = pml4t->tables[pml4to(virt)];
-    if (NULL == pdpt) {
+    if (((void *)0) == pdpt) {
         pdpt = alloc_pdpt(pml4t, virt);
+        pdpt_to_map = pdpt;
     }
 
     pdt = pdpt->tables[pdpto(virt)];
-    if (NULL == pdt) {
+    if (((void *)0) == pdt) {
         pdt = alloc_pdt(pdpt, virt);
+        pdt_to_map = pdt;
     }
 
     pt = pdt->tables[pdto(virt)];
-    if (NULL == pt) {
+    if (((void *)0) == pt) {
         pt = alloc_pt(pdt, virt);
+        pt_to_map = pt;
     }
 
     pte = &pt->entires[pto(virt)];
     if (pte->p != ((uint64_t)0)) {
-        BFERROR("page already mapped: 0x%" PRIx64 "\n", virt);
-        return LOADER_FAILURE;
+        goto SUCCESS;
     }
 
     pte->phys = (phys >> HYPERVISOR_PAGE_SHIFT);
@@ -120,6 +167,23 @@ map_4k_page(
 
     if ((flags & bfelf_pf_x) == 0U) {
         pte->nx = ((uint64_t)1);
+    }
+
+SUCCESS:
+
+    if (map_4k_page_table(pdpt_to_map, pml4t)) {
+        BFERROR("map_4k_page_table failed\n");
+        return LOADER_FAILURE;
+    }
+
+    if (map_4k_page_table(pdt_to_map, pml4t)) {
+        BFERROR("map_4k_page_table failed\n");
+        return LOADER_FAILURE;
+    }
+
+    if (map_4k_page_table(pt_to_map, pml4t)) {
+        BFERROR("map_4k_page_table failed\n");
+        return LOADER_FAILURE;
     }
 
     return LOADER_SUCCESS;

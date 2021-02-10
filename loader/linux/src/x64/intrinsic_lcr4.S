@@ -36,4 +36,6 @@ intrinsic_lcr4:
     mov cr4, rdi
 
     ret
+    int 3
+
     .size intrinsic_lcr4, .-intrinsic_lcr4

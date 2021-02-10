@@ -27,6 +27,10 @@ if(HYPERVISOR_BUILD_VMMCTL)
             VERBATIM
         )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        add_custom_target(stop
+            COMMAND vmmctl/vmmctl stop
+            VERBATIM
+        )
     else()
         message(FATAL_ERROR "Unsupported CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
     endif()

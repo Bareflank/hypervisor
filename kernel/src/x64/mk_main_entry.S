@@ -76,7 +76,7 @@ mk_main_entry:
     mov [rax], rdx
 
     /**
-     * Note:
+     * NOTE:
      * - Set up the IDT with the actual ESRs. Before we can do this, we need
      *   to lock NMIs. Any NMIs that come in can only set the pending bit
      *   in the TLS until a run occurs. Once a run occurs, we can handle

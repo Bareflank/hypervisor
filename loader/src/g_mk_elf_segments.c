@@ -29,4 +29,4 @@
 #include <types.h>
 
 /** @brief stores ELF segments associated with the microkernel */
-struct elf_segment_t g_mk_elf_segments[HYPERVISOR_MAX_SEGMENTS] = {};
+struct elf_segment_t g_mk_elf_segments[HYPERVISOR_MAX_SEGMENTS] = {0};

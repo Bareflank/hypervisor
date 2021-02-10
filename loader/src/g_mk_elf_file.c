@@ -27,4 +27,4 @@
 #include <span_t.h>
 
 /** @brief stores ELF file associated with the microkernel */
-struct span_t g_mk_elf_file = {};
+struct span_t g_mk_elf_file = {0};

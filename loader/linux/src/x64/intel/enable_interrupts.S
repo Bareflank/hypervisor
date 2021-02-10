@@ -35,5 +35,6 @@ enable_interrupts:
 
     sti
     ret
+    int 3
 
     .size enable_interrupts, .-enable_interrupts

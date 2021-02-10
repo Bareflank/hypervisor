@@ -36,6 +36,8 @@ serial_in:
     in al, dx
 
     ret
+    int 3
+
     .size serial_in, .-serial_in
 
 
@@ -49,4 +51,6 @@ serial_out:
     out dx, al
 
     ret
+    int 3
+
     .size serial_out, .-serial_out

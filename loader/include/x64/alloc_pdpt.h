@@ -40,7 +40,7 @@
  * <!-- inputs/outputs -->
  *   @param pml4t the pml4t to add the newly allocated pdpt to
  *   @param virt the virtual address to get the PML4 offset from.
- *   @return a pointer to the newly allocated pdpt on success, NULL otherwise.
+ *   @return a pointer to the newly allocated pdpt on success, ((void *)0) otherwise.
  */
 struct pdpt_t *alloc_pdpt(struct pml4t_t *const pml4t, uint64_t const virt);
 

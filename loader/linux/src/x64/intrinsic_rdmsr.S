@@ -40,4 +40,6 @@ intrinsic_rdmsr:
     or rax, rdx
 
     ret
+    int 3
+
     .size intrinsic_rdmsr, .-intrinsic_rdmsr

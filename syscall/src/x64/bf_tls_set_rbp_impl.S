@@ -35,4 +35,6 @@ bf_tls_set_rbp_impl:
 
     mov fs:[0x820], rdi
     ret
+    int 3
+
     .size bf_tls_set_rbp_impl, .-bf_tls_set_rbp_impl

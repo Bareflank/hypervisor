@@ -111,7 +111,7 @@ BRIEF_MEMBER_DESC      = YES
 # If the REPEAT_BRIEF tag is set to YES, doxygen will prepend the brief
 # description of a member or function before the detailed description
 #
-# Note: If both HIDE_UNDOC_MEMBERS and BRIEF_MEMBER_DESC are set to NO, the
+# NOTE: If both HIDE_UNDOC_MEMBERS and BRIEF_MEMBER_DESC are set to NO, the
 # brief descriptions will be completely suppressed.
 # The default value is: YES.
 
@@ -308,7 +308,7 @@ OPTIMIZE_OUTPUT_SLICE  = NO
 # .inc files as Fortran files (default is PHP), and .f files as C (default is
 # Fortran), use: inc=Fortran f=C.
 #
-# Note: For files without extension you can use no_extension as a placeholder.
+# NOTE: For files without extension you can use no_extension as a placeholder.
 #
 # Note that for custom extensions you also need to set FILE_PATTERNS otherwise
 # the files are not read by doxygen.
@@ -328,7 +328,7 @@ MARKDOWN_SUPPORT       = YES
 # When the TOC_INCLUDE_HEADINGS tag is set to a non-zero value, all headings up
 # to that level are automatically included in the table of contents, even if
 # they do not have an id attribute.
-# Note: This feature currently applies only to Markdown headings.
+# NOTE: This feature currently applies only to Markdown headings.
 # Minimum value: 0, maximum value: 99, default value: 5.
 # This tag requires that the tag MARKDOWN_SUPPORT is set to YES.
 
@@ -453,7 +453,7 @@ LOOKUP_CACHE_SIZE      = 0
 # documentation are documented, even if no documentation was available. Private
 # class members and static file members will be hidden unless the
 # EXTRACT_PRIVATE respectively EXTRACT_STATIC tags are set to YES.
-# Note: This will also disable the warnings about undocumented members that are
+# NOTE: This will also disable the warnings about undocumented members that are
 # normally produced when WARNINGS is set to YES.
 # The default value is: NO.
 
@@ -606,9 +606,9 @@ SORT_BRIEF_DOCS        = NO
 # (brief and detailed) documentation of class members so that constructors and
 # destructors are listed first. If set to NO the constructors will appear in the
 # respective orders defined by SORT_BRIEF_DOCS and SORT_MEMBER_DOCS.
-# Note: If SORT_BRIEF_DOCS is set to NO this option is ignored for sorting brief
+# NOTE: If SORT_BRIEF_DOCS is set to NO this option is ignored for sorting brief
 # member documentation.
-# Note: If SORT_MEMBER_DOCS is set to NO this option is ignored for sorting
+# NOTE: If SORT_MEMBER_DOCS is set to NO this option is ignored for sorting
 # detailed member documentation.
 # The default value is: NO.
 
@@ -624,8 +624,8 @@ SORT_GROUP_NAMES       = NO
 # If the SORT_BY_SCOPE_NAME tag is set to YES, the class list will be sorted by
 # fully-qualified names, including namespaces. If set to NO, the class list will
 # be sorted only by class name, not including the namespace part.
-# Note: This option is not very useful if HIDE_SCOPE_NAMES is set to YES.
-# Note: This option applies only to the class list, not to the alphabetical
+# NOTE: This option is not very useful if HIDE_SCOPE_NAMES is set to YES.
+# NOTE: This option applies only to the class list, not to the alphabetical
 # list.
 # The default value is: NO.
 
@@ -811,7 +811,7 @@ WARN_LOGFILE           =
 # documented source files. You may enter file names like myfile.cpp or
 # directories like /usr/src/myproject. Separate the files or directories with
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
-# Note: If this tag is empty the current directory is searched.
+# NOTE: If this tag is empty the current directory is searched.
 
 INPUT                  = kernel loader runtime syscall vmmctl
 
@@ -897,7 +897,7 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = include/bsl/details
+EXCLUDE                = loader/windows
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -1020,7 +1020,7 @@ USE_MDFILE_AS_MAINPAGE =
 # If the SOURCE_BROWSER tag is set to YES then a list of source files will be
 # generated. Documented entities will be cross-referenced with these sources.
 #
-# Note: To get rid of all source code in the generated output, make sure that
+# NOTE: To get rid of all source code in the generated output, make sure that
 # also VERBATIM_HEADERS is set to NO.
 # The default value is: NO.
 
@@ -1162,7 +1162,7 @@ HTML_FILE_EXTENSION    = .html
 # and then modify the file new_header.html. See also section "Doxygen usage"
 # for information on how to generate the default header that doxygen normally
 # uses.
-# Note: The header is subject to change so you typically have to regenerate the
+# NOTE: The header is subject to change so you typically have to regenerate the
 # default header when upgrading to a newer version of doxygen. For a description
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
@@ -1184,7 +1184,7 @@ HTML_FOOTER            =
 # the HTML output. If left blank doxygen will generate a default style sheet.
 # See also section "Doxygen usage" for information on how to generate the style
 # sheet that doxygen normally uses.
-# Note: It is recommended to use HTML_EXTRA_STYLESHEET instead of this tag, as
+# NOTE: It is recommended to use HTML_EXTRA_STYLESHEET instead of this tag, as
 # it is more robust and this tag (HTML_STYLESHEET) will in the future become
 # obsolete.
 # This tag requires that the tag GENERATE_HTML is set to YES.
@@ -1197,7 +1197,7 @@ HTML_STYLESHEET        =
 # This is preferred over using HTML_STYLESHEET since it does not replace the
 # standard style sheet and is therefore more robust against future updates.
 # Doxygen will copy the style sheet files to the output directory.
-# Note: The order of the extra style sheet files is of importance (e.g. the last
+# NOTE: The order of the extra style sheet files is of importance (e.g. the last
 # style sheet in the list overrules the setting of the previous ones in the
 # list). For an example see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
@@ -1711,7 +1711,7 @@ LATEX_CMD_NAME         =
 
 # The MAKEINDEX_CMD_NAME tag can be used to specify the command name to generate
 # index for LaTeX.
-# Note: This tag is used in the Makefile / make.bat.
+# NOTE: This tag is used in the Makefile / make.bat.
 # See also: LATEX_MAKEINDEX_CMD for the part in the generated output file
 # (.tex).
 # The default file is: makeindex.
@@ -1722,7 +1722,7 @@ MAKEINDEX_CMD_NAME     = makeindex
 # The LATEX_MAKEINDEX_CMD tag can be used to specify the command name to
 # generate index for LaTeX. In case there is no backslash (\) as first character
 # it will be automatically added in the LaTeX code.
-# Note: This tag is used in the generated output file (.tex).
+# NOTE: This tag is used in the generated output file (.tex).
 # See also: MAKEINDEX_CMD_NAME for the part in the Makefile / make.bat.
 # The default value is: makeindex.
 # This tag requires that the tag GENERATE_LATEX is set to YES.
@@ -1764,7 +1764,7 @@ EXTRA_PACKAGES         =
 # section "Doxygen usage" for information on how to let doxygen write the
 # default header to a separate file.
 #
-# Note: Only use a user-defined header if you know what you are doing! The
+# NOTE: Only use a user-defined header if you know what you are doing! The
 # following commands have a special meaning inside the header: $title,
 # $datetime, $date, $doxygenversion, $projectname, $projectnumber,
 # $projectbrief, $projectlogo. Doxygen will replace $title with the empty
@@ -1780,7 +1780,7 @@ LATEX_HEADER           =
 # LATEX_HEADER for more information on how to generate a default footer and what
 # special commands can be used inside the footer.
 #
-# Note: Only use a user-defined footer if you know what you are doing!
+# NOTE: Only use a user-defined footer if you know what you are doing!
 # This tag requires that the tag GENERATE_LATEX is set to YES.
 
 LATEX_FOOTER           =
@@ -1789,7 +1789,7 @@ LATEX_FOOTER           =
 # LaTeX style sheets that are included after the standard style sheets created
 # by doxygen. Using this option one can overrule certain style aspects. Doxygen
 # will copy the style sheet files to the output directory.
-# Note: The order of the extra style sheet files is of importance (e.g. the last
+# NOTE: The order of the extra style sheet files is of importance (e.g. the last
 # style sheet in the list overrules the setting of the previous ones in the
 # list).
 # This tag requires that the tag GENERATE_LATEX is set to YES.
@@ -1904,7 +1904,7 @@ COMPACT_RTF            = NO
 # browsing using Word or some other Word compatible readers that support those
 # fields.
 #
-# Note: WordPad (write) and others do not support links.
+# NOTE: WordPad (write) and others do not support links.
 # The default value is: NO.
 # This tag requires that the tag GENERATE_RTF is set to YES.
 
@@ -2183,7 +2183,7 @@ SKIP_FUNCTION_MACROS   = YES
 # where loc1 and loc2 can be relative or absolute paths or URLs. See the
 # section "Linking to external documentation" for more information about the use
 # of tag files.
-# Note: Each tag file must have a unique name (where the name does NOT include
+# NOTE: Each tag file must have a unique name (where the name does NOT include
 # the path). If a tag file is not located in the directory in which doxygen is
 # run, you must also specify the path to the tagfile here.
 
@@ -2400,7 +2400,7 @@ DIRECTORY_GRAPH        = YES
 # generated by dot. For an explanation of the image formats see the section
 # output formats in the documentation of the dot tool (Graphviz (see:
 # http://www.graphviz.org/)).
-# Note: If you choose svg you need to set HTML_FILE_EXTENSION to xhtml in order
+# NOTE: If you choose svg you need to set HTML_FILE_EXTENSION to xhtml in order
 # to make the SVG files visible in IE 9+ (other browsers do not have this
 # requirement).
 # Possible values are: png, jpg, gif, svg, png:gd, png:gd:gd, png:cairo,
@@ -2416,7 +2416,7 @@ DOT_IMAGE_FORMAT       = png
 #
 # Note that this requires a modern browser other than Internet Explorer. Tested
 # and working are Firefox, Chrome, Safari, and Opera.
-# Note: For IE 9+ you need to set HTML_FILE_EXTENSION to xhtml in order to make
+# NOTE: For IE 9+ you need to set HTML_FILE_EXTENSION to xhtml in order to make
 # the SVG files visible. Older versions of IE do not have SVG support.
 # The default value is: NO.
 # This tag requires that the tag HAVE_DOT is set to YES.

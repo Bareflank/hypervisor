@@ -27,11 +27,27 @@ if(HYPERVISOR_BUILD_LOADER)
             VERBATIM
         )
         add_custom_target(driver_load
-            COMMAND ${CMAKE_COMMAND} --build . --target loader_build
+            COMMAND ${CMAKE_COMMAND} --build . --target driver_build
             COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux sudo make load CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
             VERBATIM
         )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        add_custom_target(loader_load
+            COMMAND ${CMAKE_COMMAND} --build . --target loader_build
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows certmgr /add x64/Debug/loader.cer /s /r localMachine root
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows certmgr /add x64/Debug/loader.cer /s /r localMachine trustedpublisher
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows devcon remove ROOT\\loader
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows devcon install x64/Debug/loader/loader.inf ROOT\\loader
+            VERBATIM
+        )
+        add_custom_target(driver_load
+            COMMAND ${CMAKE_COMMAND} --build . --target driver_build
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows certmgr /add x64/Debug/loader.cer /s /r localMachine root
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows certmgr /add x64/Debug/loader.cer /s /r localMachine trustedpublisher
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows devcon remove ROOT\\loader
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows devcon install x64/Debug/loader/loader.inf ROOT\\loader
+            VERBATIM
+        )
     else()
         message(FATAL_ERROR "Unsupported CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
     endif()

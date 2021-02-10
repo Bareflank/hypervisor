@@ -42,7 +42,7 @@
  * <!-- inputs/outputs -->
  *   @param pdt the pdt to add the newly allocated pt to
  *   @param virt the virtual address to get the PDT offset from.
- *   @return a pointer to the newly allocated pt on success, NULL otherwise.
+ *   @return a pointer to the newly allocated pt on success, ((void *)0) otherwise.
  */
 struct pt_t *
 alloc_pt(struct pdt_t *const pdt, uint64_t const virt)
@@ -54,11 +54,11 @@ alloc_pt(struct pdt_t *const pdt, uint64_t const virt)
     pdte = &pdt->entires[pdto(virt)];
     if (pdte->p != ((uint64_t)0)) {
         BFERROR("pt already present: 0x%" PRIx64 "\n", virt);
-        return NULL;
+        return ((void *)0);
     }
 
     pt = (struct pt_t *)platform_alloc(sizeof(struct pt_t));
-    if (NULL == pt) {
+    if (((void *)0) == pt) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_pt_failed;
     }
@@ -81,5 +81,5 @@ platform_virt_to_phys_pt_failed:
     platform_free(pt, sizeof(struct pt_t));
 platform_alloc_pt_failed:
 
-    return NULL;
+    return ((void *)0);
 }

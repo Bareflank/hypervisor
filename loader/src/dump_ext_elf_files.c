@@ -43,7 +43,7 @@ dump_ext_elf_files(struct span_t *const files)
     uint64_t idx;
 
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
-        if (NULL != files[idx].addr) {
+        if (((void *)0) != files[idx].addr) {
             BFINFO("ext elf file #%u:\n", (uint32_t)idx);
             BFINFO(" - addr: 0x%016" PRIx64 "\n", (uint64_t)files[idx].addr);
             BFINFO(" - size: 0x%016" PRIx64 "\n", files[idx].size);

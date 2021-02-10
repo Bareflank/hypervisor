@@ -38,6 +38,8 @@ dispatch_esr_entry:
     jne return_to_current_fast_fail
 
     ret
+    int 3
+
     .size dispatch_esr_entry, .-dispatch_esr_entry
 
     /**************************************************************************/
@@ -120,6 +122,8 @@ dispatch_esr_entry_0_skip_swapgs_prolog:
 dispatch_esr_entry_0_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_0, .-dispatch_esr_entry_0
 
 
@@ -200,6 +204,8 @@ dispatch_esr_entry_1_skip_swapgs_prolog:
 dispatch_esr_entry_1_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_1, .-dispatch_esr_entry_1
 
 
@@ -257,6 +263,8 @@ dispatch_esr_entry_2_skip_swapgs_prolog:
 dispatch_esr_entry_2_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_2, .-dispatch_esr_entry_2
 
 
@@ -337,6 +345,8 @@ dispatch_esr_entry_3_skip_swapgs_prolog:
 dispatch_esr_entry_3_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_3, .-dispatch_esr_entry_3
 
 
@@ -417,6 +427,8 @@ dispatch_esr_entry_4_skip_swapgs_prolog:
 dispatch_esr_entry_4_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_4, .-dispatch_esr_entry_4
 
 
@@ -497,6 +509,8 @@ dispatch_esr_entry_5_skip_swapgs_prolog:
 dispatch_esr_entry_5_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_5, .-dispatch_esr_entry_5
 
 
@@ -577,6 +591,8 @@ dispatch_esr_entry_6_skip_swapgs_prolog:
 dispatch_esr_entry_6_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_6, .-dispatch_esr_entry_6
 
 
@@ -657,6 +673,8 @@ dispatch_esr_entry_7_skip_swapgs_prolog:
 dispatch_esr_entry_7_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_7, .-dispatch_esr_entry_7
 
 
@@ -739,6 +757,8 @@ dispatch_esr_entry_8_skip_swapgs_prolog:
 dispatch_esr_entry_8_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_8, .-dispatch_esr_entry_8
 
 
@@ -821,6 +841,8 @@ dispatch_esr_entry_10_skip_swapgs_prolog:
 dispatch_esr_entry_10_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_10, .-dispatch_esr_entry_10
 
 
@@ -903,6 +925,8 @@ dispatch_esr_entry_11_skip_swapgs_prolog:
 dispatch_esr_entry_11_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_11, .-dispatch_esr_entry_11
 
 
@@ -985,6 +1009,8 @@ dispatch_esr_entry_12_skip_swapgs_prolog:
 dispatch_esr_entry_12_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_12, .-dispatch_esr_entry_12
 
 
@@ -1073,6 +1099,7 @@ dispatch_esr_entry_13_ret:
 dispatch_esr_entry_13_skip_swapgs_epilog:
 
     iretq
+    int 3
 
 dispatch_esr_entry_13_fix_rip:
     mov [rsp + 0x08], rax
@@ -1163,6 +1190,8 @@ dispatch_esr_entry_14_skip_swapgs_prolog:
 dispatch_esr_entry_14_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_14, .-dispatch_esr_entry_14
 
 
@@ -1243,6 +1272,8 @@ dispatch_esr_entry_16_skip_swapgs_prolog:
 dispatch_esr_entry_16_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_16, .-dispatch_esr_entry_16
 
 
@@ -1325,6 +1356,8 @@ dispatch_esr_entry_17_skip_swapgs_prolog:
 dispatch_esr_entry_17_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_17, .-dispatch_esr_entry_17
 
 
@@ -1405,6 +1438,8 @@ dispatch_esr_entry_18_skip_swapgs_prolog:
 dispatch_esr_entry_18_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_18, .-dispatch_esr_entry_18
 
 
@@ -1485,4 +1520,6 @@ dispatch_esr_entry_19_skip_swapgs_prolog:
 dispatch_esr_entry_19_skip_swapgs_epilog:
 
     iretq
+    int 3
+
     .size dispatch_esr_entry_19, .-dispatch_esr_entry_19

@@ -35,4 +35,6 @@ bf_tls_rcx_impl:
 
     mov rax, fs:[0x810]
     ret
+    int 3
+
     .size bf_tls_rcx_impl, .-bf_tls_rcx_impl

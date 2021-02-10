@@ -35,4 +35,6 @@ bf_tls_set_rsi_impl:
 
     mov fs:[0x828], rdi
     ret
+    int 3
+
     .size bf_tls_set_rsi_impl, .-bf_tls_set_rsi_impl

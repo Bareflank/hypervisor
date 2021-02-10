@@ -224,6 +224,9 @@ demote:
     /* GDT                                                                    */
     /**************************************************************************/
 
+    mov rax, 0x1
+    mov [r15 + 0x320], rax
+
     sgdt [r15 + 0x0A0]
     lgdt [r14 + 0x0A0]
 
@@ -277,7 +280,6 @@ demote:
     push rax
 
     retfq
-    int3     /** remove straight-line speculation, unreachable */
 
 gdt_and_cs_loaded:
 
@@ -299,13 +301,15 @@ gdt_and_cs_loaded:
     /* Call Microkernel                                                       */
     /**************************************************************************/
 
+    mov rdi, r13
     push [r14 + 0x078]
     ret
-    int3     /** remove straight-line speculation, unreachable */
+    int 3
 
 demotion_success:
 
     call enable_interrupts
     ret
+    int 3
 
     .size demote, 0x1000

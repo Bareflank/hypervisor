@@ -29,7 +29,4 @@
 #include <types.h>
 
 /** @brief stores the huge pool used by the microkernel */
-struct mutable_span_t g_mk_huge_pool = {};
-
-/** @brief stores the virtual address of the MK's huge pool */
-uint64_t g_mk_huge_pool_base_virt = HYPERVISOR_DIRECT_MAP_ADDR;
+struct mutable_span_t g_mk_huge_pool = {0};

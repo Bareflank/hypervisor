@@ -71,4 +71,6 @@ set_esr:
     mov [rdi + 8], rcx
 
     ret
+    int 3
+
     .size set_esr, .-set_esr

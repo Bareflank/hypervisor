@@ -36,4 +36,6 @@ intrinsic_scr0:
     mov rax, cr0
 
     ret
+    int 3
+
     .size intrinsic_scr0, .-intrinsic_scr0

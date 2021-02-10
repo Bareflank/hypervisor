@@ -39,7 +39,7 @@
 #include <vps_pool_t.hpp>
 #include <vps_t.hpp>
 
-/// Note:
+/// NOTE:
 /// - Do not include this file. The only files that should include this
 ///   one are main entry points (like _start, a trampoline, etc...).
 ///   Instead, define a template and get these types through a template

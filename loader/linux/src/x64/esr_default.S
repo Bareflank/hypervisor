@@ -52,4 +52,6 @@ esr_default:
     hlt
 
     ret
+    int 3
+
     .size esr_default, 0x1000

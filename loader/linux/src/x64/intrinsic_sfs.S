@@ -37,4 +37,6 @@ intrinsic_sfs:
     mov ax, fs
 
     ret
+    int 3
+
     .size intrinsic_sfs, .-intrinsic_sfs

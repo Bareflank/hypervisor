@@ -53,4 +53,6 @@ esr_nmi:
     pop rax
 
     iretq
+    int 3
+
     .size esr_nmi, 0x1000

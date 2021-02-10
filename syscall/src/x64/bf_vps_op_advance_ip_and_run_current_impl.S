@@ -37,4 +37,6 @@ bf_vps_op_advance_ip_and_run_current_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_vps_op_advance_ip_and_run_current_impl, .-bf_vps_op_advance_ip_and_run_current_impl

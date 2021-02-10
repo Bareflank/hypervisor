@@ -55,7 +55,7 @@ alloc_and_copy_mk_elf_segment(
     uint64_t const dst_size = phdr->p_memsz;
 
     uint8_t *const dst_addr = (uint8_t *)platform_alloc(dst_size);
-    if (NULL == dst_addr) {
+    if (((void *)0) == dst_addr) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_failed;
     }
@@ -107,8 +107,8 @@ alloc_and_copy_mk_elf_segments(
     int64_t ret = LOADER_SUCCESS;
     uint64_t idx = ((uint64_t)0);
     bfelf_elf64_half phdr_idx;
-    struct bfelf_elf64_ehdr_t const *ehdr = NULL;
-    struct bfelf_elf64_phdr_t const *phdrtab = NULL;
+    struct bfelf_elf64_ehdr_t const *ehdr = ((void *)0);
+    struct bfelf_elf64_phdr_t const *phdrtab = ((void *)0);
 
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_SEGMENTS; ++idx) {
         struct elf_segment_t *const segment = &mk_elf_segments[idx];

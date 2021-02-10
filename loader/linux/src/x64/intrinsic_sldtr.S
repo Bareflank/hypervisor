@@ -37,4 +37,6 @@ intrinsic_sldtr:
     sldt ax
 
     ret
+    int 3
+
     .size intrinsic_sldtr, .-intrinsic_sldtr

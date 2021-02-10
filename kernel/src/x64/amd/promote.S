@@ -114,5 +114,6 @@ set_up_target:
     mov rax, [r15 + 0x2E8]
     mov [rsp], rax
     ret
+    int 3
 
     .size promote, .-promote

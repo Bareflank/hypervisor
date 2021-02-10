@@ -28,12 +28,24 @@ if(HYPERVISOR_BUILD_LOADER)
             VERBATIM
         )
         add_custom_target(driver_clean
-            COMMAND ${CMAKE_COMMAND} --build . --target loader_unload
+            COMMAND ${CMAKE_COMMAND} --build . --target driver_unload
             COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux make clean CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
             COMMAND sync
             VERBATIM
         )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        add_custom_target(loader_clean
+            COMMAND ${CMAKE_COMMAND} --build . --target loader_unload
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows/x64
+            COMMAND sync
+            VERBATIM
+        )
+        add_custom_target(driver_clean
+            COMMAND ${CMAKE_COMMAND} --build . --target driver_unload
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows/x64
+            COMMAND sync
+            VERBATIM
+        )
     else()
         message(FATAL_ERROR "Unsupported CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
     endif()

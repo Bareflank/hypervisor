@@ -39,4 +39,6 @@ bf_vps_op_create_vps_impl:
     mov [rsi], di
 
     ret
+    int 3
+
     .size bf_vps_op_create_vps_impl, .-bf_vps_op_create_vps_impl

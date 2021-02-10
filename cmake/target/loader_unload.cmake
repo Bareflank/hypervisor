@@ -32,6 +32,14 @@ if(HYPERVISOR_BUILD_LOADER)
             VERBATIM
         )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        add_custom_target(loader_unload
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows devcon remove ROOT\\loader
+            VERBATIM
+        )
+        add_custom_target(driver_unload
+            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows devcon remove ROOT\\loader
+            VERBATIM
+        )
     else()
         message(FATAL_ERROR "Unsupported CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
     endif()
