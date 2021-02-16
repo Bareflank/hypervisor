@@ -1,7 +1,6 @@
 ![Bareflank](https://github.com/Bareflank/hypervisor/raw/master/.github/images/hypervisor_logo.png)
 
 ## Description
-
 **Warning:** The master branch is under heavy development as we work to complete Bareflank 3.0. For now, you might want to consider one of our offical releases until Bareflank 3.0 is complete .
 
 The Bareflank Hypervisor is an open source hypervisor Software Development Toolkit (SDK), led by Assured Information Security, Inc. (AIS), that provides the tools needed to rapidly prototype and create your own hypervisor.
@@ -18,7 +17,6 @@ Instead, Bareflank uses a layered, modular approach, that lets you pick just how
 To support Bareflank's ecosystem, the hypervisor SDK is licensed under MIT, specifically enabling users of the project to both contribute back to the project, but also create proprietary, closed source products that use the Bareflank SDK as their foundation. Feel free to use Bareflank to create your commercial products. All we ask is that if you find a bug or add a feature to the SDK that you consider contributing your changes back to the project.
 
 ## **Quick start**
-
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/bareflank/hypervisor?color=brightgreen)
 
 Get the latest version of the Bareflank Hypervisor SDK from GitHub:
@@ -48,11 +46,9 @@ Check out our [Can You Hack It?®](https://www.canyouhackit.com) challenge and t
 </p>
 
 ## Demo
-
 Check out the latest demo for how to compile and use the Bareflank Hypervisor on Ubuntu 20.04:
 
 ## Additional Videos
-
 Check out our [YouTube Channel](https://www.youtube.com/channel/UCH-7Pw96K5V1RHAPn5-cmYA) for more great content as well as
 the following videos at [CppCon](https://www.youtube.com/user/CppCon) below:
 
@@ -82,7 +78,6 @@ make
 ```
 
 ## Usage Instructions
-
 To use the hypervisor, run the following commands:
 
 ```
@@ -104,22 +99,18 @@ make driver_unload
 ```
 
 ## **Resources**
-
 [![Join the chat](https://img.shields.io/badge/chat-on%20Slack-brightgreen.svg)](https://bareflank.herokuapp.com/)
 
 The Bareflank Support Library provides a ton of useful resources to learn how to use the library including:
-
 -   **Documentation**: <https://bareflank.github.io/hypervisor/>
 -   **Examples**: <https://github.com/Bareflank/hypervisor/tree/master/example>
 -   **Unit Tests**: <https://github.com/Bareflank/hypervisor/tree/master/test>
 
 If you have any questions, bugs, or feature requests, please feel free to ask on any of the following:
-
 -   **Slack**: <https://bareflank.herokuapp.com/>
 -   **Issue Tracker**: <https://github.com/Bareflank/hypervisor/issues>
 
-And as always, we are always looking for more help:
-
+If you would like to help:
 -   **Pull Requests**: <https://github.com/Bareflank/hypervisor/pulls>
 -   **Contributing Guidelines**: <https://github.com/Bareflank/hypervisor/blob/master/contributing.md>
 
@@ -128,7 +119,6 @@ And as always, we are always looking for more help:
 [![codecov](https://codecov.io/gh/Bareflank/hypervisor/branch/master/graph/badge.svg)](https://codecov.io/gh/Bareflank/hypervisor)
 
 The Bareflank hypervisor leverages the following tools to ensure the highest possible code quality. Each pull request undergoes the following rigorous testing and review:
-
 -   **Static Analysis:** [Clang Tidy](https://github.com/Bareflank/llvm-project)
 -   **Dynamic Analysis:** Google's ASAN and UBSAN
 -   **Code Coverage:** Code Coverage with CodeCov
@@ -137,7 +127,6 @@ The Bareflank hypervisor leverages the following tools to ensure the highest pos
 -   **Documentation**: Doxygen
 
 ## Serial Instructions
-
 On Windows, serial output might not work, and on some systems (e.g. Intel NUC),
 the default Windows serial device may prevent Bareflank from starting at all.
 If this is the case, disable the default serial device using the following:
@@ -146,7 +135,6 @@ reg add "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\Serial" /f /v "sta
 ```
 
 ## Cygwin SSH Instructions
-
 You might find it useful to setup SSH if you are using Cygwin. The instructions
 for setting up SSH on Cygwin are as follows:
 
@@ -162,13 +150,11 @@ netsh advfirewall firewall add rule name='SSH Port' dir=in action=allow protocol
 ```
 
 ## License
-
 The Bareflank Hypervisor is licensed under the MIT License.
 
 ## Related
-
 If you’re interested in Bareflank, you might also be interested in the
-following hypervisor projects:
+following projects:
 
 **MoRE:** <br>
 https://github.com/ainfosec/MoRE
