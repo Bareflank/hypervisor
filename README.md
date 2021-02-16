@@ -134,21 +134,6 @@ If this is the case, disable the default serial device using the following:
 reg add "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\Serial" /f /v "start" /t REG_DWORD /d "4"
 ```
 
-## Cygwin SSH Instructions
-You might find it useful to setup SSH if you are using Cygwin. The instructions
-for setting up SSH on Cygwin are as follows:
-
-```
-setup-x86_64.exe -q -P getent,cygrunsrv,openssl,openssh
-
-ssh-host-config -y
-<password>
-<password>
-
-net start sshd
-netsh advfirewall firewall add rule name='SSH Port' dir=in action=allow protocol=TCP localport=22
-```
-
 ## License
 The Bareflank Hypervisor is licensed under the MIT License.
 
