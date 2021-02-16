@@ -57,7 +57,7 @@ the following videos at [CppCon](https://www.youtube.com/user/CppCon) below:
 [![CppCon 2016](https://i.imgur.com/fwmlOiJ.png)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
 
 ## **Build Requirements**
-Currently, the Bareflank hypervisor only supports the Clang/LLVM 11+ compiler. This, however, ensures that the hypervisor can be natively compiled on Windows including support for cross-compiling. Support for other C++20 compilers can be added if needed, just let us know if that is something you need.
+Currently, the Bareflank hypervisor only supports the Clang/LLVM 10+ compiler. This, however, ensures that the hypervisor can be natively compiled on Windows including support for cross-compiling. Support for other C++20 compilers can be added if needed, just let us know if that is something you need.
 
 ### **Windows**
 TBD
