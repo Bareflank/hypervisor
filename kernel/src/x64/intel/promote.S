@@ -107,7 +107,7 @@ promote:
     call set_esr
 
     /**
-     * Note:
+     * NOTE:
      * - Once the loader's ESRs are installed into the IDT, we need to
      *   determine if an NMI has fired. If it has, we need to tell the
      *   loader's promote logic so that it can inject an NMI once
@@ -138,8 +138,9 @@ nmi_pending_transfer_complete:
 
     mov rax, 0x4002
     vmread rax, rax
+    jbe nmi_window_transfer_complete
 
-    mov rdx, 0xFFFFFFFFFFBFFFFF
+    mov rdx, 0x0000000000400000
     and rax, rdx
     cmp rax, 0x0
     je nmi_window_transfer_complete
@@ -147,7 +148,7 @@ nmi_pending_transfer_complete:
     mov rax, 0x1
     mov [r15 + 0x318], rax
 
-nmi_window_transfer_complete:
+ nmi_window_transfer_complete:
 
     call set_up_target
 capture_spec:
@@ -157,5 +158,6 @@ set_up_target:
     mov rax, [r15 + 0x2E8]
     mov [rsp], rax
     ret
+    int 3
 
     .size promote, .-promote

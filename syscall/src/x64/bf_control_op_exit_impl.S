@@ -37,4 +37,6 @@ bf_control_op_exit_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_control_op_exit_impl, .-bf_control_op_exit_impl

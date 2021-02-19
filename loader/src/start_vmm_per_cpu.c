@@ -59,6 +59,7 @@
 #include <map_root_vp_state.h>
 #include <platform.h>
 #include <send_command_report_on.h>
+#include <serial_write.h>
 #include <types.h>
 
 /**
@@ -150,8 +151,8 @@ start_vmm_per_cpu(uint32_t const cpu)
     g_mk_args[cpu]->rpt = g_mk_root_page_table;
     g_mk_args[cpu]->rpt_phys = platform_virt_to_phys(g_mk_root_page_table);
 
-    ret =
-        get_mk_page_pool_addr(&g_mk_page_pool, g_mk_page_pool_base_virt, &addr);
+    ret = get_mk_page_pool_addr(
+        &g_mk_page_pool, HYPERVISOR_DIRECT_MAP_ADDR, &addr);
     if (ret) {
         BFERROR("get_mk_page_pool_addr failed\n");
         goto get_mk_page_pool_addr_failed;
@@ -159,10 +160,10 @@ start_vmm_per_cpu(uint32_t const cpu)
 
     g_mk_args[cpu]->page_pool.addr = addr;
     g_mk_args[cpu]->page_pool.size = g_mk_page_pool.size;
-    g_mk_args[cpu]->page_pool_base_virt = g_mk_page_pool_base_virt;
+    g_mk_args[cpu]->page_pool_base_virt = HYPERVISOR_DIRECT_MAP_ADDR;
 
-    ret =
-        get_mk_huge_pool_addr(&g_mk_huge_pool, g_mk_huge_pool_base_virt, &addr);
+    ret = get_mk_huge_pool_addr(
+        &g_mk_huge_pool, HYPERVISOR_DIRECT_MAP_ADDR, &addr);
     if (ret) {
         BFERROR("get_mk_huge_pool_addr failed\n");
         goto get_mk_huge_pool_addr_failed;
@@ -170,7 +171,7 @@ start_vmm_per_cpu(uint32_t const cpu)
 
     g_mk_args[cpu]->huge_pool.addr = addr;
     g_mk_args[cpu]->huge_pool.size = g_mk_huge_pool.size;
-    g_mk_args[cpu]->huge_pool_base_virt = g_mk_huge_pool_base_virt;
+    g_mk_args[cpu]->huge_pool_base_virt = HYPERVISOR_DIRECT_MAP_ADDR;
 
 #ifdef DEBUG_LOADER
     dump_mk_stack(&g_mk_stack[cpu], cpu);
@@ -186,12 +187,6 @@ start_vmm_per_cpu(uint32_t const cpu)
 
     send_command_report_on();
     return LOADER_SUCCESS;
-
-    /**
-     * TODO:
-     * - Figure out why the code below will produce a triple fault on Intel
-     *   in VMWare if executed.
-     */
 
 demote_failed:
 

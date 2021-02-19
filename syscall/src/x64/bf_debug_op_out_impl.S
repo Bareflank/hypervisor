@@ -37,4 +37,6 @@ bf_debug_op_out_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_debug_op_out_impl, .-bf_debug_op_out_impl

@@ -38,4 +38,6 @@ intrinsic_inb:
     in al, dx
 
     ret
+    int 3
+
     .size intrinsic_inb, .-intrinsic_inb

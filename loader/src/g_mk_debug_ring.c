@@ -27,4 +27,4 @@
 #include <debug_ring_t.h>
 
 /** @brief stores the microkernel's debug ring */
-struct debug_ring_t *g_mk_debug_ring = NULL;
+struct debug_ring_t *g_mk_debug_ring = ((void *)0);

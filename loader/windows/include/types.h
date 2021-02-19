@@ -26,11 +26,22 @@
  * SOFTWARE.
  */
 
-#ifndef STDINT_H
-#define STDINT_H
+#ifndef TYPES_H
+#define TYPES_H
 
-#include <linux/types.h>
-#define intmax_t intptr_t
-#define uintmax_t uintptr_t
+#include "inttypes.h"
+#include "stdint.h"
+
+/**
+ * @brief Returned by a loader function when a function succeeds.
+ */
+#define LOADER_SUCCESS ((int64_t)0)
+
+/**
+ * @brief Returned by a loader function when an error occurs. Note that
+ *   functions that are responsible for stopping the hypervisor, in general,
+ *   should never return an error.
+ */
+#define LOADER_FAILURE ((int64_t)-1)
 
 #endif

@@ -68,4 +68,6 @@ esr_gpf:
     hlt
 
     ret
+    int 3
+
     .size esr_gpf, 0x1000

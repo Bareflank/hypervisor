@@ -99,12 +99,12 @@ void platform_free_contiguous(void const *const ptr, uint64_t const size);
 /**
  * <!-- description -->
  *   @brief Given a virtual address, this function returns the virtual
- *     address's physical address. Returns NULL if the conversion failed.
+ *     address's physical address. Returns ((void *)0) if the conversion failed.
  *
  * <!-- inputs/outputs -->
  *   @param virt the virtual address to convert to a physical address
  *   @return Given a virtual address, this function returns the virtual
- *     address's physical address. Returns NULL if the conversion failed.
+ *     address's physical address. Returns ((void *)0) if the conversion failed.
  */
 uintptr_t platform_virt_to_phys(void const *const virt);
 
@@ -126,13 +126,13 @@ int64_t platform_memset(void *const ptr, uint8_t const val, uint64_t const num);
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     NULL, returns FAILURE, otherwise returns 0.
+ *     ((void *)0), returns FAILURE, otherwise returns 0.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are NULL, returns FAILURE, otherwise
+ *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
  *     returns 0.
  */
 int64_t
@@ -141,14 +141,14 @@ platform_memcpy(void *const dst, void const *const src, uint64_t const num);
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     NULL, returns FAILURE, otherwise returns 0. Note that this function can
+ *     ((void *)0), returns FAILURE, otherwise returns 0. Note that this function can
  *     be used to copy memory from userspace via an IOCTL.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are NULL, returns FAILURE, otherwise
+ *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
  *     returns 0.
  */
 int64_t platform_copy_from_user(
@@ -157,14 +157,14 @@ int64_t platform_copy_from_user(
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     NULL, returns FAILURE, otherwise returns 0. Note that this function can
+ *     ((void *)0), returns FAILURE, otherwise returns 0. Note that this function can
  *     be used to copy memory to userspace via an IOCTL.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are NULL, returns FAILURE, otherwise
+ *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
  *     returns 0.
  */
 int64_t platform_copy_to_user(

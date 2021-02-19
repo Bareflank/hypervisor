@@ -21,7 +21,7 @@ To support Bareflank's ecosystem, the hypervisor SDK is licensed under MIT, spec
 
 Get the latest version of the Bareflank Hypervisor SDK from GitHub:
 
-``` bash
+```bash
 git clone https://github.com/bareflank/hypervisor
 mkdir bsl/build && cd bsl/build
 cmake -DCMAKE_CXX_COMPILER="clang++" ..
@@ -60,7 +60,41 @@ the following videos at [CppCon](https://www.youtube.com/user/CppCon) below:
 Currently, the Bareflank hypervisor only supports the Clang/LLVM 10+ compiler. This, however, ensures that the hypervisor can be natively compiled on Windows including support for cross-compiling. Support for other C++20 compilers can be added if needed, just let us know if that is something you need.
 
 ### **Windows**
-TBD
+To compile the BSL on Windows, you must first disable UEFI SecureBoot and enable test signing mode. Note that this might require you to reinstall Windows (**you have been warned**). This can be done from a command prompt with admin privileges:
+```
+bcdedit.exe /set testsigning ON
+<reboot>
+```
+
+Next, install the following:
+- [Visual Studio](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=16) (Enable "Desktop development with C++")
+- [WDK](https://docs.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk)
+- [LLVM 10+](https://github.com/llvm/llvm-project/releases)
+- [CMake 3.13+](https://cmake.org/download/)
+- [Ninja](https://github.com/ninja-build/ninja/releases)
+- [Git](https://git-scm.com/downloads)
+
+Visual Studio is needed as it contains Windows specific libraries that are needed during compilation. Instead of using the Clang/LLVM project that natively ships with Visual Studio, we use the standard Clang/LLVM binaries provided by the LLVM project which ensures we get all of the tools including LLD, Clang Tidy and Clang Format. Also note that you must put Ninja somewhere
+in your path (we usually drop into CMake's bin folder). Finally, **make sure you follow all of the instructions when installing the WDK**. These instructions change frequently, and each step must be installed correctly and in the order provided by the instructions. Skipping a step, or installing a package in the wrong order will result in a WDK installation that doesn't work.
+
+To compile the BSL, we are going to use Bash. There are many ways to start Bash including opening a CMD prompt and typing "bash". Once running bash, make sure you add the following to your PATH:
+- MSBuild
+- devcon
+- certmgr
+
+For example, in your .bashrc, you might add the following (depending on where Visual Studio put these files):
+```bash
+export PATH="/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin:/c/Program Files (x86)/Windows Kits/10/Tools/x64:/c/Program Files (x86)/Windows Kits/10/bin/10.0.19041.0/x64:$PATH"
+```
+
+Finally, run the following from Bash:
+```bash
+git clone https://github.com/bareflank/bsl
+mkdir bsl/build && cd bsl/build
+cmake -DCMAKE_CXX_COMPILER="clang++" -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+ninja info
+ninja
+```
 
 ### **Ubuntu Linux**
 To compile the BSL on Ubuntu (20.04 or higher) you must first install the following dependencies:
@@ -69,7 +103,7 @@ sudo apt-get install -y clang cmake lld
 ```
 
 To compile the BSL, use the following:
-``` bash
+```bash
 git clone https://github.com/bareflank/bsl
 mkdir bsl/build && cd bsl/build
 cmake -DCMAKE_CXX_COMPILER="clang++" -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
@@ -78,7 +112,7 @@ make
 ```
 
 ## Usage Instructions
-To use the hypervisor, run the following commands:
+To use the hypervisor, run the following commands (on Windows, replace make with ninja):
 
 ```
 make driver_quick

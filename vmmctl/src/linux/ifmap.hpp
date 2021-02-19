@@ -42,6 +42,7 @@
 #include <bsl/string_view.hpp>
 #include <bsl/swap.hpp>
 #include <bsl/touch.hpp>
+#include <bsl/unlikely.hpp>
 
 namespace vmmctl
 {
@@ -114,7 +115,7 @@ namespace vmmctl
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             m_file = open(filename.data(), O_RDONLY);
-            if (details::IFMAP_POSIX_ERROR.get() == m_file) {
+            if (bsl::unlikely(details::IFMAP_POSIX_ERROR.get() == m_file)) {
                 bsl::alert() << "failed to open read-only file: "    // --
                              << filename                             // --
                              << bsl::endl;
@@ -124,7 +125,7 @@ namespace vmmctl
             }
 
             stat_t s{};
-            if (details::IFMAP_POSIX_ERROR.get() == fstat(m_file, &s)) {
+            if (bsl::unlikely(details::IFMAP_POSIX_ERROR.get() == fstat(m_file, &s))) {
                 bsl::alert() << "failed to get the size of the read-only file: "    // --
                              << filename                                            // --
                              << bsl::endl;
@@ -146,7 +147,7 @@ namespace vmmctl
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-            if (MAP_FAILED == ptr) {
+            if (bsl::unlikely(MAP_FAILED == ptr)) {
                 bsl::alert() << "failed to map read-only file: "    // --
                              << filename                            // --
                              << bsl::endl;

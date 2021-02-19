@@ -20,19 +20,14 @@
 # SOFTWARE.
 
 if(HYPERVISOR_BUILD_LOADER)
-    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        add_custom_target(loader_quick
-            COMMAND ${CMAKE_COMMAND} --build . --target loader_clean
-            COMMAND ${CMAKE_COMMAND} --build . --target loader_load
-            VERBATIM
-        )
-        add_custom_target(driver_quick
-            COMMAND ${CMAKE_COMMAND} --build . --target loader_clean
-            COMMAND ${CMAKE_COMMAND} --build . --target loader_load
-            VERBATIM
-        )
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    else()
-        message(FATAL_ERROR "Unsupported CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
-    endif()
+    add_custom_target(loader_quick
+        COMMAND ${CMAKE_COMMAND} --build . --target loader_clean
+        COMMAND ${CMAKE_COMMAND} --build . --target loader_load
+        VERBATIM
+    )
+    add_custom_target(driver_quick
+        COMMAND ${CMAKE_COMMAND} --build . --target driver_clean
+        COMMAND ${CMAKE_COMMAND} --build . --target driver_load
+        VERBATIM
+    )
 endif()

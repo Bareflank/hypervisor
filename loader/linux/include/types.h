@@ -32,8 +32,6 @@
 #include "inttypes.h"
 #include "stdint.h"
 
-#include <linux/types.h>
-
 /**
  * @brief Returned by a loader function when a function succeeds.
  */

@@ -83,7 +83,6 @@ loader_init(void)
 
     return LOADER_SUCCESS;
 
-    free_mk_code_aliases(&g_mk_code_aliases);
 alloc_and_copy_mk_code_aliases_failed:
     free_mk_debug_ring(&g_mk_debug_ring);
 alloc_mk_debug_ring_failed:

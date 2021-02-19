@@ -37,4 +37,6 @@ bf_intrinsic_op_write_msr_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_intrinsic_op_write_msr_impl, .-bf_intrinsic_op_write_msr_impl

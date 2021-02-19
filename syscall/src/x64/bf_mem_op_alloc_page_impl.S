@@ -42,4 +42,6 @@ bf_mem_op_alloc_page_impl:
     mov [rdx], rsi
 
     ret
+    int 3
+
     .size bf_mem_op_alloc_page_impl, .-bf_mem_op_alloc_page_impl

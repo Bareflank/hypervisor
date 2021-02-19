@@ -38,9 +38,11 @@ intrinsic_vmxon:
 
     xor rax, rax
     ret
+    int 3
 
 intrinsic_vmxon_failure:
     mov rax, 0x1
     ret
+    int 3
 
     .size intrinsic_vmxon, .-intrinsic_vmxon

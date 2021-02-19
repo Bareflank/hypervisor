@@ -37,4 +37,6 @@ intrinsic_sgs:
     mov ax, gs
 
     ret
+    int 3
+
     .size intrinsic_sgs, .-intrinsic_sgs

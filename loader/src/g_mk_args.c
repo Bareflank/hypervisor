@@ -28,4 +28,4 @@
 #include <mk_args_t.h>
 
 /** @brief stores the microkernel's _start args */
-struct mk_args_t *g_mk_args[HYPERVISOR_MAX_VPS_PER_VM] = {};
+struct mk_args_t *g_mk_args[HYPERVISOR_MAX_VPS_PER_VM] = {0};

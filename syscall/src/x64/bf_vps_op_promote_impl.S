@@ -37,4 +37,6 @@ bf_vps_op_promote_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_vps_op_promote_impl, .-bf_vps_op_promote_impl

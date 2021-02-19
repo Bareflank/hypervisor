@@ -35,4 +35,6 @@ bf_tls_rdi_impl:
 
     mov rax, fs:[0x830]
     ret
+    int 3
+
     .size bf_tls_rdi_impl, .-bf_tls_rdi_impl

@@ -36,6 +36,7 @@
 #include <bsl/safe_integral.hpp>
 #include <bsl/swap.hpp>
 #include <bsl/touch.hpp>
+#include <bsl/unlikely.hpp>
 
 namespace vmmctl
 {
@@ -84,8 +85,8 @@ namespace vmmctl
         {
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-            m_hndl = open(name, O_RDWR);
-            if (details::IOCTL_INVALID_HNDL.get() == m_hndl) {
+            m_hndl = open(name.data(), O_RDWR);
+            if (bsl::unlikely(details::IOCTL_INVALID_HNDL.get() == m_hndl)) {
                 bsl::error() << "ioctl open failed\n";
                 return;
             }
@@ -98,7 +99,7 @@ namespace vmmctl
         ///
         ~ioctl() noexcept
         {
-            if (details::IOCTL_INVALID_HNDL.get() != m_hndl) {
+            if (bsl::unlikely(details::IOCTL_INVALID_HNDL.get() != m_hndl)) {
                 bsl::discard(close(m_hndl));
             }
             else {
@@ -187,14 +188,19 @@ namespace vmmctl
         [[nodiscard]] constexpr auto
         send(bsl::safe_integral<REQUEST> const &req) const noexcept -> bool
         {
-            if (details::IOCTL_INVALID_HNDL.get() == m_hndl) {
+            if (bsl::unlikely(details::IOCTL_INVALID_HNDL.get() == m_hndl)) {
                 bsl::error() << "failed to send, ioctl not properly initialized\n";
+                return false;
+            }
+
+            if (bsl::unlikely(!req)) {
+                bsl::error() << "invalid request: " << bsl::hex(req) << bsl::endl << bsl::here();
                 return false;
             }
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-            if (::ioctl(m_hndl, req.get()) < 0) {
+            if (bsl::unlikely(::ioctl(m_hndl, req.get()) < 0)) {
                 bsl::error() << "ioctl failed\n";
                 return false;
             }
@@ -223,14 +229,24 @@ namespace vmmctl
         {
             bsl::discard(size);
 
-            if (details::IOCTL_INVALID_HNDL.get() == m_hndl) {
+            if (bsl::unlikely(details::IOCTL_INVALID_HNDL.get() == m_hndl)) {
                 bsl::error() << "failed to read, ioctl not properly initialized\n";
+                return false;
+            }
+
+            if (bsl::unlikely(!req)) {
+                bsl::error() << "invalid request: " << bsl::hex(req) << bsl::endl << bsl::here();
+                return false;
+            }
+
+            if (bsl::unlikely(nullptr == data)) {
+                bsl::error() << "invalid data: " << data << bsl::endl << bsl::here();
                 return false;
             }
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-            if (::ioctl(m_hndl, req.get(), data) < 0) {
+            if (bsl::unlikely(::ioctl(m_hndl, req.get(), data) < 0)) {
                 bsl::error() << "ioctl failed\n";
                 return false;
             }
@@ -257,14 +273,24 @@ namespace vmmctl
         {
             bsl::discard(size);
 
-            if (details::IOCTL_INVALID_HNDL.get() == m_hndl) {
+            if (bsl::unlikely(details::IOCTL_INVALID_HNDL.get() == m_hndl)) {
                 bsl::error() << "failed to write, ioctl not properly initialized\n";
+                return false;
+            }
+
+            if (bsl::unlikely(!req)) {
+                bsl::error() << "invalid request: " << bsl::hex(req) << bsl::endl << bsl::here();
+                return false;
+            }
+
+            if (bsl::unlikely(nullptr == data)) {
+                bsl::error() << "invalid data: " << data << bsl::endl << bsl::here();
                 return false;
             }
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-            if (::ioctl(m_hndl, req.get(), data) < 0) {
+            if (bsl::unlikely(::ioctl(m_hndl, req.get(), data) < 0)) {
                 bsl::error() << "ioctl failed\n";
                 return false;
             }
@@ -291,14 +317,24 @@ namespace vmmctl
         {
             bsl::discard(size);
 
-            if (details::IOCTL_INVALID_HNDL.get() == m_hndl) {
+            if (bsl::unlikely(details::IOCTL_INVALID_HNDL.get() == m_hndl)) {
                 bsl::error() << "failed to read/write, ioctl not properly initialized\n";
+                return false;
+            }
+
+            if (bsl::unlikely(!req)) {
+                bsl::error() << "invalid request: " << bsl::hex(req) << bsl::endl << bsl::here();
+                return false;
+            }
+
+            if (bsl::unlikely(nullptr == data)) {
+                bsl::error() << "invalid data: " << data << bsl::endl << bsl::here();
                 return false;
             }
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-            if (::ioctl(m_hndl, req.get(), data) < 0) {
+            if (bsl::unlikely(::ioctl(m_hndl, req.get(), data) < 0)) {
                 bsl::error() << "ioctl failed\n";
                 return false;
             }

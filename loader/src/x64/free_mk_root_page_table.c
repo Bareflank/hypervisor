@@ -42,12 +42,12 @@
 void
 free_mk_root_page_table(struct pml4t_t **const pml4t)
 {
-    if (NULL == *pml4t) {
+    if (((void *)0) == *pml4t) {
         return;
     }
 
     free_pml4t(*pml4t);
 
     platform_free(*pml4t, sizeof(struct pml4t_t));
-    *pml4t = NULL;
+    *pml4t = ((void *)0);
 }

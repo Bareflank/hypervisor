@@ -39,5 +39,5 @@ void
 free_mk_debug_ring(struct debug_ring_t **const debug_ring)
 {
     platform_free(*debug_ring, HYPERVISOR_DEBUG_RING_SIZE);
-    *debug_ring = NULL;
+    *debug_ring = ((void *)0);
 }

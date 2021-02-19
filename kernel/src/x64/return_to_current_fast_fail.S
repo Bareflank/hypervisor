@@ -47,5 +47,6 @@ set_up_target:
     mov rax, gs:[0x900]
     mov [rsp], rax
     ret
+    int 3
 
     .size return_to_current_fast_fail, .-return_to_current_fast_fail

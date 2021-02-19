@@ -37,4 +37,6 @@ intrinsic_sss:
     mov ax, ss
 
     ret
+    int 3
+
     .size intrinsic_sss, .-intrinsic_sss

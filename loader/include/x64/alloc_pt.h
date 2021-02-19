@@ -40,7 +40,7 @@
  * <!-- inputs/outputs -->
  *   @param pdt the pdt to add the newly allocated pt to
  *   @param virt the virtual address to get the PDT offset from.
- *   @return a pointer to the newly allocated pt on success, NULL otherwise.
+ *   @return a pointer to the newly allocated pt on success, ((void *)0) otherwise.
  */
 struct pt_t *alloc_pt(struct pdt_t *const pdt, uint64_t const virt);
 

@@ -22,28 +22,39 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef BSL_DETAILS_IFMAP_WINDOWS_HPP
-#define BSL_DETAILS_IFMAP_WINDOWS_HPP
+#ifndef VMMCTL_IFMAP_WINDOWS_HPP
+#define VMMCTL_IFMAP_WINDOWS_HPP
 
-#include "../../../byte.hpp"
-#include "../../../convert.hpp"
-#include "../../../cstdint.hpp"
-#include "../../../debug.hpp"
-#include "../../../discard.hpp"
-#include "../../../move.hpp"
-#include "../../../safe_integral.hpp"
-#include "../../../span.hpp"
-#include "../../../string_view.hpp"
-#include "../../../swap.hpp"
-#include "../../../touch.hpp"
+// clang-format off
+
+/// NOTE:
+/// - The windows includes that we use here need to remain in this order.
+///   Otherwise the code will not compile. Also, when using CPP, we need
+///   to remove the max/min macros as they are used by the C++ standard.
+///
 
 #include <Windows.h>
 #undef max
 #undef min
 
-namespace bsl
+// clang-format on
+
+#include <bsl/byte.hpp>
+#include <bsl/convert.hpp>
+#include <bsl/cstdint.hpp>
+#include <bsl/debug.hpp>
+#include <bsl/discard.hpp>
+#include <bsl/move.hpp>
+#include <bsl/safe_integral.hpp>
+#include <bsl/span.hpp>
+#include <bsl/string_view.hpp>
+#include <bsl/swap.hpp>
+#include <bsl/touch.hpp>
+#include <bsl/unlikely.hpp>
+
+namespace vmmctl
 {
-    /// @class bsl::ifmap
+    /// @class vmmctl::ifmap
     ///
     /// <!-- description -->
     ///   @brief Maps a file as read-only, and returns a pointer to the file
@@ -57,7 +68,7 @@ namespace bsl
         /// @brief stores a handle to the mapped file.
         HANDLE m_view{};
         /// @brief stores a view of the file that is mapped.
-        span<byte const> m_data{};
+        bsl::span<bsl::byte const> m_data{};
 
         /// <!-- description -->
         ///   @brief Swaps *this with other
@@ -78,9 +89,9 @@ namespace bsl
         /// @brief alias for: void
         using value_type = void;
         /// @brief alias for: safe_uintmax
-        using size_type = safe_uintmax;
+        using size_type = bsl::safe_uintmax;
         /// @brief alias for: safe_uintmax
-        using difference_type = safe_uintmax;
+        using difference_type = bsl::safe_uintmax;
         /// @brief alias for: void *
         using pointer_type = void *;
         /// @brief alias for: void const *
@@ -93,14 +104,14 @@ namespace bsl
         ifmap() noexcept = default;
 
         /// <!-- description -->
-        ///   @brief Creates a bsl::ifmap given a the filename and path of
+        ///   @brief Creates a vmmctl::ifmap given a the filename and path of
         ///     the file to map as read-only.
         ///   @include ifmap/example_ifmap_constructor.hpp
         ///
         /// <!-- inputs/outputs -->
         ///   @param filename the filename and path of the file to map
         ///
-        explicit ifmap(string_view const &filename) noexcept
+        explicit ifmap(bsl::string_view const &filename) noexcept
         {
             m_file = CreateFileA(
                 filename.data(),
@@ -112,7 +123,7 @@ namespace bsl
                 nullptr);
 
             m_view = CreateFileMappingA(m_file, nullptr, PAGE_READONLY, 0, 0, nullptr);
-            if (nullptr == m_view) {
+            if (bsl::unlikely(nullptr == m_view)) {
                 bsl::alert() << "failed to open read-only file: "    // --
                              << filename                             // --
                              << bsl::endl;
@@ -121,7 +132,8 @@ namespace bsl
 
             DWORD high{};
             DWORD size{GetFileSize(m_file, &high)};
-            if (INVALID_FILE_SIZE == size) {
+
+            if (bsl::unlikely(INVALID_FILE_SIZE == size)) {
                 bsl::alert() << "failed to get the size of the read-only file: "    // --
                              << filename                                            // --
                              << bsl::endl;
@@ -134,7 +146,7 @@ namespace bsl
             }
 
             pointer_type const ptr{MapViewOfFile(m_view, FILE_MAP_READ, 0, 0, 0)};
-            if (nullptr == ptr) {
+            if (bsl::unlikely(nullptr == ptr)) {
                 bsl::alert() << "failed to map read-only file: "    // --
                              << filename                            // --
                              << bsl::endl;
@@ -148,7 +160,7 @@ namespace bsl
 
             m_data = {
                 static_cast<bsl::byte const *>(ptr),
-                (to_umax(high) << to_umax(32)) | to_umax(size)};
+                (bsl::to_umax(high) << bsl::to_umax(32)) | bsl::to_umax(size)};
         }
 
         /// <!-- description -->
@@ -221,7 +233,7 @@ namespace bsl
         ///   @return Returns a span to the read-only mapped file.
         ///
         [[nodiscard]] constexpr auto
-        view() const noexcept -> bsl::span<byte const>
+        view() const noexcept -> bsl::span<bsl::byte const>
         {
             return m_data;
         }
@@ -291,7 +303,7 @@ namespace bsl
         [[nodiscard]] static constexpr auto
         max_size() noexcept -> size_type
         {
-            return to_umax(size_type::max());
+            return bsl::to_umax(size_type::max());
         }
 
         /// <!-- description -->

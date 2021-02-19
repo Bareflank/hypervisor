@@ -41,4 +41,6 @@ bf_vps_op_read16_impl:
     mov [r10], di
 
     ret
+    int 3
+
     .size bf_vps_op_read16_impl, .-bf_vps_op_read16_impl

@@ -177,7 +177,7 @@ alloc_and_copy_mk_state(
 {
     int64_t ret;
 
-    struct bfelf_elf64_ehdr_t const *ehdr = NULL;
+    struct bfelf_elf64_ehdr_t const *ehdr = ((void *)0);
     if (get_elf64_ehdr(mk_elf_file->addr, &ehdr)) {
         BFERROR("get_elf64_ehdr failed\n");
         return LOADER_FAILURE;
@@ -188,7 +188,7 @@ alloc_and_copy_mk_state(
     /**************************************************************************/
 
     *state = (struct state_save_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == *state) {
+    if (((void *)0) == *state) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_state_failed;
     }
@@ -198,7 +198,7 @@ alloc_and_copy_mk_state(
     /**************************************************************************/
 
     (*state)->hve_page = platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == (*state)->hve_page) {
+    if (((void *)0) == (*state)->hve_page) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_hve_page_failed;
     }
@@ -230,13 +230,13 @@ alloc_and_copy_mk_state(
     /**************************************************************************/
 
     (*state)->tss = (struct tss_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == (*state)->tss) {
+    if (((void *)0) == (*state)->tss) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_tss_failed;
     }
 
     (*state)->ist = platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == (*state)->ist) {
+    if (((void *)0) == (*state)->ist) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_ist_failed;
     }
@@ -249,13 +249,13 @@ alloc_and_copy_mk_state(
     /**************************************************************************/
 
     (*state)->gdtr.base = (uint64_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == (*state)->gdtr.base) {
+    if (((void *)0) == (*state)->gdtr.base) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_gdt_failed;
     }
 
     (*state)->idtr.base = (uint64_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == (*state)->idtr.base) {
+    if (((void *)0) == (*state)->idtr.base) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_idt_failed;
     }
@@ -648,6 +648,6 @@ platform_alloc_hve_page_failed:
     platform_free(*state, HYPERVISOR_PAGE_SIZE);
 platform_alloc_state_failed:
 
-    *state = NULL;
+    *state = ((void *)0);
     return LOADER_FAILURE;
 }

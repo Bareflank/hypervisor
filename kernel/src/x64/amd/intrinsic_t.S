@@ -27,6 +27,19 @@
     .code64
     .intel_syntax noprefix
 
+    .globl  intrinsic_invlpg
+    .type   intrinsic_invlpg, @function
+intrinsic_invlpg:
+
+    invlpg [rdi]
+
+    ret
+    int 3
+
+    .size intrinsic_invlpg, .-intrinsic_invlpg
+
+
+
     .globl  intrinsic_cr3
     .type   intrinsic_cr3, @function
 intrinsic_cr3:
@@ -34,6 +47,8 @@ intrinsic_cr3:
     mov rax, cr3
 
     ret
+    int 3
+
     .size intrinsic_cr3, .-intrinsic_cr3
 
 
@@ -45,6 +60,8 @@ intrinsic_set_cr3:
     mov cr3, rdi
 
     ret
+    int 3
+
     .size intrinsic_set_cr3, .-intrinsic_set_cr3
 
 
@@ -60,6 +77,8 @@ intrinsic_tp:
     or rax, rdx
 
     ret
+    int 3
+
     .size intrinsic_tp, .-intrinsic_tp
 
 
@@ -75,6 +94,8 @@ intrinsic_set_tp:
     wrmsr
 
     ret
+    int 3
+
     .size intrinsic_set_tp, .-intrinsic_set_tp
 
 
@@ -88,6 +109,8 @@ intrinsic_tls_reg:
     clac
 
     ret
+    int 3
+
     .size intrinsic_tls_reg, .-intrinsic_tls_reg
 
 
@@ -101,6 +124,8 @@ intrinsic_set_tls_reg:
     clac
 
     ret
+    int 3
+
     .size intrinsic_set_tls_reg, .-intrinsic_set_tls_reg
 
 
@@ -138,6 +163,7 @@ intrinsic_rdmsr:
     mov gs:[0x850], rax
 
     ret
+    int 3
 
 intrinsic_rdmsr_failed:
 
@@ -146,6 +172,7 @@ intrinsic_rdmsr_failed:
 
     mov rax, 0x1
     ret
+    int 3
 
     .size intrinsic_rdmsr, .-intrinsic_rdmsr
 
@@ -163,6 +190,8 @@ intrinsic_rdmsr_unsafe:
     or rax, rdx
 
     ret
+    int 3
+
     .size intrinsic_rdmsr_unsafe, .-intrinsic_rdmsr_unsafe
 
 
@@ -184,6 +213,7 @@ intrinsic_wrmsr:
     mov gs:[0x850], rax
 
     ret
+    int 3
 
 intrinsic_wrmsr_failed:
 
@@ -192,6 +222,7 @@ intrinsic_wrmsr_failed:
 
     mov rax, 0x1
     ret
+    int 3
 
     .size intrinsic_wrmsr, .-intrinsic_wrmsr
 
@@ -208,6 +239,8 @@ intrinsic_wrmsr_unsafe:
     wrmsr
 
     ret
+    int 3
+
     .size intrinsic_wrmsr_unsafe, .-intrinsic_wrmsr_unsafe
 
 
@@ -342,4 +375,6 @@ intrinsic_vmrun:
     pop rbx
 
     ret
+    int 3
+
     .size intrinsic_vmrun, .-intrinsic_vmrun

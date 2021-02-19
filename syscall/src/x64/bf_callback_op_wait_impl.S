@@ -37,4 +37,6 @@ bf_callback_op_wait_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_callback_op_wait_impl, .-bf_callback_op_wait_impl

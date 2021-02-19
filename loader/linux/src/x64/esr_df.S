@@ -64,4 +64,6 @@ esr_df:
     hlt
 
     ret
+    int 3
+
     .size esr_df, 0x1000

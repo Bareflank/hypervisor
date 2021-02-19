@@ -39,4 +39,6 @@ bf_mem_op_virt_to_phys_impl:
     mov [rdx], rdi
 
     ret
+    int 3
+
     .size bf_mem_op_virt_to_phys_impl, .-bf_mem_op_virt_to_phys_impl

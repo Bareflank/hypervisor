@@ -37,4 +37,6 @@ bf_handle_op_close_handle_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_handle_op_close_handle_impl, .-bf_handle_op_close_handle_impl

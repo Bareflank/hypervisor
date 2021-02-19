@@ -58,13 +58,13 @@ platform_alloc(uint64_t const size)
 
     if (0 == size) {
         BFERROR("invalid number of bytes (i.e., size)\n");
-        return NULL;
+        return ((void *)0);
     }
 
     ret = vmalloc(size);
-    if (NULL == ret) {
+    if (((void *)0) == ret) {
         BFERROR("vmalloc failed\n");
-        return NULL;
+        return ((void *)0);
     }
 
     return memset(ret, 0, size);
@@ -92,13 +92,13 @@ platform_alloc_contiguous(uint64_t const size)
 
     if (0 == size) {
         BFERROR("invalid number of bytes (i.e., size)\n");
-        return NULL;
+        return ((void *)0);
     }
 
     ret = kmalloc(size, GFP_KERNEL);
-    if (NULL == ret) {
+    if (((void *)0) == ret) {
         BFERROR("kmalloc failed\n");
-        return NULL;
+        return ((void *)0);
     }
 
     return memset(ret, 0, size);
@@ -121,7 +121,7 @@ platform_free(void const *const ptr, uint64_t const size)
 {
     (void)size;
 
-    if (NULL != ptr) {
+    if (((void *)0) != ptr) {
         vfree(ptr);
     }
 }
@@ -143,7 +143,7 @@ platform_free_contiguous(void const *const ptr, uint64_t const size)
 {
     (void)size;
 
-    if (NULL != ptr) {
+    if (((void *)0) != ptr) {
         kfree(ptr);
     }
 }
@@ -151,12 +151,12 @@ platform_free_contiguous(void const *const ptr, uint64_t const size)
 /**
  * <!-- description -->
  *   @brief Given a virtual address, this function returns the virtual
- *     address's physical address. Returns NULL if the conversion failed.
+ *     address's physical address. Returns ((void *)0) if the conversion failed.
  *
  * <!-- inputs/outputs -->
  *   @param virt the virtual address to convert to a physical address
  *   @return Given a virtual address, this function returns the virtual
- *     address's physical address. Returns NULL if the conversion failed.
+ *     address's physical address. Returns ((void *)0) if the conversion failed.
  */
 uintptr_t
 platform_virt_to_phys(void const *const virt)
@@ -201,24 +201,24 @@ platform_memset(void *const ptr, uint8_t const val, uint64_t const num)
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     NULL, returns LOADER_FAILURE, otherwise returns 0.
+ *     ((void *)0), returns LOADER_FAILURE, otherwise returns 0.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are NULL, returns LOADER_FAILURE, otherwise
+ *   @return If "src" or "dst" are ((void *)0), returns LOADER_FAILURE, otherwise
  *     returns 0.
  */
 int64_t
 platform_memcpy(void *const dst, void const *const src, uint64_t const num)
 {
-    if (NULL == dst) {
+    if (((void *)0) == dst) {
         BFERROR("invalid pointer\n");
         return LOADER_FAILURE;
     }
 
-    if (NULL == src) {
+    if (((void *)0) == src) {
         BFERROR("invalid pointer\n");
         return LOADER_FAILURE;
     }
@@ -230,26 +230,26 @@ platform_memcpy(void *const dst, void const *const src, uint64_t const num)
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     NULL, returns FAILURE, otherwise returns 0. Note that this function can
+ *     ((void *)0), returns FAILURE, otherwise returns 0. Note that this function can
  *     be used to copy memory from userspace via an IOCTL.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are NULL, returns FAILURE, otherwise
+ *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
  *     returns 0.
  */
 int64_t
 platform_copy_from_user(
     void *const dst, void const *const src, uint64_t const num)
 {
-    if (NULL == dst) {
+    if (((void *)0) == dst) {
         BFERROR("invalid pointer\n");
         return LOADER_FAILURE;
     }
 
-    if (NULL == src) {
+    if (((void *)0) == src) {
         BFERROR("invalid pointer\n");
         return LOADER_FAILURE;
     }
@@ -261,26 +261,26 @@ platform_copy_from_user(
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     NULL, returns FAILURE, otherwise returns 0. Note that this function can
+ *     ((void *)0), returns FAILURE, otherwise returns 0. Note that this function can
  *     be used to copy memory to userspace via an IOCTL.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are NULL, returns FAILURE, otherwise
+ *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
  *     returns 0.
  */
 int64_t
 platform_copy_to_user(
     void *const dst, void const *const src, uint64_t const num)
 {
-    if (NULL == dst) {
+    if (((void *)0) == dst) {
         BFERROR("invalid pointer\n");
         return LOADER_FAILURE;
     }
 
-    if (NULL == src) {
+    if (((void *)0) == src) {
         BFERROR("invalid pointer\n");
         return LOADER_FAILURE;
     }

@@ -37,4 +37,6 @@ intrinsic_sds:
     mov ax, ds
 
     ret
+    int 3
+
     .size intrinsic_sds, .-intrinsic_sds

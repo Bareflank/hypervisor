@@ -37,4 +37,6 @@ bf_callback_op_register_vmexit_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_callback_op_register_vmexit_impl, .-bf_callback_op_register_vmexit_impl

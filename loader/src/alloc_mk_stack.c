@@ -53,7 +53,7 @@ alloc_mk_stack(uint32_t const size, struct span_t *const stack)
     }
 
     stack->addr = (uint8_t *)platform_alloc(stack->size);
-    if (NULL == stack->addr) {
+    if (((void *)0) == stack->addr) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_failed;
     }

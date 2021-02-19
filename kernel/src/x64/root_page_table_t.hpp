@@ -75,8 +75,6 @@ namespace mk
         pml4t_t *m_pml4t{};
         /// @brief stores the CR3 value used to activate this RPT
         bsl::safe_uintmax m_pml4t_phys;
-        /// @brief stores the map cursor used for mapping when needed
-        bsl::safe_uintmax m_map_cursor{MAP_ADDR};
 
         /// <!-- description -->
         ///   @brief Returns the index of the last entry present in a page
@@ -839,7 +837,8 @@ namespace mk
                 }
             }
 
-            auto *const pdpte{this->get_pdpt(pml4te)->entries.at_if(this->pdpto(page_virt))};
+            auto *const pdpt{this->get_pdpt(pml4te)};
+            auto *const pdpte{pdpt->entries.at_if(this->pdpto(page_virt))};
             if (pdpte->p == bsl::ZERO_UMAX) {
                 if (bsl::unlikely(!this->add_pdt(pdpte, us))) {
                     bsl::print<bsl::V>() << bsl::here();
@@ -852,7 +851,8 @@ namespace mk
                 bsl::touch();
             }
 
-            auto *const pdte{this->get_pdt(pdpte)->entries.at_if(this->pdto(page_virt))};
+            auto *const pdt{this->get_pdt(pdpte)};
+            auto *const pdte{pdt->entries.at_if(this->pdto(page_virt))};
             if (pdte->p == bsl::ZERO_UMAX) {
                 if (bsl::unlikely(!this->add_pt(pdte, us))) {
                     bsl::print<bsl::V>() << bsl::here();
@@ -865,7 +865,8 @@ namespace mk
                 bsl::touch();
             }
 
-            auto *const pte{this->get_pt(pdte)->entries.at_if(this->pto(page_virt))};
+            auto *const pt{this->get_pt(pdte)};
+            auto *const pte{pt->entries.at_if(this->pto(page_virt))};
             if (bsl::unlikely(pte->p != bsl::ZERO_UMAX)) {
                 bsl::error() << "virtual address "     // --
                              << bsl::hex(page_virt)    // --
@@ -903,6 +904,233 @@ namespace mk
             }
 
             return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief Unmaps a previously mapped page.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param page_virt the virtual address to unmap
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        unmap_page(bsl::safe_uintmax const &page_virt) noexcept -> bsl::errc_type
+        {
+            auto *const pml4te{m_pml4t->entries.at_if(this->pml4to(page_virt))};
+            if (bsl::unlikely(pml4te->p == bsl::ZERO_UMAX)) {
+                bsl::error() << "virtual address "     // --
+                             << bsl::hex(page_virt)    // --
+                             << " not mapped"          // --
+                             << bsl::endl              // --
+                             << bsl::here();           // --
+
+                return bsl::errc_failure;
+            }
+
+            auto *const pdpt{this->get_pdpt(pml4te)};
+            auto *const pdpte{pdpt->entries.at_if(this->pdpto(page_virt))};
+            if (bsl::unlikely(pdpte->p == bsl::ZERO_UMAX)) {
+                bsl::error() << "virtual address "     // --
+                             << bsl::hex(page_virt)    // --
+                             << " not mapped"          // --
+                             << bsl::endl              // --
+                             << bsl::here();           // --
+
+                return bsl::errc_failure;
+            }
+
+            auto *const pdt{this->get_pdt(pdpte)};
+            auto *const pdte{pdt->entries.at_if(this->pdto(page_virt))};
+            if (bsl::unlikely(pdte->p == bsl::ZERO_UMAX)) {
+                bsl::error() << "virtual address "     // --
+                             << bsl::hex(page_virt)    // --
+                             << " not mapped"          // --
+                             << bsl::endl              // --
+                             << bsl::here();           // --
+
+                return bsl::errc_failure;
+            }
+
+            auto *const pt{this->get_pt(pdte)};
+            auto *const pte{pt->entries.at_if(this->pto(page_virt))};
+            if (bsl::unlikely(pte->p == bsl::ZERO_UMAX)) {
+                bsl::error() << "virtual address "     // --
+                             << bsl::hex(page_virt)    // --
+                             << " not mapped"          // --
+                             << bsl::endl              // --
+                             << bsl::here();           // --
+
+                return bsl::errc_failure;
+            }
+
+            *pte = {};
+
+            bool remove_pt{true};
+            for (auto const elem : pt->entries) {
+                if (elem.data->p != bsl::ZERO_UMAX) {
+                    remove_pt = false;
+                    break;
+                }
+            }
+
+            if (remove_pt) {
+                m_page_pool->deallocate(pt);
+                *pdte = {};
+            }
+
+            bool remove_pdt{true};
+            for (auto const elem : pdt->entries) {
+                if (elem.data->p != bsl::ZERO_UMAX) {
+                    remove_pdt = false;
+                    break;
+                }
+            }
+
+            if (remove_pdt) {
+                m_page_pool->deallocate(pdt);
+                *pdpte = {};
+            }
+
+            bool remove_pdpt{true};
+            for (auto const elem : pdpt->entries) {
+                if (elem.data->p != bsl::ZERO_UMAX) {
+                    remove_pdpt = false;
+                    break;
+                }
+            }
+
+            if (remove_pdpt) {
+                m_page_pool->deallocate(pdpt);
+                *pml4te = {};
+            }
+
+            m_intrinsic->invlpg(page_virt);
+            return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief Converts the provided virtual address to a physical
+        ///     address by walking the provided page table.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param rpt_phys the physical address to root page table to walk
+        ///   @param page_virt the virtual address to convert
+        ///   @return Returns the resulting physical address.
+        ///
+        [[nodiscard]] constexpr auto
+        virt_to_phys(
+            bsl::safe_uintmax const &rpt_phys, bsl::safe_uintmax const &page_virt) &noexcept
+            -> bsl::safe_uintmax
+        {
+            bsl::safe_uintmax virt{MAP_ADDR};
+            bsl::safe_uintmax phys{rpt_phys};
+
+            /// PML4
+            ///
+
+            if (!this->map_page(virt, phys, false, false, false)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::safe_uintmax::zero(true);
+            }
+
+            auto *const pml4t{bsl::to_ptr<pml4t_t *>(virt)};
+            auto *const pml4te{pml4t->entries.at_if(this->pml4to(page_virt))};
+            if (bsl::ZERO_UMAX == pml4te->p) {
+                bsl::error() << "virtual address "     // --
+                             << bsl::hex(page_virt)    // --
+                             << " was never mapped"    // --
+                             << bsl::endl              // --
+                             << bsl::here();           // --
+
+                return bsl::safe_uintmax::zero(true);
+            }
+
+            phys = pml4te->phys << bsl::to_umax(PAGE_SHIFT);
+            if (!this->unmap_page(virt)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::safe_uintmax::zero(true);
+            }
+
+            /// PDPT
+            ///
+
+            if (!this->map_page(virt, phys, false, false, false)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::safe_uintmax::zero(true);
+            }
+
+            auto *const pdpt{bsl::to_ptr<pdpt_t *>(virt)};
+            auto *const pdpte{pdpt->entries.at_if(this->pdpto(page_virt))};
+            if (bsl::ZERO_UMAX == pdpte->p) {
+                bsl::error() << "virtual address "     // --
+                             << bsl::hex(page_virt)    // --
+                             << " was never mapped"    // --
+                             << bsl::endl              // --
+                             << bsl::here();           // --
+
+                return bsl::safe_uintmax::zero(true);
+            }
+
+            phys = pdpte->phys << bsl::to_umax(PAGE_SHIFT);
+            if (!this->unmap_page(virt)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::safe_uintmax::zero(true);
+            }
+
+            /// PDT
+            ///
+
+            if (!this->map_page(virt, phys, false, false, false)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::safe_uintmax::zero(true);
+            }
+
+            auto *const pdt{bsl::to_ptr<pdt_t *>(virt)};
+            auto *const pdte{pdt->entries.at_if(this->pdto(page_virt))};
+            if (bsl::ZERO_UMAX == pdte->p) {
+                bsl::error() << "virtual address "     // --
+                             << bsl::hex(page_virt)    // --
+                             << " was never mapped"    // --
+                             << bsl::endl              // --
+                             << bsl::here();           // --
+
+                return bsl::safe_uintmax::zero(true);
+            }
+
+            phys = pdte->phys << bsl::to_umax(PAGE_SHIFT);
+            if (!this->unmap_page(virt)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::safe_uintmax::zero(true);
+            }
+
+            /// PT
+            ///
+
+            if (!this->map_page(virt, phys, false, false, false)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::safe_uintmax::zero(true);
+            }
+
+            auto *const pt{bsl::to_ptr<pt_t *>(virt)};
+            auto *const pte{pt->entries.at_if(this->pto(page_virt))};
+            if (bsl::ZERO_UMAX == pte->p) {
+                bsl::error() << "virtual address "     // --
+                             << bsl::hex(page_virt)    // --
+                             << " was never mapped"    // --
+                             << bsl::endl              // --
+                             << bsl::here();           // --
+
+                return bsl::safe_uintmax::zero(true);
+            }
+
+            phys = pte->phys << bsl::to_umax(PAGE_SHIFT);
+            if (!this->unmap_page(virt)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::safe_uintmax::zero(true);
+            }
+
+            return phys;
         }
 
     public:
@@ -998,7 +1226,6 @@ namespace mk
                 bsl::touch();
             }
 
-            m_map_cursor = {};
             m_pml4t = {};
             m_page_pool = {};
             m_intrinsic = {};
@@ -1150,107 +1377,79 @@ namespace mk
         add_root_vp_state(STATE_SAVE_CONCEPT const *const root_vp_state) &noexcept -> bsl::errc_type
         {
             if (bsl::unlikely(!m_initialized)) {
-                bsl::error() << "root_page_table_t already initialized\n" << bsl::here();
+                bsl::error() << "root_page_table_t not initialized\n" << bsl::here();
+                return bsl::errc_failure;
+            }
+
+            if (bsl::ZERO_UMAX == root_vp_state->map_gdt) {
+                return bsl::errc_success;
+            }
+
+            /// NOTE:
+            /// - We need to map the root OS's GDT into the microkernel's
+            ///   address space so that it can flip the TSS busy bit
+            ///   during the promotion process.
+            /// - This is not a simple task as some OS's will not provide
+            ///   the physical address of the GDT (like Linux), so we need
+            ///   to manually walk the root OS's page tables to get this
+            ///   physical address ourselves.
+            ///
+
+            if (bsl::unlikely(nullptr == root_vp_state)) {
+                bsl::error() << "root_vp_state is invalid: "    // --
+                             << root_vp_state                   // --
+                             << bsl::endl                       // --
+                             << bsl::here();                    // --
+
+                return bsl::errc_failure;
+            }
+
+            auto const rpt_phys{this->page_aligned(root_vp_state->cr3)};
+            if (bsl::unlikely(rpt_phys.is_zero())) {
+                bsl::error() << "invalid cr3: "       // --
+                             << bsl::hex(rpt_phys)    // --
+                             << bsl::endl             // --
+                             << bsl::here();          // --
+
                 return bsl::errc_failure;
             }
 
             auto const gdt_virt{bsl::to_umax(root_vp_state->gdtr.base)};
-            auto const cr3_phys{this->page_aligned(root_vp_state->cr3)};
+            if (bsl::unlikely(gdt_virt.is_zero())) {
+                bsl::error() << "invalid gdt address: "    // --
+                             << bsl::hex(gdt_virt)         // --
+                             << bsl::endl                  // --
+                             << bsl::here();               // --
 
-            bsl::safe_uintmax virt{};
-            bsl::safe_uintmax phys{};
+                return bsl::errc_failure;
+            }
 
-            /// TODO:
-            /// - Unmap the direct maps that we create here. This should
-            ///   ensure that once complete, any pages allocated are freed
-            ///   as well.
-            ///
+            if (bsl::unlikely(!this->is_page_aligned(gdt_virt))) {
+                bsl::error() << "gdt address is not page aligned: "    // --
+                             << bsl::hex(gdt_virt)                     // --
+                             << bsl::endl                              // --
+                             << bsl::here();                           // --
 
-            virt = MAP_ADDR + m_map_cursor;
-            m_map_cursor += PAGE_SIZE;
-            if (!this->map_page(virt, cr3_phys, false, false, false)) {
+                return bsl::errc_failure;
+            }
+
+            auto const gdt_limit{bsl::to_umax(root_vp_state->gdtr.limit)};
+            if (bsl::unlikely(gdt_limit.is_zero())) {
+                bsl::error() << "invalid gdt limit: "    // --
+                             << bsl::hex(gdt_limit)      // --
+                             << bsl::endl                // --
+                             << bsl::here();             // --
+
+                return bsl::errc_failure;
+            }
+
+            auto gdpt_phys{this->virt_to_phys(rpt_phys, gdt_virt)};
+            if (bsl::unlikely(!gdpt_phys)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            auto *const pml4t{bsl::to_ptr<pml4t_t *>(virt)};
-            auto const pml4te{pml4t->entries.at_if(this->pml4to(gdt_virt))};
-            phys = pml4te->phys << bsl::to_umax(PAGE_SHIFT);
-
-            if (bsl::ZERO_UMAX == pml4te->p) {
-                bsl::error() << "virtual address "                    // --
-                             << bsl::hex(gdt_virt)                    // --
-                             << " was never mapped by the root OS"    // --
-                             << bsl::endl                             // --
-                             << bsl::here();                          // --
-
-                return bsl::errc_failure;
-            }
-
-            virt = MAP_ADDR + m_map_cursor;
-            m_map_cursor += PAGE_SIZE;
-            if (!this->map_page(virt, phys, false, false, false)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            auto *const pdpt{bsl::to_ptr<pdpt_t *>(virt)};
-            auto const pdpte{pdpt->entries.at_if(this->pdpto(gdt_virt))};
-            phys = pdpte->phys << bsl::to_umax(PAGE_SHIFT);
-
-            if (bsl::ZERO_UMAX == pdpte->p) {
-                bsl::error() << "virtual address "                    // --
-                             << bsl::hex(gdt_virt)                    // --
-                             << " was never mapped by the root OS"    // --
-                             << bsl::endl                             // --
-                             << bsl::here();                          // --
-
-                return bsl::errc_failure;
-            }
-
-            virt = MAP_ADDR + m_map_cursor;
-            m_map_cursor += PAGE_SIZE;
-            if (!this->map_page(virt, phys, false, false, false)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            auto *const pdt{bsl::to_ptr<pdt_t *>(virt)};
-            auto const pdte{pdt->entries.at_if(this->pdto(gdt_virt))};
-            phys = pdte->phys << bsl::to_umax(PAGE_SHIFT);
-
-            if (bsl::ZERO_UMAX == pdte->p) {
-                bsl::error() << "virtual address "                    // --
-                             << bsl::hex(gdt_virt)                    // --
-                             << " was never mapped by the root OS"    // --
-                             << bsl::endl                             // --
-                             << bsl::here();                          // --
-
-                return bsl::errc_failure;
-            }
-
-            virt = MAP_ADDR + m_map_cursor;
-            m_map_cursor += PAGE_SIZE;
-            if (!this->map_page(virt, phys, false, false, false)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            auto *const pt{bsl::to_ptr<pt_t *>(virt)};
-            auto const pte{pt->entries.at_if(this->pto(gdt_virt))};
-
-            if (bsl::ZERO_UMAX == pte->p) {
-                bsl::error() << "virtual address "                    // --
-                             << bsl::hex(gdt_virt)                    // --
-                             << " was never mapped by the root OS"    // --
-                             << bsl::endl                             // --
-                             << bsl::here();                          // --
-
-                return bsl::errc_failure;
-            }
-
-            phys = pte->phys << bsl::to_umax(PAGE_SHIFT);
-            if (!this->map_page(gdt_virt, phys, false, false, false)) {
+            if (!this->map_page(gdt_virt, gdpt_phys, false, false, false)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }

@@ -40,10 +40,10 @@
 void
 free_root_vp_state(struct state_save_t **const state)
 {
-    if (NULL == *state) {
+    if (((void *)0) == *state) {
         return;
     }
 
     platform_free(*state, HYPERVISOR_PAGE_SIZE);
-    *state = NULL;
+    *state = ((void *)0);
 }

@@ -39,4 +39,6 @@ intrinsic_outb:
     xor rax, rax
 
     ret
+    int 3
+
     .size intrinsic_outb, .-intrinsic_outb

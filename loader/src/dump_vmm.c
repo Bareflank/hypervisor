@@ -68,13 +68,13 @@ dump_vmm(struct dump_vmm_args_t *const ioctl_args)
     typedef struct dump_vmm_args_t args_t;
     args_t *args;
 
-    if (NULL == ioctl_args) {
-        BFERROR("ioctl_args was NULL\n");
+    if (((void *)0) == ioctl_args) {
+        BFERROR("ioctl_args was ((void *)0)\n");
         return LOADER_FAILURE;
     }
 
     args = (args_t *)platform_alloc(sizeof(args_t));
-    if (NULL == args) {
+    if (((void *)0) == args) {
         BFERROR("platform_alloc failed\n");
         return LOADER_FAILURE;
     }

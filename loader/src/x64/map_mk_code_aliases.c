@@ -37,6 +37,10 @@
 #include <pml4t_t.h>
 #include <promote.h>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4152)
+#endif
+
 /**
  * <!-- description -->
  *   @brief This function maps the code aliases into the microkernel's
@@ -56,7 +60,7 @@ map_mk_code_aliases(
     uint64_t phys;
 
     /**
-     * Note:
+     * NOTE:
      * - The map functions will automatically get the physical address
      *   if we pass 0, but in this case, we want the physical address of
      *   the alias, so we need to get it explicitly, otherwise we would
@@ -143,3 +147,7 @@ map_mk_code_aliases(
 
     return LOADER_SUCCESS;
 }
+
+#ifdef _MSC_VER
+#pragma warning(default : 4152)
+#endif

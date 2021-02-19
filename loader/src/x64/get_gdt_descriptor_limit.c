@@ -64,15 +64,15 @@ get_gdt_descriptor_limit(
     uint64_t bytes64;
     uint64_t idx64 = ((uint64_t)selector) >> ((uint64_t)3);
 
-    if (NULL == gdtr) {
-        BFERROR("invalid argument: gdtr == NULL\n");
+    if (((void *)0) == gdtr) {
+        BFERROR("invalid argument: gdtr == ((void *)0)\n");
         return LOADER_FAILURE;
     }
 
     bytes64 = ((uint64_t)gdtr->limit) + ((uint64_t)1);
 
-    if (NULL == limit) {
-        BFERROR("invalid argument: limit == NULL\n");
+    if (((void *)0) == limit) {
+        BFERROR("invalid argument: limit == ((void *)0)\n");
         return LOADER_FAILURE;
     }
 

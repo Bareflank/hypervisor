@@ -34,6 +34,8 @@ unlock_smap:
     stac
 
     ret
+    int 3
+
     .size unlock_smap, .-unlock_smap
 
 
@@ -45,4 +47,6 @@ lock_smap:
     clac
 
     ret
+    int 3
+
     .size lock_smap, .-lock_smap

@@ -19,6 +19,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/function/hypervisor_add_header_depends.cmake)
+
 add_library(runtime)
 
 target_include_directories(runtime PRIVATE
@@ -33,9 +35,20 @@ target_include_directories(runtime PUBLIC
     include
 )
 
+list(APPEND HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/include/bsl/cstdio.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/bsl/details/print_thread_id.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/bsl/details/putc_stderr.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/bsl/details/putc_stdout.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/bsl/details/puts_stderr.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/bsl/details/puts_stdout.hpp
+)
+
 target_sources(runtime PRIVATE
     src/_start.cpp
 )
+
+hypervisor_add_header_depends(src/_start.cpp ${HEADERS})
 
 target_link_libraries(runtime PUBLIC
     bsl

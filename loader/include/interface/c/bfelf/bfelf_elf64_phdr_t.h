@@ -108,11 +108,11 @@ static inline int64_t
 get_elf64_phdrtab(
     uint8_t const *const file, struct bfelf_elf64_phdr_t const **const phdrtab)
 {
-    if (NULL == file) {
+    if (((void *)0) == file) {
         return BFELF_INVALID_ARGUMENT;
     }
 
-    if (NULL == phdrtab) {
+    if (((void *)0) == phdrtab) {
         return BFELF_INVALID_ARGUMENT;
     }
 

@@ -67,13 +67,13 @@ set(CMAKE_CXX_LINK_EXECUTABLE
 # to make this work.
 # https://gitlab.kitware.com/cmake/cmake/-/issues/21789
 
-# set(__COMPILER_CLANG 1)
+set(__COMPILER_CLANG 1)
 
-# macro(__compiler_clang lang)
-# endmacro()
+macro(__compiler_clang lang)
+endmacro()
 
-# macro(__compiler_clang_cxx_standards lang)
-# endmacro()
+macro(__compiler_clang_cxx_standards lang)
+endmacro()
 
-# macro(__compiler_check_default_language_standard lang)
-# endmacro()
+macro(__compiler_check_default_language_standard lang)
+endmacro()

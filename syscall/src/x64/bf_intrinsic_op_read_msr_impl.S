@@ -39,4 +39,6 @@ bf_intrinsic_op_read_msr_impl:
     mov [rdx], rdi
 
     ret
+    int 3
+
     .size bf_intrinsic_op_read_msr_impl, .-bf_intrinsic_op_read_msr_impl

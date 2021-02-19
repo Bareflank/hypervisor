@@ -35,4 +35,6 @@ bf_tls_thread_id_impl:
 
     mov rax, fs:[0xFF8]
     ret
+    int 3
+
     .size bf_tls_thread_id_impl, .-bf_tls_thread_id_impl

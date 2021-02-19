@@ -37,4 +37,6 @@ bf_vps_op_destroy_vps_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_vps_op_destroy_vps_impl, .-bf_vps_op_destroy_vps_impl

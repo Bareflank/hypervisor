@@ -39,4 +39,6 @@ bf_vp_op_create_vp_impl:
     mov [rsi], di
 
     ret
+    int 3
+
     .size bf_vp_op_create_vp_impl, .-bf_vp_op_create_vp_impl

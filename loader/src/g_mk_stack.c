@@ -29,7 +29,7 @@
 #include <types.h>
 
 /** @brief stores the stack used by the microkernel */
-struct span_t g_mk_stack[HYPERVISOR_MAX_VPS_PER_VM] = {};
+struct span_t g_mk_stack[HYPERVISOR_MAX_VPS_PER_VM] = {0};
 
 /** @brief stores the virtual address of the MK's stack */
 uint64_t g_mk_stack_virt = HYPERVISOR_MK_STACK_ADDR;

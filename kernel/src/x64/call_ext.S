@@ -99,4 +99,6 @@ call_ext_fast_fail_entry:
 
     mov rax, 0x1
     ret
+    int 3
+
     .size call_ext_fast_fail_entry, .-call_ext_fast_fail_entry

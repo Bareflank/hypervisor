@@ -86,8 +86,8 @@ set_idt_descriptor(
     uint64_t selector64 = ((uint64_t)selector);
     uint64_t attrib64 = ((uint64_t)attrib);
 
-    if (NULL == idtr) {
-        BFERROR("invalid argument: idtr == NULL\n");
+    if (((void *)0) == idtr) {
+        BFERROR("invalid argument: idtr == ((void *)0)\n");
         return LOADER_FAILURE;
     }
 

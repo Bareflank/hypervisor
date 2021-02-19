@@ -53,7 +53,7 @@ dump_mk_args(struct mk_args_t *const args, uint32_t const cpu)
     BFINFO(" - mk_elf_file.size: 0x%016" PRIx64 "\n", args->mk_elf_file.size);
 
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
-        if (NULL != args->ext_elf_files[idx].addr) {
+        if (((void *)0) != args->ext_elf_files[idx].addr) {
             BFINFO(" - ext_elf_files[%" PRIu64 "].addr: 0x%016" PRIx64 "\n",
                 idx, (uint64_t)args->ext_elf_files[idx].addr);
             BFINFO(" - ext_elf_files[%" PRIu64 "].size: 0x%016" PRIx64 "\n",

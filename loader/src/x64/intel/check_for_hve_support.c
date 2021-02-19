@@ -321,5 +321,10 @@ check_for_hve_support(void)
         return LOADER_FAILURE;
     }
 
+    /**
+     * TODO:
+     * - CR0, CR4 and FEATURE_CONTROL bits need to be checked as well
+     */
+
     return LOADER_SUCCESS;
 }

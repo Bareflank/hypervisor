@@ -33,7 +33,4 @@
 /** @brief stores the page pool used by the microkernel */
 extern struct mutable_span_t g_mk_page_pool;
 
-/** @brief stores the virtual address of the MK's page pool */
-extern uint64_t g_mk_page_pool_base_virt;
-
 #endif

@@ -37,6 +37,10 @@
 #include <promote.h>
 #include <types.h>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4152)
+#endif
+
 /**
  * <!-- description -->
  *   @brief The function's main purpose is allocate pages for all of the
@@ -77,43 +81,43 @@ int64_t
 alloc_and_copy_mk_code_aliases(struct code_aliases_t *const a)
 {
     a->demote = platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == a->demote) {
+    if (((void *)0) == a->demote) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_demote_failed;
     }
 
     a->promote = platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == a->promote) {
+    if (((void *)0) == a->promote) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_promote_failed;
     }
 
     a->esr_default = platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == a->esr_default) {
+    if (((void *)0) == a->esr_default) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_esr_default_failed;
     }
 
     a->esr_df = platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == a->esr_df) {
+    if (((void *)0) == a->esr_df) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_esr_df_failed;
     }
 
     a->esr_gpf = platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == a->esr_gpf) {
+    if (((void *)0) == a->esr_gpf) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_esr_gpf_failed;
     }
 
     a->esr_nmi = platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == a->esr_nmi) {
+    if (((void *)0) == a->esr_nmi) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_esr_nmi_failed;
     }
 
     a->esr_pf = platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (NULL == a->esr_pf) {
+    if (((void *)0) == a->esr_pf) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_esr_pf_failed;
     }
@@ -151,3 +155,7 @@ platform_alloc_demote_failed:
     platform_memset(a, 0, sizeof(struct code_aliases_t));
     return LOADER_FAILURE;
 }
+
+#ifdef _MSC_VER
+#pragma warning(default : 4152)
+#endif

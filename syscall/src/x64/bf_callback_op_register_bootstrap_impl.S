@@ -37,4 +37,6 @@ bf_callback_op_register_bootstrap_impl:
     syscall
 
     ret
+    int 3
+
     .size bf_callback_op_register_bootstrap_impl, .-bf_callback_op_register_bootstrap_impl

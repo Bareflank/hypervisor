@@ -40,4 +40,6 @@ intrinsic_wrmsr:
     wrmsr
 
     ret
+    int 3
+
     .size intrinsic_wrmsr, .-intrinsic_wrmsr

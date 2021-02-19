@@ -43,7 +43,7 @@ dump_mk_elf_segments(struct elf_segment_t *const segments)
     uint64_t idx;
 
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_SEGMENTS; ++idx) {
-        if (NULL != segments[idx].addr) {
+        if (((void *)0) != segments[idx].addr) {
             BFINFO("mk elf segment #%u:\n", (uint32_t)idx);
             BFINFO(" - addr: 0x%016" PRIx64 "\n", (uint64_t)segments[idx].addr);
             BFINFO(" - size: 0x%016" PRIx64 "\n", segments[idx].size);

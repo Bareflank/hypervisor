@@ -39,4 +39,6 @@ bf_handle_op_open_handle_impl:
     mov [rsi], rdi
 
     ret
+    int 3
+
     .size bf_handle_op_open_handle_impl, .-bf_handle_op_open_handle_impl

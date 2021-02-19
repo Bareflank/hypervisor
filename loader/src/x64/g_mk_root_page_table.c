@@ -28,4 +28,4 @@
 #include <pml4t_t.h>
 
 /** @brief stores pml4 for the microkernel */
-struct pml4t_t *g_mk_root_page_table = NULL;
+struct pml4t_t *g_mk_root_page_table = ((void *)0);

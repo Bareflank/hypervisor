@@ -39,4 +39,6 @@ bf_vm_op_create_vm_impl:
     mov [rsi], di
 
     ret
+    int 3
+
     .size bf_vm_op_create_vm_impl, .-bf_vm_op_create_vm_impl

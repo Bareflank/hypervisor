@@ -41,7 +41,7 @@
 void
 free_mk_state(struct state_save_t **const state)
 {
-    if (NULL == *state) {
+    if (((void *)0) == *state) {
         return;
     }
 
@@ -54,5 +54,5 @@ free_mk_state(struct state_save_t **const state)
     platform_free((*state)->hve_page, HYPERVISOR_PAGE_SIZE);
 
     platform_free(*state, HYPERVISOR_PAGE_SIZE);
-    *state = NULL;
+    *state = ((void *)0);
 }

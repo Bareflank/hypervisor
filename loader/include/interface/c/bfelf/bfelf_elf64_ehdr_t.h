@@ -138,11 +138,11 @@ static inline int64_t
 get_elf64_ehdr(
     uint8_t const *const file, struct bfelf_elf64_ehdr_t const **const ehdr)
 {
-    if (NULL == file) {
+    if (((void *)0) == file) {
         return BFELF_INVALID_ARGUMENT;
     }
 
-    if (NULL == ehdr) {
+    if (((void *)0) == ehdr) {
         return BFELF_INVALID_ARGUMENT;
     }
 
@@ -162,7 +162,7 @@ get_elf64_ehdr(
 static inline int64_t
 validate_elf64_ehdr(uint8_t const *const file)
 {
-    if (NULL == file) {
+    if (((void *)0) == file) {
         return BFELF_INVALID_ARGUMENT;
     }
 

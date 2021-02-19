@@ -35,4 +35,6 @@ bf_tls_set_r11_impl:
 
     mov fs:[0x850], rdi
     ret
+    int 3
+
     .size bf_tls_set_r11_impl, .-bf_tls_set_r11_impl

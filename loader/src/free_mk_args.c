@@ -41,5 +41,5 @@ void
 free_mk_args(struct mk_args_t **const args)
 {
     platform_free(*args, HYPERVISOR_PAGE_SIZE);
-    *args = NULL;
+    *args = ((void *)0);
 }

@@ -31,12 +31,16 @@
     .type   return_to_vmexit_loop, @function
 return_to_vmexit_loop:
 
-    /**
-     * TODO:
-     * - implement the jmp as a retpoline
-     */
-
     mov rsp, gs:[0x948]
-    jmp gs:[0x940]
+
+    call set_up_target
+capture_spec:
+    pause
+    jmp capture_spec
+set_up_target:
+    mov rax, gs:[0x940]
+    mov [rsp], rax
+    ret
+    int 3
 
     .size return_to_vmexit_loop, .-return_to_vmexit_loop

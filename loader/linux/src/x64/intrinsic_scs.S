@@ -37,4 +37,6 @@ intrinsic_scs:
     mov ax, cs
 
     ret
+    int 3
+
     .size intrinsic_scs, .-intrinsic_scs

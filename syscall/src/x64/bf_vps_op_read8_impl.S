@@ -41,4 +41,6 @@ bf_vps_op_read8_impl:
     mov [r10], dil
 
     ret
+    int 3
+
     .size bf_vps_op_read8_impl, .-bf_vps_op_read8_impl

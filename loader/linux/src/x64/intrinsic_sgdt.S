@@ -36,4 +36,6 @@ intrinsic_sgdt:
     sgdt [rdi]
 
     ret
+    int 3
+
     .size intrinsic_sgdt, .-intrinsic_sgdt

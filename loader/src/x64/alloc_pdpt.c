@@ -42,7 +42,7 @@
  * <!-- inputs/outputs -->
  *   @param pml4t the pml4t to add the newly allocated pdpt to
  *   @param virt the virtual address to get the PML4 offset from.
- *   @return a pointer to the newly allocated pdpt on success, NULL otherwise.
+ *   @return a pointer to the newly allocated pdpt on success, ((void *)0) otherwise.
  */
 struct pdpt_t *
 alloc_pdpt(struct pml4t_t *const pml4t, uint64_t const virt)
@@ -54,11 +54,11 @@ alloc_pdpt(struct pml4t_t *const pml4t, uint64_t const virt)
     pml4te = &pml4t->entires[pml4to(virt)];
     if (pml4te->p != ((uint64_t)0)) {
         BFERROR("pdpt already present: 0x%" PRIx64 "\n", virt);
-        return NULL;
+        return ((void *)0);
     }
 
     pdpt = (struct pdpt_t *)platform_alloc(sizeof(struct pdpt_t));
-    if (NULL == pdpt) {
+    if (((void *)0) == pdpt) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_pdpt_failed;
     }
@@ -81,5 +81,5 @@ platform_virt_to_phys_pdpt_failed:
     platform_free(pdpt, sizeof(struct pdpt_t));
 platform_alloc_pdpt_failed:
 
-    return NULL;
+    return ((void *)0);
 }

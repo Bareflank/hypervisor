@@ -29,7 +29,4 @@
 #include <types.h>
 
 /** @brief stores the page pool used by the microkernel */
-struct mutable_span_t g_mk_page_pool = {};
-
-/** @brief stores the virtual address of the MK's page pool */
-uint64_t g_mk_page_pool_base_virt = HYPERVISOR_DIRECT_MAP_ADDR;
+struct mutable_span_t g_mk_page_pool = {0};

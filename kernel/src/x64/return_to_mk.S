@@ -47,4 +47,6 @@ return_to_mk:
 
     mov rax, rdi
     ret
+    int 3
+
     .size return_to_mk, .-return_to_mk

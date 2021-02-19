@@ -41,6 +41,9 @@
 /** @brief defines the VMX revision ID */
 #define VMX_BASIC_REVISION_ID ((uint64_t)0x000000007FFFFFFF)
 
+/** @brief defines the MSR address for VMX information */
+#define MSR_IA32_FEATURE_CONTROL ((uint32_t)0x3A)
+
 /**
  * <!-- description -->
  *   @brief Enables AMD SVE

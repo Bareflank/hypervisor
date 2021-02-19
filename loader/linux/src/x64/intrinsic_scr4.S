@@ -36,4 +36,6 @@ intrinsic_scr4:
     mov rax, cr4
 
     ret
+    int 3
+
     .size intrinsic_scr4, .-intrinsic_scr4

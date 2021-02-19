@@ -37,4 +37,6 @@ intrinsic_ses:
     mov ax, es
 
     ret
+    int 3
+
     .size intrinsic_ses, .-intrinsic_ses

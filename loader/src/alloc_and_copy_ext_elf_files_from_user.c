@@ -50,7 +50,7 @@ alloc_and_copy_ext_elf_file_from_user(
     uint64_t const dst_size = ext_elf_file_from_user->size;
 
     uint8_t *const dst_addr = (uint8_t *)platform_alloc(dst_size);
-    if (NULL == dst_addr) {
+    if (((void *)0) == dst_addr) {
         BFERROR("platform_alloc failed\n");
         goto platform_alloc_failed;
     }
@@ -108,7 +108,7 @@ alloc_and_copy_ext_elf_files_from_user(
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
         struct span_t const *const src = &ext_elf_files_from_user[idx];
         struct span_t *const dst = &copied_ext_elf_files[idx];
-        if (src->addr != NULL && src->size != ((uint64_t)0)) {
+        if (src->addr != ((void *)0) && src->size != ((uint64_t)0)) {
             ret = alloc_and_copy_ext_elf_file_from_user(src, dst);
             if (ret) {
                 break;

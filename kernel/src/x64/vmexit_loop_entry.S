@@ -49,5 +49,6 @@ loop:
 
     mov rax, 0x1
     ret
+    int 3
 
     .size vmexit_loop_entry, .-vmexit_loop_entry
