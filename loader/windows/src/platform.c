@@ -303,8 +303,7 @@ platform_copy_to_user(
 uint32_t
 platform_num_online_cpus(void)
 {
-    KAFFINITY k_affin;
-    return KeQueryActiveProcessorCount(&k_affin);
+    return KeQueryActiveProcessorCountEx(ALL_PROCESSOR_GROUPS);
 }
 
 /**
@@ -324,17 +323,30 @@ platform_num_online_cpus(void)
 static int64_t
 platform_on_each_cpu_forward(platform_per_cpu_func const func)
 {
+    (void)func;
     int64_t ret = 0;
-    uint32_t cpu;
 
-    for (cpu = 0; cpu < platform_num_online_cpus(); ++cpu) {
-        KAFFINITY old = KeSetSystemAffinityThreadEx(1ULL << cpu);
-        ret = func(cpu);
-        KeRevertToUserAffinityThreadEx(old);
+    ULONG Count;
+    ULONG ProcIndex;
+    PROCESSOR_NUMBER ProcNumber;
+
+    Count = KeQueryActiveProcessorCountEx(ALL_PROCESSOR_GROUPS);
+    for (ProcIndex = 0; ProcIndex < Count; ++ProcIndex) {
+        GROUP_AFFINITY affinity = {0};
+        GROUP_AFFINITY previous = {0};
+
+        KeGetProcessorNumberFromIndex(ProcIndex, &ProcNumber);
+
+        affinity.Mask = (1ULL << ProcNumber.Number);
+        affinity.Group = ProcNumber.Group;
+
+        KeSetSystemGroupAffinityThread(&affinity, &previous);
+        ret = func(ProcIndex);
+        KeRevertToUserGroupAffinityThread(&previous);
 
         if (ret) {
             BFERROR("platform_per_cpu_func failed\n");
-            break;
+            return ret;
         }
     }
 
@@ -359,16 +371,28 @@ static int64_t
 platform_on_each_cpu_reverse(platform_per_cpu_func const func)
 {
     int64_t ret = 0;
-    uint32_t cpu;
 
-    for (cpu = platform_num_online_cpus(); cpu > 0U; --cpu) {
-        KAFFINITY old = KeSetSystemAffinityThreadEx(1ULL << (cpu - 1U));
-        ret = func(cpu - 1U);
-        KeRevertToUserAffinityThreadEx(old);
+    ULONG Count;
+    ULONG ProcIndex;
+    PROCESSOR_NUMBER ProcNumber;
+
+    Count = KeQueryActiveProcessorCountEx(ALL_PROCESSOR_GROUPS);
+    for (ProcIndex = Count; ProcIndex > 0; --ProcIndex) {
+        GROUP_AFFINITY affinity = {0};
+        GROUP_AFFINITY previous = {0};
+
+        KeGetProcessorNumberFromIndex(ProcIndex - 1, &ProcNumber);
+
+        affinity.Mask = (1ULL << ProcNumber.Number);
+        affinity.Group = ProcNumber.Group;
+
+        KeSetSystemGroupAffinityThread(&affinity, &previous);
+        ret = func(ProcIndex - 1);
+        KeRevertToUserGroupAffinityThread(&previous);
 
         if (ret) {
             BFERROR("platform_per_cpu_func failed\n");
-            break;
+            return ret;
         }
     }
 
