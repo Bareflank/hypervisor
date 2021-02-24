@@ -166,7 +166,6 @@ alloc_and_start_the_vmm(struct start_vmm_args_t const *const args)
     }
 
     g_vmm_status = VMM_STATUS_RUNNING;
-
     return LOADER_SUCCESS;
 
 start_vmm_per_cpu_failed:

@@ -59,7 +59,6 @@
 #include <map_root_vp_state.h>
 #include <platform.h>
 #include <send_command_report_on.h>
-#include <serial_write.h>
 #include <types.h>
 
 /**

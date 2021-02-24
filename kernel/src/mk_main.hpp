@@ -441,12 +441,13 @@ namespace mk
             // [x] implement error on VMX instructions on Intel
             // [x] implement error on SVM instructions on AMD
             // [ ] implement fix for vmexit first crash (vmxoff and check state)
+            // [x] implement fix for 128 cores on Windows
             // [x] implement alloc page
             // [ ] implement free page
             // [x] implement virt_to_phys
             // [ ] implement make ack
             // [ ] implement debugging mutex/transaction support
-            // [ ] implement Windows support
+            // [x] implement Windows support
             // [ ] implement UEFI support
             // [ ] implement huge_pool
             // [ ] implement huge
