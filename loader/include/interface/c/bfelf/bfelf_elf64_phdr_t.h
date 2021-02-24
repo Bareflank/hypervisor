@@ -105,8 +105,7 @@ struct bfelf_elf64_phdr_t
  *   @return returns 0 on success or an error code otherwise.
  */
 static inline int64_t
-get_elf64_phdrtab(
-    uint8_t const *const file, struct bfelf_elf64_phdr_t const **const phdrtab)
+get_elf64_phdrtab(uint8_t const *const file, struct bfelf_elf64_phdr_t const **const phdrtab)
 {
     if (((void *)0) == file) {
         return BFELF_INVALID_ARGUMENT;

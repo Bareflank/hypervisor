@@ -39,7 +39,7 @@
 void
 dump_mk_elf_file(struct span_t *const file)
 {
-    BFINFO("mk elf file:\n");
-    BFINFO(" - addr: 0x%016" PRIx64 "\n", (uint64_t)file->addr);
-    BFINFO(" - size: 0x%016" PRIx64 "\n", file->size);
+    bfdebug("mk elf file:");
+    bfdebug_ptr(" - addr", file->addr);
+    bfdebug_x64(" - size", file->size);
 }

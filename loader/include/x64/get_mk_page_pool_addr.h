@@ -42,8 +42,6 @@
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t get_mk_page_pool_addr(
-    struct mutable_span_t const *const page_pool,
-    uint64_t const base_virt,
-    uint8_t **const addr);
+    struct mutable_span_t const *const page_pool, uint64_t const base_virt, uint8_t **const addr);
 
 #endif

@@ -42,10 +42,9 @@
 int64_t
 alloc_mk_debug_ring(struct debug_ring_t **const debug_ring)
 {
-    *debug_ring =
-        (struct debug_ring_t *)platform_alloc(HYPERVISOR_DEBUG_RING_SIZE);
+    *debug_ring = (struct debug_ring_t *)platform_alloc(HYPERVISOR_DEBUG_RING_SIZE);
     if (((void *)0) == *debug_ring) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         return LOADER_FAILURE;
     }
 

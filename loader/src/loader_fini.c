@@ -47,7 +47,7 @@ int64_t
 loader_fini(void)
 {
     if (VMM_STATUS_CORRUPT == g_vmm_status) {
-        BFERROR("Unable to fini, a VMM failed to properly stop\n");
+        bferror("Unable to fini, a VMM failed to properly stop");
         return LOADER_FAILURE;
     }
 

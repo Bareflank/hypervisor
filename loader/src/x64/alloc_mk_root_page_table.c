@@ -43,12 +43,12 @@ alloc_mk_root_page_table(struct pml4t_t **const pml4t)
 {
     *pml4t = (struct pml4t_t *)platform_alloc(sizeof(struct pml4t_t));
     if (((void *)0) == *pml4t) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         return LOADER_FAILURE;
     }
 
     if (map_4k_page_rw(*pml4t, ((uint64_t)0), *pml4t)) {
-        BFERROR("map_4k_page_rw failed\n");
+        bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }
 

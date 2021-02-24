@@ -61,13 +61,13 @@ enable_hve(struct state_save_t *const state)
 
     cr4 = intrinsic_scr4();
     if ((cr4 & CR4_VMXE) != 0) {
-        BFERROR("VT-x is already running. Is another hypervisor running?\n");
+        bferror("VT-x is already running. Is another hypervisor running?");
         return LOADER_FAILURE;
     }
 
     phys = platform_virt_to_phys(state->hve_page);
     if (((uint64_t)0) == phys) {
-        BFERROR("platform_virt_to_phys failed\n");
+        bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
@@ -77,7 +77,7 @@ enable_hve(struct state_save_t *const state)
     intrinsic_lcr4(cr4 | CR4_VMXE);
 
     if (intrinsic_vmxon(&phys)) {
-        BFERROR("intrinsic_vmxon failed\n");
+        bferror("intrinsic_vmxon failed");
         goto intrinsic_vmxon_failure;
     }
 

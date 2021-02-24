@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
-
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -26,16 +24,34 @@
  * SOFTWARE.
  */
 
-#ifndef INTTYPES_H
-#define INTTYPES_H
+#ifndef EFI_CPU_PHYSICAL_LOCATION_H
+#define EFI_CPU_PHYSICAL_LOCATION_H
 
-#include "stdint.h"
+/**
+ * @struct EFI_CPU_PHYSICAL_LOCATION
+ *
+ * <!-- description -->
+ *   @brief Defines the layout of the EFI_CPU_PHYSICAL_LOCATION struct:
+ *     https://uefi.org/sites/default/files/resources/PI_Spec_1_7_A_final_May1.pdf
+ */
+typedef struct
+{
+    /**
+     * @brief Zero-based physical package number that identifies the cartridge
+     *   of the processor.
+     */
+    UINT32 Package;
 
-#define PRId64 "lld"
-#define PRIu64 "llu"
-#define PRIx64 "llx"
-#define PRIdPTR "ld"
-#define PRIuPTR "lu"
-#define PRIxPTR "lx"
+    /**
+     * @brief Zero-based physical core number within package of the processor.
+     */
+    UINT32 Core;
+
+    /**
+     * @brief Zero-based logical thread number within core of the processor.
+     */
+    UINT32 Thread;
+
+} EFI_CPU_PHYSICAL_LOCATION;
 
 #endif

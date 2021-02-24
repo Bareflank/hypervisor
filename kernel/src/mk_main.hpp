@@ -211,13 +211,6 @@ namespace mk
 
             if (m_initialized) {
                 m_system_rpt.activate();
-
-                ret = m_system_rpt.add_root_vp_state(args->root_vp_state);
-                if (bsl::unlikely(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return bsl::errc_failure;
-                }
-
                 return bsl::errc_success;
             }
 
@@ -262,25 +255,6 @@ namespace mk
             }
 
             m_system_rpt.activate();
-
-            ret = m_system_rpt.add_root_vp_state(args->root_vp_state);
-            if (bsl::unlikely(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            /// NOTE:
-            /// - At this point, if an error occurs, it will safely exit.
-            ///   Prior to this point, if an error occurs, we will likely
-            ///   see a page fault when exiting as the microkernel has no
-            ///   way of restoring the GDT as the TSS busy bit cannot be
-            ///   cleared without successfully mapping in the GDT. To fix
-            ///   this issue, we would need to add a LOT of code to the
-            ///   loader as it would need enough pageing logic to create
-            ///   a temporary set of page tables capable of walking the
-            ///   root OS's page tables to locate the physical address of
-            ///   the GDT, since Linux will not provide that.
-            ///
 
             ret = m_vps_pool.initialize();
             if (bsl::unlikely(!ret)) {
@@ -448,13 +422,13 @@ namespace mk
             // [ ] implement make ack
             // [ ] implement debugging mutex/transaction support
             // [x] implement Windows support
-            // [ ] implement UEFI support
+            // [x] implement UEFI support
             // [ ] implement huge_pool
             // [ ] implement huge
             // [ ] implement alloc physically contiguous page
             // [ ] implement free physically contiguous page
             // [ ] implement per-VM direct maps
-            // [ ] implement reduce the size of the TLS block
+            // [x] implement reduce the size of the TLS block
             // [ ] implement optimizations for release builds
             // [ ] implement dump functions for all types
             // [ ] implement all debug ops
@@ -472,24 +446,6 @@ namespace mk
             // [ ] implement remaining todos
             // [ ] implement c extension example
             // [ ] implement mitigations for transient execution vulnerabilities
-
-            // NMI Notes:
-            // - On AMD, they are disabled, so we should never see them.
-            // - On Intel, we cannot disable them. We can, however, generate
-            //   an NMI VMExit. If an NMI fires while we are trying to start
-            //   and the attempt to start fails, you might have to reboot as
-            //   the NMI would be dropped, and we will warn the user. If an
-            //   NMI fires at any other time, we make a note of it in the
-            //   TLS block. Once we are in the "transition" portion for a
-            //   VMResume, we will make note of that in the TLS block, and
-            //   then we will check to see if an NMI was caught. If it was,
-            //   we will then execute an int 2, which will force the NMI
-            //   handler to execute. When the NMI handler executes, and it
-            //   knows that we are in the "transition" portion of the
-            //   code, it will always set the NMI window in whatever VMCS has
-            //   been loaded, which will generate a VMExit that the extension
-            //   will have to handle.
-            //
         }
     };
 }

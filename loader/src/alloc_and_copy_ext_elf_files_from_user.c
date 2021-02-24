@@ -43,20 +43,19 @@
  */
 static int64_t
 alloc_and_copy_ext_elf_file_from_user(
-    struct span_t const *const ext_elf_file_from_user,
-    struct span_t *const copied_ext_elf_file)
+    struct span_t const *const ext_elf_file_from_user, struct span_t *const copied_ext_elf_file)
 {
     uint8_t const *const src_addr = ext_elf_file_from_user->addr;
     uint64_t const dst_size = ext_elf_file_from_user->size;
 
     uint8_t *const dst_addr = (uint8_t *)platform_alloc(dst_size);
     if (((void *)0) == dst_addr) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_failed;
     }
 
     if (platform_copy_from_user(dst_addr, src_addr, dst_size)) {
-        BFERROR("platform_copy_from_user failed\n");
+        bferror("platform_copy_from_user failed");
         goto platform_copy_from_user_failed;
     }
 
@@ -94,8 +93,7 @@ platform_alloc_failed:
  */
 int64_t
 alloc_and_copy_ext_elf_files_from_user(
-    struct span_t const *const ext_elf_files_from_user,
-    struct span_t *const copied_ext_elf_files)
+    struct span_t const *const ext_elf_files_from_user, struct span_t *const copied_ext_elf_files)
 {
     int64_t ret = LOADER_SUCCESS;
     uint64_t idx;

@@ -44,11 +44,11 @@ dump_mk_elf_segments(struct elf_segment_t *const segments)
 
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_SEGMENTS; ++idx) {
         if (((void *)0) != segments[idx].addr) {
-            BFINFO("mk elf segment #%u:\n", (uint32_t)idx);
-            BFINFO(" - addr: 0x%016" PRIx64 "\n", (uint64_t)segments[idx].addr);
-            BFINFO(" - size: 0x%016" PRIx64 "\n", segments[idx].size);
-            BFINFO(" - virt: 0x%016" PRIx64 "\n", segments[idx].virt);
-            BFINFO(" - flags: 0x%x\n", segments[idx].flags);
+            bfdebug_d32("mk elf segment", (uint32_t)idx);
+            bfdebug_ptr(" - addr", segments[idx].addr);
+            bfdebug_x64(" - size", segments[idx].size);
+            bfdebug_x64(" - virt", segments[idx].virt);
+            bfdebug_x32(" - flgs", segments[idx].flags);
         }
     }
 }

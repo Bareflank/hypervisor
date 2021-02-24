@@ -111,6 +111,29 @@ make info
 make
 ```
 
+### **UEFI**
+To compile for UEFI, simply follow the steps for your OS above, but add the following to the cmake:
+```cmake
+-DHYPERVISOR_BUILD_EFI=ON
+```
+
+You can then build the hypervisor as normal and the UEFI loader will be compiled for you automatically. Once the kernel, extensions and UEFI loader are compiled, you can copy them to your UEFI FS0 partition. **Note that all binaries must be copied to your FS0 partition, and on some systems, this might be a USB stick**. To aid in this copy process, the build system includes the following command:
+```bash
+make copy_to_efi_partition
+```
+
+By default this uses the EFI partition, but it can be relocated using:
+```cmake
+-DHYPERVISOR_EFI_FS0=<path to FS0>
+```
+
+Some systems require you to provide the UEFI shell, and so Bareflank contains a copy of this shell which will be copied along with the kernel, extensions and UEFI loader. Once you have rebooted into the UEFI shell, you can start the hypervisor using
+```
+start_bareflank.efi
+```
+
+Note that by default, the hypervisor is not able to boot an OS. You must either use a non-default example that provides more complete UEFI support, or provide your own extension that is capable of successfully booting an OS. Finally, we currently *do not* provide any of the other vmmctl functions like stop or dump.
+
 ## Usage Instructions
 To use the hypervisor, run the following commands (on Windows, replace make with ninja):
 

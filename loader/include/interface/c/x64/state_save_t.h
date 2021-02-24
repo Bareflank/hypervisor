@@ -297,17 +297,10 @@ struct state_save_t
 
     /** @brief stores whether or not an NMI fired (0x318) */
     uint64_t nmi;
-
-    /**************************************************************************/
-    /* Map GDT                                                                */
-    /**************************************************************************/
-
-    /** @brief stores whether or not the GDT needs to be mapped (0x320) */
-    uint64_t map_gdt;
 };
 
 /** @brief Check to make sure the state_save_t is the right size. */
-STATIC_ASSERT(sizeof(struct state_save_t) == 0x328, invalid_size);
+STATIC_ASSERT(sizeof(struct state_save_t) == 0x320, invalid_size);
 
 #pragma pack(pop)
 

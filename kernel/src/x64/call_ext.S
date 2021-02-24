@@ -33,23 +33,23 @@ call_ext:
 
     mov r10, rcx
 
-    mov gs:[0x008], rbx
-    mov gs:[0x020], rbp
-    mov gs:[0x058], r12
-    mov gs:[0x060], r13
-    mov gs:[0x068], r14
-    mov gs:[0x070], r15
+    mov gs:[0x000], rbx
+    mov gs:[0x008], rbp
+    mov gs:[0x010], r12
+    mov gs:[0x018], r13
+    mov gs:[0x020], r14
+    mov gs:[0x028], r15
 
+    mov rax, gs:[0x208]
     stac
-    mov rax, gs:[0x808]
     mov fs:[0xFF8], rax
     clac
 
-    mov gs:[0x928], rsp
-    mov rax, gs:[0x920]
-    mov gs:[0x900], rax
-    mov rax, gs:[0x928]
-    mov gs:[0x908], rax
+    mov gs:[0x1A8], rsp
+    mov rax, gs:[0x1A0]
+    mov gs:[0x180], rax
+    mov rax, gs:[0x1A8]
+    mov gs:[0x188], rax
 
     mov rcx, rdi
     mov rsp, rsi
@@ -70,10 +70,8 @@ call_ext:
     xor r14, r14
     xor r15, r15
 
-    swapgs
-
-    .byte 0x48
-    sysret
+    sysretq
+    int 3
 
     .size call_ext, .-call_ext
 
@@ -85,17 +83,17 @@ call_ext:
     .type   call_ext_fast_fail_entry, @function
 call_ext_fast_fail_entry:
 
-    mov rax, gs:[0x910]
-    mov gs:[0x900], rax
-    mov rax, gs:[0x918]
-    mov gs:[0x908], rax
+    mov rax, gs:[0x190]
+    mov gs:[0x180], rax
+    mov rax, gs:[0x198]
+    mov gs:[0x188], rax
 
-    mov r15, gs:[0x070]
-    mov r14, gs:[0x068]
-    mov r13, gs:[0x060]
-    mov r12, gs:[0x058]
-    mov rbp, gs:[0x020]
-    mov rbx, gs:[0x008]
+    mov r15, gs:[0x028]
+    mov r14, gs:[0x020]
+    mov r13, gs:[0x018]
+    mov r12, gs:[0x010]
+    mov rbp, gs:[0x008]
+    mov rbx, gs:[0x000]
 
     mov rax, 0x1
     ret

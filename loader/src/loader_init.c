@@ -24,8 +24,6 @@
  * SOFTWARE.
  */
 
-#define DEBUG_LOADER
-
 #include <alloc_and_copy_mk_code_aliases.h>
 #include <alloc_mk_debug_ring.h>
 #include <check_for_hve_support.h>
@@ -37,7 +35,6 @@
 #include <g_mk_code_aliases.h>
 #include <g_mk_debug_ring.h>
 #include <platform.h>
-#include <serial_init.h>
 #include <types.h>
 #include <vmm_status.h>
 
@@ -55,24 +52,22 @@ int64_t
 loader_init(void)
 {
     if (VMM_STATUS_CORRUPT == g_vmm_status) {
-        BFERROR("Unable to init, previous VMM failed to properly stop\n");
+        bferror("Unable to init, previous VMM failed to properly stop");
         return LOADER_FAILURE;
     }
 
-    serial_init();
-
     if (check_for_hve_support()) {
-        BFERROR("check_for_hve_support failed\n");
+        bferror("check_for_hve_support failed");
         return LOADER_FAILURE;
     }
 
     if (alloc_mk_debug_ring(&g_mk_debug_ring)) {
-        BFERROR("alloc_mk_debug_ring failed\n");
+        bferror("alloc_mk_debug_ring failed");
         goto alloc_mk_debug_ring_failed;
     }
 
     if (alloc_and_copy_mk_code_aliases(&g_mk_code_aliases)) {
-        BFERROR("alloc_and_copy_mk_code_aliases failed\n");
+        bferror("alloc_and_copy_mk_code_aliases failed");
         goto alloc_and_copy_mk_code_aliases_failed;
     }
 

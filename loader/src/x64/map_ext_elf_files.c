@@ -49,7 +49,7 @@ map_ext_elf_file(struct span_t const *const file, struct pml4t_t *const pml4t)
 
     for (off = ((uint64_t)0); off < file->size; off += HYPERVISOR_PAGE_SIZE) {
         if (map_4k_page_rw(file->addr + off, ((uint64_t)0), pml4t)) {
-            BFERROR("map_4k_page_rw failed\n");
+            bferror("map_4k_page_rw failed");
             return LOADER_FAILURE;
         }
     }
@@ -75,7 +75,7 @@ map_ext_elf_files(struct span_t const *const files, struct pml4t_t *const pml4t)
 
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
         if (map_ext_elf_file(&files[idx], pml4t)) {
-            BFERROR("map_ext_elf_file failed\n");
+            bferror("map_ext_elf_file failed");
             return LOADER_FAILURE;
         }
     }

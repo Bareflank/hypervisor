@@ -31,7 +31,7 @@
     .type   dispatch_esr_entry, @function
 dispatch_esr_entry:
 
-    mov rdi, gs:[0x800]
+    mov rdi, gs:[0x200]
     call dispatch_esr_trampoline
 
     cmp rax, 0x0
@@ -50,76 +50,66 @@ dispatch_esr_entry:
     .type   dispatch_esr_entry_0, @function
 dispatch_esr_entry_0:
 
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_0_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_0_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x00]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x18]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0x0
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, 0x0
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_0_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_0_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -132,76 +122,66 @@ dispatch_esr_entry_0_skip_swapgs_epilog:
     .type   dispatch_esr_entry_1, @function
 dispatch_esr_entry_1:
 
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_1_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_1_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x00]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x18]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0x1
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, 0x0
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_1_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_1_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -214,53 +194,43 @@ dispatch_esr_entry_1_skip_swapgs_epilog:
     .type   dispatch_esr_entry_2, @function
 dispatch_esr_entry_2:
 
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_2_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_2_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, 0x2
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
 
-    mov rdi, gs:[0x800]
+    mov rdi, gs:[0x200]
     call dispatch_esr_trampoline
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_2_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_2_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -273,76 +243,66 @@ dispatch_esr_entry_2_skip_swapgs_epilog:
     .type   dispatch_esr_entry_3, @function
 dispatch_esr_entry_3:
 
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_3_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_3_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x00]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x18]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0x3
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, 0x0
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_3_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_3_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -355,76 +315,66 @@ dispatch_esr_entry_3_skip_swapgs_epilog:
     .type   dispatch_esr_entry_4, @function
 dispatch_esr_entry_4:
 
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_4_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_4_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x00]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x18]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0x4
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, 0x0
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_4_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_4_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -437,76 +387,66 @@ dispatch_esr_entry_4_skip_swapgs_epilog:
     .type   dispatch_esr_entry_5, @function
 dispatch_esr_entry_5:
 
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_5_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_5_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x00]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x18]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0x5
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, 0x0
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_5_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_5_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -519,76 +459,66 @@ dispatch_esr_entry_5_skip_swapgs_epilog:
     .type   dispatch_esr_entry_6, @function
 dispatch_esr_entry_6:
 
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_6_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_6_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x00]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x18]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0x6
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, 0x0
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_6_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_6_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -601,76 +531,66 @@ dispatch_esr_entry_6_skip_swapgs_epilog:
     .type   dispatch_esr_entry_7, @function
 dispatch_esr_entry_7:
 
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_7_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_7_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x00]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x18]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0x7
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, 0x0
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_7_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_7_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -683,78 +603,68 @@ dispatch_esr_entry_7_skip_swapgs_epilog:
     .type   dispatch_esr_entry_8, @function
 dispatch_esr_entry_8:
 
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_8_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_8_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0x8
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, [rsp + 0x00]
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x28]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x18]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
     pop rax
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_8_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_8_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -767,78 +677,68 @@ dispatch_esr_entry_8_skip_swapgs_epilog:
     .type   dispatch_esr_entry_10, @function
 dispatch_esr_entry_10:
 
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_10_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_10_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0xA
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, [rsp + 0x00]
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x28]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x18]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
     pop rax
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_10_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_10_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -851,78 +751,68 @@ dispatch_esr_entry_10_skip_swapgs_epilog:
     .type   dispatch_esr_entry_11, @function
 dispatch_esr_entry_11:
 
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_11_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_11_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0xB
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, [rsp + 0x00]
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x28]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x18]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
     pop rax
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_11_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_11_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -935,78 +825,68 @@ dispatch_esr_entry_11_skip_swapgs_epilog:
     .type   dispatch_esr_entry_12, @function
 dispatch_esr_entry_12:
 
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_12_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_12_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0xC
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, [rsp + 0x00]
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x28]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x18]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
     pop rax
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_12_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_12_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -1019,57 +899,52 @@ dispatch_esr_entry_12_skip_swapgs_epilog:
     .type   dispatch_esr_entry_13, @function
 dispatch_esr_entry_13:
 
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_13_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_13_skip_swapgs_prolog:
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
-
-    mov rax, gs:[0x850]
+    mov rax, gs:[0x250]
     cmp rax, 0x0
     jne dispatch_esr_entry_13_fix_rip
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0xD
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, [rsp + 0x00]
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x28]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x18]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
@@ -1077,26 +952,21 @@ dispatch_esr_entry_13_ret:
 
     pop rax
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_13_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_13_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -1113,53 +983,48 @@ dispatch_esr_entry_13_fix_rip:
     .type   dispatch_esr_entry_14, @function
 dispatch_esr_entry_14:
 
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_14_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_14_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0xE
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, [rsp + 0x00]
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x28]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x18]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     mov rax, 0x0
     mov cr2, rax
@@ -1168,26 +1033,21 @@ dispatch_esr_entry_14_skip_swapgs_prolog:
 
     pop rax
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_14_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_14_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -1200,76 +1060,66 @@ dispatch_esr_entry_14_skip_swapgs_epilog:
     .type   dispatch_esr_entry_16, @function
 dispatch_esr_entry_16:
 
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_16_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_16_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x00]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x18]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0x10
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, 0x0
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_16_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_16_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -1282,78 +1132,68 @@ dispatch_esr_entry_16_skip_swapgs_epilog:
     .type   dispatch_esr_entry_17, @function
 dispatch_esr_entry_17:
 
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_17_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_17_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0x11
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, [rsp + 0x00]
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x28]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x18]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
     pop rax
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x10], 0x10
-    je dispatch_esr_entry_17_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_17_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -1366,76 +1206,66 @@ dispatch_esr_entry_17_skip_swapgs_epilog:
     .type   dispatch_esr_entry_18, @function
 dispatch_esr_entry_18:
 
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_18_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_18_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x00]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x18]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0x12
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, 0x0
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_18_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_18_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3
@@ -1448,76 +1278,66 @@ dispatch_esr_entry_18_skip_swapgs_epilog:
     .type   dispatch_esr_entry_19, @function
 dispatch_esr_entry_19:
 
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_19_skip_swapgs_prolog
-	swapgs
-dispatch_esr_entry_19_skip_swapgs_prolog:
-
-    mov gs:[0x200], rax
-    mov gs:[0x208], rbx
-    mov gs:[0x210], rcx
-    mov gs:[0x218], rdx
-    mov gs:[0x220], rbp
-    mov gs:[0x228], rsi
-    mov gs:[0x230], rdi
-    mov gs:[0x238], r8
-    mov gs:[0x240], r9
-    mov gs:[0x248], r10
-    mov gs:[0x250], r11
-    mov gs:[0x258], r12
-    mov gs:[0x260], r13
-    mov gs:[0x268], r14
-    mov gs:[0x270], r15
+    mov gs:[0x0B0], rax
+    mov gs:[0x0B8], rbx
+    mov gs:[0x0C0], rcx
+    mov gs:[0x0C8], rdx
+    mov gs:[0x0D0], rbp
+    mov gs:[0x0D8], rsi
+    mov gs:[0x0E0], rdi
+    mov gs:[0x0E8], r8
+    mov gs:[0x0F0], r9
+    mov gs:[0x0F8], r10
+    mov gs:[0x100], r11
+    mov gs:[0x108], r12
+    mov gs:[0x110], r13
+    mov gs:[0x118], r14
+    mov gs:[0x120], r15
 
     mov rax, [rsp + 0x00]
-    mov gs:[0x278], rax
+    mov gs:[0x128], rax
     mov rax, [rsp + 0x18]
-    mov gs:[0x280], rax
+    mov gs:[0x130], rax
 
     mov rax, 0x13
-    mov gs:[0x288], rax
+    mov gs:[0x138], rax
     mov rax, 0x0
-    mov gs:[0x290], rax
+    mov gs:[0x140], rax
 
     mov rax, cr0
-    mov gs:[0x298], rax
+    mov gs:[0x148], rax
     mov rax, cr2
-    mov gs:[0x2A0], rax
+    mov gs:[0x150], rax
     mov rax, cr3
-    mov gs:[0x2A8], rax
+    mov gs:[0x158], rax
     mov rax, cr4
-    mov gs:[0x2B0], rax
+    mov gs:[0x160], rax
 
     mov rax, [rsp + 0x08]
-    mov gs:[0x2B8], rax
+    mov gs:[0x168], rax
     mov rax, [rsp + 0x20]
-    mov gs:[0x2C0], rax
+    mov gs:[0x170], rax
 
     mov rax, [rsp + 0x10]
-    mov gs:[0x2C8], rax
+    mov gs:[0x178], rax
 
     call dispatch_esr_entry
 
-    mov r15, gs:[0x270]
-    mov r14, gs:[0x268]
-    mov r13, gs:[0x260]
-    mov r12, gs:[0x258]
-    mov r11, gs:[0x250]
-    mov r10, gs:[0x248]
-    mov r9,  gs:[0x240]
-    mov r8,  gs:[0x238]
-    mov rdi, gs:[0x230]
-    mov rsi, gs:[0x228]
-    mov rbp, gs:[0x220]
-    mov rdx, gs:[0x218]
-    mov rcx, gs:[0x210]
-    mov rbx, gs:[0x208]
-    mov rax, gs:[0x200]
-
-	cmp qword ptr [rsp + 0x08], 0x10
-    je dispatch_esr_entry_19_skip_swapgs_epilog
-	swapgs
-dispatch_esr_entry_19_skip_swapgs_epilog:
+    mov r15, gs:[0x120]
+    mov r14, gs:[0x118]
+    mov r13, gs:[0x110]
+    mov r12, gs:[0x108]
+    mov r11, gs:[0x100]
+    mov r10, gs:[0x0F8]
+    mov r9,  gs:[0x0F0]
+    mov r8,  gs:[0x0E8]
+    mov rdi, gs:[0x0E0]
+    mov rsi, gs:[0x0D8]
+    mov rbp, gs:[0x0D0]
+    mov rdx, gs:[0x0C8]
+    mov rcx, gs:[0x0C0]
+    mov rbx, gs:[0x0B8]
+    mov rax, gs:[0x0B0]
 
     iretq
     int 3

@@ -43,7 +43,7 @@ static int64_t
 verify_dump_vmm_args(struct dump_vmm_args_t const *const args)
 {
     if (((uint64_t)1) != args->ver) {
-        BFERROR("IOCTL ABI version not supported\n");
+        bferror("IOCTL ABI version not supported");
         return LOADER_FAILURE;
     }
 
@@ -69,35 +69,34 @@ dump_vmm(struct dump_vmm_args_t *const ioctl_args)
     args_t *args;
 
     if (((void *)0) == ioctl_args) {
-        BFERROR("ioctl_args was ((void *)0)\n");
+        bferror("ioctl_args was NULL");
         return LOADER_FAILURE;
     }
 
     args = (args_t *)platform_alloc(sizeof(args_t));
     if (((void *)0) == args) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         return LOADER_FAILURE;
     }
 
     if (platform_copy_from_user(args, ioctl_args, sizeof(args_t))) {
-        BFERROR("platform_copy_from_user failed\n");
+        bferror("platform_copy_from_user failed");
         goto platform_copy_from_user_failed;
     }
 
     if (verify_dump_vmm_args(args)) {
-        BFERROR("verify_dump_vmm_args failed\n");
+        bferror("verify_dump_vmm_args failed");
         goto verify_dump_vmm_args_failed;
     }
 
-    ret = platform_memcpy(
-        &args->debug_ring, g_mk_debug_ring, sizeof(struct debug_ring_t));
+    ret = platform_memcpy(&args->debug_ring, g_mk_debug_ring, sizeof(struct debug_ring_t));
     if (ret) {
-        BFERROR("platform_memcpy failed\n");
+        bferror("platform_memcpy failed");
         goto platform_memcpy_failed;
     }
 
     if (platform_copy_to_user(ioctl_args, args, sizeof(args_t))) {
-        BFERROR("platform_copy_to_user failed\n");
+        bferror("platform_copy_to_user failed");
         goto platform_copy_to_user_failed;
     }
 

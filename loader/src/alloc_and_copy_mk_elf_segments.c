@@ -56,12 +56,12 @@ alloc_and_copy_mk_elf_segment(
 
     uint8_t *const dst_addr = (uint8_t *)platform_alloc(dst_size);
     if (((void *)0) == dst_addr) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_failed;
     }
 
     if (platform_memcpy(dst_addr, src_addr, phdr->p_filesz)) {
-        BFERROR("platform_memcpy failed\n");
+        bferror("platform_memcpy failed");
         goto platform_memcpy_failed;
     }
 
@@ -101,8 +101,7 @@ platform_alloc_failed:
  */
 int64_t
 alloc_and_copy_mk_elf_segments(
-    struct span_t const *const mk_elf_file,
-    struct elf_segment_t *const mk_elf_segments)
+    struct span_t const *const mk_elf_file, struct elf_segment_t *const mk_elf_segments)
 {
     int64_t ret = LOADER_SUCCESS;
     uint64_t idx = ((uint64_t)0);
@@ -116,17 +115,17 @@ alloc_and_copy_mk_elf_segments(
     }
 
     if (validate_elf64_ehdr(mk_elf_file->addr)) {
-        BFERROR("validate_elf64_ehdr failed\n");
+        bferror("validate_elf64_ehdr failed");
         return LOADER_FAILURE;
     }
 
     if (get_elf64_ehdr(mk_elf_file->addr, &ehdr)) {
-        BFERROR("get_elf64_ehdr failed\n");
+        bferror("get_elf64_ehdr failed");
         return LOADER_FAILURE;
     }
 
     if (get_elf64_phdrtab(mk_elf_file->addr, &phdrtab)) {
-        BFERROR("get_elf64_phdrtab failed\n");
+        bferror("get_elf64_phdrtab failed");
         return LOADER_FAILURE;
     }
 
@@ -142,14 +141,14 @@ alloc_and_copy_mk_elf_segments(
             struct elf_segment_t *const dst = &mk_elf_segments[idx];
             ret = alloc_and_copy_mk_elf_segment(phdr, mk_elf_file, dst);
             if (ret) {
-                BFERROR("alloc_and_copy_mk_elf_segment failed\n");
+                bferror("alloc_and_copy_mk_elf_segment failed");
                 break;
             }
 
             ++idx;
         }
         else {
-            BFERROR("provided ELF file has too many PT_LOAD segments\n");
+            bferror("provided ELF file has too many PT_LOAD segments");
             ret = LOADER_FAILURE;
             break;
         }

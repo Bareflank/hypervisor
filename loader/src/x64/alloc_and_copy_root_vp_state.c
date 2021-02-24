@@ -78,7 +78,7 @@ alloc_and_copy_root_vp_state(struct state_save_t **const state)
 
     *state = (struct state_save_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == *state) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_state_failed;
     }
 
@@ -91,198 +91,162 @@ alloc_and_copy_root_vp_state(struct state_save_t **const state)
 
     (*state)->es_selector = intrinsic_ses();
 
-    ret = get_gdt_descriptor_attrib(
-        &(*state)->gdtr, (*state)->es_selector, &(*state)->es_attrib);
+    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->es_selector, &(*state)->es_attrib);
     if (ret) {
-        BFERROR("get_gdt_descriptor_attrib failed\n");
+        bferror("get_gdt_descriptor_attrib failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_limit(
-        &(*state)->gdtr, (*state)->es_selector, &(*state)->es_limit);
+    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->es_selector, &(*state)->es_limit);
     if (ret) {
-        BFERROR("get_gdt_descriptor_limit failed\n");
+        bferror("get_gdt_descriptor_limit failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_base(
-        &(*state)->gdtr, (*state)->es_selector, &(*state)->es_base);
+    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->es_selector, &(*state)->es_base);
     if (ret) {
-        BFERROR("get_gdt_descriptor_base failed\n");
+        bferror("get_gdt_descriptor_base failed");
         goto set_descriptor_failed;
     }
 
     (*state)->cs_selector = intrinsic_scs();
 
-    /**
-     * TODO:
-     * - Right now, the OS's CS must match the microkernel's to support
-     *   the proper execution of NMIs. Remove the following check by
-     *   ensuring that the microkernel's GDT matches whatever the OS is
-     *   currently using for these values.
-     */
-
-    if (((uint16_t)0x10) != (*state)->cs_selector) {
-        BFERROR("fix me: OS's CS does not match the microkernel's\n");
+    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->cs_selector, &(*state)->cs_attrib);
+    if (ret) {
+        bferror("get_gdt_descriptor_attrib failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_attrib(
-        &(*state)->gdtr, (*state)->cs_selector, &(*state)->cs_attrib);
+    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->cs_selector, &(*state)->cs_limit);
     if (ret) {
-        BFERROR("get_gdt_descriptor_attrib failed\n");
+        bferror("get_gdt_descriptor_limit failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_limit(
-        &(*state)->gdtr, (*state)->cs_selector, &(*state)->cs_limit);
+    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->cs_selector, &(*state)->cs_base);
     if (ret) {
-        BFERROR("get_gdt_descriptor_limit failed\n");
-        goto set_descriptor_failed;
-    }
-
-    ret = get_gdt_descriptor_base(
-        &(*state)->gdtr, (*state)->cs_selector, &(*state)->cs_base);
-    if (ret) {
-        BFERROR("get_gdt_descriptor_base failed\n");
+        bferror("get_gdt_descriptor_base failed");
         goto set_descriptor_failed;
     }
 
     (*state)->ss_selector = intrinsic_sss();
 
-    ret = get_gdt_descriptor_attrib(
-        &(*state)->gdtr, (*state)->ss_selector, &(*state)->ss_attrib);
+    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->ss_selector, &(*state)->ss_attrib);
     if (ret) {
-        BFERROR("get_gdt_descriptor_attrib failed\n");
+        bferror("get_gdt_descriptor_attrib failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_limit(
-        &(*state)->gdtr, (*state)->ss_selector, &(*state)->ss_limit);
+    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->ss_selector, &(*state)->ss_limit);
     if (ret) {
-        BFERROR("get_gdt_descriptor_limit failed\n");
+        bferror("get_gdt_descriptor_limit failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_base(
-        &(*state)->gdtr, (*state)->ss_selector, &(*state)->ss_base);
+    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->ss_selector, &(*state)->ss_base);
     if (ret) {
-        BFERROR("get_gdt_descriptor_base failed\n");
+        bferror("get_gdt_descriptor_base failed");
         goto set_descriptor_failed;
     }
 
     (*state)->ds_selector = intrinsic_sds();
 
-    ret = get_gdt_descriptor_attrib(
-        &(*state)->gdtr, (*state)->ds_selector, &(*state)->ds_attrib);
+    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->ds_selector, &(*state)->ds_attrib);
     if (ret) {
-        BFERROR("get_gdt_descriptor_attrib failed\n");
+        bferror("get_gdt_descriptor_attrib failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_limit(
-        &(*state)->gdtr, (*state)->ds_selector, &(*state)->ds_limit);
+    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->ds_selector, &(*state)->ds_limit);
     if (ret) {
-        BFERROR("get_gdt_descriptor_limit failed\n");
+        bferror("get_gdt_descriptor_limit failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_base(
-        &(*state)->gdtr, (*state)->ds_selector, &(*state)->ds_base);
+    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->ds_selector, &(*state)->ds_base);
     if (ret) {
-        BFERROR("get_gdt_descriptor_base failed\n");
+        bferror("get_gdt_descriptor_base failed");
         goto set_descriptor_failed;
     }
 
     (*state)->fs_selector = intrinsic_sfs();
 
-    ret = get_gdt_descriptor_attrib(
-        &(*state)->gdtr, (*state)->fs_selector, &(*state)->fs_attrib);
+    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->fs_selector, &(*state)->fs_attrib);
     if (ret) {
-        BFERROR("get_gdt_descriptor_attrib failed\n");
+        bferror("get_gdt_descriptor_attrib failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_limit(
-        &(*state)->gdtr, (*state)->fs_selector, &(*state)->fs_limit);
+    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->fs_selector, &(*state)->fs_limit);
     if (ret) {
-        BFERROR("get_gdt_descriptor_limit failed\n");
+        bferror("get_gdt_descriptor_limit failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_base(
-        &(*state)->gdtr, (*state)->fs_selector, &(*state)->fs_base);
+    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->fs_selector, &(*state)->fs_base);
     if (ret) {
-        BFERROR("get_gdt_descriptor_base failed\n");
+        bferror("get_gdt_descriptor_base failed");
         goto set_descriptor_failed;
     }
 
     (*state)->gs_selector = intrinsic_sgs();
 
-    ret = get_gdt_descriptor_attrib(
-        &(*state)->gdtr, (*state)->gs_selector, &(*state)->gs_attrib);
+    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->gs_selector, &(*state)->gs_attrib);
     if (ret) {
-        BFERROR("get_gdt_descriptor_attrib failed\n");
+        bferror("get_gdt_descriptor_attrib failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_limit(
-        &(*state)->gdtr, (*state)->gs_selector, &(*state)->gs_limit);
+    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->gs_selector, &(*state)->gs_limit);
     if (ret) {
-        BFERROR("get_gdt_descriptor_limit failed\n");
+        bferror("get_gdt_descriptor_limit failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_base(
-        &(*state)->gdtr, (*state)->gs_selector, &(*state)->gs_base);
+    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->gs_selector, &(*state)->gs_base);
     if (ret) {
-        BFERROR("get_gdt_descriptor_base failed\n");
+        bferror("get_gdt_descriptor_base failed");
         goto set_descriptor_failed;
     }
 
     (*state)->ldtr_selector = intrinsic_sldtr();
 
-    ret = get_gdt_descriptor_attrib(
-        &(*state)->gdtr, (*state)->ldtr_selector, &(*state)->ldtr_attrib);
+    ret =
+        get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->ldtr_selector, &(*state)->ldtr_attrib);
     if (ret) {
-        BFERROR("get_gdt_descriptor_attrib failed\n");
+        bferror("get_gdt_descriptor_attrib failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_limit(
-        &(*state)->gdtr, (*state)->ldtr_selector, &(*state)->ldtr_limit);
+    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->ldtr_selector, &(*state)->ldtr_limit);
     if (ret) {
-        BFERROR("get_gdt_descriptor_limit failed\n");
+        bferror("get_gdt_descriptor_limit failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_base(
-        &(*state)->gdtr, (*state)->ldtr_selector, &(*state)->ldtr_base);
+    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->ldtr_selector, &(*state)->ldtr_base);
     if (ret) {
-        BFERROR("get_gdt_descriptor_base failed\n");
+        bferror("get_gdt_descriptor_base failed");
         goto set_descriptor_failed;
     }
 
     (*state)->tr_selector = intrinsic_str();
 
-    ret = get_gdt_descriptor_attrib(
-        &(*state)->gdtr, (*state)->tr_selector, &(*state)->tr_attrib);
+    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->tr_selector, &(*state)->tr_attrib);
     if (ret) {
-        BFERROR("get_gdt_descriptor_attrib failed\n");
+        bferror("get_gdt_descriptor_attrib failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_limit(
-        &(*state)->gdtr, (*state)->tr_selector, &(*state)->tr_limit);
+    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->tr_selector, &(*state)->tr_limit);
     if (ret) {
-        BFERROR("get_gdt_descriptor_limit failed\n");
+        bferror("get_gdt_descriptor_limit failed");
         goto set_descriptor_failed;
     }
 
-    ret = get_gdt_descriptor_base(
-        &(*state)->gdtr, (*state)->tr_selector, &(*state)->tr_base);
+    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->tr_selector, &(*state)->tr_base);
     if (ret) {
-        BFERROR("get_gdt_descriptor_base failed\n");
+        bferror("get_gdt_descriptor_base failed");
         goto set_descriptor_failed;
     }
 

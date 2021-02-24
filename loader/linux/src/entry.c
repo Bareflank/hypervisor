@@ -38,11 +38,31 @@
 #include <loader_fini.h>
 #include <loader_init.h>
 #include <loader_platform_interface.h>
+#include <platform.h>
+#include <serial_init.h>
 #include <start_vmm.h>
 #include <start_vmm_args_t.h>
 #include <stop_vmm.h>
 #include <stop_vmm_args_t.h>
 #include <types.h>
+
+int64_t
+mark_gdt_writable(uint32_t const cpu)
+{
+    (void)cpu;
+
+    load_direct_gdt(raw_smp_processor_id());
+    return LOADER_SUCCESS;
+}
+
+int64_t
+mark_gdt_readonly(uint32_t const cpu)
+{
+    (void)cpu;
+
+    load_fixmap_gdt(raw_smp_processor_id());
+    return LOADER_SUCCESS;
+}
 
 static int
 dev_open(struct inode *inode, struct file *file)
@@ -62,27 +82,27 @@ dev_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
     switch (cmd) {
         case LOADER_START_VMM: {
             if (start_vmm((struct start_vmm_args_t const *)arg)) {
-                BFERROR("start_vmm failed\n");
+                bferror("start_vmm failed");
                 return ((long)-EPERM);
             }
             break;
         }
         case LOADER_STOP_VMM: {
             if (stop_vmm((struct stop_vmm_args_t const *)arg)) {
-                BFERROR("stop_vmm failed\n");
+                bferror("stop_vmm failed");
                 return ((long)-EPERM);
             }
             break;
         }
         case LOADER_DUMP_VMM: {
             if (dump_vmm((struct dump_vmm_args_t const *)arg)) {
-                BFERROR("dump_vmm failed\n");
+                bferror("dump_vmm failed");
                 return ((long)-EPERM);
             }
             break;
         }
         default: {
-            BFERROR("invalid ioctl cmd: 0x%x\n", cmd);
+            bferror_x64("invalid ioctl cmd", cmd);
             return ((long)-EINVAL);
         }
     };
@@ -108,21 +128,18 @@ static struct miscdevice bareflank_dev = {
 int
 dev_reboot(struct notifier_block *nb, unsigned long code, void *unused)
 {
-    BFDEBUG("\n");
     return NOTIFY_DONE;
 }
 
 static int
 resume(void)
 {
-    BFDEBUG("resume not yet supported\n");
     return NOTIFY_BAD;
 }
 
 static int
 suspend(void)
 {
-    BFDEBUG("suspend not yet supported\n");
     return NOTIFY_BAD;
 }
 
@@ -163,16 +180,23 @@ static struct notifier_block pm_notifier_block = {.notifier_call = dev_pm};
 int
 dev_init(void)
 {
+    if (platform_on_each_cpu(mark_gdt_writable, PLATFORM_FORWARD)) {
+        bferror("mark_gdt_writable failed");
+        return -EPERM;
+    }
+
     register_reboot_notifier(&reboot_notifier_block);
     register_pm_notifier(&pm_notifier_block);
 
+    serial_init();
+
     if (loader_init()) {
-        BFERROR("loader_init failed\n");
+        bferror("loader_init failed");
         goto loader_init_failed;
     }
 
     if (misc_register(&bareflank_dev)) {
-        BFERROR("misc_register failed\n");
+        bferror("misc_register failed");
         goto misc_register_failed;
     }
 
@@ -197,6 +221,10 @@ dev_exit(void)
     loader_fini();
     unregister_pm_notifier(&pm_notifier_block);
     unregister_reboot_notifier(&reboot_notifier_block);
+
+    if (platform_on_each_cpu(mark_gdt_readonly, PLATFORM_FORWARD)) {
+        bferror("mark_gdt_readonly failed");
+    }
 }
 
 module_init(dev_init);

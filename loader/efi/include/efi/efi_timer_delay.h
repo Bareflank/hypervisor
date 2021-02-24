@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
-
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -26,16 +24,37 @@
  * SOFTWARE.
  */
 
-#ifndef INTTYPES_H
-#define INTTYPES_H
+#ifndef EFI_TIMER_DELAY_H
+#define EFI_TIMER_DELAY_H
 
-#include "stdint.h"
+/**
+ * @struct EFI_TIMER_DELAY
+ *
+ * <!-- description -->
+ *   @brief Defines the layout of the EFI_TIMER_DELAY struct:
+ *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf
+ */
+typedef enum
+{
+    /**
+     * @brief The event’s timer setting is to be cancelled and no timer
+     *   trigger is to be set. TriggerTime is ignored when canceling a timer.
+     */
+    TimerCancel,
 
-#define PRId64 "lld"
-#define PRIu64 "llu"
-#define PRIx64 "llx"
-#define PRIdPTR "ld"
-#define PRIuPTR "lu"
-#define PRIxPTR "lx"
+    /**
+     * @brief The event is to be signaled periodically at TriggerTime
+     *   intervals from the current time. This is the only timer trigger Type
+     *   for which the event timer does not need to be reset for each
+     *   notification. All other timer trigger types are “one shot.”
+     */
+    TimerPeriodic,
+
+    /**
+     * @brief The event is to be signaled in TriggerTime 100ns units.
+     */
+    TimerRelative
+
+} EFI_TIMER_DELAY;
 
 #endif

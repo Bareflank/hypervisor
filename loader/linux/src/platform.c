@@ -57,13 +57,13 @@ platform_alloc(uint64_t const size)
     void *ret;
 
     if (0 == size) {
-        BFERROR("invalid number of bytes (i.e., size)\n");
+        bferror("invalid number of bytes (i.e., size)");
         return ((void *)0);
     }
 
     ret = vmalloc(size);
     if (((void *)0) == ret) {
-        BFERROR("vmalloc failed\n");
+        bferror("vmalloc failed");
         return ((void *)0);
     }
 
@@ -91,13 +91,13 @@ platform_alloc_contiguous(uint64_t const size)
     void *ret;
 
     if (0 == size) {
-        BFERROR("invalid number of bytes (i.e., size)\n");
+        bferror("invalid number of bytes (i.e., size)");
         return ((void *)0);
     }
 
     ret = kmalloc(size, GFP_KERNEL);
     if (((void *)0) == ret) {
-        BFERROR("kmalloc failed\n");
+        bferror("kmalloc failed");
         return ((void *)0);
     }
 
@@ -190,7 +190,7 @@ int64_t
 platform_memset(void *const ptr, uint8_t const val, uint64_t const num)
 {
     if (!ptr) {
-        BFERROR("invalid ptr\n");
+        bferror("invalid ptr");
         return LOADER_FAILURE;
     }
 
@@ -214,12 +214,12 @@ int64_t
 platform_memcpy(void *const dst, void const *const src, uint64_t const num)
 {
     if (((void *)0) == dst) {
-        BFERROR("invalid pointer\n");
+        bferror("invalid pointer");
         return LOADER_FAILURE;
     }
 
     if (((void *)0) == src) {
-        BFERROR("invalid pointer\n");
+        bferror("invalid pointer");
         return LOADER_FAILURE;
     }
 
@@ -245,12 +245,12 @@ platform_copy_from_user(
     void *const dst, void const *const src, uint64_t const num)
 {
     if (((void *)0) == dst) {
-        BFERROR("invalid pointer\n");
+        bferror("invalid pointer");
         return LOADER_FAILURE;
     }
 
     if (((void *)0) == src) {
-        BFERROR("invalid pointer\n");
+        bferror("invalid pointer");
         return LOADER_FAILURE;
     }
 
@@ -276,12 +276,12 @@ platform_copy_to_user(
     void *const dst, void const *const src, uint64_t const num)
 {
     if (((void *)0) == dst) {
-        BFERROR("invalid pointer\n");
+        bferror("invalid pointer");
         return LOADER_FAILURE;
     }
 
     if (((void *)0) == src) {
-        BFERROR("invalid pointer\n");
+        bferror("invalid pointer");
         return LOADER_FAILURE;
     }
 
@@ -344,7 +344,7 @@ platform_on_each_cpu_forward(platform_per_cpu_func const func)
     get_online_cpus();
     for (cpu = 0; cpu < num_online_cpus(); ++cpu) {
         if (work_on_cpu(cpu, platform_on_each_cpu_callback, func)) {
-            BFERROR("platform_per_cpu_func failed\n");
+            bferror("platform_per_cpu_func failed");
             ret = LOADER_FAILURE;
             break;
         }
@@ -377,7 +377,7 @@ platform_on_each_cpu_reverse(platform_per_cpu_func const func)
     get_online_cpus();
     for (cpu = num_online_cpus(); cpu > 0U; --cpu) {
         if (work_on_cpu(cpu - 1U, platform_on_each_cpu_callback, func)) {
-            BFERROR("platform_per_cpu_func failed\n");
+            bferror("platform_per_cpu_func failed");
             ret = LOADER_FAILURE;
             break;
         }

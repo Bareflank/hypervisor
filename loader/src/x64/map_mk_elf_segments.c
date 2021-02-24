@@ -44,21 +44,19 @@
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 static int64_t
-map_mk_elf_segment(
-    struct elf_segment_t const *const segment, struct pml4t_t *const pml4t)
+map_mk_elf_segment(struct elf_segment_t const *const segment, struct pml4t_t *const pml4t)
 {
     uint64_t off;
 
-    for (off = ((uint64_t)0); off < segment->size;
-         off += HYPERVISOR_PAGE_SIZE) {
+    for (off = ((uint64_t)0); off < segment->size; off += HYPERVISOR_PAGE_SIZE) {
         uint64_t phys = platform_virt_to_phys(segment->addr + off);
         if (((uint64_t)0) == phys) {
-            BFERROR("platform_virt_to_phys failed\n");
+            bferror("platform_virt_to_phys failed");
             return LOADER_FAILURE;
         }
 
         if (map_4k_page(segment->virt + off, phys, segment->flags, pml4t)) {
-            BFERROR("map_4k_page failed\n");
+            bferror("map_4k_page failed");
             return LOADER_FAILURE;
         }
     }
@@ -78,14 +76,13 @@ map_mk_elf_segment(
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-map_mk_elf_segments(
-    struct elf_segment_t const *const segments, struct pml4t_t *const pml4t)
+map_mk_elf_segments(struct elf_segment_t const *const segments, struct pml4t_t *const pml4t)
 {
     uint64_t idx;
 
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_SEGMENTS; ++idx) {
         if (map_mk_elf_segment(&segments[idx], pml4t)) {
-            BFERROR("map_mk_elf_segment failed\n");
+            bferror("map_mk_elf_segment failed");
             return LOADER_FAILURE;
         }
     }

@@ -195,37 +195,8 @@ demote:
     wrmsr
 
     /**************************************************************************/
-    /* Control Registers                                                      */
-    /**************************************************************************/
-
-    mov rax, cr0
-    mov [r15 + 0x140], rax
-    mov rax, [r14 + 0x140]
-    mov cr0, rax
-
-    mov rax, cr2
-    mov [r15 + 0x150], rax
-    mov rax, [r14 + 0x150]
-    mov cr2, rax
-
-    mov rax, cr3
-    mov [r15 + 0x158], rax
-    mov rax, [r14 + 0x158]
-    mov cr3, rax
-
-    mov rax, cr4
-    mov [r15 + 0x160], rax
-    mov rax, [r14 + 0x160]
-    mov cr4, rax
-
-    mov rsp, [r14 + 0x080]
-
-    /**************************************************************************/
     /* GDT                                                                    */
     /**************************************************************************/
-
-    mov rax, 0x1
-    mov [r15 + 0x320], rax
 
     sgdt [r15 + 0x0A0]
     lgdt [r14 + 0x0A0]
@@ -282,6 +253,32 @@ demote:
     retfq
 
 gdt_and_cs_loaded:
+
+    /**************************************************************************/
+    /* Control Registers                                                      */
+    /**************************************************************************/
+
+    mov rax, cr0
+    mov [r15 + 0x140], rax
+    mov rax, [r14 + 0x140]
+    mov cr0, rax
+
+    mov rax, cr2
+    mov [r15 + 0x150], rax
+    mov rax, [r14 + 0x150]
+    mov cr2, rax
+
+    mov rax, cr4
+    mov [r15 + 0x160], rax
+    mov rax, [r14 + 0x160]
+    mov cr4, rax
+
+    mov rax, cr3
+    mov [r15 + 0x158], rax
+    mov rax, [r14 + 0x158]
+    mov cr3, rax
+
+    mov rsp, [r14 + 0x080]
 
     /**************************************************************************/
     /* Debug Registers                                                        */

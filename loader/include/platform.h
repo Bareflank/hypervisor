@@ -135,8 +135,7 @@ int64_t platform_memset(void *const ptr, uint8_t const val, uint64_t const num);
  *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
  *     returns 0.
  */
-int64_t
-platform_memcpy(void *const dst, void const *const src, uint64_t const num);
+int64_t platform_memcpy(void *const dst, void const *const src, uint64_t const num);
 
 /**
  * <!-- description -->
@@ -151,8 +150,7 @@ platform_memcpy(void *const dst, void const *const src, uint64_t const num);
  *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
  *     returns 0.
  */
-int64_t platform_copy_from_user(
-    void *const dst, void const *const src, uint64_t const num);
+int64_t platform_copy_from_user(void *const dst, void const *const src, uint64_t const num);
 
 /**
  * <!-- description -->
@@ -167,8 +165,7 @@ int64_t platform_copy_from_user(
  *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
  *     returns 0.
  */
-int64_t platform_copy_to_user(
-    void *const dst, void const *const src, uint64_t const num);
+int64_t platform_copy_to_user(void *const dst, void const *const src, uint64_t const num);
 
 /**
  * <!-- description -->
@@ -199,7 +196,6 @@ typedef int64_t (*platform_per_cpu_func)(uint32_t const);
  *   @return If each callback returns 0, this function returns 0, otherwise
  *     this function returns a non-0 value
  */
-int64_t
-platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const reverse);
+int64_t platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const reverse);
 
 #endif

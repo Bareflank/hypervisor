@@ -41,11 +41,13 @@
 
 /** @brief defines the CPUID leaf for feature information */
 #define CPUID_LEAF_FEATURE ((uint32_t)0x1)
-/** @brief define the CPUID feature bit for XSAVE */
-#define CPUID_FEATURE_ECX_XSAVE (((uint32_t)1) << ((uint32_t)26))
 
-/** @brief defines the CPUID leaf for xsave information */
-#define CPUID_LEAF_XSAVE ((uint32_t)0xD)
+/** @brief defines the CPUID leaf for structured extended feature information */
+#define CPUID_LEAF_STRUCT_EXT_FEATURE ((uint32_t)0x7)
+/** @brief define the CPUID feature bit for SMEP */
+#define CPUID_STRUCT_EXT_FEATURE_EBX_SMEP (((uint32_t)1) << ((uint32_t)7))
+/** @brief define the CPUID feature bit for SMAP */
+#define CPUID_STRUCT_EXT_FEATURE_EBX_SMAP (((uint32_t)1) << ((uint32_t)20))
 
 /** @brief defines the CPUID leaf for feature information */
 #define CPUID_LEAF_EXT_FEATURE ((uint32_t)0x80000001)
@@ -59,14 +61,10 @@
 
 /** @brief defines the MSR_IA32_EFER MSR  */
 #define MSR_IA32_EFER ((uint32_t)0xC0000080)
-/** @brief defines the EFER_NXE MSR field */
-#define EFER_NXE (((uint64_t)1) << ((uint64_t)11))
 /** @brief defines the EFER_LMA MSR field */
 #define EFER_LMA (((uint64_t)1) << ((uint64_t)10))
 /** @brief defines the EFER_LME MSR field */
 #define EFER_LME (((uint64_t)1) << ((uint64_t)8))
-/** @brief defines the EFER_SCE MSR field */
-#define EFER_SCE (((uint64_t)1) << ((uint64_t)0))
 
 /**
  * <!-- description -->
@@ -89,44 +87,17 @@ check_for_amd(void)
     intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
 
     if (CPUID_VENDOR_EBX != ebx) {
-        BFERROR("cpu is vendor is not AuthenticAMD: 0x%08x\n", ebx);
+        bferror_x32("cpu is vendor is not AuthenticAMD", ebx);
         return LOADER_FAILURE;
     }
 
     if (CPUID_VENDOR_ECX != ecx) {
-        BFERROR("cpu is vendor is not AuthenticAMD: 0x%08x\n", ecx);
+        bferror_x32("cpu is vendor is not AuthenticAMD", ecx);
         return LOADER_FAILURE;
     }
 
     if (CPUID_VENDOR_EDX != edx) {
-        BFERROR("cpu is vendor is not AuthenticAMD: 0x%08x\n", edx);
-        return LOADER_FAILURE;
-    }
-
-    return LOADER_SUCCESS;
-}
-
-/**
- * <!-- description -->
- *   @brief Check if the cpu supports needed XSAVE.
- *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success, LOADER_FAILURE otherwise.
- */
-static inline int64_t
-check_for_xsave(void)
-{
-    uint32_t eax;
-    uint32_t ebx;
-    uint32_t ecx;
-    uint32_t edx;
-
-    eax = CPUID_LEAF_FEATURE;
-    ecx = 0U;
-    intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
-
-    if ((ecx & CPUID_FEATURE_ECX_XSAVE) == 0U) {
-        BFERROR("cpu does not support XSAVE: 0x%08x\n", ecx);
+        bferror_x32("cpu is vendor is not AuthenticAMD", edx);
         return LOADER_FAILURE;
     }
 
@@ -153,39 +124,7 @@ check_for_svm(void)
     intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
 
     if ((ecx & CPUID_EXT_FEATURE_ECX_SVM) == 0U) {
-        BFERROR("cpu does not support SVM: 0x%08x\n", ecx);
-        return LOADER_FAILURE;
-    }
-
-    return LOADER_SUCCESS;
-}
-
-/**
- * <!-- description -->
- *   @brief Check that xcr0 does not allow bits 63:32 of xcr0 to be 1.
- *
- * <!-- inputs/outputs -->
- *   @return Return 0 on success, LOADER_FAILURE otherwise.
- */
-static inline int64_t
-check_verify_xsave_valid_bits(void)
-{
-    uint32_t eax;
-    uint32_t ebx;
-    uint32_t ecx;
-    uint32_t edx;
-
-    eax = CPUID_LEAF_XSAVE;
-    ecx = 0U;
-    intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
-
-    if (((uint64_t)ecx) > HYPERVISOR_PAGE_SIZE) {
-        BFERROR("the size of xsave is unsupported: 0x%08x\n", ecx);
-        return LOADER_FAILURE;
-    }
-
-    if (edx != 0U) {
-        BFERROR("cpu allows setting upper 32 bits in xcr0: 0x%08x\n", edx);
+        bferror_x32("cpu does not support SVM", ecx);
         return LOADER_FAILURE;
     }
 
@@ -205,7 +144,7 @@ check_for_svm_disabled(void)
     uint64_t msr = intrinsic_rdmsr(MSR_IA32_VM_CR);
 
     if ((msr & VM_CR_SVMDIS) != ((uint64_t)0)) {
-        BFERROR("SVM has been disabled in BIOS: 0x%016" PRIx64 "\n", msr);
+        bferror_x64("SVM has been disabled in BIOS", msr);
         return LOADER_FAILURE;
     }
 
@@ -224,23 +163,45 @@ check_the_configuration_of_efer(void)
 {
     uint64_t msr = intrinsic_rdmsr(MSR_IA32_EFER);
 
-    if ((msr & EFER_NXE) == ((uint64_t)0)) {
-        BFERROR("No-Execute page support not enabled: 0x%016" PRIx64 "\n", msr);
-        return LOADER_FAILURE;
-    }
-
     if ((msr & EFER_LMA) == ((uint64_t)0)) {
-        BFERROR("The OS is not in long mode: 0x%016" PRIx64 "\n", msr);
+        bferror_x64("The OS is not in long mode", msr);
         return LOADER_FAILURE;
     }
 
     if ((msr & EFER_LME) == ((uint64_t)0)) {
-        BFERROR("Long mode not enabled: 0x%016" PRIx64 "\n", msr);
+        bferror_x64("Long mode not enabled", msr);
         return LOADER_FAILURE;
     }
 
-    if ((msr & EFER_SCE) == ((uint64_t)0)) {
-        BFERROR("SYSCALL support not enabled: 0x%016" PRIx64 "\n", msr);
+    return LOADER_SUCCESS;
+}
+
+/**
+ * <!-- description -->
+ *   @brief Check if the cpu supports needed SMEP/SMAP.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success, LOADER_FAILURE otherwise.
+ */
+static inline int64_t
+check_for_smep_smap(void)
+{
+    uint32_t eax;
+    uint32_t ebx;
+    uint32_t ecx;
+    uint32_t edx;
+
+    eax = CPUID_LEAF_STRUCT_EXT_FEATURE;
+    ecx = 0U;
+    intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
+
+    if ((ebx & CPUID_STRUCT_EXT_FEATURE_EBX_SMEP) == 0U) {
+        bferror_x32("cpu does not support SMEP", ebx);
+        return LOADER_FAILURE;
+    }
+
+    if ((ebx & CPUID_STRUCT_EXT_FEATURE_EBX_SMAP) == 0U) {
+        bferror_x32("cpu does not support SMAP", ebx);
         return LOADER_FAILURE;
     }
 
@@ -259,32 +220,27 @@ int64_t
 check_for_hve_support(void)
 {
     if (check_for_amd()) {
-        BFERROR("check_for_amd failed\n");
-        return LOADER_FAILURE;
-    }
-
-    if (check_for_xsave()) {
-        BFERROR("check_for_xsave failed\n");
+        bferror("check_for_amd failed");
         return LOADER_FAILURE;
     }
 
     if (check_for_svm()) {
-        BFERROR("check_for_svm failed\n");
-        return LOADER_FAILURE;
-    }
-
-    if (check_verify_xsave_valid_bits()) {
-        BFERROR("check_verify_xsave_valid_bits failed\n");
+        bferror("check_for_svm failed");
         return LOADER_FAILURE;
     }
 
     if (check_for_svm_disabled()) {
-        BFERROR("check_for_svm_disabled failed\n");
+        bferror("check_for_svm_disabled failed");
         return LOADER_FAILURE;
     }
 
     if (check_the_configuration_of_efer()) {
-        BFERROR("check_the_configuration_of_efer failed\n");
+        bferror("check_the_configuration_of_efer failed");
+        return LOADER_FAILURE;
+    }
+
+    if (check_for_smep_smap()) {
+        bferror("check_for_smep_smap failed");
         return LOADER_FAILURE;
     }
 

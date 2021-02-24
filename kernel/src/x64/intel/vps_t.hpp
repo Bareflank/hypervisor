@@ -40,8 +40,6 @@
 namespace mk
 {
     /// @brief entry point prototype
-    extern "C" void dispatch_syscall_entry(void) noexcept;
-    /// @brief entry point prototype
     extern "C" void intrinsic_vmexit(void) noexcept;
 
     /// @brief defines the value of an invalid VPSID
@@ -49,8 +47,32 @@ namespace mk
 
     namespace details
     {
-        /// @brief defines the VMX BASIC MSR
-        constexpr bsl::safe_uint32 IA32_VMX_BASIC{bsl::to_u32(0x480)};
+        /// @brief defines the IA32_VMX_BASIC MSR
+        constexpr bsl::safe_uint32 IA32_VMX_BASIC{bsl::to_u32(0x480U)};
+        /// @brief defines the IA32_PAT MSR
+        constexpr bsl::safe_uint32 IA32_PAT{bsl::to_u32(0x277U)};
+        /// @brief defines the IA32_SYSENTER_CS MSR
+        constexpr bsl::safe_uint32 IA32_SYSENTER_CS{bsl::to_u32(0x174U)};
+        /// @brief defines the IA32_SYSENTER_ESP MSR
+        constexpr bsl::safe_uint32 IA32_SYSENTER_ESP{bsl::to_u32(0x175U)};
+        /// @brief defines the IA32_SYSENTER_EIP MSR
+        constexpr bsl::safe_uint32 IA32_SYSENTER_EIP{bsl::to_u32(0x176U)};
+        /// @brief defines the IA32_EFER MSR
+        constexpr bsl::safe_uint32 IA32_EFER{bsl::to_u32(0xC0000080U)};
+        /// @brief defines the IA32_STAR MSR
+        constexpr bsl::safe_uint32 IA32_STAR{bsl::to_u32(0xC0000081U)};
+        /// @brief defines the IA32_LSTAR MSR
+        constexpr bsl::safe_uint32 IA32_LSTAR{bsl::to_u32(0xC0000082U)};
+        /// @brief defines the IA32_CSTAR MSR
+        constexpr bsl::safe_uint32 IA32_CSTAR{bsl::to_u32(0xC0000083U)};
+        /// @brief defines the IA32_FMASK MSR
+        constexpr bsl::safe_uint32 IA32_FMASK{bsl::to_u32(0xC0000084U)};
+        /// @brief defines the IA32_FS_BASE MSR
+        constexpr bsl::safe_uint32 IA32_FS_BASE{bsl::to_u32(0xC0000100U)};
+        /// @brief defines the IA32_GS_BASE MSR
+        constexpr bsl::safe_uint32 IA32_GS_BASE{bsl::to_u32(0xC0000101U)};
+        /// @brief defines the IA32_KERNEL_GS_BASE MSR
+        constexpr bsl::safe_uint32 IA32_KERNEL_GS_BASE{bsl::to_u32(0xC0000102U)};
     }
 
     /// @class mk::vps_t
@@ -1156,7 +1178,11 @@ namespace mk
         }
 
         /// <!-- description -->
-        ///   @brief Ensures that this VPS is loaded
+        ///   @brief This is executed on each core when a VPS is first
+        ///     allocated, and ensures the VMCS contains the current host
+        ///     states of the CPU it is running on. We don't use the state
+        ///     that the loader provides as this state can change as the
+        ///     microkernel completes it's bootstrapping process.
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam TLS_CONCEPT defines the type of TLS block to use
@@ -1179,73 +1205,69 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite16(VMCS_HOST_ES_SELECTOR, state->es_selector);
+            ret = m_intrinsic->vmwrite16(VMCS_HOST_ES_SELECTOR, m_intrinsic->es_selector());
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite16(VMCS_HOST_CS_SELECTOR, state->cs_selector);
+            ret = m_intrinsic->vmwrite16(VMCS_HOST_CS_SELECTOR, m_intrinsic->cs_selector());
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite16(VMCS_HOST_SS_SELECTOR, state->ss_selector);
+            ret = m_intrinsic->vmwrite16(VMCS_HOST_SS_SELECTOR, m_intrinsic->ss_selector());
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite16(VMCS_HOST_DS_SELECTOR, state->ds_selector);
+            ret = m_intrinsic->vmwrite16(VMCS_HOST_DS_SELECTOR, m_intrinsic->ds_selector());
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite16(VMCS_HOST_FS_SELECTOR, state->fs_selector);
+            ret = m_intrinsic->vmwrite16(VMCS_HOST_FS_SELECTOR, m_intrinsic->fs_selector());
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite16(VMCS_HOST_GS_SELECTOR, state->gs_selector);
+            ret = m_intrinsic->vmwrite16(VMCS_HOST_GS_SELECTOR, m_intrinsic->gs_selector());
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite16(VMCS_HOST_TR_SELECTOR, state->tr_selector);
+            ret = m_intrinsic->vmwrite16(VMCS_HOST_TR_SELECTOR, m_intrinsic->tr_selector());
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite64(VMCS_HOST_IA32_PAT, state->ia32_pat);
+            ret = m_intrinsic->vmwrite64(VMCS_HOST_IA32_PAT, m_intrinsic->rdmsr(details::IA32_PAT));
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite64(VMCS_HOST_IA32_EFER, state->ia32_efer);
+            ret =
+                m_intrinsic->vmwrite64(VMCS_HOST_IA32_EFER, m_intrinsic->rdmsr(details::IA32_EFER));
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite64(VMCS_HOST_IA32_PAT, state->ia32_pat);
+            ret = m_intrinsic->vmwrite64(
+                VMCS_HOST_IA32_SYSENTER_CS, m_intrinsic->rdmsr(details::IA32_SYSENTER_CS));
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite64(VMCS_HOST_IA32_SYSENTER_CS, state->ia32_sysenter_cs);
-            if (bsl::unlikely(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            ret = m_intrinsic->vmwrite64(VMCS_HOST_CR0, state->cr0);
+            ret = m_intrinsic->vmwrite64(VMCS_HOST_CR0, m_intrinsic->cr0());
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -1257,19 +1279,21 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite64(VMCS_HOST_CR4, state->cr4);
+            ret = m_intrinsic->vmwrite64(VMCS_HOST_CR4, m_intrinsic->cr4());
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite64(VMCS_HOST_FS_BASE, tls.tp);
+            ret = m_intrinsic->vmwrite64(
+                VMCS_HOST_FS_BASE, m_intrinsic->rdmsr(details::IA32_FS_BASE));
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite64(VMCS_HOST_GS_BASE, bsl::to_umax(&tls));
+            ret = m_intrinsic->vmwrite64(
+                VMCS_HOST_GS_BASE, m_intrinsic->rdmsr(details::IA32_GS_BASE));
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -1293,13 +1317,15 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite64(VMCS_HOST_IA32_SYSENTER_ESP, state->ia32_sysenter_esp);
+            ret = m_intrinsic->vmwrite64(
+                VMCS_HOST_IA32_SYSENTER_ESP, m_intrinsic->rdmsr(details::IA32_SYSENTER_ESP));
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = m_intrinsic->vmwrite64(VMCS_HOST_IA32_SYSENTER_EIP, state->ia32_sysenter_eip);
+            ret = m_intrinsic->vmwrite64(
+                VMCS_HOST_IA32_SYSENTER_EIP, m_intrinsic->rdmsr(details::IA32_SYSENTER_EIP));
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -1311,11 +1337,16 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            m_vmcs_missing_registers.host_ia32_star = state->ia32_star;
-            m_vmcs_missing_registers.host_ia32_lstar = bsl::to_umax(&dispatch_syscall_entry).get();
-            m_vmcs_missing_registers.host_ia32_cstar = state->ia32_cstar;
-            m_vmcs_missing_registers.host_ia32_fmask = state->ia32_fmask;
-            m_vmcs_missing_registers.host_ia32_kernel_gs_base = state->ia32_kernel_gs_base;
+            m_vmcs_missing_registers.host_ia32_star =                      // --
+                m_intrinsic->rdmsr(details::IA32_STAR).get();              // --
+            m_vmcs_missing_registers.host_ia32_lstar =                     // --
+                m_intrinsic->rdmsr(details::IA32_LSTAR).get();             // --
+            m_vmcs_missing_registers.host_ia32_cstar =                     // --
+                m_intrinsic->rdmsr(details::IA32_CSTAR).get();             // --
+            m_vmcs_missing_registers.host_ia32_fmask =                     // --
+                m_intrinsic->rdmsr(details::IA32_FMASK).get();             // --
+            m_vmcs_missing_registers.host_ia32_kernel_gs_base =            // --
+                m_intrinsic->rdmsr(details::IA32_KERNEL_GS_BASE).get();    // --
 
             return bsl::errc_success;
         }

@@ -44,9 +44,9 @@ dump_ext_elf_files(struct span_t *const files)
 
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
         if (((void *)0) != files[idx].addr) {
-            BFINFO("ext elf file #%u:\n", (uint32_t)idx);
-            BFINFO(" - addr: 0x%016" PRIx64 "\n", (uint64_t)files[idx].addr);
-            BFINFO(" - size: 0x%016" PRIx64 "\n", files[idx].size);
+            bfdebug_d32("ext elf file", (uint32_t)idx);
+            bfdebug_x64(" - addr", (uint64_t)files[idx].addr);
+            bfdebug_x64(" - size", files[idx].size);
         }
     }
 }

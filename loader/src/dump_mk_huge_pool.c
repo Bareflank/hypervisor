@@ -39,7 +39,7 @@
 void
 dump_mk_huge_pool(struct mutable_span_t *const huge_pool)
 {
-    BFINFO("mk huge pool:\n");
-    BFINFO(" - addr: 0x%016" PRIx64 "\n", (uint64_t)huge_pool->addr);
-    BFINFO(" - size: 0x%016" PRIx64 "\n", huge_pool->size);
+    bfdebug("mk huge pool:");
+    bfdebug_ptr(" - addr", huge_pool->addr);
+    bfdebug_x64(" - size", huge_pool->size);
 }

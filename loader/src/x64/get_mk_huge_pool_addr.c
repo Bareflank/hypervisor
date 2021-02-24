@@ -41,13 +41,11 @@
  */
 int64_t
 get_mk_huge_pool_addr(
-    struct mutable_span_t const *const huge_pool,
-    uint64_t const base_virt,
-    uint8_t **const addr)
+    struct mutable_span_t const *const huge_pool, uint64_t const base_virt, uint8_t **const addr)
 {
     uint64_t phys = platform_virt_to_phys(huge_pool->addr);
     if (((uint64_t)0) == phys) {
-        BFERROR("platform_virt_to_phys failed\n");
+        bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 

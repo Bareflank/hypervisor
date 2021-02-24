@@ -43,7 +43,7 @@ static int64_t
 verify_stop_vmm_args(struct stop_vmm_args_t const *const args)
 {
     if (((uint64_t)1) != args->ver) {
-        BFERROR("IOCTL ABI version not supported\n");
+        bferror("IOCTL ABI version not supported");
         return LOADER_FAILURE;
     }
 
@@ -67,19 +67,18 @@ stop_vmm(struct stop_vmm_args_t const *const ioctl_args)
     struct stop_vmm_args_t args;
 
     if (((void *)0) == ioctl_args) {
-        BFERROR("ioctl_args was ((void *)0)\n");
+        bferror("ioctl_args was NULL");
         return LOADER_FAILURE;
     }
 
-    ret = platform_copy_from_user(
-        &args, ioctl_args, sizeof(struct stop_vmm_args_t));
+    ret = platform_copy_from_user(&args, ioctl_args, sizeof(struct stop_vmm_args_t));
     if (ret) {
-        BFERROR("platform_copy_from_user failed\n");
+        bferror("platform_copy_from_user failed");
         return LOADER_FAILURE;
     }
 
     if (verify_stop_vmm_args(&args)) {
-        BFERROR("verify_stop_vmm_args failed\n");
+        bferror("verify_stop_vmm_args failed");
         return LOADER_FAILURE;
     }
 

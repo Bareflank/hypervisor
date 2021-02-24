@@ -65,14 +65,14 @@ get_gdt_descriptor_limit(
     uint64_t idx64 = ((uint64_t)selector) >> ((uint64_t)3);
 
     if (((void *)0) == gdtr) {
-        BFERROR("invalid argument: gdtr == ((void *)0)\n");
+        bferror("invalid argument: gdtr == NULL");
         return LOADER_FAILURE;
     }
 
     bytes64 = ((uint64_t)gdtr->limit) + ((uint64_t)1);
 
     if (((void *)0) == limit) {
-        BFERROR("invalid argument: limit == ((void *)0)\n");
+        bferror("invalid argument: limit == NULL");
         return LOADER_FAILURE;
     }
 
@@ -82,7 +82,7 @@ get_gdt_descriptor_limit(
     }
 
     if (idx64 >= (bytes64 / sizeof(uint64_t))) {
-        BFERROR("invalid argument: index into GDT is out of range\n");
+        bferror("invalid argument: index into GDT is out of range");
         return LOADER_FAILURE;
     }
 

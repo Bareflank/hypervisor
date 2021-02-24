@@ -24,8 +24,6 @@
  * SOFTWARE.
  */
 
-#define DEBUG_LOADER
-
 #include <alloc_and_copy_mk_state.h>
 #include <alloc_and_copy_root_vp_state.h>
 #include <alloc_mk_args.h>
@@ -82,7 +80,7 @@ start_vmm_per_cpu(uint32_t const cpu)
     uint64_t mk_stack_virt;
 
     if (((uint64_t)cpu) >= HYPERVISOR_MAX_VPS_PER_VM) {
-        BFERROR("cpu out of range\n");
+        bferror("cpu out of range");
         return LOADER_FAILURE;
     }
 
@@ -90,54 +88,64 @@ start_vmm_per_cpu(uint32_t const cpu)
     mk_stack_virt = (g_mk_stack_virt + mk_stack_offs);
 
     if (alloc_mk_stack(0U, &g_mk_stack[cpu])) {
-        BFERROR("alloc_mk_stack failed\n");
+        bferror("alloc_mk_stack failed");
         goto alloc_mk_stack_failed;
     }
 
     ret = alloc_and_copy_mk_state(
-        g_mk_root_page_table,
-        &g_mk_elf_file,
-        &g_mk_stack[cpu],
-        mk_stack_virt,
-        &g_mk_state[cpu]);
+        g_mk_root_page_table, &g_mk_elf_file, &g_mk_stack[cpu], mk_stack_virt, &g_mk_state[cpu]);
 
     if (ret) {
-        BFERROR("alloc_and_copy_mk_state failed\n");
+        bferror("alloc_and_copy_mk_state failed");
         goto alloc_and_copy_mk_state_failed;
     }
 
     if (alloc_and_copy_root_vp_state(&g_root_vp_state[cpu])) {
-        BFERROR("alloc_and_copy_root_vp_state failed\n");
+        bferror("alloc_and_copy_root_vp_state failed");
         goto alloc_and_copy_root_vp_state_failed;
     }
 
     if (alloc_mk_args(&g_mk_args[cpu])) {
-        BFERROR("alloc_mk_args failed\n");
+        bferror("alloc_mk_args failed");
         goto alloc_mk_args_failed;
     }
 
     if (map_mk_stack(&g_mk_stack[cpu], mk_stack_virt, g_mk_root_page_table)) {
-        BFERROR("map_mk_stack failed\n");
+        bferror("map_mk_stack failed");
         goto map_mk_stack_failed;
     }
 
     if (map_mk_state(g_mk_state[cpu], g_mk_root_page_table)) {
-        BFERROR("map_mk_state failed\n");
+        bferror("map_mk_state failed");
         goto map_mk_state_failed;
     }
 
     if (map_root_vp_state(g_root_vp_state[cpu], g_mk_root_page_table)) {
-        BFERROR("map_root_vp_state failed\n");
+        bferror("map_root_vp_state failed");
         goto map_root_vp_state_failed;
     }
 
     if (map_mk_args(g_mk_args[cpu], g_mk_root_page_table)) {
-        BFERROR("map_mk_args failed\n");
+        bferror("map_mk_args failed");
         goto map_mk_args_failed;
     }
 
     g_mk_args[cpu]->pp = ((uint16_t)cpu);
-    g_mk_args[cpu]->online_pps = ((uint16_t)platform_num_online_cpus());
+
+    /**
+     * NOTE:
+     * - We cannot ask for the total number of CPUs on any AP from UEFI, so
+     *   we only do this for the BSP, and then use the BSP value to get the
+     *   total CPU count from that point on.
+     */
+
+    if (((uint64_t)0) == cpu) {
+        g_mk_args[cpu]->online_pps = ((uint16_t)platform_num_online_cpus());
+    }
+    else {
+        g_mk_args[cpu]->online_pps = g_mk_args[0]->online_pps;
+    }
+
     g_mk_args[cpu]->mk_state = g_mk_state[cpu];
     g_mk_args[cpu]->root_vp_state = g_root_vp_state[cpu];
     g_mk_args[cpu]->debug_ring = g_mk_debug_ring;
@@ -150,10 +158,9 @@ start_vmm_per_cpu(uint32_t const cpu)
     g_mk_args[cpu]->rpt = g_mk_root_page_table;
     g_mk_args[cpu]->rpt_phys = platform_virt_to_phys(g_mk_root_page_table);
 
-    ret = get_mk_page_pool_addr(
-        &g_mk_page_pool, HYPERVISOR_DIRECT_MAP_ADDR, &addr);
+    ret = get_mk_page_pool_addr(&g_mk_page_pool, HYPERVISOR_DIRECT_MAP_ADDR, &addr);
     if (ret) {
-        BFERROR("get_mk_page_pool_addr failed\n");
+        bferror("get_mk_page_pool_addr failed");
         goto get_mk_page_pool_addr_failed;
     }
 
@@ -161,10 +168,9 @@ start_vmm_per_cpu(uint32_t const cpu)
     g_mk_args[cpu]->page_pool.size = g_mk_page_pool.size;
     g_mk_args[cpu]->page_pool_base_virt = HYPERVISOR_DIRECT_MAP_ADDR;
 
-    ret = get_mk_huge_pool_addr(
-        &g_mk_huge_pool, HYPERVISOR_DIRECT_MAP_ADDR, &addr);
+    ret = get_mk_huge_pool_addr(&g_mk_huge_pool, HYPERVISOR_DIRECT_MAP_ADDR, &addr);
     if (ret) {
-        BFERROR("get_mk_huge_pool_addr failed\n");
+        bferror("get_mk_huge_pool_addr failed");
         goto get_mk_huge_pool_addr_failed;
     }
 
@@ -180,7 +186,7 @@ start_vmm_per_cpu(uint32_t const cpu)
 #endif
 
     if (demote(g_mk_args[cpu], g_mk_state[cpu], g_root_vp_state[cpu])) {
-        BFERROR("demote failed\n");
+        bferror("demote failed");
         goto demote_failed;
     }
 

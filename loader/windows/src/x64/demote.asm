@@ -260,15 +260,15 @@ gdt_and_cs_loaded:
     mov rax, [r14 + 150h]
     mov cr2, rax
 
-    mov rax, cr3
-    mov [r15 + 158h], rax
-    mov rax, [r14 + 158h]
-    mov cr3, rax
-
     mov rax, cr4
     mov [r15 + 160h], rax
     mov rax, [r14 + 160h]
     mov cr4, rax
+
+    mov rax, cr3
+    mov [r15 + 158h], rax
+    mov rax, [r14 + 158h]
+    mov cr3, rax
 
     mov rsp, [r14 + 080h]
 

@@ -29,6 +29,7 @@
 
 #include "span_t.h"
 
+#include <constants.h>
 #include <stdint.h>
 
 #pragma pack(push, 1)
@@ -51,7 +52,7 @@ struct start_vmm_args_t
     /** @brief stores the number of pages the kernel should reserve for
      *    the microkernel's page pool. If this is set to 0, the loader
      *    will reserve the default number of pages. */
-    uint32_t page_pool_size;
+    uint32_t num_pages_in_page_pool;
 
     /** @brief reserved */
     uint32_t reserved;

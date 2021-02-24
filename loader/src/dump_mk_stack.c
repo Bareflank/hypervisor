@@ -40,7 +40,7 @@
 void
 dump_mk_stack(struct span_t *const stack, uint32_t const cpu)
 {
-    BFINFO("mk stack on cpu #%u:\n", cpu);
-    BFINFO(" - addr: 0x%016" PRIx64 "\n", (uint64_t)stack->addr);
-    BFINFO(" - size: 0x%016" PRIx64 "\n", stack->size);
+    bfdebug_d32("mk stack on cpu", cpu);
+    bfdebug_ptr(" - addr", stack->addr);
+    bfdebug_x64(" - size", stack->size);
 }

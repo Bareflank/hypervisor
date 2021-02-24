@@ -53,19 +53,19 @@ alloc_pdt(struct pdpt_t *const pdpt, uint64_t const virt)
 
     pdpte = &pdpt->entires[pdpto(virt)];
     if (pdpte->p != ((uint64_t)0)) {
-        BFERROR("pdt already present: 0x%" PRIx64 "\n", virt);
+        bferror_x64("pdt already present", virt);
         return ((void *)0);
     }
 
     pdt = (struct pdt_t *)platform_alloc(sizeof(struct pdt_t));
     if (((void *)0) == pdt) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_pdt_failed;
     }
 
     phys = platform_virt_to_phys(pdt);
     if (((uint64_t)0) == phys) {
-        BFERROR("platform_virt_to_phys_pdt failed\n");
+        bferror("platform_virt_to_phys_pdt failed");
         goto platform_virt_to_phys_pdt_failed;
     }
 

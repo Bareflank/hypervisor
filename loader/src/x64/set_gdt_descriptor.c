@@ -107,7 +107,7 @@ set_gdt_descriptor(
     uint64_t attrib64 = ((uint64_t)attrib);
 
     if (((void *)0) == gdtr) {
-        BFERROR("invalid argument: gdtr == ((void *)0)\n");
+        bferror("invalid argument: gdtr == NULL");
         return LOADER_FAILURE;
     }
 
@@ -119,13 +119,13 @@ set_gdt_descriptor(
     }
 
     if (idx64_0 >= (bytes64_0 / sizeof(uint64_t))) {
-        BFERROR("invalid argument: index into GDT is out of range\n");
+        bferror("invalid argument: index into GDT is out of range");
         return LOADER_FAILURE;
     }
 
     if (((attrib64 << ATTRIB_SHIFT1) & SYSTEM_BIT) == ((uint64_t)0)) {
         if (idx64_1 >= (bytes64_1 / sizeof(uint64_t))) {
-            BFERROR("invalid argument: index into GDT is out of range\n");
+            bferror("invalid argument: index into GDT is out of range");
             return LOADER_FAILURE;
         }
     }

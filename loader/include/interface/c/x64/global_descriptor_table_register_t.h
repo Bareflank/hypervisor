@@ -48,8 +48,7 @@ struct global_descriptor_table_register_t
 };
 
 /** @brief Check to make sure the gdtr_t is the right size. */
-STATIC_ASSERT(
-    sizeof(struct global_descriptor_table_register_t) == 10, invalid_size);
+STATIC_ASSERT(sizeof(struct global_descriptor_table_register_t) == 10, invalid_size);
 
 #pragma pack(pop)
 

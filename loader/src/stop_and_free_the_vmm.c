@@ -58,12 +58,12 @@ stop_and_free_the_vmm(void)
     }
 
     if (VMM_STATUS_CORRUPT == g_vmm_status) {
-        BFERROR("Unable to stop, previous VMM stopped in a corrupt state\n");
+        bferror("Unable to stop, previous VMM stopped in a corrupt state");
         return;
     }
 
     if (platform_on_each_cpu(stop_vmm_per_cpu, PLATFORM_REVERSE)) {
-        BFERROR("stop_vmm_per_cpu failed\n");
+        bferror("stop_vmm_per_cpu failed");
         goto stop_vmm_per_cpu_failed;
     }
 

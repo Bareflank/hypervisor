@@ -48,7 +48,6 @@
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t alloc_and_copy_mk_elf_file_from_user(
-    struct span_t const *const mk_elf_file_from_user,
-    struct span_t *const copied_mk_elf_file);
+    struct span_t const *const mk_elf_file_from_user, struct span_t *const copied_mk_elf_file);
 
 #endif

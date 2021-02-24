@@ -31,14 +31,14 @@
     .type   return_to_vmexit_loop, @function
 return_to_vmexit_loop:
 
-    mov rsp, gs:[0x948]
+    mov rsp, gs:[0x1C8]
 
     call set_up_target
 capture_spec:
     pause
     jmp capture_spec
 set_up_target:
-    mov rax, gs:[0x940]
+    mov rax, gs:[0x1C0]
     mov [rsp], rax
     ret
     int 3

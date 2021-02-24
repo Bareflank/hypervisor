@@ -31,7 +31,7 @@
     .type   fast_fail_entry, @function
 fast_fail_entry:
 
-    mov rdi, gs:[0x800]
+    mov rdi, gs:[0x200]
     call fast_fail_trampoline
 
     jmp intrinsic_halt

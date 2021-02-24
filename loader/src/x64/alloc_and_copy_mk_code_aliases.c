@@ -82,43 +82,43 @@ alloc_and_copy_mk_code_aliases(struct code_aliases_t *const a)
 {
     a->demote = platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == a->demote) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_demote_failed;
     }
 
     a->promote = platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == a->promote) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_promote_failed;
     }
 
     a->esr_default = platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == a->esr_default) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_esr_default_failed;
     }
 
     a->esr_df = platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == a->esr_df) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_esr_df_failed;
     }
 
     a->esr_gpf = platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == a->esr_gpf) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_esr_gpf_failed;
     }
 
     a->esr_nmi = platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == a->esr_nmi) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_esr_nmi_failed;
     }
 
     a->esr_pf = platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == a->esr_pf) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_esr_pf_failed;
     }
 

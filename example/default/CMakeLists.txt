@@ -22,36 +22,58 @@
 add_executable(example_default)
 
 # NOTE:
-# - Include your source files
+# - Include your headers and include directories
 #
 
-target_sources(example_default PRIVATE
-    x64/intrinsic_cpuid.S
-    main.cpp
-)
-
-# NOTE:
-# - Include your arch specific source files
-#
+if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
+    target_include_directories(example_default PRIVATE
+        x64
+    )
+    list(APPEND HEADERS
+        ${CMAKE_CURRENT_LIST_DIR}/x64/common_arch_support.hpp
+    )
+endif()
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
     target_include_directories(example_default PRIVATE
-        x64
         x64/amd
     )
-    set_property(SOURCE main.cpp APPEND PROPERTY OBJECT_DEPENDS
-        ${CMAKE_CURRENT_LIST_DIR}/x64/common_arch_support.hpp
+    list(APPEND HEADERS
         ${CMAKE_CURRENT_LIST_DIR}/x64/amd/arch_support.hpp
     )
 elseif(HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
     target_include_directories(example_default PRIVATE
-        x64
         x64/intel
     )
-    set_property(SOURCE main.cpp APPEND PROPERTY OBJECT_DEPENDS
-        ${CMAKE_CURRENT_LIST_DIR}/x64/common_arch_support.hpp
+    list(APPEND HEADERS
         ${CMAKE_CURRENT_LIST_DIR}/x64/intel/arch_support.hpp
     )
+else()
+    message(FATAL_ERROR "Unsupported HYPERVISOR_TARGET_ARCH: ${HYPERVISOR_TARGET_ARCH}")
+endif()
+
+# NOTE:
+# - Include your source files and dependencies
+#
+
+target_sources(example_default PRIVATE
+    main.cpp
+)
+
+set_property(SOURCE main.cpp APPEND PROPERTY OBJECT_DEPENDS ${HEADERS})
+
+if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
+    target_sources(example_default PRIVATE
+        x64/intrinsic_cpuid.S
+    )
+endif()
+
+if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
+    # target_sources(example_default PRIVATE
+    # )
+elseif(HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
+    # target_sources(example_default PRIVATE
+    # )
 else()
     message(FATAL_ERROR "Unsupported HYPERVISOR_TARGET_ARCH: ${HYPERVISOR_TARGET_ARCH}")
 endif()
@@ -70,7 +92,7 @@ target_link_libraries(example_default PRIVATE
 )
 
 # NOTE:
-# - Include your extension somewhere.
+# - Install your extension somewhere.
 #
 
 install(TARGETS example_default DESTINATION bin)

@@ -53,19 +53,19 @@ alloc_pdpt(struct pml4t_t *const pml4t, uint64_t const virt)
 
     pml4te = &pml4t->entires[pml4to(virt)];
     if (pml4te->p != ((uint64_t)0)) {
-        BFERROR("pdpt already present: 0x%" PRIx64 "\n", virt);
+        bferror_x64("pdpt already present", virt);
         return ((void *)0);
     }
 
     pdpt = (struct pdpt_t *)platform_alloc(sizeof(struct pdpt_t));
     if (((void *)0) == pdpt) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_pdpt_failed;
     }
 
     phys = platform_virt_to_phys(pdpt);
     if (((uint64_t)0) == phys) {
-        BFERROR("platform_virt_to_phys_pdpt failed\n");
+        bferror("platform_virt_to_phys_pdpt failed");
         goto platform_virt_to_phys_pdpt_failed;
     }
 

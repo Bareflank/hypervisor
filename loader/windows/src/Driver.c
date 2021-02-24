@@ -26,6 +26,7 @@ Environment:
 
 #include <loader_fini.h>
 #include <loader_init.h>
+#include <serial_init.h>
 
 // clang-format on
 
@@ -83,15 +84,10 @@ Return Value:
 
     WDF_DRIVER_CONFIG_INIT(&config, loaderEvtDeviceAdd);
 
-    status = WdfDriverCreate(
-        DriverObject, RegistryPath, &attributes, &config, WDF_NO_HANDLE);
+    status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, WDF_NO_HANDLE);
 
     if (!NT_SUCCESS(status)) {
-        TraceEvents(
-            TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "WdfDriverCreate failed %!STATUS!",
-            status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
         WPP_CLEANUP(DriverObject);
         return status;
     }
@@ -132,20 +128,15 @@ Return Value:
 
     status = loaderCreateDevice(DeviceInit);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(
-            TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "loaderCreateDevice failed %!STATUS!",
-            status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "loaderCreateDevice failed %!STATUS!", status);
         return status;
     }
 
+    serial_init();
+
     if (loader_init()) {
         TraceEvents(
-            TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "loader_init failed %!STATUS!",
-            STATUS_UNSUCCESSFUL);
+            TRACE_LEVEL_ERROR, TRACE_DRIVER, "loader_init failed %!STATUS!", STATUS_UNSUCCESSFUL);
         return STATUS_UNSUCCESSFUL;
     }
 

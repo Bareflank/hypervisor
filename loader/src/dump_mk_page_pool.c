@@ -39,7 +39,7 @@
 void
 dump_mk_page_pool(struct mutable_span_t *const page_pool)
 {
-    BFINFO("mk page pool:\n");
-    BFINFO(" - addr: 0x%016" PRIx64 "\n", (uint64_t)page_pool->addr);
-    BFINFO(" - size: 0x%016" PRIx64 "\n", page_pool->size);
+    bfdebug("mk page pool:");
+    bfdebug_ptr(" - addr", page_pool->addr);
+    bfdebug_x64(" - size", page_pool->size);
 }
