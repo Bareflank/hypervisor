@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 TARGET_MODULE := bareflank_loader
-VENDOR_ID := $(shell lscpu | grep 'Vendor ID')
+VENDOR_ID := $(shell lscpu)
 
 ifneq ($(KERNELRELEASE),)
 	obj-m := $(TARGET_MODULE).o
