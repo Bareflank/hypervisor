@@ -42,29 +42,25 @@ dump_mk_args(struct mk_args_t *const args, uint32_t const cpu)
 {
     uint64_t idx;
 
-    // clang-format off
-
-    BFINFO("mk args on cpu #%u:\n", cpu);
-    BFINFO(" - online_pps: 0x%04x\n", args->online_pps);
-    BFINFO(" - mk_state: 0x%016" PRIx64 "\n", (uint64_t)args->mk_state);
-    BFINFO(" - root_vp_state: 0x%016" PRIx64 "\n", (uint64_t)args->root_vp_state);
-    BFINFO(" - debug_ring: 0x%016" PRIx64 "\n", (uint64_t)args->debug_ring);
-    BFINFO(" - mk_elf_file.addr: 0x%016" PRIx64 "\n",(uint64_t)args->mk_elf_file.addr);
-    BFINFO(" - mk_elf_file.size: 0x%016" PRIx64 "\n", args->mk_elf_file.size);
+    bfdebug_d32("mk args on cpu", cpu);
+    bfdebug_x16(" - online_pps", args->online_pps);
+    bfdebug_ptr(" - mk_state", args->mk_state);
+    bfdebug_ptr(" - root_vp_state", args->root_vp_state);
+    bfdebug_ptr(" - debug_ring", args->debug_ring);
+    bfdebug_ptr(" - mk_elf_file.addr", args->mk_elf_file.addr);
+    bfdebug_x64(" - mk_elf_file.size", args->mk_elf_file.size);
 
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
         if (((void *)0) != args->ext_elf_files[idx].addr) {
-            BFINFO(" - ext_elf_files[%" PRIu64 "].addr: 0x%016" PRIx64 "\n",
-                idx, (uint64_t)args->ext_elf_files[idx].addr);
-            BFINFO(" - ext_elf_files[%" PRIu64 "].size: 0x%016" PRIx64 "\n",
-                idx, args->ext_elf_files[idx].size);
+            bfdebug_ptr(" - ext_elf_files.addr", args->ext_elf_files[idx].addr);
+            bfdebug_x64(" - ext_elf_files.size", args->ext_elf_files[idx].size);
         }
     }
 
-    BFINFO(" - rpt: 0x%016" PRIx64 "\n", (uint64_t)args->rpt);
-    BFINFO(" - rpt_phys: 0x%016" PRIx64 "\n", args->rpt_phys);
-    BFINFO(" - page_pool.addr: 0x%016" PRIx64 "\n", (uint64_t)args->page_pool.addr);
-    BFINFO(" - page_pool.size: 0x%016" PRIx64 "\n", args->page_pool.size);
-    BFINFO(" - huge_pool.addr: 0x%016" PRIx64 "\n", (uint64_t)args->huge_pool.addr);
-    BFINFO(" - huge_pool.size: 0x%016" PRIx64 "\n", args->huge_pool.size);
+    bfdebug_ptr(" - rpt", args->rpt);
+    bfdebug_x64(" - rpt_phys", args->rpt_phys);
+    bfdebug_ptr(" - page_pool.addr", args->page_pool.addr);
+    bfdebug_x64(" - page_pool.size", args->page_pool.size);
+    bfdebug_ptr(" - huge_pool.addr", args->huge_pool.addr);
+    bfdebug_x64(" - huge_pool.size", args->huge_pool.size);
 }

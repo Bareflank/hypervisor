@@ -69,6 +69,7 @@ loader/**/*.mod.o
 loader/**/*.mod.cmd
 loader/**/*.o
 loader/**/*.o.cmd
+loader/**/*.cmd
 
 # Windows Loader
 loader/windows/x64/

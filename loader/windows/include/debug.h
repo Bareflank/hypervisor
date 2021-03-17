@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
-
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -29,31 +27,462 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include <itoa.h>
+#include <serial_write.h>
+#include <types.h>
 #include <wdm.h>
 
-#define BFSTR2(X) #X
-#define BFSTR(X) BFSTR2(X)
+/** @brief defines a constant for base 10 */
+#define BASE10 ((uint64_t)10)
+/** @brief defines a constant for base 16 */
+#define BASE16 ((uint64_t)16)
 
-#define BFINFO(...)                                                            \
-    DbgPrintEx(                                                                \
-        DPFLTR_IHVDRIVER_ID,                                                   \
-        DPFLTR_INFO_LEVEL,                                                     \
-        "[BAREFLANK DEBUG]: " __VA_ARGS__)
+/**
+ * <!-- description -->
+ *   @brief Outputs a string to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ */
+static inline void
+bfdebug(char const *const str)
+{
+    serial_write("[BAREFLANK DEBUG] ");
+    serial_write(str);
+    serial_write("\n");
 
-#define BFDEBUG(...)                                                           \
-    DbgPrintEx(                                                                \
-        DPFLTR_IHVDRIVER_ID,                                                   \
-        DPFLTR_INFO_LEVEL,                                                     \
-        "[BAREFLANK DEBUG]: " __FILE__ ":" BFSTR(__LINE__) ": " __VA_ARGS__)
-#define BFALERT(...)                                                           \
-    DbgPrintEx(                                                                \
-        DPFLTR_IHVDRIVER_ID,                                                   \
-        DPFLTR_INFO_LEVEL,                                                     \
-        "[BAREFLANK ALERT]: " __FILE__ ":" BFSTR(__LINE__) ": " __VA_ARGS__)
-#define BFERROR(...)                                                           \
-    DbgPrintEx(                                                                \
-        DPFLTR_IHVDRIVER_ID,                                                   \
-        DPFLTR_ERROR_LEVEL,                                                    \
-        "[BAREFLANK ERROR]: " __FILE__ ":" BFSTR(__LINE__) ": " __VA_ARGS__)
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "[BAREFLANK DEBUG] %s\n", str);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 8bit hex to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 8bit hex value to output
+ */
+static inline void
+bfdebug_x8(char const *const str, uint8_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE16);
+
+    serial_write("[BAREFLANK DEBUG] ");
+    serial_write(str);
+    serial_write(": 0x");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "[BAREFLANK DEBUG] %s: 0x%s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 16bit hex to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 16bit hex value to output
+ */
+static inline void
+bfdebug_x16(char const *const str, uint16_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE16);
+
+    serial_write("[BAREFLANK DEBUG] ");
+    serial_write(str);
+    serial_write(": 0x");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "[BAREFLANK DEBUG] %s: 0x%s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 32bit hex to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 32bit hex value to output
+ */
+static inline void
+bfdebug_x32(char const *const str, uint32_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE16);
+
+    serial_write("[BAREFLANK DEBUG] ");
+    serial_write(str);
+    serial_write(": 0x");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "[BAREFLANK DEBUG] %s: 0x%s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 64bit hex to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 64bit hex value to output
+ */
+static inline void
+bfdebug_x64(char const *const str, uint64_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE16);
+
+    serial_write("[BAREFLANK DEBUG] ");
+    serial_write(str);
+    serial_write(": 0x");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "[BAREFLANK DEBUG] %s: 0x%s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 8bit dec to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 8bit dec value to output
+ */
+static inline void
+bfdebug_d8(char const *const str, uint8_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE10);
+
+    serial_write("[BAREFLANK DEBUG] ");
+    serial_write(str);
+    serial_write(": ");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "[BAREFLANK DEBUG] %s: %s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 16bit dec to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 16bit dec value to output
+ */
+static inline void
+bfdebug_d16(char const *const str, uint16_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE10);
+
+    serial_write("[BAREFLANK DEBUG] ");
+    serial_write(str);
+    serial_write(": ");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "[BAREFLANK DEBUG] %s: %s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 32bit dec to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 32bit dec value to output
+ */
+static inline void
+bfdebug_d32(char const *const str, uint32_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE10);
+
+    serial_write("[BAREFLANK DEBUG] ");
+    serial_write(str);
+    serial_write(": ");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "[BAREFLANK DEBUG] %s: %s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 64bit dec to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 64bit dec value to output
+ */
+static inline void
+bfdebug_d64(char const *const str, uint64_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE10);
+
+    serial_write("[BAREFLANK DEBUG] ");
+    serial_write(str);
+    serial_write(": ");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "[BAREFLANK DEBUG] %s: %s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an pointer to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param p the pointer to output
+ */
+static inline void
+bfdebug_ptr(char const *const str, void const *const p)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)p), num, BASE16);
+
+    serial_write("[BAREFLANK DEBUG] ");
+    serial_write(str);
+    serial_write(": 0x");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "[BAREFLANK DEBUG] %s: 0x%s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ */
+static inline void
+bferror(char const *const str)
+{
+    serial_write("[BAREFLANK ERROR] ");
+    serial_write(str);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[BAREFLANK ERROR] %s", str);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 8bit hex to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 8bit hex value to output
+ */
+static inline void
+bferror_x8(char const *const str, uint8_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE16);
+
+    serial_write("[BAREFLANK ERROR] ");
+    serial_write(str);
+    serial_write(": 0x");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[BAREFLANK ERROR] %s: 0x%s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 16bit hex to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 16bit hex value to output
+ */
+static inline void
+bferror_x16(char const *const str, uint16_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE16);
+
+    serial_write("[BAREFLANK ERROR] ");
+    serial_write(str);
+    serial_write(": 0x");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[BAREFLANK ERROR] %s: 0x%s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 32bit hex to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 32bit hex value to output
+ */
+static inline void
+bferror_x32(char const *const str, uint32_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE16);
+
+    serial_write("[BAREFLANK ERROR] ");
+    serial_write(str);
+    serial_write(": 0x");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[BAREFLANK ERROR] %s: 0x%s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 64bit hex to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 64bit hex value to output
+ */
+static inline void
+bferror_x64(char const *const str, uint64_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE16);
+
+    serial_write("[BAREFLANK ERROR] ");
+    serial_write(str);
+    serial_write(": 0x");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[BAREFLANK ERROR] %s: 0x%s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 8bit dec to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 8bit dec value to output
+ */
+static inline void
+bferror_d8(char const *const str, uint8_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE10);
+
+    serial_write("[BAREFLANK ERROR] ");
+    serial_write(str);
+    serial_write(": ");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[BAREFLANK ERROR] %s: %s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 16bit dec to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 16bit dec value to output
+ */
+static inline void
+bferror_d16(char const *const str, uint16_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE10);
+
+    serial_write("[BAREFLANK ERROR] ");
+    serial_write(str);
+    serial_write(": ");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[BAREFLANK ERROR] %s: %s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 32bit dec to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 32bit dec value to output
+ */
+static inline void
+bferror_d32(char const *const str, uint32_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE10);
+
+    serial_write("[BAREFLANK ERROR] ");
+    serial_write(str);
+    serial_write(": ");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[BAREFLANK ERROR] %s: %s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an 64bit dec to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param val the 64bit dec value to output
+ */
+static inline void
+bferror_d64(char const *const str, uint64_t const val)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)val), num, BASE10);
+
+    serial_write("[BAREFLANK ERROR] ");
+    serial_write(str);
+    serial_write(": ");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[BAREFLANK ERROR] %s: %s\n", str, num);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Outputs a string and an pointer to the console
+ *
+ * <!-- inputs/outputs -->
+ *   @param str the string to output
+ *   @param p the pointer value to output
+ */
+static inline void
+bferror_ptr(char const *const str, void const *const p)
+{
+    char num[65] = {0};
+    bfitoa(((uint64_t)p), num, BASE16);
+
+    serial_write("[BAREFLANK ERROR] ");
+    serial_write(str);
+    serial_write(": 0x");
+    serial_write(num);
+    serial_write("\n");
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[BAREFLANK ERROR] %s: %s\n", str, num);
+}
 
 #endif

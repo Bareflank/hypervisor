@@ -42,7 +42,6 @@
  *   @param pml4t the root page table to map the huge pool into
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
-int64_t map_mk_huge_pool(
-    struct mutable_span_t const *const huge_pool, struct pml4t_t *const pml4t);
+int64_t map_mk_huge_pool(struct mutable_span_t const *const huge_pool, struct pml4t_t *const pml4t);
 
 #endif

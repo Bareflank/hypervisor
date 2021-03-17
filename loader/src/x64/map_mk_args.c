@@ -45,7 +45,7 @@ int64_t
 map_mk_args(struct mk_args_t const *const args, struct pml4t_t *const pml4t)
 {
     if (map_4k_page_rw(args, ((uint64_t)0), pml4t)) {
-        BFERROR("map_4k_page_rw failed\n");
+        bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }
 

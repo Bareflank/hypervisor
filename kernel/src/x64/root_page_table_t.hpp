@@ -55,14 +55,12 @@ namespace mk
     ///   @tparam PAGE_POOL_CONCEPT defines the type of page pool to use
     ///   @tparam PAGE_SIZE defines the size of a page
     ///   @tparam PAGE_SHIFT defines number of bits in a page
-    ///   @tparam MAP_ADDR defines the address of the MK's map region
     ///
     template<
         typename INTRINSIC_CONCEPT,
         typename PAGE_POOL_CONCEPT,
         bsl::uintmax PAGE_SIZE,
-        bsl::uintmax PAGE_SHIFT,
-        bsl::uintmax MAP_ADDR>
+        bsl::uintmax PAGE_SHIFT>
     class root_page_table_t final
     {
         /// @brief stores true if initialized() has been executed
@@ -1009,130 +1007,6 @@ namespace mk
             return bsl::errc_success;
         }
 
-        /// <!-- description -->
-        ///   @brief Converts the provided virtual address to a physical
-        ///     address by walking the provided page table.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param rpt_phys the physical address to root page table to walk
-        ///   @param page_virt the virtual address to convert
-        ///   @return Returns the resulting physical address.
-        ///
-        [[nodiscard]] constexpr auto
-        virt_to_phys(
-            bsl::safe_uintmax const &rpt_phys, bsl::safe_uintmax const &page_virt) &noexcept
-            -> bsl::safe_uintmax
-        {
-            bsl::safe_uintmax virt{MAP_ADDR};
-            bsl::safe_uintmax phys{rpt_phys};
-
-            /// PML4
-            ///
-
-            if (!this->map_page(virt, phys, false, false, false)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uintmax::zero(true);
-            }
-
-            auto *const pml4t{bsl::to_ptr<pml4t_t *>(virt)};
-            auto *const pml4te{pml4t->entries.at_if(this->pml4to(page_virt))};
-            if (bsl::ZERO_UMAX == pml4te->p) {
-                bsl::error() << "virtual address "     // --
-                             << bsl::hex(page_virt)    // --
-                             << " was never mapped"    // --
-                             << bsl::endl              // --
-                             << bsl::here();           // --
-
-                return bsl::safe_uintmax::zero(true);
-            }
-
-            phys = pml4te->phys << bsl::to_umax(PAGE_SHIFT);
-            if (!this->unmap_page(virt)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uintmax::zero(true);
-            }
-
-            /// PDPT
-            ///
-
-            if (!this->map_page(virt, phys, false, false, false)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uintmax::zero(true);
-            }
-
-            auto *const pdpt{bsl::to_ptr<pdpt_t *>(virt)};
-            auto *const pdpte{pdpt->entries.at_if(this->pdpto(page_virt))};
-            if (bsl::ZERO_UMAX == pdpte->p) {
-                bsl::error() << "virtual address "     // --
-                             << bsl::hex(page_virt)    // --
-                             << " was never mapped"    // --
-                             << bsl::endl              // --
-                             << bsl::here();           // --
-
-                return bsl::safe_uintmax::zero(true);
-            }
-
-            phys = pdpte->phys << bsl::to_umax(PAGE_SHIFT);
-            if (!this->unmap_page(virt)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uintmax::zero(true);
-            }
-
-            /// PDT
-            ///
-
-            if (!this->map_page(virt, phys, false, false, false)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uintmax::zero(true);
-            }
-
-            auto *const pdt{bsl::to_ptr<pdt_t *>(virt)};
-            auto *const pdte{pdt->entries.at_if(this->pdto(page_virt))};
-            if (bsl::ZERO_UMAX == pdte->p) {
-                bsl::error() << "virtual address "     // --
-                             << bsl::hex(page_virt)    // --
-                             << " was never mapped"    // --
-                             << bsl::endl              // --
-                             << bsl::here();           // --
-
-                return bsl::safe_uintmax::zero(true);
-            }
-
-            phys = pdte->phys << bsl::to_umax(PAGE_SHIFT);
-            if (!this->unmap_page(virt)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uintmax::zero(true);
-            }
-
-            /// PT
-            ///
-
-            if (!this->map_page(virt, phys, false, false, false)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uintmax::zero(true);
-            }
-
-            auto *const pt{bsl::to_ptr<pt_t *>(virt)};
-            auto *const pte{pt->entries.at_if(this->pto(page_virt))};
-            if (bsl::ZERO_UMAX == pte->p) {
-                bsl::error() << "virtual address "     // --
-                             << bsl::hex(page_virt)    // --
-                             << " was never mapped"    // --
-                             << bsl::endl              // --
-                             << bsl::here();           // --
-
-                return bsl::safe_uintmax::zero(true);
-            }
-
-            phys = pte->phys << bsl::to_umax(PAGE_SHIFT);
-            if (!this->unmap_page(virt)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uintmax::zero(true);
-            }
-
-            return phys;
-        }
-
     public:
         /// @brief an alias for INTRINSIC_CONCEPT
         using intrinsic_type = INTRINSIC_CONCEPT;
@@ -1359,102 +1233,6 @@ namespace mk
         add_tables(root_page_table_t const &rpt) &noexcept -> bsl::errc_type
         {
             return this->add_tables(rpt.m_pml4t);
-        }
-
-        /// <!-- description -->
-        ///   @brief Adds root VP state specific resources to the root page
-        ///     tables. This is needed on some architectures like x86 to
-        ///     ensure the entire root VP state is mapped in as needed.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam STATE_SAVE_CONCEPT the type of state save to use
-        ///   @param root_vp_state the state of the root_vp
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        template<typename STATE_SAVE_CONCEPT>
-        [[nodiscard]] constexpr auto
-        add_root_vp_state(STATE_SAVE_CONCEPT const *const root_vp_state) &noexcept -> bsl::errc_type
-        {
-            if (bsl::unlikely(!m_initialized)) {
-                bsl::error() << "root_page_table_t not initialized\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (bsl::ZERO_UMAX == root_vp_state->map_gdt) {
-                return bsl::errc_success;
-            }
-
-            /// NOTE:
-            /// - We need to map the root OS's GDT into the microkernel's
-            ///   address space so that it can flip the TSS busy bit
-            ///   during the promotion process.
-            /// - This is not a simple task as some OS's will not provide
-            ///   the physical address of the GDT (like Linux), so we need
-            ///   to manually walk the root OS's page tables to get this
-            ///   physical address ourselves.
-            ///
-
-            if (bsl::unlikely(nullptr == root_vp_state)) {
-                bsl::error() << "root_vp_state is invalid: "    // --
-                             << root_vp_state                   // --
-                             << bsl::endl                       // --
-                             << bsl::here();                    // --
-
-                return bsl::errc_failure;
-            }
-
-            auto const rpt_phys{this->page_aligned(root_vp_state->cr3)};
-            if (bsl::unlikely(rpt_phys.is_zero())) {
-                bsl::error() << "invalid cr3: "       // --
-                             << bsl::hex(rpt_phys)    // --
-                             << bsl::endl             // --
-                             << bsl::here();          // --
-
-                return bsl::errc_failure;
-            }
-
-            auto const gdt_virt{bsl::to_umax(root_vp_state->gdtr.base)};
-            if (bsl::unlikely(gdt_virt.is_zero())) {
-                bsl::error() << "invalid gdt address: "    // --
-                             << bsl::hex(gdt_virt)         // --
-                             << bsl::endl                  // --
-                             << bsl::here();               // --
-
-                return bsl::errc_failure;
-            }
-
-            if (bsl::unlikely(!this->is_page_aligned(gdt_virt))) {
-                bsl::error() << "gdt address is not page aligned: "    // --
-                             << bsl::hex(gdt_virt)                     // --
-                             << bsl::endl                              // --
-                             << bsl::here();                           // --
-
-                return bsl::errc_failure;
-            }
-
-            auto const gdt_limit{bsl::to_umax(root_vp_state->gdtr.limit)};
-            if (bsl::unlikely(gdt_limit.is_zero())) {
-                bsl::error() << "invalid gdt limit: "    // --
-                             << bsl::hex(gdt_limit)      // --
-                             << bsl::endl                // --
-                             << bsl::here();             // --
-
-                return bsl::errc_failure;
-            }
-
-            auto gdpt_phys{this->virt_to_phys(rpt_phys, gdt_virt)};
-            if (bsl::unlikely(!gdpt_phys)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (!this->map_page(gdt_virt, gdpt_phys, false, false, false)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
         }
 
         /// <!-- description -->
@@ -1931,7 +1709,6 @@ namespace mk
     ///   @tparam PAGE_POOL_CONCEPT defines the type of page pool to use
     ///   @tparam PAGE_SIZE defines the size of a page
     ///   @tparam PAGE_SHIFT defines number of bits in a page
-    ///   @tparam MAP_ADDR defines the address of the MK's map region
     ///   @param o the instance of the outputter used to output the value.
     ///   @param rpt the root_page_table_t to output
     ///   @return return o
@@ -1941,17 +1718,12 @@ namespace mk
         typename INTRINSIC_CONCEPT,
         typename PAGE_POOL_CONCEPT,
         bsl::uintmax PAGE_SIZE,
-        bsl::uintmax PAGE_SHIFT,
-        bsl::uintmax MAP_ADDR>
+        bsl::uintmax PAGE_SHIFT>
     [[maybe_unused]] constexpr auto
     operator<<(
         bsl::out<T> const o,
-        mk::root_page_table_t<
-            INTRINSIC_CONCEPT,
-            PAGE_POOL_CONCEPT,
-            PAGE_SIZE,
-            PAGE_SHIFT,
-            MAP_ADDR> const &rpt) noexcept -> bsl::out<T>
+        mk::root_page_table_t<INTRINSIC_CONCEPT, PAGE_POOL_CONCEPT, PAGE_SIZE, PAGE_SHIFT> const
+            &rpt) noexcept -> bsl::out<T>
     {
         if constexpr (!o) {
             return o;

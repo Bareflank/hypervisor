@@ -55,13 +55,13 @@ enable_hve(struct state_save_t *const state)
 
     phys = platform_virt_to_phys(state->hve_page);
     if (((uint64_t)0) == phys) {
-        BFERROR("platform_virt_to_phys failed\n");
+        bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
     efer = intrinsic_rdmsr(MSR_IA32_EFER);
     if ((efer & EFER_SVME) != 0) {
-        BFERROR("SVM is already running. Is another hypervisor running?\n");
+        bferror("SVM is already running. Is another hypervisor running?");
         return LOADER_FAILURE;
     }
 

@@ -61,27 +61,19 @@ DEFINE_GUID(
     0x44);
 
 /** @brief defines IOCTL for starting a VM */
-#define LOADER_START_VMM                                                       \
-    CTL_CODE(                                                                  \
-        FILE_DEVICE_UNKNOWN,                                                   \
-        LOADER_START_VMM_CMD,                                                  \
-        METHOD_BUFFERED,                                                       \
-        FILE_READ_DATA)
+#define LOADER_START_VMM                                                                           \
+    CTL_CODE(FILE_DEVICE_UNKNOWN, LOADER_START_VMM_CMD, METHOD_BUFFERED, FILE_READ_DATA)
 
 /** @brief defines IOCTL for stopping a VM */
-#define LOADER_STOP_VMM                                                        \
-    CTL_CODE(                                                                  \
-        FILE_DEVICE_UNKNOWN,                                                   \
-        LOADER_STOP_VMM_CMD,                                                   \
-        METHOD_BUFFERED,                                                       \
-        FILE_READ_DATA)
+#define LOADER_STOP_VMM                                                                            \
+    CTL_CODE(FILE_DEVICE_UNKNOWN, LOADER_STOP_VMM_CMD, METHOD_BUFFERED, FILE_READ_DATA)
 
 /** @brief defines IOCTL for dumping a VMs debug ring */
-#define LOADER_DUMP_VMM                                                        \
-    CTL_CODE(                                                                  \
-        FILE_DEVICE_UNKNOWN,                                                   \
-        LOADER_DUMP_VMM_CMD,                                                   \
-        METHOD_BUFFERED,                                                       \
+#define LOADER_DUMP_VMM                                                                            \
+    CTL_CODE(                                                                                      \
+        FILE_DEVICE_UNKNOWN,                                                                       \
+        LOADER_DUMP_VMM_CMD,                                                                       \
+        METHOD_BUFFERED,                                                                           \
         FILE_READ_DATA | FILE_WRITE_DATA)
 
 #endif

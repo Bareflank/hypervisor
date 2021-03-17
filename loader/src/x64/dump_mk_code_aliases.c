@@ -39,13 +39,12 @@
 void
 dump_mk_code_aliases(struct code_aliases_t *const a)
 {
-    BFINFO("mk code aliases:\n");
-
-    BFINFO(" - demote: 0x%016" PRIx64 "\n", (uint64_t)a->demote);
-    BFINFO(" - promote: 0x%016" PRIx64 "\n", (uint64_t)a->promote);
-    BFINFO(" - esr_default: 0x%016" PRIx64 "\n", (uint64_t)a->esr_default);
-    BFINFO(" - esr_df: 0x%016" PRIx64 "\n", (uint64_t)a->esr_df);
-    BFINFO(" - esr_gpf: 0x%016" PRIx64 "\n", (uint64_t)a->esr_gpf);
-    BFINFO(" - esr_nmi: 0x%016" PRIx64 "\n", (uint64_t)a->esr_nmi);
-    BFINFO(" - esr_pf: 0x%016" PRIx64 "\n", (uint64_t)a->esr_pf);
+    bfdebug("mk code aliases:");
+    bfdebug_ptr(" - demote", a->demote);
+    bfdebug_ptr(" - promote", a->promote);
+    bfdebug_ptr(" - esr_default", a->esr_default);
+    bfdebug_ptr(" - esr_df", a->esr_df);
+    bfdebug_ptr(" - esr_gpf", a->esr_gpf);
+    bfdebug_ptr(" - esr_nmi", a->esr_nmi);
+    bfdebug_ptr(" - esr_pf", a->esr_pf);
 }

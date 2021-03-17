@@ -24,8 +24,6 @@
  * SOFTWARE.
  */
 
-#define DEBUG_LOADER
-
 #include <alloc_and_copy_ext_elf_files_from_user.h>
 #include <alloc_and_copy_mk_elf_file_from_user.h>
 #include <alloc_and_copy_mk_elf_segments.h>
@@ -77,7 +75,7 @@ alloc_and_start_the_vmm(struct start_vmm_args_t const *const args)
     }
 
     if (VMM_STATUS_CORRUPT == g_vmm_status) {
-        BFERROR("Unable to start, previous VMM failed to properly stop\n");
+        bferror("Unable to start, previous VMM failed to properly stop");
         return LOADER_FAILURE;
     }
 
@@ -85,69 +83,67 @@ alloc_and_start_the_vmm(struct start_vmm_args_t const *const args)
     g_mk_debug_ring->spos = ((uint64_t)0);
 
     if (alloc_mk_root_page_table(&g_mk_root_page_table)) {
-        BFERROR("alloc_and_copy_mk_root_page_table failed\n");
+        bferror("alloc_and_copy_mk_root_page_table failed");
         goto alloc_and_copy_mk_root_page_table_failed;
     }
 
-    if (alloc_and_copy_mk_elf_file_from_user(
-            &args->mk_elf_file, &g_mk_elf_file)) {
-        BFERROR("alloc_and_copy_mk_elf_file_from_user failed\n");
+    if (alloc_and_copy_mk_elf_file_from_user(&args->mk_elf_file, &g_mk_elf_file)) {
+        bferror("alloc_and_copy_mk_elf_file_from_user failed");
         goto alloc_and_copy_mk_elf_file_from_user_failed;
     }
 
-    if (alloc_and_copy_ext_elf_files_from_user(
-            args->ext_elf_files, g_ext_elf_files)) {
-        BFERROR("alloc_and_copy_ext_elf_files_from_user failed\n");
+    if (alloc_and_copy_ext_elf_files_from_user(args->ext_elf_files, g_ext_elf_files)) {
+        bferror("alloc_and_copy_ext_elf_files_from_user failed");
         goto alloc_and_copy_ext_elf_files_from_user_failed;
     }
 
     if (alloc_and_copy_mk_elf_segments(&g_mk_elf_file, g_mk_elf_segments)) {
-        BFERROR("alloc_and_copy_mk_elf_segments failed\n");
+        bferror("alloc_and_copy_mk_elf_segments failed");
         goto alloc_and_copy_mk_elf_segments_failed;
     }
 
-    if (alloc_mk_page_pool(args->page_pool_size, &g_mk_page_pool)) {
-        BFERROR("alloc_mk_page_pool failed\n");
+    if (alloc_mk_page_pool(args->num_pages_in_page_pool, &g_mk_page_pool)) {
+        bferror("alloc_mk_page_pool failed");
         goto alloc_mk_page_pool_failed;
     }
 
     if (alloc_mk_huge_pool(0U, &g_mk_huge_pool)) {
-        BFERROR("alloc_mk_huge_pool failed\n");
+        bferror("alloc_mk_huge_pool failed");
         goto alloc_mk_huge_pool_failed;
     }
 
     if (map_mk_debug_ring(g_mk_debug_ring, g_mk_root_page_table)) {
-        BFERROR("map_mk_debug_ring failed\n");
+        bferror("map_mk_debug_ring failed");
         goto map_mk_debug_ring_failed;
     }
 
     if (map_mk_code_aliases(&g_mk_code_aliases, g_mk_root_page_table)) {
-        BFERROR("map_mk_code_aliases failed\n");
+        bferror("map_mk_code_aliases failed");
         goto map_mk_code_aliases_failed;
     }
 
     if (map_mk_elf_file(&g_mk_elf_file, g_mk_root_page_table)) {
-        BFERROR("map_mk_elf_file failed\n");
+        bferror("map_mk_elf_file failed");
         goto map_mk_elf_file_failed;
     }
 
     if (map_ext_elf_files(g_ext_elf_files, g_mk_root_page_table)) {
-        BFERROR("map_ext_elf_files failed\n");
+        bferror("map_ext_elf_files failed");
         goto map_ext_elf_files_failed;
     }
 
     if (map_mk_elf_segments(g_mk_elf_segments, g_mk_root_page_table)) {
-        BFERROR("map_mk_elf_segments failed\n");
+        bferror("map_mk_elf_segments failed");
         goto map_mk_elf_segments_failed;
     }
 
     if (map_mk_page_pool(&g_mk_page_pool, g_mk_root_page_table)) {
-        BFERROR("map_mk_page_pool failed\n");
+        bferror("map_mk_page_pool failed");
         goto map_mk_page_pool_failed;
     }
 
     if (map_mk_huge_pool(&g_mk_huge_pool, g_mk_root_page_table)) {
-        BFERROR("map_mk_huge_pool failed\n");
+        bferror("map_mk_huge_pool failed");
         goto map_mk_huge_pool_failed;
     }
 
@@ -161,7 +157,7 @@ alloc_and_start_the_vmm(struct start_vmm_args_t const *const args)
 #endif
 
     if (platform_on_each_cpu(start_vmm_per_cpu, PLATFORM_FORWARD)) {
-        BFERROR("start_vmm_per_cpu failed\n");
+        bferror("start_vmm_per_cpu failed");
         goto start_vmm_per_cpu_failed;
     }
 
@@ -170,7 +166,7 @@ alloc_and_start_the_vmm(struct start_vmm_args_t const *const args)
 
 start_vmm_per_cpu_failed:
     if (platform_on_each_cpu(stop_vmm_per_cpu, PLATFORM_REVERSE)) {
-        BFERROR("stop_vmm_per_cpu failed\n");
+        bferror("stop_vmm_per_cpu failed");
     }
 
 map_mk_huge_pool_failed:
@@ -211,47 +207,47 @@ verify_start_vmm_args(struct start_vmm_args_t const *const args)
     uint64_t idx;
 
     if (((uint64_t)1) != args->ver) {
-        BFERROR("IOCTL ABI version not supported\n");
+        bferror("IOCTL ABI version not supported");
         return LOADER_FAILURE;
     }
 
     if (((void *)0) == args->mk_elf_file.addr) {
-        BFERROR("the microkernel is required\n");
+        bferror("the microkernel is required");
         return LOADER_FAILURE;
     }
 
     if (((uint64_t)0) == args->mk_elf_file.size) {
-        BFERROR("mk_elf_file.size is invalid\n");
+        bferror("mk_elf_file.size is invalid");
         return LOADER_FAILURE;
     }
 
     if (HYPERVISOR_MAX_ELF_FILE_SIZE <= args->mk_elf_file.size) {
-        BFERROR("mk_elf_file.size is invalid\n");
+        bferror("mk_elf_file.size is invalid");
         return LOADER_FAILURE;
     }
 
     if (((void *)0) == args->ext_elf_files[((uint64_t)0)].addr) {
-        BFERROR("at least one extension is required\n");
+        bferror("at least one extension is required");
         return LOADER_FAILURE;
     }
 
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
         if (((void *)0) == args->ext_elf_files[idx].addr) {
             if (((uint64_t)0) != args->ext_elf_files[idx].size) {
-                BFERROR("invalid extension address/size combination\n");
+                bferror("invalid extension address/size combination");
                 return LOADER_FAILURE;
             }
         }
 
         if (((uint64_t)0) == args->ext_elf_files[idx].size) {
             if (((void *)0) != args->ext_elf_files[idx].addr) {
-                BFERROR("invalid extension address/size combination\n");
+                bferror("invalid extension address/size combination");
                 return LOADER_FAILURE;
             }
         }
 
         if (HYPERVISOR_MAX_ELF_FILE_SIZE <= args->ext_elf_files[idx].size) {
-            BFERROR("ext_elf_files[%u].size is invalid\n", (uint32_t)idx);
+            bferror_d32("ext_elf_files.size is invalid", (uint32_t)idx);
             return LOADER_FAILURE;
         }
     }
@@ -276,24 +272,23 @@ start_vmm(struct start_vmm_args_t const *const ioctl_args)
     struct start_vmm_args_t args;
 
     if (((void *)0) == ioctl_args) {
-        BFERROR("ioctl_args was ((void *)0)\n");
+        bferror("ioctl_args was NULL");
         return LOADER_FAILURE;
     }
 
-    ret = platform_copy_from_user(
-        &args, ioctl_args, sizeof(struct start_vmm_args_t));
+    ret = platform_copy_from_user(&args, ioctl_args, sizeof(struct start_vmm_args_t));
     if (ret) {
-        BFERROR("platform_copy_from_user failed\n");
+        bferror("platform_copy_from_user failed");
         return LOADER_FAILURE;
     }
 
     if (verify_start_vmm_args(&args)) {
-        BFERROR("verify_start_vmm_args failed\n");
+        bferror("verify_start_vmm_args failed");
         return LOADER_FAILURE;
     }
 
     if (alloc_and_start_the_vmm(&args)) {
-        BFERROR("alloc_and_start_the_vmm failed\n");
+        bferror("alloc_and_start_the_vmm failed");
         return LOADER_FAILURE;
     }
 

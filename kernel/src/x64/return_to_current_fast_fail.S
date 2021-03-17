@@ -31,7 +31,7 @@
     .type   return_to_current_fast_fail, @function
 return_to_current_fast_fail:
 
-    mov rax, gs:[0x908]
+    mov rax, gs:[0x188]
     cmp rax, 0
     je use_current_stack
 
@@ -44,7 +44,7 @@ capture_spec:
     pause
     jmp capture_spec
 set_up_target:
-    mov rax, gs:[0x900]
+    mov rax, gs:[0x180]
     mov [rsp], rax
     ret
     int 3

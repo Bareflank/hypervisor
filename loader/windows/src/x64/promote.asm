@@ -94,7 +94,6 @@
 
     xor rax, rax
     mov ax, [r15 + 130h]
-    and ax, 0F8h
 
     add rdx, rax
 

@@ -48,13 +48,12 @@
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-map_4k_page_rx(
-    void const *const virt, uint64_t const phys, struct pml4t_t *const pml4t)
+map_4k_page_rx(void const *const virt, uint64_t const phys, struct pml4t_t *const pml4t)
 {
     bfelf_elf64_word const rw = bfelf_pf_r | bfelf_pf_x;
 
     if (map_4k_page((uint64_t)virt, phys, rw, pml4t)) {
-        BFERROR("map_4k_page failed\n");
+        bferror("map_4k_page failed");
         return LOADER_FAILURE;
     }
 

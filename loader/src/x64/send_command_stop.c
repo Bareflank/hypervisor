@@ -49,12 +49,12 @@ send_command_stop(void)
     intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
 
     if (((uint32_t)0) != eax) {
-        BFERROR("stop cpuid command failed\n");
+        bferror("stop cpuid command failed");
         return LOADER_FAILURE;
     }
 
     if (CPUID_COMMAND_ECX_STOP != ecx) {
-        BFERROR("stop cpuid command failed\n");
+        bferror("stop cpuid command failed");
         return LOADER_FAILURE;
     }
 

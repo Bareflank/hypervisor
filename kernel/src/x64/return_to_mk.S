@@ -31,19 +31,19 @@
     .type   return_to_mk, @function
 return_to_mk:
 
-    mov rsp, gs:[0x928]
+    mov rsp, gs:[0x1A8]
 
-    mov rax, gs:[0x910]
-    mov gs:[0x900], rax
-    mov rax, gs:[0x918]
-    mov gs:[0x908], rax
+    mov rax, gs:[0x190]
+    mov gs:[0x180], rax
+    mov rax, gs:[0x198]
+    mov gs:[0x188], rax
 
-    mov r15, gs:[0x070]
-    mov r14, gs:[0x068]
-    mov r13, gs:[0x060]
-    mov r12, gs:[0x058]
-    mov rbp, gs:[0x020]
-    mov rbx, gs:[0x008]
+    mov r15, gs:[0x028]
+    mov r14, gs:[0x020]
+    mov r13, gs:[0x018]
+    mov r12, gs:[0x010]
+    mov rbp, gs:[0x008]
+    mov rbx, gs:[0x000]
 
     mov rax, rdi
     ret

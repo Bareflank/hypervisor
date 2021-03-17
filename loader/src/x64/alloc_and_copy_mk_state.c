@@ -37,6 +37,8 @@
 #include <intrinsic_rdmsr.h>
 #include <intrinsic_scr0.h>
 #include <intrinsic_scr4.h>
+#include <intrinsic_scs.h>
+#include <intrinsic_sss.h>
 #include <platform.h>
 #include <pml4t_t.h>
 #include <set_gdt_descriptor.h>
@@ -47,10 +49,17 @@
 #include <types.h>
 
 /** @brief defines the default value of rflags  */
-#define RFLAGS ((uint64_t)0x2)
+#define DEFAULT_RFLAGS ((uint64_t)0x2)
+
+/** @brief defines the default value of CR0  */
+#define DEFAULT_CR0 ((uint64_t)0x80050033)
+/** @brief defines the default value of CR4  */
+#define DEFAULT_CR4 ((uint64_t)0x003000E0)
 
 /** @brief defines the MSR_IA32_EFER MSR  */
 #define MSR_IA32_EFER ((uint32_t)0xC0000080)
+/** @brief defines the default value of EFER  */
+#define DEFAULT_EFER ((uint64_t)0x00000D01)
 
 /** @brief defines the microkernel's CS selector */
 #define MK_CS_SELECTOR ((uint16_t)0x10)
@@ -79,22 +88,22 @@
 /** @brief defines the microkernel's TR base */
 #define MK_TR_BASE ((uint64_t)0x0)
 
-/** @brief defines the microkernel's CS selector */
-#define EXT_CS_SELECTOR ((uint16_t)0x28)
-/** @brief defines the microkernel's CS attributes */
+/** @brief defines the extension's CS selector */
+#define EXT_CS_SELECTOR_OFFSET ((uint16_t)0x18)
+/** @brief defines the extension's CS attributes */
 #define EXT_CS_ATTRIB ((uint16_t)0x0000A0FB)
-/** @brief defines the microkernel's CS limit */
+/** @brief defines the extension's CS limit */
 #define EXT_CS_LIMIT ((uint32_t)0xFFFFFFFF)
-/** @brief defines the microkernel's CS base */
+/** @brief defines the extension's CS base */
 #define EXT_CS_BASE ((uint64_t)0x0)
 
-/** @brief defines the microkernel's SS selector */
-#define EXT_SS_SELECTOR ((uint16_t)0x20)
-/** @brief defines the microkernel's SS attributes */
+/** @brief defines the extension's SS selector */
+#define EXT_SS_SELECTOR_OFFSET ((uint16_t)0x08)
+/** @brief defines the extension's SS attributes */
 #define EXT_SS_ATTRIB ((uint16_t)0x0000C0F3)
-/** @brief defines the microkernel's SS limit */
+/** @brief defines the extension's SS limit */
 #define EXT_SS_LIMIT ((uint32_t)0xFFFFFFFF)
-/** @brief defines the microkernel's SS base */
+/** @brief defines the extension's SS base */
 #define EXT_SS_BASE ((uint64_t)0x0)
 
 /** @brief defines the DIVIDE_BY_ZERO_ERROR_VECTOR ESR vector */
@@ -140,8 +149,6 @@
 /** @brief defines the SECURITY_EXCEPTION_VECTOR ESR vector */
 #define ESR_SECURITY_EXCEPTION_VECTOR ((uint32_t)30)
 
-/** @brief defines the ESR selector used by the microkernel */
-#define ESR_SELECTOR ((uint16_t)0x10)
 /** @brief defines the ESR attributes used by the microkernel */
 #define ESR_ATTRIB ((uint16_t)0x8E01)
 
@@ -176,10 +183,12 @@ alloc_and_copy_mk_state(
     struct state_save_t **const state)
 {
     int64_t ret;
+    uint16_t ext_cs_selector;
+    uint16_t ext_ss_selector;
 
     struct bfelf_elf64_ehdr_t const *ehdr = ((void *)0);
     if (get_elf64_ehdr(mk_elf_file->addr, &ehdr)) {
-        BFERROR("get_elf64_ehdr failed\n");
+        bferror("get_elf64_ehdr failed");
         return LOADER_FAILURE;
     }
 
@@ -189,7 +198,7 @@ alloc_and_copy_mk_state(
 
     *state = (struct state_save_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == *state) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_state_failed;
     }
 
@@ -199,7 +208,7 @@ alloc_and_copy_mk_state(
 
     (*state)->hve_page = platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == (*state)->hve_page) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_hve_page_failed;
     }
 
@@ -208,7 +217,7 @@ alloc_and_copy_mk_state(
     /**************************************************************************/
 
     if (enable_hve(*state)) {
-        BFERROR("failed to enable HVE\n");
+        bferror("failed to enable HVE");
         goto enable_hve_failed;
     }
 
@@ -223,7 +232,7 @@ alloc_and_copy_mk_state(
     /* Flags                                                                  */
     /**************************************************************************/
 
-    (*state)->rflags = RFLAGS;
+    (*state)->rflags = DEFAULT_RFLAGS;
 
     /**************************************************************************/
     /* Task-State Segment                                                     */
@@ -231,13 +240,13 @@ alloc_and_copy_mk_state(
 
     (*state)->tss = (struct tss_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == (*state)->tss) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_tss_failed;
     }
 
     (*state)->ist = platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == (*state)->ist) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_ist_failed;
     }
 
@@ -250,18 +259,31 @@ alloc_and_copy_mk_state(
 
     (*state)->gdtr.base = (uint64_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == (*state)->gdtr.base) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_gdt_failed;
     }
 
     (*state)->idtr.base = (uint64_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == (*state)->idtr.base) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_idt_failed;
     }
 
     (*state)->gdtr.limit = (uint16_t)(HYPERVISOR_PAGE_SIZE - ((uint64_t)1));
     (*state)->idtr.limit = (uint16_t)(HYPERVISOR_PAGE_SIZE - ((uint64_t)1));
+
+    /**
+     * TODO:
+     * - We need to remove the hardcoded nature of CS and SS. Right now,
+     *   Windows and Linux use these same values, but UEFI doesn't. UEFI
+     *   isn't going to generate an NMI, so we should be good during demote,
+     *   but in general, this is not safe.
+     * - Note that UEFI so has CS and SS flipped. This means you cannot use
+     *   them in the microkernel as it needs fast syscalls which have the
+     *   offsets hardcoded in hardware.
+     * - UEFI also has the issue that TR is never set (it is left to 0),
+     *   which means promote will fail if you attempt to set it back to 0.
+     */
 
     (*state)->cs_selector = MK_CS_SELECTOR;
     (*state)->cs_attrib = MK_CS_ATTRIB;
@@ -278,63 +300,86 @@ alloc_and_copy_mk_state(
     (*state)->tr_limit = MK_TR_LIMIT;
     (*state)->tr_base = (uint64_t)(*state)->tss;
 
-    ret = set_gdt_descriptor(
-        &(*state)->gdtr,
-        (*state)->cs_selector,
-        (*state)->cs_base,
-        (*state)->cs_limit,
+    ext_cs_selector = (*state)->cs_selector + EXT_CS_SELECTOR_OFFSET;
+    ext_ss_selector = (*state)->ss_selector + EXT_SS_SELECTOR_OFFSET;
+
+    if ((*state)->cs_selector == MK_TR_SELECTOR) {
+        bferror("the loader generated an overlapping cs selector");
+        goto set_descriptor_failed;
+    }
+
+    if ((*state)->ss_selector == MK_TR_SELECTOR) {
+        bferror("the loader generated an overlapping ss selector");
+        goto set_descriptor_failed;
+    }
+
+    if (ext_cs_selector == MK_TR_SELECTOR) {
+        bferror("the loader generated an overlapping ext cs selector");
+        goto set_descriptor_failed;
+    }
+
+    if (ext_ss_selector == MK_TR_SELECTOR) {
+        bferror("the loader generated an overlapping ext ss selector");
+        goto set_descriptor_failed;
+    }
+
+    ret = set_gdt_descriptor(     // --
+        &(*state)->gdtr,          // --
+        (*state)->cs_selector,    // --
+        (*state)->cs_base,        // --
+        (*state)->cs_limit,       // --
         (*state)->cs_attrib);
 
     if (ret) {
-        BFERROR("set_gdt_descriptor failed\n");
+        bferror("set_gdt_descriptor failed");
         goto set_descriptor_failed;
     }
 
-    ret = set_gdt_descriptor(
-        &(*state)->gdtr,
-        (*state)->ss_selector,
-        (*state)->ss_base,
-        (*state)->ss_limit,
+    ret = set_gdt_descriptor(     // --
+        &(*state)->gdtr,          // --
+        (*state)->ss_selector,    // --
+        (*state)->ss_base,        // --
+        (*state)->ss_limit,       // --
         (*state)->ss_attrib);
 
     if (ret) {
-        BFERROR("set_gdt_descriptor failed\n");
+        bferror("set_gdt_descriptor failed");
         goto set_descriptor_failed;
     }
 
-    ret = set_gdt_descriptor(
-        &(*state)->gdtr,
-        (*state)->tr_selector,
-        (*state)->tr_base,
-        (*state)->tr_limit,
+    ret = set_gdt_descriptor(     // --
+        &(*state)->gdtr,          // --
+        (*state)->tr_selector,    // --
+        (*state)->tr_base,        // --
+        (*state)->tr_limit,       // --
         (*state)->tr_attrib);
 
     if (ret) {
-        BFERROR("set_gdt_descriptor failed\n");
+        bferror("set_gdt_descriptor failed");
         goto set_descriptor_failed;
     }
 
-    ret = set_gdt_descriptor(
-        &(*state)->gdtr,
-        EXT_CS_SELECTOR,
-        EXT_CS_BASE,
-        EXT_CS_LIMIT,
+    ret = set_gdt_descriptor(    // --
+        &(*state)->gdtr,         // --
+        ext_cs_selector,         // --
+        EXT_CS_BASE,             // --
+        EXT_CS_LIMIT,            // --
         EXT_CS_ATTRIB);
 
     if (ret) {
-        BFERROR("set_gdt_descriptor failed\n");
+        bferror("set_gdt_descriptor failed");
         goto set_descriptor_failed;
     }
 
-    ret = set_gdt_descriptor(
-        &(*state)->gdtr,
-        EXT_SS_SELECTOR,
-        EXT_SS_BASE,
-        EXT_SS_LIMIT,
+    ret = set_gdt_descriptor(    // --
+        &(*state)->gdtr,         // --
+        ext_ss_selector,         // --
+        EXT_SS_BASE,             // --
+        EXT_SS_LIMIT,            // --
         EXT_SS_ATTRIB);
 
     if (ret) {
-        BFERROR("set_gdt_descriptor failed\n");
+        bferror("set_gdt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -342,11 +387,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_DIVIDE_BY_ZERO_ERROR_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -354,11 +399,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_DEBUG_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -366,11 +411,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_NON_MASKABLE_INTERRUPT_VECTOR,
         (uint64_t)esr_nmi,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -378,11 +423,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_BREAKPOINT_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -390,11 +435,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_OVERFLOW_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -402,11 +447,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_BOUND_RANGE_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -414,11 +459,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_INVALID_OPCODE_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -426,11 +471,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_DEVICE_NOT_AVAILABLE_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -438,11 +483,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_DOUBLE_FAULT_VECTOR,
         (uint64_t)esr_df,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -450,11 +495,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_INVALID_TSS_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -462,11 +507,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_SEGMENT_NOT_PRESENT_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -474,11 +519,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_STACK_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -486,11 +531,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_GENERAL_PROTECTION_VECTOR,
         (uint64_t)esr_gpf,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -498,11 +543,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_PAGE_FAULT_VECTOR,
         (uint64_t)esr_pf,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -510,11 +555,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_X87_FLOATING_POINT_EXCEPTION_PENDING_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -522,11 +567,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_ALIGNMENT_CHECK_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -534,11 +579,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_MACHINE_CHECK_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -546,11 +591,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_SIMD_FLOATING_POINT_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -558,11 +603,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_HYPERVISOR_INJECTION_EXCEPTION_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -570,11 +615,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_VMM_COMMUNICATION_EXCEPTION_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -582,11 +627,11 @@ alloc_and_copy_mk_state(
         &(*state)->idtr,
         ESR_SECURITY_EXCEPTION_VECTOR,
         (uint64_t)esr_default,
-        ESR_SELECTOR,
+        (*state)->cs_selector,
         ESR_ATTRIB);
 
     if (ret) {
-        BFERROR("set_idt_descriptor failed\n");
+        bferror("set_idt_descriptor failed");
         goto set_descriptor_failed;
     }
 
@@ -594,33 +639,29 @@ alloc_and_copy_mk_state(
     /* Control Registers                                                      */
     /**************************************************************************/
 
-    (*state)->cr0 = intrinsic_scr0();
+    (*state)->cr0 = intrinsic_scr0() | DEFAULT_CR0;
     (*state)->cr3 = platform_virt_to_phys(pml4t);
-    (*state)->cr4 = intrinsic_scr4();
+    (*state)->cr4 = intrinsic_scr4() | DEFAULT_CR4;
 
     if (((uint64_t)0) == (*state)->cr3) {
-        BFERROR("platform_virt_to_phys failed\n");
+        bferror("platform_virt_to_phys failed");
         goto platform_virt_to_phys_cr3_failed;
     }
 
     /**
      * TODO:
-     * - Check the values of CR0, CR4
+     * - Do a complete analysis of CR0 and CR4 and turn on features if we
+     *   can detect support for them. This includes XSAVE.
      */
 
     /**************************************************************************/
     /* MSRs                                                                   */
     /**************************************************************************/
 
-    (*state)->ia32_efer = intrinsic_rdmsr(MSR_IA32_EFER);
+    (*state)->ia32_efer = intrinsic_rdmsr(MSR_IA32_EFER) | DEFAULT_EFER;
     (*state)->ia32_star = MK_MSR_IA32_STAR;
     (*state)->ia32_fmask = MK_MSR_IA32_FMASK;
     (*state)->ia32_pat = MK_MSR_IA32_PAT;
-
-    /**
-     * TODO:
-     * - Check the values of EFER
-     */
 
     return LOADER_SUCCESS;
 

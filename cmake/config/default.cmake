@@ -23,6 +23,9 @@ include(${bsl_SOURCE_DIR}/cmake/function/bf_add_config.cmake)
 
 option(HYPERVISOR_BUILD_LOADER "Turns on/off building the loader" ON)
 option(HYPERVISOR_BUILD_VMMCTL "Turns on/off building the vmmctl" ON)
+option(HYPERVISOR_BUILD_MICROKERNEL "Turns on/off building the microkernel" ON)
+option(HYPERVISOR_BUILD_EXAMPLES "Turns on/off building the examples" ON)
+option(HYPERVISOR_BUILD_EFI "Turns on/off building the EFI loader" ON)
 
 if (NOT DEFINED HYPERVISOR_TARGET_ARCH)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -56,6 +59,30 @@ else()
     set(HYPERVISOR_DEFAULT_CXX_LINKER ${HYPERVISOR_CXX_LINKER})
 endif()
 
+if (NOT DEFINED HYPERVISOR_EFI_LINKER)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        set(HYPERVISOR_DEFAULT_EFI_LINKER "lld-link")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        set(HYPERVISOR_DEFAULT_EFI_LINKER "lld-link")
+    else()
+        message(FATAL_ERROR "Unsupported CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
+    endif()
+else()
+    set(HYPERVISOR_DEFAULT_EFI_LINKER ${HYPERVISOR_EFI_LINKER})
+endif()
+
+if (NOT DEFINED HYPERVISOR_EFI_FS0)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        set(HYPERVISOR_DEFAULT_EFI_FS0 "/boot/efi/")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        set(HYPERVISOR_DEFAULT_EFI_FS0 "X:/")
+    else()
+        message(FATAL_ERROR "Unsupported CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
+    endif()
+else()
+    set(HYPERVISOR_DEFAULT_EFI_FS0 ${HYPERVISOR_EFI_FS0})
+endif()
+
 bf_add_config(
     CONFIG_NAME HYPERVISOR_TARGET_ARCH
     CONFIG_TYPE STRING
@@ -68,7 +95,23 @@ bf_add_config(
     CONFIG_NAME HYPERVISOR_CXX_LINKER
     CONFIG_TYPE STRING
     DEFAULT_VAL ${HYPERVISOR_DEFAULT_CXX_LINKER}
-    DESCRIPTION "Define the linker to use for cross-compiling. Does not effect native linking"
+    DESCRIPTION "Define the linker to use for cross-compiling"
+    SKIP_VALIDATION
+)
+
+bf_add_config(
+    CONFIG_NAME HYPERVISOR_EFI_LINKER
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ${HYPERVISOR_DEFAULT_EFI_LINKER}
+    DESCRIPTION "Define the linker to use for linking EFI applications"
+    SKIP_VALIDATION
+)
+
+bf_add_config(
+    CONFIG_NAME HYPERVISOR_EFI_FS0
+    CONFIG_TYPE STRING
+    DEFAULT_VAL ${HYPERVISOR_DEFAULT_EFI_FS0}
+    DESCRIPTION "Define the file location of FS0 for UEFI"
     SKIP_VALIDATION
 )
 
@@ -139,7 +182,7 @@ bf_add_config(
 bf_add_config(
     CONFIG_NAME HYPERVISOR_MAX_PPS
     CONFIG_TYPE STRING
-    DEFAULT_VAL "256"
+    DEFAULT_VAL "128"
     DESCRIPTION "Defines the hypervisor's max number of physical processors supported"
     SKIP_VALIDATION
 )
@@ -147,7 +190,7 @@ bf_add_config(
 bf_add_config(
     CONFIG_NAME HYPERVISOR_MAX_VPS
     CONFIG_TYPE STRING
-    DEFAULT_VAL "512"
+    DEFAULT_VAL "256"
     DESCRIPTION "Defines the hypervisor's max number of virtual processors supported"
     SKIP_VALIDATION
 )

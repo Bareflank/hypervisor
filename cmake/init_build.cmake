@@ -27,6 +27,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/depend/bsl.cmake)
 include(${bsl_SOURCE_DIR}/cmake/config/all_projects.cmake)
 include(${bsl_SOURCE_DIR}/cmake/config/cmake.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/config/default.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/validate.cmake)
 
 include(${bsl_SOURCE_DIR}/cmake/build_types.cmake)
 include(${bsl_SOURCE_DIR}/cmake/find_programs.cmake)
@@ -40,6 +41,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/target/loader_load.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/target/loader_unload.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/target/loader_clean.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/target/loader_quick.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/target/copy_to_efi_partition.cmake)
 
 include(${CMAKE_CURRENT_LIST_DIR}/write_constants.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/write_toolchain_x64_ext_ld.cmake)
@@ -51,5 +53,6 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/function/hypervisor_add_mk_cross_compile.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/function/hypervisor_add_ext_cross_compile.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/function/hypervisor_add_efi_cross_compile.cmake)
 
 include(${CMAKE_CURRENT_LIST_DIR}/interface/hypervisor.cmake)

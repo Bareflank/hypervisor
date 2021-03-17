@@ -39,6 +39,6 @@
 void
 dump_mk_root_page_table(struct pml4t_t *const pml4t)
 {
-    BFINFO("mk root page table:\n");
-    BFINFO(" - addr: 0x%016" PRIx64 "\n", (uint64_t)pml4t);
+    bfdebug("mk root page table:");
+    bfdebug_ptr(" - addr", pml4t);
 }

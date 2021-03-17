@@ -44,7 +44,7 @@ alloc_mk_args(struct mk_args_t **const args)
 {
     *args = (struct mk_args_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
     if (((void *)0) == *args) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         return LOADER_FAILURE;
     }
 

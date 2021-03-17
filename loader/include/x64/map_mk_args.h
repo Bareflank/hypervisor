@@ -42,7 +42,6 @@
  *   @param pml4t the root page table to map the args into
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_mk_args(struct mk_args_t const *const args, struct pml4t_t *const pml4t);
+int64_t map_mk_args(struct mk_args_t const *const args, struct pml4t_t *const pml4t);
 
 #endif

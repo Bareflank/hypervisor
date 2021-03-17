@@ -40,9 +40,9 @@
 void
 dump_mk_debug_ring(struct debug_ring_t *const debug_ring)
 {
-    BFINFO("mk debug ring:\n");
-    BFINFO(" - addr: 0x%016" PRIx64 "\n", (uint64_t)debug_ring);
-    BFINFO(" - size: 0x%016" PRIx64 "\n", HYPERVISOR_DEBUG_RING_SIZE);
-    BFINFO(" - epos: 0x%016" PRIx64 "\n", debug_ring->epos);
-    BFINFO(" - spos: 0x%016" PRIx64 "\n", debug_ring->spos);
+    bfdebug("mk debug ring:");
+    bfdebug_ptr(" - addr", debug_ring);
+    bfdebug_x64(" - size", HYPERVISOR_DEBUG_RING_SIZE);
+    bfdebug_x64(" - epos", debug_ring->epos);
+    bfdebug_x64(" - spos", debug_ring->spos);
 }

@@ -43,8 +43,7 @@
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-map_mk_huge_pool(
-    struct mutable_span_t const *const huge_pool, struct pml4t_t *const pml4t)
+map_mk_huge_pool(struct mutable_span_t const *const huge_pool, struct pml4t_t *const pml4t)
 {
     uint64_t off;
     uint64_t base_phys;
@@ -52,26 +51,25 @@ map_mk_huge_pool(
 
     base_phys = platform_virt_to_phys(huge_pool->addr);
     if (((uint64_t)0) == base_phys) {
-        BFERROR("platform_virt_to_phys failed\n");
+        bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
-    for (off = ((uint64_t)0); off < huge_pool->size;
-         off += HYPERVISOR_PAGE_SIZE) {
+    for (off = ((uint64_t)0); off < huge_pool->size; off += HYPERVISOR_PAGE_SIZE) {
 
         uint64_t phys = platform_virt_to_phys(huge_pool->addr + off);
         if (((uint64_t)0) == phys) {
-            BFERROR("platform_virt_to_phys failed\n");
+            bferror("platform_virt_to_phys failed");
             return LOADER_FAILURE;
         }
 
         if (phys != base_phys + off) {
-            BFERROR("huge pool is not physically contiguous\n");
+            bferror("huge pool is not physically contiguous");
             return LOADER_FAILURE;
         }
 
         if (map_4k_page_rw((void *)(base_virt + phys), phys, pml4t)) {
-            BFERROR("map_4k_page_rw failed\n");
+            bferror("map_4k_page_rw failed");
             return LOADER_FAILURE;
         }
     }

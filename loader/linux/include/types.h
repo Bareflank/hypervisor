@@ -29,7 +29,6 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include "inttypes.h"
 #include "stdint.h"
 
 /**

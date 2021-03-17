@@ -47,6 +47,45 @@ promote:
     mov dr6, rax
 
     /**************************************************************************/
+    /* Control Registers                                                      */
+    /**************************************************************************/
+
+    /**
+     * Notes:
+     * - When we promote the OS, we need to handle PCID properly. This is
+     *   done by clearing PCID in CR3, setting CR4 and then putting the actual
+     *   CR3 value into CR3. That's why we set CR3 twice here.
+     * - We also need to handle global paging properly. Once we got back to
+     *   the OS, pages from the microkernel should be flushed from the TLB.
+     *   The safest way to do that is to clear the global paging bit which
+     *   will do a complete TLB flush.
+     * - Finally, we need to load a new stack pointer once we load the new
+     *   CR3 so that we can push/pop as needed
+     */
+
+    mov rax, [r15 + 0x158]
+    and rax, 0xFFFFFFFFFFFFF000
+    mov cr3, rax
+
+    mov rax, [r15 + 0x160]
+    and rax, 0xFFFFFFFFFFFFFF7F
+    mov cr4, rax
+
+    mov rax, [r15 + 0x158]
+    mov cr3, rax
+
+    mov rax, [r15 + 0x160]
+    mov cr4, rax
+
+    mov rax, [r15 + 0x150]
+    mov cr2, rax
+
+    mov rax, [r15 + 0x140]
+    mov cr0, rax
+
+    mov rsp, [r15 + 0x080]
+
+    /**************************************************************************/
     /* Clear TSS Busy                                                         */
     /**************************************************************************/
 
@@ -54,20 +93,12 @@ promote:
      * NOTE:
      * - The TR in the GDT used by the root OS is marked as busy, and as
      *   a result, cannot be loaded without first marking it as available.
-     * - Some OS's like Linux mark the GDT as read-only, and will not provide
-     *   the physical address of the GDT, which means the microkernel needs
-     *   to walk the root OS's page tables to locate the physical address
-     *   and then map it into the microkernel's page tables. Once this is
-     *   done, we can clear the TSS busy bit. If the microkernel fails to
-     *   perform at least this operation, it will halt with no means to
-     *   return as it cannot promote the GDT portion of the root OS's state.
      */
 
     mov rdx, [r15 + 0x0A2]
 
     xor rax, rax
     mov ax, [r15 + 0x130]
-    and ax, 0xF8
 
     add rdx, rax
 
@@ -125,45 +156,6 @@ promote:
     retfq
 
 gdt_and_cs_loaded:
-
-    /**************************************************************************/
-    /* Control Registers                                                      */
-    /**************************************************************************/
-
-    /**
-     * Notes:
-     * - When we promote the OS, we need to handle PCID properly. This is
-     *   done by clearing PCID in CR3, setting CR4 and then putting the actual
-     *   CR3 value into CR3. That's why we set CR3 twice here.
-     * - We also need to handle global paging properly. Once we got back to
-     *   the OS, pages from the microkernel should be flushed from the TLB.
-     *   The safest way to do that is to clear the global paging bit which
-     *   will do a complete TLB flush.
-     * - Finally, we need to load a new stack pointer once we load the new
-     *   CR3 so that we can push/pop as needed
-     */
-
-    mov rax, [r15 + 0x158]
-    and rax, 0xFFFFFFFFFFFFF000
-    mov cr3, rax
-
-    mov rax, [r15 + 0x160]
-    and rax, 0xFFFFFFFFFFFFFF7F
-    mov cr4, rax
-
-    mov rax, [r15 + 0x158]
-    mov cr3, rax
-
-    mov rax, [r15 + 0x160]
-    mov cr4, rax
-
-    mov rax, [r15 + 0x150]
-    mov cr2, rax
-
-    mov rax, [r15 + 0x140]
-    mov cr0, rax
-
-    mov rsp, [r15 + 0x080]
 
     /**************************************************************************/
     /* MSRs                                                                   */

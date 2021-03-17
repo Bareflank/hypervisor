@@ -43,15 +43,13 @@
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-map_mk_debug_ring(
-    struct debug_ring_t const *const debug_ring, struct pml4t_t *const pml4t)
+map_mk_debug_ring(struct debug_ring_t const *const debug_ring, struct pml4t_t *const pml4t)
 {
     uint64_t off = ((uint64_t)0);
 
     for (; off < HYPERVISOR_DEBUG_RING_SIZE; off += HYPERVISOR_PAGE_SIZE) {
-        if (map_4k_page_rw(
-                ((uint8_t *)debug_ring) + off, ((uint64_t)0), pml4t)) {
-            BFERROR("map_4k_page_rw failed\n");
+        if (map_4k_page_rw(((uint8_t *)debug_ring) + off, ((uint64_t)0), pml4t)) {
+            bferror("map_4k_page_rw failed");
             return LOADER_FAILURE;
         }
     }

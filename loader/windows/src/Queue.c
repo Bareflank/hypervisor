@@ -73,21 +73,15 @@ Return Value:
     // configure-fowarded using WdfDeviceConfigureRequestDispatching to goto
     // other queues get dispatched here.
     //
-    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(
-        &queueConfig, WdfIoQueueDispatchParallel);
+    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
 
     queueConfig.EvtIoDeviceControl = loaderEvtIoDeviceControl;
     queueConfig.EvtIoStop = loaderEvtIoStop;
 
-    status = WdfIoQueueCreate(
-        Device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
+    status = WdfIoQueueCreate(Device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
 
     if (!NT_SUCCESS(status)) {
-        TraceEvents(
-            TRACE_LEVEL_ERROR,
-            TRACE_QUEUE,
-            "WdfIoQueueCreate failed %!STATUS!",
-            status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
         return status;
     }
 
@@ -145,8 +139,7 @@ Return Value:
         IoControlCode);
 
     if (InputBufferLength != 0) {
-        status = WdfRequestRetrieveInputBuffer(
-            Request, InputBufferLength, &in, &in_size);
+        status = WdfRequestRetrieveInputBuffer(Request, InputBufferLength, &in, &in_size);
 
         if (!NT_SUCCESS(status)) {
             WdfRequestComplete(Request, STATUS_ACCESS_DENIED);
@@ -155,8 +148,7 @@ Return Value:
     }
 
     if (OutputBufferLength != 0) {
-        status = WdfRequestRetrieveOutputBuffer(
-            Request, OutputBufferLength, &out, &out_size);
+        status = WdfRequestRetrieveOutputBuffer(Request, OutputBufferLength, &out, &out_size);
 
         if (!NT_SUCCESS(status)) {
             WdfRequestComplete(Request, STATUS_ACCESS_DENIED);
@@ -169,7 +161,7 @@ Return Value:
     switch (IoControlCode) {
         case LOADER_START_VMM: {
             if (start_vmm((struct start_vmm_args_t const *)in)) {
-                BFERROR("start_vmm failed\n");
+                bferror("start_vmm failed");
                 WdfRequestComplete(Request, STATUS_UNSUCCESSFUL);
                 return;
             }
@@ -177,7 +169,7 @@ Return Value:
         }
         case LOADER_STOP_VMM: {
             if (stop_vmm((struct stop_vmm_args_t const *)in)) {
-                BFERROR("stop_vmm failed\n");
+                bferror("stop_vmm failed");
                 WdfRequestComplete(Request, STATUS_UNSUCCESSFUL);
                 return;
             }
@@ -185,14 +177,14 @@ Return Value:
         }
         case LOADER_DUMP_VMM: {
             if (dump_vmm((struct dump_vmm_args_t const *)out)) {
-                BFERROR("dump_vmm failed\n");
+                bferror("dump_vmm failed");
                 WdfRequestComplete(Request, STATUS_UNSUCCESSFUL);
                 return;
             }
             break;
         }
         default: {
-            BFERROR("invalid ioctl cmd: 0x%x\n", IoControlCode);
+            bferror_x64("invalid ioctl cmd", IoControlCode);
             WdfRequestComplete(Request, STATUS_ACCESS_DENIED);
             return;
         }
@@ -203,8 +195,7 @@ Return Value:
 }
 
 VOID
-loaderEvtIoStop(
-    _In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ ULONG ActionFlags)
+loaderEvtIoStop(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ ULONG ActionFlags)
 /*++
 
 Routine Description:

@@ -42,11 +42,10 @@
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-map_root_vp_state(
-    struct state_save_t const *const state, struct pml4t_t *const pml4t)
+map_root_vp_state(struct state_save_t const *const state, struct pml4t_t *const pml4t)
 {
     if (map_4k_page_rw(state, ((uint64_t)0), pml4t)) {
-        BFERROR("map_4k_page_rw failed\n");
+        bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }
 

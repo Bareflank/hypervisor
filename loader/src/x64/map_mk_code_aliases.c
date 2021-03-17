@@ -54,8 +54,7 @@
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-map_mk_code_aliases(
-    struct code_aliases_t const *const a, struct pml4t_t *const pml4t)
+map_mk_code_aliases(struct code_aliases_t const *const a, struct pml4t_t *const pml4t)
 {
     uint64_t phys;
 
@@ -70,78 +69,78 @@ map_mk_code_aliases(
 
     phys = platform_virt_to_phys(a->demote);
     if (((uint64_t)0) == phys) {
-        BFERROR("platform_virt_to_phys failed\n");
+        bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
     if (map_4k_page_rx(demote, phys, pml4t)) {
-        BFERROR("map_4k_page_rx failed\n");
+        bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
 
     phys = platform_virt_to_phys(a->promote);
     if (((uint64_t)0) == phys) {
-        BFERROR("platform_virt_to_phys failed\n");
+        bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
     if (map_4k_page_rx(promote, phys, pml4t)) {
-        BFERROR("map_4k_page_rx failed\n");
+        bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
 
     phys = platform_virt_to_phys(a->esr_default);
     if (((uint64_t)0) == phys) {
-        BFERROR("platform_virt_to_phys failed\n");
+        bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
     if (map_4k_page_rx(esr_default, phys, pml4t)) {
-        BFERROR("map_4k_page_rx failed\n");
+        bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
 
     phys = platform_virt_to_phys(a->esr_df);
     if (((uint64_t)0) == phys) {
-        BFERROR("platform_virt_to_phys failed\n");
+        bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
     if (map_4k_page_rx(esr_df, phys, pml4t)) {
-        BFERROR("map_4k_page_rx failed\n");
+        bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
 
     phys = platform_virt_to_phys(a->esr_gpf);
     if (((uint64_t)0) == phys) {
-        BFERROR("platform_virt_to_phys failed\n");
+        bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
     if (map_4k_page_rx(esr_gpf, phys, pml4t)) {
-        BFERROR("map_4k_page_rx failed\n");
+        bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
 
     phys = platform_virt_to_phys(a->esr_nmi);
     if (((uint64_t)0) == phys) {
-        BFERROR("platform_virt_to_phys failed\n");
+        bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
     if (map_4k_page_rx(esr_nmi, phys, pml4t)) {
-        BFERROR("map_4k_page_rx failed\n");
+        bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
 
     phys = platform_virt_to_phys(a->esr_pf);
     if (((uint64_t)0) == phys) {
-        BFERROR("platform_virt_to_phys failed\n");
+        bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
     if (map_4k_page_rx(esr_pf, phys, pml4t)) {
-        BFERROR("map_4k_page_rx failed\n");
+        bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
 

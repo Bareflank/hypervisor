@@ -49,7 +49,6 @@
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t alloc_and_copy_mk_elf_segments(
-    struct span_t const *const mk_elf_file,
-    struct elf_segment_t *const mk_elf_segments);
+    struct span_t const *const mk_elf_file, struct elf_segment_t *const mk_elf_segments);
 
 #endif

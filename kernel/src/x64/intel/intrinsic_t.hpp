@@ -46,6 +46,70 @@ namespace mk
         extern "C" void intrinsic_invlpg(bsl::uint64 const val) noexcept;
 
         /// <!-- description -->
+        ///   @brief Implements intrinsic_t::es_selector
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return n/a
+        ///
+        extern "C" [[nodiscard]] auto intrinsic_es_selector() noexcept -> bsl::uint16;
+
+        /// <!-- description -->
+        ///   @brief Implements intrinsic_t::es_selector
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return n/a
+        ///
+        extern "C" [[nodiscard]] auto intrinsic_cs_selector() noexcept -> bsl::uint16;
+
+        /// <!-- description -->
+        ///   @brief Implements intrinsic_t::es_selector
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return n/a
+        ///
+        extern "C" [[nodiscard]] auto intrinsic_ss_selector() noexcept -> bsl::uint16;
+
+        /// <!-- description -->
+        ///   @brief Implements intrinsic_t::es_selector
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return n/a
+        ///
+        extern "C" [[nodiscard]] auto intrinsic_ds_selector() noexcept -> bsl::uint16;
+
+        /// <!-- description -->
+        ///   @brief Implements intrinsic_t::es_selector
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return n/a
+        ///
+        extern "C" [[nodiscard]] auto intrinsic_fs_selector() noexcept -> bsl::uint16;
+
+        /// <!-- description -->
+        ///   @brief Implements intrinsic_t::es_selector
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return n/a
+        ///
+        extern "C" [[nodiscard]] auto intrinsic_gs_selector() noexcept -> bsl::uint16;
+
+        /// <!-- description -->
+        ///   @brief Implements intrinsic_t::tr_selector
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return n/a
+        ///
+        extern "C" [[nodiscard]] auto intrinsic_tr_selector() noexcept -> bsl::uint16;
+
+        /// <!-- description -->
+        ///   @brief Implements intrinsic_t::cr0
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return n/a
+        ///
+        extern "C" [[nodiscard]] auto intrinsic_cr0() noexcept -> bsl::uint64;
+
+        /// <!-- description -->
         ///   @brief Implements intrinsic_t::cr3
         ///
         /// <!-- inputs/outputs -->
@@ -60,6 +124,14 @@ namespace mk
         ///   @param val n/a
         ///
         extern "C" void intrinsic_set_cr3(bsl::uint64 const val) noexcept;
+
+        /// <!-- description -->
+        ///   @brief Implements intrinsic_t::cr4
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return n/a
+        ///
+        extern "C" [[nodiscard]] auto intrinsic_cr4() noexcept -> bsl::uint64;
 
         /// <!-- description -->
         ///   @brief Implements intrinsic_t::tp
@@ -292,6 +364,134 @@ namespace mk
         }
 
         /// <!-- description -->
+        ///   @brief Returns the value of ES
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the value of ES
+        ///
+        [[nodiscard]] static constexpr auto
+        es_selector() noexcept -> bsl::safe_uint16
+        {
+            if (bsl::is_constant_evaluated()) {
+                return {};
+            }
+
+            return details::intrinsic_es_selector();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the value of CS
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the value of CS
+        ///
+        [[nodiscard]] static constexpr auto
+        cs_selector() noexcept -> bsl::safe_uint16
+        {
+            if (bsl::is_constant_evaluated()) {
+                return {};
+            }
+
+            return details::intrinsic_cs_selector();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the value of SS
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the value of SS
+        ///
+        [[nodiscard]] static constexpr auto
+        ss_selector() noexcept -> bsl::safe_uint16
+        {
+            if (bsl::is_constant_evaluated()) {
+                return {};
+            }
+
+            return details::intrinsic_ss_selector();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the value of DS
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the value of DS
+        ///
+        [[nodiscard]] static constexpr auto
+        ds_selector() noexcept -> bsl::safe_uint16
+        {
+            if (bsl::is_constant_evaluated()) {
+                return {};
+            }
+
+            return details::intrinsic_ds_selector();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the value of FS
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the value of FS
+        ///
+        [[nodiscard]] static constexpr auto
+        fs_selector() noexcept -> bsl::safe_uint16
+        {
+            if (bsl::is_constant_evaluated()) {
+                return {};
+            }
+
+            return details::intrinsic_fs_selector();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the value of GS
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the value of GS
+        ///
+        [[nodiscard]] static constexpr auto
+        gs_selector() noexcept -> bsl::safe_uint16
+        {
+            if (bsl::is_constant_evaluated()) {
+                return {};
+            }
+
+            return details::intrinsic_gs_selector();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the value of TR
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the value of TR
+        ///
+        [[nodiscard]] static constexpr auto
+        tr_selector() noexcept -> bsl::safe_uint16
+        {
+            if (bsl::is_constant_evaluated()) {
+                return {};
+            }
+
+            return details::intrinsic_tr_selector();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the value of CR0
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the value of CR0
+        ///
+        [[nodiscard]] static constexpr auto
+        cr0() noexcept -> bsl::safe_uint64
+        {
+            if (bsl::is_constant_evaluated()) {
+                return {};
+            }
+
+            return details::intrinsic_cr0();
+        }
+
+        /// <!-- description -->
         ///   @brief Returns the value of CR3
         ///
         /// <!-- inputs/outputs -->
@@ -330,6 +530,22 @@ namespace mk
             }
 
             details::intrinsic_set_cr3(val.get());
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the value of CR4
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the value of CR4
+        ///
+        [[nodiscard]] static constexpr auto
+        cr4() noexcept -> bsl::safe_uint64
+        {
+            if (bsl::is_constant_evaluated()) {
+                return {};
+            }
+
+            return details::intrinsic_cr4();
         }
 
         /// <!-- description -->

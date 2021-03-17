@@ -85,8 +85,7 @@ namespace mk
         intrinsic_t,                                      // --
         page_pool_t<HYPERVISOR_PAGE_SIZE>,                // --
         HYPERVISOR_PAGE_SIZE,                             // --
-        HYPERVISOR_PAGE_SHIFT,                            // --
-        HYPERVISOR_MK_MAP_ADDR>;                          // --
+        HYPERVISOR_PAGE_SHIFT>;                           // --
 
     /// @brief defines the extension type to use
     using mk_ext_type = ext_t<                // --

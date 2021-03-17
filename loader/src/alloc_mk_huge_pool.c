@@ -54,7 +54,7 @@ alloc_mk_huge_pool(uint32_t const size, struct mutable_span_t *const huge_pool)
 
     huge_pool->addr = platform_alloc_contiguous(huge_pool->size);
     if (((void *)0) == huge_pool->addr) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_failed;
     }
 

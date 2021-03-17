@@ -42,7 +42,6 @@
  *   @param pml4t the root page table to map the state into
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
-int64_t map_root_vp_state(
-    struct state_save_t const *const state, struct pml4t_t *const pml4t);
+int64_t map_root_vp_state(struct state_save_t const *const state, struct pml4t_t *const pml4t);
 
 #endif

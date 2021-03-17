@@ -26,20 +26,9 @@ include(${CMAKE_CURRENT_LIST_DIR}/depend/bsl.cmake)
 include(${bsl_SOURCE_DIR}/cmake/config/cmake.cmake)
 include(${bsl_SOURCE_DIR}/cmake/build_types.cmake)
 
+include(${CMAKE_CURRENT_LIST_DIR}/silence.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/write_constants.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/write_toolchain_x64_ext_ld.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/write_toolchain_x64_mk_ld.cmake)
-
-if(DEFINED CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE})
-endif()
-
-if(DEFINED bsl_SOURCE_DIR)
-    set(bsl_SOURCE_DIR ${bsl_SOURCE_DIR})
-endif()
-
-if(DEFINED HYPERVISOR_TARGET_ARCH)
-    set(HYPERVISOR_TARGET_ARCH ${HYPERVISOR_TARGET_ARCH})
-endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/interface/hypervisor.cmake)

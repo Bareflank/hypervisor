@@ -45,22 +45,19 @@
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-map_mk_stack(
-    struct span_t const *const stack,
-    uint64_t const virt,
-    struct pml4t_t *const pml4t)
+map_mk_stack(struct span_t const *const stack, uint64_t const virt, struct pml4t_t *const pml4t)
 {
     uint64_t off;
 
     for (off = ((uint64_t)0); off < stack->size; off += HYPERVISOR_PAGE_SIZE) {
         uint64_t phys = platform_virt_to_phys(stack->addr + off);
         if (((uint64_t)0) == phys) {
-            BFERROR("platform_virt_to_phys failed\n");
+            bferror("platform_virt_to_phys failed");
             return LOADER_FAILURE;
         }
 
         if (map_4k_page_rw((void *)(virt + off), phys, pml4t)) {
-            BFERROR("map_4k_page_rw failed\n");
+            bferror("map_4k_page_rw failed");
             return LOADER_FAILURE;
         }
     }

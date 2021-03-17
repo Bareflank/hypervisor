@@ -29,6 +29,8 @@
 
 #include "bfelf_types.h"
 
+#include <debug.h>
+
 #pragma pack(push, 1)
 
 /** @brief e_ident[bfelf_ei_mag0] contains 0x7FU for file identification */
@@ -135,8 +137,7 @@ struct bfelf_elf64_ehdr_t
  *   @return returns 0 on success or an error code otherwise.
  */
 static inline int64_t
-get_elf64_ehdr(
-    uint8_t const *const file, struct bfelf_elf64_ehdr_t const **const ehdr)
+get_elf64_ehdr(uint8_t const *const file, struct bfelf_elf64_ehdr_t const **const ehdr)
 {
     if (((void *)0) == file) {
         return BFELF_INVALID_ARGUMENT;
@@ -163,30 +164,37 @@ static inline int64_t
 validate_elf64_ehdr(uint8_t const *const file)
 {
     if (((void *)0) == file) {
+        bferror("file is NULL");
         return BFELF_INVALID_ARGUMENT;
     }
 
     if (to_ehdr(file)->e_ident[bfelf_ei_mag0] != bfelf_elfmag0) {
+        bferror_x64("invalid bfelf_ei_mag0", to_ehdr(file)->e_ident[bfelf_ei_mag0]);
         return BFELF_INVALID_MAG0;
     }
 
     if (to_ehdr(file)->e_ident[bfelf_ei_mag1] != bfelf_elfmag1) {
+        bferror_x64("invalid bfelf_ei_mag1", to_ehdr(file)->e_ident[bfelf_ei_mag1]);
         return BFELF_INVALID_MAG1;
     }
 
     if (to_ehdr(file)->e_ident[bfelf_ei_mag2] != bfelf_elfmag2) {
+        bferror_x64("invalid bfelf_ei_mag2", to_ehdr(file)->e_ident[bfelf_ei_mag2]);
         return BFELF_INVALID_MAG2;
     }
 
     if (to_ehdr(file)->e_ident[bfelf_ei_mag3] != bfelf_elfmag3) {
+        bferror_x64("invalid bfelf_ei_mag3", to_ehdr(file)->e_ident[bfelf_ei_mag3]);
         return BFELF_INVALID_MAG3;
     }
 
     if (to_ehdr(file)->e_ident[bfelf_ei_class] != bfelf_elfclass64) {
+        bferror_x64("invalid bfelf_ei_class", to_ehdr(file)->e_ident[bfelf_ei_class]);
         return BFELF_INVALID_CLASS;
     }
 
     if (to_ehdr(file)->e_ident[bfelf_ei_osabi] != bfelf_elfosabi_sysv) {
+        bferror_x64("invalid bfelf_ei_osabi", to_ehdr(file)->e_ident[bfelf_ei_osabi]);
         return BFELF_INVALID_OSABI;
     }
 
@@ -200,6 +208,7 @@ validate_elf64_ehdr(uint8_t const *const file)
      */
 
     if (to_ehdr(file)->e_type != bfelf_et_exec) {
+        bferror_x64("invalid e_type", to_ehdr(file)->e_type);
         return BFELF_INVALID_TYPE;
     }
 

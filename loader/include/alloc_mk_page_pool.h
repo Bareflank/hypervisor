@@ -42,7 +42,6 @@
  *   @param page_pool the mutable_span_t to store the page pool addr/size.
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
-int64_t
-alloc_mk_page_pool(uint32_t const size, struct mutable_span_t *const page_pool);
+int64_t alloc_mk_page_pool(uint32_t const size, struct mutable_span_t *const page_pool);
 
 #endif

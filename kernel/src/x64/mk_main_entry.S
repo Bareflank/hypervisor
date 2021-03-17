@@ -33,12 +33,17 @@ mk_main_entry:
 
     push rdi
 
+    /**
+     * TODO:
+     * - Comment this code
+     */
+
     mov r10, [rdi]
     mov rdx, 0x000000000000FFFF
     and r10, rdx
 
     mov rax, r10
-    mov rdx, 0x1000
+    mov rdx, 0x300
     mul rdx
     lea rsi, [rip + g_tls_blocks]
     add rsi, rax
@@ -56,20 +61,20 @@ mk_main_entry:
     mov rdx, 0xFFFFFFFFFFFF0000
     or  rax, rdx
 
-    mov gs:[0x800], rsi
-    mov gs:[0x808], rax
+    mov gs:[0x200], rsi
+    mov gs:[0x208], rax
 
     lea rax, [rip + mk_main_fast_fail_entry]
-    mov gs:[0x910], rax
+    mov gs:[0x190], rax
     lea rax, [rip + call_ext_fast_fail_entry]
-    mov gs:[0x920], rax
+    mov gs:[0x1A0], rax
     lea rax, [rip + dispatch_syscall_fast_fail_entry]
-    mov gs:[0x930], rax
+    mov gs:[0x1B0], rax
 
     mov rax, [rdi + 0x008]
-    mov gs:[0x828], rax
+    mov gs:[0x228], rax
     mov rax, [rdi + 0x010]
-    mov gs:[0x830], rax
+    mov gs:[0x230], rax
 
     lea rax, [rip + g_debug_ring]
     mov rdx, [rdi + 0x018]
@@ -87,7 +92,7 @@ mk_main_entry:
      */
 
     mov rax, 0x1
-    mov gs:[0x858], rax
+    mov gs:[0x258], rax
 
     mov rdi, 0
     lea rsi, [rip + dispatch_esr_entry_0]
@@ -171,18 +176,18 @@ mk_main_entry:
 
     mov rdx, [rdi + 0x010]
     mov rax, [rdx + 0x318]
-    mov gs:[0x860], rax
+    mov gs:[0x260], rax
 
     xor rax, rax
     mov [rdx + 0x318], rax
 
     pop rsi
 
-    mov gs:[0x918], rsp
-    mov rax, gs:[0x910]
-    mov gs:[0x900], rax
-    mov rax, gs:[0x918]
-    mov gs:[0x908], rax
+    mov gs:[0x198], rsp
+    mov rax, gs:[0x190]
+    mov gs:[0x180], rax
+    mov rax, gs:[0x198]
+    mov gs:[0x188], rax
 
     call mk_main_trampoline
     jmp return_to_current_fast_fail

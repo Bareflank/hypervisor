@@ -85,9 +85,6 @@
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t map_4k_page(
-    uint64_t const virt,
-    uint64_t const phys,
-    uint32_t const flags,
-    struct pml4t_t *const pml4t);
+    uint64_t const virt, uint64_t const phys, uint32_t const flags, struct pml4t_t *const pml4t);
 
 #endif

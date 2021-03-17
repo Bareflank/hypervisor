@@ -127,7 +127,7 @@ promote:
      *   is extremely unlikely.
      */
 
-    mov rax, gs:[0x860]
+    mov rax, gs:[0x260]
     cmp rax, 0x1
     jne nmi_pending_transfer_complete
 

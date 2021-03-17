@@ -37,16 +37,12 @@
  *     and returns the results
  *
  * <!-- inputs/outputs -->
- *   @param rax the index used by CPUID, returns resulting rax
- *   @param rbx returns resulting rbx
- *   @param rcx the subindex used by CPUID, returns the resulting rcx
- *   @param rdx returns resulting rdx
- *     to.
+ *   @param eax the index used by CPUID, returns resulting eax
+ *   @param ebx returns resulting ebx
+ *   @param ecx the subindex used by CPUID, returns the resulting ecx
+ *   @param edx returns resulting edx to.
  */
-void intrinsic_cpuid(
-    uint32_t *const eax,
-    uint32_t *const ebx,
-    uint32_t *const ecx,
-    uint32_t *const edx);
+void
+intrinsic_cpuid(uint32_t *const eax, uint32_t *const ebx, uint32_t *const ecx, uint32_t *const edx);
 
 #endif

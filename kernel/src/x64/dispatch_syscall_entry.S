@@ -31,66 +31,62 @@
     .type   dispatch_syscall_entry, @function
 dispatch_syscall_entry:
 
-    swapgs
+    mov gs:[0x040], rcx
+    mov gs:[0x080], r11
 
-    mov gs:[0x110], rcx
-    mov gs:[0x150], r11
+    mov gs:[0x038], rbx
+    mov gs:[0x050], rbp
+    mov gs:[0x088], r12
+    mov gs:[0x090], r13
+    mov gs:[0x098], r14
+    mov gs:[0x0A0], r15
 
-    mov gs:[0x108], rbx
-    mov gs:[0x120], rbp
-    mov gs:[0x158], r12
-    mov gs:[0x160], r13
-    mov gs:[0x168], r14
-    mov gs:[0x170], r15
+    mov gs:[0x030], rax
+    mov gs:[0x060], rdi
+    mov gs:[0x058], rsi
+    mov gs:[0x048], rdx
+    mov gs:[0x078], r10
+    mov gs:[0x068], r8
+    mov gs:[0x070], r9
 
-    mov gs:[0x100], rax
-    mov gs:[0x130], rdi
-    mov gs:[0x128], rsi
-    mov gs:[0x118], rdx
-    mov gs:[0x148], r10
-    mov gs:[0x138], r8
-    mov gs:[0x140], r9
+    mov gs:[0x0A8], rsp
+    mov rsp, gs:[0x1A8]
 
-    mov gs:[0x180], rsp
-    mov rsp, gs:[0x928]
+    mov gs:[0x1B8], rsp
+    mov rax, gs:[0x1B0]
+    mov gs:[0x180], rax
+    mov rax, gs:[0x1B8]
+    mov gs:[0x188], rax
 
-    mov gs:[0x938], rsp
-    mov rax, gs:[0x930]
-    mov gs:[0x900], rax
-    mov rax, gs:[0x938]
-    mov gs:[0x908], rax
-
-    mov rdi, gs:[0x800]
+    mov rdi, gs:[0x200]
     call dispatch_syscall_trampoline
 
-    mov rdx, gs:[0x920]
-    mov gs:[0x900], rdx
-    mov rdx, gs:[0x928]
-    mov gs:[0x908], rdx
+    mov rdx, gs:[0x1A0]
+    mov gs:[0x180], rdx
+    mov rdx, gs:[0x1A8]
+    mov gs:[0x188], rdx
 
-    mov rsp, gs:[0x180]
+    mov rsp, gs:[0x0A8]
 
-    mov r9,  gs:[0x140]
-    mov r8,  gs:[0x138]
-    mov r10, gs:[0x148]
-    mov rdx, gs:[0x118]
-    mov rsi, gs:[0x128]
-    mov rdi, gs:[0x130]
+    mov r9,  gs:[0x070]
+    mov r8,  gs:[0x068]
+    mov r10, gs:[0x078]
+    mov rdx, gs:[0x048]
+    mov rsi, gs:[0x058]
+    mov rdi, gs:[0x060]
 
-    mov r15, gs:[0x170]
-    mov r14, gs:[0x168]
-    mov r13, gs:[0x160]
-    mov r12, gs:[0x158]
-    mov rbp, gs:[0x120]
-    mov rbx, gs:[0x108]
+    mov r15, gs:[0x0A0]
+    mov r14, gs:[0x098]
+    mov r13, gs:[0x090]
+    mov r12, gs:[0x088]
+    mov rbp, gs:[0x050]
+    mov rbx, gs:[0x038]
 
-    mov r11, gs:[0x150]
-    mov rcx, gs:[0x110]
+    mov r11, gs:[0x080]
+    mov rcx, gs:[0x040]
 
-    swapgs
-
-    .byte 0x48
-    sysret
+    sysretq
+    int 3
 
     .size dispatch_syscall_entry, .-dispatch_syscall_entry
 
@@ -102,34 +98,32 @@ dispatch_syscall_entry:
     .type   dispatch_syscall_fast_fail_entry, @function
 dispatch_syscall_fast_fail_entry:
 
-    mov rax, gs:[0x920]
-    mov gs:[0x900], rax
-    mov rax, gs:[0x928]
-    mov gs:[0x908], rax
+    mov rax, gs:[0x1A0]
+    mov gs:[0x180], rax
+    mov rax, gs:[0x1A8]
+    mov gs:[0x188], rax
 
-    mov rsp, gs:[0x180]
+    mov rsp, gs:[0x0A8]
 
-    mov r9,  gs:[0x140]
-    mov r8,  gs:[0x138]
-    mov r10, gs:[0x148]
-    mov rdx, gs:[0x118]
-    mov rsi, gs:[0x128]
-    mov rdi, gs:[0x130]
+    mov r9,  gs:[0x070]
+    mov r8,  gs:[0x068]
+    mov r10, gs:[0x078]
+    mov rdx, gs:[0x048]
+    mov rsi, gs:[0x058]
+    mov rdi, gs:[0x060]
 
-    mov r15, gs:[0x170]
-    mov r14, gs:[0x168]
-    mov r13, gs:[0x160]
-    mov r12, gs:[0x158]
-    mov rbp, gs:[0x120]
-    mov rbx, gs:[0x108]
+    mov r15, gs:[0x0A0]
+    mov r14, gs:[0x098]
+    mov r13, gs:[0x090]
+    mov r12, gs:[0x088]
+    mov rbp, gs:[0x050]
+    mov rbx, gs:[0x038]
 
-    mov r11, gs:[0x150]
-    mov rcx, gs:[0x110]
-
-    swapgs
+    mov r11, gs:[0x080]
+    mov rcx, gs:[0x040]
 
     mov rax, 0xDEAD000000010001
-    .byte 0x48
-    sysret
+    sysretq
+    int 3
 
     .size dispatch_syscall_fast_fail_entry, .-dispatch_syscall_fast_fail_entry

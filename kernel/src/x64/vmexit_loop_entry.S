@@ -32,18 +32,18 @@
 vmexit_loop_entry:
 
     lea rax, [rip + loop]
-    mov gs:[0x940], rax
-    mov gs:[0x948], rsp
+    mov gs:[0x1C0], rax
+    mov gs:[0x1C8], rsp
 
 loop:
 
-    mov rdi, gs:[0x800]
+    mov rdi, gs:[0x200]
     call vmexit_loop_trampoline
 
     cmp rax, 0x0
     je loop
 
-    mov rax, gs:[0x870]
+    mov rax, gs:[0x270]
     cmp rax, 0x0
     jne fast_fail_entry
 

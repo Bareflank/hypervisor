@@ -148,7 +148,7 @@ intrinsic_halt:
 intrinsic_rdmsr:
 
     lea rax, [rip + intrinsic_rdmsr_failed]
-    mov gs:[0x850], rax
+    mov gs:[0x250], rax
 
     mov ecx, edi
     xor rax, rax
@@ -160,7 +160,7 @@ intrinsic_rdmsr:
     mov [rsi], rax
 
     xor rax, rax
-    mov gs:[0x850], rax
+    mov gs:[0x250], rax
 
     ret
     int 3
@@ -168,7 +168,7 @@ intrinsic_rdmsr:
 intrinsic_rdmsr_failed:
 
     xor rax, rax
-    mov gs:[0x850], rax
+    mov gs:[0x250], rax
 
     mov rax, 0x1
     ret
@@ -201,7 +201,7 @@ intrinsic_rdmsr_unsafe:
 intrinsic_wrmsr:
 
     lea rax, [rip + intrinsic_wrmsr_failed]
-    mov gs:[0x850], rax
+    mov gs:[0x250], rax
 
     mov ecx, edi
     mov rax, rsi
@@ -210,7 +210,7 @@ intrinsic_wrmsr:
     wrmsr
 
     xor rax, rax
-    mov gs:[0x850], rax
+    mov gs:[0x250], rax
 
     ret
     int 3
@@ -218,7 +218,7 @@ intrinsic_wrmsr:
 intrinsic_wrmsr_failed:
 
     xor rax, rax
-    mov gs:[0x850], rax
+    mov gs:[0x250], rax
 
     mov rax, 0x1
     ret

@@ -43,7 +43,6 @@
  *   @param pml4t the root page table to map the code aliases into
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
-int64_t map_mk_code_aliases(
-    struct code_aliases_t const *const a, struct pml4t_t *const pml4t);
+int64_t map_mk_code_aliases(struct code_aliases_t const *const a, struct pml4t_t *const pml4t);
 
 #endif

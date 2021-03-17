@@ -53,14 +53,14 @@ int64_t
 stop_vmm_per_cpu(uint32_t const cpu)
 {
     if (((uint64_t)cpu) >= HYPERVISOR_MAX_VPS_PER_VM) {
-        BFERROR("cpu out of range\n");
+        bferror("cpu out of range");
         return LOADER_FAILURE;
     }
 
     send_command_report_off();
 
     if (send_command_stop()) {
-        BFERROR("send_command_stop failed\n");
+        bferror("send_command_stop failed");
         return LOADER_FAILURE;
     }
 

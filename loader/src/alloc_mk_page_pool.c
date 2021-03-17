@@ -54,7 +54,7 @@ alloc_mk_page_pool(uint32_t const size, struct mutable_span_t *const page_pool)
 
     page_pool->addr = platform_alloc(page_pool->size);
     if (((void *)0) == page_pool->addr) {
-        BFERROR("platform_alloc failed\n");
+        bferror("platform_alloc failed");
         goto platform_alloc_failed;
     }
 

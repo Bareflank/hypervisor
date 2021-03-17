@@ -31,7 +31,7 @@
     .type   get_current_tls, @function
 get_current_tls:
 
-    mov rax, gs:[0x800]
+    mov rax, gs:[0x200]
 
     ret
     int 3

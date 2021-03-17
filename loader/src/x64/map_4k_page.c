@@ -61,11 +61,7 @@
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-map_4k_page(
-    uint64_t const virt,
-    uint64_t phys,
-    uint32_t const flags,
-    struct pml4t_t *const pml4t)
+map_4k_page(uint64_t const virt, uint64_t phys, uint32_t const flags, struct pml4t_t *const pml4t)
 {
     struct pdpt_t *pdpt = ((void *)0);
     struct pdt_t *pdt = ((void *)0);
@@ -88,22 +84,27 @@ map_4k_page(
      *   wouldn't have all of the memory properly mapped.
      */
 
-    if ((virt & (HYPERVISOR_PAGE_SIZE - ((uint64_t)1))) != ((uint64_t)0)) {
-        BFERROR("virt is not page aligned: 0x%" PRIx64 "\n", virt);
-        return LOADER_FAILURE;
-    }
-
-    if ((phys & (HYPERVISOR_PAGE_SIZE - ((uint64_t)1))) != ((uint64_t)0)) {
-        BFERROR("phys is not page aligned: 0x%" PRIx64 "\n", phys);
+    if (((uint64_t)0) == virt) {
+        bferror_x64("virt is NULL", virt);
         return LOADER_FAILURE;
     }
 
     if (((uint64_t)0) == phys) {
         phys = platform_virt_to_phys((void *)virt);
         if (((uint64_t)0) == phys) {
-            BFERROR("platform_virt_to_phys failed\n");
+            bferror("platform_virt_to_phys failed");
             return LOADER_FAILURE;
         }
+    }
+
+    if ((virt & (HYPERVISOR_PAGE_SIZE - ((uint64_t)1))) != ((uint64_t)0)) {
+        bferror_x64("virt is not page aligned", virt);
+        return LOADER_FAILURE;
+    }
+
+    if ((phys & (HYPERVISOR_PAGE_SIZE - ((uint64_t)1))) != ((uint64_t)0)) {
+        bferror_x64("phys is not page aligned", phys);
+        return LOADER_FAILURE;
     }
 
     pdpt = pml4t->tables[pml4to(virt)];
@@ -123,7 +124,7 @@ map_4k_page(
 
     pte = &pt->entires[pto(virt)];
     if (pte->p != ((uint64_t)0)) {
-        BFERROR("virt already mapped: 0x%" PRIx64 "\n", virt);
+        bferror_x64("virt already mapped", virt);
         return LOADER_FAILURE;
     }
 

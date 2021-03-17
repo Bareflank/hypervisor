@@ -32,6 +32,7 @@
     .globl  intrinsic_cpuid
     .type   intrinsic_cpuid, @function
 intrinsic_cpuid:
+
     push rbx
 
     mov r10, rdx

@@ -40,6 +40,117 @@ intrinsic_invlpg:
 
 
 
+    .globl  intrinsic_es_selector
+    .type   intrinsic_es_selector, @function
+intrinsic_es_selector:
+
+    xor rax, rax
+    mov ax, es
+
+    ret
+    int 3
+
+    .size intrinsic_es_selector, .-intrinsic_es_selector
+
+
+
+    .globl  intrinsic_cs_selector
+    .type   intrinsic_cs_selector, @function
+intrinsic_cs_selector:
+
+    xor rax, rax
+    mov ax, cs
+
+    ret
+    int 3
+
+    .size intrinsic_cs_selector, .-intrinsic_cs_selector
+
+
+
+    .globl  intrinsic_ss_selector
+    .type   intrinsic_ss_selector, @function
+intrinsic_ss_selector:
+
+    xor rax, rax
+    mov ax, ss
+
+    ret
+    int 3
+
+    .size intrinsic_ss_selector, .-intrinsic_ss_selector
+
+
+
+    .globl  intrinsic_ds_selector
+    .type   intrinsic_ds_selector, @function
+intrinsic_ds_selector:
+
+    xor rax, rax
+    mov ax, ds
+
+    ret
+    int 3
+
+    .size intrinsic_ds_selector, .-intrinsic_ds_selector
+
+
+
+    .globl  intrinsic_fs_selector
+    .type   intrinsic_fs_selector, @function
+intrinsic_fs_selector:
+
+    xor rax, rax
+    mov ax, fs
+
+    ret
+    int 3
+
+    .size intrinsic_fs_selector, .-intrinsic_fs_selector
+
+
+
+    .globl  intrinsic_gs_selector
+    .type   intrinsic_gs_selector, @function
+intrinsic_gs_selector:
+
+    xor rax, rax
+    mov ax, gs
+
+    ret
+    int 3
+
+    .size intrinsic_gs_selector, .-intrinsic_gs_selector
+
+
+
+    .globl  intrinsic_tr_selector
+    .type   intrinsic_tr_selector, @function
+intrinsic_tr_selector:
+
+    xor rax, rax
+    str ax
+
+    ret
+    int 3
+
+    .size intrinsic_tr_selector, .-intrinsic_tr_selector
+
+
+
+    .globl  intrinsic_cr0
+    .type   intrinsic_cr0, @function
+intrinsic_cr0:
+
+    mov rax, cr0
+
+    ret
+    int 3
+
+    .size intrinsic_cr0, .-intrinsic_cr0
+
+
+
     .globl  intrinsic_cr3
     .type   intrinsic_cr3, @function
 intrinsic_cr3:
@@ -63,6 +174,19 @@ intrinsic_set_cr3:
     int 3
 
     .size intrinsic_set_cr3, .-intrinsic_set_cr3
+
+
+
+    .globl  intrinsic_cr4
+    .type   intrinsic_cr4, @function
+intrinsic_cr4:
+
+    mov rax, cr4
+
+    ret
+    int 3
+
+    .size intrinsic_cr4, .-intrinsic_cr4
 
 
 
@@ -148,7 +272,7 @@ intrinsic_halt:
 intrinsic_rdmsr:
 
     lea rax, [rip + intrinsic_rdmsr_failed]
-    mov gs:[0x850], rax
+    mov gs:[0x250], rax
 
     mov ecx, edi
     xor rax, rax
@@ -160,7 +284,7 @@ intrinsic_rdmsr:
     mov [rsi], rax
 
     xor rax, rax
-    mov gs:[0x850], rax
+    mov gs:[0x250], rax
 
     ret
     int 3
@@ -168,7 +292,7 @@ intrinsic_rdmsr:
 intrinsic_rdmsr_failed:
 
     xor rax, rax
-    mov gs:[0x850], rax
+    mov gs:[0x250], rax
 
     mov rax, 0x1
     ret
@@ -201,7 +325,7 @@ intrinsic_rdmsr_unsafe:
 intrinsic_wrmsr:
 
     lea rax, [rip + intrinsic_wrmsr_failed]
-    mov gs:[0x850], rax
+    mov gs:[0x250], rax
 
     mov ecx, edi
     mov rax, rsi
@@ -210,7 +334,7 @@ intrinsic_wrmsr:
     wrmsr
 
     xor rax, rax
-    mov gs:[0x850], rax
+    mov gs:[0x250], rax
 
     ret
     int 3
@@ -218,7 +342,7 @@ intrinsic_wrmsr:
 intrinsic_wrmsr_failed:
 
     xor rax, rax
-    mov gs:[0x850], rax
+    mov gs:[0x250], rax
 
     mov rax, 0x1
     ret
@@ -441,9 +565,9 @@ intrinsic_vmrun:
     /**************************************************************************/
 
     xor rax, rax
-    mov gs:[0x858], rax
+    mov gs:[0x258], rax
 
-    mov rax, gs:[0x860]
+    mov rax, gs:[0x260]
     cmp rax, 0x1
     jne nmis_complete
 
@@ -505,7 +629,7 @@ intrinsic_vmrun_failure:
     /**************************************************************************/
 
     mov rax, 0x1
-    mov gs:[0x858], rax
+    mov gs:[0x258], rax
 
     /**************************************************************************/
     /* MSRs                                                                   */
@@ -611,22 +735,22 @@ intrinsic_vmexit:
     /* Signal First Launch Success                                            */
     /**************************************************************************/
 
-    mov rax, gs:[0x870]
+    mov rax, gs:[0x270]
     cmp rax, 0x0
     jne skip_first_launch_logic
 
     mov rax, 0x1
-    mov gs:[0x870], rax
+    mov gs:[0x270], rax
 
     lea rax, [rip + fast_fail_entry]
-    mov gs:[0x900], rax
+    mov gs:[0x180], rax
     mov rax, 0x0
-    mov gs:[0x908], rax
+    mov gs:[0x188], rax
 
     lea rax, [rip + fast_fail_entry]
-    mov gs:[0x910], rax
+    mov gs:[0x190], rax
     mov rax, 0x0
-    mov gs:[0x918], rax
+    mov gs:[0x198], rax
 
 skip_first_launch_logic:
 
@@ -635,7 +759,7 @@ skip_first_launch_logic:
     /**************************************************************************/
 
     mov rax, 0x1
-    mov gs:[0x858], rax
+    mov gs:[0x258], rax
 
     /**************************************************************************/
     /* MSRs                                                                   */

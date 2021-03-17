@@ -40,122 +40,110 @@
 void
 dump_mk_state(struct state_save_t *const state, uint32_t const cpu)
 {
-    BFINFO("mk state on cpu #%u:\n", cpu);
-    BFINFO(" - virt: 0x%016" PRIx64 "\n", (uint64_t)state);
+    bfdebug_d32("mk state on cpu", cpu);
+    bfdebug_ptr(" - virt", state);
 
-    BFINFO(" - rax: 0x%016" PRIx64 "\n", state->rax);
-    BFINFO(" - rbx: 0x%016" PRIx64 "\n", state->rbx);
-    BFINFO(" - rcx: 0x%016" PRIx64 "\n", state->rcx);
-    BFINFO(" - rdx: 0x%016" PRIx64 "\n", state->rdx);
-    BFINFO(" - rbp: 0x%016" PRIx64 "\n", state->rbp);
-    BFINFO(" - rsi: 0x%016" PRIx64 "\n", state->rsi);
-    BFINFO(" - rdi: 0x%016" PRIx64 "\n", state->rdi);
-    BFINFO(" - r8: 0x%016" PRIx64 "\n", state->r8);
-    BFINFO(" - r9: 0x%016" PRIx64 "\n", state->r9);
-    BFINFO(" - r10: 0x%016" PRIx64 "\n", state->r10);
-    BFINFO(" - r11: 0x%016" PRIx64 "\n", state->r11);
-    BFINFO(" - r12: 0x%016" PRIx64 "\n", state->r12);
-    BFINFO(" - r13: 0x%016" PRIx64 "\n", state->r13);
-    BFINFO(" - r14: 0x%016" PRIx64 "\n", state->r14);
-    BFINFO(" - r15: 0x%016" PRIx64 "\n", state->r15);
-    BFINFO(" - rip: 0x%016" PRIx64 "\n", state->rip);
-    BFINFO(" - rsp: 0x%016" PRIx64 "\n", state->rsp);
+    bfdebug_x64(" - rax", state->rax);
+    bfdebug_x64(" - rbx", state->rbx);
+    bfdebug_x64(" - rcx", state->rcx);
+    bfdebug_x64(" - rdx", state->rdx);
+    bfdebug_x64(" - rbp", state->rbp);
+    bfdebug_x64(" - rsi", state->rsi);
+    bfdebug_x64(" - rdi", state->rdi);
+    bfdebug_x64(" - r8", state->r8);
+    bfdebug_x64(" - r9", state->r9);
+    bfdebug_x64(" - r10", state->r10);
+    bfdebug_x64(" - r11", state->r11);
+    bfdebug_x64(" - r12", state->r12);
+    bfdebug_x64(" - r13", state->r13);
+    bfdebug_x64(" - r14", state->r14);
+    bfdebug_x64(" - r15", state->r15);
+    bfdebug_x64(" - rip", state->rip);
+    bfdebug_x64(" - rsp", state->rsp);
 
-    BFINFO(" - rflags: 0x%016" PRIx64 "\n", state->rflags);
+    bfdebug_x64(" - rflags", state->rflags);
 
-    BFINFO(" - tss: 0x%016" PRIx64 "\n", (uint64_t)state->tss);
-    BFINFO(" - ist: 0x%016" PRIx64 "\n", (uint64_t)state->ist);
-    BFINFO(" - tss->rsp0: 0x%016" PRIx64 "\n", state->tss->rsp0);
-    BFINFO(" - tss->rsp1: 0x%016" PRIx64 "\n", state->tss->rsp1);
-    BFINFO(" - tss->rsp2: 0x%016" PRIx64 "\n", state->tss->rsp2);
-    BFINFO(" - tss->ist1: 0x%016" PRIx64 "\n", state->tss->ist1);
-    BFINFO(" - tss->ist2: 0x%016" PRIx64 "\n", state->tss->ist2);
-    BFINFO(" - tss->ist3: 0x%016" PRIx64 "\n", state->tss->ist3);
-    BFINFO(" - tss->ist4: 0x%016" PRIx64 "\n", state->tss->ist4);
-    BFINFO(" - tss->ist5: 0x%016" PRIx64 "\n", state->tss->ist5);
-    BFINFO(" - tss->ist6: 0x%016" PRIx64 "\n", state->tss->ist6);
-    BFINFO(" - tss->ist7: 0x%016" PRIx64 "\n", state->tss->ist7);
-    BFINFO(" - tss->iomap: 0x%x\n", (uint32_t)state->tss->iomap);
+    bfdebug_ptr(" - tss", state->tss);
+    bfdebug_ptr(" - ist", state->ist);
+    bfdebug_x64(" - tss->rsp0", state->tss->rsp0);
+    bfdebug_x64(" - tss->rsp1", state->tss->rsp1);
+    bfdebug_x64(" - tss->rsp2", state->tss->rsp2);
+    bfdebug_x64(" - tss->ist1", state->tss->ist1);
+    bfdebug_x64(" - tss->ist2", state->tss->ist2);
+    bfdebug_x64(" - tss->ist3", state->tss->ist3);
+    bfdebug_x64(" - tss->ist4", state->tss->ist4);
+    bfdebug_x64(" - tss->ist5", state->tss->ist5);
+    bfdebug_x64(" - tss->ist6", state->tss->ist6);
+    bfdebug_x64(" - tss->ist7", state->tss->ist7);
+    bfdebug_x16(" - tss->iomap", state->tss->iomap);
 
-    BFINFO(" - gdtr.base: 0x%016" PRIx64 "\n", (uint64_t)state->gdtr.base);
-    BFINFO(" - gdtr.limit: 0x%04x\n", state->gdtr.limit);
-    BFINFO(" - idtr.base: 0x%016" PRIx64 "\n", (uint64_t)state->idtr.base);
-    BFINFO(" - idtr.limit: 0x%04x\n", state->idtr.limit);
-    BFINFO(" - es_selector: 0x%04x\n", state->es_selector);
-    BFINFO(" - es_attrib: 0x%04x\n", state->es_attrib);
-    BFINFO(" - es_limit: 0x%08x\n", state->es_limit);
-    BFINFO(" - es_base: 0x%016" PRIx64 "\n", state->es_base);
-    BFINFO(" - cs_selector: 0x%04x\n", state->cs_selector);
-    BFINFO(" - cs_attrib: 0x%04x\n", state->cs_attrib);
-    BFINFO(" - cs_limit: 0x%08x\n", state->cs_limit);
-    BFINFO(" - cs_base: 0x%016" PRIx64 "\n", state->cs_base);
-    BFINFO(" - ss_selector: 0x%04x\n", state->ss_selector);
-    BFINFO(" - ss_attrib: 0x%04x\n", state->ss_attrib);
-    BFINFO(" - ss_limit: 0x%08x\n", state->ss_limit);
-    BFINFO(" - ss_base: 0x%016" PRIx64 "\n", state->ss_base);
-    BFINFO(" - ds_selector: 0x%04x\n", state->ds_selector);
-    BFINFO(" - ds_attrib: 0x%04x\n", state->ds_attrib);
-    BFINFO(" - ds_limit: 0x%08x\n", state->ds_limit);
-    BFINFO(" - ds_base: 0x%016" PRIx64 "\n", state->ds_base);
-    BFINFO(" - fs_selector: 0x%04x\n", state->fs_selector);
-    BFINFO(" - fs_attrib: 0x%04x\n", state->fs_attrib);
-    BFINFO(" - fs_limit: 0x%08x\n", state->fs_limit);
-    BFINFO(" - fs_base: 0x%016" PRIx64 "\n", state->fs_base);
-    BFINFO(" - gs_selector: 0x%04x\n", state->gs_selector);
-    BFINFO(" - gs_attrib: 0x%04x\n", state->gs_attrib);
-    BFINFO(" - gs_limit: 0x%08x\n", state->gs_limit);
-    BFINFO(" - gs_base: 0x%016" PRIx64 "\n", state->gs_base);
-    BFINFO(" - ldtr_selector: 0x%04x\n", state->ldtr_selector);
-    BFINFO(" - ldtr_attrib: 0x%04x\n", state->ldtr_attrib);
-    BFINFO(" - ldtr_limit: 0x%08x\n", state->ldtr_limit);
-    BFINFO(" - ldtr_base: 0x%016" PRIx64 "\n", state->ldtr_base);
-    BFINFO(" - tr_selector: 0x%04x\n", state->tr_selector);
-    BFINFO(" - tr_attrib: 0x%04x\n", state->tr_attrib);
-    BFINFO(" - tr_limit: 0x%08x\n", state->tr_limit);
-    BFINFO(" - tr_base: 0x%016" PRIx64 "\n", state->tr_base);
+    bfdebug_ptr(" - gdtr.base", state->gdtr.base);
+    bfdebug_x16(" - gdtr.limit", state->gdtr.limit);
+    bfdebug_ptr(" - idtr.base", state->idtr.base);
+    bfdebug_x16(" - idtr.limit", state->idtr.limit);
+    bfdebug_x16(" - es_selector", state->es_selector);
+    bfdebug_x16(" - es_attrib", state->es_attrib);
+    bfdebug_x32(" - es_limit", state->es_limit);
+    bfdebug_x64(" - es_base", state->es_base);
+    bfdebug_x16(" - cs_selector", state->cs_selector);
+    bfdebug_x16(" - cs_attrib", state->cs_attrib);
+    bfdebug_x32(" - cs_limit", state->cs_limit);
+    bfdebug_x64(" - cs_base", state->cs_base);
+    bfdebug_x16(" - ss_selector", state->ss_selector);
+    bfdebug_x16(" - ss_attrib", state->ss_attrib);
+    bfdebug_x32(" - ss_limit", state->ss_limit);
+    bfdebug_x64(" - ss_base", state->ss_base);
+    bfdebug_x16(" - ds_selector", state->ds_selector);
+    bfdebug_x16(" - ds_attrib", state->ds_attrib);
+    bfdebug_x32(" - ds_limit", state->ds_limit);
+    bfdebug_x64(" - ds_base", state->ds_base);
+    bfdebug_x16(" - fs_selector", state->fs_selector);
+    bfdebug_x16(" - fs_attrib", state->fs_attrib);
+    bfdebug_x32(" - fs_limit", state->fs_limit);
+    bfdebug_x64(" - fs_base", state->fs_base);
+    bfdebug_x16(" - gs_selector", state->gs_selector);
+    bfdebug_x16(" - gs_attrib", state->gs_attrib);
+    bfdebug_x32(" - gs_limit", state->gs_limit);
+    bfdebug_x64(" - gs_base", state->gs_base);
+    bfdebug_x16(" - ldtr_selector", state->ldtr_selector);
+    bfdebug_x16(" - ldtr_attrib", state->ldtr_attrib);
+    bfdebug_x32(" - ldtr_limit", state->ldtr_limit);
+    bfdebug_x64(" - ldtr_base", state->ldtr_base);
+    bfdebug_x16(" - tr_selector", state->tr_selector);
+    bfdebug_x16(" - tr_attrib", state->tr_attrib);
+    bfdebug_x32(" - tr_limit", state->tr_limit);
+    bfdebug_x64(" - tr_base", state->tr_base);
 
-    BFINFO(" - cr0: 0x%016" PRIx64 "\n", state->cr0);
-    BFINFO(" - cr2: 0x%016" PRIx64 "\n", state->cr2);
-    BFINFO(" - cr3: 0x%016" PRIx64 "\n", state->cr3);
-    BFINFO(" - cr4: 0x%016" PRIx64 "\n", state->cr4);
+    bfdebug_x64(" - cr0", state->cr0);
+    bfdebug_x64(" - cr2", state->cr2);
+    bfdebug_x64(" - cr3", state->cr3);
+    bfdebug_x64(" - cr4", state->cr4);
 
-    BFINFO(" - dr6: 0x%016" PRIx64 "\n", state->dr6);
-    BFINFO(" - dr7: 0x%016" PRIx64 "\n", state->dr7);
+    bfdebug_x64(" - dr6", state->dr6);
+    bfdebug_x64(" - dr7", state->dr7);
 
-    BFINFO(" - efer: 0x%016" PRIx64 "\n", state->ia32_efer);
-    BFINFO(" - star: 0x%016" PRIx64 "\n", state->ia32_star);
-    BFINFO(" - lstar: 0x%016" PRIx64 "\n", state->ia32_lstar);
-    BFINFO(" - cstar: 0x%016" PRIx64 "\n", state->ia32_cstar);
-    BFINFO(" - fmask: 0x%016" PRIx64 "\n", state->ia32_fmask);
-    BFINFO(" - fs_base: 0x%016" PRIx64 "\n", state->ia32_fs_base);
-    BFINFO(" - gs_base: 0x%016" PRIx64 "\n", state->ia32_gs_base);
-    BFINFO(" - kernel_gs_base: 0x%016" PRIx64 "\n", state->ia32_kernel_gs_base);
-    BFINFO(" - sysenter_cs: 0x%016" PRIx64 "\n", state->ia32_sysenter_cs);
-    BFINFO(" - sysenter_esp: 0x%016" PRIx64 "\n", state->ia32_sysenter_esp);
-    BFINFO(" - sysenter_eip: 0x%016" PRIx64 "\n", state->ia32_sysenter_eip);
-    BFINFO(" - pat: 0x%016" PRIx64 "\n", state->ia32_pat);
-    BFINFO(" - debugctl: 0x%016" PRIx64 "\n", state->ia32_debugctl);
+    bfdebug_x64(" - efer", state->ia32_efer);
+    bfdebug_x64(" - star", state->ia32_star);
+    bfdebug_x64(" - lstar", state->ia32_lstar);
+    bfdebug_x64(" - cstar", state->ia32_cstar);
+    bfdebug_x64(" - fmask", state->ia32_fmask);
+    bfdebug_x64(" - fs_base", state->ia32_fs_base);
+    bfdebug_x64(" - gs_base", state->ia32_gs_base);
+    bfdebug_x64(" - kernel_gs_base", state->ia32_kernel_gs_base);
+    bfdebug_x64(" - sysenter_cs", state->ia32_sysenter_cs);
+    bfdebug_x64(" - sysenter_esp", state->ia32_sysenter_esp);
+    bfdebug_x64(" - sysenter_eip", state->ia32_sysenter_eip);
+    bfdebug_x64(" - pat", state->ia32_pat);
+    bfdebug_x64(" - debugctl", state->ia32_debugctl);
 
-    BFINFO(" - hve_page: 0x%016" PRIx64 "\n", (uint64_t)state->hve_page);
+    bfdebug_ptr(" - hve_page", state->hve_page);
 
-    BFINFO(
-        " - promote_handler: 0x%016" PRIx64 "\n",
-        (uint64_t)state->promote_handler);
-    BFINFO(
-        " - esr_default_handler: 0x%016" PRIx64 "\n",
-        (uint64_t)state->esr_default_handler);
-    BFINFO(
-        " - esr_df_handler: 0x%016" PRIx64 "\n",
-        (uint64_t)state->esr_df_handler);
-    BFINFO(
-        " - esr_gpf_handler: 0x%016" PRIx64 "\n",
-        (uint64_t)state->esr_gpf_handler);
-    BFINFO(
-        " - esr_nmi_handler: 0x%016" PRIx64 "\n",
-        (uint64_t)state->esr_nmi_handler);
-    BFINFO(
-        " - esr_pf_handler: 0x%016" PRIx64 "\n",
-        (uint64_t)state->esr_pf_handler);
+    bfdebug_ptr(" - promote_handler", state->promote_handler);
+    bfdebug_ptr(" - esr_default_handler", state->esr_default_handler);
+    bfdebug_ptr(" - esr_df_handler", state->esr_df_handler);
+    bfdebug_ptr(" - esr_gpf_handler", state->esr_gpf_handler);
+    bfdebug_ptr(" - esr_nmi_handler", state->esr_nmi_handler);
+    bfdebug_ptr(" - esr_pf_handler", state->esr_pf_handler);
 
-    BFINFO(" - nmi: 0x%016" PRIx64 "\n", state->nmi);
+    bfdebug_x64(" - nmi", state->nmi);
 }

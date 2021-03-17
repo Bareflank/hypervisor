@@ -55,7 +55,7 @@ extern "C"
     ///   @return Returns the same result as std::memset.
     ///
     [[maybe_unused]] extern "C" auto
-    memset(void *const dst, bsl::char_type const ch, bsl::uintmax const num) -> void *
+    memset(void *const dst, bsl::char_type const ch, bsl::uintmax const num) noexcept -> void *
     {
         return bsl::builtin_memset(dst, ch, num);
     }

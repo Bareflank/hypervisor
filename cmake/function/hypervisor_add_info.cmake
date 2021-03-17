@@ -61,6 +61,46 @@ macro(hypervisor_add_info)
         )
     endif()
 
+
+
+
+
+    if(HYPERVISOR_BUILD_MICROKERNEL)
+        add_custom_command(TARGET info
+            COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_BUILD_MICROKERNEL   ${BF_COLOR_GRN}enabled${BF_COLOR_RST}"
+            VERBATIM
+        )
+    else()
+        add_custom_command(TARGET info
+            COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_BUILD_MICROKERNEL   ${BF_COLOR_RED}disabled${BF_COLOR_RST}"
+            VERBATIM
+        )
+    endif()
+
+    if(HYPERVISOR_BUILD_EXAMPLES)
+        add_custom_command(TARGET info
+            COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_BUILD_EXAMPLES      ${BF_COLOR_GRN}enabled${BF_COLOR_RST}"
+            VERBATIM
+        )
+    else()
+        add_custom_command(TARGET info
+            COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_BUILD_EXAMPLES      ${BF_COLOR_RED}disabled${BF_COLOR_RST}"
+            VERBATIM
+        )
+    endif()
+
+    if(HYPERVISOR_BUILD_EFI)
+        add_custom_command(TARGET info
+            COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_BUILD_EFI           ${BF_COLOR_GRN}enabled${BF_COLOR_RST}"
+            VERBATIM
+        )
+    else()
+        add_custom_command(TARGET info
+            COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_BUILD_EFI           ${BF_COLOR_RED}disabled${BF_COLOR_RST}"
+            VERBATIM
+        )
+    endif()
+
     add_custom_command(TARGET info
         COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_TARGET_ARCH         ${BF_COLOR_CYN}${HYPERVISOR_TARGET_ARCH}${BF_COLOR_RST}"
         VERBATIM
@@ -68,6 +108,16 @@ macro(hypervisor_add_info)
 
     add_custom_command(TARGET info
         COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_CXX_LINKER          ${BF_COLOR_CYN}${HYPERVISOR_CXX_LINKER}${BF_COLOR_RST}"
+        VERBATIM
+    )
+
+    add_custom_command(TARGET info
+        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_EFI_LINKER          ${BF_COLOR_CYN}${HYPERVISOR_EFI_LINKER}${BF_COLOR_RST}"
+        VERBATIM
+    )
+
+    add_custom_command(TARGET info
+        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_EFI_FS0             ${BF_COLOR_CYN}${HYPERVISOR_EFI_FS0}${BF_COLOR_RST}"
         VERBATIM
     )
 
