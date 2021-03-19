@@ -57,57 +57,29 @@ verify_dump_vmm_args(struct dump_vmm_args_t const *const args)
  *     will call platform and architecture specific functions as needed.
  *
  * <!-- inputs/outputs -->
- *   @param ioctl_args arguments from the ioctl
+ *   @param args arguments from the ioctl
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-dump_vmm(struct dump_vmm_args_t *const ioctl_args)
+dump_vmm(struct dump_vmm_args_t *const args)
 {
     int64_t ret;
 
-    typedef struct dump_vmm_args_t args_t;
-    args_t *args;
-
-    if (((void *)0) == ioctl_args) {
-        bferror("ioctl_args was NULL");
-        return LOADER_FAILURE;
-    }
-
-    args = (args_t *)platform_alloc(sizeof(args_t));
     if (((void *)0) == args) {
-        bferror("platform_alloc failed");
+        bferror("args was NULL");
         return LOADER_FAILURE;
-    }
-
-    if (platform_copy_from_user(args, ioctl_args, sizeof(args_t))) {
-        bferror("platform_copy_from_user failed");
-        goto platform_copy_from_user_failed;
     }
 
     if (verify_dump_vmm_args(args)) {
         bferror("verify_dump_vmm_args failed");
-        goto verify_dump_vmm_args_failed;
+        return LOADER_FAILURE;
     }
 
     ret = platform_memcpy(&args->debug_ring, g_mk_debug_ring, sizeof(struct debug_ring_t));
     if (ret) {
         bferror("platform_memcpy failed");
-        goto platform_memcpy_failed;
+        return LOADER_FAILURE;
     }
 
-    if (platform_copy_to_user(ioctl_args, args, sizeof(args_t))) {
-        bferror("platform_copy_to_user failed");
-        goto platform_copy_to_user_failed;
-    }
-
-    platform_free(args, sizeof(args_t));
     return LOADER_SUCCESS;
-
-platform_copy_to_user_failed:
-platform_memcpy_failed:
-verify_dump_vmm_args_failed:
-platform_copy_from_user_failed:
-
-    platform_free(args, sizeof(args_t));
-    return LOADER_FAILURE;
 }

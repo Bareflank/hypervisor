@@ -65,7 +65,7 @@ list(APPEND HEADERS
 	${CMAKE_CURRENT_LIST_DIR}/include/efi/efi_types.h
 	${CMAKE_CURRENT_LIST_DIR}/include/efi/extened_processor_information.h
 	${CMAKE_CURRENT_LIST_DIR}/include/types.h
-	${CMAKE_CURRENT_LIST_DIR}/src/platform_on_each_cpu_callback_args.h
+	${CMAKE_CURRENT_LIST_DIR}/include/work_on_cpu_callback_args.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/bfelf/bfelf_elf64_ehdr_t.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/bfelf/bfelf_elf64_phdr_t.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/bfelf/bfelf_types.h

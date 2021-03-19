@@ -24,8 +24,6 @@
  * SOFTWARE.
  */
 
-#include "platform_on_each_cpu_callback_args.h"
-
 #include <constants.h>
 #include <debug.h>
 #include <efi/efi_mp_services_protocol.h>
@@ -33,6 +31,7 @@
 #include <efi/efi_system_table.h>
 #include <efi/efi_types.h>
 #include <platform.h>
+#include <work_on_cpu_callback_args.h>
 
 /**
  * <!-- description -->
@@ -320,19 +319,44 @@ platform_num_online_cpus(void)
  * <!-- description -->
  *   @brief This function is called when the user calls platform_on_each_cpu.
  *     On each iteration of the CPU, this function calls the user provided
- *     callback with the signature that we perfer, providing us with a way
- *     to be compatable with Linux.
+ *     callback with the signature that we perfer.
  *
  * <!-- inputs/outputs -->
- *   @param dummy ignored
+ *   @param ProcedureArgument stores the params needed to execute the callback
  */
 static void
-platform_on_each_cpu_callback(void *const ProcedureArgument)
+work_on_cpu_callback(void *const ProcedureArgument)
 {
-    struct platform_on_each_cpu_callback_args *args =
-        ((struct platform_on_each_cpu_callback_args *)ProcedureArgument);
+    struct work_on_cpu_callback_args *args =
+        ((struct work_on_cpu_callback_args *)ProcedureArgument);
 
     args->ret = args->func(args->cpu);
+}
+
+/**
+ * <!-- description -->
+ *   @brief Executes a callback on a specific core.
+ *
+ * <!-- inputs/outputs -->
+ *   @param cpu the core to execute the callback on
+ *   @param callback the callback to call
+ *   @param args the arguments for work_on_cpu_callback
+ */
+void
+work_on_cpu(uint32_t const cpu, void *const callback, struct work_on_cpu_callback_args *const args)
+{
+    if (cpu == 0U) {
+        args->ret = args->func(args->cpu);
+    }
+    else {
+        EFI_STATUS status = g_mp_services_protocol->StartupThisAP(
+            g_mp_services_protocol, callback, cpu, NULL, 0, args, NULL);
+
+        if (EFI_ERROR(status)) {
+            bferror_x64("StartupThisAP failed", status);
+            args->ret = LOADER_FAILURE;
+        }
+    }
 }
 
 /**
@@ -352,73 +376,15 @@ platform_on_each_cpu_callback(void *const ProcedureArgument)
 static int64_t
 platform_on_each_cpu_forward(platform_per_cpu_func const func)
 {
-    EFI_STATUS status = EFI_SUCCESS;
     uint32_t cpu;
 
     for (cpu = 0; cpu < platform_num_online_cpus(); ++cpu) {
-        if (cpu == 0U) {
-            if (func(cpu)) {
-                bferror("platform_per_cpu_func failed");
-                return LOADER_FAILURE;
-            }
-        }
-        else {
-            struct platform_on_each_cpu_callback_args args = {func, cpu, 0};
+        struct work_on_cpu_callback_args args = {func, cpu, 0, 0};
 
-            status = g_mp_services_protocol->StartupThisAP(
-                g_mp_services_protocol, platform_on_each_cpu_callback, cpu, NULL, 0, &args, NULL);
-            if (args.ret) {
-                bferror("platform_per_cpu_func failed");
-                return LOADER_FAILURE;
-            }
-        }
-    }
-
-    return LOADER_SUCCESS;
-}
-
-/**
- * <!-- description -->
- *   @brief Calls the user provided callback on each CPU in reverse order.
- *     If each callback returns 0, this function returns 0, otherwise this
- *     function returns a non-0 value, even if all callbacks succeed except
- *     for one. If an error occurs, it is possible that this function will
- *     continue to execute the remaining callbacks until all callbacks have
- *     been called (depends on the platform).
- *
- * <!-- inputs/outputs -->
- *   @param func the function to call on each cpu
- *   @return If each callback returns 0, this function returns 0, otherwise
- *     this function returns a non-0 value
- */
-static int64_t
-platform_on_each_cpu_reverse(platform_per_cpu_func const func)
-{
-    EFI_STATUS status = EFI_SUCCESS;
-    uint32_t cpu;
-
-    for (cpu = platform_num_online_cpus(); cpu > 0U; --cpu) {
-        if ((cpu - 1U) == 0U) {
-            if (func(cpu - 1U)) {
-                bferror("platform_per_cpu_func failed");
-                return LOADER_FAILURE;
-            }
-        }
-        else {
-            struct platform_on_each_cpu_callback_args args = {func, cpu - 1U, 0};
-
-            status = g_mp_services_protocol->StartupThisAP(
-                g_mp_services_protocol,
-                platform_on_each_cpu_callback,
-                cpu - 1U,
-                NULL,
-                0,
-                &args,
-                NULL);
-            if (args.ret) {
-                bferror("platform_per_cpu_func failed");
-                return LOADER_FAILURE;
-            }
+        work_on_cpu(cpu, work_on_cpu_callback, &args);
+        if (args.ret) {
+            bferror("platform_per_cpu_func failed");
+            return LOADER_FAILURE;
         }
     }
 
@@ -449,7 +415,8 @@ platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const order)
         ret = platform_on_each_cpu_forward(func);
     }
     else {
-        ret = platform_on_each_cpu_reverse(func);
+        bferror("PLATFORM_REVERSE currently not supported");
+        ret = LOADER_FAILURE;
     }
 
     return ret;

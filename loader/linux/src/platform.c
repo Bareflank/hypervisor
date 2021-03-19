@@ -35,6 +35,7 @@
 #include <linux/vmalloc.h>
 #include <platform.h>
 #include <types.h>
+#include <work_on_cpu_callback_args.h>
 
 /**
  * <!-- description -->
@@ -306,19 +307,19 @@ platform_num_online_cpus(void)
  * <!-- description -->
  *   @brief This function is called when the user calls platform_on_each_cpu.
  *     On each iteration of the CPU, this function calls the user provided
- *     callback with the signature that we perfer, providing us with a way
- *     to be compatable with Linux.
+ *     callback with the signature that we perfer.
  *
  * <!-- inputs/outputs -->
- *   @param dummy ignored
+ *   @param arg stores the params needed to execute the callback
  */
 static long
-platform_on_each_cpu_callback(void *const arg)
+work_on_cpu_callback(void *const arg)
 {
-    int64_t ret;
+    struct work_on_cpu_callback_args *args =
+        ((struct work_on_cpu_callback_args *)arg);
 
-    ret = ((platform_per_cpu_func)arg)((uint32_t)smp_processor_id());
-    return (long)ret;
+    args->ret = args->func(args->cpu);
+    return 0;
 }
 
 /**
@@ -338,20 +339,25 @@ platform_on_each_cpu_callback(void *const arg)
 static int64_t
 platform_on_each_cpu_forward(platform_per_cpu_func const func)
 {
-    int64_t ret = 0;
     uint32_t cpu;
 
     get_online_cpus();
-    for (cpu = 0; cpu < num_online_cpus(); ++cpu) {
-        if (work_on_cpu(cpu, platform_on_each_cpu_callback, func)) {
+    for (cpu = 0; cpu < platform_num_online_cpus(); ++cpu) {
+        struct work_on_cpu_callback_args args = {func, cpu, 0, 0};
+
+        work_on_cpu(cpu, work_on_cpu_callback, &args);
+        if (args.ret) {
             bferror("platform_per_cpu_func failed");
-            ret = LOADER_FAILURE;
-            break;
+            goto work_on_cpu_callback_failed;
         }
     }
-    put_online_cpus();
 
-    return ret;
+    put_online_cpus();
+    return LOADER_SUCCESS;
+
+work_on_cpu_callback_failed:
+    put_online_cpus();
+    return LOADER_FAILURE;
 }
 
 /**
@@ -371,20 +377,25 @@ platform_on_each_cpu_forward(platform_per_cpu_func const func)
 static int64_t
 platform_on_each_cpu_reverse(platform_per_cpu_func const func)
 {
-    int64_t ret = 0;
     uint32_t cpu;
 
     get_online_cpus();
-    for (cpu = num_online_cpus(); cpu > 0U; --cpu) {
-        if (work_on_cpu(cpu - 1U, platform_on_each_cpu_callback, func)) {
+    for (cpu = platform_num_online_cpus(); cpu > 0; --cpu) {
+        struct work_on_cpu_callback_args args = {func, cpu - 1, 0, 0};
+
+        work_on_cpu(cpu - 1, work_on_cpu_callback, &args);
+        if (args.ret) {
             bferror("platform_per_cpu_func failed");
-            ret = LOADER_FAILURE;
-            break;
+            goto work_on_cpu_callback_failed;
         }
     }
-    put_online_cpus();
 
-    return ret;
+    put_online_cpus();
+    return LOADER_SUCCESS;
+
+work_on_cpu_callback_failed:
+    put_online_cpus();
+    return LOADER_FAILURE;
 }
 
 /**
