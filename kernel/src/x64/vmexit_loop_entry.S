@@ -31,24 +31,107 @@
     .type   vmexit_loop_entry, @function
 vmexit_loop_entry:
 
-    lea rax, [rip + loop]
-    mov gs:[0x1C0], rax
-    mov gs:[0x1C8], rsp
-
-loop:
+    /**************************************************************************/
+    /* Call VMExit Handler                                                      */
+    /**************************************************************************/
 
     mov rdi, gs:[0x200]
     call vmexit_loop_trampoline
 
-    cmp rax, 0x0
-    je loop
+    /**************************************************************************/
+    /* First Exit Logic                                                       */
+    /**************************************************************************/
+
+    /**
+     * NOTE:
+     * - If this is the first VMExit, we handle how we loop differently, as we
+     *   are still able to return back to the loader in this specific case.
+     * - The following checks to see if this is our first exit
+     */
+
+    push rax
 
     mov rax, gs:[0x270]
     cmp rax, 0x0
-    jne fast_fail_entry
+    jne skip_first_launch_logic
+
+    pop rax
+
+    cmp rax, 0x0
+    je install_fast_fail_and_continue_loop
+
+    /**
+     * NOTE:
+     * - If we get here, it is because our first exit failed, in which case
+     *   we can return from this function, and a proper exit will occur
+     */
 
     mov rax, 0x1
     ret
     int 3
+
+install_fast_fail_and_continue_loop:
+
+    /**
+     * NOTE:
+     * - If we get here, it is because the VMExit was successful, in which
+     *   case, we need to state that the next exit will not be our first,
+     *   and then insteall our fast fail entry point which is what will
+     *   execute in the event of an error instead of the current fast fail
+     *   entry point, which depends on what was executing at the time of the
+     *   error occuring.
+     */
+
+    mov rax, 0x1
+    mov gs:[0x270], rax
+
+    lea rax, [rip + fast_fail_entry]
+    mov gs:[0x180], rax
+    mov rax, 0x0
+    mov gs:[0x188], rax
+
+    lea rax, [rip + fast_fail_entry]
+    mov gs:[0x190], rax
+    mov rax, 0x0
+    mov gs:[0x198], rax
+
+    jmp vmexit_loop_entry
+
+skip_first_launch_logic:
+
+    pop rax
+
+    /**************************************************************************/
+    /* Remaining Exit Logic                                                   */
+    /**************************************************************************/
+
+    /**
+     * NOTE:
+     * - If got here, it means that this is the second (or more) VMExit.
+     *   This is the typical path that the code will take. In this path, we
+     *   need to determine if an error occured.
+     * - If the VMExit handler returned an error, we need to call the fast
+     *   fail path, which will allow the extension to decide what to do. If
+     *   the extension doesn't know what to do, we will have to halt. If it
+     *   handles the issue, we can continue the loop.
+     */
+
+
+    cmp rax, 0x0
+    je vmexit_loop_entry
+
+    mov rdi, gs:[0x200]
+    call fast_fail_entry
+
+    cmp rax, 0x0
+    je vmexit_loop_entry
+
+    /**
+     * Note:
+     * - The following should be unreachable, but is here just in case that
+     *   assumption becomes invalid.
+     */
+
+    jmp intrinsic_halt
 
     .size vmexit_loop_entry, .-vmexit_loop_entry

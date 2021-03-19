@@ -41,9 +41,9 @@ namespace mk
     /// <!-- inputs/outputs -->
     ///   @param tls the current TLS block
     ///
-    extern "C" void
-    fast_fail_trampoline(tls_t *const tls) noexcept
+    extern "C" [[nodiscard]] auto
+    fast_fail_trampoline(tls_t *const tls) noexcept -> bsl::exit_code
     {
-        fast_fail(*tls, static_cast<mk_ext_type *>(tls->ext_fail));
+        return fast_fail(*tls, static_cast<mk_ext_type *>(tls->ext_fail));
     }
 }

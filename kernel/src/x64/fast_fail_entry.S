@@ -34,5 +34,12 @@ fast_fail_entry:
     mov rdi, gs:[0x200]
     call fast_fail_trampoline
 
+    cmp rax, 0x0
+    je fast_fail_trampoline_success
     jmp intrinsic_halt
+
+fast_fail_trampoline_success:
+    ret
+    int 3
+
     .size fast_fail_entry, .-fast_fail_entry

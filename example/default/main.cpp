@@ -86,6 +86,16 @@ namespace example
         ///   fault system works properly during testing.
         ///
 
+        /// NOTE:
+        /// - To report success, i.e., you can continue, nothing to see here,
+        ///   you need to execute a run API. If you are doing integration
+        ///   testing, this would be bf_vps_op_advance_ip_and_run_current.
+        ///   If you are cleaning up from a VM failure, you would typically
+        ///   run bf_vps_op_run as you should know exactly what parameters
+        ///   to give it. If you need to know what VM, VP and VPS are
+        ///   currently running, you can use the TLS functions.
+        ///
+
         bsl::print<bsl::V>() << bsl::here();
         syscall::bf_control_op_exit();
     }
