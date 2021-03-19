@@ -57,27 +57,18 @@ verify_stop_vmm_args(struct stop_vmm_args_t const *const args)
  *     will call platform and architecture specific functions as needed.
  *
  * <!-- inputs/outputs -->
- *   @param ioctl_args arguments from the ioctl
+ *   @param args arguments from the ioctl
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-stop_vmm(struct stop_vmm_args_t const *const ioctl_args)
+stop_vmm(struct stop_vmm_args_t const *const args)
 {
-    int64_t ret;
-    struct stop_vmm_args_t args;
-
-    if (((void *)0) == ioctl_args) {
-        bferror("ioctl_args was NULL");
+    if (((void *)0) == args) {
+        bferror("args was NULL");
         return LOADER_FAILURE;
     }
 
-    ret = platform_copy_from_user(&args, ioctl_args, sizeof(struct stop_vmm_args_t));
-    if (ret) {
-        bferror("platform_copy_from_user failed");
-        return LOADER_FAILURE;
-    }
-
-    if (verify_stop_vmm_args(&args)) {
+    if (verify_stop_vmm_args(args)) {
         bferror("verify_stop_vmm_args failed");
         return LOADER_FAILURE;
     }

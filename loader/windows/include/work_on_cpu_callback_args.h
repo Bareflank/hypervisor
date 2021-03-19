@@ -31,13 +31,13 @@
 #include <types.h>
 
 /**
- * @struct platform_on_each_cpu_callback_args
+ * @struct work_on_cpu_callback_args
  *
  * <!-- description -->
  *   @brief Defines the args passed to the platform_on_each_cpu_callback
  *     function.
  */
-struct platform_on_each_cpu_callback_args
+struct work_on_cpu_callback_args
 {
     /**
      * @brief The fucntion to call from platform_on_each_cpu_callback
@@ -48,6 +48,11 @@ struct platform_on_each_cpu_callback_args
      * @brief The CPU platform_on_each_cpu_callback is called on
      */
     uint32_t cpu;
+
+    /**
+     * @brief Singals when the DPC is done.
+     */
+    uint32_t done;
 
     /**
      * @brief The return value of 'func'

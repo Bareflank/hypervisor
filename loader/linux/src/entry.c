@@ -77,37 +77,114 @@ dev_release(struct inode *inode, struct file *file)
 }
 
 static long
-dev_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+handle_start_vmm(void *const ioctl_args)
+{
+    int64_t ret;
+    struct start_vmm_args_t args;
+
+    ret = platform_copy_from_user(
+        &args, ioctl_args, sizeof(struct start_vmm_args_t));
+    if (ret) {
+        bferror("platform_copy_from_user failed");
+        return -EPERM;
+    }
+
+    ret = start_vmm(&args);
+    if (ret) {
+        bferror("start_vmm failed");
+        return -EPERM;
+    }
+
+    return 0;
+}
+
+static long
+handle_stop_vmm(void *const ioctl_args)
+{
+    int64_t ret;
+    struct stop_vmm_args_t args;
+
+    ret = platform_copy_from_user(
+        &args, ioctl_args, sizeof(struct stop_vmm_args_t));
+    if (ret) {
+        bferror("platform_copy_from_user failed");
+        return -EPERM;
+    }
+
+    ret = stop_vmm(&args);
+    if (ret) {
+        bferror("stop_vmm failed");
+        return -EPERM;
+    }
+
+    return 0;
+}
+
+static long
+handle_dump_vmm(void *const ioctl_args)
+{
+    int64_t ret;
+    struct dump_vmm_args_t *args;
+
+    args = (struct dump_vmm_args_t *)platform_alloc(
+        sizeof(struct dump_vmm_args_t));
+    if (((void *)0) == args) {
+        bferror("platform_alloc failed");
+        return LOADER_FAILURE;
+    }
+
+    ret = platform_copy_from_user(
+        args, ioctl_args, sizeof(struct dump_vmm_args_t));
+    if (ret) {
+        bferror("platform_copy_from_user failed");
+        goto platform_copy_from_user_failed;
+    }
+
+    ret = dump_vmm(args);
+    if (ret) {
+        bferror("dump_vmm failed");
+        goto dump_vmm_failed;
+    }
+
+    ret =
+        platform_copy_to_user(ioctl_args, args, sizeof(struct dump_vmm_args_t));
+    if (ret) {
+        bferror("platform_copy_to_user failed");
+        goto platform_copy_to_user_failed;
+    }
+
+    platform_free(args, sizeof(struct dump_vmm_args_t));
+    return 0;
+
+platform_copy_to_user_failed:
+dump_vmm_failed:
+platform_copy_from_user_failed:
+
+    platform_free(args, sizeof(struct dump_vmm_args_t));
+    return -EPERM;
+}
+
+static long
+dev_unlocked_ioctl(
+    struct file *file, unsigned int cmd, unsigned long ioctl_args)
 {
     switch (cmd) {
         case LOADER_START_VMM: {
-            if (start_vmm((struct start_vmm_args_t const *)arg)) {
-                bferror("start_vmm failed");
-                return ((long)-EPERM);
-            }
-            break;
+            return handle_start_vmm((void *)ioctl_args);
         }
         case LOADER_STOP_VMM: {
-            if (stop_vmm((struct stop_vmm_args_t const *)arg)) {
-                bferror("stop_vmm failed");
-                return ((long)-EPERM);
-            }
-            break;
+            return handle_stop_vmm((void *)ioctl_args);
         }
         case LOADER_DUMP_VMM: {
-            if (dump_vmm((struct dump_vmm_args_t const *)arg)) {
-                bferror("dump_vmm failed");
-                return ((long)-EPERM);
-            }
-            break;
+            return handle_dump_vmm((void *)ioctl_args);
         }
         default: {
             bferror_x64("invalid ioctl cmd", cmd);
-            return ((long)-EINVAL);
+            return -EINVAL;
         }
     };
 
-    return ((long)0);
+    return 0;
 }
 
 static struct file_operations fops = {

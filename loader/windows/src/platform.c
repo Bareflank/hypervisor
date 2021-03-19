@@ -38,6 +38,7 @@
 #include <debug.h>
 #include <platform.h>
 #include <types.h>
+#include <work_on_cpu_callback_args.h>
 
 // clang-format on
 
@@ -247,6 +248,9 @@ platform_memcpy(void *const dst, void const *const src, uint64_t const num)
 int64_t
 platform_copy_from_user(void *const dst, void const *const src, uint64_t const num)
 {
+    PMDL mdl = NULL;
+    PVOID buffer = NULL;
+
     if (((void *)0) == dst) {
         bferror("invalid pointer");
         return LOADER_FAILURE;
@@ -257,8 +261,51 @@ platform_copy_from_user(void *const dst, void const *const src, uint64_t const n
         return LOADER_FAILURE;
     }
 
-    RtlCopyMemory(dst, src, num);
-    return 0;
+    try {
+        ProbeForRead((void *)src, num, sizeof(UCHAR));
+    }
+    except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        bferror("ProbeForRead failed\n");
+        goto probeforeread_failed;
+    }
+
+    mdl = IoAllocateMdl((void *)src, (ULONG)num, FALSE, TRUE, NULL);
+    if (!mdl) {
+        bferror("IoAllocateMdl failed\n");
+        goto ioallocatemdl_failed;
+    }
+
+    try {
+        MmProbeAndLockPages(mdl, UserMode, IoReadAccess);
+    }
+    except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        bferror("MmProbeAndLockPages failed\n");
+        goto mmprobeandlockpages_failed;
+    }
+
+    buffer = MmGetSystemAddressForMdlSafe(mdl, NormalPagePriority | MdlMappingNoExecute);
+    if (NULL == buffer) {
+        bferror("MmGetSystemAddressForMdlSafe failed\n");
+        goto mmgetsystemaddressformdlsafe_failed;
+    }
+
+    RtlCopyMemory(dst, buffer, num);
+
+    MmUnlockPages(mdl);
+    IoFreeMdl(mdl);
+
+    return LOADER_SUCCESS;
+
+mmgetsystemaddressformdlsafe_failed:
+    MmUnlockPages(mdl);
+mmprobeandlockpages_failed:
+    IoFreeMdl(mdl);
+ioallocatemdl_failed:
+probeforeread_failed:
+
+    return LOADER_FAILURE;
 }
 
 /**
@@ -277,6 +324,9 @@ platform_copy_from_user(void *const dst, void const *const src, uint64_t const n
 int64_t
 platform_copy_to_user(void *const dst, void const *const src, uint64_t const num)
 {
+    PMDL mdl = NULL;
+    PVOID buffer = NULL;
+
     if (((void *)0) == dst) {
         bferror("invalid pointer");
         return LOADER_FAILURE;
@@ -287,8 +337,51 @@ platform_copy_to_user(void *const dst, void const *const src, uint64_t const num
         return LOADER_FAILURE;
     }
 
-    RtlCopyMemory(dst, src, num);
-    return 0;
+    try {
+        ProbeForWrite((void *)dst, num, sizeof(UCHAR));
+    }
+    except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        bferror("ProbeForWrite failed\n");
+        goto probeforeread_failed;
+    }
+
+    mdl = IoAllocateMdl((void *)dst, (ULONG)num, FALSE, TRUE, NULL);
+    if (!mdl) {
+        bferror("IoAllocateMdl failed\n");
+        goto ioallocatemdl_failed;
+    }
+
+    try {
+        MmProbeAndLockPages(mdl, UserMode, IoWriteAccess);
+    }
+    except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        bferror("MmProbeAndLockPages failed\n");
+        goto mmprobeandlockpages_failed;
+    }
+
+    buffer = MmGetSystemAddressForMdlSafe(mdl, NormalPagePriority | MdlMappingNoExecute);
+    if (NULL == buffer) {
+        bferror("MmGetSystemAddressForMdlSafe failed\n");
+        goto mmgetsystemaddressformdlsafe_failed;
+    }
+
+    RtlCopyMemory(buffer, src, num);
+
+    MmUnlockPages(mdl);
+    IoFreeMdl(mdl);
+
+    return LOADER_SUCCESS;
+
+mmgetsystemaddressformdlsafe_failed:
+    MmUnlockPages(mdl);
+mmprobeandlockpages_failed:
+    IoFreeMdl(mdl);
+ioallocatemdl_failed:
+probeforeread_failed:
+
+    return LOADER_FAILURE;
 }
 
 /**
@@ -301,7 +394,74 @@ platform_copy_to_user(void *const dst, void const *const src, uint64_t const num
 uint32_t
 platform_num_online_cpus(void)
 {
-    return KeQueryActiveProcessorCountEx(ALL_PROCESSOR_GROUPS);
+    return ((uint32_t)KeQueryActiveProcessorCountEx(ALL_PROCESSOR_GROUPS));
+}
+
+/**
+ * <!-- description -->
+ *   @brief This function is called when the user calls platform_on_each_cpu.
+ *     On each iteration of the CPU, this function calls the user provided
+ *     callback with the signature that we perfer.
+ *
+ * <!-- inputs/outputs -->
+ *   @param DPC ignored
+ *   @param DeferredContext stores the params needed to execute the callback
+ *   @param SystemArgument1 ignored
+ *   @param SystemArgument2 ignored
+ */
+VOID
+work_on_cpu_callback(KDPC *DPC, PVOID DeferredContext, PVOID SystemArgument1, PVOID SystemArgument2)
+{
+    struct work_on_cpu_callback_args *args = ((struct work_on_cpu_callback_args *)DeferredContext);
+
+    (void)DPC;
+    (void)SystemArgument1;
+    (void)SystemArgument2;
+
+    args->ret = args->func(args->cpu);
+    args->done = 1;
+}
+
+/**
+ * <!-- description -->
+ *   @brief Executes a callback on a specific core.
+ *
+ * <!-- inputs/outputs -->
+ *   @param cpu the core to execute the callback on
+ *   @param callback the callback to call
+ *   @param args the arguments for work_on_cpu_callback
+ */
+void
+work_on_cpu(
+    uint32_t const cpu,
+    PKDEFERRED_ROUTINE const callback,
+    struct work_on_cpu_callback_args *const args)
+{
+    NTSTATUS status;
+    PROCESSOR_NUMBER ProcNumber;
+    KDPC DPC;
+
+    status = KeGetProcessorNumberFromIndex(((ULONG)cpu), &ProcNumber);
+    if (!NT_SUCCESS(status)) {
+        bferror_x64("KeGetProcessorNumberFromIndex failed", status);
+        args->ret = LOADER_FAILURE;
+    }
+
+    KeInitializeDpc(&DPC, callback, args);
+
+    status = KeSetTargetProcessorDpcEx(&DPC, &ProcNumber);
+    if (!NT_SUCCESS(status)) {
+        bferror_x64("KeSetTargetProcessorDpcEx failed", status);
+        args->ret = LOADER_FAILURE;
+    }
+
+    if (!KeInsertQueueDpc(&DPC, NULL, NULL)) {
+        bferror_x64("KeInsertQueueDpc failed", status);
+        args->ret = LOADER_FAILURE;
+    }
+
+    while (0 == args->done) {
+    }
 }
 
 /**
@@ -321,34 +481,19 @@ platform_num_online_cpus(void)
 static int64_t
 platform_on_each_cpu_forward(platform_per_cpu_func const func)
 {
-    (void)func;
-    int64_t ret = 0;
+    uint32_t cpu;
 
-    ULONG Count;
-    ULONG ProcIndex;
-    PROCESSOR_NUMBER ProcNumber;
+    for (cpu = 0; cpu < platform_num_online_cpus(); ++cpu) {
+        struct work_on_cpu_callback_args args = {func, cpu, 0, 0};
 
-    Count = KeQueryActiveProcessorCountEx(ALL_PROCESSOR_GROUPS);
-    for (ProcIndex = 0; ProcIndex < Count; ++ProcIndex) {
-        GROUP_AFFINITY affinity = {0};
-        GROUP_AFFINITY previous = {0};
-
-        KeGetProcessorNumberFromIndex(ProcIndex, &ProcNumber);
-
-        affinity.Mask = (1ULL << ProcNumber.Number);
-        affinity.Group = ProcNumber.Group;
-
-        KeSetSystemGroupAffinityThread(&affinity, &previous);
-        ret = func(ProcIndex);
-        KeRevertToUserGroupAffinityThread(&previous);
-
-        if (ret) {
+        work_on_cpu(cpu, work_on_cpu_callback, &args);
+        if (args.ret) {
             bferror("platform_per_cpu_func failed");
-            return ret;
+            return LOADER_FAILURE;
         }
     }
 
-    return ret;
+    return LOADER_SUCCESS;
 }
 
 /**
@@ -368,33 +513,19 @@ platform_on_each_cpu_forward(platform_per_cpu_func const func)
 static int64_t
 platform_on_each_cpu_reverse(platform_per_cpu_func const func)
 {
-    int64_t ret = 0;
+    uint32_t cpu;
 
-    ULONG Count;
-    ULONG ProcIndex;
-    PROCESSOR_NUMBER ProcNumber;
+    for (cpu = platform_num_online_cpus(); cpu > 0; --cpu) {
+        struct work_on_cpu_callback_args args = {func, cpu - 1, 0, 0};
 
-    Count = KeQueryActiveProcessorCountEx(ALL_PROCESSOR_GROUPS);
-    for (ProcIndex = Count; ProcIndex > 0; --ProcIndex) {
-        GROUP_AFFINITY affinity = {0};
-        GROUP_AFFINITY previous = {0};
-
-        KeGetProcessorNumberFromIndex(ProcIndex - 1, &ProcNumber);
-
-        affinity.Mask = (1ULL << ProcNumber.Number);
-        affinity.Group = ProcNumber.Group;
-
-        KeSetSystemGroupAffinityThread(&affinity, &previous);
-        ret = func(ProcIndex - 1);
-        KeRevertToUserGroupAffinityThread(&previous);
-
-        if (ret) {
+        work_on_cpu(cpu - 1, work_on_cpu_callback, &args);
+        if (args.ret) {
             bferror("platform_per_cpu_func failed");
-            return ret;
+            return LOADER_FAILURE;
         }
     }
 
-    return ret;
+    return LOADER_SUCCESS;
 }
 
 /**
