@@ -732,29 +732,6 @@ intrinsic_vmexit:
     mov [r15 + 0x0D8], rax
 
     /**************************************************************************/
-    /* Signal First Launch Success                                            */
-    /**************************************************************************/
-
-    mov rax, gs:[0x270]
-    cmp rax, 0x0
-    jne skip_first_launch_logic
-
-    mov rax, 0x1
-    mov gs:[0x270], rax
-
-    lea rax, [rip + fast_fail_entry]
-    mov gs:[0x180], rax
-    mov rax, 0x0
-    mov gs:[0x188], rax
-
-    lea rax, [rip + fast_fail_entry]
-    mov gs:[0x190], rax
-    mov rax, 0x0
-    mov gs:[0x198], rax
-
-skip_first_launch_logic:
-
-    /**************************************************************************/
     /* NMIs                                                                   */
     /**************************************************************************/
 

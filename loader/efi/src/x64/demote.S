@@ -301,6 +301,29 @@ gdt_and_cs_loaded:
 
 demotion_success:
 
+    /**
+     * NOTE:
+     * - If demotion is successful, before we return back to the loader, we
+     *   ensure that at least one exit occurs. This is done to properly handle
+     *   errors with the first VMExit. Specifically, if the first VMExit
+     *   generates a failure, it needs to return to loader. The state in
+     *   the root VP, which is what it will use to return is still the same
+     *   at this point, so a return is safe.
+     */
+
+    push rax
+    push rbx
+    push rcx
+    push rdx
+
+    mov rax, 0
+    cpuid
+
+    pop rdx
+    pop rcx
+    pop rbx
+    pop rax
+
     call enable_interrupts
     ret
     int 3

@@ -105,7 +105,7 @@ namespace vmmctl
             -> bsl::exit_code
         {
             if (!ctl.write(request, ctl_args, bsl::size_of<A>())) {
-                bsl::error() << "command failed. check kernel logs details\n";
+                bsl::error() << "vmmctl failed. check kernel logs details\n";
                 return bsl::exit_failure;
             }
 
@@ -132,7 +132,7 @@ namespace vmmctl
             -> bsl::exit_code
         {
             if (!ctl.read_write(request, ctl_args, bsl::size_of<A>())) {
-                bsl::error() << "command failed. check kernel logs details\n";
+                bsl::error() << "vmmctl failed. check kernel logs details\n";
                 return bsl::exit_failure;
             }
 

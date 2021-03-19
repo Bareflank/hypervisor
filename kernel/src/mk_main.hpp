@@ -414,12 +414,12 @@ namespace mk
             // [x] implement simplify the example as much as possible
             // [x] implement error on VMX instructions on Intel
             // [x] implement error on SVM instructions on AMD
-            // [ ] implement fix for vmexit first crash (vmxoff and check state)
+            // [x] implement fix for vmexit first crash (vmxoff and check state)
             // [x] implement fix for 128 cores on Windows
             // [x] implement alloc page
             // [ ] implement free page
+            // [ ] implement TLS functions for ext_id, vmid, vpid and vpsid
             // [x] implement virt_to_phys
-            // [ ] implement make ack
             // [ ] implement debugging mutex/transaction support
             // [x] implement Windows support
             // [x] implement UEFI support
@@ -430,7 +430,9 @@ namespace mk
             // [ ] implement per-VM direct maps
             // [x] implement reduce the size of the TLS block
             // [ ] implement optimizations for release builds
+            // [ ] implement dump function for AMD vps
             // [ ] implement dump functions for all types
+            // [ ] implement contants for all of the asm logic
             // [ ] implement all debug ops
             // [ ] implement some basic unit tests
             // [ ] implement some basic syscall tests
