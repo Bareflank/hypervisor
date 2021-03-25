@@ -26,50 +26,56 @@
 #define DISPATCH_ESR_HPP
 
 #include <dispatch_esr_nmi.hpp>
+#include <dispatch_esr_page_fault.hpp>
+#include <ext_t.hpp>
+#include <intrinsic_t.hpp>
+#include <tls_t.hpp>
 
 #include <bsl/debug.hpp>
 #include <bsl/exit_code.hpp>
+#include <bsl/finally.hpp>
+#include <bsl/likely.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/string_view.hpp>
 
 namespace mk
 {
     /// @brief defines a constant for the exception vector #0
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_0{bsl::to_umax(0)};
+    constexpr auto EXCEPTION_VECTOR_0{0_umax};
     /// @brief defines a constant for the exception vector #1
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_1{bsl::to_umax(1)};
+    constexpr auto EXCEPTION_VECTOR_1{1_umax};
     /// @brief defines a constant for the exception vector #2
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_2{bsl::to_umax(2)};
+    constexpr auto EXCEPTION_VECTOR_2{2_umax};
     /// @brief defines a constant for the exception vector #3
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_3{bsl::to_umax(3)};
+    constexpr auto EXCEPTION_VECTOR_3{3_umax};
     /// @brief defines a constant for the exception vector #4
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_4{bsl::to_umax(4)};
+    constexpr auto EXCEPTION_VECTOR_4{4_umax};
     /// @brief defines a constant for the exception vector #5
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_5{bsl::to_umax(5)};
+    constexpr auto EXCEPTION_VECTOR_5{5_umax};
     /// @brief defines a constant for the exception vector #6
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_6{bsl::to_umax(6)};
+    constexpr auto EXCEPTION_VECTOR_6{6_umax};
     /// @brief defines a constant for the exception vector #7
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_7{bsl::to_umax(7)};
+    constexpr auto EXCEPTION_VECTOR_7{7_umax};
     /// @brief defines a constant for the exception vector #8
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_8{bsl::to_umax(8)};
+    constexpr auto EXCEPTION_VECTOR_8{8_umax};
     /// @brief defines a constant for the exception vector #10
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_10{bsl::to_umax(10)};
+    constexpr auto EXCEPTION_VECTOR_10{10_umax};
     /// @brief defines a constant for the exception vector #11
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_11{bsl::to_umax(11)};
+    constexpr auto EXCEPTION_VECTOR_11{11_umax};
     /// @brief defines a constant for the exception vector #12
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_12{bsl::to_umax(12)};
+    constexpr auto EXCEPTION_VECTOR_12{12_umax};
     /// @brief defines a constant for the exception vector #13
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_13{bsl::to_umax(13)};
+    constexpr auto EXCEPTION_VECTOR_13{13_umax};
     /// @brief defines a constant for the exception vector #14
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_14{bsl::to_umax(14)};
+    constexpr auto EXCEPTION_VECTOR_14{14_umax};
     /// @brief defines a constant for the exception vector #16
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_16{bsl::to_umax(16)};
+    constexpr auto EXCEPTION_VECTOR_16{16_umax};
     /// @brief defines a constant for the exception vector #17
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_17{bsl::to_umax(17)};
+    constexpr auto EXCEPTION_VECTOR_17{17_umax};
     /// @brief defines a constant for the exception vector #18
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_18{bsl::to_umax(18)};
+    constexpr auto EXCEPTION_VECTOR_18{18_umax};
     /// @brief defines a constant for the exception vector #19
-    constexpr bsl::safe_uintmax EXCEPTION_VECTOR_19{bsl::to_umax(19)};
+    constexpr auto EXCEPTION_VECTOR_19{19_umax};
 
     /// <!-- description -->
     ///   @brief Returns the name of an ESR given it's vector
@@ -79,7 +85,7 @@ namespace mk
     ///   @return Returns the name of an ESR given it's vector
     ///
     [[nodiscard]] constexpr auto
-    dispatch_esr_vector_to_name(bsl::safe_uintmax const &vector) noexcept -> bsl::string_view
+    vector_to_name(bsl::safe_uintmax const &vector) noexcept -> bsl::string_view
     {
         switch (vector.get()) {
             case EXCEPTION_VECTOR_0.get(): {
@@ -151,33 +157,11 @@ namespace mk
             }
 
             default: {
-                return "unknown";
+                break;
             }
         }
-    }
 
-    /// <!-- description -->
-    ///   @brief Print a line
-    ///
-    constexpr void
-    dispatch_esr_print_line() noexcept
-    {
-        bsl::print() << bsl::yellow;
-        bsl::print() << "+--------------------------------------+";
-        bsl::print() << bsl::reset_color << bsl::endl;
-    }
-
-    /// <!-- description -->
-    ///   @brief Print a header
-    ///
-    constexpr void
-    dispatch_esr_print_header() noexcept
-    {
-        bsl::print() << bsl::yellow << "| " << bsl::cyan;
-        bsl::print() << "Register ";
-        bsl::print() << bsl::yellow << "| " << bsl::cyan;
-        bsl::print() << "Value                     ";
-        bsl::print() << bsl::yellow << "|" << bsl::reset_color << bsl::endl;
+        return "unknown";
     }
 
     /// <!-- description -->
@@ -188,28 +172,37 @@ namespace mk
     ///   @param val the value of the register
     ///
     constexpr void
-    dispatch_esr_print_reg(bsl::string_view const name, bsl::safe_uintmax const &val) noexcept
+    dispatch_esr_dump(bsl::string_view const &name, bsl::safe_uintmax const &val) noexcept
     {
-        constexpr bsl::safe_uintmax name_col_size{bsl::to_umax(9)};
-
-        bsl::print() << bsl::yellow << "| " << bsl::reset_color;
-        bsl::print() << name;
-
-        for (bsl::safe_uintmax i{}; i < name_col_size - name.size(); ++i) {
-            bsl::print() << ' ';
-        }
-
-        bsl::print() << bsl::yellow << "| " << bsl::reset_color;
-
+        bsl::print() << bsl::ylw << "| ";
+        bsl::print() << bsl::rst << bsl::fmt{"<16s", name};
+        bsl::print() << bsl::ylw << "| ";
         if (val.is_zero()) {
-            bsl::print() << bsl::black << bsl::hex(val) << bsl::reset_color;
+            bsl::print() << bsl::blk << "    " << bsl::hex(val) << "    ";
         }
         else {
-            bsl::print() << bsl::hex(val);
+            bsl::print() << bsl::rst << "    " << bsl::hex(val) << "    ";
         }
+        bsl::print() << bsl::ylw << "| ";
+        bsl::print() << bsl::rst << bsl::endl;
+    }
 
-        bsl::print() << bsl::yellow << "        |" << bsl::reset_color;
-        bsl::print() << bsl::endl;
+    /// <!-- description -->
+    ///   @brief Print the contents of a register
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param name the name of the register
+    ///   @param val the value of the register
+    ///
+    constexpr void
+    dispatch_esr_dump(bsl::string_view const &name, bsl::safe_uint16 const &val) noexcept
+    {
+        bsl::print() << bsl::ylw << "| ";
+        bsl::print() << bsl::rst << bsl::fmt{"<16s", name};
+        bsl::print() << bsl::ylw << "| ";
+        bsl::print() << bsl::rst << "          " << bsl::hex(val) << "          ";
+        bsl::print() << bsl::ylw << "| ";
+        bsl::print() << bsl::rst << bsl::endl;
     }
 
     /// <!-- description -->
@@ -218,22 +211,21 @@ namespace mk
     /// <!-- inputs/outputs -->
     ///   @param name the name of the register
     ///   @param val the value of the register
-    ///   @param seg_val the value of the register's segment
+    ///   @param seg the value of the register's segment
     ///
     constexpr void
-    dispatch_esr_print_reg_with_segment(
+    dispatch_esr_dump_with_segment(
         bsl::string_view const name,
         bsl::safe_uintmax const &val,
-        bsl::safe_uintmax const &seg_val) noexcept
+        bsl::safe_uintmax const &seg) noexcept
     {
-        bsl::print() << bsl::yellow << "| " << bsl::reset_color;
-        bsl::print() << name << "      ";
-        bsl::print() << bsl::yellow << "| " << bsl::reset_color;
-        bsl::print() << bsl::hex(bsl::to_u16(seg_val));
-        bsl::print() << ":";
-        bsl::print() << bsl::hex(val);
-        bsl::print() << bsl::yellow << " |" << bsl::reset_color;
-        bsl::print() << bsl::endl;
+        bsl::print() << bsl::ylw << "| ";
+        bsl::print() << bsl::rst << bsl::fmt{"<16s", name};
+        bsl::print() << bsl::ylw << "| ";
+        bsl::print() << bsl::rst << bsl::hex(bsl::to_u16(seg)) << ':';
+        bsl::print() << bsl::rst << bsl::hex(val) << ' ';
+        bsl::print() << bsl::ylw << "| ";
+        bsl::print() << bsl::rst << bsl::endl;
     }
 
     /// <!-- description -->
@@ -241,70 +233,147 @@ namespace mk
     ///     function will dispatch exceptions as needed.
     ///
     /// <!-- inputs/outputs -->
-    ///   @tparam TLS_CONCEPT defines the type of TLS block to use
-    ///   @tparam INTRINSIC_CONCEPT defines the type of intrinsics to use
     ///   @param tls the current TLS block
+    ///   @param page_pool the page_pool_t to use
+    ///   @param ext the extension that made the syscall
     ///   @param intrinsic the intrinsics to use
     ///   @return Returns bsl::exit_success if the exception was handled,
     ///     bsl::exit_failure otherwise
     ///
-    template<typename TLS_CONCEPT, typename INTRINSIC_CONCEPT>
     [[nodiscard]] constexpr auto
-    dispatch_esr(TLS_CONCEPT &tls, INTRINSIC_CONCEPT &intrinsic) noexcept -> bsl::exit_code
+    dispatch_esr(
+        tls_t &tls, page_pool_t &page_pool, intrinsic_t &intrinsic, ext_t *const ext) noexcept
+        -> bsl::exit_code
     {
-        if (tls.esr_vector == EXCEPTION_VECTOR_2) {
-            return dispatch_esr_nmi(tls, intrinsic);
+        bsl::finally reset_on_exit{[&tls]() noexcept -> void {
+            /// NOTE:
+            /// - This tells our spinlock_ts that we are no longer in an ESR,
+            ///   which is needed to ensure deadlock detection is handled
+            ///   properly.
+            ///
+
+            tls.esr_ip = {};
+        }};
+
+        switch (tls.esr_vector) {
+            case EXCEPTION_VECTOR_2.get(): {
+                if (bsl::likely(dispatch_esr_nmi(tls, intrinsic))) {
+                    return bsl::exit_success;
+                }
+
+                break;
+            }
+
+            case EXCEPTION_VECTOR_14.get(): {
+                if (bsl::likely(dispatch_esr_page_fault(tls, page_pool, ext))) {
+                    return bsl::exit_success;
+                }
+
+                break;
+            }
+
+            default: {
+                break;
+            }
         }
 
-        bsl::print() << bsl::bold_red                                                          // --
-                     << "...<EXCEPTION>\n\n"                                                   // --
-                     << bsl::bold_magenta                                                      // --
-                     << dispatch_esr_vector_to_name(tls.esr_vector) << ' '                     // --
-                     << bsl::reset_color                                                       // --
-                     << "[" << bsl::red                                                        // --
-                     << bsl::hex(bsl::to_u8_unsafe(tls.esr_error_code)) << bsl::reset_color    // --
-                     << "]: "                                                                  // --
-                     << bsl::endl;                                                             // --
+        bsl::print() << bsl::red << "...<EXCEPTION>\n\n";
+        bsl::print() << bsl::mag << vector_to_name(tls.esr_vector) << " [";
+        bsl::print() << bsl::cyn << "ec: ";
+        bsl::print() << bsl::rst << bsl::hex(bsl::to_u8_unsafe(tls.esr_error_code));
+        bsl::print() << bsl::mag << "] dump: ";
+        bsl::print() << bsl::rst << bsl::endl;
 
-        dispatch_esr_print_line();
-        dispatch_esr_print_header();
-        dispatch_esr_print_line();
+        if constexpr (BSL_DEBUG_LEVEL == bsl::CRITICAL_ONLY) {
+            return bsl::exit_failure;
+        }
 
-        dispatch_esr_print_reg_with_segment("rip", tls.esr_rip, tls.esr_cs);
-        dispatch_esr_print_reg_with_segment("rsp", tls.esr_rsp, tls.esr_ss);
-        dispatch_esr_print_line();
+        /// Header
+        ///
 
-        dispatch_esr_print_reg("rflags", tls.esr_rflags);
-        dispatch_esr_print_line();
+        bsl::print() << bsl::ylw << "+---------------------------------------------+";
+        bsl::print() << bsl::rst << bsl::endl;
 
-        dispatch_esr_print_reg("rax", tls.esr_rax);
-        dispatch_esr_print_reg("rbx", tls.esr_rbx);
-        dispatch_esr_print_reg("rcx", tls.esr_rcx);
-        dispatch_esr_print_reg("rdx", tls.esr_rdx);
-        dispatch_esr_print_reg("rbp", tls.esr_rbp);
-        dispatch_esr_print_reg("rsi", tls.esr_rsi);
-        dispatch_esr_print_reg("rdi", tls.esr_rdi);
-        dispatch_esr_print_reg("r8", tls.esr_r8);
-        dispatch_esr_print_reg("r9", tls.esr_r9);
-        dispatch_esr_print_reg("r10", tls.esr_r10);
-        dispatch_esr_print_reg("r11", tls.esr_r11);
-        dispatch_esr_print_reg("r12", tls.esr_r12);
-        dispatch_esr_print_reg("r13", tls.esr_r13);
-        dispatch_esr_print_reg("r14", tls.esr_r14);
-        dispatch_esr_print_reg("r15", tls.esr_r15);
-        dispatch_esr_print_line();
+        bsl::print() << bsl::ylw << "| ";
+        bsl::print() << bsl::cyn << bsl::fmt{"^16s", "description "};
+        bsl::print() << bsl::ylw << "| ";
+        bsl::print() << bsl::cyn << bsl::fmt{"^26s", "value "};
+        bsl::print() << bsl::ylw << "| ";
+        bsl::print() << bsl::rst << bsl::endl;
 
-        dispatch_esr_print_reg("cr0", tls.esr_cr0);
-        dispatch_esr_print_reg("cr2", tls.esr_cr2);
-        dispatch_esr_print_reg("cr3", tls.esr_cr3);
-        dispatch_esr_print_reg("cr4", tls.esr_cr4);
-        dispatch_esr_print_line();
+        bsl::print() << bsl::ylw << "+---------------------------------------------+";
+        bsl::print() << bsl::rst << bsl::endl;
 
-        bsl::print() << bsl::endl            // --
-                     << bsl::bold_magenta    // --
-                     << "backtrace:"         // --
-                     << bsl::reset_color     // --
-                     << bsl::endl;           // --
+        /// IP/SP
+        ///
+
+        dispatch_esr_dump_with_segment("rip", tls.esr_ip, tls.esr_cs);
+        dispatch_esr_dump_with_segment("rsp", tls.esr_sp, tls.esr_ss);
+
+        /// Flags
+        ///
+
+        bsl::print() << bsl::ylw << "+---------------------------------------------+";
+        bsl::print() << bsl::rst << bsl::endl;
+
+        dispatch_esr_dump("rflags", tls.esr_rflags);
+
+        /// General Purpose Registers
+        ///
+
+        bsl::print() << bsl::ylw << "+---------------------------------------------+";
+        bsl::print() << bsl::rst << bsl::endl;
+
+        dispatch_esr_dump("rax", tls.esr_rax);
+        dispatch_esr_dump("rbx", tls.esr_rbx);
+        dispatch_esr_dump("rcx", tls.esr_rcx);
+        dispatch_esr_dump("rdx", tls.esr_rdx);
+        dispatch_esr_dump("rbp", tls.esr_rbp);
+        dispatch_esr_dump("rsi", tls.esr_rsi);
+        dispatch_esr_dump("rdi", tls.esr_rdi);
+        dispatch_esr_dump("r8", tls.esr_r8);
+        dispatch_esr_dump("r9", tls.esr_r9);
+        dispatch_esr_dump("r10", tls.esr_r10);
+        dispatch_esr_dump("r11", tls.esr_r11);
+        dispatch_esr_dump("r12", tls.esr_r12);
+        dispatch_esr_dump("r13", tls.esr_r13);
+        dispatch_esr_dump("r14", tls.esr_r14);
+        dispatch_esr_dump("r15", tls.esr_r15);
+
+        /// Control Registers
+        ///
+
+        bsl::print() << bsl::ylw << "+---------------------------------------------+";
+        bsl::print() << bsl::rst << bsl::endl;
+
+        dispatch_esr_dump("cr0", tls.esr_cr0);
+        dispatch_esr_dump("cr2", tls.esr_pf_addr);
+        dispatch_esr_dump("cr3", tls.esr_cr3);
+        dispatch_esr_dump("cr4", tls.esr_cr4);
+
+        /// TLS State
+        ///
+
+        bsl::print() << bsl::ylw << "+---------------------------------------------+";
+        bsl::print() << bsl::rst << bsl::endl;
+
+        dispatch_esr_dump("ppid", tls.ppid);
+        dispatch_esr_dump("online_pps", tls.online_pps);
+        dispatch_esr_dump("active_extid", tls.active_extid);
+        dispatch_esr_dump("active_vmid", tls.active_vmid);
+        dispatch_esr_dump("active_vpid", tls.active_vpid);
+        dispatch_esr_dump("active_vpsid", tls.active_vpsid);
+        dispatch_esr_dump("sp", tls.sp);
+        dispatch_esr_dump("tp", tls.tp);
+
+        /// Footer
+        ///
+
+        bsl::print() << bsl::ylw << "+---------------------------------------------+";
+        bsl::print() << bsl::rst << bsl::endl;
+
+        bsl::print() << bsl::mag << "\nbacktrace:";
+        bsl::print() << bsl::rst << bsl::endl;
 
         return bsl::exit_failure;
     }

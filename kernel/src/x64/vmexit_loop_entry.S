@@ -51,7 +51,7 @@ vmexit_loop_entry:
 
     push rax
 
-    mov rax, gs:[0x270]
+    mov rax, gs:[0x268]
     cmp rax, 0x0
     jne skip_first_launch_logic
 
@@ -76,14 +76,14 @@ install_fast_fail_and_continue_loop:
      * NOTE:
      * - If we get here, it is because the VMExit was successful, in which
      *   case, we need to state that the next exit will not be our first,
-     *   and then insteall our fast fail entry point which is what will
+     *   and then install our fast fail entry point which is what will
      *   execute in the event of an error instead of the current fast fail
      *   entry point, which depends on what was executing at the time of the
      *   error occuring.
      */
 
     mov rax, 0x1
-    mov gs:[0x270], rax
+    mov gs:[0x268], rax
 
     lea rax, [rip + fast_fail_entry]
     mov gs:[0x180], rax

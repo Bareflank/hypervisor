@@ -27,7 +27,7 @@
 #include <debug.h>
 #include <map_4k_page_rw.h>
 #include <platform.h>
-#include <pml4t_t.h>
+#include <root_page_table_t.h>
 #include <state_save_t.h>
 
 /**
@@ -38,38 +38,38 @@
  * <!-- inputs/outputs -->
  *   @param state a pointer to a state_save_t that stores the state
  *     being mapped
- *   @param pml4t the root page table to map the state into
+ *   @param rpt the root page table to map the state into
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-map_mk_state(struct state_save_t const *const state, struct pml4t_t *const pml4t)
+map_mk_state(struct state_save_t const *const state, root_page_table_t *const rpt)
 {
-    if (map_4k_page_rw(state, ((uint64_t)0), pml4t)) {
+    if (map_4k_page_rw(state, ((uint64_t)0), rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rw(state->tss, ((uint64_t)0), pml4t)) {
+    if (map_4k_page_rw(state->tss, ((uint64_t)0), rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rw(state->ist, ((uint64_t)0), pml4t)) {
+    if (map_4k_page_rw(state->ist, ((uint64_t)0), rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rw(state->gdtr.base, ((uint64_t)0), pml4t)) {
+    if (map_4k_page_rw(state->gdtr.base, ((uint64_t)0), rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rw(state->idtr.base, ((uint64_t)0), pml4t)) {
+    if (map_4k_page_rw(state->idtr.base, ((uint64_t)0), rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rw(state->hve_page, ((uint64_t)0), pml4t)) {
+    if (map_4k_page_rw(state->hve_page, ((uint64_t)0), rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }

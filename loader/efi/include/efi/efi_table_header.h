@@ -27,7 +27,7 @@
 #ifndef EFI_TABLE_HEADER_H
 #define EFI_TABLE_HEADER_H
 
-#include "efi_types.h"
+#include <efi/efi_types.h>
 
 /**
  * @struct EFI_TABLE_HEADER

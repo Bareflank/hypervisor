@@ -27,8 +27,8 @@
 #ifndef EFI_MP_SERVICES_PROTOCOL_H
 #define EFI_MP_SERVICES_PROTOCOL_H
 
-#include "efi_processor_information.h"
-#include "efi_types.h"
+#include <efi/efi_processor_information.h>
+#include <efi/efi_types.h>
 
 /** @brief defines the GUID for EFI_MP_SERVICES_PROTOCOL_GUID */
 #define EFI_MP_SERVICES_PROTOCOL_GUID                                                              \

@@ -36,7 +36,6 @@
  *
  * <!-- inputs/outputs -->
  *   @param debug_ring the mk debug ring to output information about
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void dump_mk_debug_ring(struct debug_ring_t *const debug_ring);
 

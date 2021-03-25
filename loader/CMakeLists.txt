@@ -21,13 +21,35 @@
 
 add_library(loader INTERFACE)
 
+# ------------------------------------------------------------------------------
+# Includes
+# ------------------------------------------------------------------------------
+
 target_include_directories(loader SYSTEM INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/include/interface/cpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/interface/cpp/x64
-    ${CMAKE_CURRENT_LIST_DIR}/include/interface/cpp/bfelf
 
     $<$<PLATFORM_ID:Linux>:${CMAKE_CURRENT_LIST_DIR}/linux/include>
     $<$<PLATFORM_ID:Linux>:${CMAKE_CURRENT_LIST_DIR}/linux/include/platform_interface/cpp>
     $<$<PLATFORM_ID:Windows>:${CMAKE_CURRENT_LIST_DIR}/windows/include>
     $<$<PLATFORM_ID:Windows>:${CMAKE_CURRENT_LIST_DIR}/windows/include/platform_interface/cpp>
 )
+
+if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
+    target_include_directories(loader SYSTEM INTERFACE
+        ${CMAKE_CURRENT_LIST_DIR}/include/interface/cpp/x64
+    )
+endif()
+
+if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
+    target_include_directories(loader SYSTEM INTERFACE
+        ${CMAKE_CURRENT_LIST_DIR}/include/interface/cpp/arm/aarch64
+    )
+endif()
+
+# ------------------------------------------------------------------------------
+# Sub Directories
+# ------------------------------------------------------------------------------
+
+if(HYPERVISOR_BUILD_EFI)
+    hypervisor_add_efi_cross_compile(../cmake/efi_cross_compile)
+endif()

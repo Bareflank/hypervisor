@@ -35,12 +35,16 @@
  * <!-- inputs/outputs -->
  *   @param args the mk args to output
  *   @param cpu the CPU that this mk args belongs to
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void
 dump_mk_args(struct mk_args_t *const args, uint32_t const cpu)
 {
     uint64_t idx;
+
+    if (((void *)0) == args) {
+        bferror("args is NULL");
+        return;
+    }
 
     bfdebug_d32("mk args on cpu", cpu);
     bfdebug_x16(" - online_pps", args->online_pps);

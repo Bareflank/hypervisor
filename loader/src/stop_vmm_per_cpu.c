@@ -30,6 +30,7 @@
 #include <free_mk_stack.h>
 #include <free_mk_state.h>
 #include <free_root_vp_state.h>
+#include <g_cpu_status.h>
 #include <g_mk_args.h>
 #include <g_mk_stack.h>
 #include <g_mk_state.h>
@@ -52,8 +53,17 @@
 int64_t
 stop_vmm_per_cpu(uint32_t const cpu)
 {
-    if (((uint64_t)cpu) >= HYPERVISOR_MAX_VPS_PER_VM) {
+    if (((uint64_t)cpu) >= HYPERVISOR_MAX_PPS) {
         bferror("cpu out of range");
+        return LOADER_FAILURE;
+    }
+
+    if (CPU_STATUS_STOPPED == g_cpu_status[cpu]) {
+        return LOADER_SUCCESS;
+    }
+
+    if (CPU_STATUS_CORRUPT == g_cpu_status[cpu]) {
+        bferror("Unable to stop, previous CPU stopped in a corrupt state");
         return LOADER_FAILURE;
     }
 
@@ -61,6 +71,7 @@ stop_vmm_per_cpu(uint32_t const cpu)
 
     if (send_command_stop()) {
         bferror("send_command_stop failed");
+        g_cpu_status[cpu] = CPU_STATUS_CORRUPT;
         return LOADER_FAILURE;
     }
 
@@ -69,5 +80,6 @@ stop_vmm_per_cpu(uint32_t const cpu)
     free_mk_state(&g_mk_state[cpu]);
     free_mk_stack(&g_mk_stack[cpu]);
 
+    g_cpu_status[cpu] = CPU_STATUS_STOPPED;
     return LOADER_SUCCESS;
 }

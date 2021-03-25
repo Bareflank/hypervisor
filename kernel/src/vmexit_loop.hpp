@@ -25,6 +25,11 @@
 #ifndef VMEXIT_LOOP_HPP
 #define VMEXIT_LOOP_HPP
 
+#include <ext_t.hpp>
+#include <intrinsic_t.hpp>
+#include <vmexit_log_t.hpp>
+#include <vps_pool_t.hpp>
+
 #include <bsl/debug.hpp>
 #include <bsl/exit_code.hpp>
 #include <bsl/unlikely.hpp>
@@ -36,27 +41,29 @@ namespace mk
     ///     after a successful launch of the hypervisor.
     ///
     /// <!-- inputs/outputs -->
-    ///   @tparam TLS_CONCEPT defines the type of TLS block to use
-    ///   @tparam EXT_CONCEPT defines the type of ext_t to use
-    ///   @tparam VPS_POOL_CONCEPT defines the type of VPS pool to use
     ///   @param tls the current TLS block
-    ///   @param ext_vmexit the ext_t to handle the VMExit
+    ///   @param intrinsic the intrinsics to use
     ///   @param vps_pool the VPS pool to use
-    ///   @return Returns bsl::exit_success on success and bsl::exit_failure
+    ///   @param ext the ext_t to handle the VMExit
+    ///   @param log the VMExit log to use
+    ///   @return Returns bsl::exit_success on success, bsl::exit_failure
     ///     otherwise
     ///
-    template<typename TLS_CONCEPT, typename EXT_CONCEPT, typename VPS_POOL_CONCEPT>
     [[nodiscard]] constexpr auto
-    vmexit_loop(TLS_CONCEPT &tls, EXT_CONCEPT &ext_vmexit, VPS_POOL_CONCEPT &vps_pool) noexcept
-        -> bsl::exit_code
+    vmexit_loop(
+        tls_t &tls,
+        intrinsic_t &intrinsic,
+        vps_pool_t &vps_pool,
+        ext_t &ext,
+        vmexit_log_t &log) noexcept -> bsl::exit_code
     {
-        auto const exit_reason{vps_pool.run(tls, tls.active_vpsid)};
+        auto const exit_reason{vps_pool.run(tls, intrinsic, tls.active_vpsid, log)};
         if (bsl::unlikely(!exit_reason)) {
             bsl::print<bsl::V>() << bsl::here();
             return bsl::exit_failure;
         }
 
-        auto const ret{ext_vmexit.vmexit(tls, exit_reason)};
+        auto const ret{ext.vmexit(tls, intrinsic, exit_reason)};
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return bsl::exit_failure;

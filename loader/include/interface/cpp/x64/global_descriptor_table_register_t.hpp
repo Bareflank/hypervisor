@@ -46,15 +46,6 @@ namespace loader
         /// @brief stores a pointer to the gdt
         bsl::uint64 *base;
     };
-
-    namespace details
-    {
-        /// @brief defined the expected size of the gdtr_t struct
-        constexpr bsl::safe_uintmax EXPECTED_GDTR_T_SIZE{bsl::to_umax(10)};
-
-        /// Check to make sure the gdtr_t is the right size.
-        static_assert(sizeof(global_descriptor_table_register_t) == EXPECTED_GDTR_T_SIZE);
-    }
 }
 
 #pragma pack(pop)

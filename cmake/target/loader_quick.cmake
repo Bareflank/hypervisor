@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-if(HYPERVISOR_BUILD_LOADER)
+if(HYPERVISOR_BUILD_LOADER AND NOT HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     add_custom_target(loader_quick
         COMMAND ${CMAKE_COMMAND} --build . --target loader_clean
         COMMAND ${CMAKE_COMMAND} --build . --target loader_load

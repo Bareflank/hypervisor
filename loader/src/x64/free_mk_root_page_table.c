@@ -24,30 +24,28 @@
  * SOFTWARE.
  */
 
-#include <free_pdpt.h>
-#include <free_pdt.h>
 #include <free_pml4t.h>
 #include <platform.h>
-#include <pml4t_t.h>
+#include <root_page_table_t.h>
 #include <types.h>
 
 /**
  * <!-- description -->
- *   @brief Releases a previously allocated pml4t_t that was allocated
+ *   @brief Releases a previously allocated root_page_table_t that was allocated
  *     using the alloc_mk_root_page_table function.
  *
  * <!-- inputs/outputs -->
- *   @param pml4t the pml4t_t to free.
+ *   @param rpt the root_page_table_t to free.
  */
 void
-free_mk_root_page_table(struct pml4t_t **const pml4t)
+free_mk_root_page_table(root_page_table_t **const rpt)
 {
-    if (((void *)0) == *pml4t) {
+    if (((void *)0) == *rpt) {
         return;
     }
 
-    free_pml4t(*pml4t);
+    free_pml4t(*rpt);
 
-    platform_free(*pml4t, sizeof(struct pml4t_t));
-    *pml4t = ((void *)0);
+    platform_free(*rpt, sizeof(root_page_table_t));
+    *rpt = ((void *)0);
 }

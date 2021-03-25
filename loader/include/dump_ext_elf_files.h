@@ -36,7 +36,6 @@
  *
  * <!-- inputs/outputs -->
  *   @param files the array of extension ELF files to output
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void dump_ext_elf_files(struct span_t *const files);
 

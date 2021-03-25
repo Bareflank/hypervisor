@@ -27,9 +27,9 @@
 #ifndef EFI_PROCESSOR_INFORMATION_H
 #define EFI_PROCESSOR_INFORMATION_H
 
-#include "efi_cpu_physical_location.h"
-#include "efi_types.h"
-#include "extened_processor_information.h"
+#include <efi/efi_cpu_physical_location.h>
+#include <efi/efi_types.h>
+#include <efi/extened_processor_information.h>
 
 /**
  * @brief This bit indicates whether the processor is playing the role of BSP.

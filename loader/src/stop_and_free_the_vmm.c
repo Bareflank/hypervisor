@@ -37,10 +37,10 @@
 #include <g_mk_huge_pool.h>
 #include <g_mk_page_pool.h>
 #include <g_mk_root_page_table.h>
+#include <g_vmm_status.h>
 #include <platform.h>
 #include <stop_vmm_per_cpu.h>
 #include <types.h>
-#include <vmm_status.h>
 
 /**
  * <!-- description -->

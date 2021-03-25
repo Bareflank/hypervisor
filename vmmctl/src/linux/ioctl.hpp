@@ -40,11 +40,8 @@
 
 namespace vmmctl
 {
-    namespace details
-    {
-        /// @brief defines what an invalid handle is.
-        constexpr bsl::safe_int32 IOCTL_INVALID_HNDL{-1};
-    }
+    /// @brief defines what an invalid handle is.
+    constexpr bsl::safe_int32 IOCTL_INVALID_HNDL{-1};
 
     /// @class bsl::ioctl
     ///
@@ -56,7 +53,7 @@ namespace vmmctl
     class ioctl final
     {
         /// @brief stores a handle to the device driver.
-        bsl::int32 m_hndl{details::IOCTL_INVALID_HNDL.get()};
+        bsl::int32 m_hndl{IOCTL_INVALID_HNDL.get()};
 
         /// <!-- description -->
         ///   @brief Swaps *this with other
@@ -77,16 +74,14 @@ namespace vmmctl
         ///     with a device driver through an IOCTL interface.
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam CSTR the string type that used to describe "name"
         ///   @param name the name of the device driver to IOCTL.
         ///
-        template<typename CSTR>
-        explicit ioctl(CSTR name) noexcept
+        explicit constexpr ioctl(bsl::string_view const &name) noexcept
         {
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             m_hndl = open(name.data(), O_RDWR);
-            if (bsl::unlikely(details::IOCTL_INVALID_HNDL.get() == m_hndl)) {
+            if (bsl::unlikely(IOCTL_INVALID_HNDL.get() == m_hndl)) {
                 bsl::error() << "ioctl open failed\n";
                 return;
             }
@@ -97,9 +92,9 @@ namespace vmmctl
         /// <!-- description -->
         ///   @brief Destructor
         ///
-        ~ioctl() noexcept
+        constexpr ~ioctl() noexcept
         {
-            if (bsl::unlikely(details::IOCTL_INVALID_HNDL.get() != m_hndl)) {
+            if (bsl::unlikely(IOCTL_INVALID_HNDL.get() != m_hndl)) {
                 bsl::discard(close(m_hndl));
             }
             else {
@@ -123,7 +118,7 @@ namespace vmmctl
         ///
         constexpr ioctl(ioctl &&o) noexcept : m_hndl{bsl::move(o.m_hndl)}
         {
-            o.m_hndl = details::IOCTL_INVALID_HNDL.get();
+            o.m_hndl = IOCTL_INVALID_HNDL.get();
         }
 
         /// <!-- description -->
@@ -161,7 +156,7 @@ namespace vmmctl
         [[nodiscard]] constexpr auto
         is_open() const noexcept -> bool
         {
-            return details::IOCTL_INVALID_HNDL.get() != m_hndl;
+            return IOCTL_INVALID_HNDL.get() != m_hndl;
         }
 
         /// <!-- description -->
@@ -170,7 +165,7 @@ namespace vmmctl
         /// <!-- inputs/outputs -->
         ///   @return Returns is_open()
         ///
-        [[nodiscard]] constexpr explicit operator bool() const noexcept
+        [[nodiscard]] explicit constexpr operator bool() const noexcept
         {
             return this->is_open();
         }
@@ -180,15 +175,13 @@ namespace vmmctl
         ///     data.
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam REQUEST the type of request
         ///   @param req the request
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
-        template<typename REQUEST>
         [[nodiscard]] constexpr auto
-        send(bsl::safe_integral<REQUEST> const &req) const noexcept -> bool
+        send(bsl::safe_uintmax const &req) const noexcept -> bool
         {
-            if (bsl::unlikely(details::IOCTL_INVALID_HNDL.get() == m_hndl)) {
+            if (bsl::unlikely(IOCTL_INVALID_HNDL.get() == m_hndl)) {
                 bsl::error() << "failed to send, ioctl not properly initialized\n";
                 return false;
             }
@@ -212,24 +205,20 @@ namespace vmmctl
         ///   @brief Reads data from the device driver
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam REQUEST the type of request
         ///   @param req the request
         ///   @param data a pointer to read data to
         ///   @param size the size of the buffer being read to
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
-        template<typename REQUEST>
         [[nodiscard]] constexpr auto
         // This conflicts with read() from unistd.h when it is included.
         // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
-        read(
-            bsl::safe_integral<REQUEST> const &req,
-            void *const data,
-            bsl::safe_uintmax const &size) const noexcept -> bool
+        read_data(bsl::safe_uintmax const &req, void *const data, bsl::safe_uintmax const &size)
+            const noexcept -> bool
         {
             bsl::discard(size);
 
-            if (bsl::unlikely(details::IOCTL_INVALID_HNDL.get() == m_hndl)) {
+            if (bsl::unlikely(IOCTL_INVALID_HNDL.get() == m_hndl)) {
                 bsl::error() << "failed to read, ioctl not properly initialized\n";
                 return false;
             }
@@ -258,22 +247,20 @@ namespace vmmctl
         ///   @brief Writes data to the device driver
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam REQUEST the type of request
         ///   @param req the request
         ///   @param data a pointer to write data from
         ///   @param size the size of the buffer being written from
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
-        template<typename REQUEST>
         [[nodiscard]] constexpr auto
-        write(
-            bsl::safe_integral<REQUEST> const &req,
+        write_data(
+            bsl::safe_uintmax const &req,
             void const *const data,
             bsl::safe_uintmax const &size) const noexcept -> bool
         {
             bsl::discard(size);
 
-            if (bsl::unlikely(details::IOCTL_INVALID_HNDL.get() == m_hndl)) {
+            if (bsl::unlikely(IOCTL_INVALID_HNDL.get() == m_hndl)) {
                 bsl::error() << "failed to write, ioctl not properly initialized\n";
                 return false;
             }
@@ -302,22 +289,20 @@ namespace vmmctl
         ///   @brief Reads/writes data from/to the device driver
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam REQUEST the type of request
         ///   @param req the request
         ///   @param data a pointer to read/write data to/from
         ///   @param size the size of the buffer being read/written to/from
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
-        template<typename REQUEST>
         [[nodiscard]] constexpr auto
-        read_write(
-            bsl::safe_integral<REQUEST> const &req,
+        read_write_data(
+            bsl::safe_uintmax const &req,
             void *const data,
             bsl::safe_uintmax const &size) const noexcept -> bool
         {
             bsl::discard(size);
 
-            if (bsl::unlikely(details::IOCTL_INVALID_HNDL.get() == m_hndl)) {
+            if (bsl::unlikely(IOCTL_INVALID_HNDL.get() == m_hndl)) {
                 bsl::error() << "failed to read/write, ioctl not properly initialized\n";
                 return false;
             }

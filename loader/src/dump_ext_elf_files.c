@@ -35,12 +35,16 @@
  *
  * <!-- inputs/outputs -->
  *   @param files the array of extension ELF files to output
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void
 dump_ext_elf_files(struct span_t *const files)
 {
     uint64_t idx;
+
+    if (((void *)0) == files) {
+        bferror("files is NULL");
+        return;
+    }
 
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
         if (((void *)0) != files[idx].addr) {

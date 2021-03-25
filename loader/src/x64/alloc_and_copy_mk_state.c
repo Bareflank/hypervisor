@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-#include <bfelf_elf64_ehdr_t.h>
+#include <bfelf/bfelf_elf64_ehdr_t.h>
 #include <constants.h>
 #include <debug.h>
 #include <disable_hve.h>
@@ -40,7 +40,7 @@
 #include <intrinsic_scs.h>
 #include <intrinsic_sss.h>
 #include <platform.h>
-#include <pml4t_t.h>
+#include <root_page_table_t.h>
 #include <set_gdt_descriptor.h>
 #include <set_idt_descriptor.h>
 #include <span_t.h>
@@ -48,17 +48,23 @@
 #include <tss_t.h>
 #include <types.h>
 
-/** @brief defines the default value of rflags  */
-#define DEFAULT_RFLAGS ((uint64_t)0x2)
+/** @brief defines the default value of rflags */
+#define DEFAULT_RFLAGS ((uint64_t)0x40002)
 
-/** @brief defines the default value of CR0  */
+/** @brief defines the default value of CR0 */
 #define DEFAULT_CR0 ((uint64_t)0x80050033)
-/** @brief defines the default value of CR4  */
+/** @brief defines the default value of CR4 */
 #define DEFAULT_CR4 ((uint64_t)0x003000E0)
 
-/** @brief defines the MSR_IA32_EFER MSR  */
+/** @brief defines the default value of CR0 bits that must be off */
+#define DEFAULT_CR0_OFF ((uint64_t)0xFFFFFFFFFFFFFFFF)
+/** @brief defines the default value of CR4 bits that must be off */
+// #define DEFAULT_CR4_OFF ((uint64_t)0xFFFFFFFFFF9FFFFF)
+#define DEFAULT_CR4_OFF ((uint64_t)0xFFFFFFFFFFFFFFFF)
+
+/** @brief defines the MSR_IA32_EFER MSR */
 #define MSR_IA32_EFER ((uint32_t)0xC0000080)
-/** @brief defines the default value of EFER  */
+/** @brief defines the default value of EFER */
 #define DEFAULT_EFER ((uint64_t)0x00000D01)
 
 /** @brief defines the microkernel's CS selector */
@@ -153,13 +159,13 @@
 #define ESR_ATTRIB ((uint16_t)0x8E01)
 
 /** @brief defines the PAT MSR used by the microkernel */
-#define MK_MSR_IA32_PAT ((uint64_t)0x0606060606060606)
+#define MK_MSR_IA32_PAT ((uint64_t)0x0000000600000006)
 
 /** @brief defines the STAR MSR used by the microkernel */
 #define MK_MSR_IA32_STAR ((uint64_t)0x001B001000000000)
 
 /** @brief defines the FMASK MSR used by the microkernel */
-#define MK_MSR_IA32_FMASK ((uint64_t)0xFFFFFFFFFFFFFFFD)
+#define MK_MSR_IA32_FMASK ((uint64_t)0xFFFFFFFFFFFBFFFD)
 
 /**
  * <!-- description -->
@@ -167,7 +173,7 @@
  *     microkernel.
  *
  * <!-- inputs/outputs -->
- *   @param pml4t the mkcrokernel's root page table
+ *   @param rpt the mkcrokernel's root page table
  *   @param mk_elf_file the microkernel's ELF file
  *   @param mk_stack the microkernel's stack
  *   @param mk_stack_virt the microkernel's virtual address of the stack
@@ -176,7 +182,7 @@
  */
 int64_t
 alloc_and_copy_mk_state(
-    struct pml4t_t const *const pml4t,
+    root_page_table_t const *const rpt,
     struct span_t const *const mk_elf_file,
     struct span_t const *const mk_stack,
     uint64_t const mk_stack_virt,
@@ -278,11 +284,14 @@ alloc_and_copy_mk_state(
      *   Windows and Linux use these same values, but UEFI doesn't. UEFI
      *   isn't going to generate an NMI, so we should be good during demote,
      *   but in general, this is not safe.
-     * - Note that UEFI so has CS and SS flipped. This means you cannot use
+     * - Note that UEFI has CS and SS flipped. This means you cannot use
      *   them in the microkernel as it needs fast syscalls which have the
      *   offsets hardcoded in hardware.
      * - UEFI also has the issue that TR is never set (it is left to 0),
      *   which means promote will fail if you attempt to set it back to 0.
+     * - This is not a trivial and should only be fixed if Windows/Linux
+     *   stop using the same CS/SS, or another operating system is added to
+     *   the support list that doesn't have the same CS/SS.
      */
 
     (*state)->cs_selector = MK_CS_SELECTOR;
@@ -639,20 +648,14 @@ alloc_and_copy_mk_state(
     /* Control Registers                                                      */
     /**************************************************************************/
 
-    (*state)->cr0 = intrinsic_scr0() | DEFAULT_CR0;
-    (*state)->cr3 = platform_virt_to_phys(pml4t);
-    (*state)->cr4 = intrinsic_scr4() | DEFAULT_CR4;
+    (*state)->cr0 = (intrinsic_scr0() | DEFAULT_CR0) & DEFAULT_CR0_OFF;
+    (*state)->cr3 = platform_virt_to_phys(rpt);
+    (*state)->cr4 = (intrinsic_scr4() | DEFAULT_CR4) & DEFAULT_CR4_OFF;
 
     if (((uint64_t)0) == (*state)->cr3) {
         bferror("platform_virt_to_phys failed");
         goto platform_virt_to_phys_cr3_failed;
     }
-
-    /**
-     * TODO:
-     * - Do a complete analysis of CR0 and CR4 and turn on features if we
-     *   can detect support for them. This includes XSAVE.
-     */
 
     /**************************************************************************/
     /* MSRs                                                                   */

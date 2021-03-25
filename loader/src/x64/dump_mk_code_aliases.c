@@ -34,11 +34,15 @@
  *
  * <!-- inputs/outputs -->
  *   @param a the code_aliases_t to output
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void
 dump_mk_code_aliases(struct code_aliases_t *const a)
 {
+    if (((void *)0) == a) {
+        bferror("a is NULL");
+        return;
+    }
+
     bfdebug("mk code aliases:");
     bfdebug_ptr(" - demote", a->demote);
     bfdebug_ptr(" - promote", a->promote);
@@ -47,4 +51,6 @@ dump_mk_code_aliases(struct code_aliases_t *const a)
     bfdebug_ptr(" - esr_gpf", a->esr_gpf);
     bfdebug_ptr(" - esr_nmi", a->esr_nmi);
     bfdebug_ptr(" - esr_pf", a->esr_pf);
+    bfdebug_ptr(" - serial_write_c", a->serial_write_c);
+    bfdebug_ptr(" - serial_write_hex", a->serial_write_hex);
 }

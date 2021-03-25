@@ -27,18 +27,18 @@
 #ifndef EFI_BOOT_SERVICES_H
 #define EFI_BOOT_SERVICES_H
 
-#include "efi_allocate_type.h"
-#include "efi_device_path_protocol.h"
-#include "efi_guid.h"
-#include "efi_interface_type.h"
-#include "efi_locate_search_type.h"
-#include "efi_memory_descriptor.h"
-#include "efi_memory_type.h"
-#include "efi_open_protocol_information_entry.h"
-#include "efi_status.h"
-#include "efi_table_header.h"
-#include "efi_timer_delay.h"
-#include "efi_types.h"
+#include <efi/efi_allocate_type.h>
+#include <efi/efi_device_path_protocol.h>
+#include <efi/efi_guid.h>
+#include <efi/efi_interface_type.h>
+#include <efi/efi_locate_search_type.h>
+#include <efi/efi_memory_descriptor.h>
+#include <efi/efi_memory_type.h>
+#include <efi/efi_open_protocol_information_entry.h>
+#include <efi/efi_status.h>
+#include <efi/efi_table_header.h>
+#include <efi/efi_timer_delay.h>
+#include <efi/efi_types.h>
 
 /** @brief Defines EFI_BOOT_SERVICES_SIGNATURE */
 #define EFI_BOOT_SERVICES_SIGNATURE 0x56524553544f4f42

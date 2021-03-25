@@ -25,99 +25,104 @@
 #ifndef DISPATCH_SYSCALL_HANDLE_OP_HPP
 #define DISPATCH_SYSCALL_HANDLE_OP_HPP
 
-#include <mk_interface.hpp>
+#include <bf_constants.hpp>
+#include <ext_t.hpp>
+#include <tls_t.hpp>
 
 #include <bsl/debug.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
 {
-    namespace details
+    /// <!-- description -->
+    ///   @brief Implements the bf_handle_op_open_handle syscall
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param tls the current TLS block
+    ///   @param ext the extension that made the syscall
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+    ///     otherwise
+    ///
+    [[nodiscard]] constexpr auto
+    syscall_handle_op_open_handle(tls_t &tls, ext_t &ext) noexcept -> bsl::errc_type
     {
-        /// <!-- description -->
-        ///   @brief Implements the bf_handle_op_open_handle syscall
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
-        ///   @tparam EXT_CONCEPT defines the type of ext_t to use
-        ///   @param tls the current TLS block
-        ///   @param ext the extension that made the syscall
-        ///   @return Returns syscall::BF_STATUS_SUCCESS on success or an error
-        ///     code on failure.
-        ///
-        template<typename TLS_CONCEPT, typename EXT_CONCEPT>
-        [[nodiscard]] constexpr auto
-        syscall_handle_op_open_handle(TLS_CONCEPT &tls, EXT_CONCEPT &ext) -> syscall::bf_status_t
-        {
-            if (bsl::unlikely(bsl::to_u32(tls.ext_reg0) != syscall::BF_SPEC_ID1_VAL)) {
-                bsl::error() << "unsupported syscall interface: "    //--
-                             << bsl::hex(tls.ext_reg0)               //--
-                             << bsl::endl                            //--
-                             << bsl::here();                         //--
+        if (bsl::unlikely(bsl::to_u32(tls.ext_reg0) != syscall::BF_SPEC_ID1_VAL)) {
+            bsl::error() << "unsupported syscall ABI "    //--
+                         << bsl::hex(tls.ext_reg0)        //--
+                         << bsl::endl                     //--
+                         << bsl::here();                  //--
 
-                return syscall::BF_STATUS_FAILURE_UNSUPPORTED;
-            }
-
-            auto const handle{ext.open_handle()};
-            if (bsl::unlikely(!handle)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return syscall::BF_STATUS_FAILURE_UNKNOWN;
-            }
-
-            tls.ext_reg0 = handle.get();
-            return syscall::BF_STATUS_SUCCESS;
+            tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_UNSUPPORTED.get();
+            return bsl::errc_failure;
         }
 
-        /// <!-- description -->
-        ///   @brief Implements the bf_handle_op_close_handle syscall
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
-        ///   @tparam EXT_CONCEPT defines the type of ext_t to use
-        ///   @param tls the current TLS block
-        ///   @param ext the extension that made the syscall
-        ///   @return Returns syscall::BF_STATUS_SUCCESS on success or an error
-        ///     code on failure.
-        ///
-        template<typename TLS_CONCEPT, typename EXT_CONCEPT>
-        [[nodiscard]] constexpr auto
-        syscall_handle_op_close_handle(TLS_CONCEPT &tls, EXT_CONCEPT &ext) -> syscall::bf_status_t
-        {
-            if (bsl::unlikely(!ext.is_handle_valid(tls.ext_reg0))) {
-                bsl::error() << "invalid handle: "        // --
-                             << bsl::hex(tls.ext_reg0)    // --
-                             << bsl::endl                 // --
-                             << bsl::here();              // --
+        tls.state_reversal_required = true;
 
-                return syscall::BF_STATUS_FAILURE_INVALID_HANDLE;
-            }
-
-            ext.close_handle();
-            return syscall::BF_STATUS_SUCCESS;
+        auto const handle{ext.open_handle()};
+        if (bsl::unlikely(!handle)) {
+            bsl::print<bsl::V>() << bsl::here();
+            return bsl::errc_failure;
         }
+
+        tls.ext_reg0 = handle.get();
+
+        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
+        return bsl::errc_success;
+    }
+
+    /// <!-- description -->
+    ///   @brief Implements the bf_handle_op_close_handle syscall
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param tls the current TLS block
+    ///   @param ext the extension that made the syscall
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+    ///     otherwise
+    ///
+    [[nodiscard]] constexpr auto
+    syscall_handle_op_close_handle(tls_t &tls, ext_t &ext) noexcept -> bsl::errc_type
+    {
+        if (bsl::unlikely(!ext.is_handle_valid(tls.ext_reg0))) {
+            bsl::error() << "invalid handle "         // --
+                         << bsl::hex(tls.ext_reg0)    // --
+                         << bsl::endl                 // --
+                         << bsl::here();              // --
+
+            tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_INVALID_HANDLE.get();
+            return bsl::errc_failure;
+        }
+
+        tls.state_reversal_required = true;
+        ext.close_handle();
+
+        // int *i = nullptr;
+        // *i = 42;
+
+        // bsl::error() << "test error\n";
+        // return bsl::errc_failure;
+
+        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
+        return bsl::errc_success;
     }
 
     /// <!-- description -->
     ///   @brief Dispatches the bf_handle_op syscalls
     ///
     /// <!-- inputs/outputs -->
-    ///   @tparam TLS_CONCEPT defines the type of TLS block to use
-    ///   @tparam EXT_CONCEPT defines the type of ext_t to use
     ///   @param tls the current TLS block
     ///   @param ext the extension that made the syscall
-    ///   @return Returns syscall::BF_STATUS_SUCCESS on success or an error
-    ///     code on failure.
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+    ///     otherwise
     ///
-    template<typename TLS_CONCEPT, typename EXT_CONCEPT>
     [[nodiscard]] constexpr auto
-    dispatch_syscall_handle_op(TLS_CONCEPT &tls, EXT_CONCEPT &ext) -> syscall::bf_status_t
+    dispatch_syscall_handle_op(tls_t &tls, ext_t &ext) noexcept -> bsl::errc_type
     {
-        syscall::bf_status_t ret{};
+        bsl::errc_type ret{};
 
         switch (syscall::bf_syscall_index(tls.ext_syscall).get()) {
             case syscall::BF_HANDLE_OP_OPEN_HANDLE_IDX_VAL.get(): {
-                ret = details::syscall_handle_op_open_handle(tls, ext);
-                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
+                ret = syscall_handle_op_open_handle(tls, ext);
+                if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
                 }
@@ -126,8 +131,8 @@ namespace mk
             }
 
             case syscall::BF_HANDLE_OP_CLOSE_HANDLE_IDX_VAL.get(): {
-                ret = details::syscall_handle_op_close_handle(tls, ext);
-                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
+                ret = syscall_handle_op_close_handle(tls, ext);
+                if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
                 }
@@ -136,14 +141,17 @@ namespace mk
             }
 
             default: {
-                bsl::error() << "unknown syscall index: "    //--
-                             << bsl::hex(tls.ext_syscall)    //--
-                             << bsl::endl                    //--
-                             << bsl::here();                 //--
-
-                return syscall::BF_STATUS_FAILURE_UNKNOWN;
+                break;
             }
         }
+
+        bsl::error() << "unknown syscall index "     //--
+                     << bsl::hex(tls.ext_syscall)    //--
+                     << bsl::endl                    //--
+                     << bsl::here();                 //--
+
+        tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_UNSUPPORTED.get();
+        return bsl::errc_failure;
     }
 }
 

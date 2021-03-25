@@ -29,9 +29,9 @@
 #include <free_mk_debug_ring.h>
 #include <g_mk_code_aliases.h>
 #include <g_mk_debug_ring.h>
+#include <g_vmm_status.h>
 #include <platform.h>
 #include <types.h>
-#include <vmm_status.h>
 
 /**
  * <!-- description -->

@@ -24,6 +24,9 @@
  * SOFTWARE.
  */
 
+    /** @brief defines the offset of tls_t.self */
+    #define TLS_OFFSET_SELF 0x200
+
     .code64
     .intel_syntax noprefix
 
@@ -31,7 +34,7 @@
     .type   get_current_tls, @function
 get_current_tls:
 
-    mov rax, gs:[0x200]
+    mov rax, gs:[TLS_OFFSET_SELF]
 
     ret
     int 3

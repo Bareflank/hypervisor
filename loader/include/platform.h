@@ -112,27 +112,27 @@ uintptr_t platform_virt_to_phys(void const *const virt);
  * <!-- description -->
  *   @brief Sets "num" bytes in the memory pointed to by "ptr" to "val".
  *     If the provided parameters are valid, returns 0, otherwise
- *     returns FAILURE.
+ *     returns LOADER_FAILURE.
  *
  * <!-- inputs/outputs -->
  *   @param ptr a pointer to the memory to set
  *   @param val the value to set each byte to
  *   @param num the number of bytes in "ptr" to set to "val".
  *   @return If the provided parameters are valid, returns 0, otherwise
- *     returns FAILURE.
+ *     returns LOADER_FAILURE.
  */
 int64_t platform_memset(void *const ptr, uint8_t const val, uint64_t const num);
 
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     ((void *)0), returns FAILURE, otherwise returns 0.
+ *     ((void *)0), returns LOADER_FAILURE, otherwise returns 0.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
+ *   @return If "src" or "dst" are ((void *)0), returns LOADER_FAILURE, otherwise
  *     returns 0.
  */
 int64_t platform_memcpy(void *const dst, void const *const src, uint64_t const num);
@@ -140,14 +140,14 @@ int64_t platform_memcpy(void *const dst, void const *const src, uint64_t const n
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     ((void *)0), returns FAILURE, otherwise returns 0. Note that this function can
+ *     ((void *)0), returns LOADER_FAILURE, otherwise returns 0. Note that this function can
  *     be used to copy memory from userspace via an IOCTL.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
+ *   @return If "src" or "dst" are ((void *)0), returns LOADER_FAILURE, otherwise
  *     returns 0.
  */
 int64_t platform_copy_from_user(void *const dst, void const *const src, uint64_t const num);
@@ -155,14 +155,14 @@ int64_t platform_copy_from_user(void *const dst, void const *const src, uint64_t
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     ((void *)0), returns FAILURE, otherwise returns 0. Note that this function can
+ *     ((void *)0), returns LOADER_FAILURE, otherwise returns 0. Note that this function can
  *     be used to copy memory to userspace via an IOCTL.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
+ *   @return If "src" or "dst" are ((void *)0), returns LOADER_FAILURE, otherwise
  *     returns 0.
  */
 int64_t platform_copy_to_user(void *const dst, void const *const src, uint64_t const num);
@@ -197,5 +197,22 @@ typedef int64_t (*platform_per_cpu_func)(uint32_t const);
  *     this function returns a non-0 value
  */
 int64_t platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const reverse);
+
+/**
+ * <!-- description -->
+ *   @brief Dumps the contents of the VMM's ring buffer.
+ */
+void platform_dump_vmm(void);
+
+/**
+ * <!-- description -->
+ *   @brief Initializes the archiecture. Some platforms might need per CPU
+ *     initialization logic to get the CPU set up. Most platforms ignore
+ *     calls to this function
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success, LOADER_FAILURE otherwise
+ */
+int64_t platform_arch_init(void);
 
 #endif

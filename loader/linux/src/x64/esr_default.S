@@ -36,22 +36,43 @@
 esr_default:
     UNWIND_HINT_EMPTY
 
-    mov rdx, 0x03F8
-    mov rax, 0x45
-    out dx, al
+    mov rdi, 'e'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x53
-    out dx, al
+    mov rdi, 's'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x52
-    out dx, al
+    mov rdi, 'r'
+    call serial_write_c
+
+    mov rdi, '_'
+    call serial_write_c
+
+    mov rdi, 'd'
+    call serial_write_c
+
+    mov rdi, 'e'
+    call serial_write_c
+
+    mov rdi, 'f'
+    call serial_write_c
+
+    mov rdi, 'a'
+    call serial_write_c
+
+    mov rdi, 'u'
+    call serial_write_c
+
+    mov rdi, 'l'
+    call serial_write_c
+
+    mov rdi, 't'
+    call serial_write_c
+
+    mov rdi, '\n'
+    call serial_write_c
 
     cli
     hlt
-
-    ret
-    int 3
 
     .size esr_default, 0x1000

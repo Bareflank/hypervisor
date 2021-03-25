@@ -22,38 +22,34 @@
 ; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ; SOFTWARE.
 
+    serial_write_c PROTO
+
     esr_df_text SEGMENT ALIGN(1000h) 'CODE'
     esr_df PROC
 
-    mov rdx, 03F8h
-    mov rax, 45h
-    out dx, al
+    mov rcx, 'e'
+    call serial_write_c
 
-    mov rdx, 03F8h
-    mov rax, 53h
-    out dx, al
+    mov rcx, 's'
+    call serial_write_c
 
-    mov rdx, 03F8h
-    mov rax, 52h
-    out dx, al
+    mov rcx, 'r'
+    call serial_write_c
 
-    mov rdx, 03F8h
-    mov rax, 20h
-    out dx, al
+    mov rcx, '_'
+    call serial_write_c
 
-    mov rdx, 03F8h
-    mov rax, 44h
-    out dx, al
+    mov rcx, 'd'
+    call serial_write_c
 
-    mov rdx, 03F8h
-    mov rax, 46h
-    out dx, al
+    mov rcx, 'f'
+    call serial_write_c
+
+    mov rcx, '\n'
+    call serial_write_c
 
     cli
     hlt
-
-    ret
-    int 3
 
     esr_df ENDP
     esr_df_text ENDS

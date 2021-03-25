@@ -27,14 +27,13 @@
 #ifndef PDPT_T_H
 #define PDPT_T_H
 
-#pragma pack(push, 1)
-
 #include <pdpte_t.h>
 #include <pdt_t.h>
-#include <static_assert.h>
 #include <types.h>
 
-/** @brief defines total number of entries in the PDPT */
+#pragma pack(push, 1)
+
+/** @brief defines total number of entries in the pdpt */
 #define LOADER_NUM_PDPT_ENTRIES ((uint64_t)512)
 
 /**
@@ -50,9 +49,6 @@ struct pdpt_t
     /** @brief stores pointers to child tables */
     struct pdt_t *tables[LOADER_NUM_PDPT_ENTRIES];
 };
-
-/** @brief verify that the pdpt_t structure is the right size */
-STATIC_ASSERT(sizeof(struct pdpt_t) == 0x2000, pdpt_t_has_incorrect_size);
 
 #pragma pack(pop)
 

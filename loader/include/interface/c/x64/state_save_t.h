@@ -27,11 +27,9 @@
 #ifndef STATE_SAVE_T_H
 #define STATE_SAVE_T_H
 
-#include "global_descriptor_table_register_t.h"
-#include "interrupt_descriptor_table_register_t.h"
-#include "tss_t.h"
-
-#include <static_assert.h>
+#include <global_descriptor_table_register_t.h>
+#include <interrupt_descriptor_table_register_t.h>
+#include <tss_t.h>
 #include <types.h>
 
 #pragma pack(push, 1)
@@ -40,19 +38,9 @@
  * @struct state_save_t
  *
  * <!-- description -->
- *   @brief Stores state information for both Intel and AMD. Specifically,
- *     for a field to be included in this list, it must:
- *     - Be saved/restored by the VMCS/VMCB, meaning HVE will touch the field
- *       either because we don't have a choice, or because we enable HVE
- *       to do so (example being EFER and PAT on Intel)
- *     - Because the Microkernel needs it's own version of the field.
- *
- *     This list provides the set of all registers that meet the criteria
- *     above. It should be noted that this is the common set of fields
- *     for both Intel and AMD. To ensure consistency, the Microkernel will
- *     save/restore these fields on every VMExit/VMEntry. This ensures
- *     extensions can use this list of fields as documentation as to which
- *     fields it will have to deal with on its own.
+ *   @brief Stores the registers and processor state that is used by the
+ *     microkernel that must be restored in the event of an error or the
+ *     successful launch of the hypervisor.
  */
 struct state_save_t
 {
@@ -298,9 +286,6 @@ struct state_save_t
     /** @brief stores whether or not an NMI fired (0x318) */
     uint64_t nmi;
 };
-
-/** @brief Check to make sure the state_save_t is the right size. */
-STATIC_ASSERT(sizeof(struct state_save_t) == 0x320, invalid_size);
 
 #pragma pack(pop)
 

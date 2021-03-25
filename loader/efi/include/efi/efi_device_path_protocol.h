@@ -27,7 +27,7 @@
 #ifndef EFI_DEVICE_PATH_PROTOCOL_H
 #define EFI_DEVICE_PATH_PROTOCOL_H
 
-#include "efi_types.h"
+#include <efi/efi_types.h>
 
 /** @brief Defined in EFI_DEVICE_PATH_PROTOCOL */
 #define EFI_DEVICE_PATH_PROTOCOL_LENGTH_SIZE 2

@@ -22,6 +22,128 @@
 ; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ; SOFTWARE.
 
+    ; @brief defines the offset of state_save_t.rax
+    SS_OFFSET_RAX EQU 000h
+    ; @brief defines the offset of state_save_t.rbx
+    SS_OFFSET_RBX EQU 008h
+    ; @brief defines the offset of state_save_t.rcx
+    SS_OFFSET_RCX EQU 010h
+    ; @brief defines the offset of state_save_t.rdx
+    SS_OFFSET_RDX EQU 018h
+    ; @brief defines the offset of state_save_t.rbp
+    SS_OFFSET_RBP EQU 020h
+    ; @brief defines the offset of state_save_t.rsi
+    SS_OFFSET_RSI EQU 028h
+    ; @brief defines the offset of state_save_t.rdi
+    SS_OFFSET_RDI EQU 030h
+    ; @brief defines the offset of state_save_t.r8
+    SS_OFFSET_R8 EQU 038h
+    ; @brief defines the offset of state_save_t.r9
+    SS_OFFSET_R9 EQU 040h
+    ; @brief defines the offset of state_save_t.r10
+    SS_OFFSET_R10 EQU 048h
+    ; @brief defines the offset of state_save_t.r11
+    SS_OFFSET_R11 EQU 050h
+    ; @brief defines the offset of state_save_t.r12
+    SS_OFFSET_R12 EQU 058h
+    ; @brief defines the offset of state_save_t.r13
+    SS_OFFSET_R13 EQU 060h
+    ; @brief defines the offset of state_save_t.r14
+    SS_OFFSET_R14 EQU 068h
+    ; @brief defines the offset of state_save_t.r15
+    SS_OFFSET_R15 EQU 070h
+    ; @brief defines the offset of state_save_t.rip
+    SS_OFFSET_RIP EQU 078h
+    ; @brief defines the offset of state_save_t.rsp
+    SS_OFFSET_RSP EQU 080h
+    ; @brief defines the offset of state_save_t.rflags
+    SS_OFFSET_RFLAGS EQU 088h
+    ; @brief defines the offset of state_save_t.gdtr
+    SS_OFFSET_GDTR EQU 0A0h
+    ; @brief defines the offset of state_save_t.idtr
+    SS_OFFSET_IDTR EQU 0B0h
+    ; @brief defines the offset of state_save_t.es_selector
+    SS_OFFSET_ES_SELECTOR EQU 0C0h
+    ; @brief defines the offset of state_save_t.cs_selector
+    SS_OFFSET_CS_SELECTOR EQU 0D0h
+    ; @brief defines the offset of state_save_t.ss_selector
+    SS_OFFSET_SS_SELECTOR EQU 0E0h
+    ; @brief defines the offset of state_save_t.ds_selector
+    SS_OFFSET_DS_SELECTOR EQU 0F0h
+    ; @brief defines the offset of state_save_t.fs_selector
+    SS_OFFSET_FS_SELECTOR EQU 100h
+    ; @brief defines the offset of state_save_t.gs_selector
+    SS_OFFSET_GS_SELECTOR EQU 110h
+    ; @brief defines the offset of state_save_t.ldtr_selector
+    SS_OFFSET_LDTR_SELECTOR EQU 120h
+    ; @brief defines the offset of state_save_t.tr_selector
+    SS_OFFSET_TR_SELECTOR EQU 130h
+    ; @brief defines the offset of state_save_t.cr0
+    SS_OFFSET_CR0 EQU 140h
+    ; @brief defines the offset of state_save_t.cr2
+    SS_OFFSET_CR2 EQU 150h
+    ; @brief defines the offset of state_save_t.cr3
+    SS_OFFSET_CR3 EQU 158h
+    ; @brief defines the offset of state_save_t.cr4
+    SS_OFFSET_CR4 EQU 160h
+    ; @brief defines the offset of state_save_t.dr6
+    SS_OFFSET_DR6 EQU 1F0h
+    ; @brief defines the offset of state_save_t.dr7
+    SS_OFFSET_DR7 EQU 1F8h
+    ; @brief defines the offset of state_save_t.ia32_efer
+    SS_OFFSET_IA32_EFER EQU 240h
+    ; @brief defines the offset of state_save_t.ia32_star
+    SS_OFFSET_IA32_STAR EQU 248h
+    ; @brief defines the offset of state_save_t.ia32_lstar
+    SS_OFFSET_IA32_LSTAR EQU 250h
+    ; @brief defines the offset of state_save_t.ia32_cstar
+    SS_OFFSET_IA32_CSTAR EQU 258h
+    ; @brief defines the offset of state_save_t.ia32_fmask
+    SS_OFFSET_IA32_FMASK EQU 260h
+    ; @brief defines the offset of state_save_t.ia32_fs_base
+    SS_OFFSET_IA32_FS_BASE EQU 268h
+    ; @brief defines the offset of state_save_t.ia32_gs_base
+    SS_OFFSET_IA32_GS_BASE EQU 270h
+    ; @brief defines the offset of state_save_t.ia32_kernel_gs_base
+    SS_OFFSET_IA32_KERNEL_GS_BASE EQU 278h
+    ; @brief defines the offset of state_save_t.ia32_sysenter_cs
+    SS_OFFSET_IA32_SYSENTER_CS EQU 280h
+    ; @brief defines the offset of state_save_t.ia32_sysenter_esp
+    SS_OFFSET_IA32_SYSENTER_ESP EQU 288h
+    ; @brief defines the offset of state_save_t.ia32_sysenter_eip
+    SS_OFFSET_IA32_SYSENTER_EIP EQU 290h
+    ; @brief defines the offset of state_save_t.ia32_pat
+    SS_OFFSET_IA32_PAT EQU 298h
+    ; @brief defines the offset of state_save_t.ia32_debugctl
+    SS_OFFSET_IA32_DEBUGCTL EQU 2A0h
+
+    ; @brief defines MSR_IA32_SYSENTER_CS
+    MSR_IA32_SYSENTER_CS EQU 00000174h
+    ; @brief defines MSR_IA32_SYSENTER_ESP
+    MSR_IA32_SYSENTER_ESP EQU 00000175h
+    ; @brief defines MSR_IA32_SYSENTER_EIP
+    MSR_IA32_SYSENTER_EIP EQU 00000176h
+    ; @brief defines MSR_IA32_DEBUGCTL
+    MSR_IA32_DEBUGCTL EQU 000001D9h
+    ; @brief defines MSR_IA32_PAT
+    MSR_IA32_PAT EQU 00000277h
+    ; @brief defines MSR_IA32_EFER
+    MSR_IA32_EFER EQU 0C0000080h
+    ; @brief defines MSR_IA32_STAR
+    MSR_IA32_STAR EQU 0C0000081h
+    ; @brief defines MSR_IA32_LSTAR
+    MSR_IA32_LSTAR EQU 0C0000082h
+    ; @brief defines MSR_IA32_CSTAR
+    MSR_IA32_CSTAR EQU 0C0000083h
+    ; @brief defines MSR_IA32_FMASK
+    MSR_IA32_FMASK EQU 0C0000084h
+    ; @brief defines MSR_IA32_FS_BASE
+    MSR_IA32_FS_BASE EQU 0C0000100h
+    ; @brief defines MSR_IA32_GS_BASE
+    MSR_IA32_GS_BASE EQU 0C0000101h
+    ; @brief defines MSR_IA32_KERNEL_GS_BASE
+    MSR_IA32_KERNEL_GS_BASE EQU 0C0000102h
+
     enable_interrupts PROTO
     disable_interrupts PROTO
 
@@ -29,28 +151,34 @@
     demote PROC
 
     ; **************************************************************************
+    ; Report Success On Completion
+    ; **************************************************************************
+
+    xor rax, rax
+
+    ; **************************************************************************
     ; General Purpose Registers
     ; **************************************************************************
 
-    mov [r8 + 000h], rax
-    mov [r8 + 008h], rbx
-    mov [r8 + 010h], rcx
-    mov [r8 + 018h], r8
-    mov [r8 + 020h], rbp
-    mov [r8 + 028h], rsi
-    mov [r8 + 030h], rdi
-    mov [r8 + 038h], r8
-    mov [r8 + 040h], r9
-    mov [r8 + 048h], r10
-    mov [r8 + 050h], r11
-    mov [r8 + 058h], r12
-    mov [r8 + 060h], r13
-    mov [r8 + 068h], r14
-    mov [r8 + 070h], r15
+    mov [r8 + SS_OFFSET_RAX], rax
+    mov [r8 + SS_OFFSET_RBX], rbx
+    mov [r8 + SS_OFFSET_RCX], rcx
+    mov [r8 + SS_OFFSET_RDX], rdx
+    mov [r8 + SS_OFFSET_RBP], rbp
+    mov [r8 + SS_OFFSET_RSI], rsi
+    mov [r8 + SS_OFFSET_RDI], rdi
+    mov [r8 + SS_OFFSET_R8], r8
+    mov [r8 + SS_OFFSET_R9], r9
+    mov [r8 + SS_OFFSET_R10], r10
+    mov [r8 + SS_OFFSET_R11], r11
+    mov [r8 + SS_OFFSET_R12], r12
+    mov [r8 + SS_OFFSET_R13], r13
+    mov [r8 + SS_OFFSET_R14], r14
+    mov [r8 + SS_OFFSET_R15], r15
 
-    lea rax, [demotion_success]
-    mov [r8 + 078h], rax
-    mov [r8 + 080h], rsp
+    lea rax, [demotion_return]
+    mov [r8 + SS_OFFSET_RIP], rax
+    mov [r8 + SS_OFFSET_RSP], rsp
 
     ; **************************************************************************
     ; Setup
@@ -65,9 +193,9 @@
     ; **************************************************************************
 
     pushfq
-    pop [r15 + 088h]
-    push [r14 + 088h]
-    popf
+    pop qword ptr[r15 + SS_OFFSET_RFLAGS]
+    push qword ptr[r14 + SS_OFFSET_RFLAGS]
+    popfq
 
     ; **************************************************************************
     ; IDT
@@ -75,168 +203,162 @@
 
     call disable_interrupts
 
-    sidt fword ptr[r15 + 0B0h]
-    lidt fword ptr[r14 + 0B0h]
+    sidt fword ptr[r15 + SS_OFFSET_IDTR]
+    lidt fword ptr[r14 + SS_OFFSET_IDTR]
 
     ; **************************************************************************
     ; MSRs
     ; **************************************************************************
 
-    mov ecx, 0C0000080h      ; EFER
+    mov ecx, MSR_IA32_EFER
     rdmsr
-    mov [r15 + 240h], eax
-    mov [r15 + 244h], edx
-    mov eax, [r14 + 240h]
-    mov edx, [r14 + 244h]
+    mov [r15 + SS_OFFSET_IA32_EFER + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_EFER + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_EFER + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_EFER + 4h]
     wrmsr
 
-    mov ecx, 0C0000081h      ; STAR
+    mov ecx, MSR_IA32_STAR
     rdmsr
-    mov [r15 + 248h], eax
-    mov [r15 + 24Ch], edx
-    mov eax, [r14 + 248h]
-    mov edx, [r14 + 24Ch]
+    mov [r15 + SS_OFFSET_IA32_STAR + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_STAR + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_STAR + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_STAR + 4h]
     wrmsr
 
-    mov ecx, 0C0000082h      ; LSTAR
+    mov ecx, MSR_IA32_LSTAR
     rdmsr
-    mov [r15 + 250h], eax
-    mov [r15 + 254h], edx
-    mov eax, [r14 + 250h]
-    mov edx, [r14 + 254h]
+    mov [r15 + SS_OFFSET_IA32_LSTAR + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_LSTAR + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_LSTAR + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_LSTAR + 4h]
     wrmsr
 
-    mov ecx, 0C0000083h      ; CSTAR
+    mov ecx, MSR_IA32_CSTAR
     rdmsr
-    mov [r15 + 258h], eax
-    mov [r15 + 25Ch], edx
-    mov eax, [r14 + 258h]
-    mov edx, [r14 + 25Ch]
+    mov [r15 + SS_OFFSET_IA32_CSTAR + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_CSTAR + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_CSTAR + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_CSTAR + 4h]
     wrmsr
 
-    mov ecx, 0C0000084h      ; FMASK
+    mov ecx, MSR_IA32_FMASK
     rdmsr
-    mov [r15 + 260h], eax
-    mov [r15 + 264h], edx
-    mov eax, [r14 + 260h]
-    mov edx, [r14 + 264h]
+    mov [r15 + SS_OFFSET_IA32_FMASK + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_FMASK + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_FMASK + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_FMASK + 4h]
     wrmsr
 
-    mov ecx, 0C0000100h      ; FS Base
+    mov ecx, MSR_IA32_FS_BASE
     rdmsr
-    mov [r15 + 268h], eax
-    mov [r15 + 26Ch], edx
-    mov eax, [r14 + 268h]
-    mov edx, [r14 + 26Ch]
+    mov [r15 + SS_OFFSET_IA32_FS_BASE + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_FS_BASE + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_FS_BASE + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_FS_BASE + 4h]
     wrmsr
 
-    mov ecx, 0C0000101h      ; GS Base
+    mov ecx, MSR_IA32_GS_BASE
     rdmsr
-    mov [r15 + 270h], eax
-    mov [r15 + 274h], edx
-    mov eax, [r14 + 270h]
-    mov edx, [r14 + 274h]
+    mov [r15 + SS_OFFSET_IA32_GS_BASE + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_GS_BASE + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_GS_BASE + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_GS_BASE + 4h]
     wrmsr
 
-    mov ecx, 0C0000102h      ; Kernel GS Base
+    mov ecx, MSR_IA32_KERNEL_GS_BASE
     rdmsr
-    mov [r15 + 278h], eax
-    mov [r15 + 27Ch], edx
-    mov eax, [r14 + 278h]
-    mov edx, [r14 + 27Ch]
+    mov [r15 + SS_OFFSET_IA32_KERNEL_GS_BASE + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_KERNEL_GS_BASE + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_KERNEL_GS_BASE + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_KERNEL_GS_BASE + 4h]
     wrmsr
 
-    mov ecx, 00000174h      ; SYSENTER_CS
+    mov ecx, MSR_IA32_SYSENTER_CS
     rdmsr
-    mov [r15 + 280h], eax
-    mov [r15 + 284h], edx
-    mov eax, [r14 + 280h]
-    mov edx, [r14 + 284h]
+    mov [r15 + SS_OFFSET_IA32_SYSENTER_CS + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_SYSENTER_CS + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_SYSENTER_CS + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_SYSENTER_CS + 4h]
     wrmsr
 
-    mov ecx, 00000175h      ; SYSENTER_ESP
+    mov ecx, MSR_IA32_SYSENTER_ESP
     rdmsr
-    mov [r15 + 288h], eax
-    mov [r15 + 28Ch], edx
-    mov eax, [r14 + 288h]
-    mov edx, [r14 + 28Ch]
+    mov [r15 + SS_OFFSET_IA32_SYSENTER_ESP + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_SYSENTER_ESP + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_SYSENTER_ESP + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_SYSENTER_ESP + 4h]
     wrmsr
 
-    mov ecx, 00000176h      ; SYSENTER_EIP
+    mov ecx, MSR_IA32_SYSENTER_EIP
     rdmsr
-    mov [r15 + 290h], eax
-    mov [r15 + 294h], edx
-    mov eax, [r14 + 290h]
-    mov edx, [r14 + 294h]
+    mov [r15 + SS_OFFSET_IA32_SYSENTER_EIP + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_SYSENTER_EIP + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_SYSENTER_EIP + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_SYSENTER_EIP + 4h]
     wrmsr
 
-    mov ecx, 00000277h      ; PAT
+    mov ecx, MSR_IA32_PAT
     rdmsr
-    mov [r15 + 298h], eax
-    mov [r15 + 29Ch], edx
-    mov eax, [r14 + 298h]
-    mov edx, [r14 + 29Ch]
+    mov [r15 + SS_OFFSET_IA32_PAT + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_PAT + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_PAT + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_PAT + 4h]
     wrmsr
 
-    mov ecx, 000001D9h      ; DEBUGCTL
+    mov ecx, MSR_IA32_DEBUGCTL
     rdmsr
-    mov [r15 + 2A0h], eax
-    mov [r15 + 2A4h], edx
-    mov eax, [r14 + 2A0h]
-    mov edx, [r14 + 2A4h]
+    mov [r15 + SS_OFFSET_IA32_DEBUGCTL + 0h], eax
+    mov [r15 + SS_OFFSET_IA32_DEBUGCTL + 4h], edx
+    mov eax, [r14 + SS_OFFSET_IA32_DEBUGCTL + 0h]
+    mov edx, [r14 + SS_OFFSET_IA32_DEBUGCTL + 4h]
     wrmsr
 
     ; **************************************************************************
     ; GDT
     ; **************************************************************************
 
-    sgdt fword ptr[r15 + 0A0h]
-    lgdt fword ptr[r14 + 0A0h]
+    sgdt fword ptr[r15 + SS_OFFSET_GDTR]
+    lgdt fword ptr[r14 + SS_OFFSET_GDTR]
 
     mov dx, es
-    mov [r15 + 0C0h], dx
-    mov dx, [r14 + 0C0h]
+    mov [r15 + SS_OFFSET_ES_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_ES_SELECTOR]
     mov es, dx
 
     mov dx, cs
-    mov [r15 + 0D0h], dx
-    mov ax, [r14 + 0D0h]
+    mov [r15 + SS_OFFSET_CS_SELECTOR], dx
+    mov ax, [r14 + SS_OFFSET_CS_SELECTOR]
     push rax
 
     mov dx, ss
-    mov [r15 + 0E0h], dx
-    mov dx, [r14 + 0E0h]
+    mov [r15 + SS_OFFSET_SS_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_SS_SELECTOR]
     mov ss, dx
 
     mov dx, ds
-    mov [r15 + 0F0h], dx
-    mov dx, [r14 + 0F0h]
+    mov [r15 + SS_OFFSET_DS_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_DS_SELECTOR]
     mov ds, dx
 
     mov dx, fs
-    mov [r15 + 100h], dx
-    mov dx, [r14 + 100h]
+    mov [r15 + SS_OFFSET_FS_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_FS_SELECTOR]
     mov fs, dx
 
     mov dx, gs
-    mov [r15 + 110h], dx
-    mov dx, [r14 + 110h]
+    mov [r15 + SS_OFFSET_GS_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_GS_SELECTOR]
     mov gs, dx
 
-    mov ecx, 000001D9h
-    xor rax, rax
-    xor rdx, rdx
-    mov ax, [r14 + 110h]
-    wrmsr
-
     sldt dx
-    mov [r15 + 120h], dx
-    mov dx, [r14 + 120h]
+    mov [r15 + SS_OFFSET_LDTR_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_LDTR_SELECTOR]
     lldt dx
 
     str dx
-    mov [r15 + 130h], dx
-    mov dx, [r14 + 130h]
+    mov [r15 + SS_OFFSET_TR_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_TR_SELECTOR]
     ltr dx
 
     lea rax, [gdt_and_cs_loaded]
@@ -251,39 +373,43 @@ gdt_and_cs_loaded:
     ; **************************************************************************
 
     mov rax, cr0
-    mov [r15 + 140h], rax
-    mov rax, [r14 + 140h]
+    mov [r15 + SS_OFFSET_CR0], rax
+    mov rax, [r14 + SS_OFFSET_CR0]
     mov cr0, rax
 
     mov rax, cr2
-    mov [r15 + 150h], rax
-    mov rax, [r14 + 150h]
+    mov [r15 + SS_OFFSET_CR2], rax
+    mov rax, [r14 + SS_OFFSET_CR2]
     mov cr2, rax
 
     mov rax, cr4
-    mov [r15 + 160h], rax
-    mov rax, [r14 + 160h]
+    mov [r15 + SS_OFFSET_CR4], rax
+    mov rax, [r14 + SS_OFFSET_CR4]
     mov cr4, rax
 
     mov rax, cr3
-    mov [r15 + 158h], rax
-    mov rax, [r14 + 158h]
+    mov [r15 + SS_OFFSET_CR3], rax
+    mov rax, [r14 + SS_OFFSET_CR3]
     mov cr3, rax
 
-    mov rsp, [r14 + 080h]
+    ; **************************************************************************
+    ; Stack
+    ; **************************************************************************
+
+    mov rsp, [r14 + SS_OFFSET_RSP]
 
     ; **************************************************************************
     ; Debug Registers
     ; **************************************************************************
 
     mov rax, dr6
-    mov [r15 + 1F0h], rax
-    mov rax, [r14 + 1F0h]
+    mov [r15 + SS_OFFSET_DR6], rax
+    mov rax, [r14 + SS_OFFSET_DR6]
     mov dr6, rax
 
     mov rax, dr7
-    mov [r15 + 1F8h], rax
-    mov rax, [r14 + 1F8h]
+    mov [r15 + SS_OFFSET_DR7], rax
+    mov rax, [r14 + SS_OFFSET_DR7]
     mov dr7, rax
 
     ; **************************************************************************
@@ -291,11 +417,11 @@ gdt_and_cs_loaded:
     ; **************************************************************************
 
     mov rdi, r13
-    push [r14 + 078h]
+    push qword ptr[r14 + SS_OFFSET_RIP]
     ret
     int 3
 
-demotion_success:
+demotion_return:
 
 
     ; NOTE:

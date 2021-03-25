@@ -27,11 +27,11 @@
 #ifndef EFI_FILE_PROTOCOL_H
 #define EFI_FILE_PROTOCOL_H
 
-#include "efi_file_info.h"
-#include "efi_file_io_token.h"
-#include "efi_guid.h"
-#include "efi_status.h"
-#include "efi_types.h"
+#include <efi/efi_file_info.h>
+#include <efi/efi_file_io_token.h>
+#include <efi/efi_guid.h>
+#include <efi/efi_status.h>
+#include <efi/efi_types.h>
 
 /** @brief defines the Revision Number 1 for EFI_FILE_PROTOCOL */
 #define EFI_FILE_PROTOCOL_REVISION 0x00010000

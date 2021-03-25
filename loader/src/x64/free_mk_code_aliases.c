@@ -47,5 +47,7 @@ free_mk_code_aliases(struct code_aliases_t *const a)
     platform_free(a->esr_gpf, HYPERVISOR_PAGE_SIZE);
     platform_free(a->esr_nmi, HYPERVISOR_PAGE_SIZE);
     platform_free(a->esr_pf, HYPERVISOR_PAGE_SIZE);
+    platform_free(a->serial_write_c, HYPERVISOR_PAGE_SIZE);
+    platform_free(a->serial_write_hex, HYPERVISOR_PAGE_SIZE);
     platform_memset(a, 0, sizeof(struct code_aliases_t));
 }

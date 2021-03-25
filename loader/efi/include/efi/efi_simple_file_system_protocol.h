@@ -27,9 +27,9 @@
 #ifndef EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_H
 #define EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_H
 
-#include "efi_file_protocol.h"
-#include "efi_status.h"
-#include "efi_types.h"
+#include <efi/efi_file_protocol.h>
+#include <efi/efi_status.h>
+#include <efi/efi_types.h>
 
 /** @brief defines the GUID for EFI_SIMPLE_FILE_SYSTEM_PROTOCOL */
 #define EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID                                                       \

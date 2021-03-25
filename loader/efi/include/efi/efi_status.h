@@ -27,7 +27,7 @@
 #ifndef EFI_STATUS_CODES_H
 #define EFI_STATUS_CODES_H
 
-#include "efi_types.h"
+#include <efi/efi_types.h>
 
 /** @brief Status code. Type UINTN. */
 typedef UINTN EFI_STATUS;

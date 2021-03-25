@@ -24,26 +24,35 @@
  * SOFTWARE.
  */
 
+#include <arch_locate_protocols.h>
 #include <debug.h>
-#include <efi/efi_mp_services_protocol.h>
+#include <dump_vmm_on_error_if_needed.h>
+#include <efi/efi_shell_protocol.h>
 #include <efi/efi_simple_file_system_protocol.h>
 #include <efi/efi_status.h>
 #include <efi/efi_system_table.h>
 #include <efi/efi_types.h>
 #include <loader_init.h>
+#include <platform.h>
 #include <serial_init.h>
 #include <span_t.h>
 #include <start_vmm.h>
 #include <start_vmm_args_t.h>
 
+/**
+ * NOTE:
+ * - We always return EFI_SUCCESS, even on failure as on some systems,
+ *   returning something else will cause the system to halt.
+ */
+
 /** @brief defines the global pointer to the EFI_SYSTEM_TABLE */
 EFI_SYSTEM_TABLE *g_st = NULL;
 
-/** @brief defines the global pointer to the EFI_MP_SERVICES_PROTOCOL */
-EFI_MP_SERVICES_PROTOCOL *g_mp_services_protocol = NULL;
+/** @brief defines the global pointer to the EFI_SHELL_PROTOCOL */
+EFI_SHELL_PROTOCOL *g_shell_protocol = NULL;
 
 /** @brief defines the global pointer to the EFI_SIMPLE_FILE_SYSTEM_PROTOCOL */
-EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *g_simple_file_system = NULL;
+EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *g_simple_file_system_protocol = NULL;
 
 /**
  * <!-- description -->
@@ -123,12 +132,12 @@ EFI_STATUS
 read_file(EFI_FILE_PROTOCOL *const file_protocol, CHAR16 *const filename, struct span_t *const file)
 {
     EFI_STATUS status = EFI_SUCCESS;
-    EFI_FILE_PROTOCOL *hndl = NULL;
+    SHELL_FILE_HANDLE hndl = NULL;
 
-    status = file_protocol->Open(file_protocol, &hndl, filename, EFI_FILE_MODE_READ, EFI_FILE_NONE);
+    status = g_shell_protocol->OpenFileByName(filename, &hndl, EFI_FILE_MODE_READ);
     if (EFI_ERROR(status)) {
-        bferror_x64("Open failed", status);
-        goto open_failed;
+        bferror_x64("OpenFileByName failed", status);
+        goto get_file_size_failed;
     }
 
     status = get_file_size(file_protocol, hndl, &file->size);
@@ -177,18 +186,24 @@ EFI_STATUS
 locate_protocols(void)
 {
     EFI_STATUS status = EFI_SUCCESS;
-    EFI_GUID efi_mp_services_protocol_guid = EFI_MP_SERVICES_PROTOCOL_GUID;
+    EFI_GUID efi_shell_protocol_guid = EFI_SHELL_PROTOCOL_GUID;
     EFI_GUID efi_simple_file_system_protocol_guid = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID;
 
-    status = g_st->BootServices->LocateProtocol(
-        &efi_mp_services_protocol_guid, NULL, (VOID **)&g_mp_services_protocol);
+    status = arch_locate_protocols();
     if (EFI_ERROR(status)) {
-        bferror_x64("LocateProtocol EFI_MP_SERVICES_PROTOCOL failed", status);
+        bferror_x64("arch_locate_protocols failed", status);
         return status;
     }
 
     status = g_st->BootServices->LocateProtocol(
-        &efi_simple_file_system_protocol_guid, NULL, (VOID **)&g_simple_file_system);
+        &efi_shell_protocol_guid, NULL, (VOID **)&g_shell_protocol);
+    if (EFI_ERROR(status)) {
+        bferror_x64("LocateProtocol EFI_SHELL_PROTOCOL failed", status);
+        return status;
+    }
+
+    status = g_st->BootServices->LocateProtocol(
+        &efi_simple_file_system_protocol_guid, NULL, (VOID **)&g_simple_file_system_protocol);
     if (EFI_ERROR(status)) {
         bferror_x64("LocateProtocol EFI_SIMPLE_FILE_SYSTEM_PROTOCOL failed", status);
         return status;
@@ -212,19 +227,21 @@ load_images_and_start(void)
     EFI_FILE_PROTOCOL *file_protocol = NULL;
     struct start_vmm_args_t start_args = {0};
 
-    status = g_simple_file_system->OpenVolume(g_simple_file_system, &file_protocol);
+    status =
+        g_simple_file_system_protocol->OpenVolume(g_simple_file_system_protocol, &file_protocol);
     if (EFI_ERROR(status)) {
         bferror_x64("OpenVolume failed", status);
         return status;
     }
 
-    status = read_file(file_protocol, L"bareflank_kernel", &start_args.mk_elf_file);
+    status = read_file(file_protocol, L"fs0:\\bareflank_kernel", &start_args.mk_elf_file);
     if (EFI_ERROR(status)) {
         bferror_x64("open_kernel failed", status);
         return status;
     }
 
-    status = read_file(file_protocol, L"bareflank_extension0", &(start_args.ext_elf_files[0]));
+    status =
+        read_file(file_protocol, L"fs0:\\bareflank_extension0", &(start_args.ext_elf_files[0]));
     if (EFI_ERROR(status)) {
         bferror_x64("open_extensions failed", status);
         return status;
@@ -240,6 +257,8 @@ load_images_and_start(void)
 
     return EFI_SUCCESS;
 }
+
+void serial_write_hex(uint64_t const val);
 
 /**
  * <!-- description -->
@@ -266,69 +285,31 @@ efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
     g_st = SystemTable;
     if (g_st->Hdr.Revision < EFI_1_10_SYSTEM_TABLE_REVISION) {
         g_st->ConOut->OutputString(g_st->ConOut, L"EFI version not supported\r\n");
-        return EFI_UNSUPPORTED;
+        return EFI_SUCCESS;
     }
 
     serial_init();
 
-    /**
-     * TODO:
-     * - Need to process the command line arguments so that we can load
-     *   an image that the user provides.
-     * - Also need to add a CMAKE var for where to load the UEFI stuff.
-     */
-
-    if (loader_init()) {
-        bferror("loader_init failed");
-        return EFI_LOAD_ERROR;
-    }
-
     status = locate_protocols();
     if (EFI_ERROR(status)) {
         bferror_x64("locate_protocols failed", status);
-        return status;
+        return EFI_SUCCESS;
+    }
+
+    if (loader_init()) {
+        bferror("loader_init failed");
+        return EFI_SUCCESS;
     }
 
     status = load_images_and_start();
     if (EFI_ERROR(status)) {
         bferror_x64("load_images_and_start failed", status);
-        return status;
+        platform_dump_vmm();
+        return EFI_SUCCESS;
     }
+
+    platform_dump_vmm();
 
     g_st->ConOut->OutputString(g_st->ConOut, L"bareflank successfully started\r\n");
     return EFI_SUCCESS;
-}
-
-/**
- * <!-- description -->
- *   @brief Same as std::memcpy.
- *
- * <!-- inputs/outputs -->
- *   @param dst a pointer to the memory to copy to
- *   @param src a pointer to the memory to copy from
- *   @param count the total number of bytes to copy
- *   @return Returns the same result as std::memcpy.
- */
-void *
-memcpy(void *const dst, void const *const src, uint64_t const count)
-{
-    g_st->BootServices->CopyMem(dst, ((VOID *)src), count);
-    return dst;
-}
-
-/**
- * <!-- description -->
- *   @brief Same as std::memset.
- *
- * <!-- inputs/outputs -->
- *   @param dst a pointer to the memory to set
- *   @param ch the value to set the memory to
- *   @param num the total number of bytes to set
- *   @return Returns the same result as std::memset.
- */
-void *
-memset(void *const dst, char const ch, uint64_t const num)
-{
-    g_st->BootServices->SetMem(dst, num, ((UINT8)ch));
-    return dst;
 }

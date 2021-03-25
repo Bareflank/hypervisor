@@ -28,7 +28,6 @@
 #define TSS_T_H
 
 #include <constants.h>
-#include <static_assert.h>
 #include <types.h>
 
 #pragma pack(push, 1)
@@ -77,9 +76,6 @@ struct tss_t
     /** @brief offset to the IO map base address (0x066) */
     uint16_t iomap;
 };
-
-/** @brief Check to make sure the state_save_t is the right size. */
-STATIC_ASSERT(sizeof(struct tss_t) <= HYPERVISOR_PAGE_SIZE, invalid_size);
 
 #pragma pack(pop)
 

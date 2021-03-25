@@ -46,7 +46,7 @@ int64_t
 alloc_mk_huge_pool(uint32_t const size, struct mutable_span_t *const huge_pool)
 {
     if (0U == size) {
-        huge_pool->size = HYPERVISOR_HUGE_POOL_SIZE;
+        huge_pool->size = HYPERVISOR_MK_HUGE_POOL_SIZE;
     }
     else {
         huge_pool->size = HYPERVISOR_PAGE_SIZE * (uint64_t)size;

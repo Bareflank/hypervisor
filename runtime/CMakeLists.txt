@@ -19,37 +19,79 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/function/hypervisor_add_header_depends.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/function/hypervisor_target_source.cmake)
 
 add_library(runtime)
 
-target_include_directories(runtime PRIVATE
-    ../syscall/include/cpp/
-)
-
-target_include_directories(runtime SYSTEM PRIVATE
-    ${CMAKE_BINARY_DIR}/include
-)
+# ------------------------------------------------------------------------------
+# Includes
+# ------------------------------------------------------------------------------
 
 target_include_directories(runtime PUBLIC
-    include
+    src
 )
+
+# ------------------------------------------------------------------------------
+# Headers
+# ------------------------------------------------------------------------------
 
 list(APPEND HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/include/bsl/cstdio.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/bsl/details/print_thread_id.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/bsl/details/putc_stderr.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/bsl/details/putc_stdout.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/bsl/details/puts_stderr.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/bsl/details/puts_stdout.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/cstdio.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/print_thread_id.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/putc_stderr.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/putc_stdout.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/puts_stderr.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/puts_stdout.hpp
 )
 
-target_sources(runtime PRIVATE
-    src/_start.cpp
+# ------------------------------------------------------------------------------
+# Definitions
+# ------------------------------------------------------------------------------
+
+target_compile_definitions(runtime PUBLIC
+    HYPERVISOR_START_NAME=_start
+    HYPERVISOR_STACK_CHK_FAIL_NAME=__stack_chk_fail
+    HYPERVISOR_STACK_CHK_GUARD_NAME=__stack_chk_guard
+    HYPERVISOR_MEMCPY_NAME=memcpy
+    HYPERVISOR_MEMSET_NAME=memset
+    HYPERVISOR_PRINT_THREAD_ID_NAME=print_thread_id
+    HYPERVISOR_PUTC_STDERR_NAME=putc_stderr
+    HYPERVISOR_PUTC_STDOUT_NAME=putc_stdout
+    HYPERVISOR_PUTS_STDERR_NAME=puts_stderr
+    HYPERVISOR_PUTS_STDOUT_NAME=puts_stdout
 )
 
-hypervisor_add_header_depends(src/_start.cpp ${HEADERS})
+# ------------------------------------------------------------------------------
+# Sources
+# ------------------------------------------------------------------------------
 
-target_link_libraries(runtime PUBLIC
+hypervisor_target_source(runtime src/__stack_chk_fail.cpp ${HEADERS})
+
+if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
+    hypervisor_target_source(runtime src/x64/_start.S ${HEADERS})
+    hypervisor_target_source(runtime src/x64/__stack_chk_guard.S ${HEADERS})
+    hypervisor_target_source(runtime src/x64/memcpy.S ${HEADERS})
+    hypervisor_target_source(runtime src/x64/memset.S ${HEADERS})
+endif()
+
+if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
+    hypervisor_target_source(runtime src/arm/aarch64/_start.S ${HEADERS})
+    hypervisor_target_source(runtime src/arm/aarch64/__stack_chk_guard.S ${HEADERS})
+    hypervisor_target_source(runtime src/arm/aarch64/memcpy.S ${HEADERS})
+    hypervisor_target_source(runtime src/arm/aarch64/memset.S ${HEADERS})
+endif()
+
+# ------------------------------------------------------------------------------
+# Libraries
+# ------------------------------------------------------------------------------
+
+target_link_libraries(runtime PRIVATE
     bsl
+    syscall
 )
+
+# ------------------------------------------------------------------------------
+# Install
+# ------------------------------------------------------------------------------
+
+install(TARGETS runtime DESTINATION lib)

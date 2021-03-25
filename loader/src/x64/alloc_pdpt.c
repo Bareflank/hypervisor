@@ -26,6 +26,7 @@
 
 #include <constants.h>
 #include <debug.h>
+#include <flush_cache.h>
 #include <pdpt_t.h>
 #include <platform.h>
 #include <pml4t_t.h>
@@ -47,6 +48,7 @@
 struct pdpt_t *
 alloc_pdpt(struct pml4t_t *const pml4t, uint64_t const virt)
 {
+    uint64_t i;
     uint64_t phys;
     struct pdpt_t *pdpt;
     struct pml4te_t *pml4te;
@@ -63,6 +65,10 @@ alloc_pdpt(struct pml4t_t *const pml4t, uint64_t const virt)
         goto platform_alloc_pdpt_failed;
     }
 
+    for (i = 0; i < LOADER_NUM_PDPT_ENTRIES; ++i) {
+        flush_cache(&(pdpt->entires[i]));
+    }
+
     phys = platform_virt_to_phys(pdpt);
     if (((uint64_t)0) == phys) {
         bferror("platform_virt_to_phys_pdpt failed");
@@ -74,6 +80,7 @@ alloc_pdpt(struct pml4t_t *const pml4t, uint64_t const virt)
     pml4te->p = ((uint64_t)1);
     pml4te->rw = ((uint64_t)1);
 
+    flush_cache(pml4te);
     return pdpt;
 
 platform_virt_to_phys_pdpt_failed:

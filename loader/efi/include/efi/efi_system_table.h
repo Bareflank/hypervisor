@@ -27,13 +27,13 @@
 #ifndef EFI_SYSTEM_TABLE_H
 #define EFI_SYSTEM_TABLE_H
 
-#include "efi_boot_services.h"
-#include "efi_configuration_table.h"
-#include "efi_runtime_services.h"
-#include "efi_simple_text_input_protocol.h"
-#include "efi_simple_text_output_protocol.h"
-#include "efi_table_header.h"
-#include "efi_types.h"
+#include <efi/efi_boot_services.h>
+#include <efi/efi_configuration_table.h>
+#include <efi/efi_runtime_services.h>
+#include <efi/efi_simple_text_input_protocol.h>
+#include <efi/efi_simple_text_output_protocol.h>
+#include <efi/efi_table_header.h>
+#include <efi/efi_types.h>
 
 /** @brief Defines EFI_SYSTEM_TABLE_SIGNATURE */
 #define EFI_SYSTEM_TABLE_SIGNATURE 0x5453595320494249

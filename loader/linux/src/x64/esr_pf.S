@@ -36,31 +36,25 @@
 esr_pf:
     UNWIND_HINT_EMPTY
 
-    mov rdx, 0x03F8
-    mov rax, 0x45
-    out dx, al
+    mov rdi, 'e'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x53
-    out dx, al
+    mov rdi, 's'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x52
-    out dx, al
+    mov rdi, 'r'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x20
-    out dx, al
+    mov rdi, '_'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x50
-    out dx, al
+    mov rdi, 'p'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x46
-    out dx, al
+    mov rdi, 'f'
+    call serial_write_c
 
-    cli
-    hlt
+    mov rdi, '\n'
+    call serial_write_c
 
     .size esr_pf, 0x1000

@@ -24,12 +24,15 @@
  * SOFTWARE.
  */
 
-   .code64
+    .code64
     .intel_syntax noprefix
 
     .globl  dispatch_esr_entry
     .type   dispatch_esr_entry, @function
 dispatch_esr_entry:
+
+    push 0x40002
+    popf
 
     mov rdi, gs:[0x200]
     call dispatch_esr_trampoline

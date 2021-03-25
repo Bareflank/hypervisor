@@ -35,11 +35,20 @@
  * <!-- inputs/outputs -->
  *   @param state the mk state to output
  *   @param cpu the CPU that this mk state belongs to
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void
 dump_mk_state(struct state_save_t *const state, uint32_t const cpu)
 {
+    if (((void *)0) == state) {
+        bferror("state is NULL");
+        return;
+    }
+
+    if (((void *)0) == state->tss) {
+        bferror("state->tss is NULL");
+        return;
+    }
+
     bfdebug_d32("mk state on cpu", cpu);
     bfdebug_ptr(" - virt", state);
 
@@ -65,6 +74,7 @@ dump_mk_state(struct state_save_t *const state, uint32_t const cpu)
 
     bfdebug_ptr(" - tss", state->tss);
     bfdebug_ptr(" - ist", state->ist);
+
     bfdebug_x64(" - tss->rsp0", state->tss->rsp0);
     bfdebug_x64(" - tss->rsp1", state->tss->rsp1);
     bfdebug_x64(" - tss->rsp2", state->tss->rsp2);

@@ -31,7 +31,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <bsl/byte.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
 #include <bsl/debug.hpp>
@@ -46,13 +45,10 @@
 
 namespace vmmctl
 {
-    namespace details
-    {
-        /// @brief defines what an error looks like from a POSIX call.
-        constexpr bsl::safe_int32 IFMAP_POSIX_ERROR{-1};
-        /// @brief defines what an invalid file is.
-        constexpr bsl::safe_int32 IFMAP_INVALID_FILE{-1};
-    }
+    /// @brief defines what an error looks like from a POSIX call.
+    constexpr bsl::safe_int32 IFMAP_POSIX_ERROR{-1};
+    /// @brief defines what an invalid file is.
+    constexpr bsl::safe_int32 IFMAP_INVALID_FILE{-1};
 
     /// @class bsl::ifmap
     ///
@@ -63,9 +59,9 @@ namespace vmmctl
     class ifmap final
     {
         /// @brief stores a handle to the mapped file.
-        bsl::int32 m_file{details::IFMAP_INVALID_FILE.get()};
+        bsl::int32 m_file{IFMAP_INVALID_FILE.get()};
         /// @brief stores a view of the file that is mapped.
-        bsl::span<bsl::byte const> m_data{};
+        bsl::span<bsl::uint8 const> m_data{};
 
         /// <!-- description -->
         ///   @brief Swaps *this with other
@@ -96,7 +92,7 @@ namespace vmmctl
         /// <!-- description -->
         ///   @brief Creates a default ifmap that has not yet been mapped.
         ///
-        ifmap() noexcept = default;
+        constexpr ifmap() noexcept = default;
 
         /// <!-- description -->
         ///   @brief Creates a bsl::ifmap given a the filename and path of
@@ -105,30 +101,30 @@ namespace vmmctl
         /// <!-- inputs/outputs -->
         ///   @param filename the filename and path of the file to map
         ///
-        explicit ifmap(bsl::string_view const &filename) noexcept
+        explicit constexpr ifmap(bsl::string_view const &filename) noexcept
         {
             using stat_t = struct stat;
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             m_file = open(filename.data(), O_RDONLY);
-            if (bsl::unlikely(details::IFMAP_POSIX_ERROR.get() == m_file)) {
+            if (bsl::unlikely(IFMAP_POSIX_ERROR.get() == m_file)) {
                 bsl::alert() << "failed to open read-only file: "    // --
                              << filename                             // --
                              << bsl::endl;
 
-                m_file = details::IFMAP_INVALID_FILE.get();
+                m_file = IFMAP_INVALID_FILE.get();
                 return;
             }
 
             stat_t s{};
-            if (bsl::unlikely(details::IFMAP_POSIX_ERROR.get() == fstat(m_file, &s))) {
+            if (bsl::unlikely(IFMAP_POSIX_ERROR.get() == fstat(m_file, &s))) {
                 bsl::alert() << "failed to get the size of the read-only file: "    // --
                              << filename                                            // --
                              << bsl::endl;
 
                 bsl::discard(close(m_file));
-                m_file = details::IFMAP_INVALID_FILE.get();
+                m_file = IFMAP_INVALID_FILE.get();
                 return;
             }
 
@@ -150,29 +146,29 @@ namespace vmmctl
                              << bsl::endl;
 
                 bsl::discard(close(m_file));
-                m_file = details::IFMAP_INVALID_FILE.get();
+                m_file = IFMAP_INVALID_FILE.get();
                 return;
             }
 
-            m_data = {static_cast<bsl::byte const *>(ptr), bsl::to_umax(s.st_size)};
+            m_data = {static_cast<bsl::uint8 const *>(ptr), bsl::to_umax(s.st_size)};
         }
 
         /// <!-- description -->
         ///   @brief Destructor unmaps a previously mapped file.
         ///
-        ~ifmap() noexcept = default;
-        // {
-        //     // if (details::IFMAP_INVALID_FILE.get() != m_file) {
-        //     //     // Not given a choice here due to the APIs provided by Linux
-        //     //     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast,-warnings-as-errors)
-        //     //     bsl::discard(munmap(const_cast<byte *>(m_data.data()), m_data.size().get()));
-        //     //     bsl::discard(close(m_file));
-        //     //     m_file = details::IFMAP_INVALID_FILE.get();
-        //     // }
-        //     // else {
-        //     //     bsl::touch();
-        //     // }
-        // }
+        constexpr ~ifmap() noexcept
+        {
+            if (IFMAP_INVALID_FILE.get() != m_file) {
+                // Not given a choice here due to the APIs provided by Linux
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast,-warnings-as-errors)
+                bsl::discard(munmap(const_cast<bsl::uint8 *>(m_data.data()), m_data.size().get()));
+                bsl::discard(close(m_file));
+                m_file = IFMAP_INVALID_FILE.get();
+            }
+            else {
+                bsl::touch();
+            }
+        }
 
         /// <!-- description -->
         ///   @brief copy constructor
@@ -191,7 +187,7 @@ namespace vmmctl
         constexpr ifmap(ifmap &&o) noexcept
             : m_file{bsl::move(o.m_file)}, m_data{bsl::move(o.m_data)}
         {
-            o.m_file = details::IFMAP_INVALID_FILE.get();
+            o.m_file = IFMAP_INVALID_FILE.get();
             o.m_data = {};
         }
 
@@ -226,7 +222,7 @@ namespace vmmctl
         ///   @return Returns a span to the read-only mapped file.
         ///
         [[nodiscard]] constexpr auto
-        view() const noexcept -> bsl::span<bsl::byte const>
+        view() const noexcept -> bsl::span<bsl::uint8 const>
         {
             return m_data;
         }
@@ -263,7 +259,7 @@ namespace vmmctl
         /// <!-- inputs/outputs -->
         ///   @return Returns !empty()
         ///
-        [[nodiscard]] constexpr explicit operator bool() const noexcept
+        [[nodiscard]] explicit constexpr operator bool() const noexcept
         {
             return !this->empty();
         }

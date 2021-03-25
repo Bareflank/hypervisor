@@ -27,7 +27,6 @@
 #ifndef GLOBAL_DESCRIPTOR_TABLE_REGISTER_T_H
 #define GLOBAL_DESCRIPTOR_TABLE_REGISTER_T_H
 
-#include <static_assert.h>
 #include <types.h>
 
 #pragma pack(push, 1)
@@ -46,9 +45,6 @@ struct global_descriptor_table_register_t
     /** @brief stores a pointer to the gdt */
     uint64_t *base;
 };
-
-/** @brief Check to make sure the gdtr_t is the right size. */
-STATIC_ASSERT(sizeof(struct global_descriptor_table_register_t) == 10, invalid_size);
 
 #pragma pack(pop)
 

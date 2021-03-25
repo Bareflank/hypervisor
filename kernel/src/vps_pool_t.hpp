@@ -25,197 +25,141 @@
 #ifndef VPS_POOL_T_HPP
 #define VPS_POOL_T_HPP
 
+#include "lock_guard_t.hpp"
+#include "spinlock_t.hpp"
+
+#include <bf_constants.hpp>
+#include <bf_reg_t.hpp>
+#include <intrinsic_t.hpp>
+#include <page_pool_t.hpp>
+#include <tls_t.hpp>
+#include <vmexit_log_t.hpp>
+#include <vps_t.hpp>
+
 #include <bsl/array.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
-#include <bsl/finally.hpp>
+#include <bsl/finally_assert.hpp>
 #include <bsl/unlikely.hpp>
+#include <bsl/unlikely_assert.hpp>
 
 namespace mk
 {
+    class vp_pool_t;
+
     /// @class mk::vps_pool_t
     ///
     /// <!-- description -->
-    ///   @brief TODO
+    ///   @brief Defines the microkernel's VPS pool
     ///
-    /// <!-- template parameters -->
-    ///   @tparam VPS_CONCEPT the type of vps_t that this class manages.
-    ///   @tparam INTRINSIC_CONCEPT defines the type of intrinsics to use
-    ///   @tparam PAGE_POOL_CONCEPT defines the type of page pool to use
-    ///   @tparam MAX_VPSS the max number of VPSs supported
-    ///
-    template<
-        typename VPS_CONCEPT,
-        typename INTRINSIC_CONCEPT,
-        typename PAGE_POOL_CONCEPT,
-        bsl::uintmax MAX_VPSS>
     class vps_pool_t final
     {
-        /// @brief stores true if initialized() has been executed
-        bool m_initialized;
-        /// @brief stores a reference to the intrinsics to use
-        INTRINSIC_CONCEPT &m_intrinsic;
-        /// @brief stores a reference to the page pool to use
-        PAGE_POOL_CONCEPT &m_page_pool;
-        /// @brief stores the first VPS_CONCEPT in the VPS_CONCEPT linked list
-        VPS_CONCEPT *m_head;
-        /// @brief stores the VPS_CONCEPTs in the VPS_CONCEPT linked list
-        bsl::array<VPS_CONCEPT, MAX_VPSS> m_pool;
+        /// @brief stores the pool of vps_ts
+        bsl::array<vps_t, HYPERVISOR_MAX_VPSS.get()> m_pool{};
+        /// @brief safe guards operations on the pool.
+        mutable spinlock_t m_lock{};
 
     public:
-        /// @brief an alias for VPS_CONCEPT
-        using vps_type = VPS_CONCEPT;
-        /// @brief an alias for INTRINSIC_CONCEPT
-        using intrinsic_type = INTRINSIC_CONCEPT;
-        /// @brief an alias for PAGE_POOL_CONCEPT
-        using page_pool_type = PAGE_POOL_CONCEPT;
-
-        /// <!-- description -->
-        ///   @brief Creates a vps_pool_t
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param page_pool the page pool to use
-        ///
-        explicit constexpr vps_pool_t(
-            INTRINSIC_CONCEPT &intrinsic, PAGE_POOL_CONCEPT &page_pool) noexcept
-            : m_initialized{}, m_intrinsic{intrinsic}, m_page_pool{page_pool}, m_head{}, m_pool{}
-        {}
-
         /// <!-- description -->
         ///   @brief Initializes this vps_pool_t
         ///
         /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param page_pool the page pool to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
+        ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        initialize() &noexcept -> bsl::errc_type
+        initialize(tls_t &tls, page_pool_t &page_pool) noexcept -> bsl::errc_type
         {
-            bsl::errc_type ret{};
-
-            if (bsl::unlikely(m_initialized)) {
-                bsl::error() << "vps_pool_t already initialized\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            bsl::finally release_on_error{[this]() noexcept -> void {
-                this->release();
-            }};
-
-            VPS_CONCEPT *prev{};
-            for (auto const vps : m_pool) {
-                ret = vps.data->initialize(&m_intrinsic, &m_page_pool, bsl::to_u16(vps.index));
+            bsl::finally_assert release_on_error{[this, &tls, &page_pool]() noexcept -> void {
+                auto const ret{this->release(tls, page_pool)};
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
-                    return bsl::errc_failure;
+                    return;
                 }
 
-                if (nullptr != prev) {
-                    prev->set_next(vps.data);
-                }
-                else {
-                    m_head = vps.data;
+                bsl::touch();
+            }};
+
+            for (auto const vps : m_pool) {
+                auto const ret{vps.data->initialize(bsl::to_u16(vps.index))};
+                if (bsl::unlikely_assert(!ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return ret;
                 }
 
-                prev = vps.data;
+                bsl::touch();
             }
 
             release_on_error.ignore();
-            m_initialized = true;
+            return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief Release the vps_pool_t. Note that if this function fails,
+        ///     the microkernel is left in a corrupt state and all use of the
+        ///     vps_pool_t after calling this function will results in UB.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param page_pool the page pool to use
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        release(tls_t &tls, page_pool_t &page_pool) noexcept -> bsl::errc_type
+        {
+            for (auto const vps : m_pool) {
+                auto const ret{vps.data->release(tls, page_pool)};
+                if (bsl::unlikely(!ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return ret;
+                }
+
+                bsl::touch();
+            }
 
             return bsl::errc_success;
         }
 
         /// <!-- description -->
-        ///   @brief Release the vps_t
-        ///
-        constexpr void
-        release() &noexcept
-        {
-            for (auto const vps : m_pool) {
-                vps.data->release();
-            }
-
-            m_head = {};
-            m_initialized = {};
-        }
-
-        /// <!-- description -->
-        ///   @brief Destroyes a previously created vps_pool_t
-        ///
-        constexpr ~vps_pool_t() noexcept = default;
-
-        /// <!-- description -->
-        ///   @brief copy constructor
+        ///   @brief Allocates a vps from the vps pool.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param o the object being copied
-        ///
-        constexpr vps_pool_t(vps_pool_t const &o) noexcept = delete;
-
-        /// <!-- description -->
-        ///   @brief move constructor
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
-        ///
-        constexpr vps_pool_t(vps_pool_t &&o) noexcept = default;
-
-        /// <!-- description -->
-        ///   @brief copy assignment
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param o the object being copied
-        ///   @return a reference to *this
-        ///
-        [[maybe_unused]] constexpr auto operator=(vps_pool_t const &o) &noexcept
-            -> vps_pool_t & = delete;
-
-        /// <!-- description -->
-        ///   @brief move assignment
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
-        ///   @return a reference to *this
-        ///
-        [[maybe_unused]] constexpr auto operator=(vps_pool_t &&o) &noexcept
-            -> vps_pool_t & = default;
-
-        /// <!-- description -->
-        ///   @brief Allocates a vps from the vps pool. We set the allocated
-        ///     vps_t's next() to itself, which indicates that it has been
-        ///     allocated.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
         ///   @param tls the current TLS block
+        ///   @param page_pool the page pool to use
+        ///   @param intrinsic the intrinsics to use
+        ///   @param vpid The ID of the VP to assign the newly created VP to
+        ///   @param ppid The ID of the PP to assign the newly created VP to
         ///   @return Returns ID of the newly allocated vps
         ///
-        template<typename TLS_CONCEPT>
         [[nodiscard]] constexpr auto
-        allocate(TLS_CONCEPT &tls) &noexcept -> bsl::safe_uint16
+        allocate(
+            tls_t &tls,
+            page_pool_t &page_pool,
+            intrinsic_t &intrinsic,
+            bsl::safe_uint16 const &vpid,
+            bsl::safe_uint16 const &ppid) noexcept -> bsl::safe_uint16
         {
-            if (bsl::unlikely(!m_initialized)) {
-                bsl::error() << "vps_pool_t not initialized\n" << bsl::here();
-                return bsl::safe_uint16::zero(true);
+            lock_guard_t lock{tls, m_lock};
+
+            vps_t *vps{};
+            for (auto const elem : m_pool) {
+                if (elem.data->is_deallocated()) {
+                    vps = elem.data;
+                    break;
+                }
+
+                bsl::touch();
             }
 
-            if (bsl::unlikely(nullptr == m_head)) {
+            if (bsl::unlikely(nullptr == vps)) {
                 bsl::error() << "vps pool out of vpss\n" << bsl::here();
-                return bsl::safe_uint16::zero(true);
+                return bsl::safe_uint16::failure();
             }
 
-            if (bsl::unlikely(!m_head->allocate(tls))) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uint16::zero(true);
-            }
-
-            auto *const vps{m_head};
-            m_head = m_head->next();
-
-            vps->set_next(vps);
-            return vps->id();
+            return vps->allocate(tls, intrinsic, page_pool, vpid, ppid);
         }
 
         /// <!-- description -->
@@ -223,107 +167,473 @@ namespace mk
         ///     function to the vps pool.
         ///
         /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param page_pool the page pool to use
         ///   @param vpsid the ID of the vps to deallocate
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
+        ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        deallocate(bsl::safe_uint16 const &vpsid) &noexcept -> bsl::errc_type
+        deallocate(tls_t &tls, page_pool_t &page_pool, bsl::safe_uint16 const &vpsid) noexcept
+            -> bsl::errc_type
         {
-            if (bsl::unlikely(!m_initialized)) {
-                bsl::error() << "vps_pool_t not initialized\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
             auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
-                bsl::error() << "invalid vpsid: "    // --
-                             << bsl::hex(vpsid)      // --
-                             << bsl::endl            // --
-                             << bsl::here();         // --
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
 
-                return bsl::errc_failure;
+                return bsl::errc_index_out_of_bounds;
             }
 
-            if (vps->next() != vps) {
-                bsl::error() << "vps with id "            // --
-                             << bsl::hex(vpsid)           // --
-                             << " was never allocated"    // --
-                             << bsl::endl                 // --
-                             << bsl::here();              // --
+            return vps->deallocate(tls, page_pool);
+        }
 
-                return bsl::errc_failure;
+        /// <!-- description -->
+        ///   @brief Sets the requested vps_t's status as zombified, meaning
+        ///     it is no longer usable.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vpsid the ID of the vps_t to set as a zombie
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        zombify(bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
+        {
+            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return bsl::errc_index_out_of_bounds;
             }
 
-            vps->deallocate();
-            vps->set_next(m_head);
-            m_head = vps;
-
+            vps->zombify();
             return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns true if the requested vps_t is deallocated, false
+        ///     if the provided VPID is invalid, or if the vps_t is not
+        ///     deallocated.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param vpsid the ID of the vps_t to query
+        ///   @return Returns true if the requested vps_t is deallocated, false
+        ///     if the provided VPID is invalid, or if the vps_t is not
+        ///     deallocated.
+        ///
+        [[nodiscard]] constexpr auto
+        is_deallocated(tls_t &tls, bsl::safe_uint16 const &vpsid) const noexcept -> bool
+        {
+            bsl::discard(tls);
+
+            auto const *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return false;
+            }
+
+            return vps->is_deallocated();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns true if the requested vps_t is allocated, false
+        ///     if the provided VPID is invalid, or if the vps_t is not
+        ///     allocated.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param vpsid the ID of the vps_t to query
+        ///   @return Returns true if the requested vps_t is allocated, false
+        ///     if the provided VPID is invalid, or if the vps_t is not
+        ///     allocated.
+        ///
+        [[nodiscard]] constexpr auto
+        is_allocated(tls_t &tls, bsl::safe_uint16 const &vpsid) const noexcept -> bool
+        {
+            bsl::discard(tls);
+
+            auto const *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return false;
+            }
+
+            return vps->is_allocated();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns true if the requested vps_t is a zombie, false
+        ///     if the provided VPID is invalid, or if the vps_t is not
+        ///     a zombie.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param vpsid the ID of the vps_t to query
+        ///   @return Returns true if the requested vps_t is a zombie, false
+        ///     if the provided VPID is invalid, or if the vps_t is not
+        ///     a zombie.
+        ///
+        [[nodiscard]] constexpr auto
+        is_zombie(tls_t &tls, bsl::safe_uint16 const &vpsid) const noexcept -> bool
+        {
+            bsl::discard(tls);
+
+            auto const *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return false;
+            }
+
+            return vps->is_zombie();
+        }
+
+        /// <!-- description -->
+        ///   @brief If a vps_t in the pool is assigned to the requested VP,
+        ///     the ID of the first vps_t found is returned. Otherwise, this
+        ///     function will return bsl::safe_uint16::failure()
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param vpid the ID fo the VP to query
+        ///   @return If a vps_t in the pool is assigned to the requested VP,
+        ///     the ID of the first vps_t found is returned. Otherwise, this
+        ///     function will return bsl::safe_uint16::failure()
+        ///
+        [[nodiscard]] constexpr auto
+        is_assigned_to_vp(tls_t &tls, bsl::safe_uint16 const &vpid) const noexcept
+            -> bsl::safe_uint16
+        {
+            bsl::discard(tls);
+
+            if (bsl::unlikely(!vpid)) {
+                bsl::error() << "invalid vpid\n" << bsl::here();
+                return bsl::safe_uint16::failure();
+            }
+
+            if (bsl::unlikely(syscall::BF_INVALID_ID == vpid)) {
+                bsl::error() << "invalid vpid\n" << bsl::here();
+                return bsl::safe_uint16::failure();
+            }
+
+            for (auto const elem : m_pool) {
+                if (elem.data->assigned_vp() == vpid) {
+                    return elem.data->id();
+                }
+
+                bsl::touch();
+            }
+
+            return bsl::safe_uint16::failure();
+        }
+
+        /// <!-- description -->
+        ///   @brief Sets the requested vps_t as active.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
+        ///   @param vpsid the ID of the vps_t to set as active
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        set_active(tls_t &tls, intrinsic_t &intrinsic, bsl::safe_uint16 const &vpsid) noexcept
+            -> bsl::errc_type
+        {
+            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return bsl::errc_failure;
+            }
+
+            return vps->set_active(tls, intrinsic);
+        }
+
+        /// <!-- description -->
+        ///   @brief Sets the requested vps_t as inactive.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
+        ///   @param vpsid the ID of the vps_t to set as inactive
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        set_inactive(tls_t &tls, intrinsic_t &intrinsic, bsl::safe_uint16 const &vpsid) noexcept
+            -> bsl::errc_type
+        {
+            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return bsl::errc_failure;
+            }
+
+            return vps->set_inactive(tls, intrinsic);
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns true if the requested vps_t is active, false
+        ///     if the provided VPID is invalid, or if the vps_t is not
+        ///     active.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param vpsid the ID of the vps_t to query
+        ///   @return Returns the ID of the PP that the requested vps_t is
+        ///     still active on. If the vps_t is inactive, this function
+        ///     returns bsl::safe_uint16::failure()
+        ///
+        [[nodiscard]] constexpr auto
+        is_active(tls_t &tls, bsl::safe_uint16 const &vpsid) noexcept -> bsl::safe_uint16
+        {
+            auto const *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return bsl::safe_uint16::failure();
+            }
+
+            return vps->is_active(tls);
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns true if this vps_t is active on the current PP,
+        ///     false if the provided ID is invalid, or if the vps_t is not
+        ///     active on the current PP.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param vpsid the ID of the vps_t to query
+        ///   @return Returns true if this vps_t is active on the current PP,
+        ///     false if the provided ID is invalid, or if the vps_t is not
+        ///     active on the current PP.
+        ///
+        [[nodiscard]] constexpr auto
+        is_active_on_current_pp(tls_t &tls, bsl::safe_uint16 const &vpsid) noexcept -> bool
+        {
+            auto const *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return false;
+            }
+
+            return vps->is_active_on_current_pp(tls);
+        }
+
+        /// <!-- description -->
+        ///   @brief Migrates the requested vps_t from one PP to another.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
+        ///   @param vpsid the ID of the vps_t to migrate
+        ///   @param ppid the ID of the PP to migrate to
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        migrate(
+            tls_t &tls,
+            intrinsic_t &intrinsic,
+            bsl::safe_uint16 const &vpsid,
+            bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
+        {
+            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return bsl::errc_failure;
+            }
+
+            return vps->migrate(tls, intrinsic, ppid);
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the ID of the VP the requested vps_t is assigned to
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vpsid the ID of the vps_t to query
+        ///   @return Returns the ID of the VP the requested vps_t is assigned to
+        ///
+        [[nodiscard]] constexpr auto
+        assigned_vp(bsl::safe_uint16 const &vpsid) const noexcept -> bsl::safe_uint16
+        {
+            auto const *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return bsl::safe_uint16::failure();
+            }
+
+            return vps->assigned_vp();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the ID of the PP the requested vps_t is assigned to
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vpsid the ID of the vps_t to query
+        ///   @return Returns the ID of the PP the requested vps_t is assigned to
+        ///
+        [[nodiscard]] constexpr auto
+        assigned_pp(bsl::safe_uint16 const &vpsid) const noexcept -> bsl::safe_uint16
+        {
+            auto const *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return bsl::safe_uint16::failure();
+            }
+
+            return vps->assigned_pp();
         }
 
         /// <!-- description -->
         ///   @brief Stores the provided state in the requested VPS.
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
-        ///   @tparam STATE_SAVE_CONCEPT the type of state save to use
         ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to set the state to
         ///   @param state the state to set the VPS to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
+        ///     and friends otherwise
         ///
-        template<typename TLS_CONCEPT, typename STATE_SAVE_CONCEPT>
         [[nodiscard]] constexpr auto
         state_save_to_vps(
-            TLS_CONCEPT &tls,
+            tls_t &tls,
+            intrinsic_t &intrinsic,
             bsl::safe_uint16 const &vpsid,
-            STATE_SAVE_CONCEPT const *const state) &noexcept -> bsl::errc_type
+            loader::state_save_t const &state) noexcept -> bsl::errc_type
         {
             auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
-                bsl::error() << "invalid vpsid: "    // --
-                             << bsl::hex(vpsid)      // --
-                             << bsl::endl            // --
-                             << bsl::here();         // --
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
 
                 return bsl::errc_failure;
             }
 
-            return vps->state_save_to_vps(tls, state);
+            return vps->state_save_to_vps(tls, intrinsic, state);
         }
 
         /// <!-- description -->
         ///   @brief Stores the requested VPS state in the provided state save.
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
-        ///   @tparam STATE_SAVE_CONCEPT the type of state save to use
         ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to set the state to
         ///   @param state the state save to store the VPS state to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
+        ///     and friends otherwise
         ///
-        template<typename TLS_CONCEPT, typename STATE_SAVE_CONCEPT>
         [[nodiscard]] constexpr auto
         vps_to_state_save(
-            TLS_CONCEPT &tls,
+            tls_t &tls,
+            intrinsic_t &intrinsic,
             bsl::safe_uint16 const &vpsid,
-            STATE_SAVE_CONCEPT *const state) &noexcept -> bsl::errc_type
+            loader::state_save_t &state) noexcept -> bsl::errc_type
         {
             auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
-                bsl::error() << "invalid vpsid: "    // --
-                             << bsl::hex(vpsid)      // --
-                             << bsl::endl            // --
-                             << bsl::here();         // --
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
 
                 return bsl::errc_failure;
             }
 
-            return vps->vps_to_state_save(tls, state);
+            return vps->vps_to_state_save(tls, intrinsic, state);
         }
 
         /// <!-- description -->
@@ -331,31 +641,37 @@ namespace mk
         ///     the field to read.
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
         ///   @tparam FIELD_TYPE the type (i.e., size) of field to read
         ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to read from
         ///   @param index the index of the field to read from the VPS
         ///   @return Returns the value of the requested field from the
-        ///     requested VPS or bsl::safe_integral<FIELD_TYPE>::zero(true)
+        ///     requested VPS or bsl::safe_integral<FIELD_TYPE>::failure()
         ///     on failure.
         ///
-        template<typename FIELD_TYPE, typename TLS_CONCEPT>
+        template<typename FIELD_TYPE>
         [[nodiscard]] constexpr auto
-        read(TLS_CONCEPT &tls, bsl::safe_uint16 const &vpsid, bsl::safe_uintmax const &index)
-            &noexcept -> bsl::safe_integral<FIELD_TYPE>
+        read(
+            tls_t &tls,
+            intrinsic_t &intrinsic,
+            bsl::safe_uint16 const &vpsid,
+            bsl::safe_uintmax const &index) noexcept -> bsl::safe_integral<FIELD_TYPE>
         {
             auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
-                bsl::error() << "invalid vpsid: "    // --
-                             << bsl::hex(vpsid)      // --
-                             << bsl::endl            // --
-                             << bsl::here();         // --
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
 
-                return bsl::safe_integral<FIELD_TYPE>::zero(true);
+                return bsl::safe_integral<FIELD_TYPE>::failure();
             }
 
-            return vps->template read<FIELD_TYPE>(tls, index);
+            return vps->template read<FIELD_TYPE>(tls, intrinsic, index);
         }
 
         /// <!-- description -->
@@ -363,34 +679,38 @@ namespace mk
         ///     the field and the value to write.
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
         ///   @tparam FIELD_TYPE the type (i.e., size) of field to write
         ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to write to
         ///   @param index the index of the field to write to the VPS
         ///   @param value the value to write to the VPS
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
+        ///     and friends otherwise
         ///
-        template<typename FIELD_TYPE, typename TLS_CONCEPT>
+        template<typename FIELD_TYPE>
         [[nodiscard]] constexpr auto
         write(
-            TLS_CONCEPT &tls,
+            tls_t &tls,
+            intrinsic_t &intrinsic,
             bsl::safe_uint16 const &vpsid,
             bsl::safe_uintmax const &index,
-            bsl::safe_integral<FIELD_TYPE> const &value) &noexcept -> bsl::errc_type
+            bsl::safe_integral<FIELD_TYPE> const &value) noexcept -> bsl::errc_type
         {
             auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
-                bsl::error() << "invalid vpsid: "    // --
-                             << bsl::hex(vpsid)      // --
-                             << bsl::endl            // --
-                             << bsl::here();         // --
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
 
                 return bsl::errc_failure;
             }
 
-            return vps->template write<FIELD_TYPE>(tls, index, value);
+            return vps->template write<FIELD_TYPE>(tls, intrinsic, index, value);
         }
 
         /// <!-- description -->
@@ -398,30 +718,34 @@ namespace mk
         ///     defining the field to read.
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
         ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to read from
         ///   @param reg a bf_reg_t defining the field to read from the VPS
         ///   @return Returns the value of the requested field from the
-        ///     requested VPS or bsl::safe_uintmax::zero(true) on failure.
+        ///     requested VPS or bsl::safe_uintmax::failure() on failure.
         ///
-        template<typename TLS_CONCEPT>
         [[nodiscard]] constexpr auto
         read_reg(
-            TLS_CONCEPT &tls, bsl::safe_uint16 const &vpsid, syscall::bf_reg_t const reg) &noexcept
-            -> bsl::safe_uintmax
+            tls_t &tls,
+            intrinsic_t &intrinsic,
+            bsl::safe_uint16 const &vpsid,
+            syscall::bf_reg_t const reg) noexcept -> bsl::safe_uintmax
         {
             auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
-                bsl::error() << "invalid vpsid: "    // --
-                             << bsl::hex(vpsid)      // --
-                             << bsl::endl            // --
-                             << bsl::here();         // --
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
 
-                return bsl::safe_uintmax::zero(true);
+                return bsl::safe_uintmax::failure();
             }
 
-            return vps->read_reg(tls, reg);
+            return vps->read_reg(tls, intrinsic, reg);
         }
 
         /// <!-- description -->
@@ -429,33 +753,36 @@ namespace mk
         ///     defining the field and a value to write.
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
         ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to write to
         ///   @param reg a bf_reg_t defining the field to write to the VPS
         ///   @param value the value to write to the VPS
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
+        ///     and friends otherwise
         ///
-        template<typename TLS_CONCEPT>
         [[nodiscard]] constexpr auto
         write_reg(
-            TLS_CONCEPT &tls,
+            tls_t &tls,
+            intrinsic_t &intrinsic,
             bsl::safe_uint16 const &vpsid,
             syscall::bf_reg_t const reg,
-            bsl::safe_uintmax const &value) &noexcept -> bsl::errc_type
+            bsl::safe_uintmax const &value) noexcept -> bsl::errc_type
         {
             auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
-                bsl::error() << "invalid vpsid: "    // --
-                             << bsl::hex(vpsid)      // --
-                             << bsl::endl            // --
-                             << bsl::here();         // --
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
 
                 return bsl::errc_failure;
             }
 
-            return vps->write_reg(tls, reg, value);
+            return vps->write_reg(tls, intrinsic, reg, value);
         }
 
         /// <!-- description -->
@@ -464,82 +791,126 @@ namespace mk
         ///     will return the VMExit reason.
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
         ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
+        ///   @param log the VMExit log to use
         ///   @param vpsid the ID of the VPS to run
         ///   @return Returns the VMExit reason on success, or
-        ///     bsl::safe_uintmax::zero(true) on failure.
+        ///     bsl::safe_uintmax::failure() on failure.
         ///
-        template<typename TLS_CONCEPT>
         [[nodiscard]] constexpr auto
-        run(TLS_CONCEPT &tls, bsl::safe_uint16 const &vpsid) &noexcept -> bsl::safe_uintmax
+        run(tls_t &tls,
+            intrinsic_t &intrinsic,
+            bsl::safe_uint16 const &vpsid,
+            vmexit_log_t &log) noexcept -> bsl::safe_uintmax
         {
             auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
-                bsl::error() << "invalid vpsid: "    // --
-                             << bsl::hex(vpsid)      // --
-                             << bsl::endl            // --
-                             << bsl::here();         // --
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
 
-                return bsl::safe_uintmax::zero(true);
+                return bsl::safe_uintmax::failure();
             }
 
-            return vps->run(tls);
+            return vps->run(tls, intrinsic, log);
         }
 
         /// <!-- description -->
         ///   @brief Advance the IP of the requested VPS
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
         ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to advance the IP for
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
+        ///     and friends otherwise
         ///
-        template<typename TLS_CONCEPT>
         [[nodiscard]] constexpr auto
-        advance_ip(TLS_CONCEPT &tls, bsl::safe_uint16 const &vpsid) &noexcept -> bsl::errc_type
+        advance_ip(tls_t &tls, intrinsic_t &intrinsic, bsl::safe_uint16 const &vpsid) noexcept
+            -> bsl::errc_type
         {
             auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
-                bsl::error() << "invalid vpsid: "    // --
-                             << bsl::hex(vpsid)      // --
-                             << bsl::endl            // --
-                             << bsl::here();         // --
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
 
                 return bsl::errc_failure;
             }
 
-            return vps->advance_ip(tls);
+            return vps->advance_ip(tls, intrinsic);
+        }
+
+        /// <!-- description -->
+        ///   @brief Clears the requested VPS's internal cache. Note that this
+        ///     is a hardware specific function and doesn't change the actual
+        ///     values stored in the VPS.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
+        ///   @param vpsid the ID of the VPS to clear
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        clear(tls_t &tls, intrinsic_t &intrinsic, bsl::safe_uint16 const &vpsid) noexcept
+            -> bsl::errc_type
+        {
+            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return bsl::errc_failure;
+            }
+
+            return vps->clear(tls, intrinsic);
         }
 
         /// <!-- description -->
         ///   @brief Dumps the requested VPS
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
         ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to dump
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
         ///
-        template<typename TLS_CONCEPT>
-        [[nodiscard]] constexpr auto
-        dump(TLS_CONCEPT &tls, bsl::safe_uint16 const &vpsid) &noexcept -> bsl::errc_type
+        constexpr void
+        dump(tls_t &tls, intrinsic_t &intrinsic, bsl::safe_uint16 const &vpsid) noexcept
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
-                bsl::error() << "invalid vpsid: "    // --
-                             << bsl::hex(vpsid)      // --
-                             << bsl::endl            // --
-                             << bsl::here();         // --
-
-                return bsl::errc_failure;
+            if constexpr (BSL_DEBUG_LEVEL == bsl::CRITICAL_ONLY) {
+                return;
             }
 
-            vps->dump(tls);
-            return bsl::errc_success;
+            auto const *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == vps)) {
+                bsl::error()
+                    << "vpsid "                                                              // --
+                    << bsl::hex(vpsid)                                                       // --
+                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
+                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
+                    << bsl::endl                                                             // --
+                    << bsl::here();                                                          // --
+
+                return;
+            }
+
+            vps->dump(tls, intrinsic);
         }
     };
 }

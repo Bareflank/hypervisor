@@ -31,20 +31,41 @@
     .align  0x1000
 esr_default:
 
-    mov rdx, 0x03F8
-    mov rax, 0x45
-    out dx, al
+    mov rcx, 'e'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x53
-    out dx, al
+    mov rcx, 's'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x52
-    out dx, al
+    mov rcx, 'r'
+    call serial_write_c
+
+    mov rcx, '_'
+    call serial_write_c
+
+    mov rcx, 'd'
+    call serial_write_c
+
+    mov rcx, 'e'
+    call serial_write_c
+
+    mov rcx, 'f'
+    call serial_write_c
+
+    mov rcx, 'a'
+    call serial_write_c
+
+    mov rcx, 'u'
+    call serial_write_c
+
+    mov rcx, 'l'
+    call serial_write_c
+
+    mov rcx, 't'
+    call serial_write_c
+
+    mov rcx, '\n'
+    call serial_write_c
 
     cli
     hlt
-
-    ret
-    int 3

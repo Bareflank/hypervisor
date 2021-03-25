@@ -22,7 +22,10 @@
 Checks:
   '
     -*,
-    bsl-*
+    bsl-*,
+      -bsl-template-generic-param,
+      -bsl-literals-user-defined,
+      -bsl-unused-return-value,
     bugprone-*,
       -bugprone-branch-clone,
     cert-*,

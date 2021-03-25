@@ -36,7 +36,6 @@
  *
  * <!-- inputs/outputs -->
  *   @param huge_pool the mk huge pool to output
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void dump_mk_huge_pool(struct mutable_span_t *const huge_pool);
 

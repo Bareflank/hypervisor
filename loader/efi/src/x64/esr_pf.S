@@ -31,29 +31,26 @@
     .align  0x1000
 esr_pf:
 
-    mov rdx, 0x03F8
-    mov rax, 0x45
-    out dx, al
+    mov rcx, 'e'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x53
-    out dx, al
+    mov rcx, 's'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x52
-    out dx, al
+    mov rcx, 'r'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x20
-    out dx, al
+    mov rcx, '_'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x50
-    out dx, al
+    mov rcx, 'p'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x46
-    out dx, al
+    mov rcx, 'f'
+    call serial_write_c
+
+    mov rcx, '\n'
+    call serial_write_c
 
     cli
     hlt

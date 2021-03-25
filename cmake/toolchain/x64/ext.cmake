@@ -40,6 +40,13 @@ string(CONCAT HYPERVISOR_EXT_CXX_FLAGS
     "-std=c++20 "
 )
 
+if(CMAKE_BUILD_TYPE STREQUAL RELEASE OR CMAKE_BUILD_TYPE STREQUAL MINSIZEREL)
+    string(CONCAT HYPERVISOR_EXT_CXX_FLAGS
+        ${HYPERVISOR_EXT_CXX_FLAGS}
+        "-flto "
+    )
+endif()
+
 string(CONCAT HYPERVISOR_EXT_LINK_FLAGS
     "-static "
     "-nostdlib "

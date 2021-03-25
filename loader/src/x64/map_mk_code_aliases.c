@@ -34,8 +34,10 @@
 #include <esr_pf.h>
 #include <map_4k_page_rx.h>
 #include <platform.h>
-#include <pml4t_t.h>
 #include <promote.h>
+#include <root_page_table_t.h>
+#include <serial_write_c.h>
+#include <serial_write_hex.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4152)
@@ -50,11 +52,11 @@
  * <!-- inputs/outputs -->
  *   @param a a pointer to a code_aliases_t that stores the aliases
  *     being mapped
- *   @param pml4t the root page table to map the code aliases into
+ *   @param rpt the root page table to map the code aliases into
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-map_mk_code_aliases(struct code_aliases_t const *const a, struct pml4t_t *const pml4t)
+map_mk_code_aliases(struct code_aliases_t const *const a, root_page_table_t *const rpt)
 {
     uint64_t phys;
 
@@ -73,7 +75,7 @@ map_mk_code_aliases(struct code_aliases_t const *const a, struct pml4t_t *const 
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(demote, phys, pml4t)) {
+    if (map_4k_page_rx(demote, phys, rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
@@ -84,7 +86,7 @@ map_mk_code_aliases(struct code_aliases_t const *const a, struct pml4t_t *const 
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(promote, phys, pml4t)) {
+    if (map_4k_page_rx(promote, phys, rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
@@ -95,7 +97,7 @@ map_mk_code_aliases(struct code_aliases_t const *const a, struct pml4t_t *const 
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(esr_default, phys, pml4t)) {
+    if (map_4k_page_rx(esr_default, phys, rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
@@ -106,7 +108,7 @@ map_mk_code_aliases(struct code_aliases_t const *const a, struct pml4t_t *const 
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(esr_df, phys, pml4t)) {
+    if (map_4k_page_rx(esr_df, phys, rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
@@ -117,7 +119,7 @@ map_mk_code_aliases(struct code_aliases_t const *const a, struct pml4t_t *const 
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(esr_gpf, phys, pml4t)) {
+    if (map_4k_page_rx(esr_gpf, phys, rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
@@ -128,7 +130,7 @@ map_mk_code_aliases(struct code_aliases_t const *const a, struct pml4t_t *const 
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(esr_nmi, phys, pml4t)) {
+    if (map_4k_page_rx(esr_nmi, phys, rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
@@ -139,7 +141,29 @@ map_mk_code_aliases(struct code_aliases_t const *const a, struct pml4t_t *const 
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(esr_pf, phys, pml4t)) {
+    if (map_4k_page_rx(esr_pf, phys, rpt)) {
+        bferror("map_4k_page_rx failed");
+        return LOADER_FAILURE;
+    }
+
+    phys = platform_virt_to_phys(a->serial_write_c);
+    if (((uint64_t)0) == phys) {
+        bferror("platform_virt_to_phys failed");
+        return LOADER_FAILURE;
+    }
+
+    if (map_4k_page_rx(serial_write_c, phys, rpt)) {
+        bferror("map_4k_page_rx failed");
+        return LOADER_FAILURE;
+    }
+
+    phys = platform_virt_to_phys(a->serial_write_hex);
+    if (((uint64_t)0) == phys) {
+        bferror("platform_virt_to_phys failed");
+        return LOADER_FAILURE;
+    }
+
+    if (map_4k_page_rx(serial_write_hex, phys, rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }

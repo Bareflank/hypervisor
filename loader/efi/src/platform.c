@@ -24,14 +24,17 @@
  * SOFTWARE.
  */
 
+#include <arch_init.h>
+#include <arch_num_online_cpus.h>
+#include <arch_work_on_cpu.h>
 #include <constants.h>
 #include <debug.h>
-#include <efi/efi_mp_services_protocol.h>
 #include <efi/efi_status.h>
 #include <efi/efi_system_table.h>
 #include <efi/efi_types.h>
+#include <g_mk_debug_ring.h>
 #include <platform.h>
-#include <work_on_cpu_callback_args.h>
+#include <work_on_cpu_callback.h>
 
 /**
  * <!-- description -->
@@ -91,30 +94,9 @@ platform_alloc(uint64_t size)
  *     Returns a nullptr on failure.
  */
 void *
-platform_alloc_contiguous(uint64_t size)
+platform_alloc_contiguous(uint64_t const size)
 {
-    EFI_STATUS status = EFI_SUCCESS;
-    EFI_PHYSICAL_ADDRESS ret = ((EFI_PHYSICAL_ADDRESS)0);
-
-    if (((uint64_t)0) == size) {
-        bferror("invalid number of bytes (i.e., size)");
-        return NULL;
-    }
-
-    if (((uint64_t)0) != (size & (HYPERVISOR_PAGE_SIZE - ((uint64_t)1)))) {
-        size += HYPERVISOR_PAGE_SIZE;
-        size &= ~(HYPERVISOR_PAGE_SIZE - ((uint64_t)1));
-    }
-
-    status = g_st->BootServices->AllocatePages(
-        AllocateAnyPages, EfiRuntimeServicesData, size / HYPERVISOR_PAGE_SIZE, &ret);
-    if (EFI_ERROR(status)) {
-        bferror_x64("AllocatePages failed", status);
-        return NULL;
-    }
-
-    g_st->BootServices->SetMem((void *)ret, size, ((UINT8)0));
-    return (void *)ret;
+    return platform_alloc(size);
 }
 
 /**
@@ -130,12 +112,15 @@ platform_alloc_contiguous(uint64_t size)
  *     may or may not be ignored depending on the platform.
  */
 void
-platform_free(void const *const ptr, uint64_t const size)
+platform_free(void const *const ptr, uint64_t size)
 {
-    (void)size;
+    if (((uint64_t)0) != (size & (HYPERVISOR_PAGE_SIZE - ((uint64_t)1)))) {
+        size += HYPERVISOR_PAGE_SIZE;
+        size &= ~(HYPERVISOR_PAGE_SIZE - ((uint64_t)1));
+    }
 
     if (NULL != ptr) {
-        g_st->BootServices->FreePool((VOID *)ptr);
+        g_st->BootServices->FreePages((EFI_PHYSICAL_ADDRESS)ptr, size / HYPERVISOR_PAGE_SIZE);
     }
 }
 
@@ -154,11 +139,7 @@ platform_free(void const *const ptr, uint64_t const size)
 void
 platform_free_contiguous(void const *const ptr, uint64_t const size)
 {
-    (void)size;
-
-    if (NULL != ptr) {
-        g_st->BootServices->FreePool((VOID *)ptr);
-    }
+    platform_free(ptr, size);
 }
 
 /**
@@ -234,14 +215,14 @@ platform_memcpy(void *const dst, void const *const src, uint64_t const num)
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     NULL, returns FAILURE, otherwise returns 0. Note that this function can
+ *     NULL, returns LOADER_FAILURE, otherwise returns 0. Note that this function can
  *     be used to copy memory from userspace via an IOCTL.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are NULL, returns FAILURE, otherwise
+ *   @return If "src" or "dst" are NULL, returns LOADER_FAILURE, otherwise
  *     returns 0.
  */
 int64_t
@@ -264,14 +245,14 @@ platform_copy_from_user(void *const dst, void const *const src, uint64_t const n
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     NULL, returns FAILURE, otherwise returns 0. Note that this function can
+ *     NULL, returns LOADER_FAILURE, otherwise returns 0. Note that this function can
  *     be used to copy memory to userspace via an IOCTL.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are NULL, returns FAILURE, otherwise
+ *   @return If "src" or "dst" are NULL, returns LOADER_FAILURE, otherwise
  *     returns 0.
  */
 int64_t
@@ -301,36 +282,7 @@ platform_copy_to_user(void *const dst, void const *const src, uint64_t const num
 uint32_t
 platform_num_online_cpus(void)
 {
-    EFI_STATUS status = EFI_SUCCESS;
-    UINTN NumberOfProcessors;
-    UINTN NumberOfEnabledProcessors;
-
-    status = g_mp_services_protocol->GetNumberOfProcessors(
-        g_mp_services_protocol, &NumberOfProcessors, &NumberOfEnabledProcessors);
-    if (EFI_ERROR(status)) {
-        bferror_x64("GetNumberOfProcessors failed", status);
-        return ((uint32_t)0);
-    }
-
-    return (uint32_t)NumberOfProcessors;
-}
-
-/**
- * <!-- description -->
- *   @brief This function is called when the user calls platform_on_each_cpu.
- *     On each iteration of the CPU, this function calls the user provided
- *     callback with the signature that we perfer.
- *
- * <!-- inputs/outputs -->
- *   @param ProcedureArgument stores the params needed to execute the callback
- */
-static void
-work_on_cpu_callback(void *const ProcedureArgument)
-{
-    struct work_on_cpu_callback_args *args =
-        ((struct work_on_cpu_callback_args *)ProcedureArgument);
-
-    args->ret = args->func(args->cpu);
+    return arch_num_online_cpus();
 }
 
 /**
@@ -345,18 +297,7 @@ work_on_cpu_callback(void *const ProcedureArgument)
 void
 work_on_cpu(uint32_t const cpu, void *const callback, struct work_on_cpu_callback_args *const args)
 {
-    if (cpu == 0U) {
-        args->ret = args->func(args->cpu);
-    }
-    else {
-        EFI_STATUS status = g_mp_services_protocol->StartupThisAP(
-            g_mp_services_protocol, callback, cpu, NULL, 0, args, NULL);
-
-        if (EFI_ERROR(status)) {
-            bferror_x64("StartupThisAP failed", status);
-            args->ret = LOADER_FAILURE;
-        }
-    }
+    arch_work_on_cpu(cpu, callback, args);
 }
 
 /**
@@ -420,4 +361,50 @@ platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const order)
     }
 
     return ret;
+}
+
+/**
+ * <!-- description -->
+ *   @brief Dumps the contents of the VMM's ring buffer.
+ */
+void
+platform_dump_vmm(void)
+{
+    uint64_t epos = g_mk_debug_ring->epos;
+    uint64_t spos = g_mk_debug_ring->spos;
+
+    if (!(HYPERVISOR_DEBUG_RING_SIZE > epos)) {
+        epos = ((uint64_t)0);
+    }
+
+    if (spos == epos) {
+        console_write("no debug data to dump\r\n");
+        return;
+    }
+
+    while (spos != epos) {
+        if (!(HYPERVISOR_DEBUG_RING_SIZE > spos)) {
+            spos = ((uint64_t)0);
+        }
+
+        console_write_c(g_mk_debug_ring->buf[spos]);
+        ++spos;
+    }
+
+    console_write("\r\n");
+}
+
+/**
+ * <!-- description -->
+ *   @brief Initializes the archiecture. Some platforms might need per CPU
+ *     initialization logic to get the CPU set up. Most platforms ignore
+ *     calls to this function
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success, LOADER_FAILURE otherwise
+ */
+int64_t
+platform_arch_init(void)
+{
+    return arch_init();
 }

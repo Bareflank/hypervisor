@@ -27,7 +27,7 @@
 #ifndef EXTENDED_PROCESSOR_INFORMATION_H
 #define EXTENDED_PROCESSOR_INFORMATION_H
 
-#include "efi_cpu_physical_location2.h"
+#include <efi/efi_cpu_physical_location2.h>
 
 /** @brief Defined in EFI_MP_SERVICES_PROTOCOL.GetProcessorInfo() */
 #define CPU_V2_EXTENDED_TOPOLOGY BIT24

@@ -25,7 +25,7 @@
 #ifndef DUMP_VMM_ARGS_T_HPP
 #define DUMP_VMM_ARGS_T_HPP
 
-#include "debug_ring_t.hpp"
+#include <debug_ring_t.hpp>
 
 #include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
@@ -36,7 +36,7 @@
 namespace loader
 {
     /// @brief defines the IOCTL index for dumping a VMs debug ring
-    constexpr bsl::safe_uint32 DUMP_VMM_CMD{bsl::to_u32(0xBF03)};
+    constexpr auto DUMP_VMM_CMD{0xBF03_u32};
 
     /// @struct loader::dump_vmm_args_t
     ///

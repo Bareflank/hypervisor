@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
-
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -33,10 +31,12 @@
     .type   bf_vp_op_create_vp_impl, @function
 bf_vp_op_create_vp_impl:
 
+    mov r10, rcx
+
     mov rax, 0x6642000000050000
     syscall
 
-    mov [rsi], di
+    mov [r10], di
 
     ret
     int 3

@@ -25,7 +25,9 @@
 #ifndef DISPATCH_SYSCALL_MEM_OP_HPP
 #define DISPATCH_SYSCALL_MEM_OP_HPP
 
-#include <mk_interface.hpp>
+#include <bf_constants.hpp>
+#include <ext_t.hpp>
+#include <tls_t.hpp>
 
 #include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
@@ -34,90 +36,172 @@
 
 namespace mk
 {
-    namespace details
+    /// <!-- description -->
+    ///   @brief Implements the bf_mem_op_alloc_page syscall
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param tls the current TLS block
+    ///   @param page_pool the page pool to use
+    ///   @param ext the extension that made the syscall
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+    ///     otherwise
+    ///
+    [[nodiscard]] constexpr auto
+    syscall_mem_op_alloc_page(tls_t &tls, page_pool_t &page_pool, ext_t &ext) noexcept
+        -> bsl::errc_type
     {
-        /// <!-- description -->
-        ///   @brief Implements the bf_mem_op_alloc_page syscall
+        /// NOTE:
+        /// - ext.alloc_page is assumped to be exception UNSAFE
         ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
-        ///   @tparam EXT_CONCEPT defines the type of ext_t to use
-        ///   @param tls the current TLS block
-        ///   @param ext the extension that made the syscall
-        ///   @return Returns syscall::BF_STATUS_SUCCESS on success or an error
-        ///     code on failure.
-        ///
-        template<typename TLS_CONCEPT, typename EXT_CONCEPT>
-        [[nodiscard]] constexpr auto
-        syscall_mem_op_alloc_page(TLS_CONCEPT &tls, EXT_CONCEPT &ext) -> syscall::bf_status_t
-        {
-            auto const page{ext.alloc_page()};
-            if (bsl::unlikely(!page.virt)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return syscall::BF_STATUS_FAILURE_UNKNOWN;
-            }
 
-            tls.ext_reg0 = page.virt.get();
-            tls.ext_reg1 = page.phys.get();
-            return syscall::BF_STATUS_SUCCESS;
+        auto const page{ext.alloc_page(tls, page_pool)};
+        if (bsl::unlikely(!page.virt)) {
+            bsl::print<bsl::V>() << bsl::here();
+            return bsl::errc_failure;
         }
 
-        /// <!-- description -->
-        ///   @brief Implements the bf_mem_op_virt_to_phys syscall
+        /// NOTE:
+        /// - The remaining is assumped to be exception safe
         ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam TLS_CONCEPT defines the type of TLS block to use
-        ///   @tparam EXT_CONCEPT defines the type of ext_t to use
-        ///   @param tls the current TLS block
-        ///   @param ext the extension that made the syscall
-        ///   @return Returns syscall::BF_STATUS_SUCCESS on success or an error
-        ///     code on failure.
-        ///
-        template<typename TLS_CONCEPT, typename EXT_CONCEPT>
-        [[nodiscard]] constexpr auto
-        syscall_mem_op_virt_to_phys(TLS_CONCEPT &tls, EXT_CONCEPT &ext) -> syscall::bf_status_t
-        {
-            auto const phys{ext.virt_to_phys(tls.ext_reg1)};
-            if (bsl::unlikely(!phys)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return syscall::BF_STATUS_FAILURE_UNKNOWN;
-            }
 
-            tls.ext_reg0 = phys.get();
-            return syscall::BF_STATUS_SUCCESS;
+        tls.ext_reg0 = page.virt.get();
+        tls.ext_reg1 = page.phys.get();
+
+        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
+        return bsl::errc_success;
+    }
+
+    /// <!-- description -->
+    ///   @brief Implements the bf_mem_op_free_page syscall
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param tls the current TLS block
+    ///   @param ext the extension that made the syscall
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+    ///     otherwise
+    ///
+    [[nodiscard]] constexpr auto
+    syscall_mem_op_free_page(tls_t &tls, ext_t &ext) noexcept -> bsl::errc_type
+    {
+        auto const ret{ext.free_page(bsl::to_umax(tls.ext_reg1))};
+        if (bsl::unlikely(!ret)) {
+            bsl::print<bsl::V>() << bsl::here();
+            return ret;
         }
+
+        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
+        return bsl::errc_success;
+    }
+
+    /// <!-- description -->
+    ///   @brief Implements the bf_mem_op_alloc_huge syscall
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param tls the current TLS block
+    ///   @param page_pool the page pool to use
+    ///   @param huge_pool the huge pool to use
+    ///   @param ext the extension that made the syscall
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+    ///     otherwise
+    ///
+    [[nodiscard]] constexpr auto
+    syscall_mem_op_alloc_huge(
+        tls_t &tls, page_pool_t &page_pool, huge_pool_t &huge_pool, ext_t &ext) noexcept
+        -> bsl::errc_type
+    {
+        auto const huge{ext.alloc_huge(tls, page_pool, huge_pool, bsl::to_umax(tls.ext_reg1))};
+        if (bsl::unlikely(!huge.virt)) {
+            bsl::print<bsl::V>() << bsl::here();
+            return bsl::errc_failure;
+        }
+
+        tls.ext_reg0 = huge.virt.get();
+        tls.ext_reg1 = huge.phys.get();
+
+        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
+        return bsl::errc_success;
+    }
+
+    /// <!-- description -->
+    ///   @brief Implements the bf_mem_op_free_huge syscall
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param tls the current TLS block
+    ///   @param ext the extension that made the syscall
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+    ///     otherwise
+    ///
+    [[nodiscard]] constexpr auto
+    syscall_mem_op_free_huge(tls_t &tls, ext_t &ext) noexcept -> bsl::errc_type
+    {
+        auto const ret{ext.free_huge(bsl::to_umax(tls.ext_reg1))};
+        if (bsl::unlikely(!ret)) {
+            bsl::print<bsl::V>() << bsl::here();
+            return ret;
+        }
+
+        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
+        return bsl::errc_success;
+    }
+
+    /// <!-- description -->
+    ///   @brief Implements the bf_mem_op_alloc_heap syscall
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param tls the current TLS block
+    ///   @param page_pool the page pool to use
+    ///   @param ext the extension that made the syscall
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+    ///     otherwise
+    ///
+    [[nodiscard]] constexpr auto
+    syscall_mem_op_alloc_heap(tls_t &tls, page_pool_t &page_pool, ext_t &ext) noexcept
+        -> bsl::errc_type
+    {
+        auto const previous_heap_virt{ext.alloc_heap(tls, page_pool, bsl::to_umax(tls.ext_reg1))};
+        if (bsl::unlikely(!previous_heap_virt)) {
+            bsl::print<bsl::V>() << bsl::here();
+            return bsl::errc_failure;
+        }
+
+        tls.ext_reg0 = previous_heap_virt.get();
+
+        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
+        return bsl::errc_success;
     }
 
     /// <!-- description -->
     ///   @brief Dispatches the bf_mem_op syscalls
     ///
     /// <!-- inputs/outputs -->
-    ///   @tparam TLS_CONCEPT defines the type of TLS block to use
-    ///   @tparam EXT_CONCEPT defines the type of ext_t to use
     ///   @param tls the current TLS block
+    ///   @param page_pool the page pool to use
+    ///   @param huge_pool the huge pool to use
     ///   @param ext the extension that made the syscall
-    ///   @return Returns syscall::BF_STATUS_SUCCESS on success or an error
-    ///     code on failure.
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+    ///     otherwise
     ///
-    template<typename TLS_CONCEPT, typename EXT_CONCEPT>
     [[nodiscard]] constexpr auto
-    dispatch_syscall_mem_op(TLS_CONCEPT &tls, EXT_CONCEPT &ext) -> syscall::bf_status_t
+    dispatch_syscall_mem_op(
+        tls_t &tls, page_pool_t &page_pool, huge_pool_t &huge_pool, ext_t &ext) noexcept
+        -> bsl::errc_type
     {
-        syscall::bf_status_t ret{};
+        bsl::errc_type ret{};
 
         if (bsl::unlikely(!ext.is_handle_valid(tls.ext_reg0))) {
-            bsl::error() << "invalid handle: "        // --
+            bsl::error() << "invalid handle "         // --
                          << bsl::hex(tls.ext_reg0)    // --
                          << bsl::endl                 // --
                          << bsl::here();              // --
 
-            return syscall::BF_STATUS_FAILURE_INVALID_HANDLE;
+            tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_INVALID_HANDLE.get();
+            return bsl::errc_failure;
         }
 
         switch (syscall::bf_syscall_index(tls.ext_syscall).get()) {
             case syscall::BF_MEM_OP_ALLOC_PAGE_IDX_VAL.get(): {
-                ret = details::syscall_mem_op_alloc_page(tls, ext);
-                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
+                ret = syscall_mem_op_alloc_page(tls, page_pool, ext);
+                if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
                 }
@@ -125,9 +209,39 @@ namespace mk
                 return ret;
             }
 
-            case syscall::BF_MEM_OP_VIRT_TO_PHYS_IDX_VAL.get(): {
-                ret = details::syscall_mem_op_virt_to_phys(tls, ext);
-                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
+            case syscall::BF_MEM_OP_FREE_PAGE_IDX_VAL.get(): {
+                ret = syscall_mem_op_free_page(tls, ext);
+                if (bsl::unlikely(!ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return ret;
+                }
+
+                return ret;
+            }
+
+            case syscall::BF_MEM_OP_ALLOC_HUGE_IDX_VAL.get(): {
+                ret = syscall_mem_op_alloc_huge(tls, page_pool, huge_pool, ext);
+                if (bsl::unlikely(!ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return ret;
+                }
+
+                return ret;
+            }
+
+            case syscall::BF_MEM_OP_FREE_HUGE_IDX_VAL.get(): {
+                ret = syscall_mem_op_free_huge(tls, ext);
+                if (bsl::unlikely(!ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return ret;
+                }
+
+                return ret;
+            }
+
+            case syscall::BF_MEM_OP_ALLOC_HEAP_IDX_VAL.get(): {
+                ret = syscall_mem_op_alloc_heap(tls, page_pool, ext);
+                if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
                 }
@@ -136,14 +250,17 @@ namespace mk
             }
 
             default: {
-                bsl::error() << "unknown syscall index: "    //--
-                             << bsl::hex(tls.ext_syscall)    //--
-                             << bsl::endl                    //--
-                             << bsl::here();                 //--
-
-                return syscall::BF_STATUS_FAILURE_UNKNOWN;
+                break;
             }
         }
+
+        bsl::error() << "unknown syscall index "     //--
+                     << bsl::hex(tls.ext_syscall)    //--
+                     << bsl::endl                    //--
+                     << bsl::here();                 //--
+
+        tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_UNSUPPORTED.get();
+        return bsl::errc_failure;
     }
 }
 

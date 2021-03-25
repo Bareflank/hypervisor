@@ -37,7 +37,6 @@
  * <!-- inputs/outputs -->
  *   @param stack the mk stack to output
  *   @param cpu the CPU that this mk stack belongs to
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void dump_mk_stack(struct span_t *const stack, uint32_t const cpu);
 

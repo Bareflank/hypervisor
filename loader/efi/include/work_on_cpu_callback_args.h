@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-#ifndef PLATFORM_ON_EACH_CPU_CALLBACK_ARGS_H
-#define PLATFORM_ON_EACH_CPU_CALLBACK_ARGS_H
+#ifndef PLATFORM_WORK_ON_CPU_CALLBACK_ARGS_H
+#define PLATFORM_WORK_ON_CPU_CALLBACK_ARGS_H
 
 #include <platform.h>
 #include <types.h>

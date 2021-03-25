@@ -25,9 +25,11 @@
 #ifndef DISPATCH_ESR_NMI_HPP
 #define DISPATCH_ESR_NMI_HPP
 
+#include <intrinsic_t.hpp>
+#include <tls_t.hpp>
+
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
-#include <bsl/exit_code.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/string_view.hpp>
 #include <bsl/unlikely.hpp>
@@ -38,32 +40,32 @@ namespace mk
     ///   @brief Provides the main entry point for NMI exceptions.
     ///
     /// <!-- inputs/outputs -->
-    ///   @tparam TLS_CONCEPT defines the type of TLS block to use
-    ///   @tparam INTRINSIC_CONCEPT defines the type of intrinsics to use
     ///   @param tls the current TLS block
     ///   @param intrinsic the intrinsics to use
-    ///   @return Returns bsl::exit_success if the exception was handled,
-    ///     bsl::exit_failure otherwise
+    ///   @return Returns bsl::errc_success if the exception was handled,
+    ///     bsl::errc_failure otherwise
     ///
-    template<typename TLS_CONCEPT, typename INTRINSIC_CONCEPT>
     [[nodiscard]] constexpr auto
-    dispatch_esr_nmi(TLS_CONCEPT &tls, INTRINSIC_CONCEPT &intrinsic) noexcept -> bsl::exit_code
+    dispatch_esr_nmi(tls_t &tls, intrinsic_t &intrinsic) noexcept -> bsl::errc_type
     {
         bsl::errc_type ret{};
         bsl::safe_uint32 val{};
 
-        constexpr bsl::safe_uintmax vmcs_procbased_ctls_idx{bsl::to_umax(0x4002U)};
-        constexpr bsl::safe_uint32 vmcs_set_nmi_window_exiting{bsl::to_u32(0x400000U)};
+        constexpr auto vmcs_procbased_ctls_idx{0x4002_umax};
+        constexpr auto vmcs_set_nmi_window_exiting{0x400000_u32};
 
-        if (bsl::ZERO_UMAX != tls.nmi_lock) {
-            tls.nmi_pending = bsl::ONE_UMAX.get();
-            return bsl::exit_success;
+        constexpr auto unlocked{0_umax};
+        constexpr auto pending{1_umax};
+
+        if (unlocked != tls.nmi_lock) {
+            tls.nmi_pending = pending.get();
+            return bsl::errc_success;
         }
 
         ret = intrinsic.vmread32(vmcs_procbased_ctls_idx, val.data());
         if (bsl::unlikely(!ret)) {
             bsl::error() << bsl::here();
-            return bsl::exit_failure;
+            return ret;
         }
 
         val |= vmcs_set_nmi_window_exiting;
@@ -71,11 +73,12 @@ namespace mk
         ret = intrinsic.vmwrite32(vmcs_procbased_ctls_idx, val);
         if (bsl::unlikely(!ret)) {
             bsl::error() << bsl::here();
-            return bsl::exit_failure;
+            return ret;
         }
 
-        tls.nmi_pending = bsl::ZERO_UMAX.get();
-        return bsl::exit_success;
+        constexpr auto not_pending{0_umax};
+        tls.nmi_pending = not_pending.get();
+        return bsl::errc_success;
     }
 }
 

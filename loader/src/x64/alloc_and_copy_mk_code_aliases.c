@@ -35,6 +35,8 @@
 #include <esr_pf.h>
 #include <platform.h>
 #include <promote.h>
+#include <serial_write_c.h>
+#include <serial_write_hex.h>
 #include <types.h>
 
 #ifdef _MSC_VER
@@ -122,6 +124,18 @@ alloc_and_copy_mk_code_aliases(struct code_aliases_t *const a)
         goto platform_alloc_esr_pf_failed;
     }
 
+    a->serial_write_c = platform_alloc(HYPERVISOR_PAGE_SIZE);
+    if (((void *)0) == a->serial_write_c) {
+        bferror("platform_alloc failed");
+        goto platform_alloc_esr_pf_failed;
+    }
+
+    a->serial_write_hex = platform_alloc(HYPERVISOR_PAGE_SIZE);
+    if (((void *)0) == a->serial_write_hex) {
+        bferror("platform_alloc failed");
+        goto platform_alloc_esr_pf_failed;
+    }
+
     platform_memcpy(a->demote, demote, HYPERVISOR_PAGE_SIZE);
     platform_memcpy(a->promote, promote, HYPERVISOR_PAGE_SIZE);
     platform_memcpy(a->esr_default, esr_default, HYPERVISOR_PAGE_SIZE);
@@ -129,6 +143,8 @@ alloc_and_copy_mk_code_aliases(struct code_aliases_t *const a)
     platform_memcpy(a->esr_gpf, esr_gpf, HYPERVISOR_PAGE_SIZE);
     platform_memcpy(a->esr_nmi, esr_nmi, HYPERVISOR_PAGE_SIZE);
     platform_memcpy(a->esr_pf, esr_pf, HYPERVISOR_PAGE_SIZE);
+    platform_memcpy(a->serial_write_c, serial_write_c, HYPERVISOR_PAGE_SIZE);
+    platform_memcpy(a->serial_write_hex, serial_write_hex, HYPERVISOR_PAGE_SIZE);
 
     return LOADER_SUCCESS;
 

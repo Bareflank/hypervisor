@@ -31,6 +31,6 @@
 #include <mk_args_t.h>
 
 /** @brief stores the microkernel's _start args */
-extern struct mk_args_t *g_mk_args[HYPERVISOR_MAX_VPS_PER_VM];
+extern struct mk_args_t *g_mk_args[HYPERVISOR_MAX_PPS];
 
 #endif

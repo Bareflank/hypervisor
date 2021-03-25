@@ -33,6 +33,8 @@ namespace mk
     extern "C" void
     msg_halt() noexcept
     {
-        bsl::print() << "  --> " << bsl::bold_red << "Halting!!!\n" << bsl::reset_color;
+        bsl::print() << bsl::rst << "  --> ";
+        bsl::print() << bsl::red << "Halting!!!";
+        bsl::print() << bsl::rst << bsl::endl;
     }
 }
