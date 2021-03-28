@@ -141,9 +141,9 @@ The Bareflank Hypervisor SDK consists of the following main components:
 - kernel
 - extension
 
-The "extension" is where you put your code. It is a ring 3 application that runs on top of our microkernel in so called "ring -1" or VMX root. The "kernel" is the aformentioned microkernel, and it is responsible for executing all of the hypervisor applications that actually implement the hypervisor. In other words, all of the hypervisor logic is implemented in an extension that you provide, and our microkernel is just there to execute your extension in VMX root. The "loader" places our microkernel and your extension in VMX root. It is responsible for starting and stopping the hypervisor, and dumping the contents of its debug ring. The "vmmctl" application is used to control the loader. It provide a simple means for telling the loader what to do. 
+The "extension" is where you put your code. It is a ring 3 application that runs on top of our microkernel in so called "ring -1" or VMX root. The "kernel" is the aformentioned microkernel, and it is responsible for executing all of the hypervisor applications that actually implement the hypervisor. In other words, all of the hypervisor logic is implemented in an extension that you provide, and our microkernel is just there to execute your extension in VMX root. The "loader" places our microkernel and your extension in VMX root. It is responsible for starting and stopping the hypervisor, and dumping the contents of its debug ring. The "vmmctl" application is used to control the loader. It provides a simple means for telling the loader what to do. 
 
-To start Bareflank, we must first compile the "loader" and run it in your OS's kernel. To do that, run the following:
+To start Bareflank, compile the "loader" and run it in your OS's kernel. To do that, run the following:
 ```
 make driver_build
 make driver_load
