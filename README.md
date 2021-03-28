@@ -143,7 +143,7 @@ The Bareflank Hypervisor SDK consists of the following main components:
 
 The "extension" is where you put your code. It is a ring 3 application that runs on top of our microkernel in so called "ring -1" or VMX root. The "kernel" is the aformentioned microkernel, and it is responsible for executing all of the hypervisor applications that actually implement the hypervisor. In other words, all of the hypervisor logic is implemented in an extension that you provide, and our microkernel is just there to execute your extension in VMX root. The "loader" places our microkernel and your extension in VMX root. It is responsible for starting and stopping the hypervisor, and dumping the contents of its debug ring. The "vmmctl" application is used to control the loader. It provides a simple means for telling the loader what to do. 
 
-To start Bareflank, compile the "loader" and run it in your OS's kernel. To do that, run the following:
+To start Bareflank, compile the "loader" and run it in your OS's kernel. To do that, run the following (replace make with ninja on Windows):
 ```
 make driver_build
 make driver_load
@@ -154,24 +154,24 @@ This builds the "loader" and runs it in the OS's kernel. If you followed the bul
 make start  
 ```
 
-to get debug information, use the following:
+to get debug information, use the following (replace make with ninja on Windows):
 
 ```
 make dump
 ```
 
-To stop the hypervisor use the following:
+To stop the hypervisor use the following (replace make with ninja on Windows):
 ```
 make stop
 ```
 
-Finally, to unload the "loader" and clean up its build system you can run the following:
+Finally, to unload the "loader" and clean up its build system you can run the following (replace make with ninja on Windows):
 ```
 make driver_unload
 make driver_clean
 ```
 
-And that is it. For more information on how to build and use Bareflank, you can run the following core a complete list of commands available to you as well as the complete build configuration:
+And that is it. For more information on how to build and use Bareflank, you can run the following core a complete list of commands available to you as well as the complete build configuration (replace make with ninja on Windows):
 ```
 make info
 ```
