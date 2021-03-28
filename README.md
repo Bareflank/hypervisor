@@ -149,7 +149,7 @@ make driver_build
 make driver_load
 ```
 
-This builds the "loader" and runs it in the OS's kernel. If you followed the buld instructions above using CMake, you should have already compiled the microkernel, vmmctl and your extension (which by default is our default example). Once these components are compiled, you can run the hypervisor using the following command:
+This builds the "loader" and runs it in the OS's kernel. If you followed the buld instructions above using CMake, you should have already compiled the microkernel, vmmctl and your extension (which by default is our default example). Once these components are compiled, you can run the hypervisor using the following command (replace make with ninja on Windows):
 ```
 make start  
 ```
