@@ -25,7 +25,7 @@ option(HYPERVISOR_BUILD_LOADER "Turns on/off building the loader" ON)
 option(HYPERVISOR_BUILD_VMMCTL "Turns on/off building the vmmctl" ON)
 option(HYPERVISOR_BUILD_MICROKERNEL "Turns on/off building the microkernel" ON)
 option(HYPERVISOR_BUILD_EXAMPLES "Turns on/off building the examples" ON)
-option(HYPERVISOR_BUILD_EFI "Turns on/off building the EFI loader" ON)
+option(HYPERVISOR_BUILD_EFI "Turns on/off building the EFI loader" OFF)
 
 if (NOT DEFINED HYPERVISOR_TARGET_ARCH)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -84,6 +84,22 @@ else()
 endif()
 
 bf_add_config(
+    CONFIG_NAME HYPERVISOR_EXTENSIONS
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "example_default"
+    DESCRIPTION "Define the extension list used by the build system"
+    SKIP_VALIDATION
+)
+
+bf_add_config(
+    CONFIG_NAME HYPERVISOR_EXTENSIONS_DIR
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "${CMAKE_SOURCE_DIR}/example"
+    DESCRIPTION "Defines the extension to use"
+    SKIP_VALIDATION
+)
+
+bf_add_config(
     CONFIG_NAME HYPERVISOR_TARGET_ARCH
     CONFIG_TYPE STRING
     DEFAULT_VAL ${HYPERVISOR_DEFAULT_TARGET_ARCH}
@@ -112,14 +128,6 @@ bf_add_config(
     CONFIG_TYPE STRING
     DEFAULT_VAL ${HYPERVISOR_DEFAULT_EFI_FS0}
     DESCRIPTION "Define the file location of FS0 for UEFI"
-    SKIP_VALIDATION
-)
-
-bf_add_config(
-    CONFIG_NAME HYPERVISOR_EXTENSIONS
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "ext_cross_compile/bin/example_default"
-    DESCRIPTION "Define the extension list used by the build system"
     SKIP_VALIDATION
 )
 

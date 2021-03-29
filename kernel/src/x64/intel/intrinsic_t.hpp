@@ -282,7 +282,7 @@ namespace mk
             -> bsl::uintmax;
     }
 
-    /// @class mk::intrinsic
+    /// @class mk::intrinsic_t
     ///
     /// <!-- description -->
     ///   @brief Provides raw access to intrinsics. Instead of using global

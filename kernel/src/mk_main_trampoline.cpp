@@ -86,6 +86,8 @@ namespace mk
     /// <!-- inputs/outputs -->
     ///   @param args the loader provided arguments to the microkernel.
     ///   @param tls the current TLS block
+    ///   @return Returns bsl::exit_success on success and bsl::exit_failure
+    ///     otherwise
     ///
     [[nodiscard]] extern "C" auto
     mk_main_trampoline(loader::mk_args_t *const args, tls_t *const tls) noexcept -> bsl::exit_code

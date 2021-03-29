@@ -59,7 +59,6 @@ namespace vmmctl
     /// <!-- description -->
     ///   @brief Maps a file as read-only, and returns a pointer to the file
     ///     via data() as well as the size of the mapped file via size().
-    ///   @include example_ifmap_overview.hpp
     ///
     class ifmap final
     {
@@ -96,14 +95,12 @@ namespace vmmctl
 
         /// <!-- description -->
         ///   @brief Creates a default ifmap that has not yet been mapped.
-        ///   @include ifmap/example_ifmap_default_constructor.hpp
         ///
         ifmap() noexcept = default;
 
         /// <!-- description -->
         ///   @brief Creates a bsl::ifmap given a the filename and path of
         ///     the file to map as read-only.
-        ///   @include ifmap/example_ifmap_constructor.hpp
         ///
         /// <!-- inputs/outputs -->
         ///   @param filename the filename and path of the file to map
@@ -236,7 +233,6 @@ namespace vmmctl
 
         /// <!-- description -->
         ///   @brief Returns a pointer to the read-only mapped file.
-        ///   @include ifmap/example_ifmap_data.hpp
         ///
         /// <!-- inputs/outputs -->
         ///   @return Returns a pointer to the read-only mapped file.
@@ -250,7 +246,6 @@ namespace vmmctl
         /// <!-- description -->
         ///   @brief Returns true if the file failed to be mapped, false
         ///     otherwise.
-        ///   @include ifmap/example_ifmap_empty.hpp
         ///
         /// <!-- inputs/outputs -->
         ///   @return Returns true if the file failed to be mapped, false
@@ -264,7 +259,6 @@ namespace vmmctl
 
         /// <!-- description -->
         ///   @brief Returns !empty()
-        ///   @include ifmap/example_ifmap_operator_bool.hpp
         ///
         /// <!-- inputs/outputs -->
         ///   @return Returns !empty()
@@ -277,7 +271,6 @@ namespace vmmctl
         /// <!-- description -->
         ///   @brief Returns the number of bytes in the file being
         ///     mapped.
-        ///   @include ifmap/example_ifmap_size.hpp
         ///
         /// <!-- inputs/outputs -->
         ///   @return Returns the number of bytes in the file being
@@ -291,7 +284,6 @@ namespace vmmctl
 
         /// <!-- description -->
         ///   @brief Returns the max number of bytes the BSL supports.
-        ///   @include ifmap/example_ifmap_max_size.hpp
         ///
         /// <!-- inputs/outputs -->
         ///   @return Returns the max number of bytes the BSL supports.
@@ -305,7 +297,6 @@ namespace vmmctl
         /// <!-- description -->
         ///   @brief Returns the number of bytes in the file being
         ///     mapped.
-        ///   @include ifmap/example_ifmap_size_bytes.hpp
         ///
         /// <!-- inputs/outputs -->
         ///   @return Returns the number of bytes in the file being

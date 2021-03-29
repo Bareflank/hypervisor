@@ -40,6 +40,8 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param tls the current TLS block
+    ///   @return Returns bsl::exit_success on success and bsl::exit_failure
+    ///     otherwise
     ///
     extern "C" [[nodiscard]] auto
     fast_fail_trampoline(tls_t *const tls) noexcept -> bsl::exit_code

@@ -22,9 +22,9 @@
 if(HYPERVISOR_BUILD_EFI)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_custom_target(copy_to_efi_partition
-            COMMAND sudo cmake -E copy efi_cross_compile/bin/bareflank_efi_loader ${HYPERVISOR_EFI_FS0}/start_bareflank.efi
-            COMMAND sudo cmake -E copy mk_cross_compile/bin/kernel ${HYPERVISOR_EFI_FS0}/bareflank_kernel
-            COMMAND sudo cmake -E copy ${HYPERVISOR_EXTENSIONS} ${HYPERVISOR_EFI_FS0}/bareflank_extension0
+            COMMAND sudo cmake -E copy ${CMAKE_BINARY_DIR}/efi_cross_compile/bin/bareflank_efi_loader ${HYPERVISOR_EFI_FS0}/start_bareflank.efi
+            COMMAND sudo cmake -E copy ${CMAKE_BINARY_DIR}/mk_cross_compile/bin/kernel ${HYPERVISOR_EFI_FS0}/bareflank_kernel
+            COMMAND sudo cmake -E copy ${CMAKE_BINARY_DIR}/ext_cross_compile/bin/${HYPERVISOR_EXTENSIONS} ${HYPERVISOR_EFI_FS0}/bareflank_extension0
             COMMAND sudo cmake -E copy ${CMAKE_SOURCE_DIR}/utils/Shell.efi ${HYPERVISOR_EFI_FS0}/bareflank_efi_shell.efi
             VERBATIM
         )
@@ -32,9 +32,9 @@ if(HYPERVISOR_BUILD_EFI)
         add_custom_target(copy_to_efi_partition
             COMMAND mountvol X: /d | true
             COMMAND mountvol X: /s | true
-            COMMAND cmake -E copy efi_cross_compile/bin/bareflank_efi_loader ${HYPERVISOR_EFI_FS0}/start_bareflank.efi
-            COMMAND cmake -E copy mk_cross_compile/bin/kernel ${HYPERVISOR_EFI_FS0}/bareflank_kernel
-            COMMAND cmake -E copy ${HYPERVISOR_EXTENSIONS} ${HYPERVISOR_EFI_FS0}/bareflank_extension0
+            COMMAND cmake -E copy ${CMAKE_BINARY_DIR}/efi_cross_compile/bin/bareflank_efi_loader ${HYPERVISOR_EFI_FS0}/start_bareflank.efi
+            COMMAND cmake -E copy ${CMAKE_BINARY_DIR}/mk_cross_compile/bin/kernel ${HYPERVISOR_EFI_FS0}/bareflank_kernel
+            COMMAND cmake -E copy ${CMAKE_BINARY_DIR}/ext_cross_compile/bin/${HYPERVISOR_EXTENSIONS} ${HYPERVISOR_EFI_FS0}/bareflank_extension0
             COMMAND cmake -E copy ${CMAKE_SOURCE_DIR}/utils/Shell.efi ${HYPERVISOR_EFI_FS0}/bareflank_efi_shell.efi
             COMMAND mountvol X: /d | true
             VERBATIM

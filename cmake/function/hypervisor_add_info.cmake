@@ -37,6 +37,23 @@ macro(hypervisor_add_info)
         VERBATIM
     )
 
+    if(DEFINED hypervisor_SOURCE_DIR)
+        add_custom_command(TARGET info
+            COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR                     ${BF_COLOR_CYN}${hypervisor_SOURCE_DIR}${BF_COLOR_RST}"
+            VERBATIM
+        )
+    endif()
+
+    add_custom_command(TARGET info
+        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_EXTENSIONS          ${BF_COLOR_CYN}${HYPERVISOR_EXTENSIONS}${BF_COLOR_RST}"
+        VERBATIM
+    )
+
+    add_custom_command(TARGET info
+        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_EXTENSIONS_DIR      ${BF_COLOR_CYN}${HYPERVISOR_EXTENSIONS_DIR}${BF_COLOR_RST}"
+        VERBATIM
+    )
+
     if(HYPERVISOR_BUILD_LOADER)
         add_custom_command(TARGET info
             COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_BUILD_LOADER        ${BF_COLOR_GRN}enabled${BF_COLOR_RST}"
@@ -60,10 +77,6 @@ macro(hypervisor_add_info)
             VERBATIM
         )
     endif()
-
-
-
-
 
     if(HYPERVISOR_BUILD_MICROKERNEL)
         add_custom_command(TARGET info
@@ -118,11 +131,6 @@ macro(hypervisor_add_info)
 
     add_custom_command(TARGET info
         COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_EFI_FS0             ${BF_COLOR_CYN}${HYPERVISOR_EFI_FS0}${BF_COLOR_RST}"
-        VERBATIM
-    )
-
-    add_custom_command(TARGET info
-        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_EXTENSIONS          ${BF_COLOR_CYN}${HYPERVISOR_EXTENSIONS}${BF_COLOR_RST}"
         VERBATIM
     )
 
