@@ -1,5 +1,5 @@
 ## Contributors License Agreement
-To get started, <a href="https://www.clahub.com/agreements/Bareflank/hypervisor">sign the Contributor License Agreement</a>.
+To get started, <a href="https://www.clahub.com/agreements/Bareflank/microv">sign the Contributor License Agreement</a>.
 
 ## Forking
 
@@ -15,8 +15,8 @@ This project provides multiple methods for asking other community members questi
 **Bug Tracking / RFCs / Feature Requests / Questions:** <br>
 https://github.com/Bareflank/hypervisor/issues
 
-**IRC / Gitter:** <br>
-https://gitter.im/Bareflank-hypervisor/Lobby
+**Slack:** <br>
+[![Join the chat](https://img.shields.io/badge/chat-on%20Slack-brightgreen.svg)](https://bareflank.herokuapp.com/)
 
 ## Feature Requests
 
@@ -33,16 +33,6 @@ All issues and vulnerabilities should be submitted to the following issue tracke
 
 **Bug Tracking:** <br>
 https://github.com/Bareflank/hypervisor/issues
-
-When submitting an issue, please include the following documentation:
-
-- Title
-- Brief description of the issue
-- Instructions for how to reproduce the issue
-- Version information (or commit hash)
-- Environment information (distribution, supporting library information, compiler, hardware)
-- Console logs (if applicable)
-- Backtrace logs (if applicable)
 
 ## Request for Comments
 
@@ -62,72 +52,11 @@ Although an RFC can take on any format, please ensure that an RFC includes the f
 - Proposed documentation changes (if applicable)
 - Proposed testing changes (if applicable)
 
-Although an RFC should contain as much information as possible to reduce the number of questions likely to be asked by the community, it should also be as brief as possible. RFCs that are too long will likely see limited community involvement, resulting in a higher risk of push back during the submission of any proposed changes.
+An RFC should contain as much information as possible to reduce the number of questions likely to be asked by the community, it should also be as brief as possible. RFCs that are too long will likely see limited community involvement, resulting in a higher risk of push back during the submission of any proposed changes.
 
 ## Pull Requests / Commit Message Format
 
 Anyone can submit a pull request to the project. All pull requests must satisfy the requirements defined in the governance documentation. If the pull request includes source code, tests for the source code must also be included (usually in the form of unit tests). All CI tests must also return without error, demonstrating that not only does the source code contain the proper tests to validate it’s implementation, but these tests succeed.
-
-This project uses Astyle to format the source code, and the project provides a configuration file (astyle.conf) that should be used. Prior to submitting changes to the project, all source code should be run through Astyle to verify that the proper formatting rules are applied. If this is not done, Travis CI will fail when the PR is submitted. To format the code run "make astyle" and "make astyle_clean" when complete.
-
-Clang Tidy and Google's Sanitizers are used to perform static / dynamic analysis. If a PR fails because of these checks you can run them locally, or review the Travis CI log. To perform the Clang Tidy checks on Linux, install [bear](https://github.com/rizsotto/Bear) and run:
-
-```
-make clean
-STATIC_ANALYSIS_ENABLED=true bear make
-make tidy
-```
-
-To perform the Google Sanitizer checks run:
-
-```
-make clean
-DYNAMIC_ANALYSIS_ENABLED=true make
-make test
-```
-
-All whitespace should be removed as well. Use "git diff --check" to ensure the PR does not contain added whitespace. Doxygen is also used by this project. Prior to submitting a PR, please run "make doxygen" and "make doxygen_clean" to ensure there are no errors with respect to the documentation.
-
-Prior to submitting a PR, please rebase your git history to a single commit. To do this:
-
-```
-git fetch <upstream remote>
-git rebase -i <upstream remote>/master
-    "pick -> r" for the top commit
-    "pick -> f" for the rest of the commits
-```
-
-All commits to the project should have the following commit format. The information used in this commit format provides the community with a means to create the project’s changelog, as well as identify what each commit addresses.
-
-- Title (50 characters or less)
-- Empty line
-- Description (wrapped to 72 characters per line)
-- Empty line
-- \[ISSUE\]: link (if applicable)
-- \[RFC\]: link (if applicable)
-- Empty line
-- Sign-off
-
-For Example:
-
-```
-Added new API XYZ
-
-The library was missing the ability to do blah, and as a
-result, blah was not possible. The following commit adds
-XYZ to the project providing the ability to:
-
-- Do blah blah
-- And blah
-- As well as blah
-
-The following blah was added to the unit tests to validate
-that this new API works as intended.
-
-[RFC]: link
-
-Signed-off-by: John Smith <smithj@company.com>
-```
 
 ## API Documentation
 
