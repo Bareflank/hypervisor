@@ -23,8 +23,8 @@ Get the latest version of the Bareflank Hypervisor SDK from GitHub:
 
 ```bash
 git clone https://github.com/bareflank/hypervisor
-mkdir bsl/build && cd bsl/build
-cmake -DCMAKE_CXX_COMPILER="clang++" ..
+mkdir hypervisor/build && cd hypervisor/build
+cmake ..
 make
 ```
 
@@ -89,9 +89,9 @@ export PATH="/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBui
 
 Finally, run the following from Bash:
 ```bash
-git clone https://github.com/bareflank/bsl
-mkdir bsl/build && cd bsl/build
-cmake -DCMAKE_CXX_COMPILER="clang++" -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+git clone https://github.com/bareflank/hypervisor
+mkdir hypervisor/build && cd hypervisor/build
+cmake ..
 ninja info
 ninja
 ```
@@ -104,9 +104,9 @@ sudo apt-get install -y clang cmake lld
 
 To compile the BSL, use the following:
 ```bash
-git clone https://github.com/bareflank/bsl
-mkdir bsl/build && cd bsl/build
-cmake -DCMAKE_CXX_COMPILER="clang++" -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+git clone https://github.com/bareflank/hypervisor
+mkdir hypervisor/build && cd hypervisor/build
+cmake ..
 make info
 make
 ```
