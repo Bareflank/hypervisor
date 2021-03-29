@@ -42,6 +42,8 @@ namespace mk
     ///   @param tls the current TLS block
     ///   @param ext_vmexit the ext_t to handle the VMExit
     ///   @param vps_pool the VPS pool to use
+    ///   @return Returns bsl::exit_success on success and bsl::exit_failure
+    ///     otherwise
     ///
     template<typename TLS_CONCEPT, typename EXT_CONCEPT, typename VPS_POOL_CONCEPT>
     [[nodiscard]] constexpr auto

@@ -23,12 +23,12 @@ if(HYPERVISOR_BUILD_VMMCTL)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_custom_target(start
             COMMAND sync
-            COMMAND sudo vmmctl/vmmctl start mk_cross_compile/bin/kernel ${HYPERVISOR_EXTENSIONS}
+            COMMAND sudo vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/mk_cross_compile/bin/kernel ${CMAKE_BINARY_DIR}/ext_cross_compile/bin/${HYPERVISOR_EXTENSIONS}
             VERBATIM
         )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         add_custom_target(start
-            COMMAND vmmctl/vmmctl start mk_cross_compile/bin/kernel ${HYPERVISOR_EXTENSIONS}
+            COMMAND vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/mk_cross_compile/bin/kernel ${CMAKE_BINARY_DIR}/ext_cross_compile/bin/${HYPERVISOR_EXTENSIONS}
             VERBATIM
         )
     else()

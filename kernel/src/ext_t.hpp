@@ -995,6 +995,7 @@ namespace mk
         ///     the current set of page tables used by the extension.
         ///
         /// <!-- inputs/outputs -->
+        ///   @param virt the virtual address to convert
         ///   @return Returns the physical address of the page.
         ///
         [[nodiscard]] constexpr auto
@@ -1074,6 +1075,7 @@ namespace mk
         /// <!-- inputs/outputs -->
         ///   @tparam TLS_CONCEPT defines the type of TLS block to use
         ///   @param tls the current TLS block
+        ///   @param exit_reason the reason for the VMExit
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///

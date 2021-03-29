@@ -141,7 +141,7 @@ The Bareflank Hypervisor SDK consists of the following main components:
 - kernel
 - extension
 
-The "extension" is where you put your code. It is a ring 3 application that runs on top of our microkernel in so called "ring -1" or VMX root. The "kernel" is the aformentioned microkernel, and it is responsible for executing all of the hypervisor applications that actually implement the hypervisor. In other words, all of the hypervisor logic is implemented in an extension that you provide, and our microkernel is just there to execute your extension in VMX root. The "loader" places our microkernel and your extension in VMX root. It is responsible for starting and stopping the hypervisor, and dumping the contents of its debug ring. The "vmmctl" application is used to control the loader. It provides a simple means for telling the loader what to do. 
+The "extension" is where you put your code. It is a ring 3 application that runs on top of our microkernel in so called "ring -1" or VMX root. The "kernel" is the aformentioned microkernel, and it is responsible for executing all of the hypervisor applications that actually implement the hypervisor. In other words, all of the hypervisor logic is implemented in an extension that you provide, and our microkernel is just there to execute your extension in VMX root. The "loader" places our microkernel and your extension in VMX root. It is responsible for starting and stopping the hypervisor, and dumping the contents of its debug ring. The "vmmctl" application is used to control the loader. It provides a simple means for telling the loader what to do.
 
 To start Bareflank, compile the "loader" and run it in your OS's kernel. To do that, run the following (replace make with ninja on Windows):
 ```
@@ -151,7 +151,7 @@ make driver_load
 
 This builds the "loader" and runs it in the OS's kernel. If you followed the buld instructions above using CMake, you should have already compiled the microkernel, vmmctl and your extension (which by default is our default example). Once these components are compiled, you can run the hypervisor using the following command (replace make with ninja on Windows):
 ```
-make start  
+make start
 ```
 
 to get debug information, use the following (replace make with ninja on Windows):
@@ -175,6 +175,38 @@ And that is it. For more information on how to build and use Bareflank, you can 
 ```
 make info
 ```
+
+## Writing Your Own Extensions
+The Bareflank Hypervisor comes complete with a series of example extensions you can use to create your own custom hypervisor. To start, we will create a working directory, and clone some repos to speed up the build process:
+```bash
+mkdir ~/working
+mkdir ~/working/build
+git clone https://github.com/bareflank/bsl ~/working/bsl
+git clone https://github.com/bareflank/hypervisor ~/working/hypervisor
+```
+
+Next, we will copy an existing example into our working directory (pick the example that provides the best starting point for your project):
+```bash
+cp -R ~/working/hypervisor/example/default ~/working/extension
+```
+
+Finally, we will configure the project, telling the build system how to find our custom extension.
+```bash
+cd ~/working/build
+cmake \
+  ../hypervisor \
+  -DHYPERVISOR_EXTENSIONS=example_default \
+  -DHYPERVISOR_EXTENSIONS_DIR=$PWD/../extension \
+  -DFETCHCONTENT_SOURCE_DIR_BSL=$PWD/../bsl
+```
+
+The HYPERVISOR_EXTENSIONS variable tells CMake what the name of the resulting binary is that represents your extension. Specifically, in your extension, there will be a call to install(). You set HYPERVISOR_EXTENSIONS to the value after TARGETS. In the case above, since we copied the default example, we set DHYPERVISOR_EXTENSIONS to example_default.
+
+HYPERVISOR_EXTENSIONS_DIR defines the location of your extension. Since we copied to the extension to your working directory, we used this location. Note that the path must be an absolute path, which is why we used the absolute path of the build folder as a starting point and then worked out the location of the extension folder from there.
+
+FETCHCONTENT_SOURCE_DIR_BSL is optional. This tells the build system where to find the BSL. Since we already cloned it into our working directory, we can use it instead of asking the build system to automatically fetch the BSL for us. This is create for offline builds, or builds where you are rerunning cmake a lot and don't want to wait for the BSL to download each time.
+
+The rest of the usage instructions can be used to start/stop your custom hypervisor. For more information about what ABIs the microkernel provides your extension with, please see the Microkernel Syscall Specification in the docs folder. We also provide an example implementation of this ABI as a set of C++ APIs that you can use if you would like. This example implementation can be seen in the syscall/include/cpp/mk_interface.hpp file.
 
 ## **Resources**
 [![Join the chat](https://img.shields.io/badge/chat-on%20Slack-brightgreen.svg)](https://bareflank.herokuapp.com/)

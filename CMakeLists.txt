@@ -36,7 +36,7 @@ if(HYPERVISOR_BUILD_MICROKERNEL)
     hypervisor_add_mk_cross_compile(cmake/mk_cross_compile)
 endif()
 
-if(HYPERVISOR_BUILD_EXAMPLES)
+if(HYPERVISOR_BUILD_EXAMPLES OR DEFINED HYPERVISOR_EXTENSIONS_DIR)
     hypervisor_add_ext_cross_compile(cmake/ext_cross_compile)
 endif()
 

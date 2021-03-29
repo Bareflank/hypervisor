@@ -44,6 +44,8 @@ namespace mk
     ///   @tparam EXT_CONCEPT defines the type of ext_t to use
     ///   @param tls the current TLS block
     ///   @param ext_fail the ext_t to handle the VMExit
+    ///   @return Returns bsl::exit_success on success and bsl::exit_failure
+    ///     otherwise
     ///
     template<typename TLS_CONCEPT, typename EXT_CONCEPT>
     [[nodiscard]] constexpr auto

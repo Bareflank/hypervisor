@@ -32,6 +32,10 @@ namespace mk
     /// <!-- description -->
     ///   @brief Executes the main VMExit loop
     ///
+    /// <!-- inputs/outputs -->
+    ///   @return Returns bsl::exit_success on success and bsl::exit_failure
+    ///     otherwise
+    ///
     extern "C" [[nodiscard]] auto vmexit_loop_entry() noexcept -> bsl::exit_code;
 }
 

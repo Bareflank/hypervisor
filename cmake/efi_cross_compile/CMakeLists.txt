@@ -20,7 +20,7 @@
 # SOFTWARE.
 
 cmake_minimum_required(VERSION 3.13)
-project(hypervisor_extensions C ASM)
+project(hypervisor_efi C ASM)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../silence.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../write_constants.cmake)

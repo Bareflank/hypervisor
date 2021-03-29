@@ -32,6 +32,9 @@ namespace mk
     /// <!-- description -->
     ///   @brief Returns to the microkernel after the execution of call_ext.
     ///
+    /// <!-- inputs/outputs -->
+    ///   @param status the status code to provide the microkernel on return
+    ///
     extern "C" void return_to_mk(bsl::exit_code const status) noexcept;
 }
 
