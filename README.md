@@ -200,13 +200,13 @@ cmake \
   -DFETCHCONTENT_SOURCE_DIR_BSL=$PWD/../bsl
 ```
 
-The HYPERVISOR_EXTENSIONS variable tells CMake what the name of the resulting binary is that represents your extension. Specifically, in your extension, there will be a call to install(). You set HYPERVISOR_EXTENSIONS to the value after TARGETS. In the case above, since we copied the default example, we set DHYPERVISOR_EXTENSIONS to example_default.
+The `HYPERVISOR_EXTENSIONS` variable tells CMake what the name of the resulting binary is that represents your extension. Specifically, in your extension's CMakeLists.txt, there will be a call to `install()` like `install(TARGETS example_default DESTINATION bin)`. You set `HYPERVISOR_EXTENSIONS` to the value after `TARGETS`. In the case above, since we copied the default example, we set `HYPERVISOR_EXTENSIONS` to `example_default`.
 
-HYPERVISOR_EXTENSIONS_DIR defines the location of your extension. Since we copied to the extension to your working directory, we used this location. Note that the path must be an absolute path, which is why we used the absolute path of the build folder as a starting point and then worked out the location of the extension folder from there.
+`HYPERVISOR_EXTENSIONS_DIR` defines the location of your extension. Note that the path must be an absolute path, which is why we used the absolute path of the build folder as a starting point and then worked out the location of the extension folder from there.
 
-FETCHCONTENT_SOURCE_DIR_BSL is optional. This tells the build system where to find the BSL. Since we already cloned it into our working directory, we can use it instead of asking the build system to automatically fetch the BSL for us. This is create for offline builds, or builds where you are rerunning cmake a lot and don't want to wait for the BSL to download each time.
+`FETCHCONTENT_SOURCE_DIR_BSL` is optional. This tells the build system where to find the BSL. Since we already cloned the BSL into our working directory, we can use it instead of asking the build system to automatically fetch the BSL for us. This is great for offline builds, or builds where you are rerunning cmake a lot and don't want to wait for the BSL to download each time.
 
-The rest of the usage instructions can be used to start/stop your custom hypervisor. For more information about what ABIs the microkernel provides your extension with, please see the Microkernel Syscall Specification in the docs folder. We also provide an example implementation of this ABI as a set of C++ APIs that you can use if you would like. This example implementation can be seen in the syscall/include/cpp/mk_interface.hpp file.
+The rest of the usage instructions above can be used to start/stop your custom hypervisor. For more information about what ABIs the microkernel provides your extension with, please see the Microkernel Syscall Specification in the docs folder. We also provide an example implementation of this ABI as a set of C++ APIs that you can use if you would like. This example set of APIs can be seen in the syscall/include/cpp/mk_interface.hpp file.
 
 ## **Resources**
 [![Join the chat](https://img.shields.io/badge/chat-on%20Slack-brightgreen.svg)](https://bareflank.herokuapp.com/)
