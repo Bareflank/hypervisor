@@ -55,19 +55,16 @@
     - [2.10.2. bf_callback_op_register_bootstrap, OP=0x3, IDX=0x2](#2102-bf_callback_op_register_bootstrap-op0x3-idx0x2)
     - [2.10.3. bf_callback_op_register_vmexit, OP=0x3, IDX=0x3](#2103-bf_callback_op_register_vmexit-op0x3-idx0x3)
     - [2.10.4. bf_callback_op_register_fail, OP=0x3, IDX=0x4](#2104-bf_callback_op_register_fail-op0x3-idx0x4)
-  - [2.11. Virtual Machine (VM)](#211-virtual-machine-vm)
-  - [2.12. Virtual Machine ID (VMID)](#212-virtual-machine-id-vmid)
-  - [2.13. Virtual Machine Syscalls](#213-virtual-machine-syscalls)
+  - [2.11. Virtual Machine Syscalls](#211-virtual-machine-syscalls)
+    - [2.12. Virtual Machine ID (VMID)](#212-virtual-machine-id-vmid)
     - [2.13.1. bf_vm_op_create_vm, OP=0x4, IDX=0x0](#2131-bf_vm_op_create_vm-op0x4-idx0x0)
     - [2.13.2. bf_vm_op_destroy_vm, OP=0x4, IDX=0x1](#2132-bf_vm_op_destroy_vm-op0x4-idx0x1)
-  - [2.14. Virtual Processor (VP)](#214-virtual-processor-vp)
-  - [2.15. Virtual Processor ID (VPID)](#215-virtual-processor-id-vpid)
-  - [2.16. Virtual Processor Syscalls](#216-virtual-processor-syscalls)
+  - [2.14. Virtual Processor Syscalls](#214-virtual-processor-syscalls)
+    - [2.15. Virtual Processor ID (VPID)](#215-virtual-processor-id-vpid)
     - [2.16.1. bf_vp_op_create_vp, OP=0x5, IDX=0x0](#2161-bf_vp_op_create_vp-op0x5-idx0x0)
     - [2.16.2. bf_vp_op_destroy_vp, OP=0x5, IDX=0x1](#2162-bf_vp_op_destroy_vp-op0x5-idx0x1)
-  - [2.17. Virtual Processor State (VPS)](#217-virtual-processor-state-vps)
-  - [2.18. Virtual Processor State ID (VPSID)](#218-virtual-processor-state-id-vpsid)
-  - [2.19. Virtual Processor State Syscalls](#219-virtual-processor-state-syscalls)
+    - [2.17. Virtual Processor State Syscalls](#217-virtual-processor-state-syscalls)
+    - [2.18. Virtual Processor State ID (VPSID)](#218-virtual-processor-state-id-vpsid)
     - [2.19.1. bf_vps_op_create_vps, OP=0x6, IDX=0x0](#2191-bf_vps_op_create_vps-op0x6-idx0x0)
     - [2.19.2. bf_vps_op_destroy_vps, OP=0x6, IDX=0x1](#2192-bf_vps_op_destroy_vps-op0x6-idx0x1)
     - [2.19.3. bf_vps_op_init_as_root, OP=0x6, IDX=0x2](#2193-bf_vps_op_init_as_root-op0x6-idx0x2)
@@ -851,15 +848,13 @@ This syscall tells the microkernel that the extension would like to receive call
 | :---- | :---------- |
 | 0x0000000000000004 | Defines the syscall index for bf_callback_op_register_fail |
 
-## 2.11. Virtual Machine (VM)
+## 2.11. Virtual Machine Syscalls
 
 A Virtual Machine or VM virtually represents a physical computer. Although the microkernel has an internal representation of a VM, it doesn't understand what a VM is outside of resource management, and it is up to the extension to define what a VM is and how it should operate.
 
-## 2.12. Virtual Machine ID (VMID)
+### 2.12. Virtual Machine ID (VMID)
 
 The Virtual Machine ID  (VMID) is a 16bit number that uniquely identifies a VM.
-
-## 2.13. Virtual Machine Syscalls
 
 ### 2.13.1. bf_vm_op_create_vm, OP=0x4, IDX=0x0
 
@@ -897,15 +892,13 @@ This syscall tells the microkernel to destroy a VM given an ID.
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the syscall index for bf_vm_op_destroy_vm |
 
-## 2.14. Virtual Processor (VP)
+## 2.14. Virtual Processor Syscalls
 
 TODO
 
-## 2.15. Virtual Processor ID (VPID)
+### 2.15. Virtual Processor ID (VPID)
 
 The Virtual Processor ID (VPID) is a 16bit number that uniquely identifies a VP.
-
-## 2.16. Virtual Processor Syscalls
 
 ### 2.16.1. bf_vp_op_create_vp, OP=0x5, IDX=0x0
 
@@ -943,15 +936,13 @@ This syscall tells the microkernel to destroy a VP given an ID.
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the syscall index for bf_vp_op_destroy_vp |
 
-## 2.17. Virtual Processor State (VPS)
+### 2.17. Virtual Processor State Syscalls
 
 TODO
 
-## 2.18. Virtual Processor State ID (VPSID)
+### 2.18. Virtual Processor State ID (VPSID)
 
 The Virtual Processor State ID (VPSID) is a 16bit number that uniquely identifies a VPS.
-
-## 2.19. Virtual Processor State Syscalls
 
 ### 2.19.1. bf_vps_op_create_vps, OP=0x6, IDX=0x0
 
