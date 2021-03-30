@@ -206,7 +206,7 @@ The `HYPERVISOR_EXTENSIONS` variable tells CMake what the name of the resulting 
 
 `FETCHCONTENT_SOURCE_DIR_BSL` is optional. This tells the build system where to find the BSL. Since we already cloned the BSL into our working directory, we can use it instead of asking the build system to automatically fetch the BSL for us. This is great for offline builds, or builds where you are rerunning cmake a lot and don't want to wait for the BSL to download each time.
 
-The rest of the usage instructions above can be used to start/stop your custom hypervisor. For more information about what ABIs the microkernel provides your extension with, please see the Microkernel Syscall Specification in the docs folder. We also provide an example implementation of this ABI as a set of C++ APIs that you can use if you would like. This example set of APIs can be seen in the syscall/include/cpp/mk_interface.hpp file.
+The rest of the usage instructions above can be used to start/stop your custom hypervisor. For more information about what ABIs the microkernel provides your extension with, please see the [Microkernel Syscall Specification](https://github.com/Bareflank/hypervisor/blob/master/docs/Microkernel%20Syscall%20Specification.md) in the docs folder. We also provide an example implementation of this ABI as a set of C++ APIs that you can use if you would like. This example set of APIs can be seen in the syscall/include/cpp/mk_interface.hpp file.
 
 ## **Resources**
 [![Join the chat](https://img.shields.io/badge/chat-on%20Slack-brightgreen.svg)](https://bareflank.herokuapp.com/)
