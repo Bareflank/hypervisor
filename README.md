@@ -211,7 +211,7 @@ The rest of the usage instructions above can be used to start/stop your custom h
 ## **Resources**
 [![Join the chat](https://img.shields.io/badge/chat-on%20Slack-brightgreen.svg)](https://bareflank.herokuapp.com/)
 
-The Bareflank Support Library provides a ton of useful resources to learn how to use the library including:
+The Bareflank hypervisor provides a ton of useful resources to learn how to use the library including:
 -   **Documentation**: <https://bareflank.github.io/hypervisor/>
 -   **Examples**: <https://github.com/Bareflank/hypervisor/tree/master/example>
 -   **Unit Tests**: <https://github.com/Bareflank/hypervisor/tree/master/test>
