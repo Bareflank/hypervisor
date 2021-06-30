@@ -80,7 +80,7 @@ namespace vmmctl
         ///   @param name the name of the device driver to IOCTL.
         ///
         template<typename GUID>
-        explicit ioctl(GUID name) noexcept
+        explicit constexpr ioctl(GUID name) noexcept
         {
             BOOL ret{};
             HANDLE info{};
@@ -165,7 +165,7 @@ namespace vmmctl
         /// <!-- description -->
         ///   @brief Destructor
         ///
-        ~ioctl() noexcept
+        constexpr ~ioctl() noexcept
         {
             if (bsl::unlikely(nullptr != m_hndl)) {
                 bsl::discard(CloseHandle(m_hndl));
@@ -238,7 +238,7 @@ namespace vmmctl
         /// <!-- inputs/outputs -->
         ///   @return Returns is_open()
         ///
-        [[nodiscard]] constexpr explicit operator bool() const noexcept
+        [[nodiscard]] explicit constexpr operator bool() const noexcept
         {
             return this->is_open();
         }
@@ -248,13 +248,11 @@ namespace vmmctl
         ///     data.
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam REQUEST the type of request
         ///   @param req the request
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
-        template<typename REQUEST>
         [[nodiscard]] constexpr auto
-        send(bsl::safe_integral<REQUEST> const &req) const noexcept -> bool
+        send(bsl::safe_uintmax const &req) const noexcept -> bool
         {
             if (bsl::unlikely(nullptr == m_hndl)) {
                 bsl::error() << "failed to send, ioctl not properly initialized\n";
@@ -283,18 +281,14 @@ namespace vmmctl
         ///   @brief Reads data from the device driver
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam REQUEST the type of request
         ///   @param req the request
         ///   @param data a pointer to read data to
         ///   @param size the size of the buffer being read to
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
-        template<typename REQUEST>
         [[nodiscard]] constexpr auto
-        read(
-            bsl::safe_integral<REQUEST> const &req,
-            void *const data,
-            bsl::safe_uintmax const &size) const noexcept -> bool
+        read_data(bsl::safe_uintmax const &req, void *const data, bsl::safe_uintmax const &size)
+            const noexcept -> bool
         {
             if (bsl::unlikely(nullptr == m_hndl)) {
                 bsl::error() << "failed to read, ioctl not properly initialized\n";
@@ -334,16 +328,14 @@ namespace vmmctl
         ///   @brief Writes data to the device driver
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam REQUEST the type of request
         ///   @param req the request
         ///   @param data a pointer to write data from
         ///   @param size the size of the buffer being written from
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
-        template<typename REQUEST>
         [[nodiscard]] constexpr auto
-        write(
-            bsl::safe_integral<REQUEST> const &req,
+        write_data(
+            bsl::safe_uintmax const &req,
             void const *const data,
             bsl::safe_uintmax const &size) const noexcept -> bool
         {
@@ -387,16 +379,14 @@ namespace vmmctl
         ///   @brief Reads/writes data from/to the device driver
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam REQUEST the type of request
         ///   @param req the request
         ///   @param data a pointer to read/write data to/from
         ///   @param size the size of the buffer being read/written to/from
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
-        template<typename REQUEST>
         [[nodiscard]] constexpr auto
-        read_write(
-            bsl::safe_integral<REQUEST> const &req,
+        read_write_data(
+            bsl::safe_uintmax const &req,
             void *const data,
             bsl::safe_uintmax const &size) const noexcept -> bool
         {

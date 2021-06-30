@@ -46,15 +46,6 @@ namespace loader
         /// @brief stores a pointer to the idt
         bsl::uint64 *base;
     };
-
-    namespace details
-    {
-        /// @brief defined the expected size of the idtr_t struct
-        constexpr bsl::safe_uintmax EXPECTED_IDTR_T_SIZE{bsl::to_umax(10)};
-
-        /// Check to make sure the idtr_t is the right size.
-        static_assert(sizeof(interrupt_descriptor_table_register_t) == EXPECTED_IDTR_T_SIZE);
-    }
 }
 
 #pragma pack(pop)

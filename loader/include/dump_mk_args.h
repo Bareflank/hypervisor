@@ -37,7 +37,6 @@
  * <!-- inputs/outputs -->
  *   @param args the mk args to output
  *   @param cpu the CPU that this mk args belongs to
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void dump_mk_args(struct mk_args_t *const args, uint32_t const cpu);
 

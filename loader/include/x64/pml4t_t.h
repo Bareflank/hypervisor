@@ -27,12 +27,11 @@
 #ifndef PML4T_T_H
 #define PML4T_T_H
 
-#pragma pack(push, 1)
-
 #include <pdpt_t.h>
 #include <pml4te_t.h>
-#include <static_assert.h>
 #include <types.h>
+
+#pragma pack(push, 1)
 
 /** @brief defines total number of entries in the PML4T */
 #define LOADER_NUM_PML4T_ENTRIES ((uint64_t)512)
@@ -50,9 +49,6 @@ struct pml4t_t
     /** @brief stores pointers to child tables */
     struct pdpt_t *tables[LOADER_NUM_PML4T_ENTRIES];
 };
-
-/** @brief verify that the pml4t_t structure is the right size */
-STATIC_ASSERT(sizeof(struct pml4t_t) == 0x2000, pml4t_t_has_incorrect_size);
 
 #pragma pack(pop)
 

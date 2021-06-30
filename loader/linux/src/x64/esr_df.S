@@ -36,34 +36,28 @@
 esr_df:
     UNWIND_HINT_EMPTY
 
-    mov rdx, 0x03F8
-    mov rax, 0x45
-    out dx, al
+    mov rdi, 'e'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x53
-    out dx, al
+    mov rdi, 's'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x52
-    out dx, al
+    mov rdi, 'r'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x20
-    out dx, al
+    mov rdi, '_'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x44
-    out dx, al
+    mov rdi, 'd'
+    call serial_write_c
 
-    mov rdx, 0x03F8
-    mov rax, 0x46
-    out dx, al
+    mov rdi, 'f'
+    call serial_write_c
+
+    mov rdi, '\n'
+    call serial_write_c
 
     cli
     hlt
-
-    ret
-    int 3
 
     .size esr_df, 0x1000

@@ -31,13 +31,18 @@
 namespace loader
 {
     /// @brief defines the value of EAX for all CPUID commands
-    constexpr bsl::safe_uint32 CPUID_COMMAND_EAX{bsl::to_u32(0x400000FFU)};
+    constexpr auto CPUID_COMMAND_EAX{0x400000FF_u32};
     /// @brief defines the value of ECX for the CPUID stop command
-    constexpr bsl::safe_uint32 CPUID_COMMAND_ECX_STOP{bsl::to_u32(0xBF000000U)};
+    constexpr auto CPUID_COMMAND_ECX_STOP{0xBF000000_u32};
     /// @brief defines the value of ECX for the CPUID report on command
-    constexpr bsl::safe_uint32 CPUID_COMMAND_ECX_REPORT_ON{bsl::to_u32(0xBF000001U)};
+    constexpr auto CPUID_COMMAND_ECX_REPORT_ON{0xBF000001_u32};
     /// @brief defines the value of ECX for the CPUID report off command
-    constexpr bsl::safe_uint32 CPUID_COMMAND_ECX_REPORT_OFF{bsl::to_u32(0xBF000002U)};
+    constexpr auto CPUID_COMMAND_ECX_REPORT_OFF{0xBF000002_u32};
+
+    /// @brief defines the value of RAX on success
+    constexpr auto CPUID_COMMAND_RAX_SUCCESS{0x0_u64};
+    /// @brief defines the value of RAX on failure
+    constexpr auto CPUID_COMMAND_RAX_FAILURE{0x1_u64};
 }
 
 #endif

@@ -26,7 +26,6 @@
 
 #include <alloc_and_copy_mk_code_aliases.h>
 #include <alloc_mk_debug_ring.h>
-#include <check_for_hve_support.h>
 #include <debug.h>
 #include <dump_mk_code_aliases.h>
 #include <dump_mk_debug_ring.h>
@@ -34,9 +33,9 @@
 #include <free_mk_debug_ring.h>
 #include <g_mk_code_aliases.h>
 #include <g_mk_debug_ring.h>
+#include <g_vmm_status.h>
 #include <platform.h>
 #include <types.h>
-#include <vmm_status.h>
 
 /**
  * <!-- description -->
@@ -53,11 +52,6 @@ loader_init(void)
 {
     if (VMM_STATUS_CORRUPT == g_vmm_status) {
         bferror("Unable to init, previous VMM failed to properly stop");
-        return LOADER_FAILURE;
-    }
-
-    if (check_for_hve_support()) {
-        bferror("check_for_hve_support failed");
         return LOADER_FAILURE;
     }
 

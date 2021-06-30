@@ -35,11 +35,15 @@
  * <!-- inputs/outputs -->
  *   @param stack the mk stack to output
  *   @param cpu the CPU that this mk stack belongs to
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void
 dump_mk_stack(struct span_t *const stack, uint32_t const cpu)
 {
+    if (((void *)0) == stack) {
+        bferror("stack is NULL");
+        return;
+    }
+
     bfdebug_d32("mk stack on cpu", cpu);
     bfdebug_ptr(" - addr", stack->addr);
     bfdebug_x64(" - size", stack->size);

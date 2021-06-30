@@ -32,7 +32,7 @@
 #include <types.h>
 
 /** @brief stores the stack used by the microkernel */
-extern struct span_t g_mk_stack[HYPERVISOR_MAX_VPS_PER_VM];
+extern struct span_t g_mk_stack[HYPERVISOR_MAX_PPS];
 
 /** @brief stores the virtual address of the MK's stack */
 extern uint64_t g_mk_stack_virt;

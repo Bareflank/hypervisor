@@ -27,8 +27,7 @@
 #ifndef DUMP_VMM_ARGS_T_H
 #define DUMP_VMM_ARGS_T_H
 
-#include "debug_ring_t.h"
-
+#include <debug_ring_t.h>
 #include <stdint.h>
 
 #pragma pack(push, 1)

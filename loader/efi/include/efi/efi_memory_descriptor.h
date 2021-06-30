@@ -27,7 +27,7 @@
 #ifndef EFI_MEMORY_DESCRIPTOR_H
 #define EFI_MEMORY_DESCRIPTOR_H
 
-#include "efi_types.h"
+#include <efi/efi_types.h>
 
 /**
  * @brief Memory cacheability attribute: The memory region supports being

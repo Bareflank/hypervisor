@@ -26,7 +26,7 @@
 
     intrinsic_sgdt PROC
 
-    sgdt [rcx]
+    sgdt fword ptr[rcx]
     ret
     int 3
 

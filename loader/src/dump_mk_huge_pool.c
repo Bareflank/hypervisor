@@ -34,11 +34,15 @@
  *
  * <!-- inputs/outputs -->
  *   @param huge_pool the mk huge pool to output
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void
 dump_mk_huge_pool(struct mutable_span_t *const huge_pool)
 {
+    if (((void *)0) == huge_pool) {
+        bferror("huge_pool is NULL");
+        return;
+    }
+
     bfdebug("mk huge pool:");
     bfdebug_ptr(" - addr", huge_pool->addr);
     bfdebug_x64(" - size", huge_pool->size);

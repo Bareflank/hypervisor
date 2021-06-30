@@ -25,7 +25,9 @@
 #ifndef FAST_FAIL_HPP
 #define FAST_FAIL_HPP
 
+#include <ext_t.hpp>
 #include <return_to_vmexit_loop.hpp>
+#include <tls_t.hpp>
 
 #include <bsl/debug.hpp>
 #include <bsl/exit_code.hpp>
@@ -40,25 +42,20 @@ namespace mk
     ///     or a halt() will occur.
     ///
     /// <!-- inputs/outputs -->
-    ///   @tparam TLS_CONCEPT defines the type of TLS block to use
-    ///   @tparam EXT_CONCEPT defines the type of ext_t to use
     ///   @param tls the current TLS block
-    ///   @param ext_fail the ext_t to handle the VMExit
-    ///   @return Returns bsl::exit_success on success and bsl::exit_failure
-    ///     otherwise
+    ///   @param intrinsic the intrinsic_t to use
+    ///   @param ext the ext_t to handle the fail
+    ///   @return Returns bsl::exit_success if the fail was handled,
+    ///     bsl::exit_failure otherwise.
     ///
-    template<typename TLS_CONCEPT, typename EXT_CONCEPT>
     [[nodiscard]] constexpr auto
-    fast_fail(TLS_CONCEPT &tls, EXT_CONCEPT *const ext_fail) noexcept -> bsl::exit_code
+    fast_fail(tls_t &tls, intrinsic_t &intrinsic, ext_t *const ext) noexcept -> bsl::exit_code
     {
-        bsl::print() << bsl::endl           // --
-                     << bsl::bold_red       // --
-                     << "fast failing:"     // --
-                     << bsl::reset_color    // --
-                     << bsl::endl;          // --
+        bsl::print() << bsl::red << "\nfast failing:";
+        bsl::print() << bsl::rst << bsl::endl;
 
-        if (nullptr != ext_fail) {
-            auto const ret{ext_fail->fail(tls)};
+        if (nullptr != ext) {
+            auto const ret{ext->fail(tls, intrinsic)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::exit_failure;

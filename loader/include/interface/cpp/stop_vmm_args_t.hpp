@@ -34,7 +34,7 @@
 namespace loader
 {
     /// @brief defines the IOCTL index for stopping the VMM
-    constexpr bsl::safe_uint32 STOP_VMM_CMD{bsl::to_u32(0xBF02)};
+    constexpr auto STOP_VMM_CMD{0xBF02_u32};
 
     /// @struct loader::stop_vmm_args_t
     ///

@@ -26,7 +26,7 @@
 
     intrinsic_sidt PROC
 
-    sidt [rcx]
+    sidt fword ptr[rcx]
     ret
     int 3
 

@@ -46,7 +46,7 @@
 
 /**
  * <!-- description -->
- *   @brief Enables AMD SVE
+ *   @brief Enables Hardware Virtualization Extensions
  *
  * <!-- inputs/outputs -->
  *   @param state the mk state save containing the HVE page

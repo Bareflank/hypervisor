@@ -35,12 +35,16 @@
  *
  * <!-- inputs/outputs -->
  *   @param segments the array of mk ELF segments to output
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void
 dump_mk_elf_segments(struct elf_segment_t *const segments)
 {
     uint64_t idx;
+
+    if (((void *)0) == segments) {
+        bferror("segments is NULL");
+        return;
+    }
 
     for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_SEGMENTS; ++idx) {
         if (((void *)0) != segments[idx].addr) {

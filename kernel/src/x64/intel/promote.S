@@ -24,6 +24,31 @@
  * SOFTWARE.
  */
 
+    /** @brief defines the offset of state_save_t.rax */
+    #define SS_OFFSET_RAX 0x000
+    /** @brief defines the offset of state_save_t.promote_handler */
+    #define SS_OFFSET_PROMOTE_HANDLER 0x2E8
+    /** @brief defines the offset of state_save_t.esr_default_handler */
+    #define SS_OFFSET_ESR_DEFAULT_HANDLER 0x2F0
+    /** @brief defines the offset of state_save_t.esr_df_handler */
+    #define SS_OFFSET_ESR_DF_HANDLER 0x2F8
+    /** @brief defines the offset of state_save_t.esr_gpf_handler */
+    #define SS_OFFSET_ESR_GPF_HANDLER 0x300
+    /** @brief defines the offset of state_save_t.esr_nmi_handler */
+    #define SS_OFFSET_ESR_NMI_HANDLER 0x308
+    /** @brief defines the offset of state_save_t.esr_pf_handler */
+    #define SS_OFFSET_ESR_PF_HANDLER 0x310
+    /** @brief defines the offset of state_save_t.nmi */
+    #define SS_OFFSET_NMI 0x318
+
+    /** @brief defines the offset of tls_t.nmi_pending */
+    #define TLS_OFFSET_NMI_PENDING 0x260
+
+    /** @brief defines primary_proc_based_vm_execution_ctls */
+    #define VMCS_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS 0x4002
+    /** @brief defines primary_proc_based_vm_execution_ctls.nmi_window */
+    #define VMCS_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS_NMI_WINDOW 0x0000000000400000
+
     .code64
     .intel_syntax noprefix
 
@@ -31,79 +56,104 @@
     .type   promote, @function
 promote:
 
+    /**
+     * NOTE:
+     * - Save off the first argument just in case we need to call other
+     *   functions including debugging. The first argument in this case
+     *   is a pointer to the root VP's state save.
+     */
+
     mov r15, rdi
-    mov [r15 + 0x000], rsi
+
+    /**
+     * NOTE:
+     * - Store the return value for the demote() function. Once this function
+     *   is done, it will return to the loader's promote() function which
+     *   will return to the C portion of the loader as if demote() had returned
+     *   and this is where we store the return value. Note that promote()
+     *   can be called on error, or when the hypervisor is stopping.
+     */
+
+    mov [r15 + SS_OFFSET_RAX], rsi
+
+    /**
+     * NOTE:
+     * - Restore the exception vectors. This is needed because we will no
+     *   longer be able to use the exception vectores from the microkernel
+     *   as we unload it, so we will use the exception vectors from the
+     *   loader instead.
+     */
 
     mov rdi, 0
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 1
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 2
-    mov rsi, [r15 + 0x308]
+    mov rsi, [r15 + SS_OFFSET_ESR_NMI_HANDLER]
     call set_esr
 
     mov rdi, 3
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 4
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 5
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 6
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 7
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 8
-    mov rsi, [r15 + 0x2F8]
+    mov rsi, [r15 + SS_OFFSET_ESR_DF_HANDLER]
     call set_esr
 
     mov rdi, 10
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 11
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 12
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 13
-    mov rsi, [r15 + 0x300]
+    mov rsi, [r15 + SS_OFFSET_ESR_GPF_HANDLER]
     call set_esr
 
     mov rdi, 14
-    mov rsi, [r15 + 0x310]
+    mov rsi, [r15 + SS_OFFSET_ESR_PF_HANDLER]
     call set_esr
 
     mov rdi, 16
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 17
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 18
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     mov rdi, 19
-    mov rsi, [r15 + 0x2F0]
+    mov rsi, [r15 + SS_OFFSET_ESR_DEFAULT_HANDLER]
     call set_esr
 
     /**
@@ -121,34 +171,40 @@ promote:
 
     /**
      * TODO:
-     * - There is a third was an NMI could be recorded. If an extension
+     * - There is a third way an NMI could be recorded. If an extension
      *   injects an NMI and then promotes without ever allowing the
      *   injection to process. For now we don't handle this case as it
      *   is extremely unlikely.
      */
 
-    mov rax, gs:[0x260]
+    mov rax, gs:[TLS_OFFSET_NMI_PENDING]
     cmp rax, 0x1
     jne nmi_pending_transfer_complete
 
     mov rax, 0x1
-    mov [r15 + 0x318], rax
+    mov [r15 + SS_OFFSET_NMI], rax
 
 nmi_pending_transfer_complete:
 
-    mov rax, 0x4002
+    mov rax, VMCS_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS
     vmread rax, rax
     jbe nmi_window_transfer_complete
 
-    mov rdx, 0x0000000000400000
+    mov rdx, VMCS_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS_NMI_WINDOW
     and rax, rdx
     cmp rax, 0x0
     je nmi_window_transfer_complete
 
     mov rax, 0x1
-    mov [r15 + 0x318], rax
+    mov [r15 + SS_OFFSET_NMI], rax
 
  nmi_window_transfer_complete:
+
+    /**
+     * NOTE:
+     * - Call the loader's promote() handler. This will conclude execution
+     *   from the microkernel.
+     */
 
     call set_up_target
 capture_spec:

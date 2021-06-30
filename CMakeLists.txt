@@ -20,26 +20,37 @@
 # SOFTWARE.
 
 cmake_minimum_required(VERSION 3.13)
-project(hypervisor CXX)
+project(hypervisor C CXX ASM)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/init_build.cmake)
 
-if(HYPERVISOR_BUILD_LOADER)
-    add_subdirectory(loader)
-endif()
+if(NOT CMAKE_BUILD_TYPE STREQUAL CODECOV)
+    if(HYPERVISOR_BUILD_LOADER)
+        add_subdirectory(loader)
+    endif()
 
-if(HYPERVISOR_BUILD_VMMCTL)
-    add_subdirectory(vmmctl)
-endif()
+    if(HYPERVISOR_BUILD_VMMCTL)
+        add_subdirectory(vmmctl)
+    endif()
 
-if(HYPERVISOR_BUILD_MICROKERNEL)
-    hypervisor_add_mk_cross_compile(cmake/mk_cross_compile)
-endif()
+    if(HYPERVISOR_BUILD_MICROKERNEL)
+        hypervisor_add_mk_cross_compile(cmake/mk_cross_compile)
+    endif()
 
-if(HYPERVISOR_BUILD_EXAMPLES OR DEFINED HYPERVISOR_EXTENSIONS_DIR)
     hypervisor_add_ext_cross_compile(cmake/ext_cross_compile)
+
+    if(BUILD_TESTS AND NOT HYPERVISOR_BUILD_TESTS_OVERRIDE)
+        include(kernel/integration/integration_targets.cmake)
+    endif()
 endif()
 
-if(HYPERVISOR_BUILD_EFI)
-    hypervisor_add_efi_cross_compile(cmake/efi_cross_compile)
+if(NOT CMAKE_BUILD_TYPE STREQUAL RELEASE AND NOT CMAKE_BUILD_TYPE STREQUAL MINSIZEREL)
+    if(BUILD_TESTS AND NOT HYPERVISOR_BUILD_TESTS_OVERRIDE)
+        add_subdirectory(example/default/test)
+        add_subdirectory(kernel/test)
+        # add_subdirectory(loader/test)
+        add_subdirectory(runtime/test)
+        add_subdirectory(syscall/test)
+        add_subdirectory(vmmctl/test)
+    endif()
 endif()

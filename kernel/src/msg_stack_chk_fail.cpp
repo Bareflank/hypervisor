@@ -33,7 +33,7 @@ namespace mk
     extern "C" void
     msg_stack_chk_fail() noexcept
     {
-        bsl::print() << bsl::bold_red << "...<FAULT>\n\n" << bsl::reset_color;
+        bsl::print() << bsl::red << "...<FAULT>\n\n" << bsl::rst;
         bsl::error() << "Stack Overflow Detected!!!\n";
     }
 }

@@ -27,9 +27,9 @@
 #ifndef EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL_H
 #define EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL_H
 
-#include "efi_simple_text_output_mode.h"
-#include "efi_status.h"
-#include "efi_types.h"
+#include <efi/efi_simple_text_output_mode.h>
+#include <efi/efi_status.h>
+#include <efi/efi_types.h>
 
 /** @brief prototype for _EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL */
 struct _EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL;

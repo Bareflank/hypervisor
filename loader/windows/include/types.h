@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: SPDX-License-Identifier: GPL-2.0 OR MIT */
-
 /**
  * @copyright
  * Copyright (C) 2020 Assured Information Security, Inc.
@@ -29,7 +27,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include "stdint.h"
+#include <stdint.h>
 
 /**
  * @brief Returned by a loader function when a function succeeds.

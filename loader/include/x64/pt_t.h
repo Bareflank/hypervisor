@@ -27,11 +27,10 @@
 #ifndef PT_T_H
 #define PT_T_H
 
-#pragma pack(push, 1)
-
 #include <pte_t.h>
-#include <static_assert.h>
 #include <types.h>
+
+#pragma pack(push, 1)
 
 /** @brief defines total number of entries in the PT */
 #define LOADER_NUM_PT_ENTRIES ((uint64_t)512)
@@ -47,9 +46,6 @@ struct pt_t
     /** @brief stores the entries for this page table */
     struct pte_t entires[LOADER_NUM_PT_ENTRIES];
 };
-
-/** @brief verify that the pt_t structure is the right size */
-STATIC_ASSERT(sizeof(struct pt_t) == 0x1000, pt_t_has_incorrect_size);
 
 #pragma pack(pop)
 

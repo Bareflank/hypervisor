@@ -36,7 +36,6 @@
  *
  * <!-- inputs/outputs -->
  *   @param file the mk elf file to output
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void dump_mk_elf_file(struct span_t *const file);
 

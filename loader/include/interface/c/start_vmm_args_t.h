@@ -27,9 +27,8 @@
 #ifndef START_VMM_ARGS_T_H
 #define START_VMM_ARGS_T_H
 
-#include "span_t.h"
-
 #include <constants.h>
+#include <span_t.h>
 #include <stdint.h>
 
 #pragma pack(push, 1)

@@ -28,7 +28,15 @@ include(${bsl_SOURCE_DIR}/cmake/build_types.cmake)
 
 include(${CMAKE_CURRENT_LIST_DIR}/silence.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/write_constants.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/write_toolchain_x64_ext_ld.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/write_toolchain_x64_mk_ld.cmake)
+
+if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
+    include(${CMAKE_CURRENT_LIST_DIR}/write_toolchain_x64_ext_ld.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/write_toolchain_x64_mk_ld.cmake)
+endif()
+
+if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
+    include(${CMAKE_CURRENT_LIST_DIR}/write_toolchain_aarch64_ext_ld.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/write_toolchain_aarch64_mk_ld.cmake)
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/interface/hypervisor.cmake)

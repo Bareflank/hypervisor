@@ -39,7 +39,6 @@
 
 // clang-format on
 
-#include <bsl/byte.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
 #include <bsl/debug.hpp>
@@ -67,7 +66,7 @@ namespace vmmctl
         /// @brief stores a handle to the mapped file.
         HANDLE m_view{};
         /// @brief stores a view of the file that is mapped.
-        bsl::span<bsl::byte const> m_data{};
+        bsl::span<bsl::uint8 const> m_data{};
 
         /// <!-- description -->
         ///   @brief Swaps *this with other
@@ -99,7 +98,7 @@ namespace vmmctl
         /// <!-- description -->
         ///   @brief Creates a default ifmap that has not yet been mapped.
         ///
-        ifmap() noexcept = default;
+        constexpr ifmap() noexcept = default;
 
         /// <!-- description -->
         ///   @brief Creates a vmmctl::ifmap given a the filename and path of
@@ -108,7 +107,7 @@ namespace vmmctl
         /// <!-- inputs/outputs -->
         ///   @param filename the filename and path of the file to map
         ///
-        explicit ifmap(bsl::string_view const &filename) noexcept
+        explicit constexpr ifmap(bsl::string_view const &filename) noexcept
         {
             m_file = CreateFileA(
                 filename.data(),
@@ -156,26 +155,26 @@ namespace vmmctl
             }
 
             m_data = {
-                static_cast<bsl::byte const *>(ptr),
+                static_cast<bsl::uint8 const *>(ptr),
                 (bsl::to_umax(high) << bsl::to_umax(32)) | bsl::to_umax(size)};
         }
 
         /// <!-- description -->
         ///   @brief Destructor unmaps a previously mapped file.
         ///
-        ~ifmap() noexcept = default;
-        // {
-        //     if (nullptr != m_file) {
-        //         bsl::discard(UnmapViewOfFile(m_data.data()));
-        //         bsl::discard(CloseHandle(m_view));
-        //         bsl::discard(CloseHandle(m_file));
-        //         m_file = nullptr;
-        //         m_view = nullptr;
-        //     }
-        //     else {
-        //         bsl::touch();
-        //     }
-        // }
+        constexpr ~ifmap() noexcept
+        {
+            if (nullptr != m_file) {
+                bsl::discard(UnmapViewOfFile(m_data.data()));
+                bsl::discard(CloseHandle(m_view));
+                bsl::discard(CloseHandle(m_file));
+                m_file = nullptr;
+                m_view = nullptr;
+            }
+            else {
+                bsl::touch();
+            }
+        }
 
         /// <!-- description -->
         ///   @brief copy constructor
@@ -230,7 +229,7 @@ namespace vmmctl
         ///   @return Returns a span to the read-only mapped file.
         ///
         [[nodiscard]] constexpr auto
-        view() const noexcept -> bsl::span<bsl::byte const>
+        view() const noexcept -> bsl::span<bsl::uint8 const>
         {
             return m_data;
         }
@@ -267,7 +266,7 @@ namespace vmmctl
         /// <!-- inputs/outputs -->
         ///   @return Returns !empty()
         ///
-        [[nodiscard]] constexpr explicit operator bool() const noexcept
+        [[nodiscard]] explicit constexpr operator bool() const noexcept
         {
             return !this->empty();
         }

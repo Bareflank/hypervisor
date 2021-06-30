@@ -39,4 +39,9 @@
 /** @brief defines the value of ECX for the CPUID report off command */
 #define CPUID_COMMAND_ECX_REPORT_OFF ((uint32_t)0xBF000002U)
 
+/** @brief defines the value of RAX on success */
+#define CPUID_COMMAND_RAX_SUCCESS ((uint64_t)0x0U)
+/** @brief defines the value of RAX on failure */
+#define CPUID_COMMAND_RAX_FAILURE ((uint64_t)0x1U)
+
 #endif

@@ -35,11 +35,15 @@
  *
  * <!-- inputs/outputs -->
  *   @param debug_ring the mk debug ring to output information about
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void
 dump_mk_debug_ring(struct debug_ring_t *const debug_ring)
 {
+    if (((void *)0) == debug_ring) {
+        bferror("debug_ring is NULL");
+        return;
+    }
+
     bfdebug("mk debug ring:");
     bfdebug_ptr(" - addr", debug_ring);
     bfdebug_x64(" - size", HYPERVISOR_DEBUG_RING_SIZE);

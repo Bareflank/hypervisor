@@ -24,6 +24,11 @@
  * SOFTWARE.
  */
 
+    /** @brief defines the offset of tls_t.current_fast_fail_ip */
+    #define TLS_OFFSET_CURRENT_FAST_FAIL_IP 0x180
+    /** @brief defines the offset of tls_t.current_fast_fail_sp */
+    #define TLS_OFFSET_CURRENT_FAST_FAIL_SP 0x188
+
     .code64
     .intel_syntax noprefix
 
@@ -31,12 +36,11 @@
     .type   return_to_current_fast_fail, @function
 return_to_current_fast_fail:
 
-    mov rax, gs:[0x188]
+    mov rax, gs:[TLS_OFFSET_CURRENT_FAST_FAIL_SP]
+
     cmp rax, 0
     je use_current_stack
-
     mov rsp, rax
-
 use_current_stack:
 
     call set_up_target
@@ -44,7 +48,7 @@ capture_spec:
     pause
     jmp capture_spec
 set_up_target:
-    mov rax, gs:[0x180]
+    mov rax, gs:[TLS_OFFSET_CURRENT_FAST_FAIL_IP]
     mov [rsp], rax
     ret
     int 3

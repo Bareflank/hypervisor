@@ -34,11 +34,15 @@
  *
  * <!-- inputs/outputs -->
  *   @param page_pool the mk page pool to output
- *   @return 0 on success, LOADER_FAILURE on failure.
  */
 void
 dump_mk_page_pool(struct mutable_span_t *const page_pool)
 {
+    if (((void *)0) == page_pool) {
+        bferror("page_pool is NULL");
+        return;
+    }
+
     bfdebug("mk page pool:");
     bfdebug_ptr(" - addr", page_pool->addr);
     bfdebug_x64(" - size", page_pool->size);

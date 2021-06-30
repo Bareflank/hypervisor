@@ -104,9 +104,7 @@ intrinsic_set_tp:
     .type   intrinsic_tls_reg, @function
 intrinsic_tls_reg:
 
-    stac
     mov rax, fs:[rdi]
-    clac
 
     ret
     int 3
@@ -119,9 +117,7 @@ intrinsic_tls_reg:
     .type   intrinsic_set_tls_reg, @function
 intrinsic_set_tls_reg:
 
-    stac
     mov fs:[rdi], rsi
-    clac
 
     ret
     int 3
@@ -245,6 +241,21 @@ intrinsic_wrmsr_unsafe:
 
 
 
+    .globl  intrinsic_invlpga
+    .type   intrinsic_invlpga, @function
+intrinsic_invlpga:
+
+    mov rax, rdi
+    mov rcx, rsi
+    invlpga rax, ecx
+
+    ret
+    int 3
+
+    .size intrinsic_invlpga, .-intrinsic_invlpga
+
+
+
     .globl  intrinsic_vmrun
     .type   intrinsic_vmrun, @function
 intrinsic_vmrun:
@@ -265,17 +276,21 @@ intrinsic_vmrun:
     /* PAT                                                                    */
     /**************************************************************************/
 
+    mov rax, [r11 + 0x0090]
+    and rax, 0x00000001
+    jnz skip_load_pat
+
     mov edi, 0x00000277
     call intrinsic_rdmsr_unsafe
     mov [r13 + 0x0668], rax
     mov rsi, [r11 + 0x0668]
     call intrinsic_wrmsr_unsafe
 
+skip_load_pat:
+
     /**************************************************************************/
     /* General Purpose Register State                                         */
     /**************************************************************************/
-
-    stac
 
     mov rax, fs:[0x800]
     mov [r11 + 0x05F8], rax
@@ -300,8 +315,6 @@ intrinsic_vmrun:
     mov r14, fs:[0x868]
     mov r15, fs:[0x870]
 
-    clac
-
     /**************************************************************************/
     /* Run                                                                    */
     /**************************************************************************/
@@ -323,8 +336,6 @@ intrinsic_vmrun:
     /**************************************************************************/
     /* General Purpose Register State                                         */
     /**************************************************************************/
-
-    stac
 
     mov fs:[0x870], r15
     mov fs:[0x868], r14
@@ -349,17 +360,21 @@ intrinsic_vmrun:
     mov rax, [r11 + 0x05F8]
     mov fs:[0x800], rax
 
-    clac
-
     /**************************************************************************/
     /* PAT                                                                    */
     /**************************************************************************/
+
+    mov rax, [r11 + 0x0090]
+    and rax, 0x00000001
+    jnz skip_save_pat
 
     mov edi, 0x00000277
     call intrinsic_rdmsr_unsafe
     mov [r11 + 0x0668], rax
     mov rsi, [r13 + 0x0668]
     call intrinsic_wrmsr_unsafe
+
+skip_save_pat:
 
     /**************************************************************************/
     /* Done                                                                   */

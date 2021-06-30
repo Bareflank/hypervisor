@@ -57,6 +57,8 @@
 build/
 site/
 doxygen_output/
+grcov/
+genhtml/
 
 # Linux Loader
 loader/**/*.symvers

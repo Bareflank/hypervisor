@@ -27,9 +27,10 @@
 #include <alloc_pdpt.h>
 #include <alloc_pdt.h>
 #include <alloc_pt.h>
-#include <bfelf_elf64_phdr_t.h>
+#include <bfelf/bfelf_elf64_phdr_t.h>
 #include <constants.h>
 #include <debug.h>
+#include <flush_cache.h>
 #include <map_4k_page.h>
 #include <pdpt_t.h>
 #include <pdpto.h>
@@ -41,6 +42,7 @@
 #include <pt_t.h>
 #include <pte_t.h>
 #include <pto.h>
+#include <root_page_table_t.h>
 #include <types.h>
 
 /**
@@ -57,32 +59,16 @@
  *   @param virt the virtual address to map phys to
  *   @param phys the physical address to map
  *   @param flags the p_flags field from the segment associated with this page
- *   @param pml4t the root page table to place the resulting map
+ *   @param rpt the root page table to place the resulting map
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-map_4k_page(uint64_t const virt, uint64_t phys, uint32_t const flags, struct pml4t_t *const pml4t)
+map_4k_page(uint64_t const virt, uint64_t phys, uint32_t const flags, root_page_table_t *const rpt)
 {
     struct pdpt_t *pdpt = ((void *)0);
     struct pdt_t *pdt = ((void *)0);
     struct pt_t *pt = ((void *)0);
     struct pte_t *pte = ((void *)0);
-
-    /**
-     * TODO:
-     * - We need to map in any page tables that we allocate. The problem is,
-     *   we cannot use a recursive function to do this as it could result
-     *   in a stack overflow in the kernel. Likely, the best option would
-     *   be to convert this function into a private _impl, and provide it
-     *   with a queue that we can push allocated pages to so that the wrapper
-     *   can map any pages that are pushed. This way, as we map, we can
-     *   continue to push pages until the process finally stops. Since this
-     *   code is common between Windows/Linux/UEFI, we will need to implement
-     *   this queue from scratch. For now, we seem to be ok without this
-     *   additional logic, but it is possible that the microkernel could end
-     *   up with a page fault while it is trying to walk page tables as it
-     *   wouldn't have all of the memory properly mapped.
-     */
 
     if (((uint64_t)0) == virt) {
         bferror_x64("virt is NULL", virt);
@@ -107,9 +93,9 @@ map_4k_page(uint64_t const virt, uint64_t phys, uint32_t const flags, struct pml
         return LOADER_FAILURE;
     }
 
-    pdpt = pml4t->tables[pml4to(virt)];
+    pdpt = rpt->tables[pml4to(virt)];
     if (((void *)0) == pdpt) {
-        pdpt = alloc_pdpt(pml4t, virt);
+        pdpt = alloc_pdpt(rpt, virt);
     }
 
     pdt = pdpt->tables[pdpto(virt)];
@@ -140,5 +126,6 @@ map_4k_page(uint64_t const virt, uint64_t phys, uint32_t const flags, struct pml
         pte->nx = ((uint64_t)1);
     }
 
+    flush_cache(pte);
     return LOADER_SUCCESS;
 }

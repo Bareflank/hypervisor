@@ -28,6 +28,7 @@
 #include <alloc_and_copy_root_vp_state.h>
 #include <alloc_mk_args.h>
 #include <alloc_mk_stack.h>
+#include <check_cpu_configuration.h>
 #include <constants.h>
 #include <debug.h>
 #include <demote.h>
@@ -39,6 +40,7 @@
 #include <free_mk_stack.h>
 #include <free_mk_state.h>
 #include <free_root_vp_state.h>
+#include <g_cpu_status.h>
 #include <g_ext_elf_files.h>
 #include <g_mk_args.h>
 #include <g_mk_debug_ring.h>
@@ -79,8 +81,23 @@ start_vmm_per_cpu(uint32_t const cpu)
     uint64_t mk_stack_offs;
     uint64_t mk_stack_virt;
 
-    if (((uint64_t)cpu) >= HYPERVISOR_MAX_VPS_PER_VM) {
+    if (((uint64_t)cpu) >= HYPERVISOR_MAX_PPS) {
         bferror("cpu out of range");
+        return LOADER_FAILURE;
+    }
+
+    if (CPU_STATUS_STOPPED != g_cpu_status[cpu]) {
+        bferror("cannot start cpu that is already running/corrupt");
+        return LOADER_FAILURE;
+    }
+
+    if (platform_arch_init()) {
+        bferror("platform_arch_init failed");
+        return LOADER_FAILURE;
+    }
+
+    if (check_cpu_configuration()) {
+        bferror("check_cpu_configuration failed");
         return LOADER_FAILURE;
     }
 
@@ -130,14 +147,14 @@ start_vmm_per_cpu(uint32_t const cpu)
         goto map_mk_args_failed;
     }
 
-    g_mk_args[cpu]->pp = ((uint16_t)cpu);
+    g_mk_args[cpu]->ppid = ((uint16_t)cpu);
 
     /**
-     * NOTE:
-     * - We cannot ask for the total number of CPUs on any AP from UEFI, so
-     *   we only do this for the BSP, and then use the BSP value to get the
-     *   total CPU count from that point on.
-     */
+         * NOTE:
+         * - We cannot ask for the total number of CPUs on any AP from UEFI, so
+         *   we only do this for the BSP, and then use the BSP value to get the
+         *   total CPU count from that point on.
+         */
 
     if (((uint64_t)0) == cpu) {
         g_mk_args[cpu]->online_pps = ((uint16_t)platform_num_online_cpus());
@@ -158,17 +175,16 @@ start_vmm_per_cpu(uint32_t const cpu)
     g_mk_args[cpu]->rpt = g_mk_root_page_table;
     g_mk_args[cpu]->rpt_phys = platform_virt_to_phys(g_mk_root_page_table);
 
-    ret = get_mk_page_pool_addr(&g_mk_page_pool, HYPERVISOR_DIRECT_MAP_ADDR, &addr);
+    ret = get_mk_page_pool_addr(&g_mk_page_pool, HYPERVISOR_MK_PAGE_POOL_ADDR, &addr);
     if (ret) {
         bferror("get_mk_page_pool_addr failed");
         goto get_mk_page_pool_addr_failed;
     }
 
     g_mk_args[cpu]->page_pool.addr = addr;
-    g_mk_args[cpu]->page_pool.size = g_mk_page_pool.size;
-    g_mk_args[cpu]->page_pool_base_virt = HYPERVISOR_DIRECT_MAP_ADDR;
+    g_mk_args[cpu]->page_pool.size = g_mk_page_pool.size / HYPERVISOR_PAGE_SIZE;
 
-    ret = get_mk_huge_pool_addr(&g_mk_huge_pool, HYPERVISOR_DIRECT_MAP_ADDR, &addr);
+    ret = get_mk_huge_pool_addr(&g_mk_huge_pool, HYPERVISOR_MK_HUGE_POOL_ADDR, &addr);
     if (ret) {
         bferror("get_mk_huge_pool_addr failed");
         goto get_mk_huge_pool_addr_failed;
@@ -176,7 +192,6 @@ start_vmm_per_cpu(uint32_t const cpu)
 
     g_mk_args[cpu]->huge_pool.addr = addr;
     g_mk_args[cpu]->huge_pool.size = g_mk_huge_pool.size;
-    g_mk_args[cpu]->huge_pool_base_virt = HYPERVISOR_DIRECT_MAP_ADDR;
 
 #ifdef DEBUG_LOADER
     dump_mk_stack(&g_mk_stack[cpu], cpu);
@@ -186,11 +201,13 @@ start_vmm_per_cpu(uint32_t const cpu)
 #endif
 
     if (demote(g_mk_args[cpu], g_mk_state[cpu], g_root_vp_state[cpu])) {
+        platform_dump_vmm();
         bferror("demote failed");
         goto demote_failed;
     }
 
     send_command_report_on();
+    g_cpu_status[cpu] = CPU_STATUS_RUNNING;
     return LOADER_SUCCESS;
 
 demote_failed:

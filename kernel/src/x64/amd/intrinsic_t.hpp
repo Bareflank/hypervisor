@@ -28,114 +28,122 @@
 #include <bsl/cstdint.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
+#include <bsl/exit_code.hpp>
 #include <bsl/is_constant_evaluated.hpp>
 #include <bsl/safe_integral.hpp>
 
 namespace mk
 {
-    namespace details
-    {
-        /// <!-- description -->
-        ///   @brief Implements intrinsic_t::invlpg
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param val n/a
-        ///
-        extern "C" void intrinsic_invlpg(bsl::uint64 const val) noexcept;
+    /// <!-- description -->
+    ///   @brief Implements intrinsic_t::invlpg
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param val n/a
+    ///
+    extern "C" void intrinsic_invlpg(bsl::uint64 const val) noexcept;
 
-        /// <!-- description -->
-        ///   @brief Implements intrinsic_t::cr3
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return n/a
-        ///
-        extern "C" [[nodiscard]] auto intrinsic_cr3() noexcept -> bsl::uint64;
+    /// <!-- description -->
+    ///   @brief Implements intrinsic_t::cr3
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] auto intrinsic_cr3() noexcept -> bsl::uint64;
 
-        /// <!-- description -->
-        ///   @brief Implements intrinsic_t::set_cr3
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param val n/a
-        ///
-        extern "C" void intrinsic_set_cr3(bsl::uint64 const val) noexcept;
+    /// <!-- description -->
+    ///   @brief Implements intrinsic_t::set_cr3
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param val n/a
+    ///
+    extern "C" void intrinsic_set_cr3(bsl::uint64 const val) noexcept;
 
-        /// <!-- description -->
-        ///   @brief Implements intrinsic_t::tp
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return n/a
-        ///
-        extern "C" [[nodiscard]] auto intrinsic_tp() noexcept -> bsl::uint64;
+    /// <!-- description -->
+    ///   @brief Implements intrinsic_t::tp
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] auto intrinsic_tp() noexcept -> bsl::uint64;
 
-        /// <!-- description -->
-        ///   @brief Implements intrinsic_t::set_tp
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param val n/a
-        ///
-        extern "C" void intrinsic_set_tp(bsl::uint64 const val) noexcept;
+    /// <!-- description -->
+    ///   @brief Implements intrinsic_t::set_tp
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param val n/a
+    ///
+    extern "C" void intrinsic_set_tp(bsl::uint64 const val) noexcept;
 
-        /// <!-- description -->
-        ///   @brief Implements intrinsic_t::tls_reg
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param reg n/a
-        ///   @return n/a
-        ///
-        extern "C" [[nodiscard]] auto intrinsic_tls_reg(bsl::uint64 const reg) noexcept
-            -> bsl::uint64;
+    /// <!-- description -->
+    ///   @brief Implements intrinsic_t::tls_reg
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg n/a
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] auto intrinsic_tls_reg(bsl::uint64 const reg) noexcept -> bsl::uint64;
 
-        /// <!-- description -->
-        ///   @brief Implements intrinsic_t::set_tls_reg
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param reg n/a
-        ///   @param val n/a
-        ///
-        extern "C" void
-        intrinsic_set_tls_reg(bsl::uint64 const reg, bsl::uint64 const val) noexcept;
+    /// <!-- description -->
+    ///   @brief Implements intrinsic_t::set_tls_reg
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg n/a
+    ///   @param val n/a
+    ///
+    extern "C" void intrinsic_set_tls_reg(bsl::uint64 const reg, bsl::uint64 const val) noexcept;
 
-        /// <!-- description -->
-        ///   @brief Implements intrinsic_t::halt
-        ///
-        extern "C" void intrinsic_halt() noexcept;
+    /// <!-- description -->
+    ///   @brief Implements intrinsic_t::halt
+    ///
+    extern "C" void intrinsic_halt() noexcept;
 
-        /// <!-- description -->
-        ///   @brief Implements intrinsic_t::rdmsr
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param msr n/a
-        ///   @return n/a
-        ///
-        extern "C" [[nodiscard]] auto
-        intrinsic_rdmsr(bsl::uint32 msr, bsl::uint64 *const val) noexcept -> bsl::exit_code;
+    /// <!-- description -->
+    ///   @brief Implements intrinsic_t::rdmsr
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param msr n/a
+    ///   @param val n/a
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] auto intrinsic_rdmsr(bsl::uint32 msr, bsl::uint64 *const val) noexcept
+        -> bsl::exit_code;
 
-        /// <!-- description -->
-        ///   @brief Implements intrinsic_t::wrmsr
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param msr n/a
-        ///   @param val n/a
-        ///
-        extern "C" [[nodiscard]] auto
-        intrinsic_wrmsr(bsl::uint32 msr, bsl::uint64 const val) noexcept -> bsl::exit_code;
+    /// <!-- description -->
+    ///   @brief Implements intrinsic_t::wrmsr
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param msr n/a
+    ///   @param val n/a
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] auto intrinsic_wrmsr(bsl::uint32 msr, bsl::uint64 const val) noexcept
+        -> bsl::exit_code;
 
-        /// <!-- description -->
-        ///   @brief Executes the VMRun instruction. When this function returns
-        ///     a "VMExit" has occurred and must be handled.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param guest_vmcb a pointer to the guest VMCB to use
-        ///   @param guest_vmcb_phys the physical address of the guest VMCB to use
-        ///   @param host_vmcb a pointer to the host VMCB to use
-        ///   @param host_vmcb_phys the physical address of the host VMCB to use
-        ///
-        extern "C" [[nodiscard]] auto intrinsic_vmrun(
-            void *const guest_vmcb,
-            bsl::uintmax const guest_vmcb_phys,
-            void *const host_vmcb,
-            bsl::uintmax const host_vmcb_phys) noexcept -> bsl::uintmax;
-    }
+    /// <!-- description -->
+    ///   @brief Implements intrinsic_t::invlpga
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param addr n/a
+    ///   @param asid n/a
+    ///
+    extern "C" void intrinsic_invlpga(bsl::uint64 addr, bsl::uint64 const asid) noexcept;
+
+    /// <!-- description -->
+    ///   @brief Executes the VMRun instruction. When this function returns
+    ///     a "VMExit" has occurred and must be handled.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param guest_vmcb a pointer to the guest VMCB to use
+    ///   @param guest_vmcb_phys the physical address of the guest VMCB to use
+    ///   @param host_vmcb a pointer to the host VMCB to use
+    ///   @param host_vmcb_phys the physical address of the host VMCB to use
+    ///   @return Returns the exit reason associated with the VMExit
+    ///
+    extern "C" [[nodiscard]] auto intrinsic_vmrun(
+        void *const guest_vmcb,
+        bsl::uintmax const guest_vmcb_phys,
+        void *const host_vmcb,
+        bsl::uintmax const host_vmcb_phys) noexcept -> bsl::uintmax;
 
     /// @class mk::intrinsic_t
     ///
@@ -147,52 +155,6 @@ namespace mk
     class intrinsic_t final
     {
     public:
-        /// <!-- description -->
-        ///   @brief Default constructor
-        ///
-        constexpr intrinsic_t() noexcept = default;
-
-        /// <!-- description -->
-        ///   @brief Destructor
-        ///
-        constexpr ~intrinsic_t() noexcept = default;
-
-        /// <!-- description -->
-        ///   @brief copy constructor
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param o the object being copied
-        ///
-        constexpr intrinsic_t(intrinsic_t const &o) noexcept = delete;
-
-        /// <!-- description -->
-        ///   @brief move constructor
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
-        ///
-        constexpr intrinsic_t(intrinsic_t &&o) noexcept = delete;
-
-        /// <!-- description -->
-        ///   @brief copy assignment
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param o the object being copied
-        ///   @return a reference to *this
-        ///
-        [[maybe_unused]] constexpr auto operator=(intrinsic_t const &o) &noexcept
-            -> intrinsic_t & = delete;
-
-        /// <!-- description -->
-        ///   @brief move assignment
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
-        ///   @return a reference to *this
-        ///
-        [[maybe_unused]] constexpr auto operator=(intrinsic_t &&o) &noexcept
-            -> intrinsic_t & = delete;
-
         /// <!-- description -->
         ///   @brief Invalidates TLB entries given a virtual address
         ///
@@ -207,15 +169,15 @@ namespace mk
             }
 
             if (bsl::unlikely(!val)) {
-                bsl::error() << "invalid val: "    // --
-                             << bsl::hex(val)      // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
+                bsl::error() << "invalid val "    // --
+                             << bsl::hex(val)     // --
+                             << bsl::endl         // --
+                             << bsl::here();      // --
 
                 return;
             }
 
-            details::intrinsic_invlpg(val.get());
+            intrinsic_invlpg(val.get());
         }
 
         /// <!-- description -->
@@ -231,7 +193,7 @@ namespace mk
                 return {};
             }
 
-            return details::intrinsic_cr3();
+            return intrinsic_cr3();
         }
 
         /// <!-- description -->
@@ -248,15 +210,15 @@ namespace mk
             }
 
             if (bsl::unlikely(!val)) {
-                bsl::error() << "invalid val: "    // --
-                             << bsl::hex(val)      // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
+                bsl::error() << "invalid val "    // --
+                             << bsl::hex(val)     // --
+                             << bsl::endl         // --
+                             << bsl::here();      // --
 
                 return;
             }
 
-            details::intrinsic_set_cr3(val.get());
+            intrinsic_set_cr3(val.get());
         }
 
         /// <!-- description -->
@@ -272,7 +234,7 @@ namespace mk
                 return {};
             }
 
-            return details::intrinsic_tp();
+            return intrinsic_tp();
         }
 
         /// <!-- description -->
@@ -289,15 +251,15 @@ namespace mk
             }
 
             if (bsl::unlikely(!val)) {
-                bsl::error() << "invalid val: "    // --
-                             << bsl::hex(val)      // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
+                bsl::error() << "invalid val "    // --
+                             << bsl::hex(val)     // --
+                             << bsl::endl         // --
+                             << bsl::here();      // --
 
                 return;
             }
 
-            details::intrinsic_set_tp(val.get());
+            intrinsic_set_tp(val.get());
         }
 
         /// <!-- description -->
@@ -315,15 +277,15 @@ namespace mk
             }
 
             if (bsl::unlikely(!reg)) {
-                bsl::error() << "invalid reg: "    // --
-                             << bsl::hex(reg)      // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
+                bsl::error() << "invalid reg "    // --
+                             << bsl::hex(reg)     // --
+                             << bsl::endl         // --
+                             << bsl::here();      // --
 
                 return {};
             }
 
-            return details::intrinsic_tls_reg(reg.get());
+            return intrinsic_tls_reg(reg.get());
         }
 
         /// <!-- description -->
@@ -341,24 +303,24 @@ namespace mk
             }
 
             if (bsl::unlikely(!reg)) {
-                bsl::error() << "invalid reg: "    // --
-                             << bsl::hex(reg)      // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
+                bsl::error() << "invalid reg "    // --
+                             << bsl::hex(reg)     // --
+                             << bsl::endl         // --
+                             << bsl::here();      // --
 
                 return;
             }
 
             if (bsl::unlikely(!val)) {
-                bsl::error() << "invalid val: "    // --
-                             << bsl::hex(val)      // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
+                bsl::error() << "invalid val "    // --
+                             << bsl::hex(val)     // --
+                             << bsl::endl         // --
+                             << bsl::here();      // --
 
                 return;
             }
 
-            details::intrinsic_set_tls_reg(reg.get(), val.get());
+            intrinsic_set_tls_reg(reg.get(), val.get());
         }
 
         /// <!-- description -->
@@ -371,7 +333,7 @@ namespace mk
                 return;
             }
 
-            details::intrinsic_halt();
+            intrinsic_halt();
         }
 
         /// <!-- description -->
@@ -392,22 +354,22 @@ namespace mk
             }
 
             if (bsl::unlikely(!msr)) {
-                bsl::error() << "invalid msr: "    // --
-                             << bsl::hex(msr)      // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
+                bsl::error() << "invalid msr "    // --
+                             << bsl::hex(msr)     // --
+                             << bsl::endl         // --
+                             << bsl::here();      // --
 
-                return bsl::safe_uint64::zero(true);
+                return bsl::safe_uint64::failure();
             }
 
-            ret = details::intrinsic_rdmsr(msr.get(), val.data());
+            ret = intrinsic_rdmsr(msr.get(), val.data());
             if (bsl::unlikely(ret != bsl::exit_success)) {
                 bsl::error() << "rdmsr failed for msr "    // --
                              << bsl::hex(msr)              // --
                              << bsl::endl                  // --
                              << bsl::here();               // --
 
-                return bsl::safe_uint64::zero(true);
+                return bsl::safe_uint64::failure();
             }
 
             return val;
@@ -420,7 +382,7 @@ namespace mk
         ///   @param msr the MSR to write to
         ///   @param val the value to set the MSR to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
+        ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
         wrmsr(bsl::safe_uint32 const &msr, bsl::safe_uint64 const &val) noexcept -> bsl::errc_type
@@ -432,24 +394,24 @@ namespace mk
             }
 
             if (bsl::unlikely(!msr)) {
-                bsl::error() << "invalid msr: "    // --
-                             << bsl::hex(msr)      // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
+                bsl::error() << "invalid msr "    // --
+                             << bsl::hex(msr)     // --
+                             << bsl::endl         // --
+                             << bsl::here();      // --
 
                 return bsl::errc_failure;
             }
 
             if (bsl::unlikely(!val)) {
-                bsl::error() << "invalid val: "    // --
-                             << bsl::hex(val)      // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
+                bsl::error() << "invalid val "    // --
+                             << bsl::hex(val)     // --
+                             << bsl::endl         // --
+                             << bsl::here();      // --
 
                 return bsl::errc_failure;
             }
 
-            ret = details::intrinsic_wrmsr(msr.get(), val.get());
+            ret = intrinsic_wrmsr(msr.get(), val.get());
             if (bsl::unlikely(ret != bsl::exit_success)) {
                 bsl::error() << "wrmsr failed for msr "    // --
                              << bsl::hex(msr)              // --
@@ -461,6 +423,46 @@ namespace mk
                 return bsl::errc_failure;
             }
 
+            return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief Invalidates the TLB mapping for a given virtual page and
+        ///     a given ASID
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param addr The address to invalidate
+        ///   @param asid The ASID to invalidate
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] static constexpr auto
+        invlpga(bsl::safe_uint64 const &addr, bsl::safe_uint64 const &asid) noexcept
+            -> bsl::errc_type
+        {
+            if (bsl::is_constant_evaluated()) {
+                return bsl::errc_success;
+            }
+
+            if (bsl::unlikely(!addr)) {
+                bsl::error() << "invalid addr "    // --
+                             << bsl::hex(addr)     // --
+                             << bsl::endl          // --
+                             << bsl::here();       // --
+
+                return bsl::errc_failure;
+            }
+
+            if (bsl::unlikely(!asid)) {
+                bsl::error() << "invalid asid "    // --
+                             << bsl::hex(asid)     // --
+                             << bsl::endl          // --
+                             << bsl::here();       // --
+
+                return bsl::errc_failure;
+            }
+
+            intrinsic_invlpga(addr.get(), asid.get());
             return bsl::errc_success;
         }
     };

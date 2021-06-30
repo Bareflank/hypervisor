@@ -25,9 +25,11 @@
  */
 
 #include <debug.h>
+#include <flush_cache.h>
 #include <map_4k_page_rw.h>
 #include <platform.h>
 #include <pml4t_t.h>
+#include <root_page_table_t.h>
 #include <types.h>
 
 /**
@@ -35,19 +37,25 @@
  *   @brief This function allocates the root page table
  *
  * <!-- inputs/outputs -->
- *   @param pml4t where to return the resulting root page table
+ *   @param rpt where to return the resulting root page table
  *   @return 0 on success, LOADER_FAILURE on failure.
  */
 int64_t
-alloc_mk_root_page_table(struct pml4t_t **const pml4t)
+alloc_mk_root_page_table(root_page_table_t **const rpt)
 {
-    *pml4t = (struct pml4t_t *)platform_alloc(sizeof(struct pml4t_t));
-    if (((void *)0) == *pml4t) {
+    uint64_t i;
+
+    *rpt = (root_page_table_t *)platform_alloc(sizeof(root_page_table_t));
+    if (((void *)0) == *rpt) {
         bferror("platform_alloc failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rw(*pml4t, ((uint64_t)0), *pml4t)) {
+    for (i = 0; i < LOADER_NUM_PML4T_ENTRIES; ++i) {
+        flush_cache(&((*rpt)->entires[i]));
+    }
+
+    if (map_4k_page_rw(*rpt, ((uint64_t)0), *rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }

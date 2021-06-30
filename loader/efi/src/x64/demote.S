@@ -24,6 +24,128 @@
  * SOFTWARE.
  */
 
+    /** @brief defines the offset of state_save_t.rax */
+    #define SS_OFFSET_RAX 0x000
+    /** @brief defines the offset of state_save_t.rbx */
+    #define SS_OFFSET_RBX 0x008
+    /** @brief defines the offset of state_save_t.rcx */
+    #define SS_OFFSET_RCX 0x010
+    /** @brief defines the offset of state_save_t.rdx */
+    #define SS_OFFSET_RDX 0x018
+    /** @brief defines the offset of state_save_t.rbp */
+    #define SS_OFFSET_RBP 0x020
+    /** @brief defines the offset of state_save_t.rsi */
+    #define SS_OFFSET_RSI 0x028
+    /** @brief defines the offset of state_save_t.rdi */
+    #define SS_OFFSET_RDI 0x030
+    /** @brief defines the offset of state_save_t.r8 */
+    #define SS_OFFSET_R8 0x038
+    /** @brief defines the offset of state_save_t.r9 */
+    #define SS_OFFSET_R9 0x040
+    /** @brief defines the offset of state_save_t.r10 */
+    #define SS_OFFSET_R10 0x048
+    /** @brief defines the offset of state_save_t.r11 */
+    #define SS_OFFSET_R11 0x050
+    /** @brief defines the offset of state_save_t.r12 */
+    #define SS_OFFSET_R12 0x058
+    /** @brief defines the offset of state_save_t.r13 */
+    #define SS_OFFSET_R13 0x060
+    /** @brief defines the offset of state_save_t.r14 */
+    #define SS_OFFSET_R14 0x068
+    /** @brief defines the offset of state_save_t.r15 */
+    #define SS_OFFSET_R15 0x070
+    /** @brief defines the offset of state_save_t.rip */
+    #define SS_OFFSET_RIP 0x078
+    /** @brief defines the offset of state_save_t.rsp */
+    #define SS_OFFSET_RSP 0x080
+    /** @brief defines the offset of state_save_t.rflags */
+    #define SS_OFFSET_RFLAGS 0x088
+    /** @brief defines the offset of state_save_t.gdtr */
+    #define SS_OFFSET_GDTR 0x0A0
+    /** @brief defines the offset of state_save_t.idtr */
+    #define SS_OFFSET_IDTR 0x0B0
+    /** @brief defines the offset of state_save_t.es_selector */
+    #define SS_OFFSET_ES_SELECTOR 0x0C0
+    /** @brief defines the offset of state_save_t.cs_selector */
+    #define SS_OFFSET_CS_SELECTOR 0x0D0
+    /** @brief defines the offset of state_save_t.ss_selector */
+    #define SS_OFFSET_SS_SELECTOR 0x0E0
+    /** @brief defines the offset of state_save_t.ds_selector */
+    #define SS_OFFSET_DS_SELECTOR 0x0F0
+    /** @brief defines the offset of state_save_t.fs_selector */
+    #define SS_OFFSET_FS_SELECTOR 0x100
+    /** @brief defines the offset of state_save_t.gs_selector */
+    #define SS_OFFSET_GS_SELECTOR 0x110
+    /** @brief defines the offset of state_save_t.ldtr_selector */
+    #define SS_OFFSET_LDTR_SELECTOR 0x120
+    /** @brief defines the offset of state_save_t.tr_selector */
+    #define SS_OFFSET_TR_SELECTOR 0x130
+    /** @brief defines the offset of state_save_t.cr0 */
+    #define SS_OFFSET_CR0 0x140
+    /** @brief defines the offset of state_save_t.cr2 */
+    #define SS_OFFSET_CR2 0x150
+    /** @brief defines the offset of state_save_t.cr3 */
+    #define SS_OFFSET_CR3 0x158
+    /** @brief defines the offset of state_save_t.cr4 */
+    #define SS_OFFSET_CR4 0x160
+    /** @brief defines the offset of state_save_t.dr6 */
+    #define SS_OFFSET_DR6 0x1F0
+    /** @brief defines the offset of state_save_t.dr7 */
+    #define SS_OFFSET_DR7 0x1F8
+    /** @brief defines the offset of state_save_t.ia32_efer */
+    #define SS_OFFSET_IA32_EFER 0x240
+    /** @brief defines the offset of state_save_t.ia32_star */
+    #define SS_OFFSET_IA32_STAR 0x248
+    /** @brief defines the offset of state_save_t.ia32_lstar */
+    #define SS_OFFSET_IA32_LSTAR 0x250
+    /** @brief defines the offset of state_save_t.ia32_cstar */
+    #define SS_OFFSET_IA32_CSTAR 0x258
+    /** @brief defines the offset of state_save_t.ia32_fmask */
+    #define SS_OFFSET_IA32_FMASK 0x260
+    /** @brief defines the offset of state_save_t.ia32_fs_base */
+    #define SS_OFFSET_IA32_FS_BASE 0x268
+    /** @brief defines the offset of state_save_t.ia32_gs_base */
+    #define SS_OFFSET_IA32_GS_BASE 0x270
+    /** @brief defines the offset of state_save_t.ia32_kernel_gs_base */
+    #define SS_OFFSET_IA32_KERNEL_GS_BASE 0x278
+    /** @brief defines the offset of state_save_t.ia32_sysenter_cs */
+    #define SS_OFFSET_IA32_SYSENTER_CS 0x280
+    /** @brief defines the offset of state_save_t.ia32_sysenter_esp */
+    #define SS_OFFSET_IA32_SYSENTER_ESP 0x288
+    /** @brief defines the offset of state_save_t.ia32_sysenter_eip */
+    #define SS_OFFSET_IA32_SYSENTER_EIP 0x290
+    /** @brief defines the offset of state_save_t.ia32_pat */
+    #define SS_OFFSET_IA32_PAT 0x298
+    /** @brief defines the offset of state_save_t.ia32_debugctl */
+    #define SS_OFFSET_IA32_DEBUGCTL 0x2A0
+
+    /** @brief defines MSR_IA32_SYSENTER_CS */
+    #define MSR_IA32_SYSENTER_CS 0x00000174
+    /** @brief defines MSR_IA32_SYSENTER_ESP */
+    #define MSR_IA32_SYSENTER_ESP 0x00000175
+    /** @brief defines MSR_IA32_SYSENTER_EIP */
+    #define MSR_IA32_SYSENTER_EIP 0x00000176
+    /** @brief defines MSR_IA32_DEBUGCTL */
+    #define MSR_IA32_DEBUGCTL 0x000001D9
+    /** @brief defines MSR_IA32_PAT */
+    #define MSR_IA32_PAT 0x00000277
+    /** @brief defines MSR_IA32_EFER */
+    #define MSR_IA32_EFER 0xC0000080
+    /** @brief defines MSR_IA32_STAR */
+    #define MSR_IA32_STAR 0xC0000081
+    /** @brief defines MSR_IA32_LSTAR */
+    #define MSR_IA32_LSTAR 0xC0000082
+    /** @brief defines MSR_IA32_CSTAR */
+    #define MSR_IA32_CSTAR 0xC0000083
+    /** @brief defines MSR_IA32_FMASK */
+    #define MSR_IA32_FMASK 0xC0000084
+    /** @brief defines MSR_IA32_FS_BASE */
+    #define MSR_IA32_FS_BASE 0xC0000100
+    /** @brief defines MSR_IA32_GS_BASE */
+    #define MSR_IA32_GS_BASE 0xC0000101
+    /** @brief defines MSR_IA32_KERNEL_GS_BASE */
+    #define MSR_IA32_KERNEL_GS_BASE 0xC0000102
+
     .code64
     .intel_syntax noprefix
 
@@ -32,28 +154,34 @@
 demote:
 
     /**************************************************************************/
+    /* Report Success On Completion                                           */
+    /**************************************************************************/
+
+    xor rax, rax
+
+    /**************************************************************************/
     /* General Purpose Registers                                              */
     /**************************************************************************/
 
-    mov [r8 + 0x000], rax
-    mov [r8 + 0x008], rbx
-    mov [r8 + 0x010], rcx
-    mov [r8 + 0x018], rdx
-    mov [r8 + 0x020], rbp
-    mov [r8 + 0x028], rsi
-    mov [r8 + 0x030], rdi
-    mov [r8 + 0x038], r8
-    mov [r8 + 0x040], r9
-    mov [r8 + 0x048], r10
-    mov [r8 + 0x050], r11
-    mov [r8 + 0x058], r12
-    mov [r8 + 0x060], r13
-    mov [r8 + 0x068], r14
-    mov [r8 + 0x070], r15
+    mov [r8 + SS_OFFSET_RAX], rax
+    mov [r8 + SS_OFFSET_RBX], rbx
+    mov [r8 + SS_OFFSET_RCX], rcx
+    mov [r8 + SS_OFFSET_RDX], rdx
+    mov [r8 + SS_OFFSET_RBP], rbp
+    mov [r8 + SS_OFFSET_RSI], rsi
+    mov [r8 + SS_OFFSET_RDI], rdi
+    mov [r8 + SS_OFFSET_R8], r8
+    mov [r8 + SS_OFFSET_R9], r9
+    mov [r8 + SS_OFFSET_R10], r10
+    mov [r8 + SS_OFFSET_R11], r11
+    mov [r8 + SS_OFFSET_R12], r12
+    mov [r8 + SS_OFFSET_R13], r13
+    mov [r8 + SS_OFFSET_R14], r14
+    mov [r8 + SS_OFFSET_R15], r15
 
-    lea rax, [rip + demotion_success]
-    mov [r8 + 0x078], rax
-    mov [r8 + 0x080], rsp
+    lea rax, [rip + demotion_return]
+    mov [r8 + SS_OFFSET_RIP], rax
+    mov [r8 + SS_OFFSET_RSP], rsp
 
 
     /**************************************************************************/
@@ -68,10 +196,10 @@ demote:
     /* Flags                                                                  */
     /**************************************************************************/
 
-    pushf
-    pop qword ptr[r15 + 0x088]
-    push [r14 + 0x088]
-    popf
+    pushfq
+    pop qword ptr[r15 + SS_OFFSET_RFLAGS]
+    push qword ptr[r14 + SS_OFFSET_RFLAGS]
+    popfq
 
     /**************************************************************************/
     /* IDT                                                                    */
@@ -79,168 +207,162 @@ demote:
 
     call disable_interrupts
 
-    sidt [r15 + 0x0B0]
-    lidt [r14 + 0x0B0]
+    sidt [r15 + SS_OFFSET_IDTR]
+    lidt [r14 + SS_OFFSET_IDTR]
 
     /**************************************************************************/
     /* MSRs                                                                   */
     /**************************************************************************/
 
-    mov ecx, 0xC0000080      /* EFER */
+    mov ecx, MSR_IA32_EFER
     rdmsr
-    mov [r15 + 0x240], eax
-    mov [r15 + 0x244], edx
-    mov eax, [r14 + 0x240]
-    mov edx, [r14 + 0x244]
+    mov [r15 + SS_OFFSET_IA32_EFER + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_EFER + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_EFER + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_EFER + 0x4]
     wrmsr
 
-    mov ecx, 0xC0000081      /* STAR */
+    mov ecx, MSR_IA32_STAR
     rdmsr
-    mov [r15 + 0x248], eax
-    mov [r15 + 0x24C], edx
-    mov eax, [r14 + 0x248]
-    mov edx, [r14 + 0x24C]
+    mov [r15 + SS_OFFSET_IA32_STAR + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_STAR + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_STAR + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_STAR + 0x4]
     wrmsr
 
-    mov ecx, 0xC0000082      /* LSTAR */
+    mov ecx, MSR_IA32_LSTAR
     rdmsr
-    mov [r15 + 0x250], eax
-    mov [r15 + 0x254], edx
-    mov eax, [r14 + 0x250]
-    mov edx, [r14 + 0x254]
+    mov [r15 + SS_OFFSET_IA32_LSTAR + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_LSTAR + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_LSTAR + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_LSTAR + 0x4]
     wrmsr
 
-    mov ecx, 0xC0000083      /* CSTAR */
+    mov ecx, MSR_IA32_CSTAR
     rdmsr
-    mov [r15 + 0x258], eax
-    mov [r15 + 0x25C], edx
-    mov eax, [r14 + 0x258]
-    mov edx, [r14 + 0x25C]
+    mov [r15 + SS_OFFSET_IA32_CSTAR + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_CSTAR + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_CSTAR + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_CSTAR + 0x4]
     wrmsr
 
-    mov ecx, 0xC0000084      /* FMASK */
+    mov ecx, MSR_IA32_FMASK
     rdmsr
-    mov [r15 + 0x260], eax
-    mov [r15 + 0x264], edx
-    mov eax, [r14 + 0x260]
-    mov edx, [r14 + 0x264]
+    mov [r15 + SS_OFFSET_IA32_FMASK + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_FMASK + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_FMASK + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_FMASK + 0x4]
     wrmsr
 
-    mov ecx, 0xC0000100      /* FS Base */
+    mov ecx, MSR_IA32_FS_BASE
     rdmsr
-    mov [r15 + 0x268], eax
-    mov [r15 + 0x26C], edx
-    mov eax, [r14 + 0x268]
-    mov edx, [r14 + 0x26C]
+    mov [r15 + SS_OFFSET_IA32_FS_BASE + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_FS_BASE + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_FS_BASE + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_FS_BASE + 0x4]
     wrmsr
 
-    mov ecx, 0xC0000101      /* GS Base */
+    mov ecx, MSR_IA32_GS_BASE
     rdmsr
-    mov [r15 + 0x270], eax
-    mov [r15 + 0x274], edx
-    mov eax, [r14 + 0x270]
-    mov edx, [r14 + 0x274]
+    mov [r15 + SS_OFFSET_IA32_GS_BASE + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_GS_BASE + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_GS_BASE + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_GS_BASE + 0x4]
     wrmsr
 
-    mov ecx, 0xC0000102      /* Kernel GS Base */
+    mov ecx, MSR_IA32_KERNEL_GS_BASE
     rdmsr
-    mov [r15 + 0x278], eax
-    mov [r15 + 0x27C], edx
-    mov eax, [r14 + 0x278]
-    mov edx, [r14 + 0x27C]
+    mov [r15 + SS_OFFSET_IA32_KERNEL_GS_BASE + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_KERNEL_GS_BASE + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_KERNEL_GS_BASE + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_KERNEL_GS_BASE + 0x4]
     wrmsr
 
-    mov ecx, 0x00000174      /* SYSENTER_CS */
+    mov ecx, MSR_IA32_SYSENTER_CS
     rdmsr
-    mov [r15 + 0x280], eax
-    mov [r15 + 0x284], edx
-    mov eax, [r14 + 0x280]
-    mov edx, [r14 + 0x284]
+    mov [r15 + SS_OFFSET_IA32_SYSENTER_CS + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_SYSENTER_CS + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_SYSENTER_CS + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_SYSENTER_CS + 0x4]
     wrmsr
 
-    mov ecx, 0x00000175      /* SYSENTER_ESP */
+    mov ecx, MSR_IA32_SYSENTER_ESP
     rdmsr
-    mov [r15 + 0x288], eax
-    mov [r15 + 0x28C], edx
-    mov eax, [r14 + 0x288]
-    mov edx, [r14 + 0x28C]
+    mov [r15 + SS_OFFSET_IA32_SYSENTER_ESP + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_SYSENTER_ESP + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_SYSENTER_ESP + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_SYSENTER_ESP + 0x4]
     wrmsr
 
-    mov ecx, 0x00000176      /* SYSENTER_EIP */
+    mov ecx, MSR_IA32_SYSENTER_EIP
     rdmsr
-    mov [r15 + 0x290], eax
-    mov [r15 + 0x294], edx
-    mov eax, [r14 + 0x290]
-    mov edx, [r14 + 0x294]
+    mov [r15 + SS_OFFSET_IA32_SYSENTER_EIP + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_SYSENTER_EIP + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_SYSENTER_EIP + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_SYSENTER_EIP + 0x4]
     wrmsr
 
-    mov ecx, 0x00000277      /* PAT */
+    mov ecx, MSR_IA32_PAT
     rdmsr
-    mov [r15 + 0x298], eax
-    mov [r15 + 0x29C], edx
-    mov eax, [r14 + 0x298]
-    mov edx, [r14 + 0x29C]
+    mov [r15 + SS_OFFSET_IA32_PAT + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_PAT + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_PAT + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_PAT + 0x4]
     wrmsr
 
-    mov ecx, 0x000001D9      /* DEBUGCTL */
+    mov ecx, MSR_IA32_DEBUGCTL
     rdmsr
-    mov [r15 + 0x2A0], eax
-    mov [r15 + 0x2A4], edx
-    mov eax, [r14 + 0x2A0]
-    mov edx, [r14 + 0x2A4]
+    mov [r15 + SS_OFFSET_IA32_DEBUGCTL + 0x0], eax
+    mov [r15 + SS_OFFSET_IA32_DEBUGCTL + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_IA32_DEBUGCTL + 0x0]
+    mov edx, [r14 + SS_OFFSET_IA32_DEBUGCTL + 0x4]
     wrmsr
 
     /**************************************************************************/
     /* GDT                                                                    */
     /*************************************************************************/
 
-    sgdt qword ptr [r15 + 0x0A0]
-    lgdt qword ptr [r14 + 0x0A0]
+    sgdt [r15 + SS_OFFSET_GDTR]
+    lgdt [r14 + SS_OFFSET_GDTR]
 
     mov dx, es
-    mov [r15 + 0x0C0], dx
-    mov dx, [r14 + 0x0C0]
+    mov [r15 + SS_OFFSET_ES_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_ES_SELECTOR]
     mov es, dx
 
     mov dx, cs
-    mov [r15 + 0x0D0], dx
-    mov ax, [r14 + 0x0D0]
+    mov [r15 + SS_OFFSET_CS_SELECTOR], dx
+    mov ax, [r14 + SS_OFFSET_CS_SELECTOR]
     push rax
 
     mov dx, ss
-    mov [r15 + 0x0E0], dx
-    mov dx, [r14 + 0x0E0]
+    mov [r15 + SS_OFFSET_SS_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_SS_SELECTOR]
     mov ss, dx
 
     mov dx, ds
-    mov [r15 + 0x0F0], dx
-    mov dx, [r14 + 0x0F0]
+    mov [r15 + SS_OFFSET_DS_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_DS_SELECTOR]
     mov ds, dx
 
     mov dx, fs
-    mov [r15 + 0x100], dx
-    mov dx, [r14 + 0x100]
+    mov [r15 + SS_OFFSET_FS_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_FS_SELECTOR]
     mov fs, dx
 
     mov dx, gs
-    mov [r15 + 0x110], dx
-    mov dx, [r14 + 0x110]
+    mov [r15 + SS_OFFSET_GS_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_GS_SELECTOR]
     mov gs, dx
 
-    mov ecx, 0x000001D9
-    xor rax, rax
-    xor rdx, rdx
-    mov ax, [r14 + 0x110]
-    wrmsr
-
     sldt dx
-    mov [r15 + 0x120], dx
-    mov dx, [r14 + 0x120]
+    mov [r15 + SS_OFFSET_LDTR_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_LDTR_SELECTOR]
     lldt dx
 
     str dx
-    mov [r15 + 0x130], dx
-    mov dx, [r14 + 0x130]
+    mov [r15 + SS_OFFSET_TR_SELECTOR], dx
+    mov dx, [r14 + SS_OFFSET_TR_SELECTOR]
     ltr dx
 
     lea rax, [rip + gdt_and_cs_loaded]
@@ -255,39 +377,43 @@ gdt_and_cs_loaded:
     /**************************************************************************/
 
     mov rax, cr0
-    mov [r15 + 0x140], rax
-    mov rax, [r14 + 0x140]
+    mov [r15 + SS_OFFSET_CR0], rax
+    mov rax, [r14 + SS_OFFSET_CR0]
     mov cr0, rax
 
     mov rax, cr2
-    mov [r15 + 0x150], rax
-    mov rax, [r14 + 0x150]
+    mov [r15 + SS_OFFSET_CR2], rax
+    mov rax, [r14 + SS_OFFSET_CR2]
     mov cr2, rax
 
     mov rax, cr4
-    mov [r15 + 0x160], rax
-    mov rax, [r14 + 0x160]
+    mov [r15 + SS_OFFSET_CR4], rax
+    mov rax, [r14 + SS_OFFSET_CR4]
     mov cr4, rax
 
     mov rax, cr3
-    mov [r15 + 0x158], rax
-    mov rax, [r14 + 0x158]
+    mov [r15 + SS_OFFSET_CR3], rax
+    mov rax, [r14 + SS_OFFSET_CR3]
     mov cr3, rax
 
-    mov rsp, [r14 + 0x080]
+    /**************************************************************************/
+    /* Stack                                                                  */
+    /**************************************************************************/
+
+    mov rsp, [r14 + SS_OFFSET_RSP]
 
     /**************************************************************************/
     /* Debug Registers                                                        */
     /**************************************************************************/
 
     mov rax, dr6
-    mov [r15 + 0x1F0], rax
-    mov rax, [r14 + 0x1F0]
+    mov [r15 + SS_OFFSET_DR6], rax
+    mov rax, [r14 + SS_OFFSET_DR6]
     mov dr6, rax
 
     mov rax, dr7
-    mov [r15 + 0x1F8], rax
-    mov rax, [r14 + 0x1F8]
+    mov [r15 + SS_OFFSET_DR7], rax
+    mov rax, [r14 + SS_OFFSET_DR7]
     mov dr7, rax
 
     /**************************************************************************/
@@ -295,11 +421,11 @@ gdt_and_cs_loaded:
     /**************************************************************************/
 
     mov rdi, r13
-    push [r14 + 0x078]
+    push qword ptr[r14 + SS_OFFSET_RIP]
     ret
     int 3
 
-demotion_success:
+demotion_return:
 
     /**
      * NOTE:

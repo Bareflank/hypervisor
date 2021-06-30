@@ -27,7 +27,7 @@
 #ifndef EFI_OPEN_PROTOCOL_INFORMATION_ENTRY_H
 #define EFI_OPEN_PROTOCOL_INFORMATION_ENTRY_H
 
-#include "efi_types.h"
+#include <efi/efi_types.h>
 
 /**
  * @struct EFI_OPEN_PROTOCOL_INFORMATION_ENTRY

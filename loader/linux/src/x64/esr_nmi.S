@@ -26,6 +26,9 @@
  * SOFTWARE.
  */
 
+    /** @brief defines the offset of state_save_t.ia32_debugctl */
+    #define SS_OFFSET_NMI 0x318
+
 #include <asm/unwind_hints.h>
 
     .code64
@@ -47,7 +50,7 @@ esr_nmi:
     push rdx
 
     mov rax, 0x1
-    mov [r15 + 0x318], rax
+    mov [r15 + SS_OFFSET_NMI], rax
 
     pop rdx
     pop rax

@@ -19,9 +19,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/function/hypervisor_add_header_depends.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/function/hypervisor_target_source.cmake)
 
 add_executable(vmmctl)
+
+# ------------------------------------------------------------------------------
+# Includes
+# ------------------------------------------------------------------------------
 
 target_include_directories(vmmctl PRIVATE
     src
@@ -33,6 +37,10 @@ target_include_directories(vmmctl SYSTEM PRIVATE
     ${CMAKE_BINARY_DIR}/include
 )
 
+# ------------------------------------------------------------------------------
+# Headers
+# ------------------------------------------------------------------------------
+
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/src/linux/ifmap.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/linux/ioctl.hpp
@@ -41,11 +49,15 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/src/vmmctl_main.hpp
 )
 
-target_sources(vmmctl PRIVATE
-    src/main.cpp
-)
+# ------------------------------------------------------------------------------
+# Sources
+# ------------------------------------------------------------------------------
 
-hypervisor_add_header_depends(src/main.cpp ${HEADERS})
+hypervisor_target_source(vmmctl src/main.cpp ${HEADERS})
+
+# ------------------------------------------------------------------------------
+# Libraries
+# ------------------------------------------------------------------------------
 
 target_link_libraries(vmmctl PRIVATE
     bsl
@@ -54,3 +66,17 @@ target_link_libraries(vmmctl PRIVATE
     $<$<PLATFORM_ID:Windows>:SetupAPI>
     $<$<PLATFORM_ID:Windows>:libcmt.lib>
 )
+
+# ------------------------------------------------------------------------------
+# Options
+# ------------------------------------------------------------------------------
+
+target_compile_options(vmmctl PRIVATE
+    -Wno-frame-larger-than=
+)
+
+# ------------------------------------------------------------------------------
+# Install
+# ------------------------------------------------------------------------------
+
+install(TARGETS vmmctl DESTINATION bin)

@@ -228,9 +228,7 @@ intrinsic_set_tp:
     .type   intrinsic_tls_reg, @function
 intrinsic_tls_reg:
 
-    stac
     mov rax, fs:[rdi]
-    clac
 
     ret
     int 3
@@ -243,9 +241,7 @@ intrinsic_tls_reg:
     .type   intrinsic_set_tls_reg, @function
 intrinsic_set_tls_reg:
 
-    stac
     mov fs:[rdi], rsi
-    clac
 
     ret
     int 3
@@ -369,6 +365,32 @@ intrinsic_wrmsr_unsafe:
 
 
 
+    .globl  intrinsic_invept
+    .type   intrinsic_invept, @function
+intrinsic_invept:
+
+    invept rsi, [rdi]
+
+    ret
+    int 3
+
+    .size intrinsic_invept, .-intrinsic_invept
+
+
+
+    .globl  intrinsic_invvpid
+    .type   intrinsic_invvpid, @function
+intrinsic_invvpid:
+
+    invept rsi, [rdi]
+
+    ret
+    int 3
+
+    .size intrinsic_invvpid, .-intrinsic_invvpid
+
+
+
     .globl  intrinsic_vmload
     .type   intrinsic_vmload, @function
 intrinsic_vmload:
@@ -381,12 +403,38 @@ intrinsic_vmload:
     int 3
 
 intrinsic_vmload_failure:
-    mov rax, 0x1
+
+    mov rax, 0x4400
+    vmread rax, rax
+
     ret
     int 3
 
     .size intrinsic_vmload, .-intrinsic_vmload
 
+
+
+
+    .globl  intrinsic_vmclear
+    .type   intrinsic_vmclear, @function
+intrinsic_vmclear:
+
+    vmclear [rdi]
+    jbe intrinsic_vmclear_failure
+
+    xor rax, rax
+    ret
+    int 3
+
+intrinsic_vmclear_failure:
+
+    mov rax, 0x4400
+    vmread rax, rax
+
+    ret
+    int 3
+
+    .size intrinsic_vmclear, .-intrinsic_vmclear
 
 
 
@@ -403,7 +451,10 @@ intrinsic_vmread16:
     int 3
 
 intrinsic_vmread16_failure:
-    mov rax, 0x1
+
+    mov rax, 0x4400
+    vmread rax, rax
+
     ret
     int 3
 
@@ -424,7 +475,10 @@ intrinsic_vmread32:
     int 3
 
 intrinsic_vmread32_failure:
-    mov rax, 0x1
+
+    mov rax, 0x4400
+    vmread rax, rax
+
     ret
     int 3
 
@@ -445,7 +499,10 @@ intrinsic_vmread64:
     int 3
 
 intrinsic_vmread64_failure:
-    mov rax, 0x1
+
+    mov rax, 0x4400
+    vmread rax, rax
+
     ret
     int 3
 
@@ -465,7 +522,10 @@ intrinsic_vmwrite16:
     int 3
 
 intrinsic_vmwrite16_failure:
-    mov rax, 0x1
+
+    mov rax, 0x4400
+    vmread rax, rax
+
     ret
     int 3
 
@@ -485,7 +545,10 @@ intrinsic_vmwrite32:
     int 3
 
 intrinsic_vmwrite32_failure:
-    mov rax, 0x1
+
+    mov rax, 0x4400
+    vmread rax, rax
+
     ret
     int 3
 
@@ -505,7 +568,10 @@ intrinsic_vmwrite64:
     int 3
 
 intrinsic_vmwrite64_failure:
-    mov rax, 0x1
+
+    mov rax, 0x4400
+    vmread rax, rax
+
     ret
     int 3
 
@@ -530,10 +596,10 @@ intrinsic_vmrun:
     /* CR2/DR6                                                                */
     /**************************************************************************/
 
-    mov rax, [r15 + 0x078]
+    mov rax, [r15 + 0x000]
     mov cr2, rax
 
-    mov rax, [r15 + 0x080]
+    mov rax, [r15 + 0x008]
     mov dr6, rax
 
     /**************************************************************************/
@@ -541,23 +607,23 @@ intrinsic_vmrun:
     /**************************************************************************/
 
     mov edi, 0xC0000081
-    mov rsi, [r15 + 0x088]
+    mov rsi, [r15 + 0x010]
     call intrinsic_wrmsr_unsafe
 
     mov edi, 0xC0000082
-    mov rsi, [r15 + 0x090]
+    mov rsi, [r15 + 0x018]
     call intrinsic_wrmsr_unsafe
 
     mov edi, 0xC0000083
-    mov rsi, [r15 + 0x098]
+    mov rsi, [r15 + 0x020]
     call intrinsic_wrmsr_unsafe
 
     mov edi, 0xC0000084
-    mov rsi, [r15 + 0x0A0]
+    mov rsi, [r15 + 0x028]
     call intrinsic_wrmsr_unsafe
 
     mov edi, 0xC0000102
-    mov rsi, [r15 + 0x0A8]
+    mov rsi, [r15 + 0x030]
     call intrinsic_wrmsr_unsafe
 
     /**************************************************************************/
@@ -584,10 +650,8 @@ nmis_complete:
     mov rax, 0x6C14
     vmwrite rax, rsp
 
-    mov rax, [r15 + 0x0D8]
+    mov rax, [r15 + 0x060]
     cmp rax, 0x1
-
-    stac
 
     mov rax, fs:[0x800]
     mov rbx, fs:[0x808]
@@ -604,8 +668,6 @@ nmis_complete:
     mov r13, fs:[0x860]
     mov r14, fs:[0x868]
     mov r15, fs:[0x870]
-
-    clac
 
     /**************************************************************************/
     /* Run                                                                    */
@@ -637,32 +699,32 @@ intrinsic_vmrun_failure:
 
     mov edi, 0xC0000102
     call intrinsic_rdmsr_unsafe
-    mov [r15 + 0x0A8], rax
-    mov rsi, [r15 + 0x0D0]
+    mov [r15 + 0x030], rax
+    mov rsi, [r15 + 0x058]
     call intrinsic_wrmsr_unsafe
 
     mov edi, 0xC0000084
     call intrinsic_rdmsr_unsafe
-    mov [r15 + 0x0A0], rax
-    mov rsi, [r15 + 0x0C8]
+    mov [r15 + 0x028], rax
+    mov rsi, [r15 + 0x050]
     call intrinsic_wrmsr_unsafe
 
     mov edi, 0xC0000083
     call intrinsic_rdmsr_unsafe
-    mov [r15 + 0x098], rax
-    mov rsi, [r15 + 0x0C0]
+    mov [r15 + 0x020], rax
+    mov rsi, [r15 + 0x048]
     call intrinsic_wrmsr_unsafe
 
     mov edi, 0xC0000082
     call intrinsic_rdmsr_unsafe
-    mov [r15 + 0x090], rax
-    mov rsi, [r15 + 0x0B8]
+    mov [r15 + 0x018], rax
+    mov rsi, [r15 + 0x040]
     call intrinsic_wrmsr_unsafe
 
     mov edi, 0xC0000081
     call intrinsic_rdmsr_unsafe
-    mov [r15 + 0x088], rax
-    mov rsi, [r15 + 0x0B0]
+    mov [r15 + 0x010], rax
+    mov rsi, [r15 + 0x038]
     call intrinsic_wrmsr_unsafe
 
     /**************************************************************************/
@@ -670,10 +732,10 @@ intrinsic_vmrun_failure:
     /**************************************************************************/
 
     mov rax, dr6
-    mov [r15 + 0x080], rax
+    mov [r15 + 0x008], rax
 
     mov rax, cr2
-    mov [r15 + 0x078], rax
+    mov [r15 + 0x000], rax
 
     /**************************************************************************/
     /* Done                                                                   */
@@ -686,7 +748,11 @@ intrinsic_vmrun_failure:
     pop rbp
     pop rbx
 
-    mov rax, 0xFFFFFFFFFFFFFFFF
+    mov rax, 0x4400
+    vmread rax, rax
+    mov rdx, 0xFFFFFFFF00000000
+    or rax, rdx
+
     ret
     int 3
 
@@ -698,11 +764,12 @@ intrinsic_vmrun_failure:
     .type   intrinsic_vmexit, @function
 intrinsic_vmexit:
 
+    push 0x40002
+    popf
+
     /**************************************************************************/
     /* General Purpose Register State                                         */
     /**************************************************************************/
-
-    stac
 
     mov fs:[0x870], r15
     mov fs:[0x868], r14
@@ -720,8 +787,6 @@ intrinsic_vmexit:
     mov fs:[0x808], rbx
     mov fs:[0x800], rax
 
-    clac
-
     pop r15
 
     /**************************************************************************/
@@ -729,7 +794,7 @@ intrinsic_vmexit:
     /**************************************************************************/
 
     mov rax, 0x1
-    mov [r15 + 0x0D8], rax
+    mov [r15 + 0x060], rax
 
     /**************************************************************************/
     /* NMIs                                                                   */
@@ -744,32 +809,32 @@ intrinsic_vmexit:
 
     mov edi, 0xC0000102
     call intrinsic_rdmsr_unsafe
-    mov [r15 + 0x0A8], rax
-    mov rsi, [r15 + 0x0D0]
+    mov [r15 + 0x030], rax
+    mov rsi, [r15 + 0x058]
     call intrinsic_wrmsr_unsafe
 
     mov edi, 0xC0000084
     call intrinsic_rdmsr_unsafe
-    mov [r15 + 0x0A0], rax
-    mov rsi, [r15 + 0x0C8]
+    mov [r15 + 0x028], rax
+    mov rsi, [r15 + 0x050]
     call intrinsic_wrmsr_unsafe
 
     mov edi, 0xC0000083
     call intrinsic_rdmsr_unsafe
-    mov [r15 + 0x098], rax
-    mov rsi, [r15 + 0x0C0]
+    mov [r15 + 0x020], rax
+    mov rsi, [r15 + 0x048]
     call intrinsic_wrmsr_unsafe
 
     mov edi, 0xC0000082
     call intrinsic_rdmsr_unsafe
-    mov [r15 + 0x090], rax
-    mov rsi, [r15 + 0x0B8]
+    mov [r15 + 0x018], rax
+    mov rsi, [r15 + 0x040]
     call intrinsic_wrmsr_unsafe
 
     mov edi, 0xC0000081
     call intrinsic_rdmsr_unsafe
-    mov [r15 + 0x088], rax
-    mov rsi, [r15 + 0x0B0]
+    mov [r15 + 0x010], rax
+    mov rsi, [r15 + 0x038]
     call intrinsic_wrmsr_unsafe
 
     /**************************************************************************/
@@ -777,10 +842,10 @@ intrinsic_vmexit:
     /**************************************************************************/
 
     mov rax, dr6
-    mov [r15 + 0x080], rax
+    mov [r15 + 0x008], rax
 
     mov rax, cr2
-    mov [r15 + 0x078], rax
+    mov [r15 + 0x000], rax
 
     /**************************************************************************/
     /* Done                                                                   */

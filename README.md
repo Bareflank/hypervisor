@@ -1,20 +1,30 @@
 ![Bareflank](https://github.com/Bareflank/hypervisor/raw/master/.github/images/hypervisor_logo.png)
 
 ## Description
-**Warning:** The master branch is under heavy development as we work to complete Bareflank 3.0. For now, you might want to consider one of our offical releases until Bareflank 3.0 is complete .
+The Bareflank Hypervisor is an open source hypervisor Software Development Toolkit (SDK), led by Assured Information Security, Inc. (AIS), that provides the tools needed to rapidly prototype and create your own hypervisor on 64bit versions of Intel, AMD and ARMv8 CPUs (RISC-V and PowerPC also planned). The Bareflank SDK is intended for instructional/research purposes as it only provides enough virtualization support to start/stop a hypervisor. Bareflank can also be used as the foundation to create your own, fully functional hypervisor as it uses the MIT license, includes 100% unit test coverage and compliance for AUTOSAR and ASIL/D. If you are looking for a complete hypervisor (and not an SDK), please see [MicroV](https://github.com/Bareflank/microv). If you are looking for a minimal SDK for education or to perform research, this is the project for you. If you are simply looking for a reference hypervisor, please see [SimpleVisor](https://github.com/ionescu007/SimpleVisor).
 
-The Bareflank Hypervisor is an open source hypervisor Software Development Toolkit (SDK), led by Assured Information Security, Inc. (AIS), that provides the tools needed to rapidly prototype and create your own hypervisor.
-
-Most people think that hypervisors are meant to virtualize servers and provide a means to run Windows on a Mac, but there is a whole field of research where hypervisors are used without guest virtual machines. Since a hypervisor is capable of controlling the host OS running underneath it (so-called "ring -1"), host-only hypervisors support introspection, reverse engineering, anti-virus, containerization, diversity, and even architectural research like [MoRE](https://github.com/ainfosec/MoRE). All of these use cases start the same way, by spending months standing up the hypervisor itself before you can start working on your actual project. Existing open source hypervisors are burdened with legacy support, only support a single operating system or contain unnecessary complexity that make them painful to work with when conducting hypervisor research.
-
-Instead, Bareflank uses a layered, modular approach, that lets you pick just how much complexity you need in your project:
-- [BSL](https://github.com/Bareflank/bsl): provides a header-only, AUTOSAR compliant implementation of a subset of the C++ Standard Library, used to implement Bareflank's C++ components ensuring Bareflank and projects built using Bareflank can support critical systems applications like Automotive.
-- [LLVM](https://github.com/Bareflank/llvm-project): provides our custom implementation of the LLVM Clang compiler and associated tools including additional static analysis checks in Clang Tidy to ensure compliance with AUTOSAR.
-- [PAL](https://github.com/Bareflank/pal): provides auto-generated intrinsics APIs for Intel, AMD and ARM on any combination of OS (e.g., Windows and Linux), ABI (e.g., SysV and MS64) and programming language (e.g., C, C++ and Python).
-- [hypervisor](https://github.com/Bareflank/hypervisor): provides the base SDK including the loader, the Bareflank microkernel and support applications. If all you need is host-only hypervisor support, this is the project to start with.
-- [MicroV](https://github.com/Bareflank/microv): provides support for guest VMs, allowing the user to create and execute additional virtual machines. If you need guest VM support, this is the project to start with.
-
-To support Bareflank's ecosystem, the hypervisor SDK is licensed under MIT, specifically enabling users of the project to both contribute back to the project, but also create proprietary, closed source products that use the Bareflank SDK as their foundation. Feel free to use Bareflank to create your commercial products. All we ask is that if you find a bug or add a feature to the SDK that you consider contributing your changes back to the project.
+Bareflank uses a layered, modular approach, that lets you pick just how much complexity you need in your project when creating your own custom hypervisor:
+- [BSL](https://github.com/Bareflank/bsl): provides a header-only, AUTOSAR
+  compliant implementation of a subset of the C++ Standard Library, used to
+  implement Bareflank's C++ components ensuring Bareflank and projects built
+  using Bareflank can support critical systems applications.
+- [LLVM](https://github.com/Bareflank/llvm-project): provides our custom
+  implementation of the LLVM Clang-Tidy static analysis tool to ensure
+  compliance with AUTOSAR.
+- [PAL](https://github.com/Bareflank/pal): provides auto-generated intrinsics
+  APIs for Intel, AMD and ARM on any combination of OS.
+- [hypervisor](https://github.com/Bareflank/hypervisor): provides the base SDK
+  including the loader, the Bareflank microkernel and support applications.
+  Although this repo is labeled "hypervisor", this repo only provides the base
+  scaffolding for creating your own hypervisor. If you are in education or
+  performing research and do not want to deal with the complexity of a fully
+  functional hypervisor, this repo would be your starting point. By itself, the
+  code in this repo only implements enough virtualization to start/stop a
+  hypervisor.
+- [MicroV](https://github.com/Bareflank/microv): This is the project led by
+  Assured Information Security, Inc. (AIS) the provides a fully functional
+  hypervisor that uses the Bareflank SDK as it's foundation. If you are looking
+  for an actual hypervisor, this is the project you are looking for.
 
 ## **Quick start**
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/bareflank/hypervisor?color=brightgreen)
@@ -55,6 +65,41 @@ the following videos at [CppCon](https://www.youtube.com/user/CppCon) below:
 [![CppCon 2019](https://i.imgur.com/hjZg0pf.png)](https://www.youtube.com/watch?v=bKPN-CGhEC0)
 [![CppCon 2017](https://i.imgur.com/nBFD6uA.png)](https://www.youtube.com/watch?v=KdJhQuycD78)
 [![CppCon 2016](https://i.imgur.com/fwmlOiJ.png)](https://www.youtube.com/watch?v=uQSQy-7lveQ)
+
+## **Important Tips**
+Before attempting to use Bareflank, please review the following tips as they can make a huge difference in your initial experience:
+- Make sure you are running on a system with a serial port. Which serial port
+  Bareflank uses can be configured by setting HYPERVISOR_SERIAL_PORT on x86
+  or HYPERVISOR_SERIAL_PORTH and HYPERVISOR_SERIAL_PORTL on ARMv8. Cables like
+  [these](https://www.amazon.com/USB-Serial-Adapter-Modem-9-pin/dp/B008634VJY/ref=sr_1_1_sspa?crid=P21N96MOCMDS&dchild=1&keywords=usb+null+modem+cable&qid=1622226200&sprefix=usb+null+mo%2Caps%2C201&sr=8-1-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUEzNzBLRUcxVzRNOE8zJmVuY3J5cHRlZElkPUEwMTA1Nzg4U0IyM1RPU0NTRjROJmVuY3J5cHRlZEFkSWQ9QTA3OTM4MjVFMzlNSEQ3T1E2MEwmd2lkZ2V0TmFtZT1zcF9hdGYmYWN0aW9uPWNsaWNrUmVkaXJlY3QmZG9Ob3RMb2dDbGljaz10cnVl)
+  work great. Bareflank uses the following settings (115200 baud rate, 8 data
+  bits, no parity bits, one stop bit).
+- Using PCI serial addon cards will not work with UEFI. These cards need to be
+  initialized by the OS, logic that Bareflank does not currently contain.
+  If you are using Bareflank directly from Windows/Linux, these cards will work
+  fine, but from UEFI, you need a serial port provided on the motherboard.
+- The serial output might contain a lot of ANSI color codes if you are using
+  a terminal that doesn't support ANSI color. To remove these, configure CMake
+  with -DENABLE_COLOR=OFF.
+- Windows Subsystem For Linux v2 is not supported. When this is turned on,
+  Windows runs under HyperV, which currently does not support nested
+  virtualization. Furthermore, if you have ever enabled the WSL2, you must
+  turn HyperV off using `bcdedit /set hypervisorlaunchtype off` as HyperV will
+  continue to run even if you are no longer using the WSL2.
+- When running under Windows, driver issues can be seen by using
+  [DbgView](https://docs.microsoft.com/en-us/sysinternals/downloads/debugview).
+  This tool must be run with Admin rights, and you need to turn on kernel
+  output. Once this is working, you will see error messages coming from the
+  Windows driver if needed.
+- Nested virtualization (i.e., attempting to run Bareflank inside a VM) is
+  not officially supported, but does work if you know what you are doing.
+  Specifically, a headless version of Linux 20.04 or higher in VMWare works
+  with the proper configuration. VirtualBox does not work due to a lack of
+  supported features and KVM may or may not work (your milage may vary). In
+  general, you should be using real hardware.
+- If you need to compile Bareflank on older versions of Linux, it is possible,
+  but you will need to update the build tools manually including LLVM 10+ and
+  CMake 3.13+.
 
 ## **Build Requirements**
 Currently, the Bareflank hypervisor only supports the Clang/LLVM 10+ compiler. This, however, ensures that the hypervisor can be natively compiled on Windows including support for cross-compiling. Support for other C++20 compilers can be added if needed, just let us know if that is something you need.
@@ -208,13 +253,52 @@ The `HYPERVISOR_EXTENSIONS` variable tells CMake what the name of the resulting 
 
 The rest of the usage instructions above can be used to start/stop your custom hypervisor. For more information about what ABIs the microkernel provides your extension with, please see the [Microkernel Syscall Specification](https://github.com/Bareflank/hypervisor/blob/master/docs/Microkernel%20Syscall%20Specification.md) in the docs folder. We also provide an example implementation of this ABI as a set of C++ APIs that you can use if you would like. This example set of APIs can be seen in the [syscall/include/cpp/mk_interface.hpp](https://github.com/Bareflank/hypervisor/blob/master/syscall/include/cpp/mk_interface.hpp) file.
 
+## **Raspberry Pi 4**
+Yes, ARMv8 is supported by Bareflank. Specifically, Bareflank aims to support
+systems that adhere to the [ServerReady](https://developer.arm.com/architectures/platform-design/server-systems)
+specification using UEFI. To get the Raspberry Pi 4 to run Bareflank, you will
+need the following:
+- A [Raspberry Pi 4](https://www.raspberrypi.org/products/raspberry-pi-4-desktop-kit/).
+  Other kits exist, but it is important that you have most of the things that
+  come with this kit.
+- An SD card loaded with [UEFI](https://github.com/pftf/RPi4). The SD card
+  will only be used to boot UEFI.
+- A USB 3.0 USB stick. Make sure it is low profile as all of the USB devices
+  that will be plugged in get cramped and wide USB sticks will not fit.
+- A compatible keyboard and mouse. Not all keyboards seem to work. Likely a
+  keyboard and mouse that is well supported by Linux will work fine, which
+  does not include Corsair devices. Or, just buy the kit above which works
+  great.
+- A [USB serial cable](https://www.amazon.com/ADAFRUIT-Industries-954-Serial-Raspberry/dp/B00DJUHGHI/ref=sr_1_3?dchild=1&keywords=raspberry+pi+4+serial+cable&qid=1622228033&sr=8-3)
+  Do not use the voltage line (the red cable, meaning only use the black, green
+  and white cables). If you use the voltage line, the Raspberry Pi 4 will be
+  powered from this USB cable, which causes all sorts of instability issues
+  including crashing and certain devices not powering on during reboots.
+  Instead, use the power cable that comes in the kit above, and only use the
+  USB cable for serial.
+- A [power cable switch](https://www.amazon.com/iUniker-Raspberry-Switch-Supply-Type-C/dp/B07V8G2SYZ/ref=sr_1_5?dchild=1&keywords=raspberry+pi+4+power+cable&qid=1622228153&sr=8-5)
+  is a nice optional feature. Each time you make a mod to the hypervisor you
+  will need to reboot, and this will prevent you from having to unplug the
+  Raspberry Pi 4 all the time as it doesn't have a power or reset switch.
+- Ubuntu Server 21.04 or higher. This is important. No other versions of Linux
+  seem to work. Most versions of Linux for the Raspberry Pi 4 as pre-build
+  images. These images are not compliant with the ServerReady spec and therefore
+  do not support UEFI. Ubuntu 21.04 Sever Edition has an ISO version for ARM
+  that installs fine on the Raspberry Pi 4. Install Ubuntu onto the USB stick.
+  UEFI will make the USB stick FS0, allowing you to use the commands in the
+  UEFI section of this readme to compile and test.
+- Late Launch is not supported, meaning you must use UEFI.
+
+It is possible that the microkernel is missing APIs for configuring certain
+features on the ARMv8 CPU. If this is the case, please feel free to propose
+whatever changes are needed to support your research.
+
 ## **Resources**
 [![Join the chat](https://img.shields.io/badge/chat-on%20Slack-brightgreen.svg)](https://bareflank.herokuapp.com/)
 
 The Bareflank hypervisor provides a ton of useful resources to learn how to use the library including:
--   **Documentation**: <https://bareflank.github.io/hypervisor/>
+-   **Documentation**: <https://github.com/Bareflank/hypervisor/tree/master/docs>
 -   **Examples**: <https://github.com/Bareflank/hypervisor/tree/master/example>
--   **Unit Tests**: <https://github.com/Bareflank/hypervisor/tree/master/test>
 
 If you have any questions, bugs, or feature requests, please feel free to ask on any of the following:
 -   **Slack**: <https://bareflank.herokuapp.com/>
@@ -243,6 +327,8 @@ If this is the case, disable the default serial device using the following:
 ```
 reg add "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\Serial" /f /v "start" /t REG_DWORD /d "4"
 ```
+
+See "Important Tips" above for additional details on how to use serial devices.
 
 ## License
 The Bareflank Hypervisor is licensed under the MIT License.

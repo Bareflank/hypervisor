@@ -427,3 +427,26 @@ platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const order)
 
     return ret;
 }
+
+/**
+ * <!-- description -->
+ *   @brief Dumps the contents of the VMM's ring buffer.
+ */
+void
+platform_dump_vmm(void)
+{}
+
+/**
+ * <!-- description -->
+ *   @brief Initializes the archiecture. Some platforms might need per CPU
+ *     initialization logic to get the CPU set up. Most platforms ignore
+ *     calls to this function
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success, LOADER_FAILURE otherwise
+ */
+int64_t
+platform_arch_init(void)
+{
+    return LOADER_SUCCESS;
+}

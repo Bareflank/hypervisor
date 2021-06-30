@@ -52,6 +52,7 @@
 #include <g_mk_huge_pool.h>
 #include <g_mk_page_pool.h>
 #include <g_mk_root_page_table.h>
+#include <g_vmm_status.h>
 #include <map_ext_elf_files.h>
 #include <map_mk_code_aliases.h>
 #include <map_mk_debug_ring.h>
@@ -65,7 +66,6 @@
 #include <stop_and_free_the_vmm.h>
 #include <stop_vmm_per_cpu.h>
 #include <types.h>
-#include <vmm_status.h>
 
 static int64_t
 alloc_and_start_the_vmm(struct start_vmm_args_t const *const args)

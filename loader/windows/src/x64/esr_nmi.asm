@@ -22,6 +22,9 @@
 ; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ; SOFTWARE.
 
+    ; @brief defines the offset of state_save_t.ia32_debugctl
+    SS_OFFSET_NMI EQU 318h
+
     esr_nmi_text SEGMENT ALIGN(1000h) 'CODE'
     esr_nmi PROC
 
@@ -34,7 +37,7 @@
     push rdx
 
     mov rax, 1h
-    mov [r15 + 318h], rax
+    mov [r15 + SS_OFFSET_NMI], rax
 
     pop rdx
     pop rax

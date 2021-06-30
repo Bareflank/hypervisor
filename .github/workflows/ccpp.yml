@@ -63,7 +63,7 @@ jobs:
         sudo tar -xzvf hypervisor/utils/linux/llvm-bareflank.tar.gz -C /usr/lib/
         export PATH="/usr/lib/llvm-bareflank/bin:$PATH"
         mkdir build && cd build
-        cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=CLANG_TIDY -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ../hypervisor
+        cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=CLANG_TIDY -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DBSL_DEBUG_LEVEL=bsl::VVV ../hypervisor
         ninja
       shell: bash
 
@@ -81,7 +81,7 @@ jobs:
     - name: Validate ASAN
       run: |
         mkdir build && cd build
-        cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=ASAN -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ../hypervisor
+        cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=ASAN -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DBSL_DEBUG_LEVEL=bsl::VVV ../hypervisor
         ninja
         ninja unittest
       shell: bash
@@ -100,7 +100,7 @@ jobs:
     - name: Validate UBSAN
       run: |
         mkdir build && cd build
-        cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=UBSAN -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ../hypervisor
+        cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=UBSAN -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DBSL_DEBUG_LEVEL=bsl::VVV ../hypervisor
         ninja
         ninja unittest
       shell: bash
@@ -137,34 +137,35 @@ jobs:
     - name: Validate Debug Build
       run: |
         mkdir build && cd build
-        cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ../hypervisor
+        cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DBSL_DEBUG_LEVEL=bsl::VVV ../hypervisor
         ninja
         ninja unittest
       shell: bash
 
-  # Codecov:
-  #   runs-on: ubuntu-20.04
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #     with:
-  #       path: hypervisor
-  #   - name: Setup
-  #     run: |
-  #       sudo apt-get update
-  #       sudo apt-get install -y clang lld cmake ninja-build
-  #       wget https://github.com/mozilla/grcov/releases/download/v0.5.9/grcov-linux-x86_64.tar.bz2
-  #       tar xvf grcov-linux-x86_64.tar.bz2
-  #       sudo mv grcov /usr/bin/
-  #     shell: bash
-  #   - name: Gather Codecov Info
-  #     run: |
-  #       mkdir build && cd build
-  #       cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=CODECOV -DBUILD_TESTS=ON ../hypervisor
-  #       ninja
-  #       ninja codecov-info
-  #     shell: bash
-  #   - name: Upload Codecov Info
-  #     run: |
-  #       cd build
-  #       ninja codecov-upload-ci
-  #     shell: bash
+  Codecov:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        path: hypervisor
+    - name: Setup
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang cmake ninja-build llvm
+        wget https://github.com/mozilla/grcov/releases/download/v0.8.0/grcov-linux-x86_64.tar.bz2
+        tar xvf grcov-linux-x86_64.tar.bz2
+        sudo mv grcov /usr/bin/
+        sudo rm /usr/bin/gcov
+        sudo ln -s /usr/bin/llvm-cov-10 /usr/bin/gcov
+      shell: bash
+    - name: Gather Codecov Info
+      run: |
+        mkdir build && cd build
+        cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=CODECOV -DBUILD_TESTS=ON -DBSL_DEBUG_LEVEL=bsl::VVV ../hypervisor
+        ninja
+      shell: bash
+    - name: Upload Codecov Info
+      run: |
+        cd build
+        ninja codecov-upload-ci
+      shell: bash

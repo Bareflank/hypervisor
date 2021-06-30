@@ -25,8 +25,10 @@
 #ifndef DISPATCH_SYSCALL_CONTROL_OP_HPP
 #define DISPATCH_SYSCALL_CONTROL_OP_HPP
 
-#include <mk_interface.hpp>
+#include <bf_constants.hpp>
+#include <ext_t.hpp>
 #include <return_to_mk.hpp>
+#include <tls_t.hpp>
 
 #include <bsl/debug.hpp>
 
@@ -36,30 +38,46 @@ namespace mk
     ///   @brief Dispatches the bf_callback_op syscalls
     ///
     /// <!-- inputs/outputs -->
-    ///   @tparam TLS_CONCEPT defines the type of TLS block to use
     ///   @param tls the current TLS block
-    ///   @return Returns syscall::BF_STATUS_SUCCESS on success or an error
-    ///     code on failure.
+    ///   @param ext the extension that made the syscall
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+    ///     otherwise
     ///
-    template<typename TLS_CONCEPT>
     [[nodiscard]] constexpr auto
-    dispatch_syscall_control_op(TLS_CONCEPT &tls) noexcept -> syscall::bf_status_t
+    dispatch_syscall_control_op(tls_t &tls, ext_t &ext) noexcept -> bsl::errc_type
     {
         switch (syscall::bf_syscall_index(tls.ext_syscall).get()) {
             case syscall::BF_CONTROL_OP_EXIT_IDX_VAL.get(): {
-                return_to_mk(bsl::ONE_UMAX.get());
-                return syscall::BF_STATUS_SUCCESS;
+                return_to_mk(bsl::exit_failure);
+
+                // Unreachable
+                return bsl::errc_success;
+            }
+
+            case syscall::BF_CONTROL_OP_WAIT_IDX_VAL.get(): {
+                if (ext.is_started()) {
+                    return_to_mk(bsl::exit_failure);
+                }
+                else {
+                    return_to_mk(bsl::exit_success);
+                }
+
+                // Unreachable
+                return bsl::errc_success;
             }
 
             default: {
-                bsl::error() << "unknown syscall index: "    //--
-                             << bsl::hex(tls.ext_syscall)    //--
-                             << bsl::endl                    //--
-                             << bsl::here();                 //--
-
-                return syscall::BF_STATUS_FAILURE_UNKNOWN;
+                break;
             }
         }
+
+        bsl::error() << "unknown syscall index "     //--
+                     << bsl::hex(tls.ext_syscall)    //--
+                     << bsl::endl                    //--
+                     << bsl::here();                 //--
+
+        tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_UNSUPPORTED.get();
+        return bsl::errc_failure;
     }
 }
 

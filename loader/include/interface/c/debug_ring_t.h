@@ -28,7 +28,6 @@
 #define DEBUG_RING_T_H
 
 #include <constants.h>
-#include <static_assert.h>
 #include <stdint.h>
 
 #pragma pack(push, 1)

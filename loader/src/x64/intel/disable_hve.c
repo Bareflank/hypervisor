@@ -35,7 +35,7 @@
 
 /**
  * <!-- description -->
- *   @brief Disables AMD SVE
+ *   @brief Disables Hardware Virtualization Extensions
  */
 void
 disable_hve(void)
