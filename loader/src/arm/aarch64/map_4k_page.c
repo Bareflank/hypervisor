@@ -60,7 +60,7 @@
  *   @param phys the physical address to map
  *   @param flags the p_flags field from the segment associated with this page
  *   @param rpt the root page table to place the resulting map
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 map_4k_page(uint64_t const virt, uint64_t phys, uint32_t const flags, root_page_table_t *const rpt)

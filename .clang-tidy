@@ -23,9 +23,6 @@ Checks:
   '
     -*,
     bsl-*,
-      -bsl-template-generic-param,
-      -bsl-literals-user-defined,
-      -bsl-unused-return-value,
     bugprone-*,
       -bugprone-branch-clone,
     cert-*,
@@ -33,6 +30,7 @@ Checks:
       -cert-oop54-cpp,
     clang-analyzer-*,
       -clang-analyzer-core.CallAndMessage,
+      -clang-analyzer-core.NonNullParamChecker,
     cppcoreguidelines-*,
       -cppcoreguidelines-avoid-non-const-global-variables,
     hicpp-*,

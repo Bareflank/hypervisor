@@ -42,161 +42,150 @@ namespace mk
     ///   @brief Implements the bf_callback_op_register_bootstrap syscall
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param ext the extension that made the syscall
-    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    ///     otherwise
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_ext the extension that made the syscall
+    ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
-    syscall_callback_op_register_bootstrap(tls_t &tls, ext_t &ext) noexcept -> bsl::errc_type
+    syscall_callback_op_register_bootstrap(tls_t &mut_tls, ext_t &mut_ext) noexcept
+        -> syscall::bf_status_t
     {
-        bsl::safe_uintmax callback{tls.ext_reg1};
+        bsl::safe_uintmax const callback{mut_tls.ext_reg1};
         if (bsl::unlikely(callback.is_zero())) {
             bsl::error() << "the bootstrap callback cannot be null"    // --
                          << bsl::endl                                  // --
                          << bsl::here();                               // --
 
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
-        if (bsl::unlikely(ext.bootstrap_ip())) {
-            bsl::error() << "ext "                                          // --
-                         << bsl::hex(ext.id())                              // --
+        if (bsl::unlikely(mut_ext.bootstrap_ip())) {
+            bsl::error() << "mut_ext "                                      // --
+                         << bsl::hex(mut_ext.id())                          // --
                          << " already registered a bootstrap callback\n"    // --
                          << bsl::here();                                    // --
 
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
-        tls.state_reversal_required = true;
-        ext.set_bootstrap_ip(callback);
-
-        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-        return bsl::errc_success;
+        mut_ext.set_bootstrap_ip(callback);
+        return syscall::BF_STATUS_SUCCESS;
     }
 
     /// <!-- description -->
     ///   @brief Implements the bf_callback_op_register_vmexit syscall
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param ext the extension that made the syscall
-    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    ///     otherwise
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_ext the extension that made the syscall
+    ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
-    syscall_callback_op_register_vmexit(tls_t &tls, ext_t &ext) noexcept -> bsl::errc_type
+    syscall_callback_op_register_vmexit(tls_t &mut_tls, ext_t &mut_ext) noexcept
+        -> syscall::bf_status_t
     {
-        bsl::safe_uintmax callback{tls.ext_reg1};
+        bsl::safe_uintmax const callback{mut_tls.ext_reg1};
         if (bsl::unlikely(callback.is_zero())) {
             bsl::error() << "the vmexit callback cannot be null"    // --
                          << bsl::endl                               // --
                          << bsl::here();                            // --
 
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
-        if (bsl::unlikely(ext.vmexit_ip())) {
-            bsl::error() << "ext "                                       // --
-                         << bsl::hex(ext.id())                           // --
+        if (bsl::unlikely(mut_ext.vmexit_ip())) {
+            bsl::error() << "mut_ext "                                   // --
+                         << bsl::hex(mut_ext.id())                       // --
                          << " already registered a vmexit callback\n"    // --
                          << bsl::here();                                 // --
 
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
-        if (bsl::unlikely(nullptr != tls.ext_vmexit)) {
-            bsl::error() << "ext "                                                  // --
-                         << bsl::hex(static_cast<ext_t *>(tls.ext_vmexit)->id())    // --
-                         << " already registered a vmexit callback\n"               // --
-                         << bsl::here();                                            // --
+        if (bsl::unlikely(nullptr != mut_tls.ext_vmexit)) {
+            bsl::error() << "mut_ext "                                                  // --
+                         << bsl::hex(static_cast<ext_t *>(mut_tls.ext_vmexit)->id())    // --
+                         << " already registered a vmexit callback\n"                   // --
+                         << bsl::here();                                                // --
 
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
-        tls.state_reversal_required = true;
-        ext.set_vmexit_ip(callback);
-        tls.ext_vmexit = &ext;
+        mut_ext.set_vmexit_ip(callback);
+        mut_tls.ext_vmexit = &mut_ext;
 
-        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-        return bsl::errc_success;
+        return syscall::BF_STATUS_SUCCESS;
     }
 
     /// <!-- description -->
     ///   @brief Implements the bf_callback_op_register_fail syscall
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param ext the extension that made the syscall
-    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    ///     otherwise
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_ext the extension that made the syscall
+    ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
-    syscall_callback_op_register_fail(tls_t &tls, ext_t &ext) noexcept -> bsl::errc_type
+    syscall_callback_op_register_fail(tls_t &mut_tls, ext_t &mut_ext) noexcept
+        -> syscall::bf_status_t
     {
-        bsl::safe_uintmax callback{tls.ext_reg1};
+        bsl::safe_uintmax const callback{mut_tls.ext_reg1};
         if (bsl::unlikely(callback.is_zero())) {
             bsl::error() << "the fast fail callback cannot be null"    // --
                          << bsl::endl                                  // --
                          << bsl::here();                               // --
 
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
-        if (bsl::unlikely(ext.fail_ip())) {
-            bsl::error() << "ext "                                          // --
-                         << bsl::hex(ext.id())                              // --
+        if (bsl::unlikely(mut_ext.fail_ip())) {
+            bsl::error() << "mut_ext "                                      // --
+                         << bsl::hex(mut_ext.id())                          // --
                          << " already registered a fast fail callback\n"    // --
                          << bsl::here();                                    // --
 
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
-        if (bsl::unlikely(nullptr != tls.ext_fail)) {
-            bsl::error() << "ext "                                                // --
-                         << bsl::hex(static_cast<ext_t *>(tls.ext_fail)->id())    // --
-                         << " already registered a fast fail callback\n"          // --
-                         << bsl::here();                                          // --
+        if (bsl::unlikely(nullptr != mut_tls.ext_fail)) {
+            bsl::error() << "mut_ext "                                                // --
+                         << bsl::hex(static_cast<ext_t *>(mut_tls.ext_fail)->id())    // --
+                         << " already registered a fast fail callback\n"              // --
+                         << bsl::here();                                              // --
 
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
-        tls.state_reversal_required = true;
-        ext.set_fail_ip(callback);
-        tls.ext_fail = &ext;
+        mut_ext.set_fail_ip(callback);
+        mut_tls.ext_fail = &mut_ext;
 
-        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-        return bsl::errc_success;
+        return syscall::BF_STATUS_SUCCESS;
     }
 
     /// <!-- description -->
     ///   @brief Dispatches the bf_callback_op syscalls
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param ext the extension that made the syscall
-    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    ///     otherwise
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_ext the extension that made the syscall
+    ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
-    dispatch_syscall_callback_op(tls_t &tls, ext_t &ext) noexcept -> bsl::errc_type
+    dispatch_syscall_callback_op(tls_t &mut_tls, ext_t &mut_ext) noexcept -> syscall::bf_status_t
     {
-        bsl::errc_type ret{};
+        if (bsl::unlikely(!mut_ext.is_handle_valid(bsl::to_umax(mut_tls.ext_reg0)))) {
+            bsl::error() << "invalid handle "             // --
+                         << bsl::hex(mut_tls.ext_reg0)    // --
+                         << bsl::endl                     // --
+                         << bsl::here();                  // --
 
-        if (bsl::unlikely(!ext.is_handle_valid(tls.ext_reg0))) {
-            bsl::error() << "invalid handle "         // --
-                         << bsl::hex(tls.ext_reg0)    // --
-                         << bsl::endl                 // --
-                         << bsl::here();              // --
-
-            tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_INVALID_HANDLE.get();
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_FAILURE_INVALID_HANDLE;
         }
 
-        switch (syscall::bf_syscall_index(tls.ext_syscall).get()) {
+        switch (syscall::bf_syscall_index(bsl::to_umax(mut_tls.ext_syscall)).get()) {
             case syscall::BF_CALLBACK_OP_REGISTER_BOOTSTRAP_IDX_VAL.get(): {
-                ret = syscall_callback_op_register_bootstrap(tls, ext);
-                if (bsl::unlikely(!ret)) {
+                auto const ret{syscall_callback_op_register_bootstrap(mut_tls, mut_ext)};
+                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
                 }
@@ -205,8 +194,8 @@ namespace mk
             }
 
             case syscall::BF_CALLBACK_OP_REGISTER_VMEXIT_IDX_VAL.get(): {
-                ret = syscall_callback_op_register_vmexit(tls, ext);
-                if (bsl::unlikely(!ret)) {
+                auto const ret{syscall_callback_op_register_vmexit(mut_tls, mut_ext)};
+                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
                 }
@@ -215,8 +204,8 @@ namespace mk
             }
 
             case syscall::BF_CALLBACK_OP_REGISTER_FAIL_IDX_VAL.get(): {
-                ret = syscall_callback_op_register_fail(tls, ext);
-                if (bsl::unlikely(!ret)) {
+                auto const ret{syscall_callback_op_register_fail(mut_tls, mut_ext)};
+                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
                 }
@@ -229,13 +218,12 @@ namespace mk
             }
         }
 
-        bsl::error() << "unknown syscall index "     //--
-                     << bsl::hex(tls.ext_syscall)    //--
-                     << bsl::endl                    //--
-                     << bsl::here();                 //--
+        bsl::error() << "unknown syscall index "         //--
+                     << bsl::hex(mut_tls.ext_syscall)    //--
+                     << bsl::endl                        //--
+                     << bsl::here();                     //--
 
-        tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_UNSUPPORTED.get();
-        return bsl::errc_failure;
+        return syscall::BF_STATUS_FAILURE_UNSUPPORTED;
     }
 }
 

@@ -42,18 +42,11 @@ namespace example
     {
         bsl::ut_scenario{"initialize fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vmexit_t vmexit{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                vmexit_t mut_vmexit{};
                 bsl::ut_when{} = [&]() noexcept {
-                    vmexit.set_initialize(bsl::errc_failure);
+                    mut_vmexit.set_initialize(bsl::errc_failure);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(
-                            !vmexit.initialize(gs, tls, sys, intrinsic, vp_pool, vps_pool));
+                        bsl::ut_check(!mut_vmexit.initialize({}, {}, {}, {}, {}, {}));
                     };
                 };
             };
@@ -61,48 +54,29 @@ namespace example
 
         bsl::ut_scenario{"initialize success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vmexit_t vmexit{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                vmexit_t mut_vmexit{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(vmexit.initialize(gs, tls, sys, intrinsic, vp_pool, vps_pool));
+                    bsl::ut_check(mut_vmexit.initialize({}, {}, {}, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"release executes"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vmexit_t vmexit{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                vmexit_t mut_vmexit{};
                 bsl::ut_then{} = [&]() noexcept {
-                    vmexit.release(gs, tls, sys, intrinsic, vp_pool, vps_pool);
+                    mut_vmexit.release({}, {}, {}, {}, {}, {});
                 };
             };
         };
 
         bsl::ut_scenario{"dispatch fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vmexit_t vmexit{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                vmexit_t mut_vmexit{};
                 bsl::ut_when{} = [&]() noexcept {
-                    vmexit.set_dispatch(bsl::errc_failure);
+                    mut_vmexit.set_dispatch(bsl::errc_failure);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(
-                            !vmexit.dispatch(gs, tls, sys, intrinsic, vp_pool, vps_pool, {}, {}));
+                        bsl::ut_check(!mut_vmexit.dispatch({}, {}, {}, {}, {}, {}, {}, {}));
                     };
                 };
             };
@@ -110,16 +84,9 @@ namespace example
 
         bsl::ut_scenario{"dispatch success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vmexit_t vmexit{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                vmexit_t mut_vmexit{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(
-                        vmexit.dispatch(gs, tls, sys, intrinsic, vp_pool, vps_pool, {}, {}));
+                    bsl::ut_check(mut_vmexit.dispatch({}, {}, {}, {}, {}, {}, {}, {}));
                 };
             };
         };

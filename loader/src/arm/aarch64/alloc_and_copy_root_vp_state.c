@@ -52,7 +52,7 @@
  *
  * <!-- inputs/outputs -->
  *   @param state where to save the newly set up state to
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 alloc_and_copy_root_vp_state(struct state_save_t **const state)

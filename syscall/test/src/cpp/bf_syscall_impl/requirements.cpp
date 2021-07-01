@@ -103,16 +103,8 @@ main() noexcept -> bsl::exit_code
             static_assert(noexcept(syscall::bf_vps_op_create_vps_impl({}, {}, {}, {})));
             static_assert(noexcept(syscall::bf_vps_op_destroy_vps_impl({}, {})));
             static_assert(noexcept(syscall::bf_vps_op_init_as_root_impl({}, {})));
-            static_assert(noexcept(syscall::bf_vps_op_read8_impl({}, {}, {}, {})));
-            static_assert(noexcept(syscall::bf_vps_op_read16_impl({}, {}, {}, {})));
-            static_assert(noexcept(syscall::bf_vps_op_read32_impl({}, {}, {}, {})));
-            static_assert(noexcept(syscall::bf_vps_op_read64_impl({}, {}, {}, {})));
-            static_assert(noexcept(syscall::bf_vps_op_write8_impl({}, {}, {}, {})));
-            static_assert(noexcept(syscall::bf_vps_op_write16_impl({}, {}, {}, {})));
-            static_assert(noexcept(syscall::bf_vps_op_write32_impl({}, {}, {}, {})));
-            static_assert(noexcept(syscall::bf_vps_op_write64_impl({}, {}, {}, {})));
-            static_assert(noexcept(syscall::bf_vps_op_read_reg_impl({}, {}, {}, {})));
-            static_assert(noexcept(syscall::bf_vps_op_write_reg_impl({}, {}, {}, {})));
+            static_assert(noexcept(syscall::bf_vps_op_read_impl({}, {}, {}, {})));
+            static_assert(noexcept(syscall::bf_vps_op_write_impl({}, {}, {}, {})));
             static_assert(noexcept(syscall::bf_vps_op_run_impl({}, {}, {}, {})));
             static_assert(noexcept(syscall::bf_vps_op_run_current_impl({})));
             static_assert(noexcept(syscall::bf_vps_op_advance_ip_impl({}, {})));

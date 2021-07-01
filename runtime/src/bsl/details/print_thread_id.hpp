@@ -27,6 +27,7 @@
 
 #include <bf_syscall_impl.hpp>
 
+#include <bsl/color.hpp>
 #include <bsl/details/out.hpp>
 #include <bsl/fmt.hpp>
 #include <bsl/is_constant_evaluated.hpp>

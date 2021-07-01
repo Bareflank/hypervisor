@@ -60,21 +60,23 @@ namespace mk
         ///   @brief Initializes this vm_pool_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page_pool_t to use
-        ///   @param ext_pool the extension pool to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_ext_pool the extension pool to use
         ///   @param vp_pool the VP pool to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
         initialize(
-            tls_t &tls, page_pool_t &page_pool, ext_pool_t &ext_pool, vp_pool_t &vp_pool) noexcept
-            -> bsl::errc_type
+            tls_t &mut_tls,
+            page_pool_t &mut_page_pool,
+            ext_pool_t &mut_ext_pool,
+            vp_pool_t const &vp_pool) noexcept -> bsl::errc_type
         {
-            bsl::finally_assert release_on_error{
-                [this, &tls, &page_pool, &ext_pool, &vp_pool]() noexcept -> void {
-                    auto const ret{this->release(tls, page_pool, ext_pool, vp_pool)};
+            bsl::finally_assert mut_release_on_error{
+                [this, &mut_tls, &mut_page_pool, &mut_ext_pool, &vp_pool]() noexcept -> void {
+                    auto const ret{this->release(mut_tls, mut_page_pool, mut_ext_pool, vp_pool)};
                     if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return;
@@ -84,7 +86,7 @@ namespace mk
                 }};
 
             for (auto const vm : m_pool) {
-                auto const ret{vm.data->initialize(tls, bsl::to_u16(vm.index))};
+                auto const ret{vm.data->initialize(mut_tls, bsl::to_u16(vm.index))};
                 if (bsl::unlikely_assert(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -93,7 +95,7 @@ namespace mk
                 bsl::touch();
             }
 
-            release_on_error.ignore();
+            mut_release_on_error.ignore();
             return bsl::errc_success;
         }
 
@@ -101,20 +103,22 @@ namespace mk
         ///   @brief Release the vm_pool_t.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page_pool_t to use
-        ///   @param ext_pool the extension pool to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_ext_pool the extension pool to use
         ///   @param vp_pool the VP pool to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
         release(
-            tls_t &tls, page_pool_t &page_pool, ext_pool_t &ext_pool, vp_pool_t &vp_pool) noexcept
-            -> bsl::errc_type
+            tls_t &mut_tls,
+            page_pool_t &mut_page_pool,
+            ext_pool_t &mut_ext_pool,
+            vp_pool_t const &vp_pool) noexcept -> bsl::errc_type
         {
             for (auto const vm : m_pool) {
-                auto const ret{vm.data->release(tls, page_pool, ext_pool, vp_pool)};
+                auto const ret{vm.data->release(mut_tls, mut_page_pool, mut_ext_pool, vp_pool)};
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -130,33 +134,33 @@ namespace mk
         ///   @brief Allocates a vm from the vm pool.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page_pool_t to use
-        ///   @param ext_pool the extension pool to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_ext_pool the extension pool to use
         ///   @return Returns ID of the newly allocated vm
         ///
         [[nodiscard]] constexpr auto
-        allocate(tls_t &tls, page_pool_t &page_pool, ext_pool_t &ext_pool) noexcept
+        allocate(tls_t &mut_tls, page_pool_t &mut_page_pool, ext_pool_t &mut_ext_pool) noexcept
             -> bsl::safe_uint16
         {
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{mut_tls, m_lock};
 
-            vm_t *vm{};
+            vm_t *pmut_mut_vm{};
             for (auto const elem : m_pool) {
                 if (elem.data->is_deallocated()) {
-                    vm = elem.data;
+                    pmut_mut_vm = elem.data;
                     break;
                 }
 
                 bsl::touch();
             }
 
-            if (bsl::unlikely(nullptr == vm)) {
+            if (bsl::unlikely(nullptr == pmut_mut_vm)) {
                 bsl::error() << "vm pool out of vms\n" << bsl::here();
                 return bsl::safe_uint16::failure();
             }
 
-            return vm->allocate(tls, page_pool, ext_pool);
+            return pmut_mut_vm->allocate(mut_tls, mut_page_pool, mut_ext_pool);
         }
 
         /// <!-- description -->
@@ -164,24 +168,24 @@ namespace mk
         ///     function to the vm pool.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page_pool_t to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
         ///   @param vp_pool the VP pool to use
-        ///   @param ext_pool the extension pool to use
+        ///   @param mut_ext_pool the extension pool to use
         ///   @param vmid the ID of the vm to deallocate
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
         deallocate(
-            tls_t &tls,
-            page_pool_t &page_pool,
-            vp_pool_t &vp_pool,
-            ext_pool_t &ext_pool,
+            tls_t &mut_tls,
+            page_pool_t &mut_page_pool,
+            vp_pool_t const &vp_pool,
+            ext_pool_t &mut_ext_pool,
             bsl::safe_uint16 const &vmid) noexcept -> bsl::errc_type
         {
-            auto *const vm{m_pool.at_if(bsl::to_umax(vmid))};
-            if (bsl::unlikely(nullptr == vm)) {
+            auto *const pmut_vm{m_pool.at_if(bsl::to_umax(vmid))};
+            if (bsl::unlikely(nullptr == pmut_vm)) {
                 bsl::error()
                     << "vmid "                                                              // --
                     << bsl::hex(vmid)                                                       // --
@@ -193,7 +197,7 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            return vm->deallocate(tls, page_pool, vp_pool, ext_pool);
+            return pmut_vm->deallocate(mut_tls, mut_page_pool, vp_pool, mut_ext_pool);
         }
 
         /// <!-- description -->
@@ -208,8 +212,8 @@ namespace mk
         [[nodiscard]] constexpr auto
         zombify(bsl::safe_uint16 const &vmid) noexcept -> bsl::errc_type
         {
-            auto *const vm{m_pool.at_if(bsl::to_umax(vmid))};
-            if (bsl::unlikely(nullptr == vm)) {
+            auto *const pmut_vm{m_pool.at_if(bsl::to_umax(vmid))};
+            if (bsl::unlikely(nullptr == pmut_vm)) {
                 bsl::error()
                     << "vmid "                                                              // --
                     << bsl::hex(vmid)                                                       // --
@@ -221,7 +225,7 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            vm->zombify();
+            pmut_vm->zombify();
             return bsl::errc_success;
         }
 
@@ -238,7 +242,7 @@ namespace mk
         ///     deallocated.
         ///
         [[nodiscard]] constexpr auto
-        is_deallocated(tls_t &tls, bsl::safe_uint16 const &vmid) const noexcept -> bool
+        is_deallocated(tls_t const &tls, bsl::safe_uint16 const &vmid) const noexcept -> bool
         {
             bsl::discard(tls);
 
@@ -271,7 +275,7 @@ namespace mk
         ///     allocated.
         ///
         [[nodiscard]] constexpr auto
-        is_allocated(tls_t &tls, bsl::safe_uint16 const &vmid) const noexcept -> bool
+        is_allocated(tls_t const &tls, bsl::safe_uint16 const &vmid) const noexcept -> bool
         {
             bsl::discard(tls);
 
@@ -304,7 +308,7 @@ namespace mk
         ///     a zombie.
         ///
         [[nodiscard]] constexpr auto
-        is_zombie(tls_t &tls, bsl::safe_uint16 const &vmid) const noexcept -> bool
+        is_zombie(tls_t const &tls, bsl::safe_uint16 const &vmid) const noexcept -> bool
         {
             bsl::discard(tls);
 
@@ -328,16 +332,16 @@ namespace mk
         ///   @brief Sets the requested vm_t as active.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param vmid the ID of the vm_t to set as active
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        set_active(tls_t &tls, bsl::safe_uint16 const &vmid) noexcept -> bsl::errc_type
+        set_active(tls_t &mut_tls, bsl::safe_uint16 const &vmid) noexcept -> bsl::errc_type
         {
-            auto *const vm{m_pool.at_if(bsl::to_umax(vmid))};
-            if (bsl::unlikely(nullptr == vm)) {
+            auto *const pmut_vm{m_pool.at_if(bsl::to_umax(vmid))};
+            if (bsl::unlikely(nullptr == pmut_vm)) {
                 bsl::error()
                     << "vmid "                                                              // --
                     << bsl::hex(vmid)                                                       // --
@@ -349,23 +353,23 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            return vm->set_active(tls);
+            return pmut_vm->set_active(mut_tls);
         }
 
         /// <!-- description -->
         ///   @brief Sets the requested vm_t as inactive.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param vmid the ID of the vm_t to set as inactive
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        set_inactive(tls_t &tls, bsl::safe_uint16 const &vmid) noexcept -> bsl::errc_type
+        set_inactive(tls_t &mut_tls, bsl::safe_uint16 const &vmid) noexcept -> bsl::errc_type
         {
-            auto *const vm{m_pool.at_if(bsl::to_umax(vmid))};
-            if (bsl::unlikely(nullptr == vm)) {
+            auto *const pmut_vm{m_pool.at_if(bsl::to_umax(vmid))};
+            if (bsl::unlikely(nullptr == pmut_vm)) {
                 bsl::error()
                     << "vmid "                                                              // --
                     << bsl::hex(vmid)                                                       // --
@@ -377,7 +381,7 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            return vm->set_inactive(tls);
+            return pmut_vm->set_inactive(mut_tls);
         }
 
         /// <!-- description -->
@@ -393,7 +397,7 @@ namespace mk
         ///     function returns bsl::safe_uint16::failure()
         ///
         [[nodiscard]] constexpr auto
-        is_active(tls_t &tls, bsl::safe_uint16 const &vmid) const noexcept -> bsl::safe_uint16
+        is_active(tls_t const &tls, bsl::safe_uint16 const &vmid) const noexcept -> bsl::safe_uint16
         {
             auto const *const vm{m_pool.at_if(bsl::to_umax(vmid))};
             if (bsl::unlikely(nullptr == vm)) {
@@ -424,7 +428,8 @@ namespace mk
         ///     vm_t is not active on the current PP.
         ///
         [[nodiscard]] constexpr auto
-        is_active_on_current_pp(tls_t &tls, bsl::safe_uint16 const &vmid) const noexcept -> bool
+        is_active_on_current_pp(tls_t const &tls, bsl::safe_uint16 const &vmid) const noexcept
+            -> bool
         {
             auto const *const vm{m_pool.at_if(bsl::to_umax(vmid))};
             if (bsl::unlikely(nullptr == vm)) {
@@ -450,7 +455,7 @@ namespace mk
         ///   @param vmid the ID of the VM to dump
         ///
         constexpr void
-        dump(tls_t &tls, bsl::safe_uint16 const &vmid) const noexcept
+        dump(tls_t const &tls, bsl::safe_uint16 const &vmid) const noexcept
         {
             if constexpr (BSL_DEBUG_LEVEL == bsl::CRITICAL_ONLY) {
                 return;

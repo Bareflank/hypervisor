@@ -27,6 +27,7 @@
 #ifndef ALLOC_AND_COPY_MK_ELF_FILE_FROM_USER_H
 #define ALLOC_AND_COPY_MK_ELF_FILE_FROM_USER_H
 
+#include <elf_file_t.h>
 #include <span_t.h>
 
 /**
@@ -45,9 +46,9 @@
  * <!-- inputs/outputs -->
  *   @param mk_elf_file_from_user the ELF file to copy
  *   @param copied_mk_elf_file where to copy the ELF file too
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t alloc_and_copy_mk_elf_file_from_user(
-    struct span_t const *const mk_elf_file_from_user, struct span_t *const copied_mk_elf_file);
+    struct span_t const *const mk_elf_file_from_user, struct elf_file_t *const copied_mk_elf_file);
 
 #endif

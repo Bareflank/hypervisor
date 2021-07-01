@@ -43,35 +43,29 @@ namespace example
     {
         bsl::ut_scenario{"initialize success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                intrinsic_t intrinsic{};
-                gs_t gs{};
-                tls_t tls{};
+                intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(intrinsic.initialize(gs, tls));
+                    bsl::ut_check(mut_intrinsic.initialize({}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"release executes without initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                intrinsic_t intrinsic{};
-                gs_t gs{};
-                tls_t tls{};
+                intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
-                    intrinsic.release(gs, tls);
+                    mut_intrinsic.release({}, {});
                 };
             };
         };
 
         bsl::ut_scenario{"release executes with initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                intrinsic_t intrinsic{};
-                gs_t gs{};
-                tls_t tls{};
+                intrinsic_t mut_intrinsic{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(intrinsic.initialize(gs, tls));
+                    bsl::ut_required_step(mut_intrinsic.initialize({}, {}));
                     bsl::ut_then{} = [&]() noexcept {
-                        intrinsic.release(gs, tls);
+                        mut_intrinsic.release({}, {});
                     };
                 };
             };
@@ -79,22 +73,21 @@ namespace example
 
         bsl::ut_scenario{"cpuid"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                intrinsic_t intrinsic{};
-                gs_t gs{};
-                tls_t tls{};
-                bsl::safe_uintmax rax{};
-                bsl::safe_uintmax rbx{};
-                bsl::safe_uintmax rcx{};
-                bsl::safe_uintmax rdx{};
+                intrinsic_t const intrinsic{};
+                gs_t mut_gs{};
+                bsl::safe_uintmax mut_rax{};
+                bsl::safe_uintmax mut_rbx{};
+                bsl::safe_uintmax mut_rcx{};
+                bsl::safe_uintmax mut_rdx{};
                 constexpr auto expected_result{42_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    gs.cpuid_val = expected_result;
-                    intrinsic.cpuid(gs, tls, rax, rbx, rcx, rdx);
+                    mut_gs.cpuid_val = expected_result;
+                    intrinsic.cpuid(mut_gs, {}, mut_rax, mut_rbx, mut_rcx, mut_rdx);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(rax == expected_result);
-                        bsl::ut_check(rbx == expected_result);
-                        bsl::ut_check(rcx == expected_result);
-                        bsl::ut_check(rdx == expected_result);
+                        bsl::ut_check(mut_rax == expected_result);
+                        bsl::ut_check(mut_rbx == expected_result);
+                        bsl::ut_check(mut_rcx == expected_result);
+                        bsl::ut_check(mut_rdx == expected_result);
                     };
                 };
             };

@@ -61,13 +61,9 @@ dispatch_syscall_entry:
     push 0x40002
     popf
 
-    xor rax, rax
-    mov gs:[0x280], rax
-    mov rax, 0xDEAD000000010001
-    mov gs:[0x288], rax
-
     mov rdi, gs:[0x200]
     call dispatch_syscall_trampoline
+    mov gs:[0x030], rax
 
     cmp rax, 0x0
     jne dispatch_syscall_fast_fail_entry
@@ -85,7 +81,6 @@ dispatch_syscall_entry:
     mov rdx, gs:[0x048]
     mov rsi, gs:[0x058]
     mov rdi, gs:[0x060]
-    mov rax, gs:[0x288]
 
     mov r15, gs:[0x0A0]
     mov r14, gs:[0x098]
@@ -115,9 +110,6 @@ dispatch_syscall_fast_fail_entry:
     mov rax, gs:[0x1A8]
     mov gs:[0x188], rax
 
-    mov rdi, gs:[0x200]
-    call dispatch_syscall_trampoline_failure
-
     mov rsp, gs:[0x0A8]
 
     mov r9,  gs:[0x070]
@@ -126,7 +118,7 @@ dispatch_syscall_fast_fail_entry:
     mov rdx, gs:[0x048]
     mov rsi, gs:[0x058]
     mov rdi, gs:[0x060]
-    mov rax, gs:[0x288]
+    mov rax, gs:[0x030]
 
     mov r15, gs:[0x0A0]
     mov r14, gs:[0x098]

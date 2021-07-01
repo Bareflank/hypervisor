@@ -35,6 +35,8 @@
 #include <bsl/cstdint.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
+#include <bsl/finally.hpp>
+#include <bsl/likely.hpp>
 #include <bsl/move.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/span.hpp>
@@ -46,9 +48,9 @@
 namespace vmmctl
 {
     /// @brief defines what an error looks like from a POSIX call.
-    constexpr bsl::safe_int32 IFMAP_POSIX_ERROR{-1};
+    constexpr auto IFMAP_POSIX_ERROR{-1_i32};
     /// @brief defines what an invalid file is.
-    constexpr bsl::safe_int32 IFMAP_INVALID_FILE{-1};
+    constexpr auto IFMAP_INVALID_FILE{-1_i32};
 
     /// @class bsl::ifmap
     ///
@@ -59,36 +61,28 @@ namespace vmmctl
     class ifmap final
     {
         /// @brief stores a handle to the mapped file.
-        bsl::int32 m_file{IFMAP_INVALID_FILE.get()};
-        /// @brief stores a view of the file that is mapped.
-        bsl::span<bsl::uint8 const> m_data{};
+        bsl::safe_int32 m_file{IFMAP_INVALID_FILE};
+        /// @brief stores a pointer to the file that was opened.
+        void *m_data{};
+        /// @brief stores the number of bytes for the open file
+        bsl::safe_uintmax m_size{};
 
         /// <!-- description -->
         ///   @brief Swaps *this with other
         ///
         /// <!-- inputs/outputs -->
-        ///   @param lhs the left hand side of the exchange
-        ///   @param rhs the right hand side of the exchange
+        ///   @param mut_lhs the left hand side of the exchange
+        ///   @param mut_rhs the right hand side of the exchange
         ///
         static constexpr auto
-        private_swap(ifmap &lhs, ifmap &rhs) noexcept -> void
+        private_swap(ifmap &mut_lhs, ifmap &mut_rhs) noexcept -> void
         {
-            bsl::swap(lhs.m_file, rhs.m_file);
-            bsl::swap(lhs.m_data, rhs.m_data);
+            bsl::swap(mut_lhs.m_file, mut_rhs.m_file);
+            bsl::swap(mut_lhs.m_data, mut_rhs.m_data);
+            bsl::swap(mut_lhs.m_size, mut_rhs.m_size);
         }
 
     public:
-        /// @brief alias for: void
-        using value_type = void;
-        /// @brief alias for: safe_uintmax
-        using size_type = bsl::safe_uintmax;
-        /// @brief alias for: safe_uintmax
-        using difference_type = bsl::safe_uintmax;
-        /// @brief alias for: void *
-        using pointer_type = void *;
-        /// @brief alias for: void const *
-        using const_pointer_type = void const *;
-
         /// <!-- description -->
         ///   @brief Creates a default ifmap that has not yet been mapped.
         ///
@@ -104,53 +98,53 @@ namespace vmmctl
         explicit constexpr ifmap(bsl::string_view const &filename) noexcept
         {
             using stat_t = struct stat;
+            stat_t mut_s{};
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             m_file = open(filename.data(), O_RDONLY);
-            if (bsl::unlikely(IFMAP_POSIX_ERROR.get() == m_file)) {
-                bsl::alert() << "failed to open read-only file: "    // --
+            if (bsl::unlikely(IFMAP_INVALID_FILE == m_file)) {
+                bsl::error() << "failed to open read-only file: "    // --
                              << filename                             // --
-                             << bsl::endl;
+                             << bsl::endl;                           // --
 
-                m_file = IFMAP_INVALID_FILE.get();
                 return;
             }
 
-            stat_t s{};
-            if (bsl::unlikely(IFMAP_POSIX_ERROR.get() == fstat(m_file, &s))) {
-                bsl::alert() << "failed to get the size of the read-only file: "    // --
+            bsl::finally mut_release_on_error{[this]() noexcept -> void {
+                this->release();
+            }};
+
+            if (bsl::unlikely(IFMAP_POSIX_ERROR == fstat(m_file.get(), &mut_s))) {
+                bsl::error() << "failed to get the size of the read-only file: "    // --
                              << filename                                            // --
                              << bsl::endl;
 
-                bsl::discard(close(m_file));
-                m_file = IFMAP_INVALID_FILE.get();
                 return;
             }
 
-            pointer_type const ptr{mmap(
+            m_data = mmap(
                 nullptr,
-                static_cast<bsl::uintmax>(s.st_size),
+                static_cast<bsl::uintmax>(mut_s.st_size),
                 PROT_READ,
                 // We don't have a choice here
-                // NOLINTNEXTLINE(hicpp-signed-bitwise)
+                // NOLINTNEXTLINE(hicpp-signed-bitwise, bsl-types-fixed-width-ints-arithmetic-check)
                 MAP_SHARED | MAP_POPULATE,
-                m_file,
-                static_cast<bsl::intmax>(0))};
+                m_file.get(),
+                static_cast<bsl::intmax>(0));
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-            if (bsl::unlikely(MAP_FAILED == ptr)) {
-                bsl::alert() << "failed to map read-only file: "    // --
+            if (bsl::unlikely(MAP_FAILED == m_data)) {
+                bsl::error() << "failed to map read-only file: "    // --
                              << filename                            // --
                              << bsl::endl;
 
-                bsl::discard(close(m_file));
-                m_file = IFMAP_INVALID_FILE.get();
                 return;
             }
 
-            m_data = {static_cast<bsl::uint8 const *>(ptr), bsl::to_umax(s.st_size)};
+            m_size = bsl::to_umax(mut_s.st_size);
+            mut_release_on_error.ignore();
         }
 
         /// <!-- description -->
@@ -158,16 +152,7 @@ namespace vmmctl
         ///
         constexpr ~ifmap() noexcept
         {
-            if (IFMAP_INVALID_FILE.get() != m_file) {
-                // Not given a choice here due to the APIs provided by Linux
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast,-warnings-as-errors)
-                bsl::discard(munmap(const_cast<bsl::uint8 *>(m_data.data()), m_data.size().get()));
-                bsl::discard(close(m_file));
-                m_file = IFMAP_INVALID_FILE.get();
-            }
-            else {
-                bsl::touch();
-            }
+            this->release();
         }
 
         /// <!-- description -->
@@ -182,15 +167,17 @@ namespace vmmctl
         ///   @brief move constructor
         ///
         /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
+        ///   @param mut_o the object being moved
         ///
-        constexpr ifmap(ifmap &&o) noexcept
-            : m_file{bsl::move(o.m_file)}, m_data{bsl::move(o.m_data)}
+        constexpr ifmap(ifmap &&mut_o) noexcept
+            : m_file{bsl::move(mut_o.m_file)}
+            , m_data{bsl::move(mut_o.m_data)}
+            , m_size{bsl::move(mut_o.m_size)}
         {
-            o.m_file = IFMAP_INVALID_FILE.get();
-            o.m_data = {};
+            mut_o.m_file = IFMAP_INVALID_FILE;
+            mut_o.m_data = {};
+            mut_o.m_size = {};
         }
-
         /// <!-- description -->
         ///   @brief copy assignment
         ///
@@ -204,27 +191,41 @@ namespace vmmctl
         ///   @brief move assignment
         ///
         /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
+        ///   @param mut_o the object being moved
         ///   @return a reference to *this
         ///
         [[maybe_unused]] auto
-        operator=(ifmap &&o) &noexcept -> ifmap &
+        operator=(ifmap &&mut_o) &noexcept -> ifmap &
         {
-            ifmap tmp{bsl::move(o)};
-            this->private_swap(*this, tmp);
+            ifmap mut_tmp{bsl::move(mut_o)};
+            this->private_swap(*this, mut_tmp);
             return *this;
         }
 
         /// <!-- description -->
-        ///   @brief Returns a span to the read-only mapped file.
+        ///   @brief Closes the file, releasing all of the resource back to
+        ///     the OS kernel.
         ///
-        /// <!-- inputs/outputs -->
-        ///   @return Returns a span to the read-only mapped file.
-        ///
-        [[nodiscard]] constexpr auto
-        view() const noexcept -> bsl::span<bsl::uint8 const>
+        constexpr void
+        release() noexcept
         {
-            return m_data;
+            if (bsl::likely(nullptr != m_data)) {
+                bsl::discard(munmap(m_data, m_size.get()));
+            }
+            else {
+                bsl::touch();
+            }
+
+            if (bsl::likely(IFMAP_INVALID_FILE != m_file)) {
+                bsl::discard(close(m_file.get()));
+            }
+            else {
+                bsl::touch();
+            }
+
+            m_size = {};
+            m_data = {};
+            m_file = IFMAP_INVALID_FILE;
         }
 
         /// <!-- description -->
@@ -234,34 +235,44 @@ namespace vmmctl
         ///   @return Returns a pointer to the read-only mapped file.
         ///
         [[nodiscard]] constexpr auto
-        data() const noexcept -> const_pointer_type
+        view() const noexcept -> bsl::span<bsl::uint8 const>
         {
-            return m_data.data();
+            return {static_cast<bsl::uint8 const *>(m_data), m_size};
         }
 
         /// <!-- description -->
-        ///   @brief Returns true if the file failed to be mapped, false
-        ///     otherwise.
+        ///   @brief Returns a pointer to the read-only mapped file.
         ///
         /// <!-- inputs/outputs -->
-        ///   @return Returns true if the file failed to be mapped, false
-        ///     otherwise.
+        ///   @return Returns a pointer to the read-only mapped file.
+        ///
+        [[nodiscard]] constexpr auto
+        data() const noexcept -> void const *
+        {
+            return m_data;
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns m_size.is_zero()
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns m_size.is_zero()
         ///
         [[nodiscard]] constexpr auto
         empty() const noexcept -> bool
         {
-            return m_data.empty();
+            return m_size.is_zero();
         }
 
         /// <!-- description -->
-        ///   @brief Returns !empty()
+        ///   @brief Returns nullptr == m_data
         ///
         /// <!-- inputs/outputs -->
-        ///   @return Returns !empty()
+        ///   @return Returns nullptr == m_data
         ///
         [[nodiscard]] explicit constexpr operator bool() const noexcept
         {
-            return !this->empty();
+            return nullptr != m_data;
         }
 
         /// <!-- description -->
@@ -273,35 +284,9 @@ namespace vmmctl
         ///     mapped.
         ///
         [[nodiscard]] constexpr auto
-        size() const noexcept -> size_type
+        size() const noexcept -> bsl::safe_uintmax
         {
-            return m_data.size();
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the max number of bytes the BSL supports.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return Returns the max number of bytes the BSL supports.
-        ///
-        [[nodiscard]] static constexpr auto
-        max_size() noexcept -> size_type
-        {
-            return bsl::to_umax(size_type::max());
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the number of bytes in the file being
-        ///     mapped.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return Returns the number of bytes in the file being
-        ///     mapped.
-        ///
-        [[nodiscard]] constexpr auto
-        size_bytes() const noexcept -> size_type
-        {
-            return m_data.size();
+            return m_size;
         }
     };
 }

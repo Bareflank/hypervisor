@@ -83,7 +83,7 @@ namespace integration
         bsl::safe_uintmax hndl{};
         syscall::bf_status_t ret{};
 
-        if (bsl::unlikely(!syscall::bf_is_spec1_supported(version))) {
+        if (bsl::unlikely(!syscall::bf_is_spec1_supported(bsl::to_u32(version)))) {
             bsl::error() << "integration test not supported\n" << bsl::here();
             return syscall::bf_control_op_exit();
         }

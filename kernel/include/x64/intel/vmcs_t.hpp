@@ -25,9 +25,9 @@
 #ifndef VMCS_HPP
 #define VMCS_HPP
 
+#include <bsl/array.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
-#include <bsl/details/carray.hpp>
 #include <bsl/safe_integral.hpp>
 
 #pragma pack(push, 1)
@@ -383,7 +383,7 @@ namespace mk
         bsl::uint32 revision_id;
 
         /// @brief reserved
-        bsl::details::carray<bsl::uint8, RESERVED_SIZE.get()> reserved;
+        bsl::array<bsl::uint8, RESERVED_SIZE.get()> reserved;
     };
 }
 

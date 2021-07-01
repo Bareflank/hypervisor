@@ -44,7 +44,7 @@ namespace mk
     ///     bsl::errc_failure otherwise
     ///
     [[nodiscard]] constexpr auto
-    dispatch_esr_nmi(tls_t &tls, intrinsic_t &intrinsic) noexcept -> bsl::errc_type
+    dispatch_esr_nmi(tls_t const &tls, intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
     {
         bsl::discard(tls);
         bsl::discard(intrinsic);

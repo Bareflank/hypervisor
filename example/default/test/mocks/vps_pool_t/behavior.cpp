@@ -42,15 +42,11 @@ namespace example
     {
         bsl::ut_scenario{"initialize fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t vps_pool{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vps_pool_t mut_vps_pool{};
                 bsl::ut_when{} = [&]() noexcept {
-                    vps_pool.set_initialize(bsl::errc_failure);
+                    mut_vps_pool.set_initialize(bsl::errc_failure);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!vps_pool.initialize(gs, tls, sys, intrinsic));
+                        bsl::ut_check(!mut_vps_pool.initialize({}, {}, {}, {}));
                     };
                 };
             };
@@ -58,41 +54,29 @@ namespace example
 
         bsl::ut_scenario{"initialize success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t vps_pool{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vps_pool_t mut_vps_pool{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(vps_pool.initialize(gs, tls, sys, intrinsic));
+                    bsl::ut_check(mut_vps_pool.initialize({}, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"release executes"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t vps_pool{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vps_pool_t mut_vps_pool{};
                 bsl::ut_then{} = [&]() noexcept {
-                    vps_pool.release(gs, tls, sys, intrinsic);
+                    mut_vps_pool.release({}, {}, {}, {});
                 };
             };
         };
 
         bsl::ut_scenario{"allocate fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t vps_pool{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vps_pool_t mut_vps_pool{};
                 bsl::ut_when{} = [&]() noexcept {
-                    vps_pool.set_allocate(bsl::safe_uint16::failure());
+                    mut_vps_pool.set_allocate(bsl::safe_uint16::failure());
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!vps_pool.allocate(gs, tls, sys, intrinsic, {}, {}));
+                        bsl::ut_check(!mut_vps_pool.allocate({}, {}, {}, {}, {}, {}));
                     };
                 };
             };
@@ -100,13 +84,9 @@ namespace example
 
         bsl::ut_scenario{"allocate success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t vps_pool{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vps_pool_t mut_vps_pool{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(vps_pool.allocate(gs, tls, sys, intrinsic, {}, {}));
+                    bsl::ut_check(mut_vps_pool.allocate({}, {}, {}, {}, {}, {}));
                 };
             };
         };

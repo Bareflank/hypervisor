@@ -25,9 +25,9 @@
 #ifndef VMCB_HPP
 #define VMCB_HPP
 
+#include <bsl/array.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
-#include <bsl/details/carray.hpp>
 #include <bsl/safe_integral.hpp>
 
 #pragma pack(push, 1)
@@ -92,7 +92,7 @@ namespace mk
         /// @brief stores the VMCB field at offset (0x0014)
         bsl::uint32 intercept_instruction3;
         /// @brief stores the VMCB field at offset (0x0018)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED1_SIZE.get()> reserved1;
+        bsl::array<bsl::uint8, VMCB_RESERVED1_SIZE.get()> reserved1;
         /// @brief stores the VMCB field at offset (0x003C)
         bsl::uint16 pause_filter_threshold;
         /// @brief stores the VMCB field at offset (0x003E)
@@ -108,7 +108,7 @@ namespace mk
         /// @brief stores the VMCB field at offset (0x005C)
         bsl::uint8 tlb_control;
         /// @brief stores the VMCB field at offset (0x005D)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED2_SIZE.get()> reserved2;
+        bsl::array<bsl::uint8, VMCB_RESERVED2_SIZE.get()> reserved2;
         /// @brief stores the VMCB field at offset (0x0060)
         bsl::uint64 virtual_interrupt_a;
         /// @brief stores the VMCB field at offset (0x0068)
@@ -136,27 +136,27 @@ namespace mk
         /// @brief stores the VMCB field at offset (0x00C0)
         bsl::uint32 vmcb_clean_bits;
         /// @brief stores the VMCB field at offset (0x00C4)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED3_SIZE.get()> reserved3;
+        bsl::array<bsl::uint8, VMCB_RESERVED3_SIZE.get()> reserved3;
         /// @brief stores the VMCB field at offset (0x00C8)
         bsl::uint64 nrip;
         /// @brief stores the VMCB field at offset (0x00D0)
         bsl::uint8 number_of_bytes_fetched;
         /// @brief stores the VMCB field at offset (0x00D1)
-        bsl::details::carray<bsl::uint8, VMCB_GIB_SIZE.get()> guest_instruction_bytes;
+        bsl::array<bsl::uint8, VMCB_GIB_SIZE.get()> guest_instruction_bytes;
         /// @brief stores the VMCB field at offset (0x00E0)
         bsl::uint64 avic_apic_backing_page_ptr;
         /// @brief stores the VMCB field at offset (0x00E8)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED4_SIZE.get()> reserved4;
+        bsl::array<bsl::uint8, VMCB_RESERVED4_SIZE.get()> reserved4;
         /// @brief stores the VMCB field at offset (0x00F0)
         bsl::uint64 avic_logical_table_ptr;
         /// @brief stores the VMCB field at offset (0x00F8)
         bsl::uint64 avic_physical_table_ptr;
         /// @brief stores the VMCB field at offset (0x0100)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED5_SIZE.get()> reserved5;
+        bsl::array<bsl::uint8, VMCB_RESERVED5_SIZE.get()> reserved5;
         /// @brief stores the VMCB field at offset (0x0108)
         bsl::uint64 vmsa_ptr;
         /// @brief stores the VMCB field at offset (0x0110)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED6_SIZE.get()> reserved6;
+        bsl::array<bsl::uint8, VMCB_RESERVED6_SIZE.get()> reserved6;
 
         // -------------------------------------------------------------------------
         // State Save Area
@@ -247,15 +247,15 @@ namespace mk
         /// @brief stores the VMCB field at offset (0x0498)
         bsl::uint64 tr_base;
         /// @brief stores the VMCB field at offset (0x04A0)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED7_SIZE.get()> reserved7;
+        bsl::array<bsl::uint8, VMCB_RESERVED7_SIZE.get()> reserved7;
         /// @brief stores the VMCB field at offset (0x04CB)
         bsl::uint8 cpl;
         /// @brief stores the VMCB field at offset (0x04CC)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED8_SIZE.get()> reserved8;
+        bsl::array<bsl::uint8, VMCB_RESERVED8_SIZE.get()> reserved8;
         /// @brief stores the VMCB field at offset (0x04D0)
         bsl::uint64 efer;
         /// @brief stores the VMCB field at offset (0x04D8)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED9_SIZE.get()> reserved9;
+        bsl::array<bsl::uint8, VMCB_RESERVED9_SIZE.get()> reserved9;
         /// @brief stores the VMCB field at offset (0x0548)
         bsl::uint64 cr4;
         /// @brief stores the VMCB field at offset (0x0550)
@@ -271,11 +271,11 @@ namespace mk
         /// @brief stores the VMCB field at offset (0x0578)
         bsl::uint64 rip;
         /// @brief stores the VMCB field at offset (0x0580)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED10_SIZE.get()> reserved10;
+        bsl::array<bsl::uint8, VMCB_RESERVED10_SIZE.get()> reserved10;
         /// @brief stores the VMCB field at offset (0x05D8)
         bsl::uint64 rsp;
         /// @brief stores the VMCB field at offset (0x05E0)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED11_SIZE.get()> reserved11;
+        bsl::array<bsl::uint8, VMCB_RESERVED11_SIZE.get()> reserved11;
         /// @brief stores the VMCB field at offset (0x05F8)
         bsl::uint64 rax;
         /// @brief stores the VMCB field at offset (0x0600)
@@ -297,7 +297,7 @@ namespace mk
         /// @brief stores the VMCB field at offset (0x0640)
         bsl::uint64 cr2;
         /// @brief stores the VMCB field at offset (0x0648)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED12_SIZE.get()> reserved12;
+        bsl::array<bsl::uint8, VMCB_RESERVED12_SIZE.get()> reserved12;
         /// @brief stores the VMCB field at offset (0x0668)
         bsl::uint64 g_pat;
         /// @brief stores the VMCB field at offset (0x0670)
@@ -311,7 +311,7 @@ namespace mk
         /// @brief stores the VMCB field at offset (0x0690)
         bsl::uint64 lastexcpto;
         /// @brief stores the VMCB field at offset (0x0698)
-        bsl::details::carray<bsl::uint8, VMCB_RESERVED13_SIZE.get()> reserved13;
+        bsl::array<bsl::uint8, VMCB_RESERVED13_SIZE.get()> reserved13;
     };
 }
 

@@ -41,29 +41,30 @@ namespace mk
     ///     after a successful launch of the hypervisor.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param intrinsic the intrinsics to use
-    ///   @param vps_pool the VPS pool to use
-    ///   @param ext the ext_t to handle the VMExit
-    ///   @param log the VMExit log to use
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_intrinsic the intrinsics to use
+    ///   @param mut_vps_pool the VPS pool to use
+    ///   @param mut_ext the ext_t to handle the VMExit
+    ///   @param mut_log the VMExit log to use
     ///   @return Returns bsl::exit_success on success, bsl::exit_failure
     ///     otherwise
     ///
     [[nodiscard]] constexpr auto
     vmexit_loop(
-        tls_t &tls,
-        intrinsic_t &intrinsic,
-        vps_pool_t &vps_pool,
-        ext_t &ext,
-        vmexit_log_t &log) noexcept -> bsl::exit_code
+        tls_t &mut_tls,
+        intrinsic_t &mut_intrinsic,
+        vps_pool_t &mut_vps_pool,
+        ext_t &mut_ext,
+        vmexit_log_t &mut_log) noexcept -> bsl::exit_code
     {
-        auto const exit_reason{vps_pool.run(tls, intrinsic, tls.active_vpsid, log)};
+        auto const exit_reason{
+            mut_vps_pool.run(mut_tls, mut_intrinsic, mut_log, bsl::to_u16(mut_tls.active_vpsid))};
         if (bsl::unlikely(!exit_reason)) {
             bsl::print<bsl::V>() << bsl::here();
             return bsl::exit_failure;
         }
 
-        auto const ret{ext.vmexit(tls, intrinsic, exit_reason)};
+        auto const ret{mut_ext.vmexit(mut_tls, mut_intrinsic, exit_reason)};
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return bsl::exit_failure;

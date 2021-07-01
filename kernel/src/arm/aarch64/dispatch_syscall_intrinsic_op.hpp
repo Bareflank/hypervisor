@@ -53,17 +53,17 @@ namespace mk
     {
         bsl::discard(intrinsic);
 
-        if (bsl::unlikely(!ext.is_handle_valid(tls.ext_reg0))) {
+        if (bsl::unlikely(!ext.is_handle_valid(bsl::to_u64(tls.ext_reg0)))) {
             bsl::error() << "invalid handle "         // --
                          << bsl::hex(tls.ext_reg0)    // --
                          << bsl::endl                 // --
                          << bsl::here();              // --
 
-            tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_INVALID_HANDLE.get();
+            tls.ext_syscall = syscall::BF_STATUS_FAILURE_INVALID_HANDLE.get();
             return bsl::errc_failure;
         }
 
-        switch (syscall::bf_syscall_index(tls.ext_syscall).get()) {
+        switch (syscall::bf_syscall_index(bsl::to_u64(tls.ext_syscall)).get()) {
             default: {
                 break;
             }
@@ -74,7 +74,7 @@ namespace mk
                      << bsl::endl                    //--
                      << bsl::here();                 //--
 
-        tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_UNSUPPORTED.get();
+        tls.ext_syscall = syscall::BF_STATUS_FAILURE_UNSUPPORTED.get();
         return bsl::errc_failure;
     }
 }

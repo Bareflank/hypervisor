@@ -41,9 +41,9 @@ namespace mk
     struct vmcs_missing_registers_t final
     {
         /// @brief stores the value of cr2 (0x000)
-        bsl::uintmax cr2;
+        bsl::uintmax guest_cr2;
         /// @brief stores the value of dr6 (0x008)
-        bsl::uintmax dr6;
+        bsl::uintmax guest_dr6;
 
         /// @brief stores the guest value of ia32_star (0x010)
         bsl::uintmax guest_ia32_star;

@@ -44,7 +44,7 @@ namespace loader
         /// @brief stores the size of the idt in bytes (minus 1)
         bsl::uint16 limit;
         /// @brief stores a pointer to the idt
-        bsl::uint64 *base;
+        bsl::uint64 base;
     };
 }
 

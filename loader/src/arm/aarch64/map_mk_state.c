@@ -43,7 +43,7 @@
  *   @param state a pointer to a state_save_t that stores the state
  *     being mapped
  *   @param rpt the root page table to map the state into
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 map_mk_state(struct state_save_t const *const state, root_page_table_t *const rpt)

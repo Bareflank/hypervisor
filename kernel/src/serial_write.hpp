@@ -47,8 +47,8 @@ namespace mk
             return;
         }
 
-        for (bsl::safe_uintmax i{}; str[i.get()] != '\0'; ++i) {
-            serial_write_c(str[i.get()]);
+        for (bsl::safe_uintmax mut_i{}; '\0' != str[mut_i.get()]; ++mut_i) {
+            serial_write_c(str[mut_i.get()]);
         }
     }
 }

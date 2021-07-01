@@ -24,21 +24,21 @@
  * SOFTWARE.
  */
 
+#include <elf_file_t.h>
 #include <platform.h>
-#include <span_t.h>
 #include <types.h>
 
 /**
  * <!-- description -->
- *   @brief Releases a previously allocated span_t that was allocated
+ *   @brief Releases a previously allocated elf_file_t that was allocated
  *     using the alloc_and_copy_mk_elf_file function.
  *
  * <!-- inputs/outputs -->
- *   @param mk_elf_file the span_t to free.
+ *   @param mk_elf_file the elf_file_t to free.
  */
 void
-free_mk_elf_file(struct span_t *const mk_elf_file)
+free_mk_elf_file(struct elf_file_t *const mk_elf_file)
 {
     platform_free(mk_elf_file->addr, mk_elf_file->size);
-    platform_memset(mk_elf_file, 0, sizeof(struct span_t));
+    platform_memset(mk_elf_file, 0, sizeof(struct elf_file_t));
 }

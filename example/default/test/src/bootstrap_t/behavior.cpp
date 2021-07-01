@@ -42,48 +42,29 @@ namespace example
     {
         bsl::ut_scenario{"initialize success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                bootstrap_t bootstrap{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                bootstrap_t mut_bootstrap{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(bootstrap.initialize(gs, tls, sys, intrinsic, vp_pool, vps_pool));
+                    bsl::ut_check(mut_bootstrap.initialize({}, {}, {}, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"release executes without initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                bootstrap_t bootstrap{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                bootstrap_t mut_bootstrap{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bootstrap.release(gs, tls, sys, intrinsic, vp_pool, vps_pool);
+                    mut_bootstrap.release({}, {}, {}, {}, {}, {});
                 };
             };
         };
 
         bsl::ut_scenario{"release executes with initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                bootstrap_t bootstrap{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                bootstrap_t mut_bootstrap{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(
-                        bootstrap.initialize(gs, tls, sys, intrinsic, vp_pool, vps_pool));
+                    bsl::ut_required_step(mut_bootstrap.initialize({}, {}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
-                        bootstrap.release(gs, tls, sys, intrinsic, vp_pool, vps_pool);
+                        mut_bootstrap.release({}, {}, {}, {}, {}, {});
                     };
                 };
             };
@@ -91,20 +72,16 @@ namespace example
 
         bsl::ut_scenario{"dispatch vp_pool allocate fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                bootstrap_t bootstrap{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                bootstrap_t mut_bootstrap{};
+                syscall::bf_syscall_t mut_sys{};
+                vp_pool_t mut_vp_pool{};
+                vps_pool_t mut_vps_pool{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(
-                        bootstrap.initialize(gs, tls, sys, intrinsic, vp_pool, vps_pool));
-                    vp_pool.set_allocate(bsl::safe_uint16::failure());
+                    bsl::ut_required_step(mut_bootstrap.initialize({}, {}, {}, {}, {}, {}));
+                    mut_vp_pool.set_allocate(bsl::safe_uint16::failure());
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(
-                            !bootstrap.dispatch(gs, tls, sys, intrinsic, vp_pool, vps_pool, {}));
+                        bsl::ut_check(!mut_bootstrap.dispatch(
+                            {}, {}, mut_sys, {}, mut_vp_pool, mut_vps_pool, {}));
                     };
                 };
             };
@@ -112,20 +89,16 @@ namespace example
 
         bsl::ut_scenario{"dispatch vps_pool allocate fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                bootstrap_t bootstrap{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                bootstrap_t mut_bootstrap{};
+                syscall::bf_syscall_t mut_sys{};
+                vp_pool_t mut_vp_pool{};
+                vps_pool_t mut_vps_pool{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(
-                        bootstrap.initialize(gs, tls, sys, intrinsic, vp_pool, vps_pool));
-                    vps_pool.set_allocate(bsl::safe_uint16::failure());
+                    bsl::ut_required_step(mut_bootstrap.initialize({}, {}, {}, {}, {}, {}));
+                    mut_vps_pool.set_allocate(bsl::safe_uint16::failure());
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(
-                            !bootstrap.dispatch(gs, tls, sys, intrinsic, vp_pool, vps_pool, {}));
+                        bsl::ut_check(!mut_bootstrap.dispatch(
+                            {}, {}, mut_sys, {}, mut_vp_pool, mut_vps_pool, {}));
                     };
                 };
             };
@@ -133,19 +106,15 @@ namespace example
 
         bsl::ut_scenario{"dispatch success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                bootstrap_t bootstrap{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                bootstrap_t mut_bootstrap{};
+                syscall::bf_syscall_t mut_sys{};
+                vp_pool_t mut_vp_pool{};
+                vps_pool_t mut_vps_pool{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(
-                        bootstrap.initialize(gs, tls, sys, intrinsic, vp_pool, vps_pool));
+                    bsl::ut_required_step(mut_bootstrap.initialize({}, {}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(
-                            bootstrap.dispatch(gs, tls, sys, intrinsic, vp_pool, vps_pool, {}));
+                        bsl::ut_check(mut_bootstrap.dispatch(
+                            {}, {}, mut_sys, {}, mut_vp_pool, mut_vps_pool, {}));
                     };
                 };
             };

@@ -28,9 +28,9 @@
 #define G_EXT_ELF_FILES_H
 
 #include <constants.h>
-#include <span_t.h>
+#include <elf_file_t.h>
 
 /** @brief stores ELF files associated with the extensions */
-extern struct span_t g_ext_elf_files[HYPERVISOR_MAX_EXTENSIONS];
+extern struct elf_file_t g_ext_elf_files[HYPERVISOR_MAX_EXTENSIONS];
 
 #endif

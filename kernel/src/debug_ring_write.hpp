@@ -41,7 +41,7 @@ namespace mk
     {
         /// @brief stores a pointer to the debug ring provided by the loader
         // NOLINTNEXTLINE(bsl-var-braced-init)
-        extern loader::debug_ring_t *g_debug_ring;
+        extern loader::debug_ring_t *g_pmut_mut_debug_ring;
     }
 
     /// <!-- description -->
@@ -57,31 +57,31 @@ namespace mk
             return;
         }
 
-        bsl::safe_uintmax epos{g_debug_ring->epos};
-        bsl::safe_uintmax spos{g_debug_ring->spos};
+        bsl::safe_uintmax mut_epos{g_pmut_mut_debug_ring->epos};
+        bsl::safe_uintmax mut_spos{g_pmut_mut_debug_ring->spos};
 
-        if (!(g_debug_ring->buf.size() > epos)) {
-            epos = {};
+        if (!(g_pmut_mut_debug_ring->buf.size() > mut_epos)) {
+            mut_epos = {};
         }
         else {
             bsl::touch();
         }
 
-        *g_debug_ring->buf.at_if(epos) = c;
-        ++epos;
+        *g_pmut_mut_debug_ring->buf.at_if(mut_epos) = c;
+        ++mut_epos;
 
-        if (!(g_debug_ring->buf.size() > epos)) {
-            epos = {};
+        if (!(g_pmut_mut_debug_ring->buf.size() > mut_epos)) {
+            mut_epos = {};
         }
         else {
             bsl::touch();
         }
 
-        if (epos == spos) {
-            ++spos;
+        if (mut_epos == mut_spos) {
+            ++mut_spos;
 
-            if (!(g_debug_ring->buf.size() > spos)) {
-                spos = {};
+            if (!(g_pmut_mut_debug_ring->buf.size() > mut_spos)) {
+                mut_spos = {};
             }
             else {
                 bsl::touch();
@@ -91,8 +91,8 @@ namespace mk
             bsl::touch();
         }
 
-        g_debug_ring->epos = epos.get();
-        g_debug_ring->spos = spos.get();
+        g_pmut_mut_debug_ring->epos = mut_epos.get();
+        g_pmut_mut_debug_ring->spos = mut_spos.get();
     }
 
     /// <!-- description -->
@@ -108,8 +108,8 @@ namespace mk
             return;
         }
 
-        for (bsl::safe_uintmax i{}; str[i.get()] != '\0'; ++i) {
-            debug_ring_write(str[i.get()]);
+        for (bsl::safe_uintmax mut_i{}; '\0' != str[mut_i.get()]; ++mut_i) {
+            debug_ring_write(str[mut_i.get()]);
         }
     }
 }

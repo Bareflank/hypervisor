@@ -27,8 +27,11 @@
 #ifndef BFELF_ELF64_EHDR_T_H
 #define BFELF_ELF64_EHDR_T_H
 
-#include <bfelf/bfelf_types.h>
+#include "bfelf_elf64_phdr_t.h"
+#include "bfelf_elf64_shdr_t.h"
+
 #include <debug.h>
+#include <types.h>
 
 #pragma pack(push, 1)
 
@@ -80,23 +83,23 @@
 #define bfelf_elfosabi_standalone ((uint8_t)255U)
 
 /** @brief defines e_type for no file type */
-#define bfelf_et_none ((bfelf_elf64_half)0U)
+#define bfelf_et_none ((uint16_t)0U)
 /** @brief defines e_type for an relocatable object file */
-#define bfelf_et_rel ((bfelf_elf64_half)1U)
+#define bfelf_et_rel ((uint16_t)1U)
 /** @brief defines e_type for an executable file */
-#define bfelf_et_exec ((bfelf_elf64_half)2U)
+#define bfelf_et_exec ((uint16_t)2U)
 /** @brief defines e_type for an shared object file */
-#define bfelf_et_dyn ((bfelf_elf64_half)3U)
+#define bfelf_et_dyn ((uint16_t)3U)
 /** @brief defines e_type for an core file */
-#define bfelf_et_core ((bfelf_elf64_half)4U)
+#define bfelf_et_core ((uint16_t)4U)
 /** @brief defines e_type for an environment-specific use (lo) */
-#define bfelf_et_loos ((bfelf_elf64_half)0xFE00U)
+#define bfelf_et_loos ((uint16_t)0xFE00U)
 /** @brief defines e_type for an environment-specific use (hi) */
-#define bfelf_et_hios ((bfelf_elf64_half)0xFEFFU)
+#define bfelf_et_hios ((uint16_t)0xFEFFU)
 /** @brief defines e_type for an processor-specific use (lo) */
-#define bfelf_et_loproc ((bfelf_elf64_half)0xFF00U)
+#define bfelf_et_loproc ((uint16_t)0xFF00U)
 /** @brief defines e_type for an processor-specific use (hi) */
-#define bfelf_et_hiproc ((bfelf_elf64_half)0xFFFFU)
+#define bfelf_et_hiproc ((uint16_t)0xFFFFU)
 
 /**
  * @struct bfelf_elf64_ehdr_t
@@ -107,48 +110,21 @@
  */
 struct bfelf_elf64_ehdr_t
 {
-    uint8_t e_ident[bfelf_ei_nident]; /**< ELF identification */
-    bfelf_elf64_half e_type;          /**< Object file type */
-    bfelf_elf64_half e_machine;       /**< Machine type */
-    bfelf_elf64_word e_version;       /**< Object file version */
-    bfelf_elf64_addr e_entry;         /**< Entry point address */
-    bfelf_elf64_off e_phoff;          /**< Program header offset */
-    bfelf_elf64_off e_shoff;          /**< Section header offset */
-    bfelf_elf64_word e_flags;         /**< Processor-specific flags */
-    bfelf_elf64_half e_ehsize;        /**< ELF header size */
-    bfelf_elf64_half e_phentsize;     /**< Size of program header entry */
-    bfelf_elf64_half e_phnum;         /**< Number of program header entries */
-    bfelf_elf64_half e_shentsize;     /**< Size of section header entry */
-    bfelf_elf64_half e_shnum;         /**< Number of section header entries */
-    bfelf_elf64_half e_shstrndx;      /**< Section name string table index */
+    uint8_t e_ident[bfelf_ei_nident];  /**< ELF identification */
+    uint16_t e_type;                   /**< Object file type */
+    uint16_t e_machine;                /**< Machine type */
+    uint32_t e_version;                /**< Object file version */
+    uint64_t e_entry;                  /**< Entry point address */
+    struct bfelf_elf64_phdr_t *e_phdr; /**< Pointer to program header */
+    struct bfelf_elf64_shdr_t *e_shdr; /**< Pointer to section header */
+    uint32_t e_flags;                  /**< Processor-specific flags */
+    uint16_t e_ehsize;                 /**< ELF header size */
+    uint16_t e_phentsize;              /**< Size of program header entry */
+    uint16_t e_phnum;                  /**< Number of program header entries */
+    uint16_t e_shentsize;              /**< Size of section header entry */
+    uint16_t e_shnum;                  /**< Number of section header entries */
+    uint16_t e_shstrndx;               /**< Section name string table index */
 };
-
-/** @brief converts a uint8_t * to a struct bfelf_elf64_ehdr_t * */
-#define to_ehdr(a) ((struct bfelf_elf64_ehdr_t *)a)
-
-/**
- * <!-- description -->
- *   @brief Returns a pointer to the ELF header pointer to an ELF file.
- *
- * <!-- inputs/outputs -->
- *   @param file a pointer to the ELF file to get the ELF header from.
- *   @param ehdr where to output the ELF header.
- *   @return returns 0 on success or an error code otherwise.
- */
-static inline int64_t
-get_elf64_ehdr(uint8_t const *const file, struct bfelf_elf64_ehdr_t const **const ehdr)
-{
-    if (((void *)0) == file) {
-        return BFELF_INVALID_ARGUMENT;
-    }
-
-    if (((void *)0) == ehdr) {
-        return BFELF_INVALID_ARGUMENT;
-    }
-
-    *ehdr = to_ehdr(file);
-    return 0;
-}
 
 /**
  * <!-- description -->
@@ -156,53 +132,101 @@ get_elf64_ehdr(uint8_t const *const file, struct bfelf_elf64_ehdr_t const **cons
  *     this ELF loader can handle.
  *
  * <!-- inputs/outputs -->
- *   @param file a pointer to the elf file
+ *   @param ehdr a pointer to the ELF file
  *   @return Returns 0 on success or an error code on failure.
  */
 static inline int64_t
-validate_elf64_ehdr(uint8_t const *const file)
+validate_elf64_ehdr(struct bfelf_elf64_ehdr_t const *const ehdr)
 {
-    if (((void *)0) == file) {
-        bferror("file is NULL");
-        return BFELF_INVALID_ARGUMENT;
+    if (((void *)0) == ehdr) {
+        bferror("ehdr is NULL");
+        return LOADER_FAILURE;
     }
 
-    if (to_ehdr(file)->e_ident[bfelf_ei_mag0] != bfelf_elfmag0) {
-        bferror_x64("invalid bfelf_ei_mag0", to_ehdr(file)->e_ident[bfelf_ei_mag0]);
-        return BFELF_INVALID_MAG0;
+    if (ehdr->e_ident[bfelf_ei_mag0] != bfelf_elfmag0) {
+        bferror_x64("invalid bfelf_ei_mag0", ehdr->e_ident[bfelf_ei_mag0]);
+        return LOADER_FAILURE;
     }
 
-    if (to_ehdr(file)->e_ident[bfelf_ei_mag1] != bfelf_elfmag1) {
-        bferror_x64("invalid bfelf_ei_mag1", to_ehdr(file)->e_ident[bfelf_ei_mag1]);
-        return BFELF_INVALID_MAG1;
+    if (ehdr->e_ident[bfelf_ei_mag1] != bfelf_elfmag1) {
+        bferror_x64("invalid bfelf_ei_mag1", ehdr->e_ident[bfelf_ei_mag1]);
+        return LOADER_FAILURE;
     }
 
-    if (to_ehdr(file)->e_ident[bfelf_ei_mag2] != bfelf_elfmag2) {
-        bferror_x64("invalid bfelf_ei_mag2", to_ehdr(file)->e_ident[bfelf_ei_mag2]);
-        return BFELF_INVALID_MAG2;
+    if (ehdr->e_ident[bfelf_ei_mag2] != bfelf_elfmag2) {
+        bferror_x64("invalid bfelf_ei_mag2", ehdr->e_ident[bfelf_ei_mag2]);
+        return LOADER_FAILURE;
     }
 
-    if (to_ehdr(file)->e_ident[bfelf_ei_mag3] != bfelf_elfmag3) {
-        bferror_x64("invalid bfelf_ei_mag3", to_ehdr(file)->e_ident[bfelf_ei_mag3]);
-        return BFELF_INVALID_MAG3;
+    if (ehdr->e_ident[bfelf_ei_mag3] != bfelf_elfmag3) {
+        bferror_x64("invalid bfelf_ei_mag3", ehdr->e_ident[bfelf_ei_mag3]);
+        return LOADER_FAILURE;
     }
 
-    if (to_ehdr(file)->e_ident[bfelf_ei_class] != bfelf_elfclass64) {
-        bferror_x64("invalid bfelf_ei_class", to_ehdr(file)->e_ident[bfelf_ei_class]);
-        return BFELF_INVALID_CLASS;
+    if (ehdr->e_ident[bfelf_ei_class] != bfelf_elfclass64) {
+        bferror_x64("invalid bfelf_ei_class", ehdr->e_ident[bfelf_ei_class]);
+        return LOADER_FAILURE;
     }
 
-    if (to_ehdr(file)->e_ident[bfelf_ei_osabi] != bfelf_elfosabi_sysv) {
-        bferror_x64("invalid bfelf_ei_osabi", to_ehdr(file)->e_ident[bfelf_ei_osabi]);
-        return BFELF_INVALID_OSABI;
+    if (ehdr->e_ident[bfelf_ei_osabi] != bfelf_elfosabi_sysv) {
+        bferror_x64("invalid bfelf_ei_osabi", ehdr->e_ident[bfelf_ei_osabi]);
+        return LOADER_FAILURE;
     }
 
-    if (to_ehdr(file)->e_type != bfelf_et_exec) {
-        bferror_x64("invalid e_type", to_ehdr(file)->e_type);
-        return BFELF_INVALID_TYPE;
+    if (ehdr->e_type != bfelf_et_exec) {
+        bferror_x64("invalid e_type", ehdr->e_type);
+        return LOADER_FAILURE;
     }
 
-    return 0;
+    return LOADER_SUCCESS;
+}
+
+/**
+ * <!-- description -->
+ *   @brief The program and section header locations in ELF are actually
+ *     offsets, not pointers. The problem is, this requires arithmetic that
+ *     is not allowed, especially in C++. To avoid this, our version of
+ *     the ELF header uses pointers in the ELF file. This function performs
+ *     the arithmetic and conversion so that the rest of the code can simply
+ *     use the pointers as is. Meaning, if we have to commit a sin, lets do
+ *     it in one place where it is easy to test. All other code will be type
+ *     safe and compliant.
+ *
+ * <!-- inputs/outputs -->
+ *   @param ehdr a pointer to the ELF file
+ *   @return Returns 0 on success or an error code on failure.
+ */
+static inline int64_t
+update_elf64_ehdr(struct bfelf_elf64_ehdr_t *const ehdr)
+{
+    uint64_t i;
+    uint64_t start;
+    uint64_t phoff;
+    uint64_t shoff;
+
+    if (((void *)0) == ehdr) {
+        bferror("ehdr is NULL");
+        return LOADER_FAILURE;
+    }
+
+    start = ((uint64_t)ehdr);
+    phoff = ((uint64_t)ehdr->e_phdr);
+    shoff = ((uint64_t)ehdr->e_shdr);
+
+    ehdr->e_phdr = ((struct bfelf_elf64_phdr_t *)(phoff + start));
+    ehdr->e_shdr = ((struct bfelf_elf64_shdr_t *)(shoff + start));
+
+    for (i = ((uint64_t)0); i < ehdr->e_phnum; ++i) {
+        uint64_t off = ((uint64_t)ehdr->e_phdr[i].p_offset);
+        ehdr->e_phdr[i].p_offset = ((uint8_t *)(off + start));
+    }
+
+    for (i = ((uint64_t)0); i < ehdr->e_shnum; ++i) {
+        uint64_t off = ((uint64_t)ehdr->e_shdr[i].sh_offset);
+        ehdr->e_shdr[i].sh_offset = ((uint8_t *)(off + start));
+    }
+
+    return LOADER_SUCCESS;
 }
 
 #pragma pack(pop)

@@ -51,59 +51,11 @@ namespace mk
         ///   @param tls the current TLS block
         ///   @param lck the spinlock/mutex to guard
         ///
-        constexpr lock_guard_t(tls_t const &tls, T &lck) noexcept    // --
+        constexpr lock_guard_t(tls_t const &tls, T const &lck) noexcept    // --
         {
             bsl::discard(tls);
             bsl::discard(lck);
         }
-
-        /// <!-- description -->
-        ///   @brief Do not allow temporaries.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param lck the spinlock/mutex to guard
-        ///
-        constexpr lock_guard_t(tls_t const &tls, T const &lck) noexcept = delete;
-
-        /// <!-- description -->
-        ///   @brief Destructor
-        ///
-        constexpr ~lock_guard_t() noexcept = default;
-
-        /// <!-- description -->
-        ///   @brief copy constructor
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param o the object being copied
-        ///
-        constexpr lock_guard_t(lock_guard_t const &o) noexcept = delete;
-
-        /// <!-- description -->
-        ///   @brief move constructor
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
-        ///
-        constexpr lock_guard_t(lock_guard_t &&o) noexcept = default;
-
-        /// <!-- description -->
-        ///   @brief copy assignment
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param o the object being copied
-        ///   @return a reference to *this
-        ///
-        [[maybe_unused]] auto operator=(lock_guard_t const &o) &noexcept -> lock_guard_t & = delete;
-
-        /// <!-- description -->
-        ///   @brief move assignment
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
-        ///   @return a reference to *this
-        ///
-        [[maybe_unused]] auto operator=(lock_guard_t &&o) &noexcept -> lock_guard_t & = default;
     };
 }
 

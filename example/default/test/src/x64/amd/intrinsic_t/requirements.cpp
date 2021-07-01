@@ -30,43 +30,6 @@
 namespace
 {
     constinit example::intrinsic_t const g_verify_constinit{};
-
-    // NOLINTNEXTLINE(bsl-user-defined-type-names-match-header-name)
-    class fixture_t final
-    {
-        example::intrinsic_t m_intrinsic{};
-
-    public:
-        [[nodiscard]] static constexpr auto
-        test_member_const() noexcept -> bool
-        {
-            /// NOTE:
-            /// - intrinsic_t does not contain const member functions
-            ///
-
-            return true;
-        }
-
-        [[nodiscard]] constexpr auto
-        test_member_nonconst() noexcept -> bool
-        {
-            example::gs_t gs{};
-            example::tls_t tls{};
-            bsl::safe_uintmax rax{};
-            bsl::safe_uintmax rbx{};
-            bsl::safe_uintmax rcx{};
-            bsl::safe_uintmax rdx{};
-
-            bsl::discard(example::intrinsic_t{});
-            bsl::discard(m_intrinsic.initialize(gs, tls));
-            m_intrinsic.release(gs, tls);
-            m_intrinsic.cpuid(gs, tls, rax, rbx, rcx, rdx);
-
-            return true;
-        }
-    };
-
-    constexpr fixture_t FIXTURE1{};
 }
 
 /// <!-- description -->
@@ -86,28 +49,22 @@ main() noexcept -> bsl::exit_code
 
     bsl::ut_scenario{"verify noexcept"} = []() noexcept {
         bsl::ut_given{} = []() noexcept {
-            example::intrinsic_t intrinsic{};
-            example::gs_t gs{};
-            example::tls_t tls{};
-            bsl::safe_uintmax rax{};
-            bsl::safe_uintmax rbx{};
-            bsl::safe_uintmax rcx{};
-            bsl::safe_uintmax rdx{};
+            example::intrinsic_t mut_intrinsic{};
+            example::intrinsic_t const intrinsic{};
+            bsl::safe_uintmax mut_rax{};
+            bsl::safe_uintmax mut_rbx{};
+            bsl::safe_uintmax mut_rcx{};
+            bsl::safe_uintmax mut_rdx{};
             bsl::ut_then{} = []() noexcept {
                 static_assert(noexcept(example::intrinsic_t{}));
-                static_assert(noexcept(intrinsic.initialize(gs, tls)));
-                static_assert(noexcept(intrinsic.release(gs, tls)));
-                static_assert(noexcept(intrinsic.cpuid(gs, tls, rax, rbx, rcx, rdx)));
-            };
-        };
-    };
 
-    bsl::ut_scenario{"verify constness"} = []() noexcept {
-        bsl::ut_given{} = []() noexcept {
-            fixture_t fixture2{};
-            bsl::ut_then{} = [&]() noexcept {
-                static_assert(FIXTURE1.test_member_const());
-                bsl::ut_check(fixture2.test_member_nonconst());
+                static_assert(noexcept(mut_intrinsic.initialize({}, {})));
+                static_assert(noexcept(mut_intrinsic.release({}, {})));
+                static_assert(
+                    noexcept(mut_intrinsic.cpuid({}, {}, mut_rax, mut_rbx, mut_rcx, mut_rdx)));
+
+                static_assert(
+                    noexcept(intrinsic.cpuid({}, {}, mut_rax, mut_rbx, mut_rcx, mut_rdx)));
             };
         };
     };

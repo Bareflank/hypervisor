@@ -76,7 +76,7 @@ int64_t
 start_vmm_per_cpu(uint32_t const cpu)
 {
     int64_t ret;
-    uint64_t idx;
+    uint64_t i;
     uint8_t *addr;
     uint64_t mk_stack_offs;
     uint64_t mk_stack_virt;
@@ -91,6 +91,9 @@ start_vmm_per_cpu(uint32_t const cpu)
         return LOADER_FAILURE;
     }
 
+    mk_stack_offs = (HYPERVISOR_MK_STACK_SIZE + HYPERVISOR_PAGE_SIZE) * cpu;
+    mk_stack_virt = (g_mk_stack_virt + mk_stack_offs);
+
     if (platform_arch_init()) {
         bferror("platform_arch_init failed");
         return LOADER_FAILURE;
@@ -101,16 +104,17 @@ start_vmm_per_cpu(uint32_t const cpu)
         return LOADER_FAILURE;
     }
 
-    mk_stack_offs = (HYPERVISOR_MK_STACK_SIZE + HYPERVISOR_PAGE_SIZE) * cpu;
-    mk_stack_virt = (g_mk_stack_virt + mk_stack_offs);
-
     if (alloc_mk_stack(0U, &g_mk_stack[cpu])) {
         bferror("alloc_mk_stack failed");
         goto alloc_mk_stack_failed;
     }
 
-    ret = alloc_and_copy_mk_state(
-        g_mk_root_page_table, &g_mk_elf_file, &g_mk_stack[cpu], mk_stack_virt, &g_mk_state[cpu]);
+    ret = alloc_and_copy_mk_state(    // --
+        g_mk_root_page_table,         // --
+        &g_mk_elf_file,               // --
+        &g_mk_stack[cpu],             // --
+        mk_stack_virt,                // --
+        &g_mk_state[cpu]);
 
     if (ret) {
         bferror("alloc_and_copy_mk_state failed");
@@ -167,9 +171,9 @@ start_vmm_per_cpu(uint32_t const cpu)
     g_mk_args[cpu]->root_vp_state = g_root_vp_state[cpu];
     g_mk_args[cpu]->debug_ring = g_mk_debug_ring;
 
-    g_mk_args[cpu]->mk_elf_file = g_mk_elf_file;
-    for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
-        g_mk_args[cpu]->ext_elf_files[idx] = g_ext_elf_files[idx];
+    g_mk_args[cpu]->mk_elf_file = g_mk_elf_file.addr;
+    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_EXTENSIONS; ++i) {
+        g_mk_args[cpu]->ext_elf_files[i] = g_ext_elf_files[i].addr;
     }
 
     g_mk_args[cpu]->rpt = g_mk_root_page_table;

@@ -31,14 +31,14 @@ namespace mk
 {
     /// @brief Defines the "bf_mem_op_alloc_page" tag
     constexpr auto ALLOCATE_TAG_BF_MEM_OP_ALLOC_PAGE{"bf_mem_op_alloc_page"};
-    /// @brief Defines the "bf_mem_op_alloc_huge" tag
-    constexpr auto ALLOCATE_TAG_BF_MEM_OP_ALLOC_HUGE{"bf_mem_op_alloc_huge"};
     /// @brief Defines the "bf_mem_op_alloc_heap" tag
     constexpr auto ALLOCATE_TAG_BF_MEM_OP_ALLOC_HEAP{"bf_mem_op_alloc_heap"};
     /// @brief Defines the "extension stack memory" tag
     constexpr auto ALLOCATE_TAG_EXT_STACK{"extension stack memory"};
     /// @brief Defines the "extension TLS memory" tag
     constexpr auto ALLOCATE_TAG_EXT_TLS{"extension TLS memory"};
+    /// @brief Defines the "extension TCB memory" tag
+    constexpr auto ALLOCATE_TAG_EXT_TCB{"extension TCB memory"};
     /// @brief Defines the "extension ELF segments" tag
     constexpr auto ALLOCATE_TAG_EXT_ELF{"extension ELF segments"};
     /// @brief Defines the "pml4ts" tag

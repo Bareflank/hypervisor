@@ -39,7 +39,7 @@
  *   @param gdtr a pointer to the gdtr that stores the GDT to get from
  *   @param idx the index of the descriptor in the provided GDT to get from
  *   @param limit a pointer to store the the resulting limit to
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t get_gdt_descriptor_limit(
     struct global_descriptor_table_register_t const *const gdtr,

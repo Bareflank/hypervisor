@@ -40,7 +40,7 @@
  *   @param mk_args_t the arguments to pass to the microkernel
  *   @param mk_state the microkernel's state save
  *   @param root_vp_state the root vp's state save
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t demote(
     struct mk_args_t const *const args,

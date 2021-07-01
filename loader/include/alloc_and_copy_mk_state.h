@@ -27,6 +27,7 @@
 #ifndef ALLOC_AND_COPY_MK_STATE_H
 #define ALLOC_AND_COPY_MK_STATE_H
 
+#include <elf_file_t.h>
 #include <root_page_table_t.h>
 #include <span_t.h>
 #include <state_save_t.h>
@@ -43,11 +44,11 @@
  *   @param mk_stack the microkernel's stack
  *   @param mk_stack_virt the microkernel's virtual address of the stack
  *   @param state where to save the newly set up state to
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t alloc_and_copy_mk_state(
     root_page_table_t const *const rpt,
-    struct span_t const *const mk_elf_file,
+    struct elf_file_t const *const mk_elf_file,
     struct span_t const *const mk_stack,
     uint64_t const mk_stack_virt,
     struct state_save_t **const state);

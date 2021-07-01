@@ -34,7 +34,7 @@
  *   @brief Tells the hypervisor to stop
  *
  * <!-- inputs/outputs -->
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t send_command_stop(void);
 

@@ -37,7 +37,7 @@
  *
  * <!-- inputs/outputs -->
  *   @param args the mk_args_t to store the mk _start args
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 alloc_mk_args(struct mk_args_t **const args)

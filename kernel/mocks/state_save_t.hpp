@@ -30,7 +30,7 @@ namespace loader
     /// @struct loader::state_save_t
     ///
     /// <!-- description -->
-    ///   @brief TODO
+    ///   @brief Implements a mocked version of state_save_t.
     ///
     struct state_save_t final
     {};

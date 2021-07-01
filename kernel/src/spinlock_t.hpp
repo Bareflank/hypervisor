@@ -94,9 +94,9 @@ namespace mk
         ///   @brief move constructor
         ///
         /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
+        ///   @param mut_o the object being moved
         ///
-        constexpr spinlock_t(spinlock_t &&o) noexcept = default;
+        constexpr spinlock_t(spinlock_t &&mut_o) noexcept = default;
 
         /// <!-- description -->
         ///   @brief copy assignment
@@ -111,10 +111,10 @@ namespace mk
         ///   @brief move assignment
         ///
         /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
+        ///   @param mut_o the object being moved
         ///   @return a reference to *this
         ///
-        [[maybe_unused]] auto operator=(spinlock_t &&o) &noexcept -> spinlock_t & = default;
+        [[maybe_unused]] auto operator=(spinlock_t &&mut_o) &noexcept -> spinlock_t & = default;
 
         /// <!-- description -->
         ///   @brief Locks the spinlock_t. This will not return until the

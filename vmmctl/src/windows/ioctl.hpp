@@ -58,19 +58,6 @@ namespace vmmctl
         /// @brief stores a handle to the device driver.
         HANDLE m_hndl{};
 
-        /// <!-- description -->
-        ///   @brief Swaps *this with other
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param lhs the left hand side of the exchange
-        ///   @param rhs the right hand side of the exchange
-        ///
-        static constexpr auto
-        private_swap(ioctl &lhs, ioctl &rhs) noexcept -> void
-        {
-            bsl::swap(lhs.m_hndl, rhs.m_hndl);
-        }
-
     public:
         /// <!-- description -->
         ///   @brief Creates a vmmctl::ioctl that can be used to communicate
@@ -99,17 +86,19 @@ namespace vmmctl
                 return;
             }
 
+            bsl::finally mut_close_info{[&info]() noexcept -> void {
+                bsl::discard(CloseHandle(info));
+            }};
+
             ret = SetupDiEnumDeviceInfo(info, 0, &dev_info);
             if (bsl::unlikely(ret == FALSE)) {
                 bsl::error() << "SetupDiEnumDeviceInfo failed\n";
-                bsl::discard(CloseHandle(info));
                 return;
             }
 
             ret = SetupDiEnumDeviceInterfaces(info, &dev_info, &(name), 0, &if_info);
             if (bsl::unlikely(ret == FALSE)) {
                 bsl::error() << "SetupDiEnumDeviceInterfaces failed\n";
-                bsl::discard(CloseHandle(info));
                 return;
             }
 
@@ -117,30 +106,29 @@ namespace vmmctl
             ret = SetupDiGetDeviceInterfaceDetailA(info, &if_info, nullptr, 0, &size, nullptr);
             if (bsl::unlikely(ret == TRUE)) {
                 bsl::error() << "SetupDiGetDeviceInterfaceDetailA failed\n";
-                bsl::discard(CloseHandle(info));
                 return;
             }
 
             if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
                 bsl::error() << "SetupDiGetDeviceInterfaceDetailA failed\n";
-                bsl::discard(CloseHandle(info));
                 return;
             }
 
             dev_data = static_cast<SP_INTERFACE_DEVICE_DETAIL_DATA *>(malloc(size));
             if (bsl::unlikely(nullptr == dev_data)) {
                 bsl::error() << "malloc failed in ioctl\n";
-                bsl::discard(CloseHandle(info));
                 return;
             }
 
             dev_data->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
 
+            bsl::finally mut_free_dev_data{[&dev_data]() noexcept -> void {
+                free(dev_data);
+            }};
+
             ret = SetupDiGetDeviceInterfaceDetail(info, &if_info, dev_data, size, nullptr, nullptr);
             if (bsl::unlikely(ret == FALSE)) {
                 bsl::error() << "SetupDiGetDeviceInterfaceDetail failed\n";
-                free(dev_data);
-                bsl::discard(CloseHandle(info));
                 return;
             }
 
@@ -152,9 +140,6 @@ namespace vmmctl
                 CREATE_ALWAYS,
                 FILE_ATTRIBUTE_NORMAL,
                 nullptr);
-
-            free(dev_data);
-            bsl::discard(CloseHandle(info));
 
             if (bsl::unlikely(nullptr == m_hndl)) {
                 bsl::error() << "ioctl CreateFile failed\n";
@@ -174,7 +159,6 @@ namespace vmmctl
                 bsl::touch();
             }
         }
-
         /// <!-- description -->
         ///   @brief copy constructor
         ///
@@ -187,12 +171,9 @@ namespace vmmctl
         ///   @brief move constructor
         ///
         /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
+        ///   @param mut_o the object being moved
         ///
-        constexpr ioctl(ioctl &&o) noexcept : m_hndl{bsl::move(o.m_hndl)}
-        {
-            o.m_hndl = nullptr;
-        }
+        constexpr ioctl(ioctl &&mut_o) noexcept = delete;
 
         /// <!-- description -->
         ///   @brief copy assignment
@@ -207,16 +188,10 @@ namespace vmmctl
         ///   @brief move assignment
         ///
         /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
+        ///   @param mut_o the object being moved
         ///   @return a reference to *this
         ///
-        [[maybe_unused]] auto
-        operator=(ioctl &&o) &noexcept -> ioctl &
-        {
-            ioctl tmp{bsl::move(o)};
-            this->private_swap(*this, tmp);
-            return *this;
-        }
+        [[maybe_unused]] constexpr auto operator=(ioctl &&mut_o) &noexcept -> ioctl & = delete;
 
         /// <!-- description -->
         ///   @brief Returns true if the ioctl has been opened, false

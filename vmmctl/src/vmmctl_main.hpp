@@ -41,7 +41,6 @@
 #include <bsl/exit_code.hpp>
 #include <bsl/is_same.hpp>
 #include <bsl/move.hpp>
-#include <bsl/result.hpp>
 #include <bsl/string_view.hpp>
 #include <bsl/touch.hpp>
 
@@ -64,6 +63,8 @@ namespace vmmctl
         ifmap m_mapped_mk_elf_file{};
         /// @brief stores the mapped ELF files for each extension
         bsl::array<ifmap, HYPERVISOR_MAX_EXTENSIONS.get()> m_mapped_ext_elf_files{};
+        /// @brief stores the arguments for starting the VMM.
+        loader::start_vmm_args_t m_start_vmm_ctl_args{};
         /// @brief stores the arguments for stopping the VMM.
         loader::stop_vmm_args_t m_stop_vmm_ctl_args{IOCTL_VERSION.get()};
         /// @brief stores the arguments for dumping the VMM.
@@ -101,7 +102,8 @@ namespace vmmctl
         write_data(R const &request, ioctl const &ctl, A const *const ctl_args) const noexcept
             -> bsl::exit_code
         {
-            if (!ctl.write_data(request, ctl_args, bsl::size_of<A>())) {
+            bool const ret{ctl.write_data(request, ctl_args, bsl::to_umax(sizeof(A)))};
+            if (bsl::unlikely(!ret)) {
                 bsl::error() << "vmmctl failed. check kernel logs details\n";
                 return bsl::exit_failure;
             }
@@ -119,16 +121,17 @@ namespace vmmctl
         ///   @tparam A the type that defines the arguments to give the loader
         ///   @param request the request to give the loader
         ///   @param ctl the ioctl to the loader
-        ///   @param ctl_args the arguments to give the loader
+        ///   @param pmut_ctl_args the arguments to give the loader
         ///   @return Returns bsl::exit_success on success, bsl::exit_failure
         ///     otherwise
         ///
         template<typename R, typename A>
         [[nodiscard]] constexpr auto
-        read_write_data(R const &request, ioctl const &ctl, A *const ctl_args) const noexcept
+        read_write_data(R const &request, ioctl const &ctl, A *const pmut_ctl_args) const noexcept
             -> bsl::exit_code
         {
-            if (!ctl.read_write_data(request, ctl_args, bsl::size_of<A>())) {
+            bool const ret{ctl.read_write_data(request, pmut_ctl_args, bsl::to_umax(sizeof(A)))};
+            if (bsl::unlikely(!ret)) {
                 bsl::error() << "vmmctl failed. check kernel logs details\n";
                 return bsl::exit_failure;
             }
@@ -148,12 +151,12 @@ namespace vmmctl
         [[nodiscard]] constexpr auto
         start_vmm(loader::start_vmm_args_t const *const ctl_args) const noexcept -> bsl::exit_code
         {
-            ioctl ctl{loader::DEVICE_NAME};
-            if (ctl) {
-                return this->write_data(loader::START_VMM, ctl, ctl_args);
+            ioctl const ctl{loader::DEVICE_NAME};
+            if (bsl::unlikely(!ctl)) {
+                return bsl::exit_failure;
             }
 
-            return bsl::exit_failure;
+            return this->write_data(loader::START_VMM, ctl, ctl_args);
         }
 
         /// <!-- description -->
@@ -168,12 +171,12 @@ namespace vmmctl
         [[nodiscard]] constexpr auto
         stop_vmm(loader::stop_vmm_args_t const *const ctl_args) const noexcept -> bsl::exit_code
         {
-            ioctl ctl{loader::DEVICE_NAME};
-            if (ctl) {
-                return this->write_data(loader::STOP_VMM, ctl, ctl_args);
+            ioctl const ctl{loader::DEVICE_NAME};
+            if (bsl::unlikely(!ctl)) {
+                return bsl::exit_failure;
             }
 
-            return bsl::exit_failure;
+            return this->write_data(loader::STOP_VMM, ctl, ctl_args);
         }
 
         /// <!-- description -->
@@ -181,50 +184,48 @@ namespace vmmctl
         ///     to the loader.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param ctl_args the command line arguments provided by the user.
+        ///   @param pmut_ctl_args the command line arguments provided by the user.
         ///   @return Returns bsl::exit_success if the VMM was successfully
         ///     dumped to the console, otherwise returns bsl::exit_failure.
         ///
         [[nodiscard]] constexpr auto
-        dump_vmm(loader::dump_vmm_args_t *const ctl_args) const noexcept -> bsl::exit_code
+        dump_vmm(loader::dump_vmm_args_t *const pmut_ctl_args) const noexcept -> bsl::exit_code
         {
-            ioctl ctl{loader::DEVICE_NAME};
-            if (ctl) {
-                if (bsl::exit_success != this->read_write_data(loader::DUMP_VMM, ctl, ctl_args)) {
-                    return bsl::exit_failure;
-                }
-
-                bsl::touch();
-            }
-            else {
+            ioctl const ctl{loader::DEVICE_NAME};
+            if (bsl::unlikely(!ctl)) {
                 return bsl::exit_failure;
             }
 
-            bsl::safe_uintmax epos{ctl_args->debug_ring.epos};
-            bsl::safe_uintmax spos{ctl_args->debug_ring.spos};
+            bsl::exit_code const ret{this->read_write_data(loader::DUMP_VMM, ctl, pmut_ctl_args)};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
+                return bsl::exit_failure;
+            }
 
-            if (!(ctl_args->debug_ring.buf.size() > epos)) {
-                epos = {};
+            bsl::safe_uintmax mut_epos{pmut_ctl_args->debug_ring.epos};
+            bsl::safe_uintmax mut_spos{pmut_ctl_args->debug_ring.spos};
+
+            if (!(pmut_ctl_args->debug_ring.buf.size() > mut_epos)) {
+                mut_epos = {};
             }
             else {
                 bsl::touch();
             }
 
-            if (spos == epos) {
+            if (mut_spos == mut_epos) {
                 bsl::alert() << "no debug data to dump\n";
                 return bsl::exit_success;
             }
 
-            while (spos != epos) {
-                if (!(ctl_args->debug_ring.buf.size() > spos)) {
-                    spos = {};
+            while (mut_spos != mut_epos) {
+                if (!(pmut_ctl_args->debug_ring.buf.size() > mut_spos)) {
+                    mut_spos = {};
                 }
                 else {
                     bsl::touch();
                 }
 
-                bsl::print() << *ctl_args->debug_ring.buf.at_if(spos);
-                ++spos;
+                bsl::print() << *pmut_ctl_args->debug_ring.buf.at_if(mut_spos);
+                ++mut_spos;
             }
 
             bsl::print() << bsl::endl;
@@ -240,23 +241,24 @@ namespace vmmctl
         ///     returns bsl::errc_failure.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param args the user provided arguments. It is assumed that the
+        ///   @param mut_args the user provided arguments. It is assumed that the
         ///     "front" of these args stores a string containing the filename
         ///     and path to the ELF file to map and store.
-        ///   @param map the map to store the newly opened ELF file.
+        ///   @param mut_map the map to store the newly opened ELF file.
         ///   @return Returns bsl::errc_success and increments the provided
         ///     arguments if the ELF file was successfully mapped, otherwise
         ///     this function returns bsl::errc_failure.
         ///
         [[nodiscard]] static constexpr auto
-        map_elf_file(bsl::arguments &args, ifmap *const map) noexcept -> bsl::errc_type
+        map_elf_file(bsl::arguments &mut_args, ifmap &mut_map) noexcept -> bsl::errc_type
         {
-            if ((*map = ifmap{args.front<bsl::string_view>()})) {
-                ++args;
-                return bsl::errc_success;
+            mut_map = ifmap{mut_args.front<bsl::string_view>()};
+            if (bsl::unlikely(!mut_map)) {
+                return bsl::errc_failure;
             }
 
-            return bsl::errc_failure;
+            ++mut_args;
+            return bsl::errc_success;
         }
 
         /// <!-- description -->
@@ -266,15 +268,15 @@ namespace vmmctl
         ///     until the start command is complete.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param args the arguments provided by the user.
+        ///   @param mut_args the arguments provided by the user.
         ///   @return Returns bsl::errc_success and increments the provided
         ///     arguments if the microkernel ELF file was successfully mapped,
         ///     otherwise this function returns bsl::errc_failure.
         ///
         [[nodiscard]] constexpr auto
-        map_mk_elf_file_from_user(bsl::arguments &args) noexcept -> bsl::errc_type
+        map_mk_elf_file_from_user(bsl::arguments &mut_args) noexcept -> bsl::errc_type
         {
-            return this->map_elf_file(args, &m_mapped_mk_elf_file);
+            return this->map_elf_file(mut_args, m_mapped_mk_elf_file);
         }
 
         /// <!-- description -->
@@ -284,20 +286,20 @@ namespace vmmctl
         ///     until the start command is complete.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param args the arguments provided by the user.
+        ///   @param mut_args the arguments provided by the user.
         ///   @return Returns bsl::errc_success and increments the provided
         ///     arguments if the extension ELF filed were successfully mapped,
         ///     otherwise this function returns bsl::errc_failure.
         ///
         [[nodiscard]] constexpr auto
-        map_ext_elf_files_from_user(bsl::arguments &args) noexcept -> bsl::errc_type
+        map_ext_elf_files_from_user(bsl::arguments &mut_args) noexcept -> bsl::errc_type
         {
             for (auto const elem : m_mapped_ext_elf_files) {
-                if (!args) {
+                if (!mut_args) {
                     break;
                 }
 
-                if (!this->map_elf_file(args, elem.data)) {
+                if (!this->map_elf_file(mut_args, *elem.data)) {
                     return bsl::errc_failure;
                 }
 
@@ -317,19 +319,19 @@ namespace vmmctl
         ///
         [[nodiscard]] constexpr auto
         convert_mapped_ext_elf_files_to_array_of_spans() const noexcept
-            -> bsl::array<bsl::span<bsl::uint8 const>, HYPERVISOR_MAX_EXTENSIONS.get()>
+            -> loader::ext_elf_files_type
         {
-            bsl::array<bsl::span<bsl::uint8 const>, HYPERVISOR_MAX_EXTENSIONS.get()> files{};
+            loader::ext_elf_files_type mut_files{};
             for (auto const elem : m_mapped_ext_elf_files) {
                 if (nullptr != elem.data) {
-                    *files.at_if(elem.index) = elem.data->view();
+                    *mut_files.at_if(elem.index) = elem.data->view();
                 }
                 else {
                     bsl::touch();
                 }
             }
 
-            return files;
+            return mut_files;
         }
 
         /// <!-- description -->
@@ -338,41 +340,46 @@ namespace vmmctl
         ///     starting the VMM
         ///
         /// <!-- inputs/outputs -->
-        ///   @param args the user provided arguments
+        ///   @param mut_args the user provided arguments
+        ///   @param mut_start_args the resulting start_vmm_args_t
         ///   @return The resulting ioctl arguments
         ///
         [[nodiscard]] constexpr auto
-        make_start_vmm_args(bsl::arguments &args) noexcept -> bsl::result<loader::start_vmm_args_t>
+        make_start_vmm_args(
+            bsl::arguments &mut_args, loader::start_vmm_args_t &mut_start_args) noexcept
+            -> bsl::errc_type
         {
-            constexpr auto missing_microkernel{0_umax};
-            constexpr auto missing_extensions{1_umax};
+            constexpr auto one{1_umax};
+            constexpr auto zero{0_umax};
 
-            auto remaining{args.remaining()};
+            auto const remaining{mut_args.remaining()};
 
-            if (missing_microkernel == remaining) {
+            if (bsl::unlikely(zero == remaining)) {
                 bsl::error() << "missing the microkernel elf file\n";
-                return {bsl::errc_failure};
+                return bsl::errc_failure;
             }
 
-            if (missing_extensions == remaining) {
+            if (bsl::unlikely(one == remaining)) {
                 bsl::error() << "at least one extension is required\n";
-                return {bsl::errc_failure};
+                return bsl::errc_failure;
             }
 
-            if (!this->map_mk_elf_file_from_user(args)) {
-                return {bsl::errc_failure};
+            if (bsl::unlikely(!this->map_mk_elf_file_from_user(mut_args))) {
+                return bsl::errc_failure;
             }
 
-            if (!this->map_ext_elf_files_from_user(args)) {
-                return {bsl::errc_failure};
+            if (bsl::unlikely(!this->map_ext_elf_files_from_user(mut_args))) {
+                return bsl::errc_failure;
             }
 
-            return {loader::start_vmm_args_t{
+            mut_start_args = loader::start_vmm_args_t{
                 IOCTL_VERSION.get(),
                 0U,
                 0U,
                 m_mapped_mk_elf_file.view(),
-                this->convert_mapped_ext_elf_files_to_array_of_spans()}};
+                this->convert_mapped_ext_elf_files_to_array_of_spans()};
+
+            return bsl::errc_success;
         }
 
         /// <!-- description -->
@@ -403,24 +410,23 @@ namespace vmmctl
         ///     will return bsl::exit_failure.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param args the command line arguments provided by the user.
+        ///   @param mut_args the command line arguments provided by the user.
         ///   @return If the user provided command succeeds, this function
         ///     will return bsl::exit_success, otherwise this function
         ///     will return bsl::exit_failure.
         ///
         [[nodiscard]] constexpr auto
-        process_cmd(bsl::arguments &&args) noexcept -> bsl::exit_code
+        process_cmd(bsl::arguments &&mut_args) noexcept -> bsl::exit_code
         {
-            bsl::string_view cmd{args.front<bsl::string_view>()};
-            ++args;
-
+            auto const cmd{mut_args.front<bsl::string_view>()};
+            ++mut_args;
             if (cmd == "start") {
-                auto ctl_args{this->make_start_vmm_args(args)};
-                if (auto const *const ptr{ctl_args.get_if()}) {
-                    return this->start_vmm(ptr);
+                auto const ret{this->make_start_vmm_args(mut_args, m_start_vmm_ctl_args)};
+                if (bsl::unlikely(!ret)) {
+                    return bsl::exit_failure;
                 }
 
-                return bsl::exit_failure;
+                return this->start_vmm(&m_start_vmm_ctl_args);
             }
 
             if (cmd == "stop") {
@@ -443,25 +449,25 @@ namespace vmmctl
         ///     will return bsl::exit_failure.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param args the command line arguments provided by the user.
+        ///   @param mut_args the command line arguments provided by the user.
         ///   @return If the user provided command succeeds, this function
         ///     will return bsl::exit_success, otherwise this function
         ///     will return bsl::exit_failure.
         ///
         [[nodiscard]] constexpr auto
-        process(bsl::arguments &&args) noexcept -> bsl::exit_code
+        process(bsl::arguments &&mut_args) noexcept -> bsl::exit_code
         {
-            if (args.get<bool>("-h")) {
+            if (mut_args.get<bool>("-h")) {
                 this->help();
                 return bsl::exit_success;
             }
 
-            if (args.get<bool>("--help")) {
+            if (mut_args.get<bool>("--help")) {
                 this->help();
                 return bsl::exit_success;
             }
 
-            return this->process_cmd(bsl::move(args));
+            return this->process_cmd(bsl::move(mut_args));
         }
     };
 }

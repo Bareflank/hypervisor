@@ -25,9 +25,9 @@
 #ifndef STATE_SAVE_T_HPP
 #define STATE_SAVE_T_HPP
 
+#include <bsl/array.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
-#include <bsl/details/carray.hpp>
 #include <bsl/safe_integral.hpp>
 
 #pragma pack(push, 1)
@@ -129,7 +129,7 @@ namespace loader
         bsl::uint64 spsel;
 
         /// @brief reserved for future use (0x118)
-        bsl::details::carray<bsl::uint64, SS_RESERVED0_SIZE.get()> reserved0;
+        bsl::array<bsl::uint64, SS_RESERVED0_SIZE.get()> reserved0;
 
         /// --------------------------------------------------------------------
         /// Exceptions
@@ -156,7 +156,7 @@ namespace loader
         bsl::uint64 tpidr_el2;
 
         /// @brief reserved for future use (0x1C0)
-        bsl::details::carray<bsl::uint64, SS_RESERVED1_SIZE.get()> reserved1;
+        bsl::array<bsl::uint64, SS_RESERVED1_SIZE.get()> reserved1;
 
         /// --------------------------------------------------------------------
         /// Handlers

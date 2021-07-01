@@ -47,7 +47,7 @@ namespace mk
     ///   @brief Dispatches the bf_debug_op syscalls
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
+    ///   @param mut_tls the current TLS block
     ///   @param page_pool the page pool to use
     ///   @param huge_pool the huge pool to use
     ///   @param intrinsic the intrinsics to use
@@ -56,65 +56,52 @@ namespace mk
     ///   @param vps_pool the VPS pool to use
     ///   @param ext_pool the extension pool to use
     ///   @param log the VMExit log to use
-    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    ///     otherwise
+    ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
     dispatch_syscall_debug_op(
-        tls_t &tls,
-        page_pool_t &page_pool,
-        huge_pool_t &huge_pool,
-        intrinsic_t &intrinsic,
-        vm_pool_t &vm_pool,
-        vp_pool_t &vp_pool,
-        vps_pool_t &vps_pool,
-        ext_pool_t &ext_pool,
-        vmexit_log_t &log) noexcept -> bsl::errc_type
+        tls_t &mut_tls,
+        page_pool_t const &page_pool,
+        huge_pool_t const &huge_pool,
+        intrinsic_t const &intrinsic,
+        vm_pool_t const &vm_pool,
+        vp_pool_t const &vp_pool,
+        vps_pool_t const &vps_pool,
+        ext_pool_t const &ext_pool,
+        vmexit_log_t const &log) noexcept -> syscall::bf_status_t
     {
-        switch (syscall::bf_syscall_index(tls.ext_syscall).get()) {
+        switch (syscall::bf_syscall_index(bsl::to_u64(mut_tls.ext_syscall)).get()) {
             case syscall::BF_DEBUG_OP_OUT_IDX_VAL.get(): {
-                bsl::print() << bsl::hex(tls.ext_reg0)    //--
-                             << " "                       //--
-                             << bsl::hex(tls.ext_reg1)    //--
-                             << bsl::endl;                //--
-
-                tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-                return bsl::errc_success;
+                bsl::print() << bsl::hex(mut_tls.ext_reg0)    //--
+                             << " "                           //--
+                             << bsl::hex(mut_tls.ext_reg1)    //--
+                             << bsl::endl;                    //--
+                return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_VM_IDX_VAL.get(): {
-                vm_pool.dump(tls, bsl::to_u16_unsafe(tls.ext_reg0));
-
-                tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-                return bsl::errc_success;
+                vm_pool.dump(mut_tls, bsl::to_u16_unsafe(mut_tls.ext_reg0));
+                return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_VP_IDX_VAL.get(): {
-                vp_pool.dump(tls, bsl::to_u16_unsafe(tls.ext_reg0));
-
-                tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-                return bsl::errc_success;
+                vp_pool.dump(mut_tls, bsl::to_u16_unsafe(mut_tls.ext_reg0));
+                return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_VPS_IDX_VAL.get(): {
-                vps_pool.dump(tls, intrinsic, bsl::to_u16_unsafe(tls.ext_reg0));
-
-                tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-                return bsl::errc_success;
+                vps_pool.dump(mut_tls, intrinsic, bsl::to_u16_unsafe(mut_tls.ext_reg0));
+                return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_VMEXIT_LOG_IDX_VAL.get(): {
-                log.dump(bsl::to_u16_unsafe(tls.ext_reg0));
-
-                tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-                return bsl::errc_success;
+                log.dump(bsl::to_u16_unsafe(mut_tls.ext_reg0));
+                return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_WRITE_C_IDX_VAL.get(): {
-                bsl::print() << static_cast<bsl::char_type>(bsl::to_u8(tls.ext_reg0).get());
-
-                tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-                return bsl::errc_success;
+                bsl::print() << static_cast<bsl::char_type>(bsl::to_u8(mut_tls.ext_reg0).get());
+                return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_WRITE_STR_IDX_VAL.get(): {
@@ -129,31 +116,24 @@ namespace mk
                 ///   information.
                 ///
 
-                bsl::print() << bsl::to_ptr<bsl::cstr_type>(tls.ext_reg0);
-
-                tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-                return bsl::errc_success;
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+                bsl::print() << reinterpret_cast<bsl::cstr_type>(mut_tls.ext_reg0);
+                return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_EXT_IDX_VAL.get(): {
-                ext_pool.dump(tls, page_pool, bsl::to_u16_unsafe(tls.ext_reg0));
-
-                tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-                return bsl::errc_success;
+                ext_pool.dump(mut_tls, page_pool, bsl::to_u16_unsafe(mut_tls.ext_reg0));
+                return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_PAGE_POOL_IDX_VAL.get(): {
                 page_pool.dump();
-
-                tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-                return bsl::errc_success;
+                return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_HUGE_POOL_IDX_VAL.get(): {
                 huge_pool.dump();
-
-                tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-                return bsl::errc_success;
+                return syscall::BF_STATUS_SUCCESS;
             }
 
             default: {
@@ -161,13 +141,12 @@ namespace mk
             }
         }
 
-        bsl::error() << "unknown syscall index "     //--
-                     << bsl::hex(tls.ext_syscall)    //--
-                     << bsl::endl                    //--
-                     << bsl::here();                 //--
+        bsl::error() << "unknown syscall index "         //--
+                     << bsl::hex(mut_tls.ext_syscall)    //--
+                     << bsl::endl                        //--
+                     << bsl::here();                     //--
 
-        tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_UNSUPPORTED.get();
-        return bsl::errc_failure;
+        return syscall::BF_STATUS_FAILURE_UNSUPPORTED;
     }
 }
 

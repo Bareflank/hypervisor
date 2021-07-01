@@ -74,7 +74,7 @@ namespace integration
             g_intrinsic,               // --
             g_vp_pool,                 // --
             g_vps_pool,                // --
-            ppid);
+            bsl::to_u16(ppid));
 
         if (bsl::unlikely_assert(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
@@ -139,7 +139,7 @@ namespace integration
     {
         bsl::errc_type ret{};
 
-        ret = g_sys.initialize(version, &bootstrap_entry, &vmexit_entry, &fail_entry);
+        ret = g_sys.initialize(bsl::to_u32(version), &bootstrap_entry, &vmexit_entry, &fail_entry);
         integration::require_success(ret);
 
         ret = g_intrinsic.initialize(g_gs, g_tls);

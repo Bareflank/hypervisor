@@ -38,7 +38,7 @@
  * <!-- inputs/outputs -->
  *   @param debug_ring the debug_ring_t to store the newly allocated
  *     debug ring
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t alloc_mk_debug_ring(struct debug_ring_t **const debug_ring);
 

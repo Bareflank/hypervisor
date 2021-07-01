@@ -42,71 +42,47 @@ namespace example
     {
         bsl::ut_scenario{"initialize fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                bsl::ut_when{} = [&]() noexcept {
-                    tls.test_ret = bsl::errc_failure;
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!vp.initialize(gs, tls, sys, intrinsic, {}));
-                    };
+                vp_t mut_vp{};
+                tls_t const tls{bsl::errc_failure};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(!mut_vp.initialize({}, tls, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"initialize success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(vp.initialize(gs, tls, sys, intrinsic, {}));
+                    bsl::ut_check(mut_vp.initialize({}, {}, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"release executes"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_then{} = [&]() noexcept {
-                    vp.release(gs, tls, sys, intrinsic);
+                    mut_vp.release({}, {}, {}, {});
                 };
             };
         };
 
         bsl::ut_scenario{"allocate fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                bsl::ut_when{} = [&]() noexcept {
-                    tls.test_ret = bsl::errc_failure;
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!vp.allocate(gs, tls, sys, intrinsic, {}, {}));
-                    };
+                vp_t mut_vp{};
+                tls_t const tls{bsl::errc_failure};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(!mut_vp.allocate({}, tls, {}, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"allocate success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(vp.allocate(gs, tls, sys, intrinsic, {}, {}));
+                    bsl::ut_check(mut_vp.allocate({}, {}, {}, {}, {}, {}));
                 };
             };
         };

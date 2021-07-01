@@ -73,26 +73,35 @@ namespace example
     ///
 
     /// @brief stores the bf_syscall_t that this code will use
-    constinit syscall::bf_syscall_t g_sys{};
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit syscall::bf_syscall_t g_mut_sys{};
     /// @brief stores the intrinsic_t that this code will use
-    constinit intrinsic_t g_intrinsic{};
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit intrinsic_t g_mut_intrinsic{};
 
     /// @brief stores the pool of VPs that we will use
-    constinit vp_pool_t g_vp_pool{};
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit vp_pool_t g_mut_vp_pool{};
     /// @brief stores the pool of VPSs that we will use
-    constinit vps_pool_t g_vps_pool{};
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit vps_pool_t g_mut_vps_pool{};
 
     /// @brief stores the bootstrap_t that this code will use
-    constinit bootstrap_t g_bootstrap{};
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit bootstrap_t g_mut_bootstrap{};
     /// @brief stores the fail_t that this code will use
-    constinit fail_t g_fail{};
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit fail_t g_mut_fail{};
     /// @brief stores the vmexit_t that this code will use
-    constinit vmexit_t g_vmexit{};
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit vmexit_t g_mut_vmexit{};
 
     /// @brief stores the Global Storage for this extension
-    constinit gs_t g_gs{};
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit gs_t g_mut_gs{};
     /// @brief stores the Thread Local Storage for this extension on this PP
-    thread_local tls_t g_tls{};
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    thread_local tls_t g_mut_tls{};
 
     /// <!-- description -->
     ///   @brief Implements the bootstrap entry function. This function is
@@ -104,8 +113,6 @@ namespace example
     extern "C" void
     bootstrap_entry(syscall::bf_uint16_t::value_type const ppid) noexcept
     {
-        bsl::errc_type ret{};
-
         /// NOTE:
         /// - Call into the bootstrap handler. This entry point serves as a
         ///   trampoline between C and C++. Specifically, the microkernel
@@ -113,14 +120,14 @@ namespace example
         ///   a C style function.
         ///
 
-        ret = g_bootstrap.dispatch(    // --
-            g_gs,                      // --
-            g_tls,                     // --
-            g_sys,                     // --
-            g_intrinsic,               // --
-            g_vp_pool,                 // --
-            g_vps_pool,                // --
-            ppid);
+        auto const ret{g_mut_bootstrap.dispatch(    // --
+            g_mut_gs,                               // --
+            g_mut_tls,                              // --
+            g_mut_sys,                              // --
+            g_mut_intrinsic,                        // --
+            g_mut_vp_pool,                          // --
+            g_mut_vps_pool,                         // --
+            bsl::to_u16(ppid))};
 
         if (bsl::unlikely_assert(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
@@ -150,8 +157,6 @@ namespace example
         syscall::bf_uint16_t::value_type const vpsid,
         syscall::bf_status_t::value_type const fail_reason) noexcept
     {
-        bsl::errc_type ret{};
-
         /// NOTE:
         /// - Call into the fast fail handler. This entry point serves as a
         ///   trampoline between C and C++. Specifically, the microkernel
@@ -159,15 +164,15 @@ namespace example
         ///   a C style function.
         ///
 
-        ret = g_fail.dispatch(    // --
-            g_gs,                 // --
-            g_tls,                // --
-            g_sys,                // --
-            g_intrinsic,          // --
-            g_vp_pool,            // --
-            g_vps_pool,           // --
-            vpsid,                // --
-            fail_reason);
+        auto const ret{g_mut_fail.dispatch(    // --
+            g_mut_gs,                          // --
+            g_mut_tls,                         // --
+            g_mut_sys,                         // --
+            g_mut_intrinsic,                   // --
+            g_mut_vp_pool,                     // --
+            g_mut_vps_pool,                    // --
+            bsl::to_u16(vpsid),                // --
+            bsl::to_u64(fail_reason))};
 
         if (bsl::unlikely_assert(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
@@ -197,8 +202,6 @@ namespace example
         syscall::bf_uint16_t::value_type const vpsid,
         syscall::bf_uint64_t::value_type const exit_reason) noexcept
     {
-        bsl::errc_type ret{};
-
         /// NOTE:
         /// - Call into the vmexit handler. This entry point serves as a
         ///   trampoline between C and C++. Specifically, the microkernel
@@ -206,15 +209,15 @@ namespace example
         ///   a C style function.
         ///
 
-        ret = g_vmexit.dispatch(    // --
-            g_gs,                   // --
-            g_tls,                  // --
-            g_sys,                  // --
-            g_intrinsic,            // --
-            g_vp_pool,              // --
-            g_vps_pool,             // --
-            vpsid,                  // --
-            exit_reason);
+        auto const ret{g_mut_vmexit.dispatch(    // --
+            g_mut_gs,                            // --
+            g_mut_tls,                           // --
+            g_mut_sys,                           // --
+            g_mut_intrinsic,                     // --
+            g_mut_vp_pool,                       // --
+            g_mut_vps_pool,                      // --
+            bsl::to_u16(vpsid),                  // --
+            bsl::to_u64(exit_reason))};
 
         if (bsl::unlikely_assert(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
@@ -242,7 +245,7 @@ namespace example
     extern "C" void
     ext_main_entry(bsl::uint32 const version) noexcept
     {
-        bsl::errc_type ret{};
+        bsl::errc_type mut_ret{};
 
         /// NOTE:
         /// - Initialize the bf_syscall_t. This will validate the ABI version,
@@ -252,19 +255,24 @@ namespace example
         ///   always the same.
         ///
 
-        ret = g_sys.initialize(version, &bootstrap_entry, &vmexit_entry, &fail_entry);
-        if (bsl::unlikely_assert(!ret)) {
+        mut_ret = g_mut_sys.initialize(    // --
+            bsl::to_u32(version),          // --
+            &bootstrap_entry,              // --
+            &vmexit_entry,                 // --
+            &fail_entry);                  // --
+
+        if (bsl::unlikely_assert(!mut_ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
 
         /// NOTE:
-        /// - Initialize the g_intrinsic. This can be used to add any init
+        /// - Initialize the g_mut_intrinsic. This can be used to add any init
         ///   logic that might be needed, otherwise it can be removed.
         ///
 
-        ret = g_intrinsic.initialize(g_gs, g_tls);
-        if (bsl::unlikely_assert(!ret)) {
+        mut_ret = g_mut_intrinsic.initialize(g_mut_gs, g_mut_tls);
+        if (bsl::unlikely_assert(!mut_ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
@@ -274,8 +282,8 @@ namespace example
         ///   their IDs so that they can be allocated.
         ///
 
-        ret = g_vp_pool.initialize(g_gs, g_tls, g_sys, g_intrinsic);
-        if (bsl::unlikely_assert(!ret)) {
+        mut_ret = g_mut_vp_pool.initialize(g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic);
+        if (bsl::unlikely_assert(!mut_ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
@@ -285,41 +293,44 @@ namespace example
         ///   their IDs so that they can be allocated.
         ///
 
-        ret = g_vps_pool.initialize(g_gs, g_tls, g_sys, g_intrinsic);
-        if (bsl::unlikely_assert(!ret)) {
+        mut_ret = g_mut_vps_pool.initialize(g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic);
+        if (bsl::unlikely_assert(!mut_ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
 
         /// NOTE:
-        /// - Initialize the g_bootstrap. This can be used to add any init
+        /// - Initialize the g_mut_bootstrap. This can be used to add any init
         ///   logic that might be needed, otherwise it can be removed.
         ///
 
-        ret = g_bootstrap.initialize(g_gs, g_tls, g_sys, g_intrinsic, g_vp_pool, g_vps_pool);
-        if (bsl::unlikely_assert(!ret)) {
+        mut_ret = g_mut_bootstrap.initialize(
+            g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic, g_mut_vp_pool, g_mut_vps_pool);
+        if (bsl::unlikely_assert(!mut_ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
 
         /// NOTE:
-        /// - Initialize the g_fail. This can be used to add any init
+        /// - Initialize the g_mut_fail. This can be used to add any init
         ///   logic that might be needed, otherwise it can be removed.
         ///
 
-        ret = g_fail.initialize(g_gs, g_tls, g_sys, g_intrinsic, g_vp_pool, g_vps_pool);
-        if (bsl::unlikely_assert(!ret)) {
+        mut_ret = g_mut_fail.initialize(
+            g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic, g_mut_vp_pool, g_mut_vps_pool);
+        if (bsl::unlikely_assert(!mut_ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
 
         /// NOTE:
-        /// - Initialize the g_vmexit. This can be used to add any init
+        /// - Initialize the g_mut_vmexit. This can be used to add any init
         ///   logic that might be needed, otherwise it can be removed.
         ///
 
-        ret = g_vmexit.initialize(g_gs, g_tls, g_sys, g_intrinsic, g_vp_pool, g_vps_pool);
-        if (bsl::unlikely_assert(!ret)) {
+        mut_ret = g_mut_vmexit.initialize(
+            g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic, g_mut_vp_pool, g_mut_vps_pool);
+        if (bsl::unlikely_assert(!mut_ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }

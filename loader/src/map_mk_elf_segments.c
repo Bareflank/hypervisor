@@ -40,7 +40,7 @@
  *   @param segments a pointer to a elf_segment_t that stores the ELF
  *     segment being mapped
  *   @param rpt the root page table to map the ELF segment into
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 static int64_t
 map_mk_elf_segment(struct elf_segment_t const *const segment, root_page_table_t *const rpt)
@@ -72,15 +72,15 @@ map_mk_elf_segment(struct elf_segment_t const *const segment, root_page_table_t 
  *   @param segments a pointer to a elf_segment_t array that stores the ELF
  *     segments being mapped
  *   @param rpt the root page table to map the ELF segments into
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 map_mk_elf_segments(struct elf_segment_t const *const segments, root_page_table_t *const rpt)
 {
-    uint64_t idx;
+    uint64_t i;
 
-    for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_SEGMENTS; ++idx) {
-        if (map_mk_elf_segment(&segments[idx], rpt)) {
+    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_SEGMENTS; ++i) {
+        if (map_mk_elf_segment(&segments[i], rpt)) {
             bferror("map_mk_elf_segment failed");
             return LOADER_FAILURE;
         }

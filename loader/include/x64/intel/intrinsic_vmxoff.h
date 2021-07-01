@@ -34,7 +34,7 @@
  *   @brief Turns VT-x off
  *
  * <!-- inputs/outputs -->
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t intrinsic_vmxoff(void);
 

@@ -27,6 +27,34 @@ add_library(syscall)
 # Includes
 # ------------------------------------------------------------------------------
 
+if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
+    if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
+        target_include_directories(syscall PUBLIC
+            include/cpp/x64/amd
+            src/cpp/x64/amd
+        )
+    endif()
+
+    if(HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
+        target_include_directories(syscall PUBLIC
+            include/cpp/x64/intel
+            src/cpp/x64/intel
+        )
+    endif()
+
+    target_include_directories(syscall PUBLIC
+        include/cpp/x64
+        src/cpp/x64
+    )
+endif()
+
+if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
+    target_include_directories(syscall PUBLIC
+        include/cpp/arm/aarch64
+        src/cpp/arm/aarch64
+    )
+endif()
+
 target_include_directories(syscall PUBLIC
     include/cpp
     src/cpp
@@ -38,13 +66,32 @@ target_include_directories(syscall PUBLIC
 
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/include/cpp/bf_constants.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/cpp/bf_reg_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/cpp/bf_types.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/cpp/bf_control_ops.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/cpp/bf_debug_ops.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/cpp/bf_syscall_impl.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/cpp/bf_syscall_t.hpp
 )
+
+if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
+    if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
+        list(APPEND HEADERS
+            ${CMAKE_CURRENT_LIST_DIR}/include/cpp/x64/amd/bf_reg_t.hpp
+        )
+    endif()
+
+    if(HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
+        list(APPEND HEADERS
+            ${CMAKE_CURRENT_LIST_DIR}/include/cpp/x64/intel/bf_reg_t.hpp
+        )
+    endif()
+endif()
+
+if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
+    list(APPEND HEADERS
+        ${CMAKE_CURRENT_LIST_DIR}/include/cpp/arm/aarch64/bf_reg_t.hpp
+    )
+endif()
 
 # ------------------------------------------------------------------------------
 # Sources
@@ -127,18 +174,10 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
     hypervisor_target_source(syscall src/x64/bf_vps_op_destroy_vps_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vps_op_init_as_root_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vps_op_promote_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_read_reg_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_read8_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_read16_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_read32_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_read64_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vps_op_read_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vps_op_run_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vps_op_run_current_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_write_reg_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_write8_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_write16_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_write32_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_write64_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vps_op_write_impl.S ${HEADERS})
 endif()
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
@@ -218,18 +257,10 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_destroy_vps_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_init_as_root_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_promote_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_read_reg_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_read8_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_read16_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_read32_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_read64_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_read_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_run_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_run_current_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_write_reg_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_write8_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_write16_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_write32_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_write64_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_write_impl.S ${HEADERS})
 endif()
 
 # ------------------------------------------------------------------------------

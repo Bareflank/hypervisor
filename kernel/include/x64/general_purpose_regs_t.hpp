@@ -42,35 +42,35 @@ namespace mk
     struct general_purpose_regs_t final
     {
         /// @brief stores the value of rax (0x000)
-        bsl::uintmax rax;
+        bsl::uint64 rax;
         /// @brief stores the value of rbx (0x008)
-        bsl::uintmax rbx;
+        bsl::uint64 rbx;
         /// @brief stores the value of rcx (0x010)
-        bsl::uintmax rcx;
+        bsl::uint64 rcx;
         /// @brief stores the value of rdx (0x018)
-        bsl::uintmax rdx;
+        bsl::uint64 rdx;
         /// @brief stores the value of rbp (0x020)
-        bsl::uintmax rbp;
+        bsl::uint64 rbp;
         /// @brief stores the value of rsi (0x028)
-        bsl::uintmax rsi;
+        bsl::uint64 rsi;
         /// @brief stores the value of rdi (0x030)
-        bsl::uintmax rdi;
+        bsl::uint64 rdi;
         /// @brief stores the value of r8 (0x038)
-        bsl::uintmax r8;
+        bsl::uint64 r8;
         /// @brief stores the value of r9 (0x040)
-        bsl::uintmax r9;
+        bsl::uint64 r9;
         /// @brief stores the value of r10 (0x048)
-        bsl::uintmax r10;
+        bsl::uint64 r10;
         /// @brief stores the value of r11 (0x050)
-        bsl::uintmax r11;
+        bsl::uint64 r11;
         /// @brief stores the value of r12 (0x058)
-        bsl::uintmax r12;
+        bsl::uint64 r12;
         /// @brief stores the value of r13 (0x060)
-        bsl::uintmax r13;
+        bsl::uint64 r13;
         /// @brief stores the value of r14 (0x068)
-        bsl::uintmax r14;
+        bsl::uint64 r14;
         /// @brief stores the value of r15 (0x070)
-        bsl::uintmax r15;
+        bsl::uint64 r15;
     };
 }
 

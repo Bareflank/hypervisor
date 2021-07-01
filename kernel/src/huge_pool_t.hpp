@@ -26,6 +26,7 @@
 #define HUGE_POOL_T_HPP
 
 #include <lock_guard_t.hpp>
+#include <page_t.hpp>
 #include <spinlock_t.hpp>
 #include <tls_t.hpp>
 
@@ -54,7 +55,7 @@ namespace mk
     class huge_pool_t final
     {
         /// @brief stores the range of memory used by this allocator
-        bsl::span<bsl::uint8> m_pool{};
+        bsl::span<page_t> m_pool{};
         /// @brief stores the huge pool's cursor
         bsl::safe_uintmax m_crsr{};
         /// @brief safe guards operations on the pool.
@@ -67,71 +68,59 @@ namespace mk
         ///     huge pool which is used for virt to phys translations.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param pool the mutable_buffer_t of the huge pool
+        ///   @param mut_pool the mutable_buffer_t of the huge pool
         ///
         constexpr void
-        initialize(bsl::span<bsl::uint8> &pool) noexcept
+        initialize(bsl::span<page_t> &mut_pool) noexcept
         {
-            m_pool = pool;
+            m_pool = mut_pool;
         }
 
         /// <!-- description -->
         ///   @brief Allocates memory from the huge pool.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param size the total number of bytes to allocate.
+        ///   @param mut_tls the current TLS block
+        ///   @param pages the total number of pages to allocate.
         ///   @return Returns bsl::span containing the allocated memory
         ///
         [[nodiscard]] constexpr auto
-        allocate(tls_t &tls, bsl::safe_uintmax const &size) noexcept -> bsl::span<bsl::uint8>
+        allocate(tls_t &mut_tls, bsl::safe_uintmax const &pages) noexcept -> bsl::span<page_t>
         {
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{mut_tls, m_lock};
 
-            if (bsl::unlikely(!size)) {
-                bsl::error() << "invalid size "    // --
-                             << bsl::hex(size)     // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
+            if (bsl::unlikely(pages.is_zero_or_invalid())) {
+                bsl::error() << "invalid pages "    // --
+                             << bsl::hex(pages)     // --
+                             << bsl::endl           // --
+                             << bsl::here();        // --
 
                 return {};
             }
 
-            auto bytes{size};
-            auto pages{size / HYPERVISOR_PAGE_SIZE};
-
-            constexpr auto aligned{0_umax};
-            if ((bytes % HYPERVISOR_PAGE_SIZE) != aligned) {
-                ++pages;
-                bytes = pages * HYPERVISOR_PAGE_SIZE;
-            }
-            else {
-                bsl::touch();
-            }
-
-            auto buf{m_pool.subspan(m_crsr, bytes)};
-            if (bsl::unlikely(buf.size() != bytes)) {
+            auto mut_buf{m_pool.subspan(m_crsr, pages)};
+            if (bsl::unlikely(mut_buf.size() != pages)) {
                 bsl::error() << "huge pool out of memory\n" << bsl::here();
                 return {};
             }
 
-            m_crsr += bytes;
-            bsl::builtin_memset(buf.data(), '\0', buf.size());
+            m_crsr += pages;
+            bsl::builtin_memset(mut_buf.data(), '\0', mut_buf.size_bytes());
 
-            return buf;
+            return mut_buf;
         }
 
         /// <!-- description -->
         ///   @brief Not supported
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param buf the bsl::span containing the memory to deallocate
         ///
         constexpr void
-        deallocate(tls_t &tls, bsl::span<bsl::uint8> const &buf) noexcept
+        deallocate(tls_t &mut_tls, bsl::span<page_t> const &buf) noexcept
         {
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{mut_tls, m_lock};
             bsl::discard(buf);
 
             /// NOTE:
@@ -155,12 +144,12 @@ namespace mk
 
         /// <!-- description -->
         ///   @brief Converts a virtual address to a physical address for
-        ///     any memory allocated by the huge pool. If the provided ptr
+        ///     any page allocated by the page pool. If the provided virt
         ///     was not allocated using the allocate function by the same
-        ///     huge pool, this results of this function are UB. It should
+        ///     page pool, this results of this function are UB. It should
         ///     be noted that any virtual address may be used meaning the
         ///     provided address does not have to be page aligned, it simply
-        ///     needs to be allocated using the same huge pool.
+        ///     needs to be allocated using the same page pool.
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T defines the type of virtual address being converted
@@ -171,17 +160,21 @@ namespace mk
         [[nodiscard]] constexpr auto
         virt_to_phys(T const *const virt) const noexcept -> bsl::safe_uintmax
         {
-            return bsl::to_umax(virt) - HYPERVISOR_MK_HUGE_POOL_ADDR;
+            static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);
+
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+            auto const virt_int{bsl::to_umax(reinterpret_cast<bsl::uintmax>(virt))};
+            return virt_int - HYPERVISOR_MK_HUGE_POOL_ADDR;
         }
 
         /// <!-- description -->
         ///   @brief Converts a physical address to a virtual address for
-        ///     any memory allocated by the huge pool. If the provided address
+        ///     any page allocated by the page pool. If the provided address
         ///     was not allocated using the allocate function by the same
-        ///     huge pool, this results of this function are UB. It should
+        ///     page pool, this results of this function are UB. It should
         ///     be noted that any physical address may be used meaning the
         ///     provided address does not have to be page aligned, it simply
-        ///     needs to be allocated using the same huge pool.
+        ///     needs to be allocated using the same page pool.
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T defines the type of virtual address to convert to
@@ -192,7 +185,11 @@ namespace mk
         [[nodiscard]] constexpr auto
         phys_to_virt(bsl::safe_uintmax const &phys) const noexcept -> T *
         {
-            return bsl::to_ptr<T *>(phys + HYPERVISOR_MK_HUGE_POOL_ADDR);
+            static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);
+
+            auto const phys_int{phys + HYPERVISOR_MK_HUGE_POOL_ADDR};
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+            return reinterpret_cast<T *>(phys_int.get());
         }
 
         /// <!-- description -->

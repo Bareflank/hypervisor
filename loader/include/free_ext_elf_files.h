@@ -27,16 +27,16 @@
 #ifndef FREE_EXT_ELF_FILES_H
 #define FREE_EXT_ELF_FILES_H
 
-#include <span_t.h>
+#include <elf_file_t.h>
 
 /**
  * <!-- description -->
- *   @brief Releases a previously allocated span_t that was allocated
+ *   @brief Releases a previously allocated elf_file_t that was allocated
  *     using the alloc_and_copy_ext_elf_files function.
  *
  * <!-- inputs/outputs -->
- *   @param ext_elf_files the span_t to free.
+ *   @param ext_elf_files the elf_file_t to free.
  */
-void free_ext_elf_files(struct span_t *const ext_elf_files);
+void free_ext_elf_files(struct elf_file_t *const ext_elf_files);
 
 #endif

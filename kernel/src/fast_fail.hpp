@@ -42,20 +42,21 @@ namespace mk
     ///     or a halt() will occur.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param intrinsic the intrinsic_t to use
-    ///   @param ext the ext_t to handle the fail
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_intrinsic the intrinsic_t to use
+    ///   @param pmut_ext the ext_t to handle the fail
     ///   @return Returns bsl::exit_success if the fail was handled,
     ///     bsl::exit_failure otherwise.
     ///
     [[nodiscard]] constexpr auto
-    fast_fail(tls_t &tls, intrinsic_t &intrinsic, ext_t *const ext) noexcept -> bsl::exit_code
+    fast_fail(tls_t &mut_tls, intrinsic_t &mut_intrinsic, ext_t *const pmut_ext) noexcept
+        -> bsl::exit_code
     {
         bsl::print() << bsl::red << "\nfast failing:";
         bsl::print() << bsl::rst << bsl::endl;
 
-        if (nullptr != ext) {
-            auto const ret{ext->fail(tls, intrinsic)};
+        if (nullptr != pmut_ext) {
+            auto const ret{pmut_ext->fail(mut_tls, mut_intrinsic)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::exit_failure;

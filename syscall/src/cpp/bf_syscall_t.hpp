@@ -63,20 +63,20 @@ namespace syscall
         ///   @param version the version provided to the extension by the
         ///     microkernel. If this API does not support the ABI versions
         ///     that the microkernel supports, this function will fail.
-        ///   @param bootstrap_handler the bootstrap handler to register
-        ///   @param vmexit_handler the vmexit handler to register
-        ///   @param fail_handler the fail handler to register
+        ///   @param pmut_bootstrap_handler the bootstrap handler to register
+        ///   @param pmut_vmexit_handler the vmexit handler to register
+        ///   @param pmut_fail_handler the fail handler to register
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
         initialize(
             bf_uint32_t const &version,
-            bf_callback_handler_bootstrap_t const bootstrap_handler,
-            bf_callback_handler_vmexit_t const vmexit_handler,
-            bf_callback_handler_fail_t const fail_handler) noexcept -> bsl::errc_type
+            bf_callback_handler_bootstrap_t const pmut_bootstrap_handler,
+            bf_callback_handler_vmexit_t const pmut_vmexit_handler,
+            bf_callback_handler_fail_t const pmut_fail_handler) noexcept -> bsl::errc_type
         {
-            bf_status_t ret{};
+            bf_status_t::value_type mut_ret{};
 
             if (bsl::unlikely_assert(!version)) {
                 bsl::error() << "invalid version\n" << bsl::here();
@@ -88,17 +88,17 @@ namespace syscall
                 return bsl::errc_invalid_argument;
             }
 
-            if (bsl::unlikely_assert(nullptr == bootstrap_handler)) {
+            if (bsl::unlikely_assert(nullptr == pmut_bootstrap_handler)) {
                 bsl::error() << "invalid bootstrap_handler\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            if (bsl::unlikely_assert(nullptr == vmexit_handler)) {
+            if (bsl::unlikely_assert(nullptr == pmut_vmexit_handler)) {
                 bsl::error() << "invalid vmexit_handler\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            if (bsl::unlikely_assert(nullptr == fail_handler)) {
+            if (bsl::unlikely_assert(nullptr == pmut_fail_handler)) {
                 bsl::error() << "invalid fail_handler\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
@@ -112,51 +112,51 @@ namespace syscall
                 return bsl::errc_unsupported;
             }
 
-            ret = bf_handle_op_open_handle_impl(BF_SPEC_ID1_VAL.get(), m_hndl.data());
-            if (bsl::unlikely_assert(ret != BF_STATUS_SUCCESS)) {
+            mut_ret = bf_handle_op_open_handle_impl(BF_SPEC_ID1_VAL.get(), m_hndl.data());
+            if (bsl::unlikely_assert(mut_ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_handle_op_open_handle_impl failed with status "    // --
-                             << bsl::hex(ret)                                          // --
+                             << bsl::hex(mut_ret)                                      // --
                              << bsl::endl                                              // --
                              << bsl::here();
 
                 return bsl::errc_failure;
             }
 
-            bsl::finally_assert release_on_error{[this]() noexcept -> void {
+            bsl::finally_assert mut_release_on_error{[this]() noexcept -> void {
                 this->release();
             }};
 
-            ret = bf_callback_op_register_bootstrap_impl(m_hndl.get(), bootstrap_handler);
-            if (bsl::unlikely_assert(ret != BF_STATUS_SUCCESS)) {
+            mut_ret = bf_callback_op_register_bootstrap_impl(m_hndl.get(), pmut_bootstrap_handler);
+            if (bsl::unlikely_assert(mut_ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_callback_op_register_bootstrap failed with status "    // --
-                             << bsl::hex(ret)                                              // --
+                             << bsl::hex(mut_ret)                                          // --
                              << bsl::endl                                                  // --
                              << bsl::here();
 
                 return bsl::errc_failure;
             }
 
-            ret = bf_callback_op_register_vmexit_impl(m_hndl.get(), vmexit_handler);
-            if (bsl::unlikely_assert(ret != BF_STATUS_SUCCESS)) {
+            mut_ret = bf_callback_op_register_vmexit_impl(m_hndl.get(), pmut_vmexit_handler);
+            if (bsl::unlikely_assert(mut_ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_callback_op_register_vmexit failed with status "    // --
-                             << bsl::hex(ret)                                           // --
+                             << bsl::hex(mut_ret)                                       // --
                              << bsl::endl                                               // --
                              << bsl::here();
 
                 return bsl::errc_failure;
             }
 
-            ret = bf_callback_op_register_fail_impl(m_hndl.get(), fail_handler);
-            if (bsl::unlikely_assert(ret != BF_STATUS_SUCCESS)) {
+            mut_ret = bf_callback_op_register_fail_impl(m_hndl.get(), pmut_fail_handler);
+            if (bsl::unlikely_assert(mut_ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_callback_op_register_fail failed with status "    // --
-                             << bsl::hex(ret)                                         // --
+                             << bsl::hex(mut_ret)                                     // --
                              << bsl::endl                                             // --
                              << bsl::here();
 
                 return bsl::errc_failure;
             }
 
-            release_on_error.ignore();
+            mut_release_on_error.ignore();
             return bsl::errc_success;
         }
 
@@ -183,7 +183,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_rax() noexcept -> bf_uint64_t
         {
-            return bf_tls_rax_impl();
+            return bsl::to_u64(bf_tls_rax_impl());
         }
 
         /// <!-- description -->
@@ -212,7 +212,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_rbx() noexcept -> bf_uint64_t
         {
-            return bf_tls_rbx_impl();
+            return bsl::to_u64(bf_tls_rbx_impl());
         }
 
         /// <!-- description -->
@@ -241,7 +241,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_rcx() noexcept -> bf_uint64_t
         {
-            return bf_tls_rcx_impl();
+            return bsl::to_u64(bf_tls_rcx_impl());
         }
 
         /// <!-- description -->
@@ -270,7 +270,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_rdx() noexcept -> bf_uint64_t
         {
-            return bf_tls_rdx_impl();
+            return bsl::to_u64(bf_tls_rdx_impl());
         }
 
         /// <!-- description -->
@@ -299,7 +299,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_rbp() noexcept -> bf_uint64_t
         {
-            return bf_tls_rbp_impl();
+            return bsl::to_u64(bf_tls_rbp_impl());
         }
 
         /// <!-- description -->
@@ -328,7 +328,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_rsi() noexcept -> bf_uint64_t
         {
-            return bf_tls_rsi_impl();
+            return bsl::to_u64(bf_tls_rsi_impl());
         }
 
         /// <!-- description -->
@@ -357,7 +357,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_rdi() noexcept -> bf_uint64_t
         {
-            return bf_tls_rdi_impl();
+            return bsl::to_u64(bf_tls_rdi_impl());
         }
 
         /// <!-- description -->
@@ -386,7 +386,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_r8() noexcept -> bf_uint64_t
         {
-            return bf_tls_r8_impl();
+            return bsl::to_u64(bf_tls_r8_impl());
         }
 
         /// <!-- description -->
@@ -415,7 +415,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_r9() noexcept -> bf_uint64_t
         {
-            return bf_tls_r9_impl();
+            return bsl::to_u64(bf_tls_r9_impl());
         }
 
         /// <!-- description -->
@@ -444,7 +444,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_r10() noexcept -> bf_uint64_t
         {
-            return bf_tls_r10_impl();
+            return bsl::to_u64(bf_tls_r10_impl());
         }
 
         /// <!-- description -->
@@ -473,7 +473,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_r11() noexcept -> bf_uint64_t
         {
-            return bf_tls_r11_impl();
+            return bsl::to_u64(bf_tls_r11_impl());
         }
 
         /// <!-- description -->
@@ -502,7 +502,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_r12() noexcept -> bf_uint64_t
         {
-            return bf_tls_r12_impl();
+            return bsl::to_u64(bf_tls_r12_impl());
         }
 
         /// <!-- description -->
@@ -531,7 +531,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_r13() noexcept -> bf_uint64_t
         {
-            return bf_tls_r13_impl();
+            return bsl::to_u64(bf_tls_r13_impl());
         }
 
         /// <!-- description -->
@@ -560,7 +560,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_r14() noexcept -> bf_uint64_t
         {
-            return bf_tls_r14_impl();
+            return bsl::to_u64(bf_tls_r14_impl());
         }
 
         /// <!-- description -->
@@ -589,7 +589,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_r15() noexcept -> bf_uint64_t
         {
-            return bf_tls_r15_impl();
+            return bsl::to_u64(bf_tls_r15_impl());
         }
 
         /// <!-- description -->
@@ -618,7 +618,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_extid() noexcept -> bsl::safe_uint16
         {
-            return bf_tls_extid_impl();
+            return bsl::to_u16(bf_tls_extid_impl());
         }
 
         /// <!-- description -->
@@ -630,7 +630,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_vmid() noexcept -> bsl::safe_uint16
         {
-            return bf_tls_vmid_impl();
+            return bsl::to_u16(bf_tls_vmid_impl());
         }
 
         /// <!-- description -->
@@ -642,7 +642,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_vpid() noexcept -> bsl::safe_uint16
         {
-            return bf_tls_vpid_impl();
+            return bsl::to_u16(bf_tls_vpid_impl());
         }
 
         /// <!-- description -->
@@ -654,7 +654,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_vpsid() noexcept -> bsl::safe_uint16
         {
-            return bf_tls_vpsid_impl();
+            return bsl::to_u16(bf_tls_vpsid_impl());
         }
 
         /// <!-- description -->
@@ -666,7 +666,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_ppid() noexcept -> bsl::safe_uint16
         {
-            return bf_tls_ppid_impl();
+            return bsl::to_u16(bf_tls_ppid_impl());
         }
 
         /// <!-- description -->
@@ -678,7 +678,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         bf_tls_online_pps() noexcept -> bsl::safe_uint16
         {
-            return bf_tls_online_pps_impl();
+            return bsl::to_u16(bf_tls_online_pps_impl());
         }
 
         // ---------------------------------------------------------------------
@@ -696,10 +696,10 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_vm_op_create_vm() noexcept -> bf_uint16_t
         {
-            bf_status_t ret{};
-            bf_uint16_t vmid{};
+            bf_uint16_t mut_vmid{};
 
-            ret = bf_vm_op_create_vm_impl(m_hndl.get(), vmid.data());
+            bf_status_t::value_type const ret{
+                bf_vm_op_create_vm_impl(m_hndl.get(), mut_vmid.data())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vm_op_create_vm failed with status "    // --
                              << bsl::hex(ret)                               // --
@@ -709,7 +709,7 @@ namespace syscall
                 return bf_uint16_t::failure();
             }
 
-            return vmid;
+            return mut_vmid;
         }
 
         /// <!-- description -->
@@ -724,14 +724,12 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_vm_op_destroy_vm(bf_uint16_t const &vmid) noexcept -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!vmid)) {
                 bsl::error() << "invalid vmid\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_vm_op_destroy_vm_impl(m_hndl.get(), vmid.get());
+            bf_status_t::value_type const ret{bf_vm_op_destroy_vm_impl(m_hndl.get(), vmid.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vm_op_destroy_vm failed with status "    // --
                              << bsl::hex(ret)                                // --
@@ -763,8 +761,7 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_vp_op_create_vp(bf_uint16_t const &vmid, bf_uint16_t const &ppid) noexcept -> bf_uint16_t
         {
-            bf_status_t ret{};
-            bf_uint16_t vpid{};
+            bf_uint16_t mut_vpid{};
 
             if (bsl::unlikely_assert(!vmid)) {
                 bsl::error() << "invalid vmid\n" << bsl::here();
@@ -776,7 +773,8 @@ namespace syscall
                 return bf_uint16_t::failure();
             }
 
-            ret = bf_vp_op_create_vp_impl(m_hndl.get(), vmid.get(), ppid.get(), vpid.data());
+            bf_status_t::value_type const ret{
+                bf_vp_op_create_vp_impl(m_hndl.get(), vmid.get(), ppid.get(), mut_vpid.data())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vp_op_create_vp failed with status "    // --
                              << bsl::hex(ret)                               // --
@@ -786,7 +784,7 @@ namespace syscall
                 return bf_uint16_t::failure();
             }
 
-            return vpid;
+            return mut_vpid;
         }
 
         /// <!-- description -->
@@ -801,14 +799,12 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_vp_op_destroy_vp(bf_uint16_t const &vpid) noexcept -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!vpid)) {
                 bsl::error() << "invalid vpid\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_vp_op_destroy_vp_impl(m_hndl.get(), vpid.get());
+            bf_status_t::value_type const ret{bf_vp_op_destroy_vp_impl(m_hndl.get(), vpid.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vp_op_destroy_vp failed with status "    // --
                              << bsl::hex(ret)                                // --
@@ -868,8 +864,6 @@ namespace syscall
         bf_vp_op_migrate(bf_uint16_t const &vpid, bf_uint16_t const &ppid) noexcept
             -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!vpid)) {
                 bsl::error() << "invalid vpid\n" << bsl::here();
                 return bsl::errc_invalid_argument;
@@ -880,7 +874,8 @@ namespace syscall
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_vp_op_migrate_impl(m_hndl.get(), vpid.get(), ppid.get());
+            bf_status_t::value_type const ret{
+                bf_vp_op_migrate_impl(m_hndl.get(), vpid.get(), ppid.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vp_op_migrate failed with status "    // --
                              << bsl::hex(ret)                             // --
@@ -912,8 +907,7 @@ namespace syscall
         bf_vps_op_create_vps(bf_uint16_t const &vpid, bf_uint16_t const &ppid) noexcept
             -> bf_uint16_t
         {
-            bf_status_t ret{};
-            bf_uint16_t vpsid{};
+            bf_uint16_t mut_vpsid{};
 
             if (bsl::unlikely_assert(!vpid)) {
                 bsl::error() << "invalid vpid\n" << bsl::here();
@@ -925,7 +919,8 @@ namespace syscall
                 return bf_uint16_t::failure();
             }
 
-            ret = bf_vps_op_create_vps_impl(m_hndl.get(), vpid.get(), ppid.get(), vpsid.data());
+            bf_status_t::value_type const ret{
+                bf_vps_op_create_vps_impl(m_hndl.get(), vpid.get(), ppid.get(), mut_vpsid.data())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vps_op_create_vps failed with status "    // --
                              << bsl::hex(ret)                                 // --
@@ -935,7 +930,7 @@ namespace syscall
                 return bf_uint16_t::failure();
             }
 
-            return vpsid;
+            return mut_vpsid;
         }
 
         /// <!-- description -->
@@ -950,14 +945,13 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_vps_op_destroy_vps(bf_uint16_t const &vpsid) noexcept -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_vps_op_destroy_vps_impl(m_hndl.get(), vpsid.get());
+            bf_status_t::value_type const ret{
+                bf_vps_op_destroy_vps_impl(m_hndl.get(), vpsid.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vps_op_destroy_vps failed with status "    // --
                              << bsl::hex(ret)                                  // --
@@ -982,378 +976,17 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_vps_op_init_as_root(bf_uint16_t const &vpsid) noexcept -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_vps_op_init_as_root_impl(m_hndl.get(), vpsid.get());
+            bf_status_t::value_type const ret{
+                bf_vps_op_init_as_root_impl(m_hndl.get(), vpsid.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vps_op_init_as_root failed with status "    // --
                              << bsl::hex(ret)                                   // --
                              << bsl::endl                                       // --
-                             << bsl::here();
-
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Reads an 8bit field from the VPS and returns the value. The
-        ///     "index" is architecture-specific. For Intel, Appendix B, "Field
-        ///     Encoding in VMCS," defines the index (or encoding). For AMD,
-        ///     Appendix B, "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to read from
-        ///   @param index The HVE specific index defining which field to read
-        ///   @return Returns the value read, or bf_uint8_t::failure()
-        ///     on failure.
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_read8(bf_uint16_t const &vpsid, bf_uint64_t const &index) const noexcept
-            -> bf_uint8_t
-        {
-            bf_status_t ret{};
-            bf_uint8_t value{};
-
-            if (bsl::unlikely_assert(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bf_uint8_t::failure();
-            }
-
-            if (bsl::unlikely_assert(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bf_uint8_t::failure();
-            }
-
-            ret = bf_vps_op_read8_impl(m_hndl.get(), vpsid.get(), index.get(), value.data());
-            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vps_op_read8 failed with status "    // --
-                             << bsl::hex(ret)                            // --
-                             << bsl::endl                                // --
-                             << bsl::here();
-
-                return bf_uint8_t::failure();
-            }
-
-            return value;
-        }
-
-        /// <!-- description -->
-        ///   @brief Reads an 16bit field from the VPS and returns the value. The
-        ///     "index" is architecture-specific. For Intel, Appendix B, "Field
-        ///     Encoding in VMCS," defines the index (or encoding). For AMD,
-        ///     Appendix B, "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to read from
-        ///   @param index The HVE specific index defining which field to read
-        ///   @return Returns the value read, or bf_uint16_t::failure()
-        ///     on failure.
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_read16(bf_uint16_t const &vpsid, bf_uint64_t const &index) const noexcept
-            -> bf_uint16_t
-        {
-            bf_status_t ret{};
-            bf_uint16_t value{};
-
-            if (bsl::unlikely_assert(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bf_uint16_t::failure();
-            }
-
-            if (bsl::unlikely_assert(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bf_uint16_t::failure();
-            }
-
-            ret = bf_vps_op_read16_impl(m_hndl.get(), vpsid.get(), index.get(), value.data());
-            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vps_op_read16 failed with status "    // --
-                             << bsl::hex(ret)                             // --
-                             << bsl::endl                                 // --
-                             << bsl::here();
-
-                return bf_uint16_t::failure();
-            }
-
-            return value;
-        }
-
-        /// <!-- description -->
-        ///   @brief Reads an 32bit field from the VPS and returns the value. The
-        ///     "index" is architecture-specific. For Intel, Appendix B, "Field
-        ///     Encoding in VMCS," defines the index (or encoding). For AMD,
-        ///     Appendix B, "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to read from
-        ///   @param index The HVE specific index defining which field to read
-        ///   @return Returns the value read, or bf_uint32_t::failure()
-        ///     on failure.
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_read32(bf_uint16_t const &vpsid, bf_uint64_t const &index) const noexcept
-            -> bf_uint32_t
-        {
-            bf_status_t ret{};
-            bf_uint32_t value{};
-
-            if (bsl::unlikely_assert(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bf_uint32_t::failure();
-            }
-
-            if (bsl::unlikely_assert(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bf_uint32_t::failure();
-            }
-
-            ret = bf_vps_op_read32_impl(m_hndl.get(), vpsid.get(), index.get(), value.data());
-            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vps_op_read32 failed with status "    // --
-                             << bsl::hex(ret)                             // --
-                             << bsl::endl                                 // --
-                             << bsl::here();
-
-                return bf_uint32_t::failure();
-            }
-
-            return value;
-        }
-
-        /// <!-- description -->
-        ///   @brief Reads an 64bit field from the VPS and returns the value. The
-        ///     "index" is architecture-specific. For Intel, Appendix B, "Field
-        ///     Encoding in VMCS," defines the index (or encoding). For AMD,
-        ///     Appendix B, "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to read from
-        ///   @param index The HVE specific index defining which field to read
-        ///   @return Returns the value read, or bf_uint64_t::failure()
-        ///     on failure.
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_read64(bf_uint16_t const &vpsid, bf_uint64_t const &index) const noexcept
-            -> bf_uint64_t
-        {
-            bf_status_t ret{};
-            bf_uint64_t value{};
-
-            if (bsl::unlikely_assert(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bf_uint64_t::failure();
-            }
-
-            if (bsl::unlikely_assert(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bf_uint64_t::failure();
-            }
-
-            ret = bf_vps_op_read64_impl(m_hndl.get(), vpsid.get(), index.get(), value.data());
-            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vps_op_read64 failed with status "    // --
-                             << bsl::hex(ret)                             // --
-                             << bsl::endl                                 // --
-                             << bsl::here();
-
-                return bf_uint64_t::failure();
-            }
-
-            return value;
-        }
-
-        /// <!-- description -->
-        ///   @brief Writes to an 8bit field in the VPS. The "index" is
-        ///     architecture-specific. For Intel, Appendix B, "Field Encoding in
-        ///     VMCS," defines the index (or encoding). For AMD, Appendix B,
-        ///     "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to write to
-        ///   @param index The HVE specific index defining which field to write to
-        ///   @param value The value to write to the requested field
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_write8(
-            bf_uint16_t const &vpsid, bf_uint64_t const &index, bf_uint8_t const &value) noexcept
-            -> bsl::errc_type
-        {
-            bf_status_t ret{};
-
-            if (bsl::unlikely_assert(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely_assert(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely_assert(!value)) {
-                bsl::error() << "invalid value\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            ret = bf_vps_op_write8_impl(m_hndl.get(), vpsid.get(), index.get(), value.get());
-            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vps_op_write8 failed with status "    // --
-                             << bsl::hex(ret)                             // --
-                             << bsl::endl                                 // --
-                             << bsl::here();
-
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Writes to an 16bit field in the VPS. The "index" is
-        ///     architecture-specific. For Intel, Appendix B, "Field Encoding in
-        ///     VMCS," defines the index (or encoding). For AMD, Appendix B,
-        ///     "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to write to
-        ///   @param index The HVE specific index defining which field to write to
-        ///   @param value The value to write to the requested field
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_write16(
-            bf_uint16_t const &vpsid, bf_uint64_t const &index, bf_uint16_t const &value) noexcept
-            -> bsl::errc_type
-        {
-            bf_status_t ret{};
-
-            if (bsl::unlikely_assert(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely_assert(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely_assert(!value)) {
-                bsl::error() << "invalid value\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            ret = bf_vps_op_write16_impl(m_hndl.get(), vpsid.get(), index.get(), value.get());
-            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vps_op_write16 failed with status "    // --
-                             << bsl::hex(ret)                              // --
-                             << bsl::endl                                  // --
-                             << bsl::here();
-
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Writes to an 32bit field in the VPS. The "index" is
-        ///     architecture-specific. For Intel, Appendix B, "Field Encoding in
-        ///     VMCS," defines the index (or encoding). For AMD, Appendix B,
-        ///     "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to write to
-        ///   @param index The HVE specific index defining which field to write to
-        ///   @param value The value to write to the requested field
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_write32(
-            bf_uint16_t const &vpsid, bf_uint64_t const &index, bf_uint32_t const &value) noexcept
-            -> bsl::errc_type
-        {
-            bf_status_t ret{};
-
-            if (bsl::unlikely_assert(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely_assert(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely_assert(!value)) {
-                bsl::error() << "invalid value\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            ret = bf_vps_op_write32_impl(m_hndl.get(), vpsid.get(), index.get(), value.get());
-            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vps_op_write32 failed with status "    // --
-                             << bsl::hex(ret)                              // --
-                             << bsl::endl                                  // --
-                             << bsl::here();
-
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Writes to an 64bit field in the VPS. The "index" is
-        ///     architecture-specific. For Intel, Appendix B, "Field Encoding in
-        ///     VMCS," defines the index (or encoding). For AMD, Appendix B,
-        ///     "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to write to
-        ///   @param index The HVE specific index defining which field to write to
-        ///   @param value The value to write to the requested field
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_write64(
-            bf_uint16_t const &vpsid, bf_uint64_t const &index, bf_uint64_t const &value) noexcept
-            -> bsl::errc_type
-        {
-            bf_status_t ret{};
-
-            if (bsl::unlikely_assert(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely_assert(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely_assert(!value)) {
-                bsl::error() << "invalid value\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            ret = bf_vps_op_write64_impl(m_hndl.get(), vpsid.get(), index.get(), value.get());
-            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vps_op_write64 failed with status "    // --
-                             << bsl::hex(ret)                              // --
-                             << bsl::endl                                  // --
                              << bsl::here();
 
                 return bsl::errc_failure;
@@ -1373,28 +1006,27 @@ namespace syscall
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_vps_op_read_reg(bf_uint16_t const &vpsid, bf_reg_t const reg) const noexcept
-            -> bf_uint64_t
+        bf_vps_op_read(bf_uint16_t const &vpsid, bf_reg_t const reg) const noexcept -> bf_uint64_t
         {
-            bf_status_t ret{};
-            bf_uint64_t value{};
+            bf_uint64_t mut_val{};
 
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
                 return bf_uint64_t::failure();
             }
 
-            ret = bf_vps_op_read_reg_impl(m_hndl.get(), vpsid.get(), reg, value.data());
+            bf_status_t::value_type const ret{
+                bf_vps_op_read_impl(m_hndl.get(), vpsid.get(), reg, mut_val.data())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vps_op_read_reg failed with status "    // --
-                             << bsl::hex(ret)                               // --
-                             << bsl::endl                                   // --
+                bsl::error() << "bf_vps_op_read failed with status "    // --
+                             << bsl::hex(ret)                           // --
+                             << bsl::endl                               // --
                              << bsl::here();
 
                 return bf_uint64_t::failure();
             }
 
-            return value;
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -1409,12 +1041,10 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_vps_op_write_reg(
+        bf_vps_op_write(
             bf_uint16_t const &vpsid, bf_reg_t const reg, bf_uint64_t const &value) noexcept
             -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
                 return bsl::errc_invalid_argument;
@@ -1425,11 +1055,12 @@ namespace syscall
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_vps_op_write_reg_impl(m_hndl.get(), vpsid.get(), reg, value.get());
+            bf_status_t::value_type const ret{
+                bf_vps_op_write_impl(m_hndl.get(), vpsid.get(), reg, value.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vps_op_write_reg failed with status "    // --
-                             << bsl::hex(ret)                                // --
-                             << bsl::endl                                    // --
+                bsl::error() << "bf_vps_op_write failed with status "    // --
+                             << bsl::hex(ret)                            // --
+                             << bsl::endl                                // --
                              << bsl::here();
 
                 return bsl::errc_failure;
@@ -1489,8 +1120,6 @@ namespace syscall
             bf_uint16_t const &vmid, bf_uint16_t const &vpid, bf_uint16_t const &vpsid) noexcept
             -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!vmid)) {
                 bsl::error() << "invalid vmid\n" << bsl::here();
                 return bsl::errc_invalid_argument;
@@ -1506,7 +1135,8 @@ namespace syscall
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_vps_op_run_impl(m_hndl.get(), vmid.get(), vpid.get(), vpsid.get());
+            bf_status_t::value_type const ret{
+                bf_vps_op_run_impl(m_hndl.get(), vmid.get(), vpid.get(), vpsid.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vps_op_run failed with status "    // --
                              << bsl::hex(ret)                          // --
@@ -1555,14 +1185,12 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_vps_op_advance_ip(bf_uint16_t const &vpsid) noexcept -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_vps_op_advance_ip_impl(m_hndl.get(), vpsid.get());
+            bf_status_t::value_type const ret{bf_vps_op_advance_ip_impl(m_hndl.get(), vpsid.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vps_op_advance_ip failed with status "    // --
                              << bsl::hex(ret)                                 // --
@@ -1588,7 +1216,8 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_vps_op_advance_ip_and_run_current() noexcept -> bsl::errc_type
         {
-            bf_status_t const ret{bf_vps_op_advance_ip_and_run_current_impl(m_hndl.get())};
+            bf_status_t::value_type const ret{
+                bf_vps_op_advance_ip_and_run_current_impl(m_hndl.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vps_op_advance_ip_and_run_current failed with status "    // --
                              << bsl::hex(ret)                                                 // --
@@ -1616,14 +1245,12 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_vps_op_promote(bf_uint16_t const &vpsid) noexcept -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_vps_op_promote_impl(m_hndl.get(), vpsid.get());
+            bf_status_t::value_type const ret{bf_vps_op_promote_impl(m_hndl.get(), vpsid.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vps_op_promote failed with status "    // --
                              << bsl::hex(ret)                              // --
@@ -1653,14 +1280,12 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_vps_op_clear_vps(bf_uint16_t const &vpsid) noexcept -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_vps_op_clear_vps_impl(m_hndl.get(), vpsid.get());
+            bf_status_t::value_type const ret{bf_vps_op_clear_vps_impl(m_hndl.get(), vpsid.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vps_op_clear_vps failed with status "    // --
                              << bsl::hex(ret)                                // --
@@ -1692,15 +1317,15 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_intrinsic_op_rdmsr(bf_uint32_t const &msr) const noexcept -> bf_uint64_t
         {
-            bf_status_t ret{};
-            bf_uint64_t value{};
+            bf_uint64_t mut_val{};
 
             if (bsl::unlikely_assert(!msr)) {
                 bsl::error() << "invalid msr\n" << bsl::here();
                 return bf_uint64_t::failure();
             }
 
-            ret = bf_intrinsic_op_rdmsr_impl(m_hndl.get(), msr.get(), value.data());
+            bf_status_t::value_type const ret{
+                bf_intrinsic_op_rdmsr_impl(m_hndl.get(), msr.get(), mut_val.data())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_intrinsic_op_rdmsr failed with status "    // --
                              << bsl::hex(ret)                                  // --
@@ -1710,7 +1335,7 @@ namespace syscall
                 return bf_uint64_t::failure();
             }
 
-            return value;
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -1731,8 +1356,6 @@ namespace syscall
         bf_intrinsic_op_wrmsr(bf_uint32_t const &msr, bf_uint64_t const &value) noexcept
             -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!msr)) {
                 bsl::error() << "invalid msr\n" << bsl::here();
                 return bsl::errc_invalid_argument;
@@ -1743,7 +1366,8 @@ namespace syscall
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_intrinsic_op_wrmsr_impl(m_hndl.get(), msr.get(), value.get());
+            bf_status_t::value_type const ret{
+                bf_intrinsic_op_wrmsr_impl(m_hndl.get(), msr.get(), value.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_intrinsic_op_wrmsr failed with status "    // --
                              << bsl::hex(ret)                                  // --
@@ -1770,8 +1394,6 @@ namespace syscall
         bf_intrinsic_op_invlpga(bf_uint64_t const &addr, bf_uint64_t const &asid) noexcept
             -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!addr)) {
                 bsl::error() << "invalid addr\n" << bsl::here();
                 return bsl::errc_invalid_argument;
@@ -1782,7 +1404,8 @@ namespace syscall
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_intrinsic_op_invlpga_impl(m_hndl.get(), addr.get(), asid.get());
+            bf_status_t::value_type const ret{
+                bf_intrinsic_op_invlpga_impl(m_hndl.get(), addr.get(), asid.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_intrinsic_op_invlpga failed with status "    // --
                              << bsl::hex(ret)                                    // --
@@ -1810,8 +1433,6 @@ namespace syscall
         bf_intrinsic_op_invept(bf_uint64_t const &eptp, bf_uint64_t const &type) noexcept
             -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!eptp)) {
                 bsl::error() << "invalid eptp\n" << bsl::here();
                 return bsl::errc_invalid_argument;
@@ -1822,7 +1443,8 @@ namespace syscall
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_intrinsic_op_invept_impl(m_hndl.get(), eptp.get(), type.get());
+            bf_status_t::value_type const ret{
+                bf_intrinsic_op_invept_impl(m_hndl.get(), eptp.get(), type.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_intrinsic_op_invept failed with status "    // --
                              << bsl::hex(ret)                                   // --
@@ -1852,8 +1474,6 @@ namespace syscall
             bf_uint64_t const &addr, bf_uint16_t const &vpid, bf_uint64_t const &type) noexcept
             -> bsl::errc_type
         {
-            bf_status_t ret{};
-
             if (bsl::unlikely_assert(!addr)) {
                 bsl::error() << "invalid addr\n" << bsl::here();
                 return bsl::errc_invalid_argument;
@@ -1869,7 +1489,8 @@ namespace syscall
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_intrinsic_op_invvpid_impl(m_hndl.get(), addr.get(), vpid.get(), type.get());
+            bf_status_t::value_type const ret{
+                bf_intrinsic_op_invvpid_impl(m_hndl.get(), addr.get(), vpid.get(), type.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_intrinsic_op_invvpid failed with status "    // --
                              << bsl::hex(ret)                                    // --
@@ -1891,22 +1512,22 @@ namespace syscall
         ///     into the direct map of the VM.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param phys The physical address of the resulting page
+        ///   @param mut_phys The physical address of the resulting page
         ///   @return Returns a pointer to the newly allocated memory on success,
         ///     or a nullptr on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_mem_op_alloc_page(bf_uint64_t &phys) noexcept -> void *
+        bf_mem_op_alloc_page(bf_uint64_t &mut_phys) noexcept -> void *
         {
-            void *ptr{};
-            bf_status_t ret{};
+            void *pmut_mut_ptr{};
 
-            if (bsl::unlikely_assert(!phys)) {
-                bsl::error() << "invalid phys\n" << bsl::here();
+            if (bsl::unlikely_assert(!mut_phys)) {
+                bsl::error() << "invalid mut_phys\n" << bsl::here();
                 return nullptr;
             }
 
-            ret = bf_mem_op_alloc_page_impl(m_hndl.get(), &ptr, phys.data());
+            bf_status_t::value_type const ret{
+                bf_mem_op_alloc_page_impl(m_hndl.get(), &pmut_mut_ptr, mut_phys.data())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_mem_op_alloc_page failed with status "    // --
                              << bsl::hex(ret)                                 // --
@@ -1916,7 +1537,7 @@ namespace syscall
                 return nullptr;
             }
 
-            return ptr;
+            return pmut_mut_ptr;
         }
 
         /// <!-- description -->
@@ -1930,8 +1551,8 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_mem_op_alloc_page() noexcept -> void *
         {
-            bf_uint64_t ignored{};
-            return this->bf_mem_op_alloc_page(ignored);
+            bf_uint64_t mut_ignored{};
+            return this->bf_mem_op_alloc_page(mut_ignored);
         }
 
         /// <!-- description -->
@@ -1940,21 +1561,19 @@ namespace syscall
         ///     it.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param virt The virtual address of the page to free
+        ///   @param pmut_virt The virtual address of the page to free
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_mem_op_free_page(void *const virt) noexcept -> bsl::errc_type
+        bf_mem_op_free_page(void *const pmut_virt) noexcept -> bsl::errc_type
         {
-            bf_status_t ret{};
-
-            if (bsl::unlikely_assert(nullptr == virt)) {
+            if (bsl::unlikely_assert(nullptr == pmut_virt)) {
                 bsl::error() << "virt is a nullptr\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_mem_op_free_page_impl(m_hndl.get(), virt);
+            bf_status_t::value_type const ret{bf_mem_op_free_page_impl(m_hndl.get(), pmut_virt)};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_mem_op_free_page failed with status "    // --
                              << bsl::hex(ret)                                // --
@@ -1985,15 +1604,14 @@ namespace syscall
         ///
         /// <!-- inputs/outputs -->
         ///   @param size The total number of bytes to allocate
-        ///   @param phys The physical address of the resulting memory
+        ///   @param mut_phys The physical address of the resulting memory
         ///   @return Returns a pointer to the newly allocated memory on success,
         ///     or a nullptr on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_mem_op_alloc_huge(bf_uint64_t const &size, bf_uint64_t &phys) noexcept -> void *
+        bf_mem_op_alloc_huge(bf_uint64_t const &size, bf_uint64_t &mut_phys) noexcept -> void *
         {
-            void *ptr{};
-            bf_status_t ret{};
+            void *pmut_mut_ptr{};
 
             if (bsl::unlikely_assert(!size)) {
                 bsl::error() << "invalid size\n" << bsl::here();
@@ -2005,12 +1623,13 @@ namespace syscall
                 return nullptr;
             }
 
-            if (bsl::unlikely_assert(!phys)) {
-                bsl::error() << "invalid phys\n" << bsl::here();
+            if (bsl::unlikely_assert(!mut_phys)) {
+                bsl::error() << "invalid mut_phys\n" << bsl::here();
                 return nullptr;
             }
 
-            ret = bf_mem_op_alloc_huge_impl(m_hndl.get(), size.get(), &ptr, phys.data());
+            bf_status_t::value_type const ret{bf_mem_op_alloc_huge_impl(
+                m_hndl.get(), size.get(), &pmut_mut_ptr, mut_phys.data())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_mem_op_alloc_huge failed with status "    // --
                              << bsl::hex(ret)                                 // --
@@ -2020,7 +1639,7 @@ namespace syscall
                 return nullptr;
             }
 
-            return ptr;
+            return pmut_mut_ptr;
         }
 
         /// <!-- description -->
@@ -2047,8 +1666,8 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_mem_op_alloc_huge(bf_uint64_t const &size) noexcept -> void *
         {
-            bf_uint64_t ignored{};
-            return this->bf_mem_op_alloc_huge(size, ignored);
+            bf_uint64_t mut_ignored{};
+            return this->bf_mem_op_alloc_huge(size, mut_ignored);
         }
 
         /// <!-- description -->
@@ -2057,21 +1676,19 @@ namespace syscall
         ///     it.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param virt The virtual address of the memory to free
+        ///   @param pmut_virt The virtual address of the memory to free
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_mem_op_free_huge(void *const virt) noexcept -> bsl::errc_type
+        bf_mem_op_free_huge(void *const pmut_virt) noexcept -> bsl::errc_type
         {
-            bf_status_t ret{};
-
-            if (bsl::unlikely_assert(nullptr == virt)) {
+            if (bsl::unlikely_assert(nullptr == pmut_virt)) {
                 bsl::error() << "virt is a nullptr\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            ret = bf_mem_op_free_huge_impl(m_hndl.get(), virt);
+            bf_status_t::value_type const ret{bf_mem_op_free_huge_impl(m_hndl.get(), pmut_virt)};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_mem_op_free_huge failed with status "    // --
                              << bsl::hex(ret)                                // --
@@ -2108,15 +1725,15 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_mem_op_alloc_heap(bf_uint64_t const &size) noexcept -> void *
         {
-            void *ptr{};
-            bf_status_t ret{};
+            void *pmut_mut_ptr{};
 
             if (bsl::unlikely_assert(!size)) {
                 bsl::error() << "invalid size\n" << bsl::here();
                 return nullptr;
             }
 
-            ret = bf_mem_op_alloc_heap_impl(m_hndl.get(), size.get(), &ptr);
+            bf_status_t::value_type const ret{
+                bf_mem_op_alloc_heap_impl(m_hndl.get(), size.get(), &pmut_mut_ptr)};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_mem_op_alloc_heap failed with status "    // --
                              << bsl::hex(ret)                                 // --
@@ -2126,7 +1743,7 @@ namespace syscall
                 return nullptr;
             }
 
-            return ptr;
+            return pmut_mut_ptr;
         }
 
         // ---------------------------------------------------------------------
@@ -2150,28 +1767,24 @@ namespace syscall
         bf_read_phys(bf_uint64_t const &phys) noexcept -> bsl::safe_integral<T>
         {
             static_assert(bsl::is_unsigned<T>::value);
-            bsl::safe_uintmax virt{};
 
-            if (bsl::unlikely_assert(!phys)) {
+            if (bsl::unlikely_assert(phys.is_zero_or_invalid())) {
                 bsl::error() << "invalid phys\n" << bsl::here();
                 return bsl::safe_integral<T>::failure();
             }
 
-            if (bsl::unlikely_assert(phys.is_zero())) {
-                bsl::error() << "phys is a nullptr\n" << bsl::here();
-                return bsl::safe_integral<T>::failure();
-            }
-
-            virt = phys + HYPERVISOR_EXT_DIRECT_MAP_ADDR;
+            auto const virt{phys + HYPERVISOR_EXT_DIRECT_MAP_ADDR};
             if (bsl::unlikely_assert(!virt)) {
                 bsl::error() << "bf_read_phys failed due to invalid physical address "    // --
-                             << bsl::hex(phys) << bsl::endl                               // --
+                             << bsl::hex(phys)                                            // --
+                             << bsl::endl                                                 // --
                              << bsl::here();
 
                 return bsl::safe_integral<T>::failure();
             }
 
-            return bsl::safe_integral<T>{*bsl::to_ptr<T *>(virt)};
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+            return bsl::safe_integral<T>{*reinterpret_cast<T *>(virt.get())};
         }
 
         /// <!-- description -->
@@ -2190,15 +1803,9 @@ namespace syscall
             -> bsl::errc_type
         {
             static_assert(bsl::is_unsigned<T>::value);
-            bsl::safe_uintmax virt{};
 
-            if (bsl::unlikely_assert(!phys)) {
+            if (bsl::unlikely_assert(phys.is_zero_or_invalid())) {
                 bsl::error() << "invalid phys\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely_assert(phys.is_zero())) {
-                bsl::error() << "phys is a nullptr\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
@@ -2207,80 +1814,19 @@ namespace syscall
                 return bsl::errc_invalid_argument;
             }
 
-            virt = phys + HYPERVISOR_EXT_DIRECT_MAP_ADDR;
+            auto const virt{phys + HYPERVISOR_EXT_DIRECT_MAP_ADDR};
             if (bsl::unlikely_assert(!virt)) {
                 bsl::error() << "bf_write_phys failed due to invalid physical address "    // --
-                             << bsl::hex(phys) << bsl::endl                                // --
+                             << bsl::hex(phys)                                             // --
+                             << bsl::endl                                                  // --
                              << bsl::here();
 
                 return bsl::errc_failure;
             }
 
-            *bsl::to_ptr<T *>(virt) = val.get();
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+            *reinterpret_cast<T *>(virt.get()) = val.get();
             return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Performs a virtual address to physical address translation.
-        ///     Note that this function only works on direct map memory, which
-        ///     includes direct map addresses, allocated pages and allocated
-        ///     huge memory.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param virt the virtual address to convert
-        ///   @return Returns the resulting physical address
-        ///
-        [[nodiscard]] static constexpr auto
-        bf_virt_to_phys(void *const virt) noexcept -> bf_uint64_t
-        {
-            bsl::safe_uintmax phys{};
-
-            if (bsl::unlikely_assert(nullptr == virt)) {
-                bsl::error() << "invalid virt\n" << bsl::here();
-                return bf_uint64_t::failure();
-            }
-
-            phys = bsl::to_umax(virt) - HYPERVISOR_EXT_DIRECT_MAP_ADDR;
-            if (bsl::unlikely(!phys)) {
-                bsl::error() << "bf_virt_to_phys arithmetic overflowed\n" << bsl::here();
-                return bf_uint64_t::failure();
-            }
-
-            return phys;
-        }
-
-        /// <!-- description -->
-        ///   @brief Performs a physical address to virtual address translation.
-        ///     Note that this function only works on direct map memory, which
-        ///     includes direct map addresses, allocated pages and allocated
-        ///     huge memory.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param phys the physical address to convert
-        ///   @return Returns the resulting virtual address
-        ///
-        [[nodiscard]] static constexpr auto
-        bf_phys_to_virt(bf_uint64_t const &phys) noexcept -> void *
-        {
-            bsl::safe_uintmax virt{};
-
-            if (bsl::unlikely_assert(!phys)) {
-                bsl::error() << "invalid phys\n" << bsl::here();
-                return nullptr;
-            }
-
-            if (bsl::unlikely_assert(phys.is_zero())) {
-                bsl::error() << "phys is a nullptr\n" << bsl::here();
-                return nullptr;
-            }
-
-            virt = phys + HYPERVISOR_EXT_DIRECT_MAP_ADDR;
-            if (bsl::unlikely(!virt)) {
-                bsl::error() << "bf_phys_to_virt arithmetic overflowed\n" << bsl::here();
-                return nullptr;
-            }
-
-            return bsl::to_ptr<void *>(virt);
         }
     };
 }

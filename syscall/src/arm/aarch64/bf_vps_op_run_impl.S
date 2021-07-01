@@ -33,7 +33,7 @@ bf_vps_op_run_impl:
 /*
     mov r10, rcx
 
-    mov rax, 0x664200000006000D
+    mov rax, 0x6642000000060006
     syscall
 */
     ret

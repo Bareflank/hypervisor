@@ -37,7 +37,7 @@
  *   @param base_virt provide the base virtual address that the page pool
  *     was mapped to.
  *   @param addr where to store the resulting addr of the page pool
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 get_mk_page_pool_addr(

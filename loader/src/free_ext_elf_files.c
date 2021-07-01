@@ -25,26 +25,26 @@
  */
 
 #include <constants.h>
+#include <elf_file_t.h>
 #include <platform.h>
-#include <span_t.h>
 #include <types.h>
 
 /**
  * <!-- description -->
- *   @brief Releases a previously allocated span_t that was allocated
+ *   @brief Releases a previously allocated elf_file_t that was allocated
  *     using the alloc_and_copy_ext_elf_files function.
  *
  * <!-- inputs/outputs -->
- *   @param ext_elf_files the span_t to free.
+ *   @param ext_elf_files the elf_file_t to free.
  */
 void
-free_ext_elf_files(struct span_t *const ext_elf_files)
+free_ext_elf_files(struct elf_file_t *const ext_elf_files)
 {
-    uint64_t idx;
+    uint64_t i;
 
-    for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
-        struct span_t *const file = &ext_elf_files[idx];
+    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_EXTENSIONS; ++i) {
+        struct elf_file_t *const file = &ext_elf_files[i];
         platform_free(file->addr, file->size);
-        platform_memset(file, 0, sizeof(struct span_t));
+        platform_memset(file, 0, sizeof(struct elf_file_t));
     }
 }

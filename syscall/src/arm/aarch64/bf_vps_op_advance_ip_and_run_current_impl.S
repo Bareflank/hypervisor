@@ -31,7 +31,7 @@
 bf_vps_op_advance_ip_and_run_current_impl:
 
 /*
-    mov rax, 0x6642000000060010
+    mov rax, 0x6642000000060009
     syscall
 */
     ret

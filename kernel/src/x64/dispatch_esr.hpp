@@ -215,7 +215,7 @@ namespace mk
     ///
     constexpr void
     dispatch_esr_dump_with_segment(
-        bsl::string_view const name,
+        bsl::string_view const &name,
         bsl::safe_uintmax const &val,
         bsl::safe_uintmax const &seg) noexcept
     {
@@ -233,31 +233,33 @@ namespace mk
     ///     function will dispatch exceptions as needed.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param page_pool the page_pool_t to use
-    ///   @param ext the extension that made the syscall
-    ///   @param intrinsic the intrinsics to use
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_page_pool the page_pool_t to use
+    ///   @param mut_intrinsic the intrinsics to use
+    ///   @param pmut_ext the extension that made the syscall
     ///   @return Returns bsl::exit_success if the exception was handled,
     ///     bsl::exit_failure otherwise
     ///
     [[nodiscard]] constexpr auto
     dispatch_esr(
-        tls_t &tls, page_pool_t &page_pool, intrinsic_t &intrinsic, ext_t *const ext) noexcept
-        -> bsl::exit_code
+        tls_t &mut_tls,
+        page_pool_t &mut_page_pool,
+        intrinsic_t &mut_intrinsic,
+        ext_t *const pmut_ext) noexcept -> bsl::exit_code
     {
-        bsl::finally reset_on_exit{[&tls]() noexcept -> void {
+        bsl::finally mut_reset_on_exit{[&mut_tls]() noexcept -> void {
             /// NOTE:
             /// - This tells our spinlock_ts that we are no longer in an ESR,
             ///   which is needed to ensure deadlock detection is handled
             ///   properly.
             ///
 
-            tls.esr_ip = {};
+            mut_tls.esr_ip = {};
         }};
 
-        switch (tls.esr_vector) {
+        switch (mut_tls.esr_vector) {
             case EXCEPTION_VECTOR_2.get(): {
-                if (bsl::likely(dispatch_esr_nmi(tls, intrinsic))) {
+                if (bsl::likely(dispatch_esr_nmi(mut_tls, mut_intrinsic))) {
                     return bsl::exit_success;
                 }
 
@@ -265,7 +267,7 @@ namespace mk
             }
 
             case EXCEPTION_VECTOR_14.get(): {
-                if (bsl::likely(dispatch_esr_page_fault(tls, page_pool, ext))) {
+                if (bsl::likely(dispatch_esr_page_fault(mut_tls, mut_page_pool, pmut_ext))) {
                     return bsl::exit_success;
                 }
 
@@ -278,15 +280,11 @@ namespace mk
         }
 
         bsl::print() << bsl::red << "...<EXCEPTION>\n\n";
-        bsl::print() << bsl::mag << vector_to_name(tls.esr_vector) << " [";
+        bsl::print() << bsl::mag << vector_to_name(bsl::to_umax(mut_tls.esr_vector)) << " [";
         bsl::print() << bsl::cyn << "ec: ";
-        bsl::print() << bsl::rst << bsl::hex(bsl::to_u8_unsafe(tls.esr_error_code));
+        bsl::print() << bsl::rst << bsl::hex(bsl::to_u8_unsafe(mut_tls.esr_error_code));
         bsl::print() << bsl::mag << "] dump: ";
         bsl::print() << bsl::rst << bsl::endl;
-
-        if constexpr (BSL_DEBUG_LEVEL == bsl::CRITICAL_ONLY) {
-            return bsl::exit_failure;
-        }
 
         /// Header
         ///
@@ -307,8 +305,10 @@ namespace mk
         /// IP/SP
         ///
 
-        dispatch_esr_dump_with_segment("rip", tls.esr_ip, tls.esr_cs);
-        dispatch_esr_dump_with_segment("rsp", tls.esr_sp, tls.esr_ss);
+        dispatch_esr_dump_with_segment(
+            "rip", bsl::to_umax(mut_tls.esr_ip), bsl::to_umax(mut_tls.esr_cs));
+        dispatch_esr_dump_with_segment(
+            "rsp", bsl::to_umax(mut_tls.esr_sp), bsl::to_umax(mut_tls.esr_ss));
 
         /// Flags
         ///
@@ -316,7 +316,7 @@ namespace mk
         bsl::print() << bsl::ylw << "+---------------------------------------------+";
         bsl::print() << bsl::rst << bsl::endl;
 
-        dispatch_esr_dump("rflags", tls.esr_rflags);
+        dispatch_esr_dump("rflags", bsl::to_umax(mut_tls.esr_rflags));
 
         /// General Purpose Registers
         ///
@@ -324,21 +324,21 @@ namespace mk
         bsl::print() << bsl::ylw << "+---------------------------------------------+";
         bsl::print() << bsl::rst << bsl::endl;
 
-        dispatch_esr_dump("rax", tls.esr_rax);
-        dispatch_esr_dump("rbx", tls.esr_rbx);
-        dispatch_esr_dump("rcx", tls.esr_rcx);
-        dispatch_esr_dump("rdx", tls.esr_rdx);
-        dispatch_esr_dump("rbp", tls.esr_rbp);
-        dispatch_esr_dump("rsi", tls.esr_rsi);
-        dispatch_esr_dump("rdi", tls.esr_rdi);
-        dispatch_esr_dump("r8", tls.esr_r8);
-        dispatch_esr_dump("r9", tls.esr_r9);
-        dispatch_esr_dump("r10", tls.esr_r10);
-        dispatch_esr_dump("r11", tls.esr_r11);
-        dispatch_esr_dump("r12", tls.esr_r12);
-        dispatch_esr_dump("r13", tls.esr_r13);
-        dispatch_esr_dump("r14", tls.esr_r14);
-        dispatch_esr_dump("r15", tls.esr_r15);
+        dispatch_esr_dump("rax", bsl::to_umax(mut_tls.esr_rax));
+        dispatch_esr_dump("rbx", bsl::to_umax(mut_tls.esr_rbx));
+        dispatch_esr_dump("rcx", bsl::to_umax(mut_tls.esr_rcx));
+        dispatch_esr_dump("rdx", bsl::to_umax(mut_tls.esr_rdx));
+        dispatch_esr_dump("rbp", bsl::to_umax(mut_tls.esr_rbp));
+        dispatch_esr_dump("rsi", bsl::to_umax(mut_tls.esr_rsi));
+        dispatch_esr_dump("rdi", bsl::to_umax(mut_tls.esr_rdi));
+        dispatch_esr_dump("r8", bsl::to_umax(mut_tls.esr_r8));
+        dispatch_esr_dump("r9", bsl::to_umax(mut_tls.esr_r9));
+        dispatch_esr_dump("r10", bsl::to_umax(mut_tls.esr_r10));
+        dispatch_esr_dump("r11", bsl::to_umax(mut_tls.esr_r11));
+        dispatch_esr_dump("r12", bsl::to_umax(mut_tls.esr_r12));
+        dispatch_esr_dump("r13", bsl::to_umax(mut_tls.esr_r13));
+        dispatch_esr_dump("r14", bsl::to_umax(mut_tls.esr_r14));
+        dispatch_esr_dump("r15", bsl::to_umax(mut_tls.esr_r15));
 
         /// Control Registers
         ///
@@ -346,10 +346,10 @@ namespace mk
         bsl::print() << bsl::ylw << "+---------------------------------------------+";
         bsl::print() << bsl::rst << bsl::endl;
 
-        dispatch_esr_dump("cr0", tls.esr_cr0);
-        dispatch_esr_dump("cr2", tls.esr_pf_addr);
-        dispatch_esr_dump("cr3", tls.esr_cr3);
-        dispatch_esr_dump("cr4", tls.esr_cr4);
+        dispatch_esr_dump("cr0", bsl::to_umax(mut_tls.esr_cr0));
+        dispatch_esr_dump("cr2", bsl::to_umax(mut_tls.esr_pf_addr));
+        dispatch_esr_dump("cr3", bsl::to_umax(mut_tls.esr_cr3));
+        dispatch_esr_dump("cr4", bsl::to_umax(mut_tls.esr_cr4));
 
         /// TLS State
         ///
@@ -357,14 +357,14 @@ namespace mk
         bsl::print() << bsl::ylw << "+---------------------------------------------+";
         bsl::print() << bsl::rst << bsl::endl;
 
-        dispatch_esr_dump("ppid", tls.ppid);
-        dispatch_esr_dump("online_pps", tls.online_pps);
-        dispatch_esr_dump("active_extid", tls.active_extid);
-        dispatch_esr_dump("active_vmid", tls.active_vmid);
-        dispatch_esr_dump("active_vpid", tls.active_vpid);
-        dispatch_esr_dump("active_vpsid", tls.active_vpsid);
-        dispatch_esr_dump("sp", tls.sp);
-        dispatch_esr_dump("tp", tls.tp);
+        dispatch_esr_dump("ppid", bsl::to_umax(mut_tls.ppid));
+        dispatch_esr_dump("online_pps", bsl::to_umax(mut_tls.online_pps));
+        dispatch_esr_dump("active_extid", bsl::to_umax(mut_tls.active_extid));
+        dispatch_esr_dump("active_vmid", bsl::to_umax(mut_tls.active_vmid));
+        dispatch_esr_dump("active_vpid", bsl::to_umax(mut_tls.active_vpid));
+        dispatch_esr_dump("active_vpsid", bsl::to_umax(mut_tls.active_vpsid));
+        dispatch_esr_dump("sp", bsl::to_umax(mut_tls.sp));
+        dispatch_esr_dump("tp", bsl::to_umax(mut_tls.tp));
 
         /// Footer
         ///

@@ -31,7 +31,7 @@
 bf_callback_op_register_fail_impl:
 
 /*
-    mov rax, 0x6642000000030004
+    mov rax, 0x6642000000030002
     syscall
 */
 

@@ -27,8 +27,8 @@
 #ifndef ALLOC_AND_COPY_MK_ELF_SEGMENTS_H
 #define ALLOC_AND_COPY_MK_ELF_SEGMENTS_H
 
+#include <elf_file_t.h>
 #include <elf_segment_t.h>
-#include <span_t.h>
 
 /**
  * <!-- description -->
@@ -46,9 +46,9 @@
  * <!-- inputs/outputs -->
  *   @param mk_elf_file the ELF file to copy the segments from
  *   @param mk_elf_segments where to copy the ELF segments too
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t alloc_and_copy_mk_elf_segments(
-    struct span_t const *const mk_elf_file, struct elf_segment_t *const mk_elf_segments);
+    struct elf_file_t const *const mk_elf_file, struct elf_segment_t *const mk_elf_segments);
 
 #endif

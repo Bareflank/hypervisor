@@ -27,17 +27,7 @@ add_executable(kernel)
 # Includes
 # ------------------------------------------------------------------------------
 
-target_include_directories(kernel PRIVATE
-    include
-    src
-)
-
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
-    target_include_directories(kernel PRIVATE
-        include/x64
-        src/x64
-    )
-
     if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
         target_include_directories(kernel PRIVATE
             include/x64/amd
@@ -51,6 +41,11 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
             src/x64/intel
         )
     endif()
+
+    target_include_directories(kernel PRIVATE
+        include/x64
+        src/x64
+    )
 endif()
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
@@ -59,6 +54,11 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
         src/arm/aarch64
     )
 endif()
+
+target_include_directories(kernel PRIVATE
+    include
+    src
+)
 
 # ------------------------------------------------------------------------------
 # Headers
@@ -82,23 +82,18 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/include/serial_write_hex.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/vmexit_loop_entry.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/yield.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/bfelf/elf64_ehdr_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/bfelf/elf64_phdr_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/bfelf/elf64_shdr_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/debug_ring_write.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_esr_page_fault.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_callback_op_failure.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_callback_op.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_control_op_failure.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_control_op.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_debug_op_failure.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_debug_op.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_failure.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_handle_op_failure.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_handle_op.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_mem_op_failure.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_mem_op.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_vm_op_failure.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_vm_op.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_vp_op_failure.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_vp_op.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_vps_op.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ext_pool_t.hpp
@@ -116,8 +111,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/src/vp_pool_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vp_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vps_pool_t.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bfelf/elf64_ehdr_t.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bfelf/elf64_phdr_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/bsl/cstdio.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/print_thread_id.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/putc_stderr.hpp
@@ -262,8 +255,8 @@ target_link_libraries(kernel PRIVATE
 # Install
 # ------------------------------------------------------------------------------
 
-if(CMAKE_BUILD_TYPE STREQUAL RELEASE OR CMAKE_BUILD_TYPE STREQUAL MINSIZEREL)
-    add_custom_command(TARGET kernel POST_BUILD COMMAND ${CMAKE_STRIP} kernel)
-endif()
+# if(CMAKE_BUILD_TYPE STREQUAL RELEASE OR CMAKE_BUILD_TYPE STREQUAL MINSIZEREL)
+#     add_custom_command(TARGET kernel POST_BUILD COMMAND ${CMAKE_STRIP} kernel)
+# endif()
 
 install(TARGETS kernel DESTINATION bin)

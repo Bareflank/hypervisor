@@ -43,37 +43,43 @@ namespace example
     {
         bsl::ut_scenario{"intrinsic_cpuid_impl invalid inputs doesn't crash"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                gs_t gs{};
-                bsl::safe_uintmax rax{};
-                bsl::safe_uintmax rbx{};
-                bsl::safe_uintmax rcx{};
-                bsl::safe_uintmax rdx{};
+                gs_t const gs{};
+                bsl::safe_uintmax mut_rax{};
+                bsl::safe_uintmax mut_rbx{};
+                bsl::safe_uintmax mut_rcx{};
+                bsl::safe_uintmax mut_rdx{};
                 bsl::ut_when{} = [&]() noexcept {
-                    intrinsic_cpuid_impl(nullptr, rax.data(), rbx.data(), rcx.data(), rdx.data());
-                    intrinsic_cpuid_impl(&gs, nullptr, rbx.data(), rcx.data(), rdx.data());
-                    intrinsic_cpuid_impl(&gs, rax.data(), nullptr, rcx.data(), rdx.data());
-                    intrinsic_cpuid_impl(&gs, rax.data(), rbx.data(), nullptr, rdx.data());
-                    intrinsic_cpuid_impl(&gs, rax.data(), rbx.data(), rcx.data(), nullptr);
+                    intrinsic_cpuid_impl(
+                        nullptr, mut_rax.data(), mut_rbx.data(), mut_rcx.data(), mut_rdx.data());
+                    intrinsic_cpuid_impl(
+                        &gs, nullptr, mut_rbx.data(), mut_rcx.data(), mut_rdx.data());
+                    intrinsic_cpuid_impl(
+                        &gs, mut_rax.data(), nullptr, mut_rcx.data(), mut_rdx.data());
+                    intrinsic_cpuid_impl(
+                        &gs, mut_rax.data(), mut_rbx.data(), nullptr, mut_rdx.data());
+                    intrinsic_cpuid_impl(
+                        &gs, mut_rax.data(), mut_rbx.data(), mut_rcx.data(), nullptr);
                 };
             };
         };
 
         bsl::ut_scenario{"intrinsic_cpuid_impl"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                gs_t gs{};
-                bsl::safe_uintmax rax{};
-                bsl::safe_uintmax rbx{};
-                bsl::safe_uintmax rcx{};
-                bsl::safe_uintmax rdx{};
+                gs_t mut_gs{};
+                bsl::safe_uintmax mut_rax{};
+                bsl::safe_uintmax mut_rbx{};
+                bsl::safe_uintmax mut_rcx{};
+                bsl::safe_uintmax mut_rdx{};
                 constexpr auto expected_result{42_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    gs.cpuid_val = expected_result;
-                    intrinsic_cpuid_impl(&gs, rax.data(), rbx.data(), rcx.data(), rdx.data());
+                    mut_gs.cpuid_val = expected_result;
+                    intrinsic_cpuid_impl(
+                        &mut_gs, mut_rax.data(), mut_rbx.data(), mut_rcx.data(), mut_rdx.data());
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(rax == expected_result);
-                        bsl::ut_check(rbx == expected_result);
-                        bsl::ut_check(rcx == expected_result);
-                        bsl::ut_check(rdx == expected_result);
+                        bsl::ut_check(mut_rax == expected_result);
+                        bsl::ut_check(mut_rbx == expected_result);
+                        bsl::ut_check(mut_rcx == expected_result);
+                        bsl::ut_check(mut_rdx == expected_result);
                     };
                 };
             };

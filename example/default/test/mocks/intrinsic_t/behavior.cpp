@@ -42,13 +42,11 @@ namespace example
     {
         bsl::ut_scenario{"initialize fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                intrinsic_t intrinsic{};
-                gs_t gs{};
-                tls_t tls{};
+                intrinsic_t mut_intrinsic{};
                 bsl::ut_when{} = [&]() noexcept {
-                    intrinsic.set_initialize(bsl::errc_failure);
+                    mut_intrinsic.set_initialize(bsl::errc_failure);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!intrinsic.initialize(gs, tls));
+                        bsl::ut_check(!mut_intrinsic.initialize({}, {}));
                     };
                 };
             };
@@ -56,22 +54,18 @@ namespace example
 
         bsl::ut_scenario{"initialize success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                intrinsic_t intrinsic{};
-                gs_t gs{};
-                tls_t tls{};
+                intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(intrinsic.initialize(gs, tls));
+                    bsl::ut_check(mut_intrinsic.initialize({}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"release executes"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                intrinsic_t intrinsic{};
-                gs_t gs{};
-                tls_t tls{};
+                intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
-                    intrinsic.release(gs, tls);
+                    mut_intrinsic.release({}, {});
                 };
             };
         };

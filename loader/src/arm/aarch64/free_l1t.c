@@ -42,10 +42,10 @@
 void
 free_l1t(struct l1t_t *const l1t)
 {
-    uint64_t idx;
+    uint64_t i;
 
-    for (idx = ((uint64_t)0); idx < LOADER_NUM_L1T_ENTRIES; ++idx) {
-        struct l2t_t *const l2t = l1t->tables[idx];
+    for (i = ((uint64_t)0); i < LOADER_NUM_L1T_ENTRIES; ++i) {
+        struct l2t_t *const l2t = l1t->tables[i];
         if (((void *)0) != l2t) {
             free_l2t(l2t);
             platform_free(l2t, sizeof(struct l2t_t));

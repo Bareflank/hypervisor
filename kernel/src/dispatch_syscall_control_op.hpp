@@ -40,18 +40,17 @@ namespace mk
     /// <!-- inputs/outputs -->
     ///   @param tls the current TLS block
     ///   @param ext the extension that made the syscall
-    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    ///     otherwise
+    ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
-    dispatch_syscall_control_op(tls_t &tls, ext_t &ext) noexcept -> bsl::errc_type
+    dispatch_syscall_control_op(tls_t const &tls, ext_t const &ext) noexcept -> syscall::bf_status_t
     {
-        switch (syscall::bf_syscall_index(tls.ext_syscall).get()) {
+        switch (syscall::bf_syscall_index(bsl::to_umax(tls.ext_syscall)).get()) {
             case syscall::BF_CONTROL_OP_EXIT_IDX_VAL.get(): {
                 return_to_mk(bsl::exit_failure);
 
                 // Unreachable
-                return bsl::errc_success;
+                return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_CONTROL_OP_WAIT_IDX_VAL.get(): {
@@ -63,7 +62,7 @@ namespace mk
                 }
 
                 // Unreachable
-                return bsl::errc_success;
+                return syscall::BF_STATUS_SUCCESS;
             }
 
             default: {
@@ -76,8 +75,7 @@ namespace mk
                      << bsl::endl                    //--
                      << bsl::here();                 //--
 
-        tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_UNSUPPORTED.get();
-        return bsl::errc_failure;
+        return syscall::BF_STATUS_FAILURE_UNSUPPORTED;
     }
 }
 

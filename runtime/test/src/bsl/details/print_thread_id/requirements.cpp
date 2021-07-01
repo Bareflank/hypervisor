@@ -40,7 +40,7 @@ main() noexcept -> bsl::exit_code
 {
     bsl::ut_scenario{"verify noexcept"} = []() noexcept {
         bsl::ut_given{} = []() noexcept {
-            bsl::details::out_type<BSL_DEBUG_LEVEL, bsl::details::out_type_debug> o{};
+            bsl::details::out_type<BSL_DEBUG_LEVEL, bsl::details::out_type_debug> const o{};
             bsl::ut_then{} = []() noexcept {
                 static_assert(noexcept(bsl::details::ut_print_thread_id(o)));
             };

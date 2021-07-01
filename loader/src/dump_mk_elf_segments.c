@@ -39,20 +39,20 @@
 void
 dump_mk_elf_segments(struct elf_segment_t *const segments)
 {
-    uint64_t idx;
+    uint64_t i;
 
     if (((void *)0) == segments) {
         bferror("segments is NULL");
         return;
     }
 
-    for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_SEGMENTS; ++idx) {
-        if (((void *)0) != segments[idx].addr) {
-            bfdebug_d32("mk elf segment", (uint32_t)idx);
-            bfdebug_ptr(" - addr", segments[idx].addr);
-            bfdebug_x64(" - size", segments[idx].size);
-            bfdebug_x64(" - virt", segments[idx].virt);
-            bfdebug_x32(" - flgs", segments[idx].flags);
+    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_SEGMENTS; ++i) {
+        if (((void *)0) != segments[i].addr) {
+            bfdebug_d32("mk elf segment", (uint32_t)i);
+            bfdebug_ptr(" - addr", segments[i].addr);
+            bfdebug_x64(" - size", segments[i].size);
+            bfdebug_x64(" - virt", segments[i].virt);
+            bfdebug_x32(" - flgs", segments[i].flags);
         }
     }
 }

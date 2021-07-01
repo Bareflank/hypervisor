@@ -27,9 +27,9 @@
 namespace mk
 {
     /// @brief stores when ext_main_entry have been executed
-    constinit bool g_ext_main_entry_executed{};
+    constinit bool g_mut_ext_main_entry_executed{};
     /// @brief stores when bf_control_op_exit_impl have been executed
-    constinit bool g_bf_control_op_exit_impl_executed{};
+    constinit bool g_mut_bf_control_op_exit_impl_executed{};
 
     /// <!-- description -->
     ///   @brief Defines a prototype for the _start function
@@ -42,7 +42,7 @@ namespace mk
     extern "C" void
     ext_main_entry() noexcept
     {
-        g_ext_main_entry_executed = true;
+        g_mut_ext_main_entry_executed = true;
     }
 
     /// <!-- description -->
@@ -51,7 +51,7 @@ namespace mk
     extern "C" void
     bf_control_op_exit_impl() noexcept
     {
-        g_bf_control_op_exit_impl_executed = true;
+        g_mut_bf_control_op_exit_impl_executed = true;
     }
 
     /// <!-- description -->
@@ -71,8 +71,8 @@ namespace mk
                 bsl::ut_when{} = []() noexcept {
                     ut_start();
                     bsl::ut_then{} = []() noexcept {
-                        bsl::ut_check(g_ext_main_entry_executed);
-                        bsl::ut_check(g_bf_control_op_exit_impl_executed);
+                        bsl::ut_check(g_mut_ext_main_entry_executed);
+                        bsl::ut_check(g_mut_bf_control_op_exit_impl_executed);
                     };
                 };
             };

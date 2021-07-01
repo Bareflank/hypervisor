@@ -25,9 +25,9 @@
 #ifndef PAGE_T_HPP
 #define PAGE_T_HPP
 
+#include <bsl/array.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
-#include <bsl/details/carray.hpp>
 
 namespace mk
 {
@@ -39,8 +39,11 @@ namespace mk
     struct page_t final
     {
         /// @brief stores the data in the page
-        bsl::details::carray<bsl::uint8, HYPERVISOR_PAGE_SIZE.get()> data;
+        bsl::array<bsl::uint8, HYPERVISOR_PAGE_SIZE.get()> data;
     };
+
+    /// @brief sanity check
+    static_assert(sizeof(page_t) == HYPERVISOR_PAGE_SIZE);
 }
 
 #endif

@@ -40,7 +40,7 @@
  *
  * <!-- inputs/outputs -->
  *   @param mk_args_t the arguments that were passed to the microkernel
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t promote(struct mk_args_t const *const args);
 

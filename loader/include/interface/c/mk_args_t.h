@@ -27,10 +27,10 @@
 #ifndef MK_ARGS_T_H
 #define MK_ARGS_T_H
 
+#include <bfelf/bfelf_elf64_ehdr_t.h>
 #include <constants.h>
 #include <debug_ring_t.h>
 #include <mutable_span_t.h>
-#include <span_t.h>
 #include <state_save_t.h>
 #include <types.h>
 
@@ -60,9 +60,9 @@ struct mk_args_t
     /** @brief stores the location of the debug ring (0x018) */
     struct debug_ring_t *debug_ring;
     /** @brief stores the location of the microkernel's ELF file */
-    struct span_t mk_elf_file;
+    struct bfelf_elf64_ehdr_t const *mk_elf_file;
     /** @brief stores the location of the extension's ELF files */
-    struct span_t ext_elf_files[HYPERVISOR_MAX_EXTENSIONS];
+    struct bfelf_elf64_ehdr_t const *ext_elf_files[HYPERVISOR_MAX_EXTENSIONS];
     /** @brief stores the virtual address of the MK's RPT for this CPU */
     void *rpt;
     /** @brief stores the physical address of the MK's RPT for this CPU */

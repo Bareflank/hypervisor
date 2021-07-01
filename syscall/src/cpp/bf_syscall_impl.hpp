@@ -348,12 +348,12 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto bf_handle_op_open_handle_impl(
-        bf_uint32_t::value_type const reg0_in, bf_uint64_t::value_type *const reg0_out) noexcept
-        -> bf_status_t::value_type;
+        bf_uint32_t::value_type const reg0_in,
+        bf_uint64_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_handle_op_close_handle.
@@ -456,36 +456,36 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
+    ///   @param pmut_reg1_in n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto bf_callback_op_register_bootstrap_impl(
         bf_uint64_t::value_type const reg0_in,
-        bf_callback_handler_bootstrap_t const reg1_in) noexcept -> bf_status_t::value_type;
+        bf_callback_handler_bootstrap_t const pmut_reg1_in) noexcept -> bf_status_t::value_type;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_callback_op_register_vmexit.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
+    ///   @param pmut_reg1_in n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto bf_callback_op_register_vmexit_impl(
-        bf_uint64_t::value_type const reg0_in, bf_callback_handler_vmexit_t const reg1_in) noexcept
-        -> bf_status_t::value_type;
+        bf_uint64_t::value_type const reg0_in,
+        bf_callback_handler_vmexit_t const pmut_reg1_in) noexcept -> bf_status_t::value_type;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_callback_op_register_fail.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
+    ///   @param pmut_reg1_in n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto bf_callback_op_register_fail_impl(
-        bf_uint64_t::value_type const reg0_in, bf_callback_handler_fail_t const reg1_in) noexcept
-        -> bf_status_t::value_type;
+        bf_uint64_t::value_type const reg0_in,
+        bf_callback_handler_fail_t const pmut_reg1_in) noexcept -> bf_status_t::value_type;
 
     // -------------------------------------------------------------------------
     // bf_vm_ops
@@ -496,12 +496,12 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto bf_vm_op_create_vm_impl(
-        bf_uint64_t::value_type const reg0_in, bf_uint16_t::value_type *const reg0_out) noexcept
-        -> bf_status_t::value_type;
+        bf_uint64_t::value_type const reg0_in,
+        bf_uint16_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_vm_op_destroy_vm.
@@ -526,14 +526,14 @@ namespace syscall
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
     ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto bf_vp_op_create_vp_impl(
         bf_uint64_t::value_type const reg0_in,
         bf_uint16_t::value_type const reg1_in,
         bf_uint16_t::value_type const reg2_in,
-        bf_uint16_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type;
+        bf_uint16_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_vp_op_destroy_vp.
@@ -572,14 +572,14 @@ namespace syscall
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
     ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto bf_vps_op_create_vps_impl(
         bf_uint64_t::value_type const reg0_in,
         bf_uint16_t::value_type const reg1_in,
         bf_uint16_t::value_type const reg2_in,
-        bf_uint16_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type;
+        bf_uint16_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_vps_op_destroy_vps.
@@ -606,151 +606,23 @@ namespace syscall
         -> bf_status_t::value_type;
 
     /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_read8.
+    ///   @brief Implements the ABI for bf_vps_op_read_impl.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
     ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
-    extern "C" [[nodiscard]] auto bf_vps_op_read8_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint8_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_read16.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto bf_vps_op_read16_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint16_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_read32.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto bf_vps_op_read32_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint32_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_read64.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto bf_vps_op_read64_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint64_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_write8.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg3_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto bf_vps_op_write8_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint8_t::value_type const reg3_in) noexcept -> bf_status_t::value_type;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_write16.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg3_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto bf_vps_op_write16_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint16_t::value_type const reg3_in) noexcept -> bf_status_t::value_type;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_write32.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg3_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto bf_vps_op_write32_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint32_t::value_type const reg3_in) noexcept -> bf_status_t::value_type;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_write64.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg3_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto bf_vps_op_write64_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint64_t::value_type const reg3_in) noexcept -> bf_status_t::value_type;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_read_reg_impl.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto bf_vps_op_read_reg_impl(
+    extern "C" [[nodiscard]] auto bf_vps_op_read_impl(
         bf_uint64_t::value_type const reg0_in,
         bf_uint16_t::value_type const reg1_in,
         bf_reg_t const reg2_in,
-        bf_uint64_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type;
+        bf_uint64_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type;
 
     /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_write_reg.
+    ///   @brief Implements the ABI for bf_vps_op_write.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
@@ -759,7 +631,7 @@ namespace syscall
     ///   @param reg3_in n/a
     ///   @return n/a
     ///
-    extern "C" [[nodiscard]] auto bf_vps_op_write_reg_impl(
+    extern "C" [[nodiscard]] auto bf_vps_op_write_impl(
         bf_uint64_t::value_type const reg0_in,
         bf_uint16_t::value_type const reg1_in,
         bf_reg_t const reg2_in,
@@ -849,13 +721,13 @@ namespace syscall
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto bf_intrinsic_op_rdmsr_impl(
         bf_uint64_t::value_type const reg0_in,
         bf_uint32_t::value_type const reg1_in,
-        bf_uint64_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type;
+        bf_uint64_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_intrinsic_op_wrmsr.
@@ -924,25 +796,25 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg0_out n/a
-    ///   @param reg1_out n/a
+    ///   @param pmut_reg0_out n/a
+    ///   @param pmut_reg1_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto bf_mem_op_alloc_page_impl(
         bf_uint64_t::value_type const reg0_in,
-        void **const reg0_out,
-        bf_uint64_t::value_type *const reg1_out) noexcept -> bf_status_t::value_type;
+        void **const pmut_reg0_out,
+        bf_uint64_t::value_type *const pmut_reg1_out) noexcept -> bf_status_t::value_type;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_mem_op_free_page.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
+    ///   @param pmut_reg1_in n/a
     ///   @return n/a
     ///
-    extern "C" [[nodiscard]] auto
-    bf_mem_op_free_page_impl(bf_uint64_t::value_type const reg0_in, void *const reg1_in) noexcept
+    extern "C" [[nodiscard]] auto bf_mem_op_free_page_impl(
+        bf_uint64_t::value_type const reg0_in, void *const pmut_reg1_in) noexcept
         -> bf_status_t::value_type;
 
     /// <!-- description -->
@@ -951,26 +823,26 @@ namespace syscall
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
-    ///   @param reg0_out n/a
-    ///   @param reg1_out n/a
+    ///   @param pmut_reg0_out n/a
+    ///   @param pmut_reg1_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto bf_mem_op_alloc_huge_impl(
         bf_uint64_t::value_type const reg0_in,
         bf_uint64_t::value_type const reg1_in,
-        void **const reg0_out,
-        bf_uint64_t::value_type *const reg1_out) noexcept -> bf_status_t::value_type;
+        void **const pmut_reg0_out,
+        bf_uint64_t::value_type *const pmut_reg1_out) noexcept -> bf_status_t::value_type;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_mem_op_free_huge.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
+    ///   @param pmut_reg1_in n/a
     ///   @return n/a
     ///
-    extern "C" [[nodiscard]] auto
-    bf_mem_op_free_huge_impl(bf_uint64_t::value_type const reg0_in, void *const reg1_in) noexcept
+    extern "C" [[nodiscard]] auto bf_mem_op_free_huge_impl(
+        bf_uint64_t::value_type const reg0_in, void *const pmut_reg1_in) noexcept
         -> bf_status_t::value_type;
 
     /// <!-- description -->
@@ -979,13 +851,13 @@ namespace syscall
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto bf_mem_op_alloc_heap_impl(
         bf_uint64_t::value_type const reg0_in,
         bf_uint64_t::value_type const reg1_in,
-        void **const reg0_out) noexcept -> bf_status_t::value_type;
+        void **const pmut_reg0_out) noexcept -> bf_status_t::value_type;
 }
 
 #endif

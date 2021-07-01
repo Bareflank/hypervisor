@@ -95,7 +95,7 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        initialize(tls_t &tls, bsl::safe_uint16 const &i) noexcept -> bsl::errc_type
+        initialize(tls_t const &tls, bsl::safe_uint16 const &i) noexcept -> bsl::errc_type
         {
             bsl::discard(tls);
 
@@ -127,20 +127,21 @@ namespace mk
         ///   @brief Release the vm_t.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page_pool_t to use
-        ///   @param ext_pool the extension pool to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_ext_pool the extension pool to use
         ///   @param vp_pool the VP pool to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
         release(
-            tls_t &tls, page_pool_t &page_pool, ext_pool_t &ext_pool, vp_pool_t &vp_pool) noexcept
-            -> bsl::errc_type
+            tls_t &mut_tls,
+            page_pool_t &mut_page_pool,
+            ext_pool_t &mut_ext_pool,
+            vp_pool_t const &vp_pool) noexcept -> bsl::errc_type
         {
-            bsl::errc_type ret{};
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{mut_tls, m_lock};
 
             if (syscall::BF_ROOT_VMID == m_id) {
                 return bsl::errc_success;
@@ -150,12 +151,11 @@ namespace mk
                 return bsl::errc_success;
             }
 
-            tls.state_reversal_required = true;
-            bsl::finally zombify_on_error{[this]() noexcept -> void {
+            bsl::finally mut_zombify_on_error{[this]() noexcept -> void {
                 this->zombify();
             }};
 
-            auto const vpid{vp_pool.is_assigned_to_vm(tls, m_id)};
+            auto const vpid{vp_pool.is_assigned_to_vm(mut_tls, m_id)};
             if (bsl::unlikely(vpid)) {
                 bsl::error() << "vp "                     // --
                              << bsl::hex(vpid)            // --
@@ -170,7 +170,7 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            auto const active_ppid{this->is_active(tls)};
+            auto const active_ppid{this->is_active(mut_tls)};
             if (bsl::unlikely(active_ppid)) {
                 bsl::error() << "vm "                     // --
                              << bsl::hex(m_id)            // --
@@ -185,17 +185,17 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            ret = ext_pool.signal_vm_destroyed(tls, page_pool, m_id);
+            auto const ret{mut_ext_pool.signal_vm_destroyed(mut_tls, mut_page_pool, m_id)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
+                return ret;
             }
 
             m_allocated = allocated_status_t::deallocated;
             m_id = bsl::safe_uint16::failure();
 
-            zombify_on_error.ignore();
-            return bsl::errc_success;
+            mut_zombify_on_error.ignore();
+            return ret;
         }
 
         /// <!-- description -->
@@ -214,17 +214,16 @@ namespace mk
         ///   @brief Allocates this vm_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page_pool_t to use
-        ///   @param ext_pool the extension pool to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_ext_pool the extension pool to use
         ///   @return Returns ID of the newly allocated vm
         ///
         [[nodiscard]] constexpr auto
-        allocate(tls_t &tls, page_pool_t &page_pool, ext_pool_t &ext_pool) noexcept
+        allocate(tls_t &mut_tls, page_pool_t &mut_page_pool, ext_pool_t &mut_ext_pool) noexcept
             -> bsl::safe_uint16
         {
-            bsl::errc_type ret{};
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{mut_tls, m_lock};
 
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vm_t not initialized\n" << bsl::here();
@@ -251,10 +250,7 @@ namespace mk
                 return bsl::safe_uint16::failure();
             }
 
-            tls.state_reversal_required = true;
-            tls.log_vmid = m_id.get();
-
-            ret = ext_pool.signal_vm_created(tls, page_pool, m_id);
+            auto const ret{mut_ext_pool.signal_vm_created(mut_tls, mut_page_pool, m_id)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::safe_uint16::failure();
@@ -268,20 +264,21 @@ namespace mk
         ///   @brief Deallocates this vm_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page_pool_t to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
         ///   @param vp_pool the VP pool to use
-        ///   @param ext_pool the extension pool to use
+        ///   @param mut_ext_pool the extension pool to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
         deallocate(
-            tls_t &tls, page_pool_t &page_pool, vp_pool_t &vp_pool, ext_pool_t &ext_pool) noexcept
-            -> bsl::errc_type
+            tls_t &mut_tls,
+            page_pool_t &mut_page_pool,
+            vp_pool_t const &vp_pool,
+            ext_pool_t &mut_ext_pool) noexcept -> bsl::errc_type
         {
-            bsl::errc_type ret{};
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{mut_tls, m_lock};
 
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vm_t not initialized\n" << bsl::here();
@@ -318,12 +315,11 @@ namespace mk
                 return bsl::errc_precondition;
             }
 
-            tls.state_reversal_required = true;
-            bsl::finally zombify_on_error{[this]() noexcept -> void {
+            bsl::finally mut_zombify_on_error{[this]() noexcept -> void {
                 this->zombify();
             }};
 
-            auto const vpid{vp_pool.is_assigned_to_vm(tls, m_id)};
+            auto const vpid{vp_pool.is_assigned_to_vm(mut_tls, m_id)};
             if (bsl::unlikely(vpid)) {
                 bsl::error() << "vp "                     // --
                              << bsl::hex(vpid)            // --
@@ -338,7 +334,7 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            auto const active_ppid{this->is_active(tls)};
+            auto const active_ppid{this->is_active(mut_tls)};
             if (bsl::unlikely(active_ppid)) {
                 bsl::error() << "vm "                     // --
                              << bsl::hex(m_id)            // --
@@ -353,16 +349,16 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            ret = ext_pool.signal_vm_destroyed(tls, page_pool, m_id);
+            auto const ret{mut_ext_pool.signal_vm_destroyed(mut_tls, mut_page_pool, m_id)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
+                return ret;
             }
 
             m_allocated = allocated_status_t::deallocated;
 
-            zombify_on_error.ignore();
-            return bsl::errc_success;
+            mut_zombify_on_error.ignore();
+            return ret;
         }
 
         /// <!-- description -->
@@ -376,7 +372,7 @@ namespace mk
                 return;
             }
 
-            if (m_allocated == allocated_status_t::zombie) {
+            if (allocated_status_t::zombie == m_allocated) {
                 return;
             }
 
@@ -436,21 +432,21 @@ namespace mk
         ///   @brief Sets this vm_t as active.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        set_active(tls_t &tls) noexcept -> bsl::errc_type
+        set_active(tls_t &mut_tls) noexcept -> bsl::errc_type
         {
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{mut_tls, m_lock};
 
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vm_t not initialized\n" << bsl::here();
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely(m_allocated != allocated_status_t::allocated)) {
+            if (bsl::unlikely(allocated_status_t::allocated != m_allocated)) {
                 bsl::error() << "vm "                                              // --
                              << bsl::hex(m_id)                                     // --
                              << "'s status is not allocated and cannot be used"    // --
@@ -460,20 +456,20 @@ namespace mk
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely_assert(syscall::BF_INVALID_ID != tls.active_vmid)) {
-                bsl::error() << "vm "                        // --
-                             << bsl::hex(tls.active_vmid)    // --
-                             << " is still active on pp "    // --
-                             << bsl::hex(tls.ppid)           // --
-                             << bsl::endl                    // --
-                             << bsl::here();                 // --
+            if (bsl::unlikely_assert(syscall::BF_INVALID_ID != mut_tls.active_vmid)) {
+                bsl::error() << "vm "                            // --
+                             << bsl::hex(mut_tls.active_vmid)    // --
+                             << " is still active on pp "        // --
+                             << bsl::hex(mut_tls.ppid)           // --
+                             << bsl::endl                        // --
+                             << bsl::here();                     // --
 
                 return bsl::errc_precondition;
             }
 
-            auto *const active{m_active.at_if(bsl::to_umax(tls.ppid))};
-            if (bsl::unlikely_assert(nullptr == active)) {
-                bsl::error() << "tls.ppid "                                   // --
+            auto *const pmut_active{m_active.at_if(bsl::to_umax(mut_tls.ppid))};
+            if (bsl::unlikely_assert(nullptr == pmut_active)) {
+                bsl::error() << "mut_tls.ppid "                               // --
                              << bsl::hex(m_id)                                // --
                              << " is greater than the HYPERVISOR_MAX_PPS "    // --
                              << bsl::hex(HYPERVISOR_MAX_PPS)                  // --
@@ -483,19 +479,19 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            if (bsl::unlikely_assert(*active)) {
+            if (bsl::unlikely_assert(*pmut_active)) {
                 bsl::error() << "vm "                                 // --
                              << bsl::hex(m_id)                        // --
                              << " is already the active vm on pp "    // --
-                             << bsl::hex(tls.ppid)                    // --
+                             << bsl::hex(mut_tls.ppid)                // --
                              << bsl::endl                             // --
                              << bsl::here();                          // --
 
                 return bsl::errc_precondition;
             }
 
-            tls.active_vmid = m_id.get();
-            *active = true;
+            mut_tls.active_vmid = m_id.get();
+            *pmut_active = true;
 
             return bsl::errc_success;
         }
@@ -504,14 +500,14 @@ namespace mk
         ///   @brief Sets this vm_t as inactive.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        set_inactive(tls_t &tls) noexcept -> bsl::errc_type
+        set_inactive(tls_t &mut_tls) noexcept -> bsl::errc_type
         {
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{mut_tls, m_lock};
 
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vm_t not initialized\n" << bsl::here();
@@ -528,31 +524,31 @@ namespace mk
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely_assert(syscall::BF_INVALID_ID == tls.active_vmid)) {
+            if (bsl::unlikely_assert(syscall::BF_INVALID_ID == mut_tls.active_vmid)) {
                 bsl::error() << "vm "                      // --
                              << bsl::hex(m_id)             // --
                              << " is not active on pp "    // --
-                             << bsl::hex(tls.ppid)         // --
+                             << bsl::hex(mut_tls.ppid)     // --
                              << bsl::endl                  // --
                              << bsl::here();               // --
 
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely_assert(tls.active_vmid != m_id)) {
-                bsl::error() << "vm "                        // --
-                             << bsl::hex(tls.active_vmid)    // --
-                             << " is still active on pp "    // --
-                             << bsl::hex(tls.ppid)           // --
-                             << bsl::endl                    // --
-                             << bsl::here();                 // --
+            if (bsl::unlikely_assert(mut_tls.active_vmid != m_id)) {
+                bsl::error() << "vm "                            // --
+                             << bsl::hex(mut_tls.active_vmid)    // --
+                             << " is still active on pp "        // --
+                             << bsl::hex(mut_tls.ppid)           // --
+                             << bsl::endl                        // --
+                             << bsl::here();                     // --
 
                 return bsl::errc_precondition;
             }
 
-            auto *const active{m_active.at_if(bsl::to_umax(tls.ppid))};
-            if (bsl::unlikely_assert(nullptr == active)) {
-                bsl::error() << "tls.ppid "                                   // --
+            auto *const pmut_active{m_active.at_if(bsl::to_umax(mut_tls.ppid))};
+            if (bsl::unlikely_assert(nullptr == pmut_active)) {
+                bsl::error() << "mut_tls.ppid "                               // --
                              << bsl::hex(m_id)                                // --
                              << " is greater than the HYPERVISOR_MAX_PPS "    // --
                              << bsl::hex(HYPERVISOR_MAX_PPS)                  // --
@@ -562,19 +558,19 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            if (bsl::unlikely_assert(!*active)) {
+            if (bsl::unlikely_assert(!*pmut_active)) {
                 bsl::error() << "vm "                      // --
                              << bsl::hex(m_id)             // --
                              << " is not active on pp "    // --
-                             << bsl::hex(tls.ppid)         // --
+                             << bsl::hex(mut_tls.ppid)     // --
                              << bsl::endl                  // --
                              << bsl::here();               // --
 
                 return bsl::errc_precondition;
             }
 
-            tls.active_vmid = syscall::BF_INVALID_ID.get();
-            *active = false;
+            mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
+            *pmut_active = false;
 
             return bsl::errc_success;
         }
@@ -591,13 +587,13 @@ namespace mk
         ///     returns bsl::safe_uint16::failure()
         ///
         [[nodiscard]] constexpr auto
-        is_active(tls_t &tls) const noexcept -> bsl::safe_uint16
+        is_active(tls_t const &tls) const noexcept -> bsl::safe_uint16
         {
             auto const online_pps{m_active.size().min(bsl::to_umax(tls.online_pps))};
 
-            for (bsl::safe_uintmax i{}; i < online_pps; ++i) {
-                if (*m_active.at_if(i)) {
-                    return bsl::to_u16(i);
+            for (bsl::safe_uintmax mut_i{}; mut_i < online_pps; ++mut_i) {
+                if (*m_active.at_if(mut_i)) {
+                    return bsl::to_u16(mut_i);
                 }
 
                 bsl::touch();
@@ -616,7 +612,7 @@ namespace mk
         ///     false otherwise
         ///
         [[nodiscard]] constexpr auto
-        is_active_on_current_pp(tls_t &tls) const noexcept -> bool
+        is_active_on_current_pp(tls_t const &tls) const noexcept -> bool
         {
             auto const *const active{m_active.at_if(bsl::to_umax(tls.ppid))};
             if (bsl::unlikely(nullptr == active)) {
@@ -640,7 +636,7 @@ namespace mk
         ///   @param tls the current TLS block
         ///
         constexpr void
-        dump(tls_t &tls) const noexcept
+        dump(tls_t const &tls) const noexcept
         {
             if constexpr (BSL_DEBUG_LEVEL == bsl::CRITICAL_ONLY) {
                 return;

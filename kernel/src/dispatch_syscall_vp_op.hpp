@@ -42,119 +42,111 @@ namespace mk
     ///   @brief Implements the bf_vp_op_create_vp syscall
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param vp_pool the VP pool to use
-    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    ///     otherwise
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_vp_pool the VP pool to use
+    ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
-    syscall_vp_op_create_vp(tls_t &tls, vp_pool_t &vp_pool) noexcept -> bsl::errc_type
+    syscall_vp_op_create_vp(tls_t &mut_tls, vp_pool_t &mut_vp_pool) noexcept -> syscall::bf_status_t
     {
-        auto const vpid{vp_pool.allocate(
-            tls, bsl::to_u16_unsafe(tls.ext_reg1), bsl::to_u16_unsafe(tls.ext_reg2))};
+        auto const vpid{mut_vp_pool.allocate(
+            mut_tls, bsl::to_u16_unsafe(mut_tls.ext_reg1), bsl::to_u16_unsafe(mut_tls.ext_reg2))};
 
         if (bsl::unlikely(!vpid)) {
             bsl::print<bsl::V>() << bsl::here();
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
-        constexpr auto mask{0xFFFFFFFFFFFF0000_umax};
-        tls.ext_reg0 = ((tls.ext_reg0 & mask) | bsl::to_umax(vpid)).get();
-
-        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-        return bsl::errc_success;
+        mut_tls.ext_reg0 = bsl::to_umax_upper_lower(mut_tls.ext_reg0, vpid).get();
+        return syscall::BF_STATUS_SUCCESS;
     }
 
     /// <!-- description -->
     ///   @brief Implements the bf_vp_op_destroy_vp syscall
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param vp_pool the VP pool to use
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_vp_pool the VP pool to use
     ///   @param vps_pool the VPS pool to use
-    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    ///     otherwise
+    ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
-    syscall_vp_op_destroy_vp(tls_t &tls, vp_pool_t &vp_pool, vps_pool_t &vps_pool) noexcept
-        -> bsl::errc_type
+    syscall_vp_op_destroy_vp(
+        tls_t &mut_tls, vp_pool_t &mut_vp_pool, vps_pool_t const &vps_pool) noexcept
+        -> syscall::bf_status_t
     {
-        auto const ret{vp_pool.deallocate(tls, vps_pool, bsl::to_u16_unsafe(tls.ext_reg1))};
+        auto const ret{
+            mut_vp_pool.deallocate(mut_tls, vps_pool, bsl::to_u16_unsafe(mut_tls.ext_reg1))};
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
-            return ret;
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
-        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-        return bsl::errc_success;
+        return syscall::BF_STATUS_SUCCESS;
     }
 
     /// <!-- description -->
     ///   @brief Implements the bf_vp_op_migrate syscall
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param vp_pool the VP pool to use
-    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    ///     otherwise
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_vp_pool the VP pool to use
+    ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
-    syscall_vp_op_migrate(tls_t &tls, vp_pool_t &vp_pool) noexcept -> bsl::errc_type
+    syscall_vp_op_migrate(tls_t &mut_tls, vp_pool_t &mut_vp_pool) noexcept -> syscall::bf_status_t
     {
-        auto const ret{vp_pool.migrate(
-            tls, bsl::to_u16_unsafe(tls.ext_reg1), bsl::to_u16_unsafe(tls.ext_reg2))};
+        auto const ret{mut_vp_pool.migrate(
+            mut_tls, bsl::to_u16_unsafe(mut_tls.ext_reg1), bsl::to_u16_unsafe(mut_tls.ext_reg2))};
 
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
-        tls.syscall_ret_status = syscall::BF_STATUS_SUCCESS.get();
-        return bsl::errc_success;
+        return syscall::BF_STATUS_SUCCESS;
     }
 
     /// <!-- description -->
     ///   @brief Dispatches the bf_vp_op syscalls
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param ext the extension that made the syscall
-    ///   @param vp_pool the VP pool to use
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_vp_pool the VP pool to use
     ///   @param vps_pool the VPS pool to use
-    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    ///     otherwise
+    ///   @param ext the extension that made the syscall
+    ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
     dispatch_syscall_vp_op(
-        tls_t &tls, vp_pool_t &vp_pool, vps_pool_t &vps_pool, ext_t &ext) noexcept -> bsl::errc_type
+        tls_t &mut_tls,
+        vp_pool_t &mut_vp_pool,
+        vps_pool_t const &vps_pool,
+        ext_t const &ext) noexcept -> syscall::bf_status_t
     {
-        bsl::errc_type ret{};
+        if (bsl::unlikely(!ext.is_handle_valid(bsl::to_u64(mut_tls.ext_reg0)))) {
+            bsl::error() << "invalid handle "             // --
+                         << bsl::hex(mut_tls.ext_reg0)    // --
+                         << bsl::endl                     // --
+                         << bsl::here();                  // --
 
-        if (bsl::unlikely(!ext.is_handle_valid(tls.ext_reg0))) {
-            bsl::error() << "invalid handle "         // --
-                         << bsl::hex(tls.ext_reg0)    // --
-                         << bsl::endl                 // --
-                         << bsl::here();              // --
-
-            tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_INVALID_HANDLE.get();
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_FAILURE_INVALID_HANDLE;
         }
 
-        if (bsl::unlikely(tls.ext != tls.ext_vmexit)) {
+        if (bsl::unlikely(mut_tls.ext != mut_tls.ext_vmexit)) {
             bsl::error() << "vp ops are not allowed by ext "        // --
                          << bsl::hex(ext.id())                      // --
                          << " as it didn't register for vmexits"    // --
                          << bsl::endl                               // --
                          << bsl::here();                            // --
 
-            tls.syscall_ret_status = syscall::BF_STATUS_INVALID_PERM_EXT.get();
-            return bsl::errc_failure;
+            return syscall::BF_STATUS_INVALID_PERM_EXT;
         }
 
-        switch (syscall::bf_syscall_index(tls.ext_syscall).get()) {
+        switch (syscall::bf_syscall_index(bsl::to_u64(mut_tls.ext_syscall)).get()) {
             case syscall::BF_VP_OP_CREATE_VP_IDX_VAL.get(): {
-                ret = syscall_vp_op_create_vp(tls, vp_pool);
-                if (bsl::unlikely(!ret)) {
+                auto const ret{syscall_vp_op_create_vp(mut_tls, mut_vp_pool)};
+                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
                 }
@@ -163,8 +155,8 @@ namespace mk
             }
 
             case syscall::BF_VP_OP_DESTROY_VP_IDX_VAL.get(): {
-                ret = syscall_vp_op_destroy_vp(tls, vp_pool, vps_pool);
-                if (bsl::unlikely(!ret)) {
+                auto const ret{syscall_vp_op_destroy_vp(mut_tls, mut_vp_pool, vps_pool)};
+                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
                 }
@@ -173,8 +165,8 @@ namespace mk
             }
 
             case syscall::BF_VP_OP_MIGRATE_IDX_VAL.get(): {
-                ret = syscall_vp_op_migrate(tls, vp_pool);
-                if (bsl::unlikely(!ret)) {
+                auto const ret{syscall_vp_op_migrate(mut_tls, mut_vp_pool)};
+                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
                 }
@@ -187,13 +179,12 @@ namespace mk
             }
         }
 
-        bsl::error() << "unknown syscall index "     //--
-                     << bsl::hex(tls.ext_syscall)    //--
-                     << bsl::endl                    //--
-                     << bsl::here();                 //--
+        bsl::error() << "unknown syscall index "         //--
+                     << bsl::hex(mut_tls.ext_syscall)    //--
+                     << bsl::endl                        //--
+                     << bsl::here();                     //--
 
-        tls.syscall_ret_status = syscall::BF_STATUS_FAILURE_UNSUPPORTED.get();
-        return bsl::errc_failure;
+        return syscall::BF_STATUS_FAILURE_UNSUPPORTED;
     }
 }
 

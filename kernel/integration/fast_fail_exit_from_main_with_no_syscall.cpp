@@ -98,7 +98,7 @@ namespace integration
     ext_main_entry(bsl::uint32 const version) noexcept
     {
         integration::require_success(
-            g_sys.initialize(version, &bootstrap_entry, &vmexit_entry, &fail_entry));
+            g_sys.initialize(bsl::to_u32(version), &bootstrap_entry, &vmexit_entry, &fail_entry));
 
         bsl::error() << "extension purposely not calling exit syscall. fault expected\n";
     }

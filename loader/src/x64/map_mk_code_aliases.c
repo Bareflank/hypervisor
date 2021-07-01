@@ -53,7 +53,7 @@
  *   @param a a pointer to a code_aliases_t that stores the aliases
  *     being mapped
  *   @param rpt the root page table to map the code aliases into
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 map_mk_code_aliases(struct code_aliases_t const *const a, root_page_table_t *const rpt)

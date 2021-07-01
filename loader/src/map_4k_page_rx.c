@@ -45,12 +45,12 @@
  *   @param virt the virtual address to map phys to
  *   @param phys the physical address to map
  *   @param rpt the root page table to place the resulting map
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 map_4k_page_rx(void const *const virt, uint64_t const phys, root_page_table_t *const rpt)
 {
-    bfelf_elf64_word const rw = bfelf_pf_r | bfelf_pf_x;
+    uint32_t const rw = bfelf_pf_r | bfelf_pf_x;
 
     if (map_4k_page((uint64_t)virt, phys, rw, rpt)) {
         bferror("map_4k_page failed");

@@ -37,7 +37,7 @@
  *
  * <!-- inputs/outputs -->
  *   @param args the arguments to verify
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 static int64_t
 verify_dump_vmm_args(struct dump_vmm_args_t const *const args)
@@ -58,7 +58,7 @@ verify_dump_vmm_args(struct dump_vmm_args_t const *const args)
  *
  * <!-- inputs/outputs -->
  *   @param args arguments from the ioctl
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 dump_vmm(struct dump_vmm_args_t *const args)

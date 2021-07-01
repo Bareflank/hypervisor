@@ -26,10 +26,10 @@
 
 #include <constants.h>
 #include <debug.h>
+#include <elf_file_t.h>
 #include <map_4k_page_rw.h>
 #include <platform.h>
 #include <root_page_table_t.h>
-#include <span_t.h>
 
 /**
  * <!-- description -->
@@ -37,18 +37,18 @@
  *     microkernel's root page tables.
  *
  * <!-- inputs/outputs -->
- *   @param file a pointer to a span_t that stores the ELF file
- *     being mapped
+ *   @param mk_elf_file a pointer to the mk_elf_file to map
  *   @param rpt the root page table to map the ELF file into
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
-map_mk_elf_file(struct span_t const *const file, root_page_table_t *const rpt)
+map_mk_elf_file(struct elf_file_t const *const mk_elf_file, root_page_table_t *const rpt)
 {
-    uint64_t off;
+    uint64_t i;
+    uint8_t const *file = ((uint8_t const *)mk_elf_file->addr);
 
-    for (off = ((uint64_t)0); off < file->size; off += HYPERVISOR_PAGE_SIZE) {
-        if (map_4k_page_rw(file->addr + off, ((uint64_t)0), rpt)) {
+    for (i = ((uint64_t)0); i < mk_elf_file->size; i += HYPERVISOR_PAGE_SIZE) {
+        if (map_4k_page_rw(file + i, ((uint64_t)0), rpt)) {
             bferror("map_4k_page_rw failed");
             return LOADER_FAILURE;
         }

@@ -68,10 +68,10 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         initialize(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic,
             bsl::safe_uint16 const &i) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
@@ -137,7 +137,11 @@ namespace example
         ///   @param intrinsic the intrinsic_t to use
         ///
         constexpr void
-        release(gs_t &gs, tls_t &tls, syscall::bf_syscall_t &sys, intrinsic_t &intrinsic) noexcept
+        release(
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic) noexcept
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -160,7 +164,7 @@ namespace example
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
         ///   @param tls the tls_t to use
-        ///   @param sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vpid the ID of the VP to assign the vps_t to
         ///   @param ppid the ID of the PP to assign the vps_t to
@@ -169,10 +173,10 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         allocate(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t &mut_sys,
+            intrinsic_t const &intrinsic,
             bsl::safe_uint16 const &vpid,
             bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
         {
@@ -180,7 +184,7 @@ namespace example
             bsl::discard(tls);
             bsl::discard(intrinsic);
 
-            bsl::errc_type ret{};
+            bsl::errc_type mut_ret{};
 
             /// NOTE:
             /// - The following is a pedantic check to make sure we have
@@ -273,10 +277,10 @@ namespace example
             ///
 
             if (ppid == m_id) {
-                ret = sys.bf_vps_op_init_as_root(m_id);
-                if (bsl::unlikely_assert(!ret)) {
+                mut_ret = mut_sys.bf_vps_op_init_as_root(m_id);
+                if (bsl::unlikely_assert(!mut_ret)) {
                     bsl::print<bsl::V>() << bsl::here();
-                    return ret;
+                    return mut_ret;
                 }
 
                 bsl::touch();
@@ -300,13 +304,12 @@ namespace example
             ///   VPSs are assigned to VPs).
             ///
 
-            constexpr auto guest_asid_idx{0x0058_u64};
-            constexpr auto guest_asid_val{0x1_u32};
-
-            ret = sys.bf_vps_op_write32(m_id, guest_asid_idx, guest_asid_val);
-            if (bsl::unlikely_assert(!ret)) {
+            constexpr auto guest_asid_val{0x1_u64};
+            mut_ret = mut_sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_guest_asid, guest_asid_val);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             /// NOTE:
@@ -314,21 +317,20 @@ namespace example
             ///   VMRun, and CPUID if we plan to support reporting and stopping.
             ///
 
-            constexpr auto intercept_instr1_idx{0x000C_u64};
-            constexpr auto intercept_instr1_val{0x00040000_u32};
-            constexpr auto intercept_instr2_idx{0x0010_u64};
-            constexpr auto intercept_instr2_val{0x00000001_u32};
-
-            ret = sys.bf_vps_op_write32(m_id, intercept_instr1_idx, intercept_instr1_val);
-            if (bsl::unlikely_assert(!ret)) {
+            constexpr auto intercept_instr1_val{0x00040000_u64};
+            mut_ret = mut_sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_intercept_instruction1, intercept_instr1_val);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = sys.bf_vps_op_write32(m_id, intercept_instr2_idx, intercept_instr2_val);
-            if (bsl::unlikely_assert(!ret)) {
+            constexpr auto intercept_instr2_val{0x00000001_u64};
+            mut_ret = mut_sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_intercept_instruction2, intercept_instr2_val);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             /// NOTE:

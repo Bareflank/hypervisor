@@ -38,7 +38,7 @@
  *
  * <!-- inputs/outputs -->
  *   @param rpt where to return the resulting root page table
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 alloc_mk_root_page_table(root_page_table_t **const rpt)
