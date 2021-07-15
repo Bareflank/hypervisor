@@ -41,10 +41,10 @@
 void
 free_pdt(struct pdt_t *const pdt)
 {
-    uint64_t idx;
+    uint64_t i;
 
-    for (idx = ((uint64_t)0); idx < LOADER_NUM_PDT_ENTRIES; ++idx) {
-        struct pt_t *const pt = pdt->tables[idx];
+    for (i = ((uint64_t)0); i < LOADER_NUM_PDT_ENTRIES; ++i) {
+        struct pt_t *const pt = pdt->tables[i];
         if (((void *)0) != pt) {
             platform_free(pt, sizeof(struct pt_t));
         }

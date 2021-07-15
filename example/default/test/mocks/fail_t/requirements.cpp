@@ -30,43 +30,6 @@
 namespace
 {
     constinit example::fail_t const g_verify_constinit{};
-
-    // NOLINTNEXTLINE(bsl-user-defined-type-names-match-header-name)
-    class fixture_t final
-    {
-        example::fail_t m_fail{};
-
-    public:
-        [[nodiscard]] static constexpr auto
-        test_member_const() noexcept -> bool
-        {
-            /// NOTE:
-            /// - fail_t does not contain const member functions
-            ///
-
-            return true;
-        }
-
-        [[nodiscard]] constexpr auto
-        test_member_nonconst() noexcept -> bool
-        {
-            example::gs_t gs{};
-            example::tls_t tls{};
-            syscall::bf_syscall_t sys{};
-            example::intrinsic_t intrinsic{};
-            example::vp_pool_t vp_pool{};
-            example::vps_pool_t vps_pool{};
-
-            bsl::discard(example::fail_t{});
-            bsl::discard(m_fail.initialize(gs, tls, sys, intrinsic, vp_pool, vps_pool));
-            m_fail.release(gs, tls, sys, intrinsic, vp_pool, vps_pool);
-            bsl::discard(m_fail.dispatch(gs, tls, sys, intrinsic, vp_pool, vps_pool, {}, {}));
-
-            return true;
-        }
-    };
-
-    constexpr fixture_t FIXTURE1{};
 }
 
 /// <!-- description -->
@@ -86,30 +49,12 @@ main() noexcept -> bsl::exit_code
 
     bsl::ut_scenario{"verify noexcept"} = []() noexcept {
         bsl::ut_given{} = []() noexcept {
-            example::fail_t fail{};
-            example::gs_t gs{};
-            example::tls_t tls{};
-            syscall::bf_syscall_t sys{};
-            example::intrinsic_t intrinsic{};
-            example::vp_pool_t vp_pool{};
-            example::vps_pool_t vps_pool{};
+            example::fail_t mut_fail{};
             bsl::ut_then{} = []() noexcept {
                 static_assert(noexcept(example::fail_t{}));
-                static_assert(
-                    noexcept(fail.initialize(gs, tls, sys, intrinsic, vp_pool, vps_pool)));
-                static_assert(noexcept(fail.release(gs, tls, sys, intrinsic, vp_pool, vps_pool)));
-                static_assert(
-                    noexcept(fail.dispatch(gs, tls, sys, intrinsic, vp_pool, vps_pool, {}, {})));
-            };
-        };
-    };
-
-    bsl::ut_scenario{"verify constness"} = []() noexcept {
-        bsl::ut_given{} = []() noexcept {
-            fixture_t fixture2{};
-            bsl::ut_then{} = [&]() noexcept {
-                static_assert(FIXTURE1.test_member_const());
-                bsl::ut_check(fixture2.test_member_nonconst());
+                static_assert(noexcept(mut_fail.initialize({}, {}, {}, {}, {}, {})));
+                static_assert(noexcept(mut_fail.release({}, {}, {}, {}, {}, {})));
+                static_assert(noexcept(mut_fail.dispatch({}, {}, {}, {}, {}, {}, {}, {})));
             };
         };
     };

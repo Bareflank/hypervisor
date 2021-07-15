@@ -37,17 +37,17 @@ namespace example
     ///
     /// <!-- inputs/outputs -->
     ///   @param gs ignored
-    ///   @param rax the index used by CPUID, returns resulting rax
-    ///   @param rbx returns resulting rbx
-    ///   @param rcx the subindex used by CPUID, returns the resulting rcx
-    ///   @param rdx returns resulting rdx
+    ///   @param pmut_rax the index used by CPUID, returns resulting rax
+    ///   @param pmut_rbx returns resulting rbx
+    ///   @param pmut_rcx the subindex used by CPUID, returns the resulting rcx
+    ///   @param pmut_rdx returns resulting rdx
     ///
     extern "C" void intrinsic_cpuid_impl(
-        gs_t *const gs,
-        bsl::uint64 *const rax,
-        bsl::uint64 *const rbx,
-        bsl::uint64 *const rcx,
-        bsl::uint64 *const rdx) noexcept;
+        gs_t const *const gs,
+        bsl::uint64 *const pmut_rax,
+        bsl::uint64 *const pmut_rbx,
+        bsl::uint64 *const pmut_rcx,
+        bsl::uint64 *const pmut_rdx) noexcept;
 }
 
 #endif

@@ -40,10 +40,10 @@
 void
 free_mk_elf_segments(struct elf_segment_t *const mk_elf_segments)
 {
-    uint64_t idx;
+    uint64_t i;
 
-    for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_SEGMENTS; ++idx) {
-        struct elf_segment_t *const segment = &mk_elf_segments[idx];
+    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_SEGMENTS; ++i) {
+        struct elf_segment_t *const segment = &mk_elf_segments[i];
         platform_free(segment->addr, segment->size);
         platform_memset(segment, 0, sizeof(struct elf_segment_t));
     }

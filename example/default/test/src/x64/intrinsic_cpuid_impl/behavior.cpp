@@ -27,44 +27,6 @@
 #include <bsl/convert.hpp>
 #include <bsl/ut.hpp>
 
-namespace example
-{
-    /// <!-- description -->
-    ///   @brief Used to execute the actual checks. We put the checks in this
-    ///     function so that we can validate the tests both at compile-time
-    ///     and at run-time. If a bsl::ut_check fails, the tests will either
-    ///     fail fast at run-time, or will produce a compile-time error.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @return Always returns bsl::exit_success.
-    ///
-    [[nodiscard]] constexpr auto
-    tests() noexcept -> bsl::exit_code
-    {
-        bsl::ut_scenario{"intrinsic_cpuid_impl"} = []() noexcept {
-            bsl::ut_given_at_runtime{} = []() noexcept {
-                constexpr auto data{0x1234567800000000_u64};
-                constexpr auto mask{0xFFFFFFFF00000000_u64};
-                auto rax{data};
-                auto rbx{data};
-                auto rcx{data};
-                auto rdx{data};
-                bsl::ut_when{} = [&]() noexcept {
-                    intrinsic_cpuid_impl(nullptr, rax.data(), rbx.data(), rcx.data(), rdx.data());
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check((rax & mask) == data);
-                        bsl::ut_check((rbx & mask) == data);
-                        bsl::ut_check((rcx & mask) == data);
-                        bsl::ut_check((rdx & mask) == data);
-                    };
-                };
-            };
-        };
-
-        return bsl::ut_success();
-    }
-}
-
 /// <!-- description -->
 ///   @brief Main function for this unit test. If a call to bsl::ut_check() fails
 ///     the application will fast fail. If all calls to bsl::ut_check() pass, this
@@ -78,6 +40,26 @@ main() noexcept -> bsl::exit_code
 {
     bsl::enable_color();
 
-    static_assert(example::tests() == bsl::ut_success());
-    return example::tests();
+    bsl::ut_scenario{"intrinsic_cpuid_impl"} = []() noexcept {
+        bsl::ut_given{} = []() noexcept {
+            constexpr auto data{0x1234567800000000_u64};
+            constexpr auto mask{0xFFFFFFFF00000000_u64};
+            auto mut_rax{data};
+            auto mut_rbx{data};
+            auto mut_rcx{data};
+            auto mut_rdx{data};
+            bsl::ut_when{} = [&]() noexcept {
+                example::intrinsic_cpuid_impl(
+                    nullptr, mut_rax.data(), mut_rbx.data(), mut_rcx.data(), mut_rdx.data());
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check((mut_rax & mask) == data);
+                    bsl::ut_check((mut_rbx & mask) == data);
+                    bsl::ut_check((mut_rcx & mask) == data);
+                    bsl::ut_check((mut_rdx & mask) == data);
+                };
+            };
+        };
+    };
+
+    return bsl::ut_success();
 }

@@ -64,23 +64,24 @@ namespace mk
         ///   @brief Initializes this vps_pool_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page pool to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page pool to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        initialize(tls_t &tls, page_pool_t &page_pool) noexcept -> bsl::errc_type
+        initialize(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept -> bsl::errc_type
         {
-            bsl::finally_assert release_on_error{[this, &tls, &page_pool]() noexcept -> void {
-                auto const ret{this->release(tls, page_pool)};
-                if (bsl::unlikely(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return;
-                }
+            bsl::finally_assert mut_release_on_error{
+                [this, &mut_tls, &mut_page_pool]() noexcept -> void {
+                    auto const ret{this->release(mut_tls, mut_page_pool)};
+                    if (bsl::unlikely(!ret)) {
+                        bsl::print<bsl::V>() << bsl::here();
+                        return;
+                    }
 
-                bsl::touch();
-            }};
+                    bsl::touch();
+                }};
 
             for (auto const vps : m_pool) {
                 auto const ret{vps.data->initialize(bsl::to_u16(vps.index))};
@@ -92,7 +93,7 @@ namespace mk
                 bsl::touch();
             }
 
-            release_on_error.ignore();
+            mut_release_on_error.ignore();
             return bsl::errc_success;
         }
 
@@ -102,16 +103,16 @@ namespace mk
         ///     vps_pool_t after calling this function will results in UB.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page pool to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page pool to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        release(tls_t &tls, page_pool_t &page_pool) noexcept -> bsl::errc_type
+        release(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept -> bsl::errc_type
         {
             for (auto const vps : m_pool) {
-                auto const ret{vps.data->release(tls, page_pool)};
+                auto const ret{vps.data->release(mut_tls, mut_page_pool)};
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -127,39 +128,39 @@ namespace mk
         ///   @brief Allocates a vps from the vps pool.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page pool to use
-        ///   @param intrinsic the intrinsics to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page pool to use
+        ///   @param mut_intrinsic the intrinsics to use
         ///   @param vpid The ID of the VP to assign the newly created VP to
         ///   @param ppid The ID of the PP to assign the newly created VP to
         ///   @return Returns ID of the newly allocated vps
         ///
         [[nodiscard]] constexpr auto
         allocate(
-            tls_t &tls,
-            page_pool_t &page_pool,
-            intrinsic_t &intrinsic,
+            tls_t &mut_tls,
+            page_pool_t &mut_page_pool,
+            intrinsic_t &mut_intrinsic,
             bsl::safe_uint16 const &vpid,
             bsl::safe_uint16 const &ppid) noexcept -> bsl::safe_uint16
         {
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{mut_tls, m_lock};
 
-            vps_t *vps{};
+            vps_t *pmut_mut_vps{};
             for (auto const elem : m_pool) {
                 if (elem.data->is_deallocated()) {
-                    vps = elem.data;
+                    pmut_mut_vps = elem.data;
                     break;
                 }
 
                 bsl::touch();
             }
 
-            if (bsl::unlikely(nullptr == vps)) {
+            if (bsl::unlikely(nullptr == pmut_mut_vps)) {
                 bsl::error() << "vps pool out of vpss\n" << bsl::here();
                 return bsl::safe_uint16::failure();
             }
 
-            return vps->allocate(tls, intrinsic, page_pool, vpid, ppid);
+            return pmut_mut_vps->allocate(mut_tls, mut_intrinsic, mut_page_pool, vpid, ppid);
         }
 
         /// <!-- description -->
@@ -167,18 +168,19 @@ namespace mk
         ///     function to the vps pool.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page pool to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page pool to use
         ///   @param vpsid the ID of the vps to deallocate
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        deallocate(tls_t &tls, page_pool_t &page_pool, bsl::safe_uint16 const &vpsid) noexcept
+        deallocate(
+            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_uint16 const &vpsid) noexcept
             -> bsl::errc_type
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
+            auto *const pmut_vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == pmut_vps)) {
                 bsl::error()
                     << "vpsid "                                                              // --
                     << bsl::hex(vpsid)                                                       // --
@@ -190,7 +192,7 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            return vps->deallocate(tls, page_pool);
+            return pmut_vps->deallocate(mut_tls, mut_page_pool);
         }
 
         /// <!-- description -->
@@ -205,8 +207,8 @@ namespace mk
         [[nodiscard]] constexpr auto
         zombify(bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
+            auto *const pmut_vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == pmut_vps)) {
                 bsl::error()
                     << "vpsid "                                                              // --
                     << bsl::hex(vpsid)                                                       // --
@@ -218,7 +220,7 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            vps->zombify();
+            pmut_vps->zombify();
             return bsl::errc_success;
         }
 
@@ -235,7 +237,7 @@ namespace mk
         ///     deallocated.
         ///
         [[nodiscard]] constexpr auto
-        is_deallocated(tls_t &tls, bsl::safe_uint16 const &vpsid) const noexcept -> bool
+        is_deallocated(tls_t const &tls, bsl::safe_uint16 const &vpsid) const noexcept -> bool
         {
             bsl::discard(tls);
 
@@ -268,7 +270,7 @@ namespace mk
         ///     allocated.
         ///
         [[nodiscard]] constexpr auto
-        is_allocated(tls_t &tls, bsl::safe_uint16 const &vpsid) const noexcept -> bool
+        is_allocated(tls_t const &tls, bsl::safe_uint16 const &vpsid) const noexcept -> bool
         {
             bsl::discard(tls);
 
@@ -301,7 +303,7 @@ namespace mk
         ///     a zombie.
         ///
         [[nodiscard]] constexpr auto
-        is_zombie(tls_t &tls, bsl::safe_uint16 const &vpsid) const noexcept -> bool
+        is_zombie(tls_t const &tls, bsl::safe_uint16 const &vpsid) const noexcept -> bool
         {
             bsl::discard(tls);
 
@@ -334,7 +336,7 @@ namespace mk
         ///     function will return bsl::safe_uint16::failure()
         ///
         [[nodiscard]] constexpr auto
-        is_assigned_to_vp(tls_t &tls, bsl::safe_uint16 const &vpid) const noexcept
+        is_assigned_to_vp(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept
             -> bsl::safe_uint16
         {
             bsl::discard(tls);
@@ -364,18 +366,19 @@ namespace mk
         ///   @brief Sets the requested vps_t as active.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsics to use
         ///   @param vpsid the ID of the vps_t to set as active
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        set_active(tls_t &tls, intrinsic_t &intrinsic, bsl::safe_uint16 const &vpsid) noexcept
+        set_active(
+            tls_t &mut_tls, intrinsic_t &mut_intrinsic, bsl::safe_uint16 const &vpsid) noexcept
             -> bsl::errc_type
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
+            auto *const pmut_vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == pmut_vps)) {
                 bsl::error()
                     << "vpsid "                                                              // --
                     << bsl::hex(vpsid)                                                       // --
@@ -387,25 +390,26 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            return vps->set_active(tls, intrinsic);
+            return pmut_vps->set_active(mut_tls, mut_intrinsic);
         }
 
         /// <!-- description -->
         ///   @brief Sets the requested vps_t as inactive.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the vps_t to set as inactive
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        set_inactive(tls_t &tls, intrinsic_t &intrinsic, bsl::safe_uint16 const &vpsid) noexcept
+        set_inactive(
+            tls_t &mut_tls, intrinsic_t const &intrinsic, bsl::safe_uint16 const &vpsid) noexcept
             -> bsl::errc_type
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
+            auto *const pmut_vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == pmut_vps)) {
                 bsl::error()
                     << "vpsid "                                                              // --
                     << bsl::hex(vpsid)                                                       // --
@@ -417,7 +421,7 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            return vps->set_inactive(tls, intrinsic);
+            return pmut_vps->set_inactive(mut_tls, intrinsic);
         }
 
         /// <!-- description -->
@@ -433,7 +437,7 @@ namespace mk
         ///     returns bsl::safe_uint16::failure()
         ///
         [[nodiscard]] constexpr auto
-        is_active(tls_t &tls, bsl::safe_uint16 const &vpsid) noexcept -> bsl::safe_uint16
+        is_active(tls_t const &tls, bsl::safe_uint16 const &vpsid) noexcept -> bsl::safe_uint16
         {
             auto const *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
@@ -464,7 +468,7 @@ namespace mk
         ///     active on the current PP.
         ///
         [[nodiscard]] constexpr auto
-        is_active_on_current_pp(tls_t &tls, bsl::safe_uint16 const &vpsid) noexcept -> bool
+        is_active_on_current_pp(tls_t const &tls, bsl::safe_uint16 const &vpsid) noexcept -> bool
         {
             auto const *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
@@ -495,13 +499,13 @@ namespace mk
         ///
         [[nodiscard]] constexpr auto
         migrate(
-            tls_t &tls,
-            intrinsic_t &intrinsic,
+            tls_t const &tls,
+            intrinsic_t const &intrinsic,
             bsl::safe_uint16 const &vpsid,
             bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
+            auto *const pmut_vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == pmut_vps)) {
                 bsl::error()
                     << "vpsid "                                                              // --
                     << bsl::hex(vpsid)                                                       // --
@@ -513,7 +517,7 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            return vps->migrate(tls, intrinsic, ppid);
+            return pmut_vps->migrate(tls, intrinsic, ppid);
         }
 
         /// <!-- description -->
@@ -572,8 +576,8 @@ namespace mk
         ///   @brief Stores the provided state in the requested VPS.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to set the state to
         ///   @param state the state to set the VPS to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
@@ -581,13 +585,13 @@ namespace mk
         ///
         [[nodiscard]] constexpr auto
         state_save_to_vps(
-            tls_t &tls,
-            intrinsic_t &intrinsic,
+            tls_t &mut_tls,
+            intrinsic_t &mut_intrinsic,
             bsl::safe_uint16 const &vpsid,
             loader::state_save_t const &state) noexcept -> bsl::errc_type
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
+            auto *const pmut_vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == pmut_vps)) {
                 bsl::error()
                     << "vpsid "                                                              // --
                     << bsl::hex(vpsid)                                                       // --
@@ -599,28 +603,28 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            return vps->state_save_to_vps(tls, intrinsic, state);
+            return pmut_vps->state_save_to_vps(mut_tls, mut_intrinsic, state);
         }
 
         /// <!-- description -->
         ///   @brief Stores the requested VPS state in the provided state save.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to set the state to
-        ///   @param state the state save to store the VPS state to
+        ///   @param mut_state the state save to store the VPS state to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
         vps_to_state_save(
-            tls_t &tls,
-            intrinsic_t &intrinsic,
+            tls_t &mut_tls,
+            intrinsic_t const &intrinsic,
             bsl::safe_uint16 const &vpsid,
-            loader::state_save_t &state) noexcept -> bsl::errc_type
+            loader::state_save_t &mut_state) const noexcept -> bsl::errc_type
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            auto const *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
                 bsl::error()
                     << "vpsid "                                                              // --
@@ -633,84 +637,7 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            return vps->vps_to_state_save(tls, intrinsic, state);
-        }
-
-        /// <!-- description -->
-        ///   @brief Reads a field from the requested VPS given the index of
-        ///     the field to read.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam FIELD_TYPE the type (i.e., size) of field to read
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
-        ///   @param vpsid the ID of the VPS to read from
-        ///   @param index the index of the field to read from the VPS
-        ///   @return Returns the value of the requested field from the
-        ///     requested VPS or bsl::safe_integral<FIELD_TYPE>::failure()
-        ///     on failure.
-        ///
-        template<typename FIELD_TYPE>
-        [[nodiscard]] constexpr auto
-        read(
-            tls_t &tls,
-            intrinsic_t &intrinsic,
-            bsl::safe_uint16 const &vpsid,
-            bsl::safe_uintmax const &index) noexcept -> bsl::safe_integral<FIELD_TYPE>
-        {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
-                bsl::error()
-                    << "vpsid "                                                              // --
-                    << bsl::hex(vpsid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
-                    << bsl::endl                                                             // --
-                    << bsl::here();                                                          // --
-
-                return bsl::safe_integral<FIELD_TYPE>::failure();
-            }
-
-            return vps->template read<FIELD_TYPE>(tls, intrinsic, index);
-        }
-
-        /// <!-- description -->
-        ///   @brief Writes a field to the requested VPS given the index of
-        ///     the field and the value to write.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam FIELD_TYPE the type (i.e., size) of field to write
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
-        ///   @param vpsid the ID of the VPS to write to
-        ///   @param index the index of the field to write to the VPS
-        ///   @param value the value to write to the VPS
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        template<typename FIELD_TYPE>
-        [[nodiscard]] constexpr auto
-        write(
-            tls_t &tls,
-            intrinsic_t &intrinsic,
-            bsl::safe_uint16 const &vpsid,
-            bsl::safe_uintmax const &index,
-            bsl::safe_integral<FIELD_TYPE> const &value) noexcept -> bsl::errc_type
-        {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
-                bsl::error()
-                    << "vpsid "                                                              // --
-                    << bsl::hex(vpsid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPSS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPSS)                                         // --
-                    << bsl::endl                                                             // --
-                    << bsl::here();                                                          // --
-
-                return bsl::errc_failure;
-            }
-
-            return vps->template write<FIELD_TYPE>(tls, intrinsic, index, value);
+            return vps->vps_to_state_save(mut_tls, intrinsic, mut_state);
         }
 
         /// <!-- description -->
@@ -718,7 +645,7 @@ namespace mk
         ///     defining the field to read.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to read from
         ///   @param reg a bf_reg_t defining the field to read from the VPS
@@ -726,13 +653,13 @@ namespace mk
         ///     requested VPS or bsl::safe_uintmax::failure() on failure.
         ///
         [[nodiscard]] constexpr auto
-        read_reg(
-            tls_t &tls,
-            intrinsic_t &intrinsic,
+        read(
+            tls_t &mut_tls,
+            intrinsic_t const &intrinsic,
             bsl::safe_uint16 const &vpsid,
-            syscall::bf_reg_t const reg) noexcept -> bsl::safe_uintmax
+            syscall::bf_reg_t const reg) const noexcept -> bsl::safe_uintmax
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            auto const *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
             if (bsl::unlikely(nullptr == vps)) {
                 bsl::error()
                     << "vpsid "                                                              // --
@@ -745,7 +672,7 @@ namespace mk
                 return bsl::safe_uintmax::failure();
             }
 
-            return vps->read_reg(tls, intrinsic, reg);
+            return vps->read(mut_tls, intrinsic, reg);
         }
 
         /// <!-- description -->
@@ -753,8 +680,8 @@ namespace mk
         ///     defining the field and a value to write.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to write to
         ///   @param reg a bf_reg_t defining the field to write to the VPS
         ///   @param value the value to write to the VPS
@@ -762,15 +689,15 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        write_reg(
-            tls_t &tls,
-            intrinsic_t &intrinsic,
+        write(
+            tls_t &mut_tls,
+            intrinsic_t &mut_intrinsic,
             bsl::safe_uint16 const &vpsid,
             syscall::bf_reg_t const reg,
             bsl::safe_uintmax const &value) noexcept -> bsl::errc_type
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
+            auto *const pmut_vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == pmut_vps)) {
                 bsl::error()
                     << "vpsid "                                                              // --
                     << bsl::hex(vpsid)                                                       // --
@@ -782,7 +709,7 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            return vps->write_reg(tls, intrinsic, reg, value);
+            return pmut_vps->write(mut_tls, mut_intrinsic, reg, value);
         }
 
         /// <!-- description -->
@@ -791,21 +718,21 @@ namespace mk
         ///     will return the VMExit reason.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
-        ///   @param log the VMExit log to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsics to use
+        ///   @param mut_log the VMExit log to use
         ///   @param vpsid the ID of the VPS to run
         ///   @return Returns the VMExit reason on success, or
         ///     bsl::safe_uintmax::failure() on failure.
         ///
         [[nodiscard]] constexpr auto
-        run(tls_t &tls,
-            intrinsic_t &intrinsic,
-            bsl::safe_uint16 const &vpsid,
-            vmexit_log_t &log) noexcept -> bsl::safe_uintmax
+        run(tls_t &mut_tls,
+            intrinsic_t &mut_intrinsic,
+            vmexit_log_t &mut_log,
+            bsl::safe_uint16 const &vpsid) noexcept -> bsl::safe_uintmax
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
+            auto *const pmut_vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == pmut_vps)) {
                 bsl::error()
                     << "vpsid "                                                              // --
                     << bsl::hex(vpsid)                                                       // --
@@ -817,25 +744,26 @@ namespace mk
                 return bsl::safe_uintmax::failure();
             }
 
-            return vps->run(tls, intrinsic, log);
+            return pmut_vps->run(mut_tls, mut_intrinsic, mut_log);
         }
 
         /// <!-- description -->
         ///   @brief Advance the IP of the requested VPS
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to advance the IP for
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        advance_ip(tls_t &tls, intrinsic_t &intrinsic, bsl::safe_uint16 const &vpsid) noexcept
+        advance_ip(
+            tls_t &mut_tls, intrinsic_t &mut_intrinsic, bsl::safe_uint16 const &vpsid) noexcept
             -> bsl::errc_type
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
+            auto *const pmut_vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == pmut_vps)) {
                 bsl::error()
                     << "vpsid "                                                              // --
                     << bsl::hex(vpsid)                                                       // --
@@ -847,7 +775,7 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            return vps->advance_ip(tls, intrinsic);
+            return pmut_vps->advance_ip(mut_tls, mut_intrinsic);
         }
 
         /// <!-- description -->
@@ -856,18 +784,18 @@ namespace mk
         ///     values stored in the VPS.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to clear
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        clear(tls_t &tls, intrinsic_t &intrinsic, bsl::safe_uint16 const &vpsid) noexcept
+        clear(tls_t &mut_tls, intrinsic_t const &intrinsic, bsl::safe_uint16 const &vpsid) noexcept
             -> bsl::errc_type
         {
-            auto *const vps{m_pool.at_if(bsl::to_umax(vpsid))};
-            if (bsl::unlikely(nullptr == vps)) {
+            auto *const pmut_vps{m_pool.at_if(bsl::to_umax(vpsid))};
+            if (bsl::unlikely(nullptr == pmut_vps)) {
                 bsl::error()
                     << "vpsid "                                                              // --
                     << bsl::hex(vpsid)                                                       // --
@@ -879,19 +807,20 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            return vps->clear(tls, intrinsic);
+            return pmut_vps->clear(mut_tls, intrinsic);
         }
 
         /// <!-- description -->
         ///   @brief Dumps the requested VPS
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsics to use
         ///   @param vpsid the ID of the VPS to dump
         ///
         constexpr void
-        dump(tls_t &tls, intrinsic_t &intrinsic, bsl::safe_uint16 const &vpsid) noexcept
+        dump(tls_t &mut_tls, intrinsic_t const &intrinsic, bsl::safe_uint16 const &vpsid)
+            const noexcept
         {
             if constexpr (BSL_DEBUG_LEVEL == bsl::CRITICAL_ONLY) {
                 return;
@@ -910,7 +839,7 @@ namespace mk
                 return;
             }
 
-            vps->dump(tls, intrinsic);
+            vps->dump(mut_tls, intrinsic);
         }
     };
 }

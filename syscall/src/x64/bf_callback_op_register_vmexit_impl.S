@@ -31,7 +31,7 @@
     .type   bf_callback_op_register_vmexit_impl, @function
 bf_callback_op_register_vmexit_impl:
 
-    mov rax, 0x6642000000030003
+    mov rax, 0x6642000000030001
     syscall
 
     ret

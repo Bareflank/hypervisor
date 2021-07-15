@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-#include <span_t.h>
+#include <elf_file_t.h>
 
 /** @brief stores ELF file associated with the microkernel */
-struct span_t g_mk_elf_file = {0};
+struct elf_file_t g_mk_elf_file = {0};

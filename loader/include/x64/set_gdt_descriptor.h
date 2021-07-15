@@ -46,7 +46,7 @@
  *     at the provided index
  *   @param attrib the attributes to set the decriptor to in the provided GDT
  *     at the provided index
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t set_gdt_descriptor(
     struct global_descriptor_table_register_t const *const gdtr,

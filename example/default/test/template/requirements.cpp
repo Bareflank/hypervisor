@@ -26,6 +26,7 @@
 
 #include <bsl/convert.hpp>
 #include <bsl/discard.hpp>
+#include <bsl/move.hpp>
 #include <bsl/ut.hpp>
 
 namespace
@@ -50,77 +51,6 @@ namespace
     ///
 
     constinit bsl::errc_type const g_verify_constinit{};
-
-    /// NOTE:
-    /// - The following is used to ensure that each function is marked as
-    ///   const as needed. Everything in the test_member_const function
-    ///   should be marked as const. If it is not, it will not compile.
-    ///   The test_member_nonconst function should have all of the functions
-    ///   to ensure that everything is tested.
-    /// - Also note that in this test we have two of our classes under test.
-    ///   This is to support the == and != operator functions. These functions
-    ///   are not member functions, but we add them to these tests anyways
-    ///   as they have to use member functions, which adds an additional check
-    ///   encase we are missing something, and it allows the non-const tests
-    ///   to be the same as the noexcept tests.
-    /// - The const test does not need to test constructors as that doesn't
-    ///   make much sense, and it is expect that for some classes, not all of
-    ///   the member functions will be in the const test as they will not be
-    ///   marked as const. The non-const test should have every function
-    ///   including the constructors.
-    ///
-
-    // NOLINTNEXTLINE(bsl-user-defined-type-names-match-header-name)
-    class fixture_t final
-    {
-        bsl::errc_type m_errc1{};
-        bsl::errc_type m_errc2{};
-
-    public:
-        [[nodiscard]] constexpr auto
-        test_member_const() const noexcept -> bool
-        {
-            bsl::discard(m_errc1.get());
-            bsl::discard(!m_errc1);
-            bsl::discard(m_errc1.success());
-            bsl::discard(m_errc1.failure());
-            bsl::discard(m_errc1.is_checked());
-            bsl::discard(m_errc1.is_unchecked());
-            bsl::discard(m_errc1 == m_errc2);
-            bsl::discard(m_errc1 != m_errc2);
-
-            return true;
-        }
-
-        [[nodiscard]] constexpr auto
-        test_member_nonconst() noexcept -> bool
-        {
-            constexpr auto the_answer{42_i32};
-
-            bsl::discard(bsl::errc_type{});
-            bsl::discard(bsl::errc_type{the_answer.get()});
-            bsl::discard(bsl::errc_type{the_answer});
-            bsl::discard(m_errc1.get());
-            bsl::discard(!m_errc1);
-            bsl::discard(m_errc1.success());
-            bsl::discard(m_errc1.failure());
-            bsl::discard(m_errc1.is_checked());
-            bsl::discard(m_errc1.is_unchecked());
-            bsl::discard(m_errc1 == m_errc2);
-            bsl::discard(m_errc1 != m_errc2);
-
-            return true;
-        }
-    };
-
-    /// NOTE:
-    /// - The following verifies that all of our code will compile as a
-    ///   constexpr. If test_member_nonconst contains a call to all of the
-    ///   functions in your class, the following will not compile if anything
-    ///   in the class is not constexpr friendly.
-    ///
-
-    constexpr fixture_t FIXTURE1{};
 }
 
 /// <!-- description -->
@@ -141,69 +71,63 @@ main() noexcept -> bsl::exit_code
 
     bsl::ut_scenario{"verify supports constinit/constexpr"} = []() noexcept {
         bsl::discard(g_verify_constinit);
-        bsl::discard(FIXTURE1);
     };
 
     /// NOTE:
     /// - The following verifies that all functions are marked as noexcept.
     ///   This list should include not only all of the functions, but all
     ///   constructors as well.
+    /// - It also verifies that certain functions are labeled as const,
+    ///   which behavior.cpp should be doing as well. Basically, each
+    ///   function should be checked for noexcept twice. One for const, and
+    ///   one for non-const. This is because most of the time, functions
+    ///   that have both const and non-const are actually two different
+    ///   functions, so checking both ensures all forms are verified.
     ///
 
     bsl::ut_scenario{"verify noexcept"} = []() noexcept {
         bsl::ut_given{} = []() noexcept {
-            bsl::errc_type errc1{};
-            bsl::errc_type errc2{};
+            bsl::errc_type mut_errc1{};
+            bsl::errc_type mut_errc2{};
+            bsl::errc_type const errc3{};
+            bsl::errc_type const errc4{};
             constexpr auto the_answer{42_i32};
             bsl::ut_then{} = []() noexcept {
+                /// NOTE:
+                /// - Check constructors
+                ///
+
                 static_assert(noexcept(bsl::errc_type{}));
                 static_assert(noexcept(bsl::errc_type{the_answer.get()}));
                 static_assert(noexcept(bsl::errc_type{the_answer}));
-                static_assert(noexcept(errc1.get()));
-                static_assert(noexcept(!errc1));
-                static_assert(noexcept(errc1.success()));
-                static_assert(noexcept(errc1.failure()));
-                static_assert(noexcept(errc1.is_checked()));
-                static_assert(noexcept(errc1.is_unchecked()));
-                static_assert(noexcept(errc1 == errc2));
-                static_assert(noexcept(errc1 != errc2));
-            };
-        };
-    };
 
-    /// NOTE:
-    /// - The following is what actually verifies constness. This can be
-    ///   left as is in each test. It is important to note that we use a
-    ///   static_assert here to ensure that the const functions are also
-    ///   constexpr friendly as yet another verifier that this is working
-    ///   correctly.
-    ///
+                /// NOTE:
+                /// - Check non-const
+                ///
 
-    bsl::ut_scenario{"verify constness"} = []() noexcept {
-        bsl::ut_given{} = []() noexcept {
-            fixture_t fixture2{};
-            bsl::ut_then{} = [&]() noexcept {
-                static_assert(FIXTURE1.test_member_const());
-                bsl::ut_check(fixture2.test_member_nonconst());
-            };
-        };
-    };
+                static_assert(noexcept(mut_errc1 = errc3));
+                static_assert(noexcept(mut_errc1 = bsl::move(mut_errc2)));
+                static_assert(noexcept(mut_errc1.get()));
+                static_assert(noexcept(!mut_errc1));
+                static_assert(noexcept(mut_errc1.success()));
+                static_assert(noexcept(mut_errc1.failure()));
+                static_assert(noexcept(mut_errc1.is_checked()));
+                static_assert(noexcept(mut_errc1.is_unchecked()));
+                static_assert(noexcept(mut_errc1 == errc4));
+                static_assert(noexcept(mut_errc1 != errc4));
 
-    /// NOTE:
-    /// - The following a second version of this, designed to support
-    ///   classes that are not constexpr friendly. Ideally, you will never
-    ///   need this, but in some cases, this might be needed. The difference
-    ///   is we use const instead of a global constexpr used in a static
-    ///   assert.
-    ///
+                /// NOTE:
+                /// - Check const
+                ///
 
-    bsl::ut_scenario{"verify constness without using constexpr"} = []() noexcept {
-        bsl::ut_given{} = []() noexcept {
-            fixture_t fixture2{};
-            fixture_t const fixture3{};
-            bsl::ut_then{} = [&]() noexcept {
-                bsl::ut_check(fixture3.test_member_const());
-                bsl::ut_check(fixture2.test_member_nonconst());
+                static_assert(noexcept(errc3.get()));
+                static_assert(noexcept(!errc3));
+                static_assert(noexcept(errc3.success()));
+                static_assert(noexcept(errc3.failure()));
+                static_assert(noexcept(errc3.is_checked()));
+                static_assert(noexcept(errc3.is_unchecked()));
+                static_assert(noexcept(errc3 == errc4));
+                static_assert(noexcept(errc3 != errc4));
             };
         };
     };

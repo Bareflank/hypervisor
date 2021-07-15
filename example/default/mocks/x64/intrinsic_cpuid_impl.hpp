@@ -41,48 +41,48 @@ namespace example
     ///
     /// <!-- inputs/outputs -->
     ///   @param gs a pointer to the global storage to use
-    ///   @param rax the index used by CPUID, returns resulting rax
-    ///   @param rbx returns resulting rbx
-    ///   @param rcx the subindex used by CPUID, returns the resulting rcx
-    ///   @param rdx returns resulting rdx
+    ///   @param pmut_rax the index used by CPUID, returns resulting rax
+    ///   @param pmut_rbx returns resulting rbx
+    ///   @param pmut_rcx the subindex used by CPUID, returns the resulting rcx
+    ///   @param pmut_rdx returns resulting rdx
     ///
     extern "C" constexpr void
     intrinsic_cpuid_impl(
-        gs_t *const gs,
-        bsl::uint64 *const rax,
-        bsl::uint64 *const rbx,
-        bsl::uint64 *const rcx,
-        bsl::uint64 *const rdx) noexcept
+        gs_t const *const gs,
+        bsl::uint64 *const pmut_rax,
+        bsl::uint64 *const pmut_rbx,
+        bsl::uint64 *const pmut_rcx,
+        bsl::uint64 *const pmut_rdx) noexcept
     {
         if (bsl::unlikely_assert(nullptr == gs)) {
             bsl::alert() << "gs is null\n" << bsl::here();
             return;
         }
 
-        if (bsl::unlikely_assert(nullptr == rax)) {
-            bsl::alert() << "rax is null\n" << bsl::here();
+        if (bsl::unlikely_assert(nullptr == pmut_rax)) {
+            bsl::alert() << "pmut_rax is null\n" << bsl::here();
             return;
         }
 
-        if (bsl::unlikely_assert(nullptr == rbx)) {
-            bsl::alert() << "rbx is null\n" << bsl::here();
+        if (bsl::unlikely_assert(nullptr == pmut_rbx)) {
+            bsl::alert() << "pmut_rbx is null\n" << bsl::here();
             return;
         }
 
-        if (bsl::unlikely_assert(nullptr == rcx)) {
-            bsl::alert() << "rcx is null\n" << bsl::here();
+        if (bsl::unlikely_assert(nullptr == pmut_rcx)) {
+            bsl::alert() << "pmut_rcx is null\n" << bsl::here();
             return;
         }
 
-        if (bsl::unlikely_assert(nullptr == rdx)) {
-            bsl::alert() << "rdx is null\n" << bsl::here();
+        if (bsl::unlikely_assert(nullptr == pmut_rdx)) {
+            bsl::alert() << "pmut_rdx is null\n" << bsl::here();
             return;
         }
 
-        *rax = gs->cpuid_val.get();
-        *rbx = gs->cpuid_val.get();
-        *rcx = gs->cpuid_val.get();
-        *rdx = gs->cpuid_val.get();
+        *pmut_rax = gs->cpuid_val.get();
+        *pmut_rbx = gs->cpuid_val.get();
+        *pmut_rcx = gs->cpuid_val.get();
+        *pmut_rdx = gs->cpuid_val.get();
     }
 }
 

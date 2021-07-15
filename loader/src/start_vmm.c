@@ -30,6 +30,7 @@
 #include <alloc_mk_huge_pool.h>
 #include <alloc_mk_page_pool.h>
 #include <alloc_mk_root_page_table.h>
+#include <bfelf/bfelf_elf64_ehdr_t.h>
 #include <constants.h>
 #include <debug.h>
 #include <dump_ext_elf_files.h>
@@ -199,12 +200,12 @@ alloc_and_copy_mk_root_page_table_failed:
  *
  * <!-- inputs/outputs -->
  *   @param args the arguments to verify
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 static int64_t
 verify_start_vmm_args(struct start_vmm_args_t const *const args)
 {
-    uint64_t idx;
+    uint64_t i;
 
     if (((uint64_t)1) != args->ver) {
         bferror("IOCTL ABI version not supported");
@@ -231,23 +232,23 @@ verify_start_vmm_args(struct start_vmm_args_t const *const args)
         return LOADER_FAILURE;
     }
 
-    for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
-        if (((void *)0) == args->ext_elf_files[idx].addr) {
-            if (((uint64_t)0) != args->ext_elf_files[idx].size) {
+    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_EXTENSIONS; ++i) {
+        if (((void *)0) == args->ext_elf_files[i].addr) {
+            if (((uint64_t)0) != args->ext_elf_files[i].size) {
                 bferror("invalid extension address/size combination");
                 return LOADER_FAILURE;
             }
         }
 
-        if (((uint64_t)0) == args->ext_elf_files[idx].size) {
-            if (((void *)0) != args->ext_elf_files[idx].addr) {
+        if (((uint64_t)0) == args->ext_elf_files[i].size) {
+            if (((void *)0) != args->ext_elf_files[i].addr) {
                 bferror("invalid extension address/size combination");
                 return LOADER_FAILURE;
             }
         }
 
-        if (HYPERVISOR_MAX_ELF_FILE_SIZE <= args->ext_elf_files[idx].size) {
-            bferror_d32("ext_elf_files.size is invalid", (uint32_t)idx);
+        if (HYPERVISOR_MAX_ELF_FILE_SIZE <= args->ext_elf_files[i].size) {
+            bferror_d32("ext_elf_files.size is invalid", (uint32_t)i);
             return LOADER_FAILURE;
         }
     }
@@ -263,7 +264,7 @@ verify_start_vmm_args(struct start_vmm_args_t const *const args)
  *
  * <!-- inputs/outputs -->
  *   @param args arguments from the ioctl
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 start_vmm(struct start_vmm_args_t const *const args)

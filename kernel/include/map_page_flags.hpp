@@ -38,19 +38,27 @@ namespace mk
     constexpr auto MAP_PAGE_EXECUTE{0x0000000000000004_umax};
 
     /// @brief Defines the auto release tag for no auto release
-    constexpr auto MAP_PAGE_NO_AUTO_RELEASE{0_i32};
+    constexpr auto MAP_PAGE_NO_AUTO_RELEASE{0_umax};
     /// @brief Defines the auto release tag for alloc_page allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_ALLOC_PAGE{1_i32};
-    /// @brief Defines the auto release tag for alloc_huge allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_ALLOC_HUGE{2_i32};
+    constexpr auto MAP_PAGE_AUTO_RELEASE_ALLOC_PAGE{1_umax};
     /// @brief Defines the auto release tag for alloc_heap allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_ALLOC_HEAP{3_i32};
+    constexpr auto MAP_PAGE_AUTO_RELEASE_ALLOC_HEAP{2_umax};
     /// @brief Defines the auto release tag for stack allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_STACK{4_i32};
+    constexpr auto MAP_PAGE_AUTO_RELEASE_STACK{3_umax};
     /// @brief Defines the auto release tag for tls allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_TLS{5_i32};
+    constexpr auto MAP_PAGE_AUTO_RELEASE_TLS{4_umax};
+    /// @brief Defines the auto release tag for tls allocations
+    constexpr auto MAP_PAGE_AUTO_RELEASE_TCB{5_umax};
     /// @brief Defines the auto release tag for ELF allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_ELF{6_i32};
+    constexpr auto MAP_PAGE_AUTO_RELEASE_ELF{6_umax};
+
+    /// NOTE:
+    /// - Likely to support more architectures, we can only support a max
+    ///   of 8 (i.e., 3 bits in a pte).
+    ///
+
+    /// @brief Defines the auto release tag for ELF allocations
+    constexpr auto MAP_PAGE_AUTO_RELEASE_MAX{8_umax};
 }
 
 #endif

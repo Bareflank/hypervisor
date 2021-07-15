@@ -39,7 +39,7 @@
  * <!-- inputs/outputs -->
  *   @param size the total number of pages (not bytes) to allocate
  *   @param stack the span_t to store the stack addr/size.
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t alloc_mk_stack(uint32_t const size, struct span_t *const stack);
 

@@ -25,15 +25,6 @@ add_library(loader INTERFACE)
 # Includes
 # ------------------------------------------------------------------------------
 
-target_include_directories(loader SYSTEM INTERFACE
-    ${CMAKE_CURRENT_LIST_DIR}/include/interface/cpp
-
-    $<$<PLATFORM_ID:Linux>:${CMAKE_CURRENT_LIST_DIR}/linux/include>
-    $<$<PLATFORM_ID:Linux>:${CMAKE_CURRENT_LIST_DIR}/linux/include/platform_interface/cpp>
-    $<$<PLATFORM_ID:Windows>:${CMAKE_CURRENT_LIST_DIR}/windows/include>
-    $<$<PLATFORM_ID:Windows>:${CMAKE_CURRENT_LIST_DIR}/windows/include/platform_interface/cpp>
-)
-
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
     target_include_directories(loader SYSTEM INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/include/interface/cpp/x64
@@ -45,6 +36,15 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
         ${CMAKE_CURRENT_LIST_DIR}/include/interface/cpp/arm/aarch64
     )
 endif()
+
+target_include_directories(loader SYSTEM INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/include/interface/cpp
+
+    $<$<PLATFORM_ID:Linux>:${CMAKE_CURRENT_LIST_DIR}/linux/include>
+    $<$<PLATFORM_ID:Linux>:${CMAKE_CURRENT_LIST_DIR}/linux/include/platform_interface/cpp>
+    $<$<PLATFORM_ID:Windows>:${CMAKE_CURRENT_LIST_DIR}/windows/include>
+    $<$<PLATFORM_ID:Windows>:${CMAKE_CURRENT_LIST_DIR}/windows/include/platform_interface/cpp>
+)
 
 # ------------------------------------------------------------------------------
 # Sub Directories

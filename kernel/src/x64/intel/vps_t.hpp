@@ -107,1287 +107,22 @@ namespace mk
         general_purpose_regs_t m_gprs{};
 
         /// <!-- description -->
-        ///   @brief Stores the provided ES segment state info in the VPS.
+        ///   @brief Returns the row color based on the value of "val"
         ///
         /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set the VPS to
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
+        ///   @tparam T the type of field to query
+        ///   @param val the field to query
+        ///   @return Returns the row color based on the value of "val"
         ///
+        template<typename T>
         [[nodiscard]] static constexpr auto
-        set_es_segment_descriptor(
-            intrinsic_t &intrinsic, loader::state_save_t const &state) noexcept -> bsl::errc_type
+        get_row_color(bsl::safe_integral<T> const &val) noexcept -> bsl::string_view
         {
-            bsl::errc_type ret{};
-
-            constexpr auto unused{0_u16};
-            if (unused == state.es_selector) {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_ES_SELECTOR, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_ES_ACCESS_RIGHTS, VMCS_UNUSABLE_SEGMENT);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_ES_LIMIT, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_ES_BASE, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-            else {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_ES_SELECTOR, state.es_selector);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret =
-                    intrinsic.vmwrite32(VMCS_GUEST_ES_ACCESS_RIGHTS, bsl::to_u32(state.es_attrib));
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_ES_LIMIT, state.es_limit);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_ES_BASE, state.es_base);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the provided CS segment state info in the VPS.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set the VPS to
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        set_cs_segment_descriptor(
-            intrinsic_t &intrinsic, loader::state_save_t const &state) noexcept -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-
-            constexpr auto unused{0_u16};
-            if (unused == state.cs_selector) {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_CS_SELECTOR, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_CS_ACCESS_RIGHTS, VMCS_UNUSABLE_SEGMENT);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_CS_LIMIT, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_CS_BASE, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-            else {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_CS_SELECTOR, state.cs_selector);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret =
-                    intrinsic.vmwrite32(VMCS_GUEST_CS_ACCESS_RIGHTS, bsl::to_u32(state.cs_attrib));
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_CS_LIMIT, state.cs_limit);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_CS_BASE, state.cs_base);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the provided SS segment state info in the VPS.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set the VPS to
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        set_ss_segment_descriptor(
-            intrinsic_t &intrinsic, loader::state_save_t const &state) noexcept -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-
-            constexpr auto unused{0_u16};
-            if (unused == state.ss_selector) {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_SS_SELECTOR, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_SS_ACCESS_RIGHTS, VMCS_UNUSABLE_SEGMENT);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_SS_LIMIT, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_SS_BASE, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-            else {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_SS_SELECTOR, state.ss_selector);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret =
-                    intrinsic.vmwrite32(VMCS_GUEST_SS_ACCESS_RIGHTS, bsl::to_u32(state.ss_attrib));
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_SS_LIMIT, state.ss_limit);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_SS_BASE, state.ss_base);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the provided DS segment state info in the VPS.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set the VPS to
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        set_ds_segment_descriptor(
-            intrinsic_t &intrinsic, loader::state_save_t const &state) noexcept -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-
-            constexpr auto unused{0_u16};
-            if (unused == state.ds_selector) {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_DS_SELECTOR, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_DS_ACCESS_RIGHTS, VMCS_UNUSABLE_SEGMENT);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_DS_LIMIT, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_DS_BASE, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-            else {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_DS_SELECTOR, state.ds_selector);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret =
-                    intrinsic.vmwrite32(VMCS_GUEST_DS_ACCESS_RIGHTS, bsl::to_u32(state.ds_attrib));
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_DS_LIMIT, state.ds_limit);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_DS_BASE, state.ds_base);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the provided FS segment state info in the VPS.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set the VPS to
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        set_fs_segment_descriptor(
-            intrinsic_t &intrinsic, loader::state_save_t const &state) noexcept -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-
-            constexpr auto unused{0_u16};
-            if (unused == state.fs_selector) {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_FS_SELECTOR, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_FS_ACCESS_RIGHTS, VMCS_UNUSABLE_SEGMENT);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_FS_LIMIT, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_FS_BASE, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-            else {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_FS_SELECTOR, state.fs_selector);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret =
-                    intrinsic.vmwrite32(VMCS_GUEST_FS_ACCESS_RIGHTS, bsl::to_u32(state.fs_attrib));
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_FS_LIMIT, state.fs_limit);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_FS_BASE, state.fs_base);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the provided GS segment state info in the VPS.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set the VPS to
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        set_gs_segment_descriptor(
-            intrinsic_t &intrinsic, loader::state_save_t const &state) noexcept -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-
-            constexpr auto unused{0_u16};
-            if (unused == state.gs_selector) {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_GS_SELECTOR, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_GS_ACCESS_RIGHTS, VMCS_UNUSABLE_SEGMENT);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_GS_LIMIT, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_GS_BASE, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-            else {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_GS_SELECTOR, state.gs_selector);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret =
-                    intrinsic.vmwrite32(VMCS_GUEST_GS_ACCESS_RIGHTS, bsl::to_u32(state.gs_attrib));
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_GS_LIMIT, state.gs_limit);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_GS_BASE, state.gs_base);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the provided LDTR segment state info in the VPS.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set the VPS to
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        set_ldtr_segment_descriptor(
-            intrinsic_t &intrinsic, loader::state_save_t const &state) noexcept -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-
-            constexpr auto unused{0_u16};
-            if (unused == state.ldtr_selector) {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_LDTR_SELECTOR, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_LDTR_ACCESS_RIGHTS, VMCS_UNUSABLE_SEGMENT);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_LDTR_LIMIT, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_LDTR_BASE, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-            else {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_LDTR_SELECTOR, state.ldtr_selector);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(
-                    VMCS_GUEST_LDTR_ACCESS_RIGHTS, bsl::to_u32(state.ldtr_attrib));
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_LDTR_LIMIT, state.ldtr_limit);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_LDTR_BASE, state.ldtr_base);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the provided TR segment state info in the VPS.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set the VPS to
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        set_tr_segment_descriptor(
-            intrinsic_t &intrinsic, loader::state_save_t const &state) noexcept -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-
-            constexpr auto unused{0_u16};
-            if (unused == state.tr_selector) {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_TR_SELECTOR, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_TR_ACCESS_RIGHTS, VMCS_UNUSABLE_SEGMENT);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_TR_LIMIT, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_TR_BASE, {});
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-            else {
-                ret = intrinsic.vmwrite16(VMCS_GUEST_TR_SELECTOR, state.tr_selector);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret =
-                    intrinsic.vmwrite32(VMCS_GUEST_TR_ACCESS_RIGHTS, bsl::to_u32(state.tr_attrib));
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite32(VMCS_GUEST_TR_LIMIT, state.tr_limit);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                ret = intrinsic.vmwrite64(VMCS_GUEST_TR_BASE, state.tr_base);
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the ES segment info in the VPS to the provided
-        ///     state save.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        get_es_segment_descriptor(intrinsic_t &intrinsic, loader::state_save_t &state) noexcept
-            -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-            bsl::safe_uint16 selector{};
-            bsl::safe_uint32 access_rights{};
-            bsl::safe_uint32 limit{};
-            bsl::safe_uint64 base{};
-
-            ret = intrinsic.vmread16(VMCS_GUEST_ES_SELECTOR, selector.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_ES_ACCESS_RIGHTS, access_rights.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_ES_LIMIT, limit.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread64(VMCS_GUEST_ES_BASE, base.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            if (VMCS_UNUSABLE_SEGMENT == access_rights) {
-                state.es_selector = {};
-                state.es_attrib = {};
-                state.es_limit = {};
-                state.es_base = {};
-            }
-            else {
-                state.es_selector = selector.get();
-                state.es_attrib = bsl::to_u16(access_rights).get();
-                state.es_limit = limit.get();
-                state.es_base = base.get();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the CS segment info in the VPS to the provided
-        ///     state save.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        get_cs_segment_descriptor(intrinsic_t &intrinsic, loader::state_save_t &state) noexcept
-            -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-            bsl::safe_uint16 selector{};
-            bsl::safe_uint32 access_rights{};
-            bsl::safe_uint32 limit{};
-            bsl::safe_uint64 base{};
-
-            ret = intrinsic.vmread16(VMCS_GUEST_CS_SELECTOR, selector.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_CS_ACCESS_RIGHTS, access_rights.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_CS_LIMIT, limit.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread64(VMCS_GUEST_CS_BASE, base.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            if (VMCS_UNUSABLE_SEGMENT == access_rights) {
-                state.cs_selector = {};
-                state.cs_attrib = {};
-                state.cs_limit = {};
-                state.cs_base = {};
-            }
-            else {
-                state.cs_selector = selector.get();
-                state.cs_attrib = bsl::to_u16(access_rights).get();
-                state.cs_limit = limit.get();
-                state.cs_base = base.get();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the SS segment info in the VPS to the provided
-        ///     state save.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        get_ss_segment_descriptor(intrinsic_t &intrinsic, loader::state_save_t &state) noexcept
-            -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-            bsl::safe_uint16 selector{};
-            bsl::safe_uint32 access_rights{};
-            bsl::safe_uint32 limit{};
-            bsl::safe_uint64 base{};
-
-            ret = intrinsic.vmread16(VMCS_GUEST_SS_SELECTOR, selector.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_SS_ACCESS_RIGHTS, access_rights.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_SS_LIMIT, limit.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread64(VMCS_GUEST_SS_BASE, base.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            if (VMCS_UNUSABLE_SEGMENT == access_rights) {
-                state.ss_selector = {};
-                state.ss_attrib = {};
-                state.ss_limit = {};
-                state.ss_base = {};
-            }
-            else {
-                state.ss_selector = selector.get();
-                state.ss_attrib = bsl::to_u16(access_rights).get();
-                state.ss_limit = limit.get();
-                state.ss_base = base.get();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the DS segment info in the VPS to the provided
-        ///     state save.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        get_ds_segment_descriptor(intrinsic_t &intrinsic, loader::state_save_t &state) noexcept
-            -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-            bsl::safe_uint16 selector{};
-            bsl::safe_uint32 access_rights{};
-            bsl::safe_uint32 limit{};
-            bsl::safe_uint64 base{};
-
-            ret = intrinsic.vmread16(VMCS_GUEST_DS_SELECTOR, selector.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_DS_ACCESS_RIGHTS, access_rights.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_DS_LIMIT, limit.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread64(VMCS_GUEST_DS_BASE, base.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            if (VMCS_UNUSABLE_SEGMENT == access_rights) {
-                state.ds_selector = {};
-                state.ds_attrib = {};
-                state.ds_limit = {};
-                state.ds_base = {};
-            }
-            else {
-                state.ds_selector = selector.get();
-                state.ds_attrib = bsl::to_u16(access_rights).get();
-                state.ds_limit = limit.get();
-                state.ds_base = base.get();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the GS segment info in the VPS to the provided
-        ///     state save.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        get_gs_segment_descriptor(intrinsic_t &intrinsic, loader::state_save_t &state) noexcept
-            -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-            bsl::safe_uint16 selector{};
-            bsl::safe_uint32 access_rights{};
-            bsl::safe_uint32 limit{};
-            bsl::safe_uint64 base{};
-
-            ret = intrinsic.vmread16(VMCS_GUEST_GS_SELECTOR, selector.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_GS_ACCESS_RIGHTS, access_rights.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_GS_LIMIT, limit.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread64(VMCS_GUEST_GS_BASE, base.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            if (VMCS_UNUSABLE_SEGMENT == access_rights) {
-                state.gs_selector = {};
-                state.gs_attrib = {};
-                state.gs_limit = {};
-                state.gs_base = {};
-            }
-            else {
-                state.gs_selector = selector.get();
-                state.gs_attrib = bsl::to_u16(access_rights).get();
-                state.gs_limit = limit.get();
-                state.gs_base = base.get();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the FS segment info in the VPS to the provided
-        ///     state save.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        get_fs_segment_descriptor(intrinsic_t &intrinsic, loader::state_save_t &state) noexcept
-            -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-            bsl::safe_uint16 selector{};
-            bsl::safe_uint32 access_rights{};
-            bsl::safe_uint32 limit{};
-            bsl::safe_uint64 base{};
-
-            ret = intrinsic.vmread16(VMCS_GUEST_FS_SELECTOR, selector.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_FS_ACCESS_RIGHTS, access_rights.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_FS_LIMIT, limit.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread64(VMCS_GUEST_FS_BASE, base.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            if (VMCS_UNUSABLE_SEGMENT == access_rights) {
-                state.fs_selector = {};
-                state.fs_attrib = {};
-                state.fs_limit = {};
-                state.fs_base = {};
-            }
-            else {
-                state.fs_selector = selector.get();
-                state.fs_attrib = bsl::to_u16(access_rights).get();
-                state.fs_limit = limit.get();
-                state.fs_base = base.get();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the LDTR segment info in the VPS to the provided
-        ///     state save.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        get_ldtr_segment_descriptor(intrinsic_t &intrinsic, loader::state_save_t &state) noexcept
-            -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-            bsl::safe_uint16 selector{};
-            bsl::safe_uint32 access_rights{};
-            bsl::safe_uint32 limit{};
-            bsl::safe_uint64 base{};
-
-            ret = intrinsic.vmread16(VMCS_GUEST_LDTR_SELECTOR, selector.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_LDTR_ACCESS_RIGHTS, access_rights.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_LDTR_LIMIT, limit.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread64(VMCS_GUEST_LDTR_BASE, base.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            if (VMCS_UNUSABLE_SEGMENT == access_rights) {
-                state.ldtr_selector = {};
-                state.ldtr_attrib = {};
-                state.ldtr_limit = {};
-                state.ldtr_base = {};
-            }
-            else {
-                state.ldtr_selector = selector.get();
-                state.ldtr_attrib = bsl::to_u16(access_rights).get();
-                state.ldtr_limit = limit.get();
-                state.ldtr_base = base.get();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Stores the TR segment info in the VPS to the provided
-        ///     state save.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param intrinsic the intrinsics to use
-        ///   @param state the state to set
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        get_tr_segment_descriptor(intrinsic_t &intrinsic, loader::state_save_t &state) noexcept
-            -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-            bsl::safe_uint16 selector{};
-            bsl::safe_uint32 access_rights{};
-            bsl::safe_uint32 limit{};
-            bsl::safe_uint64 base{};
-
-            ret = intrinsic.vmread16(VMCS_GUEST_TR_SELECTOR, selector.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_TR_ACCESS_RIGHTS, access_rights.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread32(VMCS_GUEST_TR_LIMIT, limit.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmread64(VMCS_GUEST_TR_BASE, base.data());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            if (VMCS_UNUSABLE_SEGMENT == access_rights) {
-                state.tr_selector = {};
-                state.tr_attrib = {};
-                state.tr_limit = {};
-                state.tr_base = {};
-            }
-            else {
-                state.tr_selector = selector.get();
-                state.tr_attrib = bsl::to_u16(access_rights).get();
-                state.tr_limit = limit.get();
-                state.tr_base = base.get();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Ensures that this VPS is loaded
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        ensure_this_vps_is_loaded(tls_t &tls, intrinsic_t &intrinsic) noexcept -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-
-            if (m_id == tls.loaded_vpsid) {
-                return bsl::errc_success;
-            }
-
-            ret = intrinsic.vmload(&m_vmcs_phys);
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            tls.loaded_vpsid = m_id.get();
-            return ret;
-        }
-
-        /// <!-- description -->
-        ///   @brief This is executed on each core when a VPS is first
-        ///     allocated, and ensures the VMCS contains the current host
-        ///     states of the CPU it is running on. We don't use the state
-        ///     that the loader provides as this state can change as the
-        ///     microkernel completes it's bootstrapping process.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        init_vmcs(tls_t &tls, intrinsic_t &intrinsic) noexcept -> bsl::errc_type
-        {
-            bsl::errc_type ret{};
-            auto *const state{tls.mk_state};
-
-            auto const revision_id{intrinsic.rdmsr(IA32_VMX_BASIC)};
-            if (bsl::unlikely_assert(!revision_id)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            m_vmcs->revision_id = bsl::to_u32_unsafe(revision_id).get();
-
-            ret = this->ensure_this_vps_is_loaded(tls, intrinsic);
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite16(VMCS_HOST_ES_SELECTOR, intrinsic.es_selector());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite16(VMCS_HOST_CS_SELECTOR, intrinsic.cs_selector());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite16(VMCS_HOST_SS_SELECTOR, intrinsic.ss_selector());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite16(VMCS_HOST_DS_SELECTOR, intrinsic.ds_selector());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite16(VMCS_HOST_FS_SELECTOR, intrinsic.fs_selector());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
+            if (val.is_zero()) {
+                return bsl::blk;
             }
-
-            ret = intrinsic.vmwrite16(VMCS_HOST_GS_SELECTOR, intrinsic.gs_selector());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite16(VMCS_HOST_TR_SELECTOR, intrinsic.tr_selector());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(VMCS_HOST_IA32_PAT, intrinsic.rdmsr(IA32_PAT));
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(VMCS_HOST_IA32_EFER, intrinsic.rdmsr(IA32_EFER));
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret =
-                intrinsic.vmwrite64(VMCS_HOST_IA32_SYSENTER_CS, intrinsic.rdmsr(IA32_SYSENTER_CS));
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(VMCS_HOST_CR0, intrinsic.cr0());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(VMCS_HOST_CR3, intrinsic.cr3());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(VMCS_HOST_CR4, intrinsic.cr4());
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(VMCS_HOST_FS_BASE, intrinsic.rdmsr(IA32_FS_BASE));
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(VMCS_HOST_GS_BASE, intrinsic.rdmsr(IA32_GS_BASE));
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(VMCS_HOST_TR_BASE, state->tr_base);
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(VMCS_HOST_GDTR_BASE, bsl::to_umax(state->gdtr.base));
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(VMCS_HOST_IDTR_BASE, bsl::to_umax(state->idtr.base));
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(
-                VMCS_HOST_IA32_SYSENTER_ESP, intrinsic.rdmsr(IA32_SYSENTER_ESP));
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(
-                VMCS_HOST_IA32_SYSENTER_EIP, intrinsic.rdmsr(IA32_SYSENTER_EIP));
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            ret = intrinsic.vmwrite64(VMCS_HOST_RIP, bsl::to_umax(&intrinsic_vmexit));
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            m_vmcs_missing_registers.host_ia32_star =              // --
-                intrinsic.rdmsr(IA32_STAR).get();                  // --
-            m_vmcs_missing_registers.host_ia32_lstar =             // --
-                intrinsic.rdmsr(IA32_LSTAR).get();                 // --
-            m_vmcs_missing_registers.host_ia32_cstar =             // --
-                intrinsic.rdmsr(IA32_CSTAR).get();                 // --
-            m_vmcs_missing_registers.host_ia32_fmask =             // --
-                intrinsic.rdmsr(IA32_FMASK).get();                 // --
-            m_vmcs_missing_registers.host_ia32_kernel_gs_base =    // --
-                intrinsic.rdmsr(IA32_KERNEL_GS_BASE).get();        // --
 
-            return bsl::errc_success;
+            return bsl::rst;
         }
 
         /// <!-- description -->
@@ -1400,16 +135,13 @@ namespace mk
         ///
         template<typename T>
         constexpr void
-        dump(bsl::string_view const &str, bsl::safe_integral<T> const &val) const noexcept
+        dump_field(bsl::string_view const &str, bsl::safe_integral<T> const &val) const noexcept
         {
-            auto const *rowcolor{bsl::rst};
+            if constexpr (BSL_DEBUG_LEVEL == bsl::CRITICAL_ONLY) {
+                return;
+            }
 
-            if (val.is_zero()) {
-                rowcolor = bsl::blk;
-            }
-            else {
-                bsl::touch();
-            }
+            auto const rowcolor{get_row_color(val)};
 
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<40s", str};
@@ -1438,6 +170,410 @@ namespace mk
 
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;
+        }
+
+        /// <!-- description -->
+        ///   @brief Stores the provided ES segment state info in the VPS.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_intrinsic the intrinsics to use
+        ///   @param selector_idx the selector VMCS index to use
+        ///   @param selector_val the selector value to write to the VMCS
+        ///   @param attrib_idx the attrib VMCS index to use
+        ///   @param attrib_val the attrib value to write to the VMCS
+        ///   @param limit_idx the limit VMCS index to use
+        ///   @param limit_val the limit value to write to the VMCS
+        ///   @param base_idx the base VMCS index to use
+        ///   @param base_val the base value to write to the VMCS
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] static constexpr auto
+        set_segment_descriptor(
+            intrinsic_t &mut_intrinsic,
+            bsl::safe_uintmax const &selector_idx,
+            bsl::safe_uint16 const &selector_val,
+            bsl::safe_uintmax const &attrib_idx,
+            bsl::safe_uint32 const &attrib_val,
+            bsl::safe_uintmax const &limit_idx,
+            bsl::safe_uint32 const &limit_val,
+            bsl::safe_uintmax const &base_idx,
+            bsl::safe_uint64 const &base_val) noexcept -> bsl::errc_type
+        {
+            bsl::errc_type mut_ret{};
+
+            if (selector_val.is_zero()) {
+                mut_ret = mut_intrinsic.vmwrite16(selector_idx, {});
+                if (bsl::unlikely_assert(!mut_ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return mut_ret;
+                }
+
+                mut_ret = mut_intrinsic.vmwrite32(attrib_idx, VMCS_UNUSABLE_SEGMENT);
+                if (bsl::unlikely_assert(!mut_ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return mut_ret;
+                }
+
+                mut_ret = mut_intrinsic.vmwrite32(limit_idx, {});
+                if (bsl::unlikely_assert(!mut_ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return mut_ret;
+                }
+
+                mut_ret = mut_intrinsic.vmwrite64(base_idx, {});
+                if (bsl::unlikely_assert(!mut_ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return mut_ret;
+                }
+
+                bsl::touch();
+            }
+            else {
+                mut_ret = mut_intrinsic.vmwrite16(selector_idx, selector_val);
+                if (bsl::unlikely_assert(!mut_ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return mut_ret;
+                }
+
+                mut_ret = mut_intrinsic.vmwrite32(attrib_idx, attrib_val);
+                if (bsl::unlikely_assert(!mut_ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return mut_ret;
+                }
+
+                mut_ret = mut_intrinsic.vmwrite32(limit_idx, limit_val);
+                if (bsl::unlikely_assert(!mut_ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return mut_ret;
+                }
+
+                mut_ret = mut_intrinsic.vmwrite64(base_idx, base_val);
+                if (bsl::unlikely_assert(!mut_ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return mut_ret;
+                }
+
+                bsl::touch();
+            }
+
+            return mut_ret;
+        }
+
+        /// <!-- description -->
+        ///   @brief Stores the ES segment info in the VPS to the provided
+        ///     state save.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param intrinsic the intrinsics to use
+        ///   @param selector_idx the selector VMCS index to use
+        ///   @param pmut_selector_val the selector value to read from the VMCS
+        ///   @param attrib_idx the attrib VMCS index to use
+        ///   @param pmut_attrib_val the attrib value to read from the VMCS
+        ///   @param limit_idx the limit VMCS index to use
+        ///   @param pmut_limit_val the limit value to read from the VMCS
+        ///   @param base_idx the base VMCS index to use
+        ///   @param pmut_base_val the base value to read from the VMCS
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] static constexpr auto
+        get_segment_descriptor(
+            intrinsic_t const &intrinsic,
+            bsl::safe_uintmax const &selector_idx,
+            bsl::uint16 *const pmut_selector_val,
+            bsl::safe_uintmax const &attrib_idx,
+            bsl::uint16 *const pmut_attrib_val,
+            bsl::safe_uintmax const &limit_idx,
+            bsl::uint32 *const pmut_limit_val,
+            bsl::safe_uintmax const &base_idx,
+            bsl::uint64 *const pmut_base_val) noexcept -> bsl::errc_type
+        {
+            bsl::errc_type mut_ret{};
+            bsl::safe_uint32 mut_attrib{};
+
+            mut_ret = intrinsic.vmread16(selector_idx, pmut_selector_val);
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = intrinsic.vmread32(attrib_idx, mut_attrib.data());
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = intrinsic.vmread32(limit_idx, pmut_limit_val);
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = intrinsic.vmread64(base_idx, pmut_base_val);
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            if (VMCS_UNUSABLE_SEGMENT == mut_attrib) {
+                *pmut_selector_val = {};
+                *pmut_attrib_val = {};
+                *pmut_limit_val = {};
+                *pmut_base_val = {};
+            }
+            else {
+                *pmut_attrib_val = bsl::to_u16(mut_attrib).get();
+            }
+
+            return mut_ret;
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns a sanitized version of the provided pinbased_ctls
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param val the value to sanitize
+        ///   @return Returns a sanitized version of the provided pinbased_ctls
+        ///
+        [[nodiscard]] static constexpr auto
+        sanitize_pinbased_ctls(bsl::safe_uint64 const &val) noexcept -> bsl::safe_uint32
+        {
+            constexpr auto vmcs_pinbased_ctls_mask{0x28_u64};
+            return bsl::to_u32(val | vmcs_pinbased_ctls_mask);
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns a sanitized version of the provided exit_ctls
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param val the value to sanitize
+        ///   @return Returns a sanitized version of the provided exit_ctls
+        ///
+        [[nodiscard]] static constexpr auto
+        sanitize_exit_ctls(bsl::safe_uint64 const &val) noexcept -> bsl::safe_uint32
+        {
+            constexpr auto vmcs_exit_ctls_mask{0x3C0204_u64};
+            return bsl::to_u32(val | vmcs_exit_ctls_mask);
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns a sanitized version of the provided entry_ctls
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param val the value to sanitize
+        ///   @return Returns a sanitized version of the provided entry_ctls
+        ///
+        [[nodiscard]] static constexpr auto
+        sanitize_entry_ctls(bsl::safe_uint64 const &val) noexcept -> bsl::safe_uint32
+        {
+            constexpr auto vmcs_entry_ctls_mask{0xC204_u64};
+            return bsl::to_u32(val | vmcs_entry_ctls_mask);
+        }
+
+        /// <!-- description -->
+        ///   @brief Ensures that this VPS is loaded
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///   @param intrinsic the intrinsics to use
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        ensure_this_vps_is_loaded(tls_t &mut_tls, intrinsic_t const &intrinsic) const noexcept
+            -> bsl::errc_type
+        {
+            if (m_id == mut_tls.loaded_vpsid) {
+                return bsl::errc_success;
+            }
+
+            auto const ret{intrinsic.vmload(&m_vmcs_phys)};
+            if (bsl::unlikely_assert(!ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return ret;
+            }
+
+            mut_tls.loaded_vpsid = m_id.get();
+            return ret;
+        }
+
+        /// <!-- description -->
+        ///   @brief This is executed on each core when a VPS is first
+        ///     allocated, and ensures the VMCS contains the current host
+        ///     states of the CPU it is running on. We don't use the state
+        ///     that the loader provides as this state can change as the
+        ///     microkernel completes it's bootstrapping process.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsics to use
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        init_vmcs(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept -> bsl::errc_type
+        {
+            bsl::errc_type mut_ret{};
+            auto *const pmut_state{mut_tls.mk_state};
+
+            auto const revision_id{mut_intrinsic.rdmsr(IA32_VMX_BASIC)};
+            if (bsl::unlikely_assert(!revision_id)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::errc_failure;
+            }
+
+            m_vmcs->revision_id = bsl::to_u32_unsafe(revision_id).get();
+
+            mut_ret = this->ensure_this_vps_is_loaded(mut_tls, mut_intrinsic);
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite16(VMCS_HOST_ES_SELECTOR, mut_intrinsic.es_selector());
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite16(VMCS_HOST_CS_SELECTOR, mut_intrinsic.cs_selector());
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite16(VMCS_HOST_SS_SELECTOR, mut_intrinsic.ss_selector());
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite16(VMCS_HOST_DS_SELECTOR, mut_intrinsic.ds_selector());
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite16(VMCS_HOST_FS_SELECTOR, mut_intrinsic.fs_selector());
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite16(VMCS_HOST_GS_SELECTOR, mut_intrinsic.gs_selector());
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite16(VMCS_HOST_TR_SELECTOR, mut_intrinsic.tr_selector());
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_HOST_IA32_PAT, mut_intrinsic.rdmsr(IA32_PAT));
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_HOST_IA32_EFER, mut_intrinsic.rdmsr(IA32_EFER));
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite64(
+                VMCS_HOST_IA32_SYSENTER_CS, mut_intrinsic.rdmsr(IA32_SYSENTER_CS));
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_HOST_CR0, mut_intrinsic.cr0());
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_HOST_CR3, mut_intrinsic.cr3());
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_HOST_CR4, mut_intrinsic.cr4());
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_HOST_FS_BASE, mut_intrinsic.rdmsr(IA32_FS_BASE));
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_HOST_GS_BASE, mut_intrinsic.rdmsr(IA32_GS_BASE));
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_HOST_TR_BASE, bsl::to_u64(pmut_state->tr_base));
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret =
+                mut_intrinsic.vmwrite64(VMCS_HOST_GDTR_BASE, bsl::to_u64(pmut_state->gdtr.base));
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret =
+                mut_intrinsic.vmwrite64(VMCS_HOST_IDTR_BASE, bsl::to_u64(pmut_state->idtr.base));
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite64(
+                VMCS_HOST_IA32_SYSENTER_ESP, mut_intrinsic.rdmsr(IA32_SYSENTER_ESP));
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwrite64(
+                VMCS_HOST_IA32_SYSENTER_EIP, mut_intrinsic.rdmsr(IA32_SYSENTER_EIP));
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            mut_ret = mut_intrinsic.vmwritefunc(VMCS_HOST_RIP, &intrinsic_vmexit);
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
+            m_vmcs_missing_registers.host_ia32_star =              // --
+                mut_intrinsic.rdmsr(IA32_STAR).get();              // --
+            m_vmcs_missing_registers.host_ia32_lstar =             // --
+                mut_intrinsic.rdmsr(IA32_LSTAR).get();             // --
+            m_vmcs_missing_registers.host_ia32_cstar =             // --
+                mut_intrinsic.rdmsr(IA32_CSTAR).get();             // --
+            m_vmcs_missing_registers.host_ia32_fmask =             // --
+                mut_intrinsic.rdmsr(IA32_FMASK).get();             // --
+            m_vmcs_missing_registers.host_ia32_kernel_gs_base =    // --
+                mut_intrinsic.rdmsr(IA32_KERNEL_GS_BASE).get();    // --
+
+            return mut_ret;
         }
 
     public:
@@ -1482,20 +618,19 @@ namespace mk
         ///     vp_t after calling this function will results in UB.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page pool to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page pool to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        release(tls_t &tls, page_pool_t &page_pool) noexcept -> bsl::errc_type
+        release(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept -> bsl::errc_type
         {
             if (this->is_zombie()) {
                 return bsl::errc_success;
             }
 
-            tls.state_reversal_required = true;
-            bsl::finally zombify_on_error{[this]() noexcept -> void {
+            bsl::finally mut_zombify_on_error{[this]() noexcept -> void {
                 this->zombify();
             }};
 
@@ -1517,7 +652,7 @@ namespace mk
             m_vmcs_missing_registers = {};
 
             m_vmcs_phys = bsl::safe_uintmax::failure();
-            page_pool.deallocate(tls, m_vmcs, ALLOCATE_TAG_VMCS);
+            mut_page_pool.deallocate(mut_tls, m_vmcs, ALLOCATE_TAG_VMCS);
             m_vmcs = {};
 
             m_assigned_ppid = syscall::BF_INVALID_ID;
@@ -1525,7 +660,7 @@ namespace mk
             m_allocated = allocated_status_t::deallocated;
             m_id = bsl::safe_uint16::failure();
 
-            zombify_on_error.ignore();
+            mut_zombify_on_error.ignore();
             return bsl::errc_success;
         }
 
@@ -1545,23 +680,21 @@ namespace mk
         ///   @brief Allocates this vps_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
-        ///   @param page_pool the page pool to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsics to use
+        ///   @param mut_page_pool the page pool to use
         ///   @param vpid The ID of the VP to assign the newly created VP to
         ///   @param ppid The ID of the PP to assign the newly created VP to
         ///   @return Returns ID of the newly allocated vps
         ///
         [[nodiscard]] constexpr auto
         allocate(
-            tls_t &tls,
-            intrinsic_t &intrinsic,
-            page_pool_t &page_pool,
+            tls_t &mut_tls,
+            intrinsic_t &mut_intrinsic,
+            page_pool_t &mut_page_pool,
             bsl::safe_uint16 const &vpid,
             bsl::safe_uint16 const &ppid) noexcept -> bsl::safe_uint16
         {
-            bsl::errc_type ret{};
-
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vps_t not initialized\n" << bsl::here();
                 return bsl::safe_uint16::failure();
@@ -1582,7 +715,7 @@ namespace mk
                 return bsl::safe_uint16::failure();
             }
 
-            // if (bsl::unlikely(vp_pool.is_zombie(tls, vpid))) {
+            // if (bsl::unlikely(vp_pool.is_zombie(mut_tls, vpid))) {
             //     bsl::error() << "vp "                                                // --
             //                  << bsl::hex(vpid)                                       // --
             //                  << " is a zombie and a vps cannot be assigned to it"    // --
@@ -1592,7 +725,7 @@ namespace mk
             //     return bsl::safe_uint16::failure();
             // }
 
-            // if (bsl::unlikely(vp_pool.is_deallocated(tls, vpid))) {
+            // if (bsl::unlikely(vp_pool.is_deallocated(mut_tls, vpid))) {
             //     bsl::error() << "vp "                                                         // --
             //                  << bsl::hex(vpid)                                                // --
             //                  << " has not been created and a vps cannot be assigned to it"    // --
@@ -1617,11 +750,11 @@ namespace mk
                 return bsl::safe_uint16::failure();
             }
 
-            if (bsl::unlikely(!(ppid < tls.online_pps))) {
+            if (bsl::unlikely(!(ppid < mut_tls.online_pps))) {
                 bsl::error() << "pp "                                                  // --
                              << bsl::hex(ppid)                                         // --
                              << " is not less than the total number of online pps "    // --
-                             << bsl::hex(tls.online_pps)                               // --
+                             << bsl::hex(mut_tls.online_pps)                           // --
                              << " and a vps cannot be assigned to it"                  // --
                              << bsl::endl                                              // --
                              << bsl::here();                                           // --
@@ -1649,28 +782,25 @@ namespace mk
                 return bsl::safe_uint16::failure();
             }
 
-            tls.state_reversal_required = true;
-            tls.log_vpsid = m_id.get();
-
-            bsl::finally cleanup_on_error{[this, &tls, &page_pool]() noexcept -> void {
+            bsl::finally mut_cleanup_on_error{[this, &mut_tls, &mut_page_pool]() noexcept -> void {
                 m_vmcs_phys = bsl::safe_uintmax::failure();
-                page_pool.deallocate(tls, m_vmcs, ALLOCATE_TAG_VMCS);
+                mut_page_pool.deallocate(mut_tls, m_vmcs, ALLOCATE_TAG_VMCS);
                 m_vmcs = {};
             }};
 
-            m_vmcs = page_pool.template allocate<vmcs_t>(tls, ALLOCATE_TAG_VMCS);
+            m_vmcs = mut_page_pool.template allocate<vmcs_t>(mut_tls, ALLOCATE_TAG_VMCS);
             if (bsl::unlikely(nullptr == m_vmcs)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::safe_uint16::failure();
             }
 
-            m_vmcs_phys = page_pool.virt_to_phys(m_vmcs);
+            m_vmcs_phys = mut_page_pool.virt_to_phys(m_vmcs);
             if (bsl::unlikely_assert(!m_vmcs_phys)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::safe_uint16::failure();
             }
 
-            ret = this->init_vmcs(tls, intrinsic);
+            auto const ret{this->init_vmcs(mut_tls, mut_intrinsic)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::safe_uint16::failure();
@@ -1680,7 +810,7 @@ namespace mk
             m_assigned_ppid = ppid;
             m_allocated = allocated_status_t::allocated;
 
-            cleanup_on_error.ignore();
+            mut_cleanup_on_error.ignore();
             return m_id;
         }
 
@@ -1688,13 +818,13 @@ namespace mk
         ///   @brief Deallocates this vps_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param page_pool the page pool to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page pool to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        deallocate(tls_t &tls, page_pool_t &page_pool) noexcept -> bsl::errc_type
+        deallocate(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vps_t not initialized\n" << bsl::here();
@@ -1721,8 +851,7 @@ namespace mk
                 return bsl::errc_precondition;
             }
 
-            tls.state_reversal_required = true;
-            bsl::finally zombify_on_error{[this]() noexcept -> void {
+            bsl::finally mut_zombify_on_error{[this]() noexcept -> void {
                 this->zombify();
             }};
 
@@ -1744,14 +873,14 @@ namespace mk
             m_vmcs_missing_registers = {};
 
             m_vmcs_phys = bsl::safe_uintmax::failure();
-            page_pool.deallocate(tls, m_vmcs, ALLOCATE_TAG_VMCS);
+            mut_page_pool.deallocate(mut_tls, m_vmcs, ALLOCATE_TAG_VMCS);
             m_vmcs = {};
 
             m_assigned_ppid = syscall::BF_INVALID_ID;
             m_assigned_vpid = syscall::BF_INVALID_ID;
             m_allocated = allocated_status_t::deallocated;
 
-            zombify_on_error.ignore();
+            mut_zombify_on_error.ignore();
             return bsl::errc_success;
         }
 
@@ -1818,13 +947,13 @@ namespace mk
         ///   @brief Sets this vps_t as active.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsics to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        set_active(tls_t &tls, intrinsic_t &intrinsic) noexcept -> bsl::errc_type
+        set_active(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vps_t not initialized\n" << bsl::here();
@@ -1841,39 +970,39 @@ namespace mk
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely(tls.active_vpid != m_assigned_vpid)) {
+            if (bsl::unlikely(mut_tls.active_vpid != m_assigned_vpid)) {
                 bsl::error() << "vps "                                 // --
                              << bsl::hex(m_id)                         // --
                              << " is assigned to vp "                  // --
                              << bsl::hex(m_assigned_vpid)              // --
                              << " and cannot be activated with vp "    // --
-                             << bsl::hex(tls.active_vpid)              // --
+                             << bsl::hex(mut_tls.active_vpid)          // --
                              << bsl::endl                              // --
                              << bsl::here();                           // --
 
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely(tls.ppid != m_assigned_ppid)) {
+            if (bsl::unlikely(mut_tls.ppid != m_assigned_ppid)) {
                 bsl::error() << "vps "                               // --
                              << bsl::hex(m_id)                       // --
                              << " is assigned to pp "                // --
                              << bsl::hex(m_assigned_ppid)            // --
                              << " and cannot be activated on pp "    // --
-                             << bsl::hex(tls.ppid)                   // --
+                             << bsl::hex(mut_tls.ppid)               // --
                              << bsl::endl                            // --
                              << bsl::here();                         // --
 
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely_assert(syscall::BF_INVALID_ID != tls.active_vpsid)) {
-                bsl::error() << "vps "                        // --
-                             << bsl::hex(tls.active_vpsid)    // --
-                             << " is still active on pp "     // --
-                             << bsl::hex(tls.ppid)            // --
-                             << bsl::endl                     // --
-                             << bsl::here();                  // --
+            if (bsl::unlikely_assert(syscall::BF_INVALID_ID != mut_tls.active_vpsid)) {
+                bsl::error() << "vps "                            // --
+                             << bsl::hex(mut_tls.active_vpsid)    // --
+                             << " is still active on pp "         // --
+                             << bsl::hex(mut_tls.ppid)            // --
+                             << bsl::endl                         // --
+                             << bsl::here();                      // --
 
                 return bsl::errc_precondition;
             }
@@ -1889,24 +1018,24 @@ namespace mk
                 return bsl::errc_precondition;
             }
 
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_RAX, m_gprs.rax);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_RBX, m_gprs.rbx);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_RCX, m_gprs.rcx);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_RDX, m_gprs.rdx);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_RBP, m_gprs.rbp);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_RSI, m_gprs.rsi);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_RDI, m_gprs.rdi);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_R8, m_gprs.r8);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_R9, m_gprs.r9);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_R10, m_gprs.r10);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_R11, m_gprs.r11);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_R12, m_gprs.r12);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_R13, m_gprs.r13);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_R14, m_gprs.r14);
-            intrinsic.set_tls_reg(syscall::TLS_OFFSET_R15, m_gprs.r15);
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RAX, bsl::to_u64(m_gprs.rax));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RBX, bsl::to_u64(m_gprs.rbx));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RCX, bsl::to_u64(m_gprs.rcx));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RDX, bsl::to_u64(m_gprs.rdx));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RBP, bsl::to_u64(m_gprs.rbp));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RSI, bsl::to_u64(m_gprs.rsi));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RDI, bsl::to_u64(m_gprs.rdi));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R8, bsl::to_u64(m_gprs.r8));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R9, bsl::to_u64(m_gprs.r9));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R10, bsl::to_u64(m_gprs.r10));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R11, bsl::to_u64(m_gprs.r11));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R12, bsl::to_u64(m_gprs.r12));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R13, bsl::to_u64(m_gprs.r13));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R14, bsl::to_u64(m_gprs.r14));
+            mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R15, bsl::to_u64(m_gprs.r15));
 
-            tls.active_vpsid = m_id.get();
-            m_active_ppid = tls.ppid;
+            mut_tls.active_vpsid = m_id.get();
+            m_active_ppid = mut_tls.ppid;
 
             return bsl::errc_success;
         }
@@ -1915,13 +1044,13 @@ namespace mk
         ///   @brief Sets this vps_t as inactive.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsics to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        set_inactive(tls_t &tls, intrinsic_t &intrinsic) noexcept -> bsl::errc_type
+        set_inactive(tls_t &mut_tls, intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vps_t not initialized\n" << bsl::here();
@@ -1938,24 +1067,24 @@ namespace mk
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely_assert(syscall::BF_INVALID_ID == tls.active_vpsid)) {
+            if (bsl::unlikely_assert(syscall::BF_INVALID_ID == mut_tls.active_vpsid)) {
                 bsl::error() << "vps "                     // --
                              << bsl::hex(m_id)             // --
                              << " is not active on pp "    // --
-                             << bsl::hex(tls.ppid)         // --
+                             << bsl::hex(mut_tls.ppid)     // --
                              << bsl::endl                  // --
                              << bsl::here();               // --
 
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely_assert(tls.active_vpsid != m_id)) {
-                bsl::error() << "vps "                        // --
-                             << bsl::hex(tls.active_vpsid)    // --
-                             << " is still active on pp "     // --
-                             << bsl::hex(tls.ppid)            // --
-                             << bsl::endl                     // --
-                             << bsl::here();                  // --
+            if (bsl::unlikely_assert(mut_tls.active_vpsid != m_id)) {
+                bsl::error() << "vps "                            // --
+                             << bsl::hex(mut_tls.active_vpsid)    // --
+                             << " is still active on pp "         // --
+                             << bsl::hex(mut_tls.ppid)            // --
+                             << bsl::endl                         // --
+                             << bsl::here();                      // --
 
                 return bsl::errc_precondition;
             }
@@ -1970,11 +1099,11 @@ namespace mk
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely_assert(tls.ppid != m_active_ppid)) {
+            if (bsl::unlikely_assert(mut_tls.ppid != m_active_ppid)) {
                 bsl::error() << "vps "                     // --
                              << bsl::hex(m_id)             // --
                              << " is not active on pp "    // --
-                             << bsl::hex(tls.ppid)         // --
+                             << bsl::hex(mut_tls.ppid)     // --
                              << bsl::endl                  // --
                              << bsl::here();               // --
 
@@ -1997,7 +1126,7 @@ namespace mk
             m_gprs.r14 = intrinsic.tls_reg(syscall::TLS_OFFSET_R14).get();
             m_gprs.r15 = intrinsic.tls_reg(syscall::TLS_OFFSET_R15).get();
 
-            tls.active_vpsid = syscall::BF_INVALID_ID.get();
+            mut_tls.active_vpsid = syscall::BF_INVALID_ID.get();
             m_active_ppid = bsl::safe_uint16::failure();
 
             return bsl::errc_success;
@@ -2015,7 +1144,7 @@ namespace mk
         ///     bsl::safe_uint16::failure()
         ///
         [[nodiscard]] constexpr auto
-        is_active(tls_t &tls) const noexcept -> bsl::safe_uint16
+        is_active(tls_t const &tls) const noexcept -> bsl::safe_uint16
         {
             bsl::discard(tls);
             return m_active_ppid;
@@ -2031,7 +1160,7 @@ namespace mk
         ///     false otherwise
         ///
         [[nodiscard]] constexpr auto
-        is_active_on_current_pp(tls_t &tls) const noexcept -> bool
+        is_active_on_current_pp(tls_t const &tls) const noexcept -> bool
         {
             return tls.ppid == m_active_ppid;
         }
@@ -2050,7 +1179,8 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
-        migrate(tls_t &tls, intrinsic_t &intrinsic, bsl::safe_uint16 const &ppid) noexcept
+        migrate(
+            tls_t const &tls, intrinsic_t const &intrinsic, bsl::safe_uint16 const &ppid) noexcept
             -> bsl::errc_type
         {
             bsl::discard(tls);
@@ -2165,17 +1295,17 @@ namespace mk
         ///   @brief Stores the provided state in the VPS.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsics to use
         ///   @param state the state to set the VPS to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         [[nodiscard]] constexpr auto
         state_save_to_vps(
-            tls_t &tls, intrinsic_t &intrinsic, loader::state_save_t const &state) noexcept
+            tls_t &mut_tls, intrinsic_t &mut_intrinsic, loader::state_save_t const &state) noexcept
             -> bsl::errc_type
         {
-            bsl::errc_type ret{};
+            bsl::errc_type mut_ret{};
 
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vps_t not initialized\n" << bsl::here();
@@ -2192,41 +1322,41 @@ namespace mk
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely(tls.ppid != m_assigned_ppid)) {
+            if (bsl::unlikely(mut_tls.ppid != m_assigned_ppid)) {
                 bsl::error() << "vp "                                  // --
                              << bsl::hex(m_id)                         // --
                              << " is assigned to pp "                  // --
                              << bsl::hex(m_assigned_ppid)              // --
                              << " and cannot be operated on by pp "    // --
-                             << bsl::hex(tls.ppid)                     // --
+                             << bsl::hex(mut_tls.ppid)                 // --
                              << bsl::endl                              // --
                              << bsl::here();                           // --
 
                 return bsl::errc_precondition;
             }
 
-            ret = this->ensure_this_vps_is_loaded(tls, intrinsic);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->ensure_this_vps_is_loaded(mut_tls, mut_intrinsic);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            if (tls.active_vpsid == m_id) {
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_RAX, state.rax);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_RBX, state.rbx);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_RCX, state.rcx);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_RDX, state.rdx);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_RBP, state.rbp);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_RSI, state.rsi);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_RDI, state.rdi);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_R8, state.r8);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_R9, state.r9);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_R10, state.r10);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_R11, state.r11);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_R12, state.r12);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_R13, state.r13);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_R14, state.r14);
-                intrinsic.set_tls_reg(syscall::TLS_OFFSET_R15, state.r15);
+            if (mut_tls.active_vpsid == m_id) {
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RAX, bsl::to_u64(state.rax));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RBX, bsl::to_u64(state.rbx));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RCX, bsl::to_u64(state.rcx));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RDX, bsl::to_u64(state.rdx));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RBP, bsl::to_u64(state.rbp));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RSI, bsl::to_u64(state.rsi));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RDI, bsl::to_u64(state.rdi));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R8, bsl::to_u64(state.r8));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R9, bsl::to_u64(state.r9));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R10, bsl::to_u64(state.r10));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R11, bsl::to_u64(state.r11));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R12, bsl::to_u64(state.r12));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R13, bsl::to_u64(state.r13));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R14, bsl::to_u64(state.r14));
+                mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R15, bsl::to_u64(state.r15));
             }
             else {
                 m_gprs.rax = state.rax;
@@ -2246,132 +1376,210 @@ namespace mk
                 m_gprs.r15 = state.r15;
             }
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_RSP, state.rsp);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_RSP, bsl::to_u64(state.rsp));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_RIP, state.rip);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_RIP, bsl::to_u64(state.rip));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_RFLAGS, state.rflags);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_RFLAGS, bsl::to_u64(state.rflags));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             auto const gdtr_limit{bsl::to_u32(state.gdtr.limit)};
-            ret = intrinsic.vmwrite32(VMCS_GUEST_GDTR_LIMIT, gdtr_limit);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_GDTR_LIMIT, gdtr_limit);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            auto const gdtr_base{bsl::to_umax(state.gdtr.base)};
-            ret = intrinsic.vmwrite64(VMCS_GUEST_GDTR_BASE, gdtr_base);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_GDTR_BASE, bsl::to_u64(state.gdtr.base));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             auto const idtr_limit{bsl::to_u32(state.idtr.limit)};
-            ret = intrinsic.vmwrite32(VMCS_GUEST_IDTR_LIMIT, idtr_limit);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_IDTR_LIMIT, idtr_limit);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            auto const idtr_base{bsl::to_umax(state.idtr.base)};
-            ret = intrinsic.vmwrite64(VMCS_GUEST_IDTR_BASE, idtr_base);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_IDTR_BASE, bsl::to_u64(state.idtr.base));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->set_es_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->set_segment_descriptor(
+                mut_intrinsic,
+                VMCS_GUEST_ES_SELECTOR,
+                bsl::to_u16(state.es_selector),
+                VMCS_GUEST_ES_ACCESS_RIGHTS,
+                bsl::to_u32(state.es_attrib),
+                VMCS_GUEST_ES_LIMIT,
+                bsl::to_u32(state.es_limit),
+                VMCS_GUEST_ES_BASE,
+                bsl::to_u64(state.es_base));
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->set_cs_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->set_segment_descriptor(
+                mut_intrinsic,
+                VMCS_GUEST_CS_SELECTOR,
+                bsl::to_u16(state.cs_selector),
+                VMCS_GUEST_CS_ACCESS_RIGHTS,
+                bsl::to_u32(state.cs_attrib),
+                VMCS_GUEST_CS_LIMIT,
+                bsl::to_u32(state.cs_limit),
+                VMCS_GUEST_CS_BASE,
+                bsl::to_u64(state.cs_base));
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->set_ss_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->set_segment_descriptor(
+                mut_intrinsic,
+                VMCS_GUEST_SS_SELECTOR,
+                bsl::to_u16(state.ss_selector),
+                VMCS_GUEST_SS_ACCESS_RIGHTS,
+                bsl::to_u32(state.ss_attrib),
+                VMCS_GUEST_SS_LIMIT,
+                bsl::to_u32(state.ss_limit),
+                VMCS_GUEST_SS_BASE,
+                bsl::to_u64(state.ss_base));
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->set_ds_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->set_segment_descriptor(
+                mut_intrinsic,
+                VMCS_GUEST_DS_SELECTOR,
+                bsl::to_u16(state.ds_selector),
+                VMCS_GUEST_DS_ACCESS_RIGHTS,
+                bsl::to_u32(state.ds_attrib),
+                VMCS_GUEST_DS_LIMIT,
+                bsl::to_u32(state.ds_limit),
+                VMCS_GUEST_DS_BASE,
+                bsl::to_u64(state.ds_base));
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->set_fs_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->set_segment_descriptor(
+                mut_intrinsic,
+                VMCS_GUEST_FS_SELECTOR,
+                bsl::to_u16(state.fs_selector),
+                VMCS_GUEST_FS_ACCESS_RIGHTS,
+                bsl::to_u32(state.fs_attrib),
+                VMCS_GUEST_FS_LIMIT,
+                bsl::to_u32(state.fs_limit),
+                VMCS_GUEST_FS_BASE,
+                bsl::to_u64(state.fs_base));
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->set_gs_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->set_segment_descriptor(
+                mut_intrinsic,
+                VMCS_GUEST_GS_SELECTOR,
+                bsl::to_u16(state.gs_selector),
+                VMCS_GUEST_GS_ACCESS_RIGHTS,
+                bsl::to_u32(state.gs_attrib),
+                VMCS_GUEST_GS_LIMIT,
+                bsl::to_u32(state.gs_limit),
+                VMCS_GUEST_GS_BASE,
+                bsl::to_u64(state.gs_base));
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->set_ldtr_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->set_segment_descriptor(
+                mut_intrinsic,
+                VMCS_GUEST_LDTR_SELECTOR,
+                bsl::to_u16(state.ldtr_selector),
+                VMCS_GUEST_LDTR_ACCESS_RIGHTS,
+                bsl::to_u32(state.ldtr_attrib),
+                VMCS_GUEST_LDTR_LIMIT,
+                bsl::to_u32(state.ldtr_limit),
+                VMCS_GUEST_LDTR_BASE,
+                bsl::to_u64(state.ldtr_base));
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->set_tr_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->set_segment_descriptor(
+                mut_intrinsic,
+                VMCS_GUEST_TR_SELECTOR,
+                bsl::to_u16(state.tr_selector),
+                VMCS_GUEST_TR_ACCESS_RIGHTS,
+                bsl::to_u32(state.tr_attrib),
+                VMCS_GUEST_TR_LIMIT,
+                bsl::to_u32(state.tr_limit),
+                VMCS_GUEST_TR_BASE,
+                bsl::to_u64(state.tr_base));
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_CR0, state.cr0);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_CR0, bsl::to_u64(state.cr0));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            m_vmcs_missing_registers.cr2 = state.cr2;
+            m_vmcs_missing_registers.guest_cr2 = state.cr2;
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_CR3, state.cr3);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_CR3, bsl::to_u64(state.cr3));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_CR4, state.cr4);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_CR4, bsl::to_u64(state.cr4));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            m_vmcs_missing_registers.dr6 = state.dr6;
+            m_vmcs_missing_registers.guest_dr6 = state.dr6;
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_DR7, state.dr7);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_DR7, bsl::to_u64(state.dr7));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_IA32_EFER, state.ia32_efer);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_IA32_EFER, bsl::to_u64(state.ia32_efer));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             m_vmcs_missing_registers.guest_ia32_star = state.ia32_star;
@@ -2379,67 +1587,73 @@ namespace mk
             m_vmcs_missing_registers.guest_ia32_cstar = state.ia32_cstar;
             m_vmcs_missing_registers.guest_ia32_fmask = state.ia32_fmask;
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_FS_BASE, state.ia32_fs_base);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_FS_BASE, bsl::to_u64(state.ia32_fs_base));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_GS_BASE, state.ia32_gs_base);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_GS_BASE, bsl::to_u64(state.ia32_gs_base));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             m_vmcs_missing_registers.guest_ia32_kernel_gs_base = state.ia32_kernel_gs_base;
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_IA32_SYSENTER_CS, state.ia32_sysenter_cs);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(
+                VMCS_GUEST_IA32_SYSENTER_CS, bsl::to_u64(state.ia32_sysenter_cs));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_IA32_SYSENTER_ESP, state.ia32_sysenter_esp);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(
+                VMCS_GUEST_IA32_SYSENTER_ESP, bsl::to_u64(state.ia32_sysenter_esp));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_IA32_SYSENTER_EIP, state.ia32_sysenter_eip);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(
+                VMCS_GUEST_IA32_SYSENTER_EIP, bsl::to_u64(state.ia32_sysenter_eip));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_IA32_PAT, state.ia32_pat);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_IA32_PAT, bsl::to_u64(state.ia32_pat));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_IA32_DEBUGCTL, state.ia32_debugctl);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret =
+                mut_intrinsic.vmwrite64(VMCS_GUEST_IA32_DEBUGCTL, bsl::to_u64(state.ia32_debugctl));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            return bsl::errc_success;
+            return mut_ret;
         }
 
         /// <!-- description -->
         ///   @brief Stores the VPS state in the provided state save.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsics to use
-        ///   @param state the state save to store the VPS state to
+        ///   @param mut_state the state save to store the VPS state to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         [[nodiscard]] constexpr auto
-        vps_to_state_save(tls_t &tls, intrinsic_t &intrinsic, loader::state_save_t &state) noexcept
-            -> bsl::errc_type
+        vps_to_state_save(
+            tls_t &mut_tls,
+            intrinsic_t const &intrinsic,
+            loader::state_save_t &mut_state) const noexcept -> bsl::errc_type
         {
-            bsl::errc_type ret{};
+            bsl::errc_type mut_ret{};
 
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vps_t not initialized\n" << bsl::here();
@@ -2456,501 +1670,316 @@ namespace mk
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely(tls.ppid != m_assigned_ppid)) {
+            if (bsl::unlikely(mut_tls.ppid != m_assigned_ppid)) {
                 bsl::error() << "vp "                                  // --
                              << bsl::hex(m_id)                         // --
                              << " is assigned to pp "                  // --
                              << bsl::hex(m_assigned_ppid)              // --
                              << " and cannot be operated on by pp "    // --
-                             << bsl::hex(tls.ppid)                     // --
+                             << bsl::hex(mut_tls.ppid)                 // --
                              << bsl::endl                              // --
                              << bsl::here();                           // --
 
                 return bsl::errc_precondition;
             }
 
-            ret = this->ensure_this_vps_is_loaded(tls, intrinsic);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->ensure_this_vps_is_loaded(mut_tls, intrinsic);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            if (tls.active_vpsid == m_id) {
-                state.rax = intrinsic.tls_reg(syscall::TLS_OFFSET_RAX).get();
-                state.rbx = intrinsic.tls_reg(syscall::TLS_OFFSET_RBX).get();
-                state.rcx = intrinsic.tls_reg(syscall::TLS_OFFSET_RCX).get();
-                state.rdx = intrinsic.tls_reg(syscall::TLS_OFFSET_RDX).get();
-                state.rbp = intrinsic.tls_reg(syscall::TLS_OFFSET_RBP).get();
-                state.rsi = intrinsic.tls_reg(syscall::TLS_OFFSET_RSI).get();
-                state.rdi = intrinsic.tls_reg(syscall::TLS_OFFSET_RDI).get();
-                state.r8 = intrinsic.tls_reg(syscall::TLS_OFFSET_R8).get();
-                state.r9 = intrinsic.tls_reg(syscall::TLS_OFFSET_R9).get();
-                state.r10 = intrinsic.tls_reg(syscall::TLS_OFFSET_R10).get();
-                state.r11 = intrinsic.tls_reg(syscall::TLS_OFFSET_R11).get();
-                state.r12 = intrinsic.tls_reg(syscall::TLS_OFFSET_R12).get();
-                state.r13 = intrinsic.tls_reg(syscall::TLS_OFFSET_R13).get();
-                state.r14 = intrinsic.tls_reg(syscall::TLS_OFFSET_R14).get();
-                state.r15 = intrinsic.tls_reg(syscall::TLS_OFFSET_R15).get();
+            if (mut_tls.active_vpsid == m_id) {
+                mut_state.rax = intrinsic.tls_reg(syscall::TLS_OFFSET_RAX).get();
+                mut_state.rbx = intrinsic.tls_reg(syscall::TLS_OFFSET_RBX).get();
+                mut_state.rcx = intrinsic.tls_reg(syscall::TLS_OFFSET_RCX).get();
+                mut_state.rdx = intrinsic.tls_reg(syscall::TLS_OFFSET_RDX).get();
+                mut_state.rbp = intrinsic.tls_reg(syscall::TLS_OFFSET_RBP).get();
+                mut_state.rsi = intrinsic.tls_reg(syscall::TLS_OFFSET_RSI).get();
+                mut_state.rdi = intrinsic.tls_reg(syscall::TLS_OFFSET_RDI).get();
+                mut_state.r8 = intrinsic.tls_reg(syscall::TLS_OFFSET_R8).get();
+                mut_state.r9 = intrinsic.tls_reg(syscall::TLS_OFFSET_R9).get();
+                mut_state.r10 = intrinsic.tls_reg(syscall::TLS_OFFSET_R10).get();
+                mut_state.r11 = intrinsic.tls_reg(syscall::TLS_OFFSET_R11).get();
+                mut_state.r12 = intrinsic.tls_reg(syscall::TLS_OFFSET_R12).get();
+                mut_state.r13 = intrinsic.tls_reg(syscall::TLS_OFFSET_R13).get();
+                mut_state.r14 = intrinsic.tls_reg(syscall::TLS_OFFSET_R14).get();
+                mut_state.r15 = intrinsic.tls_reg(syscall::TLS_OFFSET_R15).get();
             }
             else {
-                state.rax = m_gprs.rax;
-                state.rbx = m_gprs.rbx;
-                state.rcx = m_gprs.rcx;
-                state.rdx = m_gprs.rdx;
-                state.rbp = m_gprs.rbp;
-                state.rsi = m_gprs.rsi;
-                state.rdi = m_gprs.rdi;
-                state.r8 = m_gprs.r8;
-                state.r9 = m_gprs.r9;
-                state.r10 = m_gprs.r10;
-                state.r11 = m_gprs.r11;
-                state.r12 = m_gprs.r12;
-                state.r13 = m_gprs.r13;
-                state.r14 = m_gprs.r14;
-                state.r15 = m_gprs.r15;
+                mut_state.rax = m_gprs.rax;
+                mut_state.rbx = m_gprs.rbx;
+                mut_state.rcx = m_gprs.rcx;
+                mut_state.rdx = m_gprs.rdx;
+                mut_state.rbp = m_gprs.rbp;
+                mut_state.rsi = m_gprs.rsi;
+                mut_state.rdi = m_gprs.rdi;
+                mut_state.r8 = m_gprs.r8;
+                mut_state.r9 = m_gprs.r9;
+                mut_state.r10 = m_gprs.r10;
+                mut_state.r11 = m_gprs.r11;
+                mut_state.r12 = m_gprs.r12;
+                mut_state.r13 = m_gprs.r13;
+                mut_state.r14 = m_gprs.r14;
+                mut_state.r15 = m_gprs.r15;
             }
 
-            ret = intrinsic.vmread64(VMCS_GUEST_RSP, &state.rsp);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_RSP, &mut_state.rsp);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread64(VMCS_GUEST_RIP, &state.rip);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_RIP, &mut_state.rip);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread64(VMCS_GUEST_RFLAGS, &state.rflags);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_RFLAGS, &mut_state.rflags);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread16(VMCS_GUEST_GDTR_LIMIT, &state.gdtr.limit);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread16(VMCS_GUEST_GDTR_LIMIT, &mut_state.gdtr.limit);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            bsl::safe_uint64 gdtr_base{};
-            ret = intrinsic.vmread64(VMCS_GUEST_GDTR_BASE, gdtr_base.data());
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_GDTR_BASE, &mut_state.gdtr.base);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            state.gdtr.base = bsl::to_ptr<bsl::uint64 *>(gdtr_base);
-
-            ret = intrinsic.vmread16(VMCS_GUEST_IDTR_LIMIT, &state.idtr.limit);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread16(VMCS_GUEST_IDTR_LIMIT, &mut_state.idtr.limit);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            bsl::safe_uint64 idtr_base{};
-            ret = intrinsic.vmread64(VMCS_GUEST_IDTR_BASE, idtr_base.data());
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_IDTR_BASE, &mut_state.idtr.base);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            state.idtr.base = bsl::to_ptr<bsl::uint64 *>(idtr_base);
+            mut_ret = this->get_segment_descriptor(
+                intrinsic,
+                VMCS_GUEST_ES_SELECTOR,
+                &mut_state.es_selector,
+                VMCS_GUEST_ES_ACCESS_RIGHTS,
+                &mut_state.es_attrib,
+                VMCS_GUEST_ES_LIMIT,
+                &mut_state.es_limit,
+                VMCS_GUEST_ES_BASE,
+                &mut_state.es_base);
 
-            ret = this->get_es_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->get_cs_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->get_segment_descriptor(
+                intrinsic,
+                VMCS_GUEST_CS_SELECTOR,
+                &mut_state.cs_selector,
+                VMCS_GUEST_CS_ACCESS_RIGHTS,
+                &mut_state.cs_attrib,
+                VMCS_GUEST_CS_LIMIT,
+                &mut_state.cs_limit,
+                VMCS_GUEST_CS_BASE,
+                &mut_state.cs_base);
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->get_ss_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->get_segment_descriptor(
+                intrinsic,
+                VMCS_GUEST_SS_SELECTOR,
+                &mut_state.ss_selector,
+                VMCS_GUEST_SS_ACCESS_RIGHTS,
+                &mut_state.ss_attrib,
+                VMCS_GUEST_SS_LIMIT,
+                &mut_state.ss_limit,
+                VMCS_GUEST_SS_BASE,
+                &mut_state.ss_base);
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->get_ds_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->get_segment_descriptor(
+                intrinsic,
+                VMCS_GUEST_DS_SELECTOR,
+                &mut_state.ds_selector,
+                VMCS_GUEST_DS_ACCESS_RIGHTS,
+                &mut_state.ds_attrib,
+                VMCS_GUEST_DS_LIMIT,
+                &mut_state.ds_limit,
+                VMCS_GUEST_DS_BASE,
+                &mut_state.ds_base);
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->get_fs_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->get_segment_descriptor(
+                intrinsic,
+                VMCS_GUEST_FS_SELECTOR,
+                &mut_state.fs_selector,
+                VMCS_GUEST_FS_ACCESS_RIGHTS,
+                &mut_state.fs_attrib,
+                VMCS_GUEST_FS_LIMIT,
+                &mut_state.fs_limit,
+                VMCS_GUEST_FS_BASE,
+                &mut_state.fs_base);
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->get_gs_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->get_segment_descriptor(
+                intrinsic,
+                VMCS_GUEST_GS_SELECTOR,
+                &mut_state.gs_selector,
+                VMCS_GUEST_GS_ACCESS_RIGHTS,
+                &mut_state.gs_attrib,
+                VMCS_GUEST_GS_LIMIT,
+                &mut_state.gs_limit,
+                VMCS_GUEST_GS_BASE,
+                &mut_state.gs_base);
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->get_ldtr_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->get_segment_descriptor(
+                intrinsic,
+                VMCS_GUEST_LDTR_SELECTOR,
+                &mut_state.ldtr_selector,
+                VMCS_GUEST_LDTR_ACCESS_RIGHTS,
+                &mut_state.ldtr_attrib,
+                VMCS_GUEST_LDTR_LIMIT,
+                &mut_state.ldtr_limit,
+                VMCS_GUEST_LDTR_BASE,
+                &mut_state.ldtr_base);
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = this->get_tr_segment_descriptor(intrinsic, state);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->get_segment_descriptor(
+                intrinsic,
+                VMCS_GUEST_TR_SELECTOR,
+                &mut_state.tr_selector,
+                VMCS_GUEST_TR_ACCESS_RIGHTS,
+                &mut_state.tr_attrib,
+                VMCS_GUEST_TR_LIMIT,
+                &mut_state.tr_limit,
+                VMCS_GUEST_TR_BASE,
+                &mut_state.tr_base);
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread64(VMCS_GUEST_CR0, &state.cr0);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_CR0, &mut_state.cr0);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            state.cr2 = m_vmcs_missing_registers.cr2;
+            mut_state.cr2 = m_vmcs_missing_registers.guest_cr2;
 
-            ret = intrinsic.vmread64(VMCS_GUEST_CR3, &state.cr3);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_CR3, &mut_state.cr3);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread64(VMCS_GUEST_CR4, &state.cr4);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_CR4, &mut_state.cr4);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            state.dr6 = m_vmcs_missing_registers.dr6;
+            mut_state.dr6 = m_vmcs_missing_registers.guest_dr6;
 
-            ret = intrinsic.vmread64(VMCS_GUEST_DR7, &state.dr7);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_DR7, &mut_state.dr7);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread64(VMCS_GUEST_IA32_EFER, &state.ia32_efer);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_IA32_EFER, &mut_state.ia32_efer);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            state.ia32_star = m_vmcs_missing_registers.guest_ia32_star;
-            state.ia32_lstar = m_vmcs_missing_registers.guest_ia32_lstar;
-            state.ia32_cstar = m_vmcs_missing_registers.guest_ia32_cstar;
-            state.ia32_fmask = m_vmcs_missing_registers.guest_ia32_fmask;
+            mut_state.ia32_star = m_vmcs_missing_registers.guest_ia32_star;
+            mut_state.ia32_lstar = m_vmcs_missing_registers.guest_ia32_lstar;
+            mut_state.ia32_cstar = m_vmcs_missing_registers.guest_ia32_cstar;
+            mut_state.ia32_fmask = m_vmcs_missing_registers.guest_ia32_fmask;
 
-            ret = intrinsic.vmread64(VMCS_GUEST_FS_BASE, &state.ia32_fs_base);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_FS_BASE, &mut_state.ia32_fs_base);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread64(VMCS_GUEST_GS_BASE, &state.ia32_gs_base);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_GS_BASE, &mut_state.ia32_gs_base);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            state.ia32_kernel_gs_base = m_vmcs_missing_registers.guest_ia32_kernel_gs_base;
+            mut_state.ia32_kernel_gs_base = m_vmcs_missing_registers.guest_ia32_kernel_gs_base;
 
-            ret = intrinsic.vmread64(VMCS_GUEST_IA32_SYSENTER_CS, &state.ia32_sysenter_cs);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_IA32_SYSENTER_CS, &mut_state.ia32_sysenter_cs);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread64(VMCS_GUEST_IA32_SYSENTER_ESP, &state.ia32_sysenter_esp);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret =
+                intrinsic.vmread64(VMCS_GUEST_IA32_SYSENTER_ESP, &mut_state.ia32_sysenter_esp);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread64(VMCS_GUEST_IA32_SYSENTER_EIP, &state.ia32_sysenter_eip);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret =
+                intrinsic.vmread64(VMCS_GUEST_IA32_SYSENTER_EIP, &mut_state.ia32_sysenter_eip);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread64(VMCS_GUEST_IA32_PAT, &state.ia32_pat);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_IA32_PAT, &mut_state.ia32_pat);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread64(VMCS_GUEST_IA32_DEBUGCTL, &state.ia32_debugctl);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmread64(VMCS_GUEST_IA32_DEBUGCTL, &mut_state.ia32_debugctl);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Reads a field from the VPS given the index of
-        ///     the field to read.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam FIELD_TYPE the type (i.e., size) of field to read
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
-        ///   @param index the index of the field to read from the VPS
-        ///   @return Returns the value of the requested field from the
-        ///     VPS or bsl::safe_integral<FIELD_TYPE>::failure()
-        ///
-        template<typename FIELD_TYPE>
-        [[nodiscard]] constexpr auto
-        read(tls_t &tls, intrinsic_t &intrinsic, bsl::safe_uintmax const &index) noexcept
-            -> bsl::safe_integral<FIELD_TYPE>
-        {
-            /// TODO:
-            /// - Implement a field type checker to make sure the user is
-            ///   using the proper field type here. Make sure that this field
-            ///   type checker is only turned on with debug builds.
-            ///
-
-            bsl::errc_type ret{};
-            bsl::safe_integral<FIELD_TYPE> val{};
-
-            if (bsl::unlikely_assert(!m_id)) {
-                bsl::error() << "vps_t not initialized\n" << bsl::here();
-                return bsl::safe_integral<FIELD_TYPE>::failure();
-            }
-
-            if (bsl::unlikely(m_allocated != allocated_status_t::allocated)) {
-                bsl::error() << "vps "                                             // --
-                             << bsl::hex(m_id)                                     // --
-                             << "'s status is not allocated and cannot be used"    // --
-                             << bsl::endl                                          // --
-                             << bsl::here();                                       // --
-
-                return bsl::safe_integral<FIELD_TYPE>::failure();
-            }
-
-            if (bsl::unlikely(tls.ppid != m_assigned_ppid)) {
-                bsl::error() << "vp "                                  // --
-                             << bsl::hex(m_id)                         // --
-                             << " is assigned to pp "                  // --
-                             << bsl::hex(m_assigned_ppid)              // --
-                             << " and cannot be operated on by pp "    // --
-                             << bsl::hex(tls.ppid)                     // --
-                             << bsl::endl                              // --
-                             << bsl::here();                           // --
-
-                return bsl::safe_integral<FIELD_TYPE>::failure();
-            }
-
-            ret = this->ensure_this_vps_is_loaded(tls, intrinsic);
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_integral<FIELD_TYPE>::failure();
-            }
-
-            if constexpr (bsl::is_same<FIELD_TYPE, bsl::uint16>::value) {
-                ret = intrinsic.vmread16(index, val.data());
-                if (bsl::unlikely(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return val;
-                }
-
-                return val;
-            }
-
-            if constexpr (bsl::is_same<FIELD_TYPE, bsl::uint32>::value) {
-                ret = intrinsic.vmread32(index, val.data());
-                if (bsl::unlikely(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return val;
-                }
-
-                return val;
-            }
-
-            if constexpr (bsl::is_same<FIELD_TYPE, bsl::uint64>::value) {
-                ret = intrinsic.vmread64(index, val.data());
-                if (bsl::unlikely(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return val;
-                }
-
-                return val;
-            }
-
-            bsl::error() << "unsupported field type\n" << bsl::here();
-            return bsl::safe_integral<FIELD_TYPE>::failure();
-        }
-
-        /// <!-- description -->
-        ///   @brief Writes a field to the VPS given the index of
-        ///     the field and the value to write.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam FIELD_TYPE the type (i.e., size) of field to write
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
-        ///   @param index the index of the field to write to the VPS
-        ///   @param val the value to write to the VPS
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///
-        template<typename FIELD_TYPE>
-        [[nodiscard]] constexpr auto
-        write(
-            tls_t &tls,
-            intrinsic_t &intrinsic,
-            bsl::safe_uintmax const &index,
-            bsl::safe_integral<FIELD_TYPE> const &val) noexcept -> bsl::errc_type
-        {
-            /// TODO:
-            /// - Implement a field type checker to make sure the user is
-            ///   using the proper field type here. Make sure that this field
-            ///   type checker is only turned on with debug builds.
-            ///
-
-            bsl::errc_type ret{};
-
-            if (bsl::unlikely_assert(!m_id)) {
-                bsl::error() << "vps_t not initialized\n" << bsl::here();
-                return bsl::errc_precondition;
-            }
-
-            if (bsl::unlikely(m_allocated != allocated_status_t::allocated)) {
-                bsl::error() << "vps "                                             // --
-                             << bsl::hex(m_id)                                     // --
-                             << "'s status is not allocated and cannot be used"    // --
-                             << bsl::endl                                          // --
-                             << bsl::here();                                       // --
-
-                return bsl::errc_precondition;
-            }
-
-            if (bsl::unlikely_assert(!val)) {
-                bsl::error() << "invalid value\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (bsl::unlikely(tls.ppid != m_assigned_ppid)) {
-                bsl::error() << "vp "                                  // --
-                             << bsl::hex(m_id)                         // --
-                             << " is assigned to pp "                  // --
-                             << bsl::hex(m_assigned_ppid)              // --
-                             << " and cannot be operated on by pp "    // --
-                             << bsl::hex(tls.ppid)                     // --
-                             << bsl::endl                              // --
-                             << bsl::here();                           // --
-
-                return bsl::errc_precondition;
-            }
-
-            ret = this->ensure_this_vps_is_loaded(tls, intrinsic);
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            constexpr auto vmcs_pinbased_ctls_idx{0x4000_umax};
-            constexpr auto vmcs_exit_ctls_idx{0x400C_umax};
-            constexpr auto vmcs_entry_ctls_idx{0x4012_umax};
-
-            bsl::safe_integral<FIELD_TYPE> sanitized{val};
-
-            if constexpr (bsl::is_same<FIELD_TYPE, bsl::uint32>::value) {
-                switch (index.get()) {
-                    case vmcs_pinbased_ctls_idx.get(): {
-                        constexpr auto vmcs_pinbased_ctls_mask{0x28_u32};
-                        sanitized |= vmcs_pinbased_ctls_mask;
-                        break;
-                    }
-
-                    case vmcs_exit_ctls_idx.get(): {
-                        constexpr auto vmcs_exit_ctls_mask{0x3C0204_u32};
-                        sanitized |= vmcs_exit_ctls_mask;
-                        break;
-                    }
-
-                    case vmcs_entry_ctls_idx.get(): {
-                        constexpr auto vmcs_entry_ctls_mask{0xC204_u32};
-                        sanitized |= vmcs_entry_ctls_mask;
-                        break;
-                    }
-
-                    default: {
-                        break;
-                    }
-                }
-            }
-            else {
-                switch (index.get()) {
-                    case vmcs_pinbased_ctls_idx.get(): {
-                        bsl::error() << "invalid integer type for field "    // --
-                                     << bsl::hex(index)                      // --
-                                     << bsl::endl                            // --
-                                     << bsl::here();                         // --
-
-                        return bsl::errc_failure;
-                    }
-
-                    case vmcs_exit_ctls_idx.get(): {
-                        bsl::error() << "invalid integer type for field "    // --
-                                     << bsl::hex(index)                      // --
-                                     << bsl::endl                            // --
-                                     << bsl::here();                         // --
-
-                        return bsl::errc_failure;
-                    }
-
-                    case vmcs_entry_ctls_idx.get(): {
-                        bsl::error() << "invalid integer type for field "    // --
-                                     << bsl::hex(index)                      // --
-                                     << bsl::endl                            // --
-                                     << bsl::here();                         // --
-
-                        return bsl::errc_failure;
-                    }
-
-                    default: {
-                        break;
-                    }
-                }
-            }
-
-            if constexpr (bsl::is_same<FIELD_TYPE, bsl::uint16>::value) {
-                ret = intrinsic.vmwrite16(index, sanitized);
-                if (bsl::unlikely(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                return ret;
-            }
-
-            if constexpr (bsl::is_same<FIELD_TYPE, bsl::uint32>::value) {
-                ret = intrinsic.vmwrite32(index, sanitized);
-                if (bsl::unlikely(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                return ret;
-            }
-
-            if constexpr (bsl::is_same<FIELD_TYPE, bsl::uint64>::value) {
-                ret = intrinsic.vmwrite64(index, sanitized);
-                if (bsl::unlikely(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                return ret;
-            }
-
-            bsl::error() << "unsupported field type\n" << bsl::here();
-            return bsl::errc_failure;
+            return mut_ret;
         }
 
         /// <!-- description -->
@@ -2958,16 +1987,17 @@ namespace mk
         ///     defining the field to read.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsics to use
         ///   @param reg a bf_reg_t defining the field to read from the VPS
         ///   @return Returns the value of the requested field from the
         ///     VPS or bsl::safe_uintmax::failure() on failure.
         [[nodiscard]] constexpr auto
-        read_reg(tls_t &tls, intrinsic_t &intrinsic, syscall::bf_reg_t const reg) noexcept
-            -> bsl::safe_uintmax
+        read(tls_t &mut_tls, intrinsic_t const &intrinsic, syscall::bf_reg_t const reg)
+            const noexcept -> bsl::safe_uintmax
         {
-            bsl::safe_uint64 index{bsl::safe_uint64::failure()};
+            bsl::errc_type mut_ret{};
+            bsl::safe_uint64 mut_val{};
 
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vps_t not initialized\n" << bsl::here();
@@ -2984,436 +2014,869 @@ namespace mk
                 return bsl::safe_uintmax::failure();
             }
 
-            if (bsl::unlikely(tls.ppid != m_assigned_ppid)) {
+            if (bsl::unlikely(mut_tls.ppid != m_assigned_ppid)) {
                 bsl::error() << "vp "                                  // --
                              << bsl::hex(m_id)                         // --
                              << " is assigned to pp "                  // --
                              << bsl::hex(m_assigned_ppid)              // --
                              << " and cannot be operated on by pp "    // --
-                             << bsl::hex(tls.ppid)                     // --
+                             << bsl::hex(mut_tls.ppid)                 // --
                              << bsl::endl                              // --
                              << bsl::here();                           // --
 
                 return bsl::safe_uintmax::failure();
             }
 
+            mut_ret = this->ensure_this_vps_is_loaded(mut_tls, intrinsic);
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::safe_uintmax::failure();
+            }
+
             switch (reg) {
                 case syscall::bf_reg_t::bf_reg_t_rax: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RAX);
                     }
 
-                    return m_gprs.rax;
+                    return bsl::to_u64(m_gprs.rax);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rbx: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RBX);
                     }
 
-                    return m_gprs.rbx;
+                    return bsl::to_u64(m_gprs.rbx);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rcx: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RCX);
                     }
 
-                    return m_gprs.rcx;
+                    return bsl::to_u64(m_gprs.rcx);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rdx: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RDX);
                     }
 
-                    return m_gprs.rdx;
+                    return bsl::to_u64(m_gprs.rdx);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rbp: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RBP);
                     }
 
-                    return m_gprs.rbp;
+                    return bsl::to_u64(m_gprs.rbp);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rsi: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RSI);
                     }
 
-                    return m_gprs.rsi;
+                    return bsl::to_u64(m_gprs.rsi);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rdi: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RDI);
                     }
 
-                    return m_gprs.rdi;
+                    return bsl::to_u64(m_gprs.rdi);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r8: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R8);
                     }
 
-                    return m_gprs.r8;
+                    return bsl::to_u64(m_gprs.r8);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r9: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R9);
                     }
 
-                    return m_gprs.r9;
+                    return bsl::to_u64(m_gprs.r9);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r10: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R10);
                     }
 
-                    return m_gprs.r10;
+                    return bsl::to_u64(m_gprs.r10);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r11: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R11);
                     }
 
-                    return m_gprs.r11;
+                    return bsl::to_u64(m_gprs.r11);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r12: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R12);
                     }
 
-                    return m_gprs.r12;
+                    return bsl::to_u64(m_gprs.r12);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r13: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R13);
                     }
 
-                    return m_gprs.r13;
+                    return bsl::to_u64(m_gprs.r13);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r14: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R14);
                     }
 
-                    return m_gprs.r14;
+                    return bsl::to_u64(m_gprs.r14);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r15: {
-                    if (tls.active_vpsid == m_id) {
+                    if (mut_tls.active_vpsid == m_id) {
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R15);
                     }
 
-                    return m_gprs.r15;
+                    return bsl::to_u64(m_gprs.r15);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_rip: {
-                    index = VMCS_GUEST_RIP;
+                case syscall::bf_reg_t::bf_reg_t_guest_cr2: {
+                    return bsl::to_u64(m_vmcs_missing_registers.guest_cr2);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_dr6: {
+                    return bsl::to_u64(m_vmcs_missing_registers.guest_dr6);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_star: {
+                    return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_star);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_lstar: {
+                    return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_lstar);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_cstar: {
+                    return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_cstar);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_fmask: {
+                    return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_fmask);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_kernel_gs_base: {
+                    return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_kernel_gs_base);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_virtual_processor_identifier: {
+                    mut_ret = intrinsic.vmread64(VMCS_VIRTUAL_PROCESSOR_IDENTIFIER, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_rsp: {
-                    index = VMCS_GUEST_RSP;
+                case syscall::bf_reg_t::bf_reg_t_posted_interrupt_notification_vector: {
+                    mut_ret = intrinsic.vmread64(
+                        VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_rflags: {
-                    index = VMCS_GUEST_RFLAGS;
+                case syscall::bf_reg_t::bf_reg_t_eptp_index: {
+                    mut_ret = intrinsic.vmread64(VMCS_EPTP_INDEX, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_gdtr_base_addr: {
-                    index = VMCS_GUEST_GDTR_BASE;
+                case syscall::bf_reg_t::bf_reg_t_guest_es_selector: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_ES_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_gdtr_limit: {
-                    index = VMCS_GUEST_GDTR_LIMIT;
+                case syscall::bf_reg_t::bf_reg_t_guest_cs_selector: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_CS_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_idtr_base_addr: {
-                    index = VMCS_GUEST_IDTR_BASE;
+                case syscall::bf_reg_t::bf_reg_t_guest_ss_selector: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_SS_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_idtr_limit: {
-                    index = VMCS_GUEST_IDTR_LIMIT;
+                case syscall::bf_reg_t::bf_reg_t_guest_ds_selector: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_DS_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_es: {
-                    index = VMCS_GUEST_ES_SELECTOR;
+                case syscall::bf_reg_t::bf_reg_t_guest_fs_selector: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_FS_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_es_base_addr: {
-                    index = VMCS_GUEST_ES_BASE;
+                case syscall::bf_reg_t::bf_reg_t_guest_gs_selector: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_GS_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_es_limit: {
-                    index = VMCS_GUEST_ES_LIMIT;
+                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_selector: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_LDTR_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_es_attributes: {
-                    index = VMCS_GUEST_ES_ACCESS_RIGHTS;
+                case syscall::bf_reg_t::bf_reg_t_guest_tr_selector: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_TR_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_cs: {
-                    index = VMCS_GUEST_CS_SELECTOR;
+                case syscall::bf_reg_t::bf_reg_t_guest_interrupt_status: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_INTERRUPT_STATUS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_cs_base_addr: {
-                    index = VMCS_GUEST_CS_BASE;
+                case syscall::bf_reg_t::bf_reg_t_pml_index: {
+                    mut_ret = intrinsic.vmread64(VMCS_PML_INDEX, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_cs_limit: {
-                    index = VMCS_GUEST_CS_LIMIT;
+                case syscall::bf_reg_t::bf_reg_t_address_of_io_bitmap_a: {
+                    mut_ret = intrinsic.vmread64(VMCS_ADDRESS_OF_IO_BITMAP_A, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_cs_attributes: {
-                    index = VMCS_GUEST_CS_ACCESS_RIGHTS;
+                case syscall::bf_reg_t::bf_reg_t_address_of_io_bitmap_b: {
+                    mut_ret = intrinsic.vmread64(VMCS_ADDRESS_OF_IO_BITMAP_B, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ss: {
-                    index = VMCS_GUEST_SS_SELECTOR;
+                case syscall::bf_reg_t::bf_reg_t_address_of_msr_bitmaps: {
+                    mut_ret = intrinsic.vmread64(VMCS_ADDRESS_OF_MSR_BITMAPS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ss_base_addr: {
-                    index = VMCS_GUEST_SS_BASE;
+                case syscall::bf_reg_t::bf_reg_t_vmexit_msr_store_address: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMEXIT_MSR_STORE_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ss_limit: {
-                    index = VMCS_GUEST_SS_LIMIT;
+                case syscall::bf_reg_t::bf_reg_t_vmexit_msr_load_address: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMEXIT_MSR_LOAD_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ss_attributes: {
-                    index = VMCS_GUEST_SS_ACCESS_RIGHTS;
+                case syscall::bf_reg_t::bf_reg_t_vmentry_msr_load_address: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMENTRY_MSR_LOAD_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ds: {
-                    index = VMCS_GUEST_DS_SELECTOR;
+                case syscall::bf_reg_t::bf_reg_t_executive_vmcs_pointer: {
+                    mut_ret = intrinsic.vmread64(VMCS_EXECUTIVE_VMCS_POINTER, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ds_base_addr: {
-                    index = VMCS_GUEST_DS_BASE;
+                case syscall::bf_reg_t::bf_reg_t_pml_address: {
+                    mut_ret = intrinsic.vmread64(VMCS_PML_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ds_limit: {
-                    index = VMCS_GUEST_DS_LIMIT;
+                case syscall::bf_reg_t::bf_reg_t_tsc_offset: {
+                    mut_ret = intrinsic.vmread64(VMCS_TSC_OFFSET, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ds_attributes: {
-                    index = VMCS_GUEST_DS_ACCESS_RIGHTS;
+                case syscall::bf_reg_t::bf_reg_t_virtual_apic_address: {
+                    mut_ret = intrinsic.vmread64(VMCS_VIRTUAL_APIC_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_fs: {
-                    index = VMCS_GUEST_FS_SELECTOR;
+                case syscall::bf_reg_t::bf_reg_t_apic_access_address: {
+                    mut_ret = intrinsic.vmread64(VMCS_APIC_ACCESS_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_fs_base_addr: {
-                    index = VMCS_GUEST_FS_BASE;
+                case syscall::bf_reg_t::bf_reg_t_posted_interrupt_descriptor_address: {
+                    mut_ret = intrinsic.vmread64(
+                        VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_fs_limit: {
-                    index = VMCS_GUEST_FS_LIMIT;
+                case syscall::bf_reg_t::bf_reg_t_vm_function_controls: {
+                    mut_ret = intrinsic.vmread64(VMCS_VM_FUNCTION_CONTROLS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_fs_attributes: {
-                    index = VMCS_GUEST_FS_ACCESS_RIGHTS;
+                case syscall::bf_reg_t::bf_reg_t_ept_pointer: {
+                    mut_ret = intrinsic.vmread64(VMCS_EPT_POINTER, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_gs: {
-                    index = VMCS_GUEST_GS_SELECTOR;
+                case syscall::bf_reg_t::bf_reg_t_eoi_exit_bitmap0: {
+                    mut_ret = intrinsic.vmread64(VMCS_EOI_EXIT_BITMAP0, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_gs_base_addr: {
-                    index = VMCS_GUEST_GS_BASE;
+                case syscall::bf_reg_t::bf_reg_t_eoi_exit_bitmap1: {
+                    mut_ret = intrinsic.vmread64(VMCS_EOI_EXIT_BITMAP1, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_gs_limit: {
-                    index = VMCS_GUEST_GS_LIMIT;
+                case syscall::bf_reg_t::bf_reg_t_eoi_exit_bitmap2: {
+                    mut_ret = intrinsic.vmread64(VMCS_EOI_EXIT_BITMAP2, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_gs_attributes: {
-                    index = VMCS_GUEST_GS_ACCESS_RIGHTS;
+                case syscall::bf_reg_t::bf_reg_t_eoi_exit_bitmap3: {
+                    mut_ret = intrinsic.vmread64(VMCS_EOI_EXIT_BITMAP3, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ldtr: {
-                    index = VMCS_GUEST_LDTR_SELECTOR;
+                case syscall::bf_reg_t::bf_reg_t_eptp_list_address: {
+                    mut_ret = intrinsic.vmread64(VMCS_EPTP_LIST_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ldtr_base_addr: {
-                    index = VMCS_GUEST_LDTR_BASE;
+                case syscall::bf_reg_t::bf_reg_t_vmread_bitmap_address: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMREAD_BITMAP_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ldtr_limit: {
-                    index = VMCS_GUEST_LDTR_LIMIT;
+                case syscall::bf_reg_t::bf_reg_t_vmwrite_bitmap_address: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMWRITE_BITMAP_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ldtr_attributes: {
-                    index = VMCS_GUEST_LDTR_ACCESS_RIGHTS;
+                case syscall::bf_reg_t::bf_reg_t_virt_exception_information_address: {
+                    mut_ret =
+                        intrinsic.vmread64(VMCS_VIRT_EXCEPTION_INFORMATION_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_tr: {
-                    index = VMCS_GUEST_TR_SELECTOR;
+                case syscall::bf_reg_t::bf_reg_t_xss_exiting_bitmap: {
+                    mut_ret = intrinsic.vmread64(VMCS_XSS_EXITING_BITMAP, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_tr_base_addr: {
-                    index = VMCS_GUEST_TR_BASE;
+                case syscall::bf_reg_t::bf_reg_t_encls_exiting_bitmap: {
+                    mut_ret = intrinsic.vmread64(VMCS_ENCLS_EXITING_BITMAP, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_tr_limit: {
-                    index = VMCS_GUEST_TR_LIMIT;
+                case syscall::bf_reg_t::bf_reg_t_sub_page_permission_table_pointer: {
+                    mut_ret =
+                        intrinsic.vmread64(VMCS_SUB_PAGE_PERMISSION_TABLE_POINTER, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_tr_attributes: {
-                    index = VMCS_GUEST_TR_ACCESS_RIGHTS;
+                case syscall::bf_reg_t::bf_reg_t_tls_multiplier: {
+                    mut_ret = intrinsic.vmread64(VMCS_TLS_MULTIPLIER, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_cr0: {
-                    index = VMCS_GUEST_CR0;
+                case syscall::bf_reg_t::bf_reg_t_guest_physical_address: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_PHYSICAL_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_cr2: {
-                    return m_vmcs_missing_registers.cr2;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_cr3: {
-                    index = VMCS_GUEST_CR3;
+                case syscall::bf_reg_t::bf_reg_t_vmcs_link_pointer: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMCS_LINK_POINTER, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_cr4: {
-                    index = VMCS_GUEST_CR4;
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_debugctl: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_IA32_DEBUGCTL, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_dr6: {
-                    return m_vmcs_missing_registers.dr6;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_dr7: {
-                    index = VMCS_GUEST_DR7;
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_pat: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_IA32_PAT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_efer: {
-                    index = VMCS_GUEST_IA32_EFER;
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_efer: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_IA32_EFER, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_star: {
-                    return m_vmcs_missing_registers.guest_ia32_star;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ia32_lstar: {
-                    return m_vmcs_missing_registers.guest_ia32_lstar;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ia32_cstar: {
-                    return m_vmcs_missing_registers.guest_ia32_cstar;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ia32_fmask: {
-                    return m_vmcs_missing_registers.guest_ia32_fmask;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ia32_fs_base: {
-                    index = VMCS_GUEST_FS_BASE;
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_perf_global_ctrl: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_gs_base: {
-                    index = VMCS_GUEST_GS_BASE;
+                case syscall::bf_reg_t::bf_reg_t_guest_pdpte0: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_PDPTE0, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_kernel_gs_base: {
-                    return m_vmcs_missing_registers.guest_ia32_kernel_gs_base;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_cs: {
-                    index = VMCS_GUEST_IA32_SYSENTER_CS;
+                case syscall::bf_reg_t::bf_reg_t_guest_pdpte1: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_PDPTE1, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_esp: {
-                    index = VMCS_GUEST_IA32_SYSENTER_ESP;
+                case syscall::bf_reg_t::bf_reg_t_guest_pdpte2: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_PDPTE2, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_eip: {
-                    index = VMCS_GUEST_IA32_SYSENTER_EIP;
+                case syscall::bf_reg_t::bf_reg_t_guest_pdpte3: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_PDPTE3, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_pat: {
-                    index = VMCS_GUEST_IA32_PAT;
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_bndcfgs: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_IA32_BNDCFGS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_debugctl: {
-                    index = VMCS_GUEST_IA32_DEBUGCTL;
+                case syscall::bf_reg_t::bf_reg_t_guest_rtit_ctl: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_RTIT_CTL, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_pin_based_vm_execution_ctls: {
+                    mut_ret = intrinsic.vmread64(VMCS_PIN_BASED_VM_EXECUTION_CTLS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls: {
+                    mut_ret = intrinsic.vmread64(
+                        VMCS_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_exception_bitmap: {
+                    mut_ret = intrinsic.vmread64(VMCS_EXCEPTION_BITMAP, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_page_fault_error_code_mask: {
+                    mut_ret = intrinsic.vmread64(VMCS_PAGE_FAULT_ERROR_CODE_MASK, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_page_fault_error_code_match: {
+                    mut_ret = intrinsic.vmread64(VMCS_PAGE_FAULT_ERROR_CODE_MATCH, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr3_target_count: {
+                    mut_ret = intrinsic.vmread64(VMCS_CR3_TARGET_COUNT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_ctls: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMEXIT_CTLS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_msr_store_count: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMEXIT_MSR_STORE_COUNT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_msr_load_count: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMEXIT_MSR_LOAD_COUNT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmentry_ctls: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMENTRY_CTLS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmentry_msr_load_count: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMENTRY_MSR_LOAD_COUNT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmentry_interrupt_information_field: {
+                    mut_ret = intrinsic.vmread64(
+                        VMCS_VMENTRY_INTERRUPT_INFORMATION_FIELD, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmentry_exception_error_code: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMENTRY_EXCEPTION_ERROR_CODE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmentry_instruction_length: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMENTRY_INSTRUCTION_LENGTH, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_tpr_threshold: {
+                    mut_ret = intrinsic.vmread64(VMCS_TPR_THRESHOLD, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_secondary_proc_based_vm_execution_ctls: {
+                    mut_ret = intrinsic.vmread64(
+                        VMCS_SECONDARY_PROC_BASED_VM_EXECUTION_CTLS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_ple_gap: {
+                    mut_ret = intrinsic.vmread64(VMCS_PLE_GAP, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_ple_window: {
+                    mut_ret = intrinsic.vmread64(VMCS_PLE_WINDOW, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vm_instruction_error: {
+                    mut_ret = intrinsic.vmread64(VMCS_VM_INSTRUCTION_ERROR, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_exit_reason: {
+                    mut_ret = intrinsic.vmread64(VMCS_EXIT_REASON, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_interruption_information: {
+                    mut_ret =
+                        intrinsic.vmread64(VMCS_VMEXIT_INTERRUPTION_INFORMATION, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_interruption_error_code: {
+                    mut_ret =
+                        intrinsic.vmread64(VMCS_VMEXIT_INTERRUPTION_ERROR_CODE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_idt_vectoring_information_field: {
+                    mut_ret =
+                        intrinsic.vmread64(VMCS_IDT_VECTORING_INFORMATION_FIELD, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_idt_vectoring_error_code: {
+                    mut_ret = intrinsic.vmread64(VMCS_IDT_VECTORING_ERROR_CODE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_instruction_length: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMEXIT_INSTRUCTION_LENGTH, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_instruction_information: {
+                    mut_ret =
+                        intrinsic.vmread64(VMCS_VMEXIT_INSTRUCTION_INFORMATION, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_es_limit: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_ES_LIMIT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_cs_limit: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_CS_LIMIT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ss_limit: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_SS_LIMIT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ds_limit: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_DS_LIMIT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_fs_limit: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_FS_LIMIT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_gs_limit: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_GS_LIMIT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_limit: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_LDTR_LIMIT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_tr_limit: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_TR_LIMIT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_gdtr_limit: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_GDTR_LIMIT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_idtr_limit: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_IDTR_LIMIT, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_es_access_rights: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_ES_ACCESS_RIGHTS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_cs_access_rights: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_CS_ACCESS_RIGHTS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ss_access_rights: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_SS_ACCESS_RIGHTS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ds_access_rights: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_DS_ACCESS_RIGHTS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_fs_access_rights: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_FS_ACCESS_RIGHTS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_gs_access_rights: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_GS_ACCESS_RIGHTS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_access_rights: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_LDTR_ACCESS_RIGHTS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_tr_access_rights: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_TR_ACCESS_RIGHTS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_interruptibility_state: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_INTERRUPTIBILITY_STATE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_activity_state: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_ACTIVITY_STATE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_smbase: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_SMBASE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_sysenter_cs: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_IA32_SYSENTER_CS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmx_preemption_timer_value: {
+                    mut_ret = intrinsic.vmread64(VMCS_VMX_PREEMPTION_TIMER_VALUE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr0_guest_host_mask: {
+                    mut_ret = intrinsic.vmread64(VMCS_CR0_GUEST_HOST_MASK, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr4_guest_host_mask: {
+                    mut_ret = intrinsic.vmread64(VMCS_CR4_GUEST_HOST_MASK, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr0_read_shadow: {
+                    mut_ret = intrinsic.vmread64(VMCS_CR0_READ_SHADOW, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr4_read_shadow: {
+                    mut_ret = intrinsic.vmread64(VMCS_CR4_READ_SHADOW, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr3_target_value0: {
+                    mut_ret = intrinsic.vmread64(VMCS_CR3_TARGET_VALUE0, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr3_target_value1: {
+                    mut_ret = intrinsic.vmread64(VMCS_CR3_TARGET_VALUE1, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr3_target_value2: {
+                    mut_ret = intrinsic.vmread64(VMCS_CR3_TARGET_VALUE2, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr3_target_value3: {
+                    mut_ret = intrinsic.vmread64(VMCS_CR3_TARGET_VALUE3, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_exit_qualification: {
+                    mut_ret = intrinsic.vmread64(VMCS_EXIT_QUALIFICATION, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_io_rcx: {
+                    mut_ret = intrinsic.vmread64(VMCS_IO_RCX, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_io_rsi: {
+                    mut_ret = intrinsic.vmread64(VMCS_IO_RSI, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_io_rdi: {
+                    mut_ret = intrinsic.vmread64(VMCS_IO_RDI, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_io_rip: {
+                    mut_ret = intrinsic.vmread64(VMCS_IO_RIP, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_linear_address: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_LINEAR_ADDRESS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_cr0: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_CR0, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_cr3: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_CR3, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_cr4: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_CR4, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_es_base: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_ES_BASE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_cs_base: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_CS_BASE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ss_base: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_SS_BASE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ds_base: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_DS_BASE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_fs_base: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_FS_BASE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_gs_base: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_GS_BASE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_base: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_LDTR_BASE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_tr_base: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_TR_BASE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_gdtr_base: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_GDTR_BASE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_idtr_base: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_IDTR_BASE, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_dr7: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_DR7, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_rsp: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_RSP, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_rip: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_RIP, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_rflags: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_RFLAGS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_pending_debug_exceptions: {
+                    mut_ret =
+                        intrinsic.vmread64(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_sysenter_esp: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_IA32_SYSENTER_ESP, mut_val.data());
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_sysenter_eip: {
+                    mut_ret = intrinsic.vmread64(VMCS_GUEST_IA32_SYSENTER_EIP, mut_val.data());
                     break;
                 }
 
                 default: {
+                    mut_ret = bsl::errc_failure;
                     bsl::error() << "unknown by bf_reg_t\n" << bsl::here();
                     break;
                 }
             }
 
-            auto const val{this->read<bsl::uint64>(tls, intrinsic, index)};
-            if (bsl::unlikely(!val)) {
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return val;
+                return bsl::safe_uintmax::failure();
             }
 
-            return val;
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -3421,20 +2884,20 @@ namespace mk
         ///     defining the field and a value to write.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsics to use
         ///   @param reg a bf_reg_t defining the field to write to the VPS
         ///   @param val the value to write to the VPS
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///
         [[nodiscard]] constexpr auto
-        write_reg(
-            tls_t &tls,
-            intrinsic_t &intrinsic,
+        write(
+            tls_t &mut_tls,
+            intrinsic_t &mut_intrinsic,
             syscall::bf_reg_t const reg,
             bsl::safe_uintmax const &val) noexcept -> bsl::errc_type
         {
-            bsl::safe_uint64 index{bsl::safe_uint64::failure()};
+            bsl::errc_type mut_ret{};
 
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vps_t not initialized\n" << bsl::here();
@@ -3456,23 +2919,29 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            if (bsl::unlikely(tls.ppid != m_assigned_ppid)) {
+            if (bsl::unlikely(mut_tls.ppid != m_assigned_ppid)) {
                 bsl::error() << "vp "                                  // --
                              << bsl::hex(m_id)                         // --
                              << " is assigned to pp "                  // --
                              << bsl::hex(m_assigned_ppid)              // --
                              << " and cannot be operated on by pp "    // --
-                             << bsl::hex(tls.ppid)                     // --
+                             << bsl::hex(mut_tls.ppid)                 // --
                              << bsl::endl                              // --
                              << bsl::here();                           // --
 
                 return bsl::errc_precondition;
             }
 
+            mut_ret = this->ensure_this_vps_is_loaded(mut_tls, mut_intrinsic);
+            if (bsl::unlikely_assert(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return mut_ret;
+            }
+
             switch (reg) {
                 case syscall::bf_reg_t::bf_reg_t_rax: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_RAX, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RAX, val);
                     }
                     else {
                         m_gprs.rax = val.get();
@@ -3481,8 +2950,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rbx: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_RBX, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RBX, val);
                     }
                     else {
                         m_gprs.rbx = val.get();
@@ -3491,8 +2960,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rcx: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_RCX, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RCX, val);
                     }
                     else {
                         m_gprs.rcx = val.get();
@@ -3501,8 +2970,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rdx: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_RDX, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RDX, val);
                     }
                     else {
                         m_gprs.rdx = val.get();
@@ -3511,8 +2980,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rbp: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_RBP, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RBP, val);
                     }
                     else {
                         m_gprs.rbp = val.get();
@@ -3521,8 +2990,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rsi: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_RSI, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RSI, val);
                     }
                     else {
                         m_gprs.rsi = val.get();
@@ -3531,8 +3000,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rdi: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_RDI, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RDI, val);
                     }
                     else {
                         m_gprs.rdi = val.get();
@@ -3541,8 +3010,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r8: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_R8, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R8, val);
                     }
                     else {
                         m_gprs.r8 = val.get();
@@ -3551,8 +3020,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r9: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_R9, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R9, val);
                     }
                     else {
                         m_gprs.r9 = val.get();
@@ -3561,8 +3030,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r10: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_R10, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R10, val);
                     }
                     else {
                         m_gprs.r10 = val.get();
@@ -3571,8 +3040,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r11: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_R11, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R11, val);
                     }
                     else {
                         m_gprs.r11 = val.get();
@@ -3581,8 +3050,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r12: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_R12, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R12, val);
                     }
                     else {
                         m_gprs.r12 = val.get();
@@ -3591,8 +3060,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r13: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_R13, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R13, val);
                     }
                     else {
                         m_gprs.r13 = val.get();
@@ -3601,8 +3070,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r14: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_R14, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R14, val);
                     }
                     else {
                         m_gprs.r14 = val.get();
@@ -3611,8 +3080,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r15: {
-                    if (tls.active_vpsid == m_id) {
-                        intrinsic.set_tls_reg(syscall::TLS_OFFSET_R15, val);
+                    if (mut_tls.active_vpsid == m_id) {
+                        mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_R15, val);
                     }
                     else {
                         m_gprs.r15 = val.get();
@@ -3620,309 +3089,770 @@ namespace mk
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_rip: {
-                    index = VMCS_GUEST_RIP;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_rsp: {
-                    index = VMCS_GUEST_RSP;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_rflags: {
-                    index = VMCS_GUEST_RFLAGS;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_gdtr_base_addr: {
-                    index = VMCS_GUEST_GDTR_BASE;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_gdtr_limit: {
-                    index = VMCS_GUEST_GDTR_LIMIT;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_idtr_base_addr: {
-                    index = VMCS_GUEST_IDTR_BASE;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_idtr_limit: {
-                    index = VMCS_GUEST_IDTR_LIMIT;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_es: {
-                    index = VMCS_GUEST_ES_SELECTOR;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_es_base_addr: {
-                    index = VMCS_GUEST_ES_BASE;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_es_limit: {
-                    index = VMCS_GUEST_ES_LIMIT;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_es_attributes: {
-                    index = VMCS_GUEST_ES_ACCESS_RIGHTS;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_cs: {
-                    index = VMCS_GUEST_CS_SELECTOR;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_cs_base_addr: {
-                    index = VMCS_GUEST_CS_BASE;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_cs_limit: {
-                    index = VMCS_GUEST_CS_LIMIT;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_cs_attributes: {
-                    index = VMCS_GUEST_CS_ACCESS_RIGHTS;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ss: {
-                    index = VMCS_GUEST_SS_SELECTOR;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ss_base_addr: {
-                    index = VMCS_GUEST_SS_BASE;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ss_limit: {
-                    index = VMCS_GUEST_SS_LIMIT;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ss_attributes: {
-                    index = VMCS_GUEST_SS_ACCESS_RIGHTS;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ds: {
-                    index = VMCS_GUEST_DS_SELECTOR;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ds_base_addr: {
-                    index = VMCS_GUEST_DS_BASE;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ds_limit: {
-                    index = VMCS_GUEST_DS_LIMIT;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ds_attributes: {
-                    index = VMCS_GUEST_DS_ACCESS_RIGHTS;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_fs: {
-                    index = VMCS_GUEST_FS_SELECTOR;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_fs_base_addr: {
-                    index = VMCS_GUEST_FS_BASE;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_fs_limit: {
-                    index = VMCS_GUEST_FS_LIMIT;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_fs_attributes: {
-                    index = VMCS_GUEST_FS_ACCESS_RIGHTS;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_gs: {
-                    index = VMCS_GUEST_GS_SELECTOR;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_gs_base_addr: {
-                    index = VMCS_GUEST_GS_BASE;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_gs_limit: {
-                    index = VMCS_GUEST_GS_LIMIT;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_gs_attributes: {
-                    index = VMCS_GUEST_GS_ACCESS_RIGHTS;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ldtr: {
-                    index = VMCS_GUEST_LDTR_SELECTOR;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ldtr_base_addr: {
-                    index = VMCS_GUEST_LDTR_BASE;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ldtr_limit: {
-                    index = VMCS_GUEST_LDTR_LIMIT;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ldtr_attributes: {
-                    index = VMCS_GUEST_LDTR_ACCESS_RIGHTS;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_tr: {
-                    index = VMCS_GUEST_TR_SELECTOR;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_tr_base_addr: {
-                    index = VMCS_GUEST_TR_BASE;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_tr_limit: {
-                    index = VMCS_GUEST_TR_LIMIT;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_tr_attributes: {
-                    index = VMCS_GUEST_TR_ACCESS_RIGHTS;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_cr0: {
-                    index = VMCS_GUEST_CR0;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_cr2: {
-                    m_vmcs_missing_registers.cr2 = val.get();
+                case syscall::bf_reg_t::bf_reg_t_guest_cr2: {
+                    m_vmcs_missing_registers.guest_cr2 = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_cr3: {
-                    index = VMCS_GUEST_CR3;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_cr4: {
-                    index = VMCS_GUEST_CR4;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_dr6: {
-                    m_vmcs_missing_registers.dr6 = val.get();
+                case syscall::bf_reg_t::bf_reg_t_guest_dr6: {
+                    m_vmcs_missing_registers.guest_dr6 = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_dr7: {
-                    index = VMCS_GUEST_DR7;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ia32_efer: {
-                    index = VMCS_GUEST_IA32_EFER;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ia32_star: {
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_star: {
                     m_vmcs_missing_registers.guest_ia32_star = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_lstar: {
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_lstar: {
                     m_vmcs_missing_registers.guest_ia32_lstar = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_cstar: {
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_cstar: {
                     m_vmcs_missing_registers.guest_ia32_cstar = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_fmask: {
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_fmask: {
                     m_vmcs_missing_registers.guest_ia32_fmask = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_fs_base: {
-                    index = VMCS_GUEST_FS_BASE;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ia32_gs_base: {
-                    index = VMCS_GUEST_GS_BASE;
-                    break;
-                }
-
-                case syscall::bf_reg_t::bf_reg_t_ia32_kernel_gs_base: {
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_kernel_gs_base: {
                     m_vmcs_missing_registers.guest_ia32_kernel_gs_base = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_cs: {
-                    index = VMCS_GUEST_IA32_SYSENTER_CS;
+                case syscall::bf_reg_t::bf_reg_t_virtual_processor_identifier: {
+                    mut_ret = mut_intrinsic.vmwrite16(
+                        VMCS_VIRTUAL_PROCESSOR_IDENTIFIER, bsl::to_u16(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_esp: {
-                    index = VMCS_GUEST_IA32_SYSENTER_ESP;
+                case syscall::bf_reg_t::bf_reg_t_posted_interrupt_notification_vector: {
+                    mut_ret = mut_intrinsic.vmwrite16(
+                        VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR, bsl::to_u16(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_eip: {
-                    index = VMCS_GUEST_IA32_SYSENTER_EIP;
+                case syscall::bf_reg_t::bf_reg_t_eptp_index: {
+                    mut_ret = mut_intrinsic.vmwrite16(VMCS_EPTP_INDEX, bsl::to_u16(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_pat: {
-                    index = VMCS_GUEST_IA32_PAT;
+                case syscall::bf_reg_t::bf_reg_t_guest_es_selector: {
+                    mut_ret = mut_intrinsic.vmwrite16(VMCS_GUEST_ES_SELECTOR, bsl::to_u16(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_debugctl: {
-                    index = VMCS_GUEST_IA32_DEBUGCTL;
+                case syscall::bf_reg_t::bf_reg_t_guest_cs_selector: {
+                    mut_ret = mut_intrinsic.vmwrite16(VMCS_GUEST_CS_SELECTOR, bsl::to_u16(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ss_selector: {
+                    mut_ret = mut_intrinsic.vmwrite16(VMCS_GUEST_SS_SELECTOR, bsl::to_u16(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ds_selector: {
+                    mut_ret = mut_intrinsic.vmwrite16(VMCS_GUEST_DS_SELECTOR, bsl::to_u16(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_fs_selector: {
+                    mut_ret = mut_intrinsic.vmwrite16(VMCS_GUEST_FS_SELECTOR, bsl::to_u16(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_gs_selector: {
+                    mut_ret = mut_intrinsic.vmwrite16(VMCS_GUEST_GS_SELECTOR, bsl::to_u16(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_selector: {
+                    mut_ret = mut_intrinsic.vmwrite16(VMCS_GUEST_LDTR_SELECTOR, bsl::to_u16(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_tr_selector: {
+                    mut_ret = mut_intrinsic.vmwrite16(VMCS_GUEST_TR_SELECTOR, bsl::to_u16(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_interrupt_status: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite16(VMCS_GUEST_INTERRUPT_STATUS, bsl::to_u16(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_pml_index: {
+                    mut_ret = mut_intrinsic.vmwrite16(VMCS_PML_INDEX, bsl::to_u16(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_address_of_io_bitmap_a: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite64(VMCS_ADDRESS_OF_IO_BITMAP_A, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_address_of_io_bitmap_b: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite64(VMCS_ADDRESS_OF_IO_BITMAP_B, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_address_of_msr_bitmaps: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite64(VMCS_ADDRESS_OF_MSR_BITMAPS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_msr_store_address: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite64(VMCS_VMEXIT_MSR_STORE_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_msr_load_address: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite64(VMCS_VMEXIT_MSR_LOAD_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmentry_msr_load_address: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite64(VMCS_VMENTRY_MSR_LOAD_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_executive_vmcs_pointer: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite64(VMCS_EXECUTIVE_VMCS_POINTER, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_pml_address: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_PML_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_tsc_offset: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_TSC_OFFSET, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_virtual_apic_address: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_VIRTUAL_APIC_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_apic_access_address: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_APIC_ACCESS_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_posted_interrupt_descriptor_address: {
+                    mut_ret = mut_intrinsic.vmwrite64(
+                        VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vm_function_controls: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_VM_FUNCTION_CONTROLS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_ept_pointer: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_EPT_POINTER, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_eoi_exit_bitmap0: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_EOI_EXIT_BITMAP0, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_eoi_exit_bitmap1: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_EOI_EXIT_BITMAP1, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_eoi_exit_bitmap2: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_EOI_EXIT_BITMAP2, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_eoi_exit_bitmap3: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_EOI_EXIT_BITMAP3, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_eptp_list_address: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_EPTP_LIST_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmread_bitmap_address: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_VMREAD_BITMAP_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmwrite_bitmap_address: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite64(VMCS_VMWRITE_BITMAP_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_virt_exception_information_address: {
+                    mut_ret = mut_intrinsic.vmwrite64(
+                        VMCS_VIRT_EXCEPTION_INFORMATION_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_xss_exiting_bitmap: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_XSS_EXITING_BITMAP, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_encls_exiting_bitmap: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_ENCLS_EXITING_BITMAP, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_sub_page_permission_table_pointer: {
+                    mut_ret = mut_intrinsic.vmwrite64(
+                        VMCS_SUB_PAGE_PERMISSION_TABLE_POINTER, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_tls_multiplier: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_TLS_MULTIPLIER, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_physical_address: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite64(VMCS_GUEST_PHYSICAL_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmcs_link_pointer: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_VMCS_LINK_POINTER, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_debugctl: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_IA32_DEBUGCTL, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_pat: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_IA32_PAT, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_efer: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_IA32_EFER, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_perf_global_ctrl: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite64(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_pdpte0: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_PDPTE0, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_pdpte1: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_PDPTE1, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_pdpte2: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_PDPTE2, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_pdpte3: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_PDPTE3, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_bndcfgs: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_IA32_BNDCFGS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_rtit_ctl: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_RTIT_CTL, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_pin_based_vm_execution_ctls: {
+                    mut_ret = mut_intrinsic.vmwrite32(
+                        VMCS_PIN_BASED_VM_EXECUTION_CTLS, sanitize_pinbased_ctls(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls: {
+                    mut_ret = mut_intrinsic.vmwrite32(
+                        VMCS_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_exception_bitmap: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_EXCEPTION_BITMAP, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_page_fault_error_code_mask: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_PAGE_FAULT_ERROR_CODE_MASK, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_page_fault_error_code_match: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_PAGE_FAULT_ERROR_CODE_MATCH, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr3_target_count: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_CR3_TARGET_COUNT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_ctls: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_VMEXIT_CTLS, sanitize_exit_ctls(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_msr_store_count: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_VMEXIT_MSR_STORE_COUNT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_msr_load_count: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_VMEXIT_MSR_LOAD_COUNT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmentry_ctls: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_VMENTRY_CTLS, sanitize_entry_ctls(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmentry_msr_load_count: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_VMENTRY_MSR_LOAD_COUNT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmentry_interrupt_information_field: {
+                    mut_ret = mut_intrinsic.vmwrite32(
+                        VMCS_VMENTRY_INTERRUPT_INFORMATION_FIELD, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmentry_exception_error_code: {
+                    mut_ret = mut_intrinsic.vmwrite32(
+                        VMCS_VMENTRY_EXCEPTION_ERROR_CODE, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmentry_instruction_length: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_VMENTRY_INSTRUCTION_LENGTH, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_tpr_threshold: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_TPR_THRESHOLD, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_secondary_proc_based_vm_execution_ctls: {
+                    mut_ret = mut_intrinsic.vmwrite32(
+                        VMCS_SECONDARY_PROC_BASED_VM_EXECUTION_CTLS, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_ple_gap: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_PLE_GAP, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_ple_window: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_PLE_WINDOW, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vm_instruction_error: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_VM_INSTRUCTION_ERROR, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_exit_reason: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_EXIT_REASON, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_interruption_information: {
+                    mut_ret = mut_intrinsic.vmwrite32(
+                        VMCS_VMEXIT_INTERRUPTION_INFORMATION, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_interruption_error_code: {
+                    mut_ret = mut_intrinsic.vmwrite32(
+                        VMCS_VMEXIT_INTERRUPTION_ERROR_CODE, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_idt_vectoring_information_field: {
+                    mut_ret = mut_intrinsic.vmwrite32(
+                        VMCS_IDT_VECTORING_INFORMATION_FIELD, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_idt_vectoring_error_code: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_IDT_VECTORING_ERROR_CODE, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_instruction_length: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_VMEXIT_INSTRUCTION_LENGTH, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmexit_instruction_information: {
+                    mut_ret = mut_intrinsic.vmwrite32(
+                        VMCS_VMEXIT_INSTRUCTION_INFORMATION, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_es_limit: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_ES_LIMIT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_cs_limit: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_CS_LIMIT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ss_limit: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_SS_LIMIT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ds_limit: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_DS_LIMIT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_fs_limit: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_FS_LIMIT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_gs_limit: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_GS_LIMIT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_limit: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_LDTR_LIMIT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_tr_limit: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_TR_LIMIT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_gdtr_limit: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_GDTR_LIMIT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_idtr_limit: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_IDTR_LIMIT, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_es_access_rights: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_GUEST_ES_ACCESS_RIGHTS, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_cs_access_rights: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_GUEST_CS_ACCESS_RIGHTS, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ss_access_rights: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_GUEST_SS_ACCESS_RIGHTS, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ds_access_rights: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_GUEST_DS_ACCESS_RIGHTS, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_fs_access_rights: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_GUEST_FS_ACCESS_RIGHTS, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_gs_access_rights: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_GUEST_GS_ACCESS_RIGHTS, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_access_rights: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_GUEST_LDTR_ACCESS_RIGHTS, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_tr_access_rights: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_GUEST_TR_ACCESS_RIGHTS, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_interruptibility_state: {
+                    mut_ret = mut_intrinsic.vmwrite32(
+                        VMCS_GUEST_INTERRUPTIBILITY_STATE, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_activity_state: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_ACTIVITY_STATE, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_smbase: {
+                    mut_ret = mut_intrinsic.vmwrite32(VMCS_GUEST_SMBASE, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_sysenter_cs: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_GUEST_IA32_SYSENTER_CS, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_vmx_preemption_timer_value: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite32(VMCS_VMX_PREEMPTION_TIMER_VALUE, bsl::to_u32(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr0_guest_host_mask: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_CR0_GUEST_HOST_MASK, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr4_guest_host_mask: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_CR4_GUEST_HOST_MASK, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr0_read_shadow: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_CR0_READ_SHADOW, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr4_read_shadow: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_CR4_READ_SHADOW, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr3_target_value0: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_CR3_TARGET_VALUE0, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr3_target_value1: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_CR3_TARGET_VALUE1, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr3_target_value2: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_CR3_TARGET_VALUE2, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr3_target_value3: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_CR3_TARGET_VALUE3, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_exit_qualification: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_EXIT_QUALIFICATION, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_io_rcx: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_IO_RCX, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_io_rsi: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_IO_RSI, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_io_rdi: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_IO_RDI, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_io_rip: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_IO_RIP, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_linear_address: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_LINEAR_ADDRESS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_cr0: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_CR0, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_cr3: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_CR3, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_cr4: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_CR4, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_es_base: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_ES_BASE, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_cs_base: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_CS_BASE, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ss_base: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_SS_BASE, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ds_base: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_DS_BASE, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_fs_base: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_FS_BASE, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_gs_base: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_GS_BASE, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_base: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_LDTR_BASE, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_tr_base: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_TR_BASE, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_gdtr_base: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_GDTR_BASE, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_idtr_base: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_IDTR_BASE, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_dr7: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_DR7, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_rsp: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_RSP, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_rip: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_RIP, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_rflags: {
+                    mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_RFLAGS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_pending_debug_exceptions: {
+                    mut_ret = mut_intrinsic.vmwrite64(
+                        VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_sysenter_esp: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite64(VMCS_GUEST_IA32_SYSENTER_ESP, bsl::to_u64(val));
+                    break;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_guest_ia32_sysenter_eip: {
+                    mut_ret =
+                        mut_intrinsic.vmwrite64(VMCS_GUEST_IA32_SYSENTER_EIP, bsl::to_u64(val));
                     break;
                 }
 
                 default: {
+                    mut_ret = bsl::errc_failure;
                     bsl::error() << "unknown by bf_reg_t\n" << bsl::here();
                     break;
                 }
             }
 
-            auto const ret{this->write<bsl::uint64>(tls, intrinsic, index, val)};
-            if (bsl::unlikely(!ret)) {
+            if (bsl::unlikely(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            return ret;
+            return mut_ret;
         }
 
         /// <!-- description -->
@@ -3931,15 +3861,15 @@ namespace mk
         ///     will return the VMExit reason.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
-        ///   @param log the VMExit log to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsics to use
+        ///   @param mut_log the VMExit log to use
         ///   @return Returns the VMExit reason on success, or
         ///
         [[nodiscard]] constexpr auto
-        run(tls_t &tls, intrinsic_t &intrinsic, vmexit_log_t &log) noexcept -> bsl::safe_uintmax
+        run(tls_t &mut_tls, intrinsic_t &mut_intrinsic, vmexit_log_t &mut_log) noexcept
+            -> bsl::safe_uintmax
         {
-            bsl::errc_type ret{};
             constexpr auto invalid_exit_reason{0xFFFFFFFF00000000_umax};
 
             if (bsl::unlikely_assert(!m_id)) {
@@ -3957,20 +3887,20 @@ namespace mk
                 return bsl::safe_uintmax::failure();
             }
 
-            if (bsl::unlikely_assert(tls.ppid != m_assigned_ppid)) {
+            if (bsl::unlikely_assert(mut_tls.ppid != m_assigned_ppid)) {
                 bsl::error() << "vp "                        // --
                              << bsl::hex(m_id)               // --
                              << " is assigned to pp "        // --
                              << bsl::hex(m_assigned_ppid)    // --
                              << " and cannot run by pp "     // --
-                             << bsl::hex(tls.ppid)           // --
+                             << bsl::hex(mut_tls.ppid)       // --
                              << bsl::endl                    // --
                              << bsl::here();                 // --
 
                 return bsl::safe_uintmax::failure();
             }
 
-            ret = this->ensure_this_vps_is_loaded(tls, intrinsic);
+            auto const ret{this->ensure_this_vps_is_loaded(mut_tls, mut_intrinsic)};
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::safe_uintmax::failure();
@@ -3986,33 +3916,33 @@ namespace mk
                 return bsl::safe_uintmax::failure();
             }
 
-            if constexpr (!(BSL_DEBUG_LEVEL < bsl::VV)) {
-                log.add(
-                    tls.ppid,
-                    {tls.active_vmid,
-                     tls.active_vpid,
-                     tls.active_vpsid,
+            if constexpr (BSL_DEBUG_LEVEL >= bsl::VV) {
+                mut_log.add(
+                    bsl::to_u16(mut_tls.ppid),
+                    {bsl::to_u16(mut_tls.active_vmid),
+                     bsl::to_u16(mut_tls.active_vpid),
+                     bsl::to_u16(mut_tls.active_vpsid),
                      exit_reason,
-                     intrinsic.vmread64_quiet(VMCS_EXIT_QUALIFICATION),
-                     intrinsic.vmread64_quiet(VMCS_VMEXIT_INSTRUCTION_INFORMATION),
+                     mut_intrinsic.vmread64_quiet(VMCS_EXIT_QUALIFICATION),
+                     mut_intrinsic.vmread64_quiet(VMCS_VMEXIT_INSTRUCTION_INFORMATION),
                      {},
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_RAX),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_RBX),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_RCX),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_RDX),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_RBP),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_RSI),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_RDI),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_R8),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_R9),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_R10),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_R11),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_R12),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_R13),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_R14),
-                     intrinsic.tls_reg(syscall::TLS_OFFSET_R15),
-                     intrinsic.vmread64_quiet(VMCS_GUEST_RSP),
-                     intrinsic.vmread64_quiet(VMCS_GUEST_RIP)});
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_RAX),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_RBX),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_RCX),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_RDX),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_RBP),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_RSI),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_RDI),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_R8),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_R9),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_R10),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_R11),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_R12),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_R13),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_R14),
+                     mut_intrinsic.tls_reg(syscall::TLS_OFFSET_R15),
+                     mut_intrinsic.vmread64_quiet(VMCS_GUEST_RSP),
+                     mut_intrinsic.vmread64_quiet(VMCS_GUEST_RIP)});
             }
 
             /// TODO:
@@ -4027,17 +3957,17 @@ namespace mk
         ///   @brief Advance the IP of the VPS
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param intrinsic the intrinsics to use
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsics to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        advance_ip(tls_t &tls, intrinsic_t &intrinsic) noexcept -> bsl::errc_type
+        advance_ip(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept -> bsl::errc_type
         {
-            bsl::errc_type ret{};
-            bsl::safe_uint64 rip{};
-            bsl::safe_uint64 len{};
+            bsl::errc_type mut_ret{};
+            bsl::safe_uint64 mut_rip{};
+            bsl::safe_uint64 mut_len{};
 
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vps_t not initialized\n" << bsl::here();
@@ -4054,44 +3984,44 @@ namespace mk
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely(tls.ppid != m_assigned_ppid)) {
+            if (bsl::unlikely(mut_tls.ppid != m_assigned_ppid)) {
                 bsl::error() << "vp "                                  // --
                              << bsl::hex(m_id)                         // --
                              << " is assigned to pp "                  // --
                              << bsl::hex(m_assigned_ppid)              // --
                              << " and cannot be operated on by pp "    // --
-                             << bsl::hex(tls.ppid)                     // --
+                             << bsl::hex(mut_tls.ppid)                 // --
                              << bsl::endl                              // --
                              << bsl::here();                           // --
 
                 return bsl::errc_precondition;
             }
 
-            ret = this->ensure_this_vps_is_loaded(tls, intrinsic);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->ensure_this_vps_is_loaded(mut_tls, mut_intrinsic);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread64(VMCS_GUEST_RIP, rip.data());
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmread64(VMCS_GUEST_RIP, mut_rip.data());
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmread64(VMCS_VMEXIT_INSTRUCTION_LENGTH, len.data());
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmread64(VMCS_VMEXIT_INSTRUCTION_LENGTH, mut_len.data());
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmwrite64(VMCS_GUEST_RIP, rip + len);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_intrinsic.vmwrite64(VMCS_GUEST_RIP, mut_rip + mut_len);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            return ret;
+            return mut_ret;
         }
 
         /// <!-- description -->
@@ -4100,15 +4030,15 @@ namespace mk
         ///     values stored in the VPS.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsics to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        clear(tls_t &tls, intrinsic_t &intrinsic) noexcept -> bsl::errc_type
+        clear(tls_t &mut_tls, intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
         {
-            bsl::errc_type ret{};
+            bsl::errc_type mut_ret{};
 
             if (bsl::unlikely_assert(!m_id)) {
                 bsl::error() << "vps_t not initialized\n" << bsl::here();
@@ -4125,56 +4055,62 @@ namespace mk
                 return bsl::errc_precondition;
             }
 
-            if (bsl::unlikely(tls.ppid != m_assigned_ppid)) {
+            if (bsl::unlikely(mut_tls.ppid != m_assigned_ppid)) {
                 bsl::error() << "vp "                                  // --
                              << bsl::hex(m_id)                         // --
                              << " is assigned to pp "                  // --
                              << bsl::hex(m_assigned_ppid)              // --
                              << " and cannot be operated on by pp "    // --
-                             << bsl::hex(tls.ppid)                     // --
+                             << bsl::hex(mut_tls.ppid)                 // --
                              << bsl::endl                              // --
                              << bsl::here();                           // --
 
                 return bsl::errc_precondition;
             }
 
-            ret = this->ensure_this_vps_is_loaded(tls, intrinsic);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = this->ensure_this_vps_is_loaded(mut_tls, intrinsic);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmclear(&m_vmcs_phys);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmclear(&m_vmcs_phys);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            ret = intrinsic.vmload(&m_vmcs_phys);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = intrinsic.vmload(&m_vmcs_phys);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
-            tls.loaded_vpsid = m_id.get();
+            mut_tls.loaded_vpsid = m_id.get();
             m_vmcs_missing_registers.launched = {};
 
-            return ret;
+            return mut_ret;
         }
 
         /// <!-- description -->
         ///   @brief Dumps the vm_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsics to use
         ///
         constexpr void
-        dump(tls_t &tls, intrinsic_t &intrinsic) const noexcept
+        dump(tls_t &mut_tls, intrinsic_t const &intrinsic) const noexcept
         {
-            bsl::discard(tls);
+            bsl::discard(mut_tls);
 
             if constexpr (BSL_DEBUG_LEVEL == bsl::CRITICAL_ONLY) {
+                return;
+            }
+
+            auto const ret{this->ensure_this_vps_is_loaded(mut_tls, intrinsic)};
+            if (bsl::unlikely_assert(!ret)) {
+                bsl::print<bsl::V>() << bsl::here();
                 return;
             }
 
@@ -4261,39 +4197,39 @@ namespace mk
                 return;
             }
 
-            if (tls.active_vpsid == m_id) {
-                this->dump("rax ", intrinsic.tls_reg(syscall::TLS_OFFSET_RAX));
-                this->dump("rbx ", intrinsic.tls_reg(syscall::TLS_OFFSET_RBX));
-                this->dump("rcx ", intrinsic.tls_reg(syscall::TLS_OFFSET_RCX));
-                this->dump("rdx ", intrinsic.tls_reg(syscall::TLS_OFFSET_RDX));
-                this->dump("rbp ", intrinsic.tls_reg(syscall::TLS_OFFSET_RBP));
-                this->dump("rsi ", intrinsic.tls_reg(syscall::TLS_OFFSET_RSI));
-                this->dump("rdi ", intrinsic.tls_reg(syscall::TLS_OFFSET_RDI));
-                this->dump("r8 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R8));
-                this->dump("r9 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R9));
-                this->dump("r10 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R10));
-                this->dump("r11 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R11));
-                this->dump("r12 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R12));
-                this->dump("r13 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R13));
-                this->dump("r14 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R14));
-                this->dump("r15 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R15));
+            if (mut_tls.active_vpsid == m_id) {
+                this->dump_field("rax ", intrinsic.tls_reg(syscall::TLS_OFFSET_RAX));
+                this->dump_field("rbx ", intrinsic.tls_reg(syscall::TLS_OFFSET_RBX));
+                this->dump_field("rcx ", intrinsic.tls_reg(syscall::TLS_OFFSET_RCX));
+                this->dump_field("rdx ", intrinsic.tls_reg(syscall::TLS_OFFSET_RDX));
+                this->dump_field("rbp ", intrinsic.tls_reg(syscall::TLS_OFFSET_RBP));
+                this->dump_field("rsi ", intrinsic.tls_reg(syscall::TLS_OFFSET_RSI));
+                this->dump_field("rdi ", intrinsic.tls_reg(syscall::TLS_OFFSET_RDI));
+                this->dump_field("r8 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R8));
+                this->dump_field("r9 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R9));
+                this->dump_field("r10 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R10));
+                this->dump_field("r11 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R11));
+                this->dump_field("r12 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R12));
+                this->dump_field("r13 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R13));
+                this->dump_field("r14 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R14));
+                this->dump_field("r15 ", intrinsic.tls_reg(syscall::TLS_OFFSET_R15));
             }
             else {
-                this->dump("rax ", bsl::make_safe(m_gprs.rax));
-                this->dump("rbx ", bsl::make_safe(m_gprs.rbx));
-                this->dump("rcx ", bsl::make_safe(m_gprs.rcx));
-                this->dump("rdx ", bsl::make_safe(m_gprs.rdx));
-                this->dump("rbp ", bsl::make_safe(m_gprs.rbp));
-                this->dump("rsi ", bsl::make_safe(m_gprs.rsi));
-                this->dump("rdi ", bsl::make_safe(m_gprs.rdi));
-                this->dump("r8 ", bsl::make_safe(m_gprs.r8));
-                this->dump("r9 ", bsl::make_safe(m_gprs.r9));
-                this->dump("r10 ", bsl::make_safe(m_gprs.r10));
-                this->dump("r11 ", bsl::make_safe(m_gprs.r11));
-                this->dump("r12 ", bsl::make_safe(m_gprs.r12));
-                this->dump("r13 ", bsl::make_safe(m_gprs.r13));
-                this->dump("r14 ", bsl::make_safe(m_gprs.r14));
-                this->dump("r15 ", bsl::make_safe(m_gprs.r15));
+                this->dump_field("rax ", bsl::make_safe(m_gprs.rax));
+                this->dump_field("rbx ", bsl::make_safe(m_gprs.rbx));
+                this->dump_field("rcx ", bsl::make_safe(m_gprs.rcx));
+                this->dump_field("rdx ", bsl::make_safe(m_gprs.rdx));
+                this->dump_field("rbp ", bsl::make_safe(m_gprs.rbp));
+                this->dump_field("rsi ", bsl::make_safe(m_gprs.rsi));
+                this->dump_field("rdi ", bsl::make_safe(m_gprs.rdi));
+                this->dump_field("r8 ", bsl::make_safe(m_gprs.r8));
+                this->dump_field("r9 ", bsl::make_safe(m_gprs.r9));
+                this->dump_field("r10 ", bsl::make_safe(m_gprs.r10));
+                this->dump_field("r11 ", bsl::make_safe(m_gprs.r11));
+                this->dump_field("r12 ", bsl::make_safe(m_gprs.r12));
+                this->dump_field("r13 ", bsl::make_safe(m_gprs.r13));
+                this->dump_field("r14 ", bsl::make_safe(m_gprs.r14));
+                this->dump_field("r15 ", bsl::make_safe(m_gprs.r15));
             }
 
             /// 16 Bit Control Fields
@@ -4302,9 +4238,9 @@ namespace mk
             bsl::print() << bsl::ylw << "+--------------------------------------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            this->dump("virtual_processor_identifier ", intrinsic.vmread16_quiet(VMCS_VIRTUAL_PROCESSOR_IDENTIFIER));
-            this->dump("posted_interrupt_notification_vector ", intrinsic.vmread16_quiet(VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR));
-            this->dump("eptp_index ", intrinsic.vmread16_quiet(VMCS_EPTP_INDEX));
+            this->dump_field("virtual_processor_identifier ", intrinsic.vmread16_quiet(VMCS_VIRTUAL_PROCESSOR_IDENTIFIER));
+            this->dump_field("posted_interrupt_notification_vector ", intrinsic.vmread16_quiet(VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR));
+            this->dump_field("eptp_index ", intrinsic.vmread16_quiet(VMCS_EPTP_INDEX));
 
             /// 16 Bit Guest Fields
             ///
@@ -4312,16 +4248,16 @@ namespace mk
             bsl::print() << bsl::ylw << "+--------------------------------------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            this->dump("es_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_ES_SELECTOR));
-            this->dump("cs_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_CS_SELECTOR));
-            this->dump("ss_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_SS_SELECTOR));
-            this->dump("ds_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_DS_SELECTOR));
-            this->dump("fs_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_FS_SELECTOR));
-            this->dump("gs_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_GS_SELECTOR));
-            this->dump("ldtr_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_LDTR_SELECTOR));
-            this->dump("tr_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_TR_SELECTOR));
-            this->dump("interrupt_status ", intrinsic.vmread16_quiet(VMCS_GUEST_INTERRUPT_STATUS));
-            this->dump("pml_index ", intrinsic.vmread16_quiet(VMCS_PML_INDEX));
+            this->dump_field("es_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_ES_SELECTOR));
+            this->dump_field("cs_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_CS_SELECTOR));
+            this->dump_field("ss_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_SS_SELECTOR));
+            this->dump_field("ds_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_DS_SELECTOR));
+            this->dump_field("fs_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_FS_SELECTOR));
+            this->dump_field("gs_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_GS_SELECTOR));
+            this->dump_field("ldtr_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_LDTR_SELECTOR));
+            this->dump_field("tr_selector ", intrinsic.vmread16_quiet(VMCS_GUEST_TR_SELECTOR));
+            this->dump_field("interrupt_status ", intrinsic.vmread16_quiet(VMCS_GUEST_INTERRUPT_STATUS));
+            this->dump_field("pml_index ", intrinsic.vmread16_quiet(VMCS_PML_INDEX));
 
             /// 64 Bit Control Fields
             ///
@@ -4329,32 +4265,32 @@ namespace mk
             bsl::print() << bsl::ylw << "+--------------------------------------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            this->dump("address_of_io_bitmap_a ", intrinsic.vmread64_quiet(VMCS_ADDRESS_OF_IO_BITMAP_A));
-            this->dump("address_of_io_bitmap_b ", intrinsic.vmread64_quiet(VMCS_ADDRESS_OF_IO_BITMAP_B));
-            this->dump("address_of_msr_bitmaps ", intrinsic.vmread64_quiet(VMCS_ADDRESS_OF_MSR_BITMAPS));
-            this->dump("vmexit_msr_store_address ", intrinsic.vmread64_quiet(VMCS_VMEXIT_MSR_STORE_ADDRESS));
-            this->dump("vmexit_msr_load_address ", intrinsic.vmread64_quiet(VMCS_VMEXIT_MSR_LOAD_ADDRESS));
-            this->dump("vmentry_msr_load_address ", intrinsic.vmread64_quiet(VMCS_VMENTRY_MSR_LOAD_ADDRESS));
-            this->dump("executive_vmcs_pointer ", intrinsic.vmread64_quiet(VMCS_EXECUTIVE_VMCS_POINTER));
-            this->dump("pml_address ", intrinsic.vmread64_quiet(VMCS_PML_ADDRESS));
-            this->dump("tsc_offset ", intrinsic.vmread64_quiet(VMCS_TSC_OFFSET));
-            this->dump("virtual_apic_address ", intrinsic.vmread64_quiet(VMCS_VIRTUAL_APIC_ADDRESS));
-            this->dump("apic_access_address ", intrinsic.vmread64_quiet(VMCS_APIC_ACCESS_ADDRESS));
-            this->dump("posted_interrupt_descriptor_address ", intrinsic.vmread64_quiet(VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS));
-            this->dump("vm_function_controls ", intrinsic.vmread64_quiet(VMCS_VM_FUNCTION_CONTROLS));
-            this->dump("ept_pointer ", intrinsic.vmread64_quiet(VMCS_EPT_POINTER));
-            this->dump("eoi_exit_bitmap0 ", intrinsic.vmread64_quiet(VMCS_EOI_EXIT_BITMAP0));
-            this->dump("eoi_exit_bitmap1 ", intrinsic.vmread64_quiet(VMCS_EOI_EXIT_BITMAP1));
-            this->dump("eoi_exit_bitmap2 ", intrinsic.vmread64_quiet(VMCS_EOI_EXIT_BITMAP2));
-            this->dump("eoi_exit_bitmap3 ", intrinsic.vmread64_quiet(VMCS_EOI_EXIT_BITMAP3));
-            this->dump("eptp_list_address ", intrinsic.vmread64_quiet(VMCS_EPTP_LIST_ADDRESS));
-            this->dump("vmread_bitmap_address ", intrinsic.vmread64_quiet(VMCS_VMREAD_BITMAP_ADDRESS));
-            this->dump("vmwrite_bitmap_address ", intrinsic.vmread64_quiet(VMCS_VMWRITE_BITMAP_ADDRESS));
-            this->dump("virt_exception_information_address ", intrinsic.vmread64_quiet(VMCS_VIRT_EXCEPTION_INFORMATION_ADDRESS));
-            this->dump("xss_exiting_bitmap ", intrinsic.vmread64_quiet(VMCS_XSS_EXITING_BITMAP));
-            this->dump("encls_exiting_bitmap ", intrinsic.vmread64_quiet(VMCS_ENCLS_EXITING_BITMAP));
-            this->dump("sub_page_permission_table_pointer ", intrinsic.vmread64_quiet(VMCS_SUB_PAGE_PERMISSION_TABLE_POINTER));
-            this->dump("tls_multiplier ", intrinsic.vmread64_quiet(VMCS_TLS_MULTIPLIER));
+            this->dump_field("address_of_io_bitmap_a ", intrinsic.vmread64_quiet(VMCS_ADDRESS_OF_IO_BITMAP_A));
+            this->dump_field("address_of_io_bitmap_b ", intrinsic.vmread64_quiet(VMCS_ADDRESS_OF_IO_BITMAP_B));
+            this->dump_field("address_of_msr_bitmaps ", intrinsic.vmread64_quiet(VMCS_ADDRESS_OF_MSR_BITMAPS));
+            this->dump_field("vmexit_msr_store_address ", intrinsic.vmread64_quiet(VMCS_VMEXIT_MSR_STORE_ADDRESS));
+            this->dump_field("vmexit_msr_load_address ", intrinsic.vmread64_quiet(VMCS_VMEXIT_MSR_LOAD_ADDRESS));
+            this->dump_field("vmentry_msr_load_address ", intrinsic.vmread64_quiet(VMCS_VMENTRY_MSR_LOAD_ADDRESS));
+            this->dump_field("executive_vmcs_pointer ", intrinsic.vmread64_quiet(VMCS_EXECUTIVE_VMCS_POINTER));
+            this->dump_field("pml_address ", intrinsic.vmread64_quiet(VMCS_PML_ADDRESS));
+            this->dump_field("tsc_offset ", intrinsic.vmread64_quiet(VMCS_TSC_OFFSET));
+            this->dump_field("virtual_apic_address ", intrinsic.vmread64_quiet(VMCS_VIRTUAL_APIC_ADDRESS));
+            this->dump_field("apic_access_address ", intrinsic.vmread64_quiet(VMCS_APIC_ACCESS_ADDRESS));
+            this->dump_field("posted_interrupt_descriptor_address ", intrinsic.vmread64_quiet(VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS));
+            this->dump_field("vm_function_controls ", intrinsic.vmread64_quiet(VMCS_VM_FUNCTION_CONTROLS));
+            this->dump_field("ept_pointer ", intrinsic.vmread64_quiet(VMCS_EPT_POINTER));
+            this->dump_field("eoi_exit_bitmap0 ", intrinsic.vmread64_quiet(VMCS_EOI_EXIT_BITMAP0));
+            this->dump_field("eoi_exit_bitmap1 ", intrinsic.vmread64_quiet(VMCS_EOI_EXIT_BITMAP1));
+            this->dump_field("eoi_exit_bitmap2 ", intrinsic.vmread64_quiet(VMCS_EOI_EXIT_BITMAP2));
+            this->dump_field("eoi_exit_bitmap3 ", intrinsic.vmread64_quiet(VMCS_EOI_EXIT_BITMAP3));
+            this->dump_field("eptp_list_address ", intrinsic.vmread64_quiet(VMCS_EPTP_LIST_ADDRESS));
+            this->dump_field("vmread_bitmap_address ", intrinsic.vmread64_quiet(VMCS_VMREAD_BITMAP_ADDRESS));
+            this->dump_field("vmwrite_bitmap_address ", intrinsic.vmread64_quiet(VMCS_VMWRITE_BITMAP_ADDRESS));
+            this->dump_field("virt_exception_information_address ", intrinsic.vmread64_quiet(VMCS_VIRT_EXCEPTION_INFORMATION_ADDRESS));
+            this->dump_field("xss_exiting_bitmap ", intrinsic.vmread64_quiet(VMCS_XSS_EXITING_BITMAP));
+            this->dump_field("encls_exiting_bitmap ", intrinsic.vmread64_quiet(VMCS_ENCLS_EXITING_BITMAP));
+            this->dump_field("sub_page_permission_table_pointer ", intrinsic.vmread64_quiet(VMCS_SUB_PAGE_PERMISSION_TABLE_POINTER));
+            this->dump_field("tls_multiplier ", intrinsic.vmread64_quiet(VMCS_TLS_MULTIPLIER));
 
             /// 64 Bit Read-Only Fields
             ///
@@ -4362,7 +4298,7 @@ namespace mk
             bsl::print() << bsl::ylw << "+--------------------------------------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            this->dump("guest_physical_address ", intrinsic.vmread64_quiet(VMCS_GUEST_PHYSICAL_ADDRESS));
+            this->dump_field("guest_physical_address ", intrinsic.vmread64_quiet(VMCS_GUEST_PHYSICAL_ADDRESS));
 
             /// 64 Bit Guest Fields
             ///
@@ -4370,22 +4306,22 @@ namespace mk
             bsl::print() << bsl::ylw << "+--------------------------------------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            this->dump("vmcs_link_pointer ", intrinsic.vmread64_quiet(VMCS_VMCS_LINK_POINTER));
-            this->dump("ia32_debugctl ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_DEBUGCTL));
-            this->dump("ia32_pat ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_PAT));
-            this->dump("ia32_efer ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_EFER));
-            this->dump("ia32_perf_global_ctrl ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL));
-            this->dump("guest_pdpte0 ", intrinsic.vmread64_quiet(VMCS_GUEST_PDPTE0));
-            this->dump("guest_pdpte1 ", intrinsic.vmread64_quiet(VMCS_GUEST_PDPTE1));
-            this->dump("guest_pdpte2 ", intrinsic.vmread64_quiet(VMCS_GUEST_PDPTE2));
-            this->dump("guest_pdpte3 ", intrinsic.vmread64_quiet(VMCS_GUEST_PDPTE3));
-            this->dump("ia32_bndcfgs ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_BNDCFGS));
-            this->dump("guest_rtit_ctl ", intrinsic.vmread64_quiet(VMCS_GUEST_RTIT_CTL));
-            this->dump("ia32_star ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_star));
-            this->dump("ia32_lstar ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_lstar));
-            this->dump("ia32_cstar ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_cstar));
-            this->dump("ia32_fmask ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_fmask));
-            this->dump("ia32_kernel_gs_base ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_kernel_gs_base));
+            this->dump_field("vmcs_link_pointer ", intrinsic.vmread64_quiet(VMCS_VMCS_LINK_POINTER));
+            this->dump_field("ia32_debugctl ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_DEBUGCTL));
+            this->dump_field("ia32_pat ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_PAT));
+            this->dump_field("ia32_efer ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_EFER));
+            this->dump_field("ia32_perf_global_ctrl ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL));
+            this->dump_field("guest_pdpte0 ", intrinsic.vmread64_quiet(VMCS_GUEST_PDPTE0));
+            this->dump_field("guest_pdpte1 ", intrinsic.vmread64_quiet(VMCS_GUEST_PDPTE1));
+            this->dump_field("guest_pdpte2 ", intrinsic.vmread64_quiet(VMCS_GUEST_PDPTE2));
+            this->dump_field("guest_pdpte3 ", intrinsic.vmread64_quiet(VMCS_GUEST_PDPTE3));
+            this->dump_field("ia32_bndcfgs ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_BNDCFGS));
+            this->dump_field("guest_rtit_ctl ", intrinsic.vmread64_quiet(VMCS_GUEST_RTIT_CTL));
+            this->dump_field("ia32_star ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_star));
+            this->dump_field("ia32_lstar ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_lstar));
+            this->dump_field("ia32_cstar ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_cstar));
+            this->dump_field("ia32_fmask ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_fmask));
+            this->dump_field("ia32_kernel_gs_base ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_kernel_gs_base));
 
             /// 32 Bit Control Fields
             ///
@@ -4393,24 +4329,24 @@ namespace mk
             bsl::print() << bsl::ylw << "+--------------------------------------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            this->dump("pin_based_vm_execution_ctls ", intrinsic.vmread32_quiet(VMCS_PIN_BASED_VM_EXECUTION_CTLS));
-            this->dump("primary_proc_based_vm_execution_ctls ", intrinsic.vmread32_quiet(VMCS_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS));
-            this->dump("exception_bitmap ", intrinsic.vmread32_quiet(VMCS_EXCEPTION_BITMAP));
-            this->dump("page_fault_error_code_mask ", intrinsic.vmread32_quiet(VMCS_PAGE_FAULT_ERROR_CODE_MASK));
-            this->dump("page_fault_error_code_match ", intrinsic.vmread32_quiet(VMCS_PAGE_FAULT_ERROR_CODE_MATCH));
-            this->dump("cr3_target_count ", intrinsic.vmread32_quiet(VMCS_CR3_TARGET_COUNT));
-            this->dump("vmexit_ctls ", intrinsic.vmread32_quiet(VMCS_VMEXIT_CTLS));
-            this->dump("vmexit_msr_store_count ", intrinsic.vmread32_quiet(VMCS_VMEXIT_MSR_STORE_COUNT));
-            this->dump("vmexit_msr_load_count ", intrinsic.vmread32_quiet(VMCS_VMEXIT_MSR_LOAD_COUNT));
-            this->dump("vmentry_ctls ", intrinsic.vmread32_quiet(VMCS_VMENTRY_CTLS));
-            this->dump("vmentry_msr_load_count ", intrinsic.vmread32_quiet(VMCS_VMENTRY_MSR_LOAD_COUNT));
-            this->dump("vmentry_interrupt_information_field ", intrinsic.vmread32_quiet(VMCS_VMENTRY_INTERRUPT_INFORMATION_FIELD));
-            this->dump("vmentry_exception_error_code ", intrinsic.vmread32_quiet(VMCS_VMENTRY_EXCEPTION_ERROR_CODE));
-            this->dump("vmentry_instruction_length ", intrinsic.vmread32_quiet(VMCS_VMENTRY_INSTRUCTION_LENGTH));
-            this->dump("tpr_threshold ", intrinsic.vmread32_quiet(VMCS_TPR_THRESHOLD));
-            this->dump("secondary_proc_based_vm_execution_ctls ", intrinsic.vmread32_quiet(VMCS_SECONDARY_PROC_BASED_VM_EXECUTION_CTLS));
-            this->dump("ple_gap ", intrinsic.vmread32_quiet(VMCS_PLE_GAP));
-            this->dump("ple_window ", intrinsic.vmread32_quiet(VMCS_PLE_WINDOW));
+            this->dump_field("pin_based_vm_execution_ctls ", intrinsic.vmread32_quiet(VMCS_PIN_BASED_VM_EXECUTION_CTLS));
+            this->dump_field("primary_proc_based_vm_execution_ctls ", intrinsic.vmread32_quiet(VMCS_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS));
+            this->dump_field("exception_bitmap ", intrinsic.vmread32_quiet(VMCS_EXCEPTION_BITMAP));
+            this->dump_field("page_fault_error_code_mask ", intrinsic.vmread32_quiet(VMCS_PAGE_FAULT_ERROR_CODE_MASK));
+            this->dump_field("page_fault_error_code_match ", intrinsic.vmread32_quiet(VMCS_PAGE_FAULT_ERROR_CODE_MATCH));
+            this->dump_field("cr3_target_count ", intrinsic.vmread32_quiet(VMCS_CR3_TARGET_COUNT));
+            this->dump_field("vmexit_ctls ", intrinsic.vmread32_quiet(VMCS_VMEXIT_CTLS));
+            this->dump_field("vmexit_msr_store_count ", intrinsic.vmread32_quiet(VMCS_VMEXIT_MSR_STORE_COUNT));
+            this->dump_field("vmexit_msr_load_count ", intrinsic.vmread32_quiet(VMCS_VMEXIT_MSR_LOAD_COUNT));
+            this->dump_field("vmentry_ctls ", intrinsic.vmread32_quiet(VMCS_VMENTRY_CTLS));
+            this->dump_field("vmentry_msr_load_count ", intrinsic.vmread32_quiet(VMCS_VMENTRY_MSR_LOAD_COUNT));
+            this->dump_field("vmentry_interrupt_information_field ", intrinsic.vmread32_quiet(VMCS_VMENTRY_INTERRUPT_INFORMATION_FIELD));
+            this->dump_field("vmentry_exception_error_code ", intrinsic.vmread32_quiet(VMCS_VMENTRY_EXCEPTION_ERROR_CODE));
+            this->dump_field("vmentry_instruction_length ", intrinsic.vmread32_quiet(VMCS_VMENTRY_INSTRUCTION_LENGTH));
+            this->dump_field("tpr_threshold ", intrinsic.vmread32_quiet(VMCS_TPR_THRESHOLD));
+            this->dump_field("secondary_proc_based_vm_execution_ctls ", intrinsic.vmread32_quiet(VMCS_SECONDARY_PROC_BASED_VM_EXECUTION_CTLS));
+            this->dump_field("ple_gap ", intrinsic.vmread32_quiet(VMCS_PLE_GAP));
+            this->dump_field("ple_window ", intrinsic.vmread32_quiet(VMCS_PLE_WINDOW));
 
             /// 32 Bit Read-Only Fields
             ///
@@ -4418,13 +4354,13 @@ namespace mk
             bsl::print() << bsl::ylw << "+--------------------------------------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            this->dump("exit_reason ", intrinsic.vmread32_quiet(VMCS_EXIT_REASON));
-            this->dump("vmexit_interruption_information ", intrinsic.vmread32_quiet(VMCS_VMEXIT_INTERRUPTION_INFORMATION));
-            this->dump("vmexit_interruption_error_code ", intrinsic.vmread32_quiet(VMCS_VMEXIT_INTERRUPTION_ERROR_CODE));
-            this->dump("idt_vectoring_information_field ", intrinsic.vmread32_quiet(VMCS_IDT_VECTORING_INFORMATION_FIELD));
-            this->dump("idt_vectoring_error_code ", intrinsic.vmread32_quiet(VMCS_IDT_VECTORING_ERROR_CODE));
-            this->dump("vmexit_instruction_length ", intrinsic.vmread32_quiet(VMCS_VMEXIT_INSTRUCTION_LENGTH));
-            this->dump("vmexit_instruction_information ", intrinsic.vmread32_quiet(VMCS_VMEXIT_INSTRUCTION_INFORMATION));
+            this->dump_field("exit_reason ", intrinsic.vmread32_quiet(VMCS_EXIT_REASON));
+            this->dump_field("vmexit_interruption_information ", intrinsic.vmread32_quiet(VMCS_VMEXIT_INTERRUPTION_INFORMATION));
+            this->dump_field("vmexit_interruption_error_code ", intrinsic.vmread32_quiet(VMCS_VMEXIT_INTERRUPTION_ERROR_CODE));
+            this->dump_field("idt_vectoring_information_field ", intrinsic.vmread32_quiet(VMCS_IDT_VECTORING_INFORMATION_FIELD));
+            this->dump_field("idt_vectoring_error_code ", intrinsic.vmread32_quiet(VMCS_IDT_VECTORING_ERROR_CODE));
+            this->dump_field("vmexit_instruction_length ", intrinsic.vmread32_quiet(VMCS_VMEXIT_INSTRUCTION_LENGTH));
+            this->dump_field("vmexit_instruction_information ", intrinsic.vmread32_quiet(VMCS_VMEXIT_INSTRUCTION_INFORMATION));
 
             /// 32 Bit Guest Fields
             ///
@@ -4432,29 +4368,29 @@ namespace mk
             bsl::print() << bsl::ylw << "+--------------------------------------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            this->dump("es_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_ES_LIMIT));
-            this->dump("cs_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_CS_LIMIT));
-            this->dump("ss_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_SS_LIMIT));
-            this->dump("ds_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_DS_LIMIT));
-            this->dump("fs_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_FS_LIMIT));
-            this->dump("gs_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_GS_LIMIT));
-            this->dump("ldtr_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_LDTR_LIMIT));
-            this->dump("tr_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_TR_LIMIT));
-            this->dump("gdtr_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_GDTR_LIMIT));
-            this->dump("idtr_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_IDTR_LIMIT));
-            this->dump("es_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_ES_ACCESS_RIGHTS));
-            this->dump("cs_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_CS_ACCESS_RIGHTS));
-            this->dump("ss_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_SS_ACCESS_RIGHTS));
-            this->dump("ds_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_DS_ACCESS_RIGHTS));
-            this->dump("fs_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_FS_ACCESS_RIGHTS));
-            this->dump("gs_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_GS_ACCESS_RIGHTS));
-            this->dump("ldtr_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_LDTR_ACCESS_RIGHTS));
-            this->dump("tr_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_TR_ACCESS_RIGHTS));
-            this->dump("guest_interruptibility_state ", intrinsic.vmread32_quiet(VMCS_GUEST_INTERRUPTIBILITY_STATE));
-            this->dump("guest_activity_state ", intrinsic.vmread32_quiet(VMCS_GUEST_ACTIVITY_STATE));
-            this->dump("guest_smbase ", intrinsic.vmread32_quiet(VMCS_GUEST_SMBASE));
-            this->dump("ia32_sysenter_cs ", intrinsic.vmread32_quiet(VMCS_GUEST_IA32_SYSENTER_CS));
-            this->dump("vmx_preemption_timer_value ", intrinsic.vmread32_quiet(VMCS_VMX_PREEMPTION_TIMER_VALUE));
+            this->dump_field("es_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_ES_LIMIT));
+            this->dump_field("cs_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_CS_LIMIT));
+            this->dump_field("ss_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_SS_LIMIT));
+            this->dump_field("ds_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_DS_LIMIT));
+            this->dump_field("fs_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_FS_LIMIT));
+            this->dump_field("gs_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_GS_LIMIT));
+            this->dump_field("ldtr_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_LDTR_LIMIT));
+            this->dump_field("tr_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_TR_LIMIT));
+            this->dump_field("gdtr_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_GDTR_LIMIT));
+            this->dump_field("idtr_limit ", intrinsic.vmread32_quiet(VMCS_GUEST_IDTR_LIMIT));
+            this->dump_field("es_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_ES_ACCESS_RIGHTS));
+            this->dump_field("cs_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_CS_ACCESS_RIGHTS));
+            this->dump_field("ss_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_SS_ACCESS_RIGHTS));
+            this->dump_field("ds_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_DS_ACCESS_RIGHTS));
+            this->dump_field("fs_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_FS_ACCESS_RIGHTS));
+            this->dump_field("gs_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_GS_ACCESS_RIGHTS));
+            this->dump_field("ldtr_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_LDTR_ACCESS_RIGHTS));
+            this->dump_field("tr_access_rights ", intrinsic.vmread32_quiet(VMCS_GUEST_TR_ACCESS_RIGHTS));
+            this->dump_field("guest_interruptibility_state ", intrinsic.vmread32_quiet(VMCS_GUEST_INTERRUPTIBILITY_STATE));
+            this->dump_field("guest_activity_state ", intrinsic.vmread32_quiet(VMCS_GUEST_ACTIVITY_STATE));
+            this->dump_field("guest_smbase ", intrinsic.vmread32_quiet(VMCS_GUEST_SMBASE));
+            this->dump_field("ia32_sysenter_cs ", intrinsic.vmread32_quiet(VMCS_GUEST_IA32_SYSENTER_CS));
+            this->dump_field("vmx_preemption_timer_value ", intrinsic.vmread32_quiet(VMCS_VMX_PREEMPTION_TIMER_VALUE));
 
             /// Natural-Width Control Fields
             ///
@@ -4462,14 +4398,14 @@ namespace mk
             bsl::print() << bsl::ylw << "+--------------------------------------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            this->dump("cr0_guest_host_mask ", intrinsic.vmread64_quiet(VMCS_CR0_GUEST_HOST_MASK));
-            this->dump("cr4_guest_host_mask ", intrinsic.vmread64_quiet(VMCS_CR4_GUEST_HOST_MASK));
-            this->dump("cr0_read_shadow ", intrinsic.vmread64_quiet(VMCS_CR0_READ_SHADOW));
-            this->dump("cr4_read_shadow ", intrinsic.vmread64_quiet(VMCS_CR4_READ_SHADOW));
-            this->dump("cr3_target_value0 ", intrinsic.vmread64_quiet(VMCS_CR3_TARGET_VALUE0));
-            this->dump("cr3_target_value1 ", intrinsic.vmread64_quiet(VMCS_CR3_TARGET_VALUE1));
-            this->dump("cr3_target_value2 ", intrinsic.vmread64_quiet(VMCS_CR3_TARGET_VALUE2));
-            this->dump("cr3_target_value3 ", intrinsic.vmread64_quiet(VMCS_CR3_TARGET_VALUE3));
+            this->dump_field("cr0_guest_host_mask ", intrinsic.vmread64_quiet(VMCS_CR0_GUEST_HOST_MASK));
+            this->dump_field("cr4_guest_host_mask ", intrinsic.vmread64_quiet(VMCS_CR4_GUEST_HOST_MASK));
+            this->dump_field("cr0_read_shadow ", intrinsic.vmread64_quiet(VMCS_CR0_READ_SHADOW));
+            this->dump_field("cr4_read_shadow ", intrinsic.vmread64_quiet(VMCS_CR4_READ_SHADOW));
+            this->dump_field("cr3_target_value0 ", intrinsic.vmread64_quiet(VMCS_CR3_TARGET_VALUE0));
+            this->dump_field("cr3_target_value1 ", intrinsic.vmread64_quiet(VMCS_CR3_TARGET_VALUE1));
+            this->dump_field("cr3_target_value2 ", intrinsic.vmread64_quiet(VMCS_CR3_TARGET_VALUE2));
+            this->dump_field("cr3_target_value3 ", intrinsic.vmread64_quiet(VMCS_CR3_TARGET_VALUE3));
 
             /// Natural-Width Read-Only Fields
             ///
@@ -4477,12 +4413,12 @@ namespace mk
             bsl::print() << bsl::ylw << "+--------------------------------------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            this->dump("exit_qualification ", intrinsic.vmread64_quiet(VMCS_EXIT_QUALIFICATION));
-            this->dump("io_rcx ", intrinsic.vmread64_quiet(VMCS_IO_RCX));
-            this->dump("io_rsi ", intrinsic.vmread64_quiet(VMCS_IO_RSI));
-            this->dump("io_rdi ", intrinsic.vmread64_quiet(VMCS_IO_RDI));
-            this->dump("io_rip ", intrinsic.vmread64_quiet(VMCS_IO_RIP));
-            this->dump("guest_linear_address ", intrinsic.vmread64_quiet(VMCS_GUEST_LINEAR_ADDRESS));
+            this->dump_field("exit_qualification ", intrinsic.vmread64_quiet(VMCS_EXIT_QUALIFICATION));
+            this->dump_field("io_rcx ", intrinsic.vmread64_quiet(VMCS_IO_RCX));
+            this->dump_field("io_rsi ", intrinsic.vmread64_quiet(VMCS_IO_RSI));
+            this->dump_field("io_rdi ", intrinsic.vmread64_quiet(VMCS_IO_RDI));
+            this->dump_field("io_rip ", intrinsic.vmread64_quiet(VMCS_IO_RIP));
+            this->dump_field("guest_linear_address ", intrinsic.vmread64_quiet(VMCS_GUEST_LINEAR_ADDRESS));
 
             /// Natural-Width Guest Fields
             ///
@@ -4490,28 +4426,28 @@ namespace mk
             bsl::print() << bsl::ylw << "+--------------------------------------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            this->dump("cr0 ", intrinsic.vmread64_quiet(VMCS_GUEST_CR0));
-            this->dump("cr2 ", bsl::make_safe(m_vmcs_missing_registers.cr2));
-            this->dump("cr3 ", intrinsic.vmread64_quiet(VMCS_GUEST_CR3));
-            this->dump("cr4 ", intrinsic.vmread64_quiet(VMCS_GUEST_CR4));
-            this->dump("es_base ", intrinsic.vmread64_quiet(VMCS_GUEST_ES_BASE));
-            this->dump("cs_base ", intrinsic.vmread64_quiet(VMCS_GUEST_CS_BASE));
-            this->dump("ss_base ", intrinsic.vmread64_quiet(VMCS_GUEST_SS_BASE));
-            this->dump("ds_base ", intrinsic.vmread64_quiet(VMCS_GUEST_DS_BASE));
-            this->dump("fs_base ", intrinsic.vmread64_quiet(VMCS_GUEST_FS_BASE));
-            this->dump("gs_base ", intrinsic.vmread64_quiet(VMCS_GUEST_GS_BASE));
-            this->dump("ldtr_base ", intrinsic.vmread64_quiet(VMCS_GUEST_LDTR_BASE));
-            this->dump("tr_base ", intrinsic.vmread64_quiet(VMCS_GUEST_TR_BASE));
-            this->dump("gdtr_base ", intrinsic.vmread64_quiet(VMCS_GUEST_GDTR_BASE));
-            this->dump("idtr_base ", intrinsic.vmread64_quiet(VMCS_GUEST_IDTR_BASE));
-            this->dump("dr6 ", bsl::make_safe(m_vmcs_missing_registers.dr6));
-            this->dump("dr7 ", intrinsic.vmread64_quiet(VMCS_GUEST_DR7));
-            this->dump("rsp ", intrinsic.vmread64_quiet(VMCS_GUEST_RSP));
-            this->dump("rip ", intrinsic.vmread64_quiet(VMCS_GUEST_RIP));
-            this->dump("rflags ", intrinsic.vmread64_quiet(VMCS_GUEST_RFLAGS));
-            this->dump("guest_pending_debug_exceptions ", intrinsic.vmread64_quiet(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS));
-            this->dump("ia32_sysenter_esp ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_SYSENTER_ESP));
-            this->dump("ia32_sysenter_eip ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_SYSENTER_EIP));
+            this->dump_field("cr0 ", intrinsic.vmread64_quiet(VMCS_GUEST_CR0));
+            this->dump_field("cr2 ", bsl::make_safe(m_vmcs_missing_registers.guest_cr2));
+            this->dump_field("cr3 ", intrinsic.vmread64_quiet(VMCS_GUEST_CR3));
+            this->dump_field("cr4 ", intrinsic.vmread64_quiet(VMCS_GUEST_CR4));
+            this->dump_field("es_base ", intrinsic.vmread64_quiet(VMCS_GUEST_ES_BASE));
+            this->dump_field("cs_base ", intrinsic.vmread64_quiet(VMCS_GUEST_CS_BASE));
+            this->dump_field("ss_base ", intrinsic.vmread64_quiet(VMCS_GUEST_SS_BASE));
+            this->dump_field("ds_base ", intrinsic.vmread64_quiet(VMCS_GUEST_DS_BASE));
+            this->dump_field("fs_base ", intrinsic.vmread64_quiet(VMCS_GUEST_FS_BASE));
+            this->dump_field("gs_base ", intrinsic.vmread64_quiet(VMCS_GUEST_GS_BASE));
+            this->dump_field("ldtr_base ", intrinsic.vmread64_quiet(VMCS_GUEST_LDTR_BASE));
+            this->dump_field("tr_base ", intrinsic.vmread64_quiet(VMCS_GUEST_TR_BASE));
+            this->dump_field("gdtr_base ", intrinsic.vmread64_quiet(VMCS_GUEST_GDTR_BASE));
+            this->dump_field("idtr_base ", intrinsic.vmread64_quiet(VMCS_GUEST_IDTR_BASE));
+            this->dump_field("dr6 ", bsl::make_safe(m_vmcs_missing_registers.guest_dr6));
+            this->dump_field("dr7 ", intrinsic.vmread64_quiet(VMCS_GUEST_DR7));
+            this->dump_field("rsp ", intrinsic.vmread64_quiet(VMCS_GUEST_RSP));
+            this->dump_field("rip ", intrinsic.vmread64_quiet(VMCS_GUEST_RIP));
+            this->dump_field("rflags ", intrinsic.vmread64_quiet(VMCS_GUEST_RFLAGS));
+            this->dump_field("guest_pending_debug_exceptions ", intrinsic.vmread64_quiet(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS));
+            this->dump_field("ia32_sysenter_esp ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_SYSENTER_ESP));
+            this->dump_field("ia32_sysenter_eip ", intrinsic.vmread64_quiet(VMCS_GUEST_IA32_SYSENTER_EIP));
 
             /// Footer
             ///

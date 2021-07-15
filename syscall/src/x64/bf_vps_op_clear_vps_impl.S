@@ -31,7 +31,7 @@
     .type   bf_vps_op_clear_vps_impl, @function
 bf_vps_op_clear_vps_impl:
 
-    mov rax, 0x6642000000060012
+    mov rax, 0x664200000006000A
     syscall
 
     ret

@@ -30,41 +30,6 @@
 namespace
 {
     constinit example::vp_t const g_verify_constinit{};
-
-    // NOLINTNEXTLINE(bsl-user-defined-type-names-match-header-name)
-    class fixture_t final
-    {
-        example::vp_t m_vp{};
-
-    public:
-        [[nodiscard]] static constexpr auto
-        test_member_const() noexcept -> bool
-        {
-            /// NOTE:
-            /// - vp_t does not contain const member functions
-            ///
-
-            return true;
-        }
-
-        [[nodiscard]] constexpr auto
-        test_member_nonconst() noexcept -> bool
-        {
-            example::gs_t gs{};
-            example::tls_t tls{};
-            syscall::bf_syscall_t sys{};
-            example::intrinsic_t intrinsic{};
-
-            bsl::discard(example::vp_t{});
-            bsl::discard(m_vp.initialize(gs, tls, sys, intrinsic, {}));
-            m_vp.release(gs, tls, sys, intrinsic);
-            bsl::discard(m_vp.allocate(gs, tls, sys, intrinsic, {}, {}));
-
-            return true;
-        }
-    };
-
-    constexpr fixture_t FIXTURE1{};
 }
 
 /// <!-- description -->
@@ -84,26 +49,12 @@ main() noexcept -> bsl::exit_code
 
     bsl::ut_scenario{"verify noexcept"} = []() noexcept {
         bsl::ut_given{} = []() noexcept {
-            example::vp_t vp{};
-            example::gs_t gs{};
-            example::tls_t tls{};
-            syscall::bf_syscall_t sys{};
-            example::intrinsic_t intrinsic{};
+            example::vp_t mut_vp{};
             bsl::ut_then{} = []() noexcept {
                 static_assert(noexcept(example::vp_t{}));
-                static_assert(noexcept(vp.initialize(gs, tls, sys, intrinsic, {})));
-                static_assert(noexcept(vp.release(gs, tls, sys, intrinsic)));
-                static_assert(noexcept(vp.allocate(gs, tls, sys, intrinsic, {}, {})));
-            };
-        };
-    };
-
-    bsl::ut_scenario{"verify constness"} = []() noexcept {
-        bsl::ut_given{} = []() noexcept {
-            fixture_t fixture2{};
-            bsl::ut_then{} = [&]() noexcept {
-                static_assert(FIXTURE1.test_member_const());
-                bsl::ut_check(fixture2.test_member_nonconst());
+                static_assert(noexcept(mut_vp.initialize({}, {}, {}, {}, {})));
+                static_assert(noexcept(mut_vp.release({}, {}, {}, {})));
+                static_assert(noexcept(mut_vp.allocate({}, {}, {}, {}, {}, {})));
             };
         };
     };

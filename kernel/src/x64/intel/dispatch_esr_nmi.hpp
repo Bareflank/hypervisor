@@ -40,16 +40,16 @@ namespace mk
     ///   @brief Provides the main entry point for NMI exceptions.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param intrinsic the intrinsics to use
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_intrinsic the intrinsics to use
     ///   @return Returns bsl::errc_success if the exception was handled,
     ///     bsl::errc_failure otherwise
     ///
     [[nodiscard]] constexpr auto
-    dispatch_esr_nmi(tls_t &tls, intrinsic_t &intrinsic) noexcept -> bsl::errc_type
+    dispatch_esr_nmi(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept -> bsl::errc_type
     {
-        bsl::errc_type ret{};
-        bsl::safe_uint32 val{};
+        bsl::errc_type mut_ret{};
+        bsl::safe_uint32 mut_val{};
 
         constexpr auto vmcs_procbased_ctls_idx{0x4002_umax};
         constexpr auto vmcs_set_nmi_window_exiting{0x400000_u32};
@@ -57,28 +57,28 @@ namespace mk
         constexpr auto unlocked{0_umax};
         constexpr auto pending{1_umax};
 
-        if (unlocked != tls.nmi_lock) {
-            tls.nmi_pending = pending.get();
+        if (unlocked != mut_tls.nmi_lock) {
+            mut_tls.nmi_pending = pending.get();
             return bsl::errc_success;
         }
 
-        ret = intrinsic.vmread32(vmcs_procbased_ctls_idx, val.data());
-        if (bsl::unlikely(!ret)) {
+        mut_ret = mut_intrinsic.vmread32(vmcs_procbased_ctls_idx, mut_val.data());
+        if (bsl::unlikely(!mut_ret)) {
             bsl::error() << bsl::here();
-            return ret;
+            return mut_ret;
         }
 
-        val |= vmcs_set_nmi_window_exiting;
+        mut_val |= vmcs_set_nmi_window_exiting;
 
-        ret = intrinsic.vmwrite32(vmcs_procbased_ctls_idx, val);
-        if (bsl::unlikely(!ret)) {
+        mut_ret = mut_intrinsic.vmwrite32(vmcs_procbased_ctls_idx, mut_val);
+        if (bsl::unlikely(!mut_ret)) {
             bsl::error() << bsl::here();
-            return ret;
+            return mut_ret;
         }
 
         constexpr auto not_pending{0_umax};
-        tls.nmi_pending = not_pending.get();
-        return bsl::errc_success;
+        mut_tls.nmi_pending = not_pending.get();
+        return mut_ret;
     }
 }
 

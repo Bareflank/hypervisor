@@ -42,11 +42,11 @@ namespace syscall
     {
         bsl::ut_scenario{"bf_control_op_exit"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                g_bf_control_op_exit_impl_executed = {};
+                g_mut_bf_control_op_exit_impl_executed = {};
                 bsl::ut_when{} = []() noexcept {
                     bf_control_op_exit();
                     bsl::ut_then{} = []() noexcept {
-                        bsl::ut_check(g_bf_control_op_exit_impl_executed);
+                        bsl::ut_check(g_mut_bf_control_op_exit_impl_executed);
                     };
                 };
             };
@@ -54,11 +54,11 @@ namespace syscall
 
         bsl::ut_scenario{"bf_control_op_wait"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                g_bf_control_op_wait_impl_executed = {};
+                g_mut_bf_control_op_wait_impl_executed = {};
                 bsl::ut_when{} = []() noexcept {
                     bf_control_op_wait();
                     bsl::ut_then{} = []() noexcept {
-                        bsl::ut_check(g_bf_control_op_wait_impl_executed);
+                        bsl::ut_check(g_mut_bf_control_op_wait_impl_executed);
                     };
                 };
             };

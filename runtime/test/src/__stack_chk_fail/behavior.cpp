@@ -50,7 +50,7 @@ namespace mk
                 bsl::ut_when{} = []() noexcept {
                     ut_stack_chk_fail();
                     bsl::ut_then{} = []() noexcept {
-                        bsl::ut_check(syscall::g_bf_control_op_exit_impl_executed);
+                        bsl::ut_check(syscall::g_mut_bf_control_op_exit_impl_executed);
                     };
                 };
             };

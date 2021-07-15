@@ -25,10 +25,6 @@ add_executable(example_nested_paging)
 # Includes
 # ------------------------------------------------------------------------------
 
-target_include_directories(example_nested_paging PRIVATE
-    .
-)
-
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
     target_include_directories(example_nested_paging PRIVATE
         x64
@@ -58,6 +54,10 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
         )
     endif()
 endif()
+
+target_include_directories(example_nested_paging PRIVATE
+    .
+)
 
 # ------------------------------------------------------------------------------
 # Headers

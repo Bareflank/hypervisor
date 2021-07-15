@@ -64,12 +64,12 @@ namespace example
         ///
         [[nodiscard]] static constexpr auto
         initialize(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
-            vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool) noexcept -> bsl::errc_type
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic,
+            vp_pool_t const &vp_pool,
+            vps_pool_t const &vps_pool) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -99,12 +99,12 @@ namespace example
         ///
         static constexpr void
         release(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
-            vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool) noexcept
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic,
+            vp_pool_t const &vp_pool,
+            vps_pool_t const &vps_pool) noexcept
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -127,22 +127,22 @@ namespace example
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
         ///   @param tls the tls_t to use
-        ///   @param sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
-        ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param mut_vp_pool the vp_pool_t to use
+        ///   @param mut_vps_pool the vps_pool_t to use
         ///   @param ppid the ID of the PP to bootstrap
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
         dispatch(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
-            vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool,
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t &mut_sys,
+            intrinsic_t const &intrinsic,
+            vp_pool_t &mut_vp_pool,
+            vps_pool_t &mut_vps_pool,
             bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
         {
             /// NOTE:
@@ -166,13 +166,13 @@ namespace example
             ///   the VMCS/VMCB and other CPU register state that is needed.
             ///
 
-            auto const vpid{vp_pool.allocate(gs, tls, sys, intrinsic, vmid, ppid)};
+            auto const vpid{mut_vp_pool.allocate(gs, tls, mut_sys, intrinsic, vmid, ppid)};
             if (bsl::unlikely_assert(!vpid)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            auto const vpsid{vps_pool.allocate(gs, tls, sys, intrinsic, vpid, ppid)};
+            auto const vpsid{mut_vps_pool.allocate(gs, tls, mut_sys, intrinsic, vpid, ppid)};
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -185,7 +185,7 @@ namespace example
             ///   hypervisor, or switching the VM, VP or VPS as it is slow.
             ///
 
-            return sys.bf_vps_op_run(vmid, vpid, vpsid);
+            return mut_sys.bf_vps_op_run(vmid, vpid, vpsid);
         }
     };
 }

@@ -27,8 +27,8 @@
 #ifndef MAP_EXT_ELF_FILES_H
 #define MAP_EXT_ELF_FILES_H
 
+#include <elf_file_t.h>
 #include <root_page_table_t.h>
-#include <span_t.h>
 #include <types.h>
 
 /**
@@ -37,11 +37,11 @@
  *     microkernel's root page tables.
  *
  * <!-- inputs/outputs -->
- *   @param files a pointer to a span_t array that stores the ELF files
- *     being mapped
+ *   @param ext_elf_files a pointer to the ext_elf_files to map
  *   @param rpt the root page table to map the ELF files into
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t map_ext_elf_files(struct span_t const *const files, root_page_table_t *const rpt);
+int64_t
+map_ext_elf_files(struct elf_file_t const *const ext_elf_files, root_page_table_t *const rpt);
 
 #endif

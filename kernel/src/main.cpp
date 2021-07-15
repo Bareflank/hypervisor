@@ -24,7 +24,6 @@
 
 #include <dispatch_esr.hpp>
 #include <dispatch_syscall.hpp>
-#include <dispatch_syscall_failure.hpp>
 #include <ext_pool_t.hpp>
 #include <fast_fail.hpp>
 #include <huge_pool_t.hpp>
@@ -48,136 +47,112 @@
 namespace mk
 {
     /// @brief stores the TLS blocks used by the microkernel.
-    extern "C" constinit bsl::array<tls_t, HYPERVISOR_MAX_PPS.get()> g_tls_blocks{};
+    extern "C" constinit bsl::array<tls_t, HYPERVISOR_MAX_PPS.get()> g_mut_tls_blocks{};
 
     /// @brief stores a pointer to the debug ring provided by the loader
-    extern "C" constinit loader::debug_ring_t *g_debug_ring{};
+    extern "C" constinit loader::debug_ring_t *g_pmut_mut_debug_ring{};
 
     /// @brief stores the vmexit log used by the microkernel
-    constinit inline vmexit_log_t g_vmexit_log{};
+    constinit inline vmexit_log_t g_mut_vmexit_log{};
 
     /// @brief stores the page pool used by the microkernel
-    constinit inline page_pool_t g_page_pool{};
+    constinit inline page_pool_t g_mut_page_pool{};
 
     /// @brief stores the huge pool used by the microkernel
-    constinit inline huge_pool_t g_huge_pool{};
+    constinit inline huge_pool_t g_mut_huge_pool{};
 
     /// @brief stores the intrinsics used by the microkernel
-    constinit inline intrinsic_t g_intrinsic{};
+    constinit inline intrinsic_t g_mut_intrinsic{};
 
     /// @brief stores the vm pool used by the microkernel
-    constinit inline vm_pool_t g_vm_pool{};
+    constinit inline vm_pool_t g_mut_vm_pool{};
 
     /// @brief stores the vp pool used by the microkernel
-    constinit inline vp_pool_t g_vp_pool{};
+    constinit inline vp_pool_t g_mut_vp_pool{};
 
     /// @brief stores the vps pool used by the microkernel
-    constinit inline vps_pool_t g_vps_pool{};
+    constinit inline vps_pool_t g_mut_vps_pool{};
 
     /// @brief stores the ext pool used by the microkernel
-    constinit inline ext_pool_t g_ext_pool{};
+    constinit inline ext_pool_t g_mut_ext_pool{};
 
     /// @brief stores the system RPT provided by the loader
-    constinit inline root_page_table_t g_system_rpt{};
+    constinit inline root_page_table_t g_mut_system_rpt{};
 
     /// @brief stores the microkernel's main class
-    constinit inline mk_main_t g_mk_main{};
+    constinit inline mk_main_t g_mut_mk_main{};
 
     /// <!-- description -->
     ///   @brief Remove me
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
+    ///   @param pmut_tls the current TLS block
     ///   @return Returns bsl::exit_success if the exception was handled,
     ///     bsl::exit_failure otherwise
     ///
     extern "C" [[nodiscard]] auto
-    dispatch_esr_trampoline(tls_t *const tls) noexcept -> bsl::exit_code
+    dispatch_esr_trampoline(tls_t *const pmut_tls) noexcept -> bsl::exit_code
     {
-        auto *const ext{static_cast<ext_t *>(tls->ext)};
-        return dispatch_esr(*tls, g_page_pool, g_intrinsic, ext);
+        return dispatch_esr(
+            *pmut_tls, g_mut_page_pool, g_mut_intrinsic, static_cast<ext_t *>(pmut_tls->ext));
     }
 
     /// <!-- description -->
     ///   @brief remove me
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
+    ///   @param pmut_tls the current TLS block
     ///   @return Returns bsl::exit_success on success, bsl::exit_failure
     ///     otherwise
     ///
     [[nodiscard]] extern "C" auto
-    dispatch_syscall_trampoline(tls_t *const tls) noexcept -> bsl::exit_code
+    dispatch_syscall_trampoline(tls_t *const pmut_tls) noexcept -> syscall::bf_status_t::value_type
     {
-        auto *const ext{static_cast<ext_t *>(tls->ext)};
-
         return dispatch_syscall(
-            *tls,
-            g_page_pool,
-            g_huge_pool,
-            g_intrinsic,
-            g_vm_pool,
-            g_vp_pool,
-            g_vps_pool,
-            g_ext_pool,
-            *ext,
-            g_vmexit_log);
+                   *pmut_tls,
+                   g_mut_page_pool,
+                   g_mut_huge_pool,
+                   g_mut_intrinsic,
+                   g_mut_vm_pool,
+                   g_mut_vp_pool,
+                   g_mut_vps_pool,
+                   g_mut_ext_pool,
+                   *static_cast<ext_t *>(pmut_tls->ext),
+                   g_mut_vmexit_log)
+            .get();
     }
 
     /// <!-- description -->
     ///   @brief remove me
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @return Returns bsl::exit_success on success, bsl::exit_failure
-    ///     otherwise
-    ///
-    [[nodiscard]] extern "C" auto
-    dispatch_syscall_trampoline_failure(tls_t *const tls) noexcept -> bsl::exit_code
-    {
-        auto *const ext{static_cast<ext_t *>(tls->ext)};
-
-        return dispatch_syscall_failure(
-            *tls,
-            g_page_pool,
-            g_huge_pool,
-            g_intrinsic,
-            g_vm_pool,
-            g_vp_pool,
-            g_vps_pool,
-            g_ext_pool,
-            *ext,
-            g_vmexit_log);
-    }
-
-    /// <!-- description -->
-    ///   @brief remove me
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
+    ///   @param pmut_tls the current TLS block
     ///   @return Returns bsl::exit_success on success, bsl::exit_failure
     ///     otherwise
     ///
     extern "C" [[nodiscard]] auto
-    vmexit_loop_trampoline(tls_t *const tls) noexcept -> bsl::exit_code
+    vmexit_loop_trampoline(tls_t *const pmut_tls) noexcept -> bsl::exit_code
     {
-        auto *const ext{static_cast<ext_t *>(tls->ext)};
-        return vmexit_loop(*tls, g_intrinsic, g_vps_pool, *ext, g_vmexit_log);
+        return vmexit_loop(
+            *pmut_tls,
+            g_mut_intrinsic,
+            g_mut_vps_pool,
+            *static_cast<ext_t *>(pmut_tls->ext),
+            g_mut_vmexit_log);
     }
 
     /// <!-- description -->
     ///   @brief remove me
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
+    ///   @param pmut_tls the current TLS block
     ///   @return Returns bsl::exit_success if the fail was handled,
     ///     bsl::exit_failure otherwise.
     ///
     extern "C" [[nodiscard]] auto
-    fast_fail_trampoline(tls_t *const tls) noexcept -> bsl::exit_code
+    fast_fail_trampoline(tls_t *const pmut_tls) noexcept -> bsl::exit_code
     {
-        auto *const ext{static_cast<ext_t *>(tls->ext)};
-        return fast_fail(*tls, g_intrinsic, ext);
+        return fast_fail(*pmut_tls, g_mut_intrinsic, static_cast<ext_t *>(pmut_tls->ext));
     }
 
     /// <!-- description -->
@@ -186,24 +161,24 @@ namespace mk
     ///     the hypervisor on a specific core
     ///
     /// <!-- inputs/outputs -->
-    ///   @param args the loader provided arguments to the microkernel.
-    ///   @param tls the current TLS block
+    ///   @param pmut_args the loader provided arguments to the microkernel.
+    ///   @param pmut_tls the current TLS block
     ///   @return Returns bsl::exit_success on success, bsl::exit_failure
     ///     otherwise
     ///
     [[nodiscard]] extern "C" auto
-    mk_main(loader::mk_args_t *const args, tls_t *const tls) noexcept -> bsl::exit_code
+    mk_main(loader::mk_args_t *const pmut_args, tls_t *const pmut_tls) noexcept -> bsl::exit_code
     {
-        return g_mk_main.process(
-            *tls,
-            g_page_pool,
-            g_huge_pool,
-            g_intrinsic,
-            g_vm_pool,
-            g_vp_pool,
-            g_vps_pool,
-            g_ext_pool,
-            g_system_rpt,
-            args);
+        return g_mut_mk_main.process(
+            *pmut_tls,
+            g_mut_page_pool,
+            g_mut_huge_pool,
+            g_mut_intrinsic,
+            g_mut_vm_pool,
+            g_mut_vp_pool,
+            g_mut_vps_pool,
+            g_mut_ext_pool,
+            g_mut_system_rpt,
+            *pmut_args);
     }
 }

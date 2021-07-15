@@ -40,7 +40,7 @@
  *   @param segments a pointer to a elf_segment_t array that stores the ELF
  *     segments being mapped
  *   @param rpt the root page table to map the ELF segments into
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 map_mk_elf_segments(struct elf_segment_t const *const segments, root_page_table_t *const rpt);

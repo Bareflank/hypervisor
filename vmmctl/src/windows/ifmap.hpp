@@ -50,6 +50,7 @@
 #include <bsl/swap.hpp>
 #include <bsl/touch.hpp>
 #include <bsl/unlikely.hpp>
+#include <bsl/finally.hpp>
 
 namespace vmmctl
 {
@@ -61,26 +62,29 @@ namespace vmmctl
     ///
     class ifmap final
     {
-        /// @brief stores a handle to the mapped file.
+        /// @brief stores a handle to the file being mapped
         HANDLE m_file{};
         /// @brief stores a handle to the mapped file.
         HANDLE m_view{};
-        /// @brief stores a view of the file that is mapped.
-        bsl::span<bsl::uint8 const> m_data{};
+        /// @brief stores a pointer to the file that was opened.
+        void *m_data{};
+        /// @brief stores the number of bytes for the open file
+        bsl::safe_uintmax m_size{};
 
         /// <!-- description -->
         ///   @brief Swaps *this with other
         ///
         /// <!-- inputs/outputs -->
-        ///   @param lhs the left hand side of the exchange
-        ///   @param rhs the right hand side of the exchange
+        ///   @param mut_lhs the left hand side of the exchange
+        ///   @param mut_rhs the right hand side of the exchange
         ///
         static constexpr void
-        private_swap(ifmap &lhs, ifmap &rhs) noexcept
+        private_swap(ifmap &mut_lhs, ifmap &mut_rhs) noexcept
         {
-            bsl::swap(lhs.m_file, rhs.m_file);
-            bsl::swap(lhs.m_view, rhs.m_view);
-            bsl::swap(lhs.m_data, rhs.m_data);
+            bsl::swap(mut_lhs.m_file, mut_rhs.m_file);
+            bsl::swap(mut_lhs.m_view, mut_rhs.m_view);
+            bsl::swap(mut_lhs.m_data, mut_rhs.m_data);
+            bsl::swap(mut_lhs.m_size, mut_rhs.m_size);
         }
 
     public:
@@ -118,6 +122,10 @@ namespace vmmctl
                 FILE_ATTRIBUTE_NORMAL,
                 nullptr);
 
+            bsl::finally mut_release_on_error{[this]() noexcept -> void {
+                this->release();
+            }};
+
             m_view = CreateFileMappingA(m_file, nullptr, PAGE_READONLY, 0, 0, nullptr);
             if (bsl::unlikely(nullptr == m_view)) {
                 bsl::alert() << "failed to open read-only file: "    // --
@@ -133,30 +141,26 @@ namespace vmmctl
                 bsl::alert() << "failed to get the size of the read-only file: "    // --
                              << filename                                            // --
                              << bsl::endl;
-
-                bsl::discard(CloseHandle(m_view));
-                bsl::discard(CloseHandle(m_file));
-                m_file = nullptr;
-                m_view = nullptr;
                 return;
             }
 
-            pointer_type const ptr{MapViewOfFile(m_view, FILE_MAP_READ, 0, 0, 0)};
-            if (bsl::unlikely(nullptr == ptr)) {
+            if (bsl::unlikely(DWORD{} != high)) {
+                bsl::alert() << "file too big: "    // --
+                             << filename            // --
+                             << bsl::endl;
+                return;
+            }
+
+            m_data = MapViewOfFile(m_view, FILE_MAP_READ, 0, 0, 0);
+            if (bsl::unlikely(nullptr == m_data)) {
                 bsl::alert() << "failed to map read-only file: "    // --
                              << filename                            // --
                              << bsl::endl;
-
-                bsl::discard(CloseHandle(m_view));
-                bsl::discard(CloseHandle(m_file));
-                m_file = nullptr;
-                m_view = nullptr;
                 return;
             }
 
-            m_data = {
-                static_cast<bsl::uint8 const *>(ptr),
-                (bsl::to_umax(high) << bsl::to_umax(32)) | bsl::to_umax(size)};
+            m_size = bsl::to_umax(static_cast<bsl::uintmax>(size));
+            mut_release_on_error.ignore();
         }
 
         /// <!-- description -->
@@ -164,16 +168,7 @@ namespace vmmctl
         ///
         constexpr ~ifmap() noexcept
         {
-            if (nullptr != m_file) {
-                bsl::discard(UnmapViewOfFile(m_data.data()));
-                bsl::discard(CloseHandle(m_view));
-                bsl::discard(CloseHandle(m_file));
-                m_file = nullptr;
-                m_view = nullptr;
-            }
-            else {
-                bsl::touch();
-            }
+            this->release();
         }
 
         /// <!-- description -->
@@ -188,14 +183,18 @@ namespace vmmctl
         ///   @brief move constructor
         ///
         /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
+        ///   @param mut_o the object being moved
         ///
-        constexpr ifmap(ifmap &&o) noexcept
-            : m_file{bsl::move(o.m_file)}, m_view{bsl::move(o.m_view)}, m_data{bsl::move(o.m_data)}
+        constexpr ifmap(ifmap &&mut_o) noexcept
+            : m_file{bsl::move(mut_o.m_file)}
+            , m_view{bsl::move(mut_o.m_view)}
+            , m_data{bsl::move(mut_o.m_data)}
+            , m_size{bsl::move(mut_o.m_size)}
         {
-            o.m_file = nullptr;
-            o.m_view = nullptr;
-            o.m_data = {};
+            mut_o.m_file = {};
+            mut_o.m_view = {};
+            mut_o.m_data = {};
+            mut_o.m_size = {};
         }
 
         /// <!-- description -->
@@ -211,27 +210,60 @@ namespace vmmctl
         ///   @brief move assignment
         ///
         /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
+        ///   @param mut_o the object being moved
         ///   @return a reference to *this
         ///
         [[maybe_unused]] auto
-        operator=(ifmap &&o) &noexcept -> ifmap &
+        operator=(ifmap &&mut_o) &noexcept -> ifmap &
         {
-            ifmap tmp{bsl::move(o)};
-            this->private_swap(*this, tmp);
+            ifmap mut_tmp{bsl::move(mut_o)};
+            this->private_swap(*this, mut_tmp);
             return *this;
         }
 
         /// <!-- description -->
-        ///   @brief Returns a span to the read-only mapped file.
+        ///   @brief Closes the file, releasing all of the resource back to
+        ///     the OS kernel.
+        ///
+        constexpr void
+        release() noexcept
+        {
+            if (nullptr != m_data) {
+                bsl::discard(UnmapViewOfFile(m_data));
+            }
+            else {
+                bsl::touch();
+            }
+
+            if (nullptr != m_view) {
+                bsl::discard(CloseHandle(m_view));
+            }
+            else {
+                bsl::touch();
+            }
+
+            if (nullptr != m_file) {
+                bsl::discard(CloseHandle(m_file));
+            }
+            else {
+                bsl::touch();
+            }
+
+            m_size = {};
+            m_data = {};
+            m_view = {};
+            m_file = {};
+        }
+        /// <!-- description -->
+        ///   @brief Returns a pointer to the read-only mapped file.
         ///
         /// <!-- inputs/outputs -->
-        ///   @return Returns a span to the read-only mapped file.
+        ///   @return Returns a pointer to the read-only mapped file.
         ///
         [[nodiscard]] constexpr auto
         view() const noexcept -> bsl::span<bsl::uint8 const>
         {
-            return m_data;
+            return {static_cast<bsl::uint8 const *>(m_data), m_size};
         }
 
         /// <!-- description -->
@@ -241,34 +273,32 @@ namespace vmmctl
         ///   @return Returns a pointer to the read-only mapped file.
         ///
         [[nodiscard]] constexpr auto
-        data() const noexcept -> const_pointer_type
+        data() const noexcept -> void const *
         {
-            return m_data.data();
+            return m_data;
         }
 
         /// <!-- description -->
-        ///   @brief Returns true if the file failed to be mapped, false
-        ///     otherwise.
+        ///   @brief Returns m_size.is_zero()
         ///
         /// <!-- inputs/outputs -->
-        ///   @return Returns true if the file failed to be mapped, false
-        ///     otherwise.
+        ///   @return Returns m_size.is_zero()
         ///
         [[nodiscard]] constexpr auto
         empty() const noexcept -> bool
         {
-            return m_data.empty();
+            return m_size.is_zero();
         }
 
         /// <!-- description -->
-        ///   @brief Returns !empty()
+        ///   @brief Returns nullptr == m_data
         ///
         /// <!-- inputs/outputs -->
-        ///   @return Returns !empty()
+        ///   @return Returns nullptr == m_data
         ///
         [[nodiscard]] explicit constexpr operator bool() const noexcept
         {
-            return !this->empty();
+            return nullptr != m_data;
         }
 
         /// <!-- description -->
@@ -280,35 +310,9 @@ namespace vmmctl
         ///     mapped.
         ///
         [[nodiscard]] constexpr auto
-        size() const noexcept -> size_type
+        size() const noexcept -> bsl::safe_uintmax
         {
-            return m_data.size();
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the max number of bytes the BSL supports.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return Returns the max number of bytes the BSL supports.
-        ///
-        [[nodiscard]] static constexpr auto
-        max_size() noexcept -> size_type
-        {
-            return bsl::to_umax(size_type::max());
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the number of bytes in the file being
-        ///     mapped.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return Returns the number of bytes in the file being
-        ///     mapped.
-        ///
-        [[nodiscard]] constexpr auto
-        size_bytes() const noexcept -> size_type
-        {
-            return m_data.size();
+            return m_size;
         }
     };
 }

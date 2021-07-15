@@ -25,10 +25,10 @@
 #ifndef DEBUG_RING_T_HPP
 #define DEBUG_RING_T_HPP
 
+#include <bsl/array.hpp>
 #include <bsl/char_type.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
-#include <bsl/details/carray.hpp>
 #include <bsl/safe_integral.hpp>
 
 #pragma pack(push, 1)
@@ -48,7 +48,7 @@ namespace loader
         bsl::uint64 spos;
 
         /// @brief stores the characters in the debug ring
-        bsl::details::carray<bsl::char_type, HYPERVISOR_DEBUG_RING_SIZE.get()> buf;
+        bsl::array<bsl::char_type, HYPERVISOR_DEBUG_RING_SIZE.get()> buf;
     };
 }
 

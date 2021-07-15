@@ -27,22 +27,7 @@ add_executable(bareflank_efi_loader)
 # Includes
 # ------------------------------------------------------------------------------
 
-target_include_directories(bareflank_efi_loader PUBLIC
-	include
-	include/std
-	include/platform_interface/c
-	../include
-	../include/interface/c
-    ${CMAKE_BINARY_DIR}/include
-)
-
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
-    target_include_directories(bareflank_efi_loader PUBLIC
-		include/x64
-		../include/x64/
-		../include/interface/c/x64
-    )
-
 	if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
 		target_include_directories(bareflank_efi_loader PUBLIC
 			include/x64/amd
@@ -58,6 +43,12 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
 			../include/interface/c/x64/intel
 		)
 	endif()
+
+    target_include_directories(bareflank_efi_loader PUBLIC
+		include/x64
+		../include/x64/
+		../include/interface/c/x64
+    )
 endif()
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
@@ -67,6 +58,15 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
 		../include/interface/c/arm/aarch64
 	)
 endif()
+
+target_include_directories(bareflank_efi_loader PUBLIC
+	include
+	include/std
+	include/platform_interface/c
+	../include
+	../include/interface/c
+    ${CMAKE_BINARY_DIR}/include
+)
 
 # ------------------------------------------------------------------------------
 # Headers
@@ -204,7 +204,7 @@ list(APPEND HEADERS
 	${CMAKE_CURRENT_LIST_DIR}/../include/stop_vmm_per_cpu.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/bfelf/bfelf_elf64_ehdr_t.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/bfelf/bfelf_elf64_phdr_t.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/bfelf/bfelf_types.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/bfelf/bfelf_elf64_shdr_t.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/debug_ring_t.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/dump_vmm_args_t.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/mk_args_t.h

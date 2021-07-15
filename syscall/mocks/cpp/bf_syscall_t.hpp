@@ -74,26 +74,10 @@ namespace syscall
         bsl::unordered_map<bf_uint16_t, bsl::errc_type> m_bf_vps_op_destroy_vps;
         /// @brief stores the results for bf_vps_op_init_as_root
         bsl::unordered_map<bf_uint16_t, bsl::errc_type> m_bf_vps_op_init_as_root;
-        /// @brief stores the results for bf_vps_op_read8
-        bsl::unordered_map<std::tuple<bf_uint16_t, bf_uint64_t>, bf_uint8_t> m_bf_vps_op_read8;
-        /// @brief stores the results for bf_vps_op_read16
-        bsl::unordered_map<std::tuple<bf_uint16_t, bf_uint64_t>, bf_uint16_t> m_bf_vps_op_read16;
-        /// @brief stores the results for bf_vps_op_read32
-        bsl::unordered_map<std::tuple<bf_uint16_t, bf_uint64_t>, bf_uint32_t> m_bf_vps_op_read32;
-        /// @brief stores the results for bf_vps_op_read64
-        bsl::unordered_map<std::tuple<bf_uint16_t, bf_uint64_t>, bf_uint64_t> m_bf_vps_op_read64;
-        /// @brief stores the results for bf_vps_op_write8
-        bsl::unordered_map<std::tuple<bf_uint16_t, bf_uint64_t, bf_uint8_t>, bsl::errc_type> m_bf_vps_op_write8;
-        /// @brief stores the results for bf_vps_op_write16
-        bsl::unordered_map<std::tuple<bf_uint16_t, bf_uint64_t, bf_uint16_t>, bsl::errc_type> m_bf_vps_op_write16;
-        /// @brief stores the results for bf_vps_op_write32
-        bsl::unordered_map<std::tuple<bf_uint16_t, bf_uint64_t, bf_uint32_t>, bsl::errc_type> m_bf_vps_op_write32;
-        /// @brief stores the results for bf_vps_op_write64
-        bsl::unordered_map<std::tuple<bf_uint16_t, bf_uint64_t, bf_uint64_t>, bsl::errc_type> m_bf_vps_op_write64;
-        /// @brief stores the results for bf_vps_op_read_reg
-        bsl::unordered_map<std::tuple<bf_uint16_t, bf_reg_t>, bf_uint64_t> m_bf_vps_op_read_reg;
-        /// @brief stores the results for bf_vps_op_write_reg
-        bsl::unordered_map<std::tuple<bf_uint16_t, bf_reg_t, bf_uint64_t>, bsl::errc_type> m_bf_vps_op_write_reg;
+        /// @brief stores the results for bf_vps_op_read
+        bsl::unordered_map<std::tuple<bf_uint16_t, bf_reg_t>, bf_uint64_t> m_bf_vps_op_read;
+        /// @brief stores the results for bf_vps_op_write
+        bsl::unordered_map<std::tuple<bf_uint16_t, bf_reg_t, bf_uint64_t>, bsl::errc_type> m_bf_vps_op_write;
         /// @brief stores the results for bf_vps_op_run
         bsl::unordered_map<std::tuple<bf_uint16_t, bf_uint16_t, bf_uint16_t>, bsl::errc_type> m_bf_vps_op_run;
         /// @brief stores the results for bf_vps_op_run_current
@@ -146,18 +130,18 @@ namespace syscall
         ///   @param version the version provided to the extension by the
         ///     microkernel. If this API does not support the ABI versions
         ///     that the microkernel supports, this function will fail.
-        ///   @param bootstrap_handler the bootstrap handler to register
-        ///   @param vmexit_handler the vmexit handler to register
-        ///   @param fail_handler the fail handler to register
+        ///   @param pmut_bootstrap_handler the bootstrap handler to register
+        ///   @param pmut_vmexit_handler the vmexit handler to register
+        ///   @param pmut_fail_handler the fail handler to register
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
         initialize(
             bf_uint32_t const &version,
-            bf_callback_handler_bootstrap_t const bootstrap_handler,
-            bf_callback_handler_vmexit_t const vmexit_handler,
-            bf_callback_handler_fail_t const fail_handler) noexcept -> bsl::errc_type
+            bf_callback_handler_bootstrap_t const pmut_bootstrap_handler,
+            bf_callback_handler_vmexit_t const pmut_vmexit_handler,
+            bf_callback_handler_fail_t const pmut_fail_handler) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely(!version)) {
                 bsl::error() << "invalid version\n" << bsl::here();
@@ -169,17 +153,17 @@ namespace syscall
                 return bsl::errc_invalid_argument;
             }
 
-            if (bsl::unlikely(nullptr == bootstrap_handler)) {
+            if (bsl::unlikely(nullptr == pmut_bootstrap_handler)) {
                 bsl::error() << "invalid bootstrap_handler\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            if (bsl::unlikely(nullptr == vmexit_handler)) {
+            if (bsl::unlikely(nullptr == pmut_vmexit_handler)) {
                 bsl::error() << "invalid vmexit_handler\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
-            if (bsl::unlikely(nullptr == fail_handler)) {
+            if (bsl::unlikely(nullptr == pmut_fail_handler)) {
                 bsl::error() << "invalid fail_handler\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
@@ -1135,446 +1119,6 @@ namespace syscall
         }
 
         /// <!-- description -->
-        ///   @brief Reads an 8bit field from the VPS and returns the value. The
-        ///     "index" is architecture-specific. For Intel, Appendix B, "Field
-        ///     Encoding in VMCS," defines the index (or encoding). For AMD,
-        ///     Appendix B, "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to read from
-        ///   @param index The HVE specific index defining which field to read
-        ///   @return Returns the value read, or bf_uint8_t::failure()
-        ///     on failure.
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_read8(bf_uint16_t const &vpsid, bf_uint64_t const &index) const noexcept
-            -> bf_uint8_t
-        {
-            if (bsl::unlikely(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bf_uint8_t::failure();
-            }
-
-            if (bsl::unlikely(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bf_uint8_t::failure();
-            }
-
-            return m_bf_vps_op_read8.at({vpsid, index});
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the return value of bf_vps_op_read8.
-        ///     (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to read from
-        ///   @param index The HVE specific index defining which field to read
-        ///   @param value the value to return when executing
-        ///     bf_vps_op_read8
-        ///
-        constexpr void
-        set_bf_vps_op_read8(
-            bf_uint16_t const &vpsid, bf_uint64_t const &index, bf_uint8_t const &value) noexcept
-        {
-            m_bf_vps_op_read8.at({vpsid, index}) = value;
-        }
-
-        /// <!-- description -->
-        ///   @brief Reads an 16bit field from the VPS and returns the value. The
-        ///     "index" is architecture-specific. For Intel, Appendix B, "Field
-        ///     Encoding in VMCS," defines the index (or encoding). For AMD,
-        ///     Appendix B, "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to read from
-        ///   @param index The HVE specific index defining which field to read
-        ///   @return Returns the value read, or bf_uint16_t::failure()
-        ///     on failure.
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_read16(bf_uint16_t const &vpsid, bf_uint64_t const &index) const noexcept
-            -> bf_uint16_t
-        {
-            if (bsl::unlikely(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bf_uint16_t::failure();
-            }
-
-            if (bsl::unlikely(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bf_uint16_t::failure();
-            }
-
-            return m_bf_vps_op_read16.at({vpsid, index});
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the return value of bf_vps_op_read16.
-        ///     (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to read from
-        ///   @param index The HVE specific index defining which field to read
-        ///   @param value the value to return when executing
-        ///     bf_vps_op_read16
-        ///
-        constexpr void
-        set_bf_vps_op_read16(
-            bf_uint16_t const &vpsid, bf_uint64_t const &index, bf_uint16_t const &value) noexcept
-        {
-            m_bf_vps_op_read16.at({vpsid, index}) = value;
-        }
-
-        /// <!-- description -->
-        ///   @brief Reads an 32bit field from the VPS and returns the value. The
-        ///     "index" is architecture-specific. For Intel, Appendix B, "Field
-        ///     Encoding in VMCS," defines the index (or encoding). For AMD,
-        ///     Appendix B, "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to read from
-        ///   @param index The HVE specific index defining which field to read
-        ///   @return Returns the value read, or bf_uint32_t::failure()
-        ///     on failure.
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_read32(bf_uint16_t const &vpsid, bf_uint64_t const &index) const noexcept
-            -> bf_uint32_t
-        {
-            if (bsl::unlikely(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bf_uint32_t::failure();
-            }
-
-            if (bsl::unlikely(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bf_uint32_t::failure();
-            }
-
-            return m_bf_vps_op_read32.at({vpsid, index});
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the return value of bf_vps_op_read32.
-        ///     (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to read from
-        ///   @param index The HVE specific index defining which field to read
-        ///   @param value the value to return when executing
-        ///     bf_vps_op_read32
-        ///
-        constexpr void
-        set_bf_vps_op_read32(
-            bf_uint16_t const &vpsid, bf_uint64_t const &index, bf_uint32_t const &value) noexcept
-        {
-            m_bf_vps_op_read32.at({vpsid, index}) = value;
-        }
-
-        /// <!-- description -->
-        ///   @brief Reads an 64bit field from the VPS and returns the value. The
-        ///     "index" is architecture-specific. For Intel, Appendix B, "Field
-        ///     Encoding in VMCS," defines the index (or encoding). For AMD,
-        ///     Appendix B, "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to read from
-        ///   @param index The HVE specific index defining which field to read
-        ///   @return Returns the value read, or bf_uint64_t::failure()
-        ///     on failure.
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_read64(bf_uint16_t const &vpsid, bf_uint64_t const &index) const noexcept
-            -> bf_uint64_t
-        {
-            if (bsl::unlikely(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bf_uint64_t::failure();
-            }
-
-            if (bsl::unlikely(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bf_uint64_t::failure();
-            }
-
-            return m_bf_vps_op_read64.at({vpsid, index});
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the return value of bf_vps_op_read64.
-        ///     (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to read from
-        ///   @param index The HVE specific index defining which field to read
-        ///   @param value the value to return when executing
-        ///     bf_vps_op_read64
-        ///
-        constexpr void
-        set_bf_vps_op_read64(
-            bf_uint16_t const &vpsid, bf_uint64_t const &index, bf_uint64_t const &value) noexcept
-        {
-            m_bf_vps_op_read64.at({vpsid, index}) = value;
-        }
-
-        /// <!-- description -->
-        ///   @brief Writes to an 8bit field in the VPS. The "index" is
-        ///     architecture-specific. For Intel, Appendix B, "Field Encoding in
-        ///     VMCS," defines the index (or encoding). For AMD, Appendix B,
-        ///     "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to write to
-        ///   @param index The HVE specific index defining which field to write to
-        ///   @param value The value to write to the requested field
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_write8(
-            bf_uint16_t const &vpsid, bf_uint64_t const &index, bf_uint8_t const &value) noexcept
-            -> bsl::errc_type
-        {
-            if (bsl::unlikely(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely(!value)) {
-                bsl::error() << "invalid value\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (m_bf_vps_op_write8.at({vpsid, index, value})) {
-                m_bf_vps_op_read8.at({vpsid, index}) = value;
-            }
-            else {
-                bsl::touch();
-            }
-
-            return m_bf_vps_op_write8.at({vpsid, index, value});
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the return value of bf_vps_op_write8.
-        ///     (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to write to
-        ///   @param index The HVE specific index defining which field to write to
-        ///   @param value The value to write to the requested field
-        ///   @param errc the bsl::errc_type to return when executing
-        ///     bf_vps_op_write8
-        ///
-        constexpr void
-        set_bf_vps_op_write8(
-            bf_uint16_t const &vpsid,
-            bf_uint64_t const &index,
-            bf_uint8_t const &value,
-            bsl::errc_type const errc) noexcept
-        {
-            m_bf_vps_op_write8.at({vpsid, index, value}) = errc;
-        }
-
-        /// <!-- description -->
-        ///   @brief Writes to an 16bit field in the VPS. The "index" is
-        ///     architecture-specific. For Intel, Appendix B, "Field Encoding in
-        ///     VMCS," defines the index (or encoding). For AMD, Appendix B,
-        ///     "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to write to
-        ///   @param index The HVE specific index defining which field to write to
-        ///   @param value The value to write to the requested field
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_write16(
-            bf_uint16_t const &vpsid, bf_uint64_t const &index, bf_uint16_t const &value) noexcept
-            -> bsl::errc_type
-        {
-            if (bsl::unlikely(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely(!value)) {
-                bsl::error() << "invalid value\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (m_bf_vps_op_write16.at({vpsid, index, value})) {
-                m_bf_vps_op_read16.at({vpsid, index}) = value;
-            }
-            else {
-                bsl::touch();
-            }
-
-            return m_bf_vps_op_write16.at({vpsid, index, value});
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the return value of bf_vps_op_write16.
-        ///     (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to write to
-        ///   @param index The HVE specific index defining which field to write to
-        ///   @param value The value to write to the requested field
-        ///   @param errc the bsl::errc_type to return when executing
-        ///     bf_vps_op_write16
-        ///
-        constexpr void
-        set_bf_vps_op_write16(
-            bf_uint16_t const &vpsid,
-            bf_uint64_t const &index,
-            bf_uint16_t const &value,
-            bsl::errc_type const errc) noexcept
-        {
-            m_bf_vps_op_write16.at({vpsid, index, value}) = errc;
-        }
-
-        /// <!-- description -->
-        ///   @brief Writes to an 32bit field in the VPS. The "index" is
-        ///     architecture-specific. For Intel, Appendix B, "Field Encoding in
-        ///     VMCS," defines the index (or encoding). For AMD, Appendix B,
-        ///     "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to write to
-        ///   @param index The HVE specific index defining which field to write to
-        ///   @param value The value to write to the requested field
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_write32(
-            bf_uint16_t const &vpsid, bf_uint64_t const &index, bf_uint32_t const &value) noexcept
-            -> bsl::errc_type
-        {
-            if (bsl::unlikely(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely(!value)) {
-                bsl::error() << "invalid value\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (m_bf_vps_op_write32.at({vpsid, index, value})) {
-                m_bf_vps_op_read32.at({vpsid, index}) = value;
-            }
-            else {
-                bsl::touch();
-            }
-
-            return m_bf_vps_op_write32.at({vpsid, index, value});
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the return value of bf_vps_op_write32.
-        ///     (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to write to
-        ///   @param index The HVE specific index defining which field to write to
-        ///   @param value The value to write to the requested field
-        ///   @param errc the bsl::errc_type to return when executing
-        ///     bf_vps_op_write32
-        ///
-        constexpr void
-        set_bf_vps_op_write32(
-            bf_uint16_t const &vpsid,
-            bf_uint64_t const &index,
-            bf_uint32_t const &value,
-            bsl::errc_type const errc) noexcept
-        {
-            m_bf_vps_op_write32.at({vpsid, index, value}) = errc;
-        }
-
-        /// <!-- description -->
-        ///   @brief Writes to an 64bit field in the VPS. The "index" is
-        ///     architecture-specific. For Intel, Appendix B, "Field Encoding in
-        ///     VMCS," defines the index (or encoding). For AMD, Appendix B,
-        ///     "Layout of VMCB," defines the index (or offset).
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to write to
-        ///   @param index The HVE specific index defining which field to write to
-        ///   @param value The value to write to the requested field
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vps_op_write64(
-            bf_uint16_t const &vpsid, bf_uint64_t const &index, bf_uint64_t const &value) noexcept
-            -> bsl::errc_type
-        {
-            if (bsl::unlikely(!vpsid)) {
-                bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely(!index)) {
-                bsl::error() << "invalid index\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (bsl::unlikely(!value)) {
-                bsl::error() << "invalid value\n" << bsl::here();
-                return bsl::errc_invalid_argument;
-            }
-
-            if (m_bf_vps_op_write64.at({vpsid, index, value})) {
-                m_bf_vps_op_read64.at({vpsid, index}) = value;
-            }
-            else {
-                bsl::touch();
-            }
-
-            return m_bf_vps_op_write64.at({vpsid, index, value});
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the return value of bf_vps_op_write64.
-        ///     (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpsid The VPSID of the VPS to write to
-        ///   @param index The HVE specific index defining which field to write to
-        ///   @param value The value to write to the requested field
-        ///   @param errc the bsl::errc_type to return when executing
-        ///     bf_vps_op_write64
-        ///
-        constexpr void
-        set_bf_vps_op_write64(
-            bf_uint16_t const &vpsid,
-            bf_uint64_t const &index,
-            bf_uint64_t const &value,
-            bsl::errc_type const errc) noexcept
-        {
-            m_bf_vps_op_write64.at({vpsid, index, value}) = errc;
-        }
-
-        /// <!-- description -->
         ///   @brief Reads a CPU register from the VPS given a bf_reg_t. Note
         ///     that the bf_reg_t is architecture specific.
         ///
@@ -1585,32 +1129,31 @@ namespace syscall
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_vps_op_read_reg(bf_uint16_t const &vpsid, bf_reg_t const reg) const noexcept
-            -> bf_uint64_t
+        bf_vps_op_read(bf_uint16_t const &vpsid, bf_reg_t const reg) const noexcept -> bf_uint64_t
         {
             if (bsl::unlikely(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
                 return bf_uint64_t::failure();
             }
 
-            return m_bf_vps_op_read_reg.at({vpsid, reg});
+            return m_bf_vps_op_read.at({vpsid, reg});
         }
 
         /// <!-- description -->
-        ///   @brief Sets the return value of bf_vps_op_read_reg.
+        ///   @brief Sets the return value of bf_vps_op_read.
         ///     (unit testing only)
         ///
         /// <!-- inputs/outputs -->
         ///   @param vpsid The VPSID of the VPS to read from
         ///   @param reg A bf_reg_t defining which register to read
         ///   @param value the value to return when executing
-        ///     bf_vps_op_read_reg
+        ///     bf_vps_op_read
         ///
         constexpr void
-        set_bf_vps_op_read_reg(
+        set_bf_vps_op_read(
             bf_uint16_t const &vpsid, bf_reg_t const reg, bf_uint64_t const &value) noexcept
         {
-            m_bf_vps_op_read_reg.at({vpsid, reg}) = value;
+            m_bf_vps_op_read.at({vpsid, reg}) = value;
         }
 
         /// <!-- description -->
@@ -1625,7 +1168,7 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_vps_op_write_reg(
+        bf_vps_op_write(
             bf_uint16_t const &vpsid, bf_reg_t const reg, bf_uint64_t const &value) noexcept
             -> bsl::errc_type
         {
@@ -1639,18 +1182,18 @@ namespace syscall
                 return bsl::errc_invalid_argument;
             }
 
-            if (m_bf_vps_op_write_reg.at({vpsid, reg, value})) {
-                m_bf_vps_op_read_reg.at({vpsid, reg}) = value;
+            if (m_bf_vps_op_write.at({vpsid, reg, value})) {
+                m_bf_vps_op_read.at({vpsid, reg}) = value;
             }
             else {
                 bsl::touch();
             }
 
-            return m_bf_vps_op_write_reg.at({vpsid, reg, value});
+            return m_bf_vps_op_write.at({vpsid, reg, value});
         }
 
         /// <!-- description -->
-        ///   @brief Sets the return value of bf_vps_op_write_reg.
+        ///   @brief Sets the return value of bf_vps_op_write.
         ///     (unit testing only)
         ///
         /// <!-- inputs/outputs -->
@@ -1658,16 +1201,16 @@ namespace syscall
         ///   @param reg A bf_reg_t defining which register to write to
         ///   @param value The value to write to the requested field
         ///   @param errc the bsl::errc_type to return when executing
-        ///     bf_vps_op_write_reg
+        ///     bf_vps_op_write
         ///
         constexpr void
-        set_bf_vps_op_write_reg(
+        set_bf_vps_op_write(
             bf_uint16_t const &vpsid,
             bf_reg_t const reg,
             bf_uint64_t const &value,
             bsl::errc_type const errc) noexcept
         {
-            m_bf_vps_op_write_reg.at({vpsid, reg, value}) = errc;
+            m_bf_vps_op_write.at({vpsid, reg, value}) = errc;
         }
 
         /// <!-- description -->
@@ -2182,15 +1725,15 @@ namespace syscall
         ///     into the direct map of the VM.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param phys The physical address of the resulting page
+        ///   @param mut_phys The mut_physical address of the resulting page
         ///   @return Returns a pointer to the newly allocated memory on success,
         ///     or a nullptr on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_mem_op_alloc_page(bf_uint64_t &phys) noexcept -> void *
+        bf_mem_op_alloc_page(bf_uint64_t &mut_phys) noexcept -> void *
         {
-            if (bsl::unlikely(!phys)) {
-                bsl::error() << "invalid phys\n" << bsl::here();
+            if (bsl::unlikely(!mut_phys)) {
+                bsl::error() << "invalid mut_phys\n" << bsl::here();
                 return nullptr;
             }
 
@@ -2198,14 +1741,14 @@ namespace syscall
                 return nullptr;
             }
 
-            auto *const virt{new bsl::uint8[HYPERVISOR_PAGE_SIZE.get()]};
-            m_alloc_free_map.at(virt) = HYPERVISOR_PAGE_SIZE;
+            auto *const pmut_virt{new bsl::uint8[HYPERVISOR_PAGE_SIZE.get()]};
+            m_alloc_free_map.at(pmut_virt) = HYPERVISOR_PAGE_SIZE;
 
-            phys = (m_alloc_free_map.size() * HYPERVISOR_PAGE_SIZE);
-            m_virt_to_phys_map.at(virt) = phys;
-            m_phys_to_virt_map.at(phys) = virt;
+            mut_phys = (m_alloc_free_map.size() * HYPERVISOR_PAGE_SIZE);
+            m_virt_to_phys_map.at(pmut_virt) = mut_phys;
+            m_phys_to_virt_map.at(mut_phys) = pmut_virt;
 
-            return virt;
+            return pmut_virt;
         }
 
         /// <!-- description -->
@@ -2219,8 +1762,8 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_mem_op_alloc_page() noexcept -> void *
         {
-            bf_uint64_t ignored{};
-            return this->bf_mem_op_alloc_page(ignored);
+            bf_uint64_t mut_ignored{};
+            return this->bf_mem_op_alloc_page(mut_ignored);
         }
 
         /// <!-- description -->
@@ -2243,18 +1786,15 @@ namespace syscall
         ///     it.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param addr The virtual address of the page to free
+        ///   @param pmut_addr The virtual address of the page to free
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_mem_op_free_page(void *const addr) noexcept -> bsl::errc_type
+        bf_mem_op_free_page(void *const pmut_addr) noexcept -> bsl::errc_type
         {
-            bf_uint64_t phys{};
-            bsl::uint8 *virt{};
-
-            if (bsl::unlikely(nullptr == addr)) {
-                bsl::error() << "addr is a nullptr\n" << bsl::here();
+            if (bsl::unlikely(nullptr == pmut_addr)) {
+                bsl::error() << "pmut_addr is a nullptr\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
@@ -2262,18 +1802,18 @@ namespace syscall
                 return m_bf_mem_op_free_page;
             }
 
-            if (m_alloc_free_map.at(addr).is_zero()) {
+            if (m_alloc_free_map.at(pmut_addr).is_zero()) {
                 return bsl::errc_failure;
             }
 
-            phys = m_virt_to_phys_map.at(addr);
-            virt = m_phys_to_virt_map.at(phys);
-            m_virt_to_phys_map.at(virt) = {};
+            auto const phys{m_virt_to_phys_map.at(pmut_addr)};
+            auto *const pmut_virt{m_phys_to_virt_map.at(phys)};
+            m_virt_to_phys_map.at(pmut_virt) = {};
             m_phys_to_virt_map.at(phys) = {};
 
             // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-            delete[] virt;    // GRCOV_EXCLUDE_BR
-            m_alloc_free_map.at(virt) = {};
+            delete[] pmut_virt;    // GRCOV_EXCLUDE_BR
+            m_alloc_free_map.at(pmut_virt) = {};
 
             return bsl::errc_success;
         }
@@ -2310,12 +1850,12 @@ namespace syscall
         ///
         /// <!-- inputs/outputs -->
         ///   @param size The total number of bytes to allocate
-        ///   @param phys The physical address of the resulting memory
+        ///   @param mut_phys The physical address of the resulting memory
         ///   @return Returns a pointer to the newly allocated memory on success,
         ///     or a nullptr on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_mem_op_alloc_huge(bf_uint64_t const &size, bf_uint64_t &phys) noexcept -> void *
+        bf_mem_op_alloc_huge(bf_uint64_t const &size, bf_uint64_t &mut_phys) noexcept -> void *
         {
             if (bsl::unlikely(!size)) {
                 bsl::error() << "invalid size\n" << bsl::here();
@@ -2327,8 +1867,8 @@ namespace syscall
                 return nullptr;
             }
 
-            if (bsl::unlikely(!phys)) {
-                bsl::error() << "invalid phys\n" << bsl::here();
+            if (bsl::unlikely(!mut_phys)) {
+                bsl::error() << "invalid mut_phys\n" << bsl::here();
                 return nullptr;
             }
 
@@ -2336,14 +1876,14 @@ namespace syscall
                 return nullptr;
             }
 
-            auto *const virt{new bsl::uint8[size.get()]};
-            m_alloc_free_map.at(virt) = size;
+            auto *const pmut_virt{new bsl::uint8[size.get()]};
+            m_alloc_free_map.at(pmut_virt) = size;
 
-            phys = (m_alloc_free_map.size() * HYPERVISOR_PAGE_SIZE);
-            m_virt_to_phys_map.at(virt) = phys;
-            m_phys_to_virt_map.at(phys) = virt;
+            mut_phys = (m_alloc_free_map.size() * HYPERVISOR_PAGE_SIZE);
+            m_virt_to_phys_map.at(pmut_virt) = mut_phys;
+            m_phys_to_virt_map.at(mut_phys) = pmut_virt;
 
-            return virt;
+            return pmut_virt;
         }
 
         /// <!-- description -->
@@ -2370,8 +1910,8 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_mem_op_alloc_huge(bf_uint64_t const &size) noexcept -> void *
         {
-            bf_uint64_t ignored{};
-            return this->bf_mem_op_alloc_huge(size, ignored);
+            bf_uint64_t mut_ignored{};
+            return this->bf_mem_op_alloc_huge(size, mut_ignored);
         }
 
         /// <!-- description -->
@@ -2394,18 +1934,15 @@ namespace syscall
         ///     it.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param addr The virtual address of the memory to free
+        ///   @param pmut_addr The virtual address of the memory to free
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_mem_op_free_huge(void *const addr) noexcept -> bsl::errc_type
+        bf_mem_op_free_huge(void *const pmut_addr) noexcept -> bsl::errc_type
         {
-            bf_uint64_t phys{};
-            bsl::uint8 *virt{};
-
-            if (bsl::unlikely(nullptr == addr)) {
-                bsl::error() << "addr is a nullptr\n" << bsl::here();
+            if (bsl::unlikely(nullptr == pmut_addr)) {
+                bsl::error() << "pmut_addr is a nullptr\n" << bsl::here();
                 return bsl::errc_invalid_argument;
             }
 
@@ -2413,18 +1950,18 @@ namespace syscall
                 return m_bf_mem_op_free_huge;
             }
 
-            if (m_alloc_free_map.at(addr).is_zero()) {
+            if (m_alloc_free_map.at(pmut_addr).is_zero()) {
                 return bsl::errc_failure;
             }
 
-            phys = m_virt_to_phys_map.at(addr);
-            virt = m_phys_to_virt_map.at(phys);
-            m_virt_to_phys_map.at(virt) = {};
+            auto const phys{m_virt_to_phys_map.at(pmut_addr)};
+            auto *const pmut_virt{m_phys_to_virt_map.at(phys)};
+            m_virt_to_phys_map.at(pmut_virt) = {};
             m_phys_to_virt_map.at(phys) = {};
 
             // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-            delete[] virt;    // GRCOV_EXCLUDE_BR
-            m_alloc_free_map.at(virt) = {};
+            delete[] pmut_virt;    // GRCOV_EXCLUDE_BR
+            m_alloc_free_map.at(pmut_virt) = {};
 
             return bsl::errc_success;
         }
@@ -2518,7 +2055,6 @@ namespace syscall
         bf_read_phys(bf_uint64_t const &phys) const noexcept -> bsl::safe_integral<T>
         {
             static_assert(bsl::is_unsigned<T>::value);
-            bsl::safe_uintmax virt{};
 
             if (bsl::unlikely(!phys)) {
                 bsl::error() << "invalid phys\n" << bsl::here();
@@ -2530,7 +2066,7 @@ namespace syscall
                 return bsl::safe_integral<T>::failure();
             }
 
-            virt = phys + HYPERVISOR_EXT_DIRECT_MAP_ADDR;
+            auto const virt{phys + HYPERVISOR_EXT_DIRECT_MAP_ADDR};
             if (bsl::unlikely(!virt)) {
                 bsl::error() << "bf_read_phys failed due to invalid physical address "    // --
                              << bsl::hex(phys) << bsl::endl                               // --
@@ -2558,7 +2094,6 @@ namespace syscall
             -> bsl::errc_type
         {
             static_assert(bsl::is_unsigned<T>::value);
-            bsl::safe_uintmax virt{};
 
             if (bsl::unlikely(!phys)) {
                 bsl::error() << "invalid phys\n" << bsl::here();
@@ -2575,7 +2110,7 @@ namespace syscall
                 return bsl::errc_invalid_argument;
             }
 
-            virt = phys + HYPERVISOR_EXT_DIRECT_MAP_ADDR;
+            auto const virt{phys + HYPERVISOR_EXT_DIRECT_MAP_ADDR};
             if (bsl::unlikely(!virt)) {
                 bsl::error() << "bf_write_phys failed due to invalid physical address "    // --
                              << bsl::hex(phys) << bsl::endl                                // --
@@ -2586,99 +2121,6 @@ namespace syscall
 
             m_read_write_phys_map.at(phys) = bsl::to_u64(val);
             return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Performs a virtual address to physical address translation.
-        ///     Note that this function only works on direct map memory, which
-        ///     includes direct map addresses, allocated pages and allocated
-        ///     huge memory.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param virt the virtual address to convert
-        ///   @return Returns the resulting physical address
-        ///
-        [[nodiscard]] constexpr auto
-        bf_virt_to_phys(void *const virt) const noexcept -> bf_uint64_t
-        {
-            if (bsl::unlikely(nullptr == virt)) {
-                bsl::error() << "invalid virt\n" << bsl::here();
-                return bf_uint64_t::failure();
-            }
-
-            /// NOTE:
-            /// - If you get this error message, it is because your code
-            ///   does not adhere to the ABI. Virt to phys conversions are
-            ///   only supported for memory that is allocated using
-            ///   bf_mem_op_alloc_page and bf_mem_op_alloc_huge. We added this
-            ///   extra check for sanity to help ensure the ABI is being
-            ///   adhered to as the regular code doesn't keep track of this
-            ///   which could result in UB.
-            ///
-
-            if (!m_virt_to_phys_map.contains(virt)) {
-                bsl::error() << "virtual address "          // --
-                             << virt                        // --
-                             << " was not obtained from"    // --
-                             << " bf_mem_op_alloc_page"     // --
-                             << " or "                      // --
-                             << " bf_mem_op_alloc_huge"     // --
-                             << bsl::endl                   // --
-                             << bsl::here();
-
-                return bf_uint64_t::failure();
-            }
-
-            return m_virt_to_phys_map.at(virt);
-        }
-
-        /// <!-- description -->
-        ///   @brief Performs a physical address to virtual address translation.
-        ///     Note that this function only works on direct map memory, which
-        ///     includes direct map addresses, allocated pages and allocated
-        ///     huge memory.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param phys the physical address to convert
-        ///   @return Returns the resulting virtual address
-        ///
-        [[nodiscard]] constexpr auto
-        bf_phys_to_virt(bf_uint64_t const &phys) const noexcept -> void *
-        {
-            if (bsl::unlikely(!phys)) {
-                bsl::error() << "invalid phys\n" << bsl::here();
-                return nullptr;
-            }
-
-            if (bsl::unlikely(phys.is_zero())) {
-                bsl::error() << "phys is a nullptr\n" << bsl::here();
-                return nullptr;
-            }
-
-            /// NOTE:
-            /// - If you get this error message, it is because your code
-            ///   does not adhere to the ABI. Virt to phys conversions are
-            ///   only supported for memory that is allocated using
-            ///   bf_mem_op_alloc_page and bf_mem_op_alloc_huge. We added this
-            ///   extra check for sanity to help ensure the ABI is being
-            ///   adhered to as the regular code doesn't keep track of this
-            ///   which could result in UB.
-            ///
-
-            if (!m_phys_to_virt_map.contains(phys)) {
-                bsl::error() << "physical address "          // --
-                             << phys                         // --
-                             << " was not reserved using"    // --
-                             << " bf_mem_op_alloc_page"      // --
-                             << " or "                       // --
-                             << " bf_mem_op_alloc_huge"      // --
-                             << bsl::endl                    // --
-                             << bsl::here();
-
-                return nullptr;
-            }
-
-            return m_phys_to_virt_map.at(phys);
         }
     };
 }

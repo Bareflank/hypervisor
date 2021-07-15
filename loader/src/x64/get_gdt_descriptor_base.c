@@ -58,7 +58,7 @@
  *   @param selector the selector of the descriptor in the provided GDT
  *     to get from
  *   @param base a pointer to store the the resulting base to
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 get_gdt_descriptor_base(

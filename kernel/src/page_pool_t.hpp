@@ -47,7 +47,7 @@
 namespace mk
 {
     /// @brief stores the max number of records the page pool can store
-    constexpr auto PAGE_POOL_MAX_RECORDS{9_umax};
+    constexpr auto PAGE_POOL_MAX_RECORDS{10_umax};
 
     /// @class mk::page_pool_t
     ///
@@ -61,7 +61,7 @@ namespace mk
     class page_pool_t final
     {
         /// @brief stores the head of the page pool.
-        loader::page_pool_node_t *m_head{};
+        page_pool_node_t *m_head{};
         /// @brief stores the total number of bytes given to the page pool.
         bsl::safe_uintmax m_size{};
         /// @brief stores information about how memory is allocated
@@ -76,13 +76,13 @@ namespace mk
         ///     page pool which is used for virt to phys translations.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param pool the mutable_buffer_t of the page pool
+        ///   @param mut_pool the mutable_buffer_t of the page pool
         ///
         constexpr void
-        initialize(bsl::span<loader::page_pool_node_t> &pool) noexcept
+        initialize(bsl::span<page_pool_node_t> &mut_pool) noexcept
         {
-            m_head = pool.data();
-            m_size = pool.size() * HYPERVISOR_PAGE_SIZE;
+            m_head = mut_pool.data();
+            m_size = mut_pool.size() * HYPERVISOR_PAGE_SIZE;
         }
 
         /// <!-- description -->
@@ -90,22 +90,19 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of pointer to allocate
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param tag the tag to mark the allocation with
         ///   @return Returns a pointer to the newly allocated page
         ///
         template<typename T>
         [[nodiscard]] constexpr auto
-        allocate(tls_t &tls, bsl::string_view const &tag) noexcept -> T *
+        allocate(tls_t &mut_tls, bsl::string_view const &tag) noexcept -> T *
         {
             static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{mut_tls, m_lock};
 
-            if (tag.empty()) {
-                bsl::error() << "invalid empty tag"    // --
-                             << bsl::endl              // --
-                             << bsl::here();           // --
-
+            if (bsl::unlikely(tag.empty())) {
+                bsl::error() << "invalid tag\n" << bsl::here();
                 return nullptr;
             }
 
@@ -114,30 +111,30 @@ namespace mk
                 return nullptr;
             }
 
-            page_pool_record_t *record{};
+            page_pool_record_t *pmut_mut_record{};
             for (auto const elem : m_rcds) {
                 if (nullptr == elem.data->tag) {
-                    record = elem.data;
-                    record->tag = tag.data();
+                    pmut_mut_record = elem.data;
+                    pmut_mut_record->tag = tag.data();
                     break;
                 }
 
                 if (tag == elem.data->tag) {
-                    record = elem.data;
+                    pmut_mut_record = elem.data;
                     break;
                 }
 
                 bsl::touch();
             }
 
-            if (nullptr == record) {
+            if (bsl::unlikely(nullptr == pmut_mut_record)) {
                 bsl::error() << "page pool out of space for tags\n" << bsl::here();
                 return nullptr;
             }
 
-            auto *const node{m_head};
+            auto *const pmut_node{m_head};
             m_head = m_head->next;
-            record->usd += HYPERVISOR_PAGE_SIZE;
+            pmut_mut_record->usd += HYPERVISOR_PAGE_SIZE;
 
             /// NOTE:
             /// - We need start the lifetime of the object we are allocating.
@@ -152,14 +149,14 @@ namespace mk
             ///   to initialize the type.
             ///
 
-            bsl::destroy_at(node);
-            auto *const ptr{bsl::construct_at<T>(node)};
+            bsl::destroy_at(pmut_node);
+            auto *const pmut_virt{bsl::construct_at<T>(pmut_node)};
 
             if (bsl::is_trivial<T>::value) {
-                return bsl::builtin_memset(ptr, '\0', HYPERVISOR_PAGE_SIZE);
+                return bsl::builtin_memset(pmut_virt, '\0', HYPERVISOR_PAGE_SIZE);
             }
 
-            return ptr;
+            return pmut_virt;
         }
 
         /// <!-- description -->
@@ -168,32 +165,32 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of pointer to deallocate
-        ///   @param tls the current TLS block
-        ///   @param ptr the pointer to the page to deallocate
+        ///   @param mut_tls the current TLS block
+        ///   @param pmut_virt the pointer to the page to deallocate
         ///   @param tag the tag the allocation was marked with
         ///
         template<typename T>
         constexpr void
-        deallocate(tls_t &tls, T *const ptr, bsl::string_view const &tag) noexcept
+        deallocate(tls_t &mut_tls, T *const pmut_virt, bsl::string_view const &tag) noexcept
         {
             static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{mut_tls, m_lock};
 
-            if (bsl::unlikely(nullptr == ptr)) {
+            if (bsl::unlikely(nullptr == pmut_virt)) {
                 return;
             }
 
-            page_pool_record_t *record{};
+            page_pool_record_t *pmut_mut_record{};
             for (auto const elem : m_rcds) {
                 if (elem.data->tag == tag) {
-                    record = elem.data;
+                    pmut_mut_record = elem.data;
                     break;
                 }
 
                 bsl::touch();
             }
 
-            if (nullptr == record) {
+            if (bsl::unlikely(nullptr == pmut_mut_record)) {
                 bsl::error() << "invalid tag "    // --
                              << tag               // --
                              << bsl::endl         // --
@@ -229,26 +226,26 @@ namespace mk
             ///   delete to properly create a constexpr friendly version of T.
             ///
 
-            bsl::destroy_at(ptr);
-            auto *const node{bsl::construct_at<loader::page_pool_node_t>(ptr)};
+            bsl::destroy_at(pmut_virt);
+            auto *const pmut_node{bsl::construct_at<page_pool_node_t>(pmut_virt)};
 
-            node->next = m_head;
-            m_head = node;
-            record->usd -= HYPERVISOR_PAGE_SIZE;
+            pmut_node->next = m_head;
+            m_head = pmut_node;
+            pmut_mut_record->usd -= HYPERVISOR_PAGE_SIZE;
         }
 
         /// <!-- description -->
         ///   @brief Returns the number of bytes allocated for a given tag.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param tag the tag the allocation was marked with
         ///   @return Returns the number of bytes allocated for a given tag.
         ///
         [[nodiscard]] constexpr auto
-        allocated(tls_t &tls, bsl::string_view const &tag) noexcept -> bsl::safe_uintmax
+        allocated(tls_t &mut_tls, bsl::string_view const &tag) noexcept -> bsl::safe_uintmax
         {
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{mut_tls, m_lock};
 
             for (auto const elem : m_rcds) {
                 if (elem.data->tag == tag) {
@@ -268,7 +265,7 @@ namespace mk
 
         /// <!-- description -->
         ///   @brief Converts a virtual address to a physical address for
-        ///     any page allocated by the page pool. If the provided ptr
+        ///     any page allocated by the page pool. If the provided virt
         ///     was not allocated using the allocate function by the same
         ///     page pool, this results of this function are UB. It should
         ///     be noted that any virtual address may be used meaning the
@@ -285,7 +282,10 @@ namespace mk
         virt_to_phys(T const *const virt) const noexcept -> bsl::safe_uintmax
         {
             static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);
-            return bsl::to_umax(virt) - HYPERVISOR_MK_PAGE_POOL_ADDR;
+
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+            auto const virt_int{bsl::to_umax(reinterpret_cast<bsl::uintmax>(virt))};
+            return virt_int - HYPERVISOR_MK_PAGE_POOL_ADDR;
         }
 
         /// <!-- description -->
@@ -307,7 +307,10 @@ namespace mk
         phys_to_virt(bsl::safe_uintmax const &phys) const noexcept -> T *
         {
             static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);
-            return bsl::to_ptr<T *>(phys + HYPERVISOR_MK_PAGE_POOL_ADDR);
+
+            auto const phys_int{phys + HYPERVISOR_MK_PAGE_POOL_ADDR};
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+            return reinterpret_cast<T *>(phys_int.get());
         }
 
         /// <!-- description -->
@@ -346,9 +349,9 @@ namespace mk
             bsl::print() << bsl::ylw << "+----------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            bsl::safe_uintmax usd{};
+            bsl::safe_uintmax mut_usd{};
             for (auto const elem : m_rcds) {
-                usd += elem.data->usd;
+                mut_usd += elem.data->usd;
             }
 
             /// Total
@@ -372,11 +375,11 @@ namespace mk
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<23s", "used "};
             bsl::print() << bsl::ylw << "| ";
-            if ((usd / mb).is_zero()) {
-                bsl::print() << bsl::rst << bsl::fmt{"4d", usd / kb} << " KB ";
+            if ((mut_usd / mb).is_zero()) {
+                bsl::print() << bsl::rst << bsl::fmt{"4d", mut_usd / kb} << " KB ";
             }
             else {
-                bsl::print() << bsl::rst << bsl::fmt{"4d", usd / mb} << " MB ";
+                bsl::print() << bsl::rst << bsl::fmt{"4d", mut_usd / mb} << " MB ";
             }
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;
@@ -387,11 +390,11 @@ namespace mk
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<23s", "remaining "};
             bsl::print() << bsl::ylw << "| ";
-            if (((m_size - usd) / mb).is_zero()) {
-                bsl::print() << bsl::rst << bsl::fmt{"4d", (m_size - usd) / kb} << " KB ";
+            if (((m_size - mut_usd) / mb).is_zero()) {
+                bsl::print() << bsl::rst << bsl::fmt{"4d", (m_size - mut_usd) / kb} << " KB ";
             }
             else {
-                bsl::print() << bsl::rst << bsl::fmt{"4d", (m_size - usd) / mb} << " MB ";
+                bsl::print() << bsl::rst << bsl::fmt{"4d", (m_size - mut_usd) / mb} << " MB ";
             }
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;

@@ -35,10 +35,7 @@ namespace mk
     /// @struct mk::tls_t
     ///
     /// <!-- description -->
-    ///   @brief Defines the layout of the microkernel's TLS block. This
-    ///     should not be confused with the TLS blocks given to an extension,
-    ///     for which there are two, the TLS block for thread_local and the
-    ///     TLS block provided by the microkernel's ABI.
+    ///   @brief Implements a mocked version of tls_t.
     ///
     struct tls_t final
     {

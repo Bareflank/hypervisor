@@ -55,7 +55,7 @@ namespace example
         ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
-        initialize(gs_t &gs, tls_t &tls) noexcept -> bsl::errc_type
+        initialize(gs_t const &gs, tls_t const &tls) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -76,7 +76,7 @@ namespace example
         ///   @param tls the tls_t to use
         ///
         static constexpr void
-        release(gs_t &gs, tls_t &tls) noexcept
+        release(gs_t const &gs, tls_t const &tls) noexcept
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -94,22 +94,24 @@ namespace example
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
         ///   @param tls the tls_t to use
-        ///   @param rax the index used by CPUID, returns resulting rax
-        ///   @param rbx returns resulting rbx
-        ///   @param rcx the subindex used by CPUID, returns the resulting rcx
-        ///   @param rdx returns resulting rdx
+        ///   @param mut_rax the index used by CPUID, returns resulting rax
+        ///   @param mut_rbx returns resulting rbx
+        ///   @param mut_rcx the subindex used by CPUID, returns the resulting rcx
+        ///   @param mut_rdx returns resulting rdx
         ///
         static constexpr void
         cpuid(
-            gs_t &gs,
-            tls_t &tls,
-            bsl::safe_uint64 &rax,
-            bsl::safe_uint64 &rbx,
-            bsl::safe_uint64 &rcx,
-            bsl::safe_uint64 &rdx) noexcept
+            gs_t const &gs,
+            tls_t const &tls,
+            bsl::safe_uint64 &mut_rax,
+            bsl::safe_uint64 &mut_rbx,
+            bsl::safe_uint64 &mut_rcx,
+            bsl::safe_uint64 &mut_rdx) noexcept
         {
             bsl::discard(tls);
-            intrinsic_cpuid_impl(&gs, rax.data(), rbx.data(), rcx.data(), rdx.data());
+
+            intrinsic_cpuid_impl(
+                &gs, mut_rax.data(), mut_rbx.data(), mut_rcx.data(), mut_rdx.data());
         }
     };
 }

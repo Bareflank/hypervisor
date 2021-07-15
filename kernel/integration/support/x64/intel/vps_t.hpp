@@ -48,11 +48,11 @@ namespace integration
     ///   @return The masked version of the control fields.
     ///
     [[nodiscard]] constexpr auto
-    ctls_mask(bsl::safe_uint64 const &val) noexcept -> bsl::safe_uint32
+    ctls_mask(bsl::safe_uint64 const &val) noexcept -> bsl::safe_uint64
     {
         constexpr auto mask{0x00000000FFFFFFFF_u64};
         constexpr auto shift{32_u64};
-        return bsl::to_u32_unsafe((val & mask) & (val >> shift));
+        return (val & mask) & (val >> shift);
     };
 
     /// @class integration::vps_t
@@ -151,29 +151,21 @@ namespace integration
                 return ret;
             }
 
-            constexpr auto vmcs_vpid_idx{0x0000_u64};
-            constexpr auto vmcs_vpid_val{0x1_u16};
-
-            ret = sys.bf_vps_op_write16(m_id, vmcs_vpid_idx, vmcs_vpid_val);
+            constexpr auto vmcs_vpid_val{0x1_u64};
+            ret = sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_virtual_processor_identifier, vmcs_vpid_val);
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
 
-            constexpr auto vmcs_link_ptr_idx{0x2800_u64};
             constexpr auto vmcs_link_ptr_val{0xFFFFFFFFFFFFFFFF_u64};
-
-            ret = sys.bf_vps_op_write64(m_id, vmcs_link_ptr_idx, vmcs_link_ptr_val);
+            ret = sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_vmcs_link_pointer, vmcs_link_ptr_val);
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
-
-            constexpr auto vmcs_pinbased_ctls_idx{0x4000_u64};
-            constexpr auto vmcs_procbased_ctls_idx{0x4002_u64};
-            constexpr auto vmcs_exit_ctls_idx{0x400C_u64};
-            constexpr auto vmcs_entry_ctls_idx{0x4012_u64};
-            constexpr auto vmcs_procbased_ctls2_idx{0x401E_u64};
 
             constexpr auto ia32_vmx_true_pinbased_ctls{0x48D_u32};
             constexpr auto ia32_vmx_true_procbased_ctls{0x48E_u32};
@@ -189,7 +181,8 @@ namespace integration
                 return bsl::errc_failure;
             }
 
-            ret = sys.bf_vps_op_write32(m_id, vmcs_pinbased_ctls_idx, ctls_mask(ctls));
+            ret = sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_pin_based_vm_execution_ctls, ctls_mask(ctls));
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
@@ -207,7 +200,10 @@ namespace integration
             ctls |= enable_msr_bitmaps;
             ctls |= enable_procbased_ctls2;
 
-            ret = sys.bf_vps_op_write32(m_id, vmcs_procbased_ctls_idx, ctls_mask(ctls));
+            ret = sys.bf_vps_op_write(
+                m_id,
+                syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls,
+                ctls_mask(ctls));
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
@@ -219,7 +215,8 @@ namespace integration
                 return bsl::errc_failure;
             }
 
-            ret = sys.bf_vps_op_write32(m_id, vmcs_exit_ctls_idx, ctls_mask(ctls));
+            ret =
+                sys.bf_vps_op_write(m_id, syscall::bf_reg_t::bf_reg_t_vmexit_ctls, ctls_mask(ctls));
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
@@ -231,7 +228,8 @@ namespace integration
                 return bsl::errc_failure;
             }
 
-            ret = sys.bf_vps_op_write32(m_id, vmcs_entry_ctls_idx, ctls_mask(ctls));
+            ret = sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_vmentry_ctls, ctls_mask(ctls));
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
@@ -255,15 +253,17 @@ namespace integration
             ctls |= enable_xsave;
             ctls |= enable_uwait;
 
-            ret = sys.bf_vps_op_write32(m_id, vmcs_procbased_ctls2_idx, ctls_mask(ctls));
+            ret = sys.bf_vps_op_write(
+                m_id,
+                syscall::bf_reg_t::bf_reg_t_secondary_proc_based_vm_execution_ctls,
+                ctls_mask(ctls));
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
 
-            constexpr auto vmcs_msr_bitmaps{0x2004_u64};
-
-            ret = sys.bf_vps_op_write64(m_id, vmcs_msr_bitmaps, gs.msr_bitmap_phys);
+            ret = sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_address_of_msr_bitmaps, gs.msr_bitmap_phys);
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;

@@ -78,23 +78,23 @@ namespace mk
         constexpr void
         add(bsl::safe_uint16 const &ppid, vmexit_log_record_t const &rec) noexcept
         {
-            if constexpr (BSL_DEBUG_LEVEL < bsl::VV) {
+            if constexpr (bsl::debug_level_is_at_least_vv()) {
                 return;
             }
 
-            auto *const pp_log{m_vmexit_logs.at_if(bsl::to_umax(ppid))};
-            if (bsl::unlikely(nullptr == pp_log)) {
+            auto *const pmut_pp_log{m_vmexit_logs.at_if(bsl::to_umax(ppid))};
+            if (bsl::unlikely(nullptr == pmut_pp_log)) {
                 return;
             }
 
-            *pp_log->log.at_if(pp_log->crsr) = rec;
+            *pmut_pp_log->log.at_if(pmut_pp_log->crsr) = rec;
 
-            ++pp_log->crsr;
-            if (pp_log->crsr < pp_log->log.size()) {
+            ++pmut_pp_log->crsr;
+            if (pmut_pp_log->crsr < pmut_pp_log->log.size()) {
                 bsl::touch();
             }
             else {
-                pp_log->crsr = {};
+                pmut_pp_log->crsr = {};
             }
         }
 
@@ -105,13 +105,13 @@ namespace mk
         ///   @param ppid the ID of the PP whose log should be dumped
         ///
         constexpr void
-        dump(bsl::safe_uint16 const &ppid) noexcept
+        dump(bsl::safe_uint16 const &ppid) const noexcept
         {
-            if constexpr (BSL_DEBUG_LEVEL < bsl::VV) {
+            if constexpr (bsl::debug_level_is_at_least_vv()) {
                 return;
             }
 
-            auto *const pp_log{m_vmexit_logs.at_if(bsl::to_umax(ppid))};
+            auto const *const pp_log{m_vmexit_logs.at_if(bsl::to_umax(ppid))};
             if (bsl::unlikely(nullptr == pp_log)) {
                 bsl::error() << "invalid ppid "    // --
                              << bsl::hex(ppid)     // --
@@ -131,8 +131,9 @@ namespace mk
             bsl::print() << bsl::ylw << "----------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            for (bsl::safe_uintmax i{}; i < pp_log->log.size(); ++i) {
-                auto const *const rec{pp_log->log.at_if(pp_log->crsr)};
+            bsl::safe_uintmax mut_crsr{pp_log->crsr};
+            for (bsl::safe_uintmax mut_i{}; mut_i < pp_log->log.size(); ++mut_i) {
+                auto const *const rec{pp_log->log.at_if(mut_crsr)};
 
                 if (rec->rip.is_pos()) {
                     bsl::print() << bsl::ylw << "| ";
@@ -205,12 +206,12 @@ namespace mk
                     bsl::touch();
                 }
 
-                ++pp_log->crsr;
-                if (pp_log->crsr < pp_log->log.size()) {
+                ++mut_crsr;
+                if (mut_crsr < pp_log->log.size()) {
                     bsl::touch();
                 }
                 else {
-                    pp_log->crsr = {};
+                    mut_crsr = {};
                 }
             }
         }

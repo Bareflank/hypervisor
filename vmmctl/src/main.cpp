@@ -45,13 +45,13 @@
 ///   @return bsl::exit_success on success, bsl::exit_failure otherwise.
 ///
 [[nodiscard]] auto
-main(bsl::int32 const argc, bsl::cstr_type const argv[]) noexcept -> bsl::exit_code
+main(bsl::int32 const argc, bsl::cstr_type const *const argv) noexcept -> bsl::exit_code
 {
     bsl::enable_color();
 
-    bsl::arguments args{bsl::to_umax(argc), argv};
-    ++args;
+    bsl::arguments mut_args{bsl::to_umax(argc), argv};
+    ++mut_args;
 
-    vmmctl::vmmctl_main app{};
-    return app.process(bsl::move(args));
+    vmmctl::vmmctl_main mut_app{};
+    return mut_app.process(bsl::move(mut_args));
 }

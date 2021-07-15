@@ -23,13 +23,6 @@ Checks:
   '
     -*,
     bsl-*,
-      -bsl-template-generic-param,
-      -bsl-comparison-operators-forbidden,
-      -bsl-boolean-operators-forbidden,
-      -bsl-function-noexcept,
-      -bsl-name-prefixes,
-      -bsl-name-case,
-      -bsl-using-ident-unique-namespace,
       -bsl-literals-user-defined,
     bugprone-*,
       -bugprone-branch-clone,

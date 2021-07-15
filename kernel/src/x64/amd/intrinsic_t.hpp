@@ -102,11 +102,11 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param msr n/a
-    ///   @param val n/a
+    ///   @param pmut_val n/a
     ///   @return n/a
     ///
-    extern "C" [[nodiscard]] auto intrinsic_rdmsr(bsl::uint32 msr, bsl::uint64 *const val) noexcept
-        -> bsl::exit_code;
+    extern "C" [[nodiscard]] auto
+    intrinsic_rdmsr(bsl::uint32 const msr, bsl::uint64 *const pmut_val) noexcept -> bsl::exit_code;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::wrmsr
@@ -116,8 +116,8 @@ namespace mk
     ///   @param val n/a
     ///   @return n/a
     ///
-    extern "C" [[nodiscard]] auto intrinsic_wrmsr(bsl::uint32 msr, bsl::uint64 const val) noexcept
-        -> bsl::exit_code;
+    extern "C" [[nodiscard]] auto
+    intrinsic_wrmsr(bsl::uint32 const msr, bsl::uint64 const val) noexcept -> bsl::exit_code;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::invlpga
@@ -126,23 +126,23 @@ namespace mk
     ///   @param addr n/a
     ///   @param asid n/a
     ///
-    extern "C" void intrinsic_invlpga(bsl::uint64 addr, bsl::uint64 const asid) noexcept;
+    extern "C" void intrinsic_invlpga(bsl::uint64 const addr, bsl::uint64 const asid) noexcept;
 
     /// <!-- description -->
     ///   @brief Executes the VMRun instruction. When this function returns
     ///     a "VMExit" has occurred and must be handled.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param guest_vmcb a pointer to the guest VMCB to use
+    ///   @param pmut_guest_vmcb a pointer to the guest VMCB to use
     ///   @param guest_vmcb_phys the physical address of the guest VMCB to use
-    ///   @param host_vmcb a pointer to the host VMCB to use
+    ///   @param pmut_host_vmcb a pointer to the host VMCB to use
     ///   @param host_vmcb_phys the physical address of the host VMCB to use
     ///   @return Returns the exit reason associated with the VMExit
     ///
     extern "C" [[nodiscard]] auto intrinsic_vmrun(
-        void *const guest_vmcb,
+        void *const pmut_guest_vmcb,
         bsl::uintmax const guest_vmcb_phys,
-        void *const host_vmcb,
+        void *const pmut_host_vmcb,
         bsl::uintmax const host_vmcb_phys) noexcept -> bsl::uintmax;
 
     /// @class mk::intrinsic_t
@@ -193,7 +193,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_cr3();
+            return bsl::to_u64(intrinsic_cr3());
         }
 
         /// <!-- description -->
@@ -234,7 +234,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_tp();
+            return bsl::to_u64(intrinsic_tp());
         }
 
         /// <!-- description -->
@@ -285,7 +285,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_tls_reg(reg.get());
+            return bsl::to_u64(intrinsic_tls_reg(reg.get()));
         }
 
         /// <!-- description -->
@@ -346,8 +346,7 @@ namespace mk
         [[nodiscard]] static constexpr auto
         rdmsr(bsl::safe_uint32 const &msr) noexcept -> bsl::safe_uint64
         {
-            bsl::exit_code ret{};
-            bsl::safe_uint64 val{};
+            bsl::safe_uint64 mut_val{};
 
             if (bsl::is_constant_evaluated()) {
                 return {};
@@ -362,8 +361,8 @@ namespace mk
                 return bsl::safe_uint64::failure();
             }
 
-            ret = intrinsic_rdmsr(msr.get(), val.data());
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            bsl::exit_code const ret{intrinsic_rdmsr(msr.get(), mut_val.data())};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 bsl::error() << "rdmsr failed for msr "    // --
                              << bsl::hex(msr)              // --
                              << bsl::endl                  // --
@@ -372,7 +371,7 @@ namespace mk
                 return bsl::safe_uint64::failure();
             }
 
-            return val;
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -387,8 +386,6 @@ namespace mk
         [[nodiscard]] static constexpr auto
         wrmsr(bsl::safe_uint32 const &msr, bsl::safe_uint64 const &val) noexcept -> bsl::errc_type
         {
-            bsl::exit_code ret{};
-
             if (bsl::is_constant_evaluated()) {
                 return bsl::errc_success;
             }
@@ -411,8 +408,8 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            ret = intrinsic_wrmsr(msr.get(), val.get());
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            bsl::exit_code const ret{intrinsic_wrmsr(msr.get(), val.get())};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 bsl::error() << "wrmsr failed for msr "    // --
                              << bsl::hex(msr)              // --
                              << " with value "             // --

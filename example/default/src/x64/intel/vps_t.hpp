@@ -48,11 +48,11 @@ namespace example
     ///   @return The masked version of the control fields.
     ///
     [[nodiscard]] constexpr auto
-    ctls_mask(bsl::safe_uint64 const &val) noexcept -> bsl::safe_uint32
+    ctls_mask(bsl::safe_uint64 const &val) noexcept -> bsl::safe_uint64
     {
         constexpr auto mask{0x00000000FFFFFFFF_u64};
         constexpr auto shift{32_u64};
-        return bsl::to_u32_unsafe((val & mask) & (val >> shift));
+        return (val & mask) & (val >> shift);
     };
 
     /// @class example::vps_t
@@ -84,10 +84,10 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         initialize(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic,
             bsl::safe_uint16 const &i) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
@@ -153,7 +153,11 @@ namespace example
         ///   @param intrinsic the intrinsic_t to use
         ///
         constexpr void
-        release(gs_t &gs, tls_t &tls, syscall::bf_syscall_t &sys, intrinsic_t &intrinsic) noexcept
+        release(
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic) noexcept
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -176,7 +180,7 @@ namespace example
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
         ///   @param tls the tls_t to use
-        ///   @param sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vpid the ID of the VP to assign the vps_t to
         ///   @param ppid the ID of the PP to assign the vps_t to
@@ -185,10 +189,10 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         allocate(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t &mut_sys,
+            intrinsic_t const &intrinsic,
             bsl::safe_uint16 const &vpid,
             bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
         {
@@ -196,7 +200,7 @@ namespace example
             bsl::discard(tls);
             bsl::discard(intrinsic);
 
-            bsl::errc_type ret{};
+            bsl::errc_type mut_ret{};
 
             /// NOTE:
             /// - The following is a pedantic check to make sure we have
@@ -289,10 +293,10 @@ namespace example
             ///
 
             if (ppid == m_id) {
-                ret = sys.bf_vps_op_init_as_root(m_id);
-                if (bsl::unlikely_assert(!ret)) {
+                mut_ret = mut_sys.bf_vps_op_init_as_root(m_id);
+                if (bsl::unlikely_assert(!mut_ret)) {
                     bsl::print<bsl::V>() << bsl::here();
-                    return ret;
+                    return mut_ret;
                 }
 
                 bsl::touch();
@@ -312,26 +316,24 @@ namespace example
             /// - Set up VPID
             ///
 
-            constexpr auto vmcs_vpid_idx{0x0000_u64};
-            constexpr auto vmcs_vpid_val{0x1_u16};
-
-            ret = sys.bf_vps_op_write16(m_id, vmcs_vpid_idx, vmcs_vpid_val);
-            if (bsl::unlikely_assert(!ret)) {
+            constexpr auto vmcs_vpid_val{0x1_u64};
+            mut_ret = mut_sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_virtual_processor_identifier, vmcs_vpid_val);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             /// NOTE:
             /// - Set up the VMCS link pointer
             ///
 
-            constexpr auto vmcs_link_ptr_idx{0x2800_u64};
             constexpr auto vmcs_link_ptr_val{0xFFFFFFFFFFFFFFFF_u64};
-
-            ret = sys.bf_vps_op_write64(m_id, vmcs_link_ptr_idx, vmcs_link_ptr_val);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_vmcs_link_pointer, vmcs_link_ptr_val);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             /// NOTE:
@@ -357,34 +359,29 @@ namespace example
             ///   project.
             ///
 
-            constexpr auto vmcs_pinbased_ctls_idx{0x4000_u64};
-            constexpr auto vmcs_procbased_ctls_idx{0x4002_u64};
-            constexpr auto vmcs_exit_ctls_idx{0x400C_u64};
-            constexpr auto vmcs_entry_ctls_idx{0x4012_u64};
-            constexpr auto vmcs_procbased_ctls2_idx{0x401E_u64};
-
             constexpr auto ia32_vmx_true_pinbased_ctls{0x48D_u32};
             constexpr auto ia32_vmx_true_procbased_ctls{0x48E_u32};
             constexpr auto ia32_vmx_true_exit_ctls{0x48F_u32};
             constexpr auto ia32_vmx_true_entry_ctls{0x490_u32};
             constexpr auto ia32_vmx_true_procbased_ctls2{0x48B_u32};
 
-            bsl::safe_uintmax ctls{};
+            bsl::safe_uintmax mut_ctls{};
 
             /// NOTE:
             /// - Configure the pin based controls
             ///
 
-            ctls = sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_pinbased_ctls);
-            if (bsl::unlikely_assert(!ctls)) {
+            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_pinbased_ctls);
+            if (bsl::unlikely_assert(!mut_ctls)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = sys.bf_vps_op_write32(m_id, vmcs_pinbased_ctls_idx, ctls_mask(ctls));
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_pin_based_vm_execution_ctls, ctls_mask(mut_ctls));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             /// NOTE:
@@ -394,51 +391,57 @@ namespace example
             constexpr auto enable_msr_bitmaps{0x10000000_u64};
             constexpr auto enable_procbased_ctls2{0x80000000_u64};
 
-            ctls = sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_procbased_ctls);
-            if (bsl::unlikely_assert(!ctls)) {
+            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_procbased_ctls);
+            if (bsl::unlikely_assert(!mut_ctls)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ctls |= enable_msr_bitmaps;
-            ctls |= enable_procbased_ctls2;
+            mut_ctls |= enable_msr_bitmaps;
+            mut_ctls |= enable_procbased_ctls2;
 
-            ret = sys.bf_vps_op_write32(m_id, vmcs_procbased_ctls_idx, ctls_mask(ctls));
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_sys.bf_vps_op_write(
+                m_id,
+                syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls,
+                ctls_mask(mut_ctls));
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             /// NOTE:
             /// - Configure the exit controls
             ///
 
-            ctls = sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_exit_ctls);
-            if (bsl::unlikely_assert(!ctls)) {
+            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_exit_ctls);
+            if (bsl::unlikely_assert(!mut_ctls)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = sys.bf_vps_op_write32(m_id, vmcs_exit_ctls_idx, ctls_mask(ctls));
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_vmexit_ctls, ctls_mask(mut_ctls));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             /// NOTE:
             /// - Configure the entry controls
             ///
 
-            ctls = sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_entry_ctls);
-            if (bsl::unlikely_assert(!ctls)) {
+            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_entry_ctls);
+            if (bsl::unlikely_assert(!mut_ctls)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = sys.bf_vps_op_write32(m_id, vmcs_entry_ctls_idx, ctls_mask(ctls));
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_vmentry_ctls, ctls_mask(mut_ctls));
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             /// NOTE:
@@ -451,22 +454,26 @@ namespace example
             constexpr auto enable_xsave{0x00100000_u64};
             constexpr auto enable_uwait{0x04000000_u64};
 
-            ctls = sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_procbased_ctls2);
-            if (bsl::unlikely_assert(!ctls)) {
+            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_procbased_ctls2);
+            if (bsl::unlikely_assert(!mut_ctls)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ctls |= enable_vpid;
-            ctls |= enable_rdtscp;
-            ctls |= enable_invpcid;
-            ctls |= enable_xsave;
-            ctls |= enable_uwait;
+            mut_ctls |= enable_vpid;
+            mut_ctls |= enable_rdtscp;
+            mut_ctls |= enable_invpcid;
+            mut_ctls |= enable_xsave;
+            mut_ctls |= enable_uwait;
 
-            ret = sys.bf_vps_op_write32(m_id, vmcs_procbased_ctls2_idx, ctls_mask(ctls));
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_sys.bf_vps_op_write(
+                m_id,
+                syscall::bf_reg_t::bf_reg_t_secondary_proc_based_vm_execution_ctls,
+                ctls_mask(mut_ctls));
+
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             /// NOTE:
@@ -476,12 +483,11 @@ namespace example
             ///   CPUs you are running on.
             ///
 
-            constexpr auto vmcs_msr_bitmaps{0x2004_u64};
-
-            ret = sys.bf_vps_op_write64(m_id, vmcs_msr_bitmaps, gs.msr_bitmap_phys);
-            if (bsl::unlikely_assert(!ret)) {
+            mut_ret = mut_sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_address_of_msr_bitmaps, gs.msr_bitmap_phys);
+            if (bsl::unlikely_assert(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return ret;
+                return mut_ret;
             }
 
             /// NOTE:
@@ -492,7 +498,7 @@ namespace example
             m_assigned_vpid = vpid;
             m_assigned_ppid = ppid;
 
-            return bsl::errc_success;
+            return mut_ret;
         }
     };
 }

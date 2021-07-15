@@ -57,10 +57,10 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
-        ///   @param lck the spinlock/mutex to guard
+        ///   @param mut_lck the spinlock/mutex to guard
         ///
-        constexpr lock_guard_t(tls_t const &tls, T &lck) noexcept    // --
-            : m_tls{tls}, m_lock{lck}
+        constexpr lock_guard_t(tls_t const &tls, T &mut_lck) noexcept    // --
+            : m_tls{tls}, m_lock{mut_lck}
         {
             m_lock.lock(m_tls);
         }
@@ -94,9 +94,9 @@ namespace mk
         ///   @brief move constructor
         ///
         /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
+        ///   @param mut_o the object being moved
         ///
-        constexpr lock_guard_t(lock_guard_t &&o) noexcept = default;
+        constexpr lock_guard_t(lock_guard_t &&mut_o) noexcept = default;
 
         /// <!-- description -->
         ///   @brief copy assignment
@@ -111,10 +111,10 @@ namespace mk
         ///   @brief move assignment
         ///
         /// <!-- inputs/outputs -->
-        ///   @param o the object being moved
+        ///   @param mut_o the object being moved
         ///   @return a reference to *this
         ///
-        [[maybe_unused]] auto operator=(lock_guard_t &&o) &noexcept -> lock_guard_t & = default;
+        [[maybe_unused]] auto operator=(lock_guard_t &&mut_o) &noexcept -> lock_guard_t & = default;
     };
 }
 

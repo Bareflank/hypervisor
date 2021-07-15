@@ -579,6 +579,29 @@ intrinsic_vmwrite64_failure:
 
 
 
+    .globl  intrinsic_vmwritefunc
+    .type   intrinsic_vmwritefunc, @function
+intrinsic_vmwritefunc:
+
+    vmwrite rdi, rsi
+    jbe intrinsic_vmwritefunc_failure
+
+    xor rax, rax
+    ret
+    int 3
+
+intrinsic_vmwritefunc_failure:
+
+    mov rax, 0x4400
+    vmread rax, rax
+
+    ret
+    int 3
+
+    .size intrinsic_vmwritefunc, .-intrinsic_vmwritefunc
+
+
+
     .globl  intrinsic_vmrun
     .type   intrinsic_vmrun, @function
 intrinsic_vmrun:

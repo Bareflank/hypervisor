@@ -56,7 +56,7 @@ namespace mk
         /// @brief defines the "global" field in the page (must be 0)
         bsl::uint64 g : static_cast<bsl::uint64>(1);
         /// @brief defines our "auto_release" field in the page
-        bsl::int32 auto_release : static_cast<bsl::int32>(3);
+        bsl::uint64 auto_release : static_cast<bsl::uint64>(3);
         /// @brief defines the "physical address" field in the page
         bsl::uint64 phys : static_cast<bsl::uint64>(40);
         /// @brief defines the "available to software" field in the page

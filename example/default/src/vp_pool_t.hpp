@@ -67,8 +67,10 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         initialize(
-            gs_t &gs, tls_t &tls, syscall::bf_syscall_t &sys, intrinsic_t &intrinsic) noexcept
-            -> bsl::errc_type
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
         {
             /// NOTE:
             /// - The following is used in the event of an error. Basically,
@@ -77,7 +79,7 @@ namespace example
             ///   ignore() function, which we do at the end when all is good.
             ///
 
-            bsl::finally_assert release_on_error{
+            bsl::finally_assert mut_release_on_error{
                 [this, &gs, &tls, &sys, &intrinsic]() noexcept -> void {
                     this->release(gs, tls, sys, intrinsic);
                 }};
@@ -91,9 +93,9 @@ namespace example
             ///   and it allows us to create more if needed.
             ///
 
-            bsl::errc_type ret{};
-            for (bsl::safe_uintmax i{}; i < m_pool.size(); ++i) {
-                ret = m_pool.at_if(i)->initialize(gs, tls, sys, intrinsic, bsl::to_u16(i));
+            for (bsl::safe_uintmax mut_i{}; mut_i < m_pool.size(); ++mut_i) {
+                auto const ret{
+                    m_pool.at_if(mut_i)->initialize(gs, tls, sys, intrinsic, bsl::to_u16(mut_i))};
                 if (bsl::unlikely_assert(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -108,7 +110,7 @@ namespace example
                 bsl::touch();
             }
 
-            release_on_error.ignore();
+            mut_release_on_error.ignore();
             return bsl::errc_success;
         }
 
@@ -122,15 +124,19 @@ namespace example
         ///   @param intrinsic the intrinsic_t to use
         ///
         constexpr void
-        release(gs_t &gs, tls_t &tls, syscall::bf_syscall_t &sys, intrinsic_t &intrinsic) noexcept
+        release(
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic) noexcept
         {
             /// NOTE:
             /// - Release functions are usually only needed in the event of
             ///   an error, or during unit testing.
             ///
 
-            for (bsl::safe_uintmax i{}; i < m_pool.size(); ++i) {
-                m_pool.at_if(i)->release(gs, tls, sys, intrinsic);
+            for (bsl::safe_uintmax mut_i{}; mut_i < m_pool.size(); ++mut_i) {
+                m_pool.at_if(mut_i)->release(gs, tls, sys, intrinsic);
             }
         }
 
@@ -140,7 +146,7 @@ namespace example
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
         ///   @param tls the tls_t to use
-        ///   @param sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vmid the ID of the VM to assign the newly created VP to
         ///   @param ppid the ID of the PP to assign the newly created VP to
@@ -149,16 +155,13 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         allocate(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t &mut_sys,
+            intrinsic_t const &intrinsic,
             bsl::safe_uint16 const &vmid,
             bsl::safe_uint16 const &ppid) noexcept -> bsl::safe_uint16
         {
-            bsl::errc_type ret{};
-            bsl::safe_uint16 vpid{};
-
             /// NOTE:
             /// - Ask the microkernel to create a VP and return the ID of the
             ///   newly created VP. We do not check in this function if the
@@ -168,7 +171,7 @@ namespace example
             ///   them to another function.
             ///
 
-            vpid = sys.bf_vp_op_create_vp(vmid, ppid);
+            auto const vpid{mut_sys.bf_vp_op_create_vp(vmid, ppid)};
             if (bsl::unlikely_assert(!vpid)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::safe_uint16::failure();
@@ -181,8 +184,8 @@ namespace example
             ///   ignore() function, which we do at the end when all is good.
             ///
 
-            bsl::finally destroy_vp_on_error{[&sys, &vpid]() noexcept -> void {
-                bsl::discard(sys.bf_vp_op_destroy_vp(vpid));
+            bsl::finally mut_destroy_vp_on_error{[&mut_sys, &vpid]() noexcept -> void {
+                bsl::discard(mut_sys.bf_vp_op_destroy_vp(vpid));
             }};
 
             /// NOTE:
@@ -192,8 +195,8 @@ namespace example
             ///   the microkernel did not use the same max limits.
             ///
 
-            auto *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
+            auto *const pmut_vp{m_pool.at_if(bsl::to_umax(vpid))};
+            if (bsl::unlikely(nullptr == pmut_vp)) {
                 bsl::error() << "vpid "                                                   // --
                              << bsl::hex(vpid)                                            // --
                              << " provided by the microkernel is invalid"                 // --
@@ -213,13 +216,13 @@ namespace example
             ///   more than once.
             ///
 
-            ret = vp->allocate(gs, tls, sys, intrinsic, vmid, ppid);
+            auto const ret{pmut_vp->allocate(gs, tls, mut_sys, intrinsic, vmid, ppid)};
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::safe_uint16::failure();
             }
 
-            destroy_vp_on_error.ignore();
+            mut_destroy_vp_on_error.ignore();
             return vpid;
         }
     };

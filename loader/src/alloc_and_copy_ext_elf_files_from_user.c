@@ -24,8 +24,10 @@
  * SOFTWARE.
  */
 
+#include <bfelf/bfelf_elf64_ehdr_t.h>
 #include <constants.h>
 #include <debug.h>
+#include <elf_file_t.h>
 #include <platform.h>
 #include <span_t.h>
 #include <types.h>
@@ -37,18 +39,18 @@
  *     allocation and copy operation for a single elf file.
  *
  * <!-- inputs/outputs -->
- *   @param ext_elf_files_from_user the ELF files to copy
- *   @param copied_ext_elf_files where to copy the ELF files too
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @param ext_elf_file_from_user the ELF file to copy
+ *   @param copied_ext_elf_file where to copy the ELF file too
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 static int64_t
 alloc_and_copy_ext_elf_file_from_user(
-    struct span_t const *const ext_elf_file_from_user, struct span_t *const copied_ext_elf_file)
+    struct span_t const *const ext_elf_file_from_user, struct elf_file_t *const copied_ext_elf_file)
 {
     uint8_t const *const src_addr = ext_elf_file_from_user->addr;
     uint64_t const dst_size = ext_elf_file_from_user->size;
 
-    uint8_t *const dst_addr = (uint8_t *)platform_alloc(dst_size);
+    struct bfelf_elf64_ehdr_t *dst_addr = (struct bfelf_elf64_ehdr_t *)platform_alloc(dst_size);
     if (((void *)0) == dst_addr) {
         bferror("platform_alloc failed");
         goto platform_alloc_failed;
@@ -59,17 +61,25 @@ alloc_and_copy_ext_elf_file_from_user(
         goto platform_copy_from_user_failed;
     }
 
+    if (update_elf64_ehdr(dst_addr)) {
+        bferror("update_elf64_ehdr failed");
+        goto update_elf64_ehdr_failed;
+    }
+
     copied_ext_elf_file->addr = dst_addr;
     copied_ext_elf_file->size = dst_size;
 
     return LOADER_SUCCESS;
 
+update_elf64_ehdr_failed:
 platform_copy_from_user_failed:
 
     platform_free(dst_addr, dst_size);
 platform_alloc_failed:
 
-    platform_memset(copied_ext_elf_file, 0, sizeof(struct span_t));
+    copied_ext_elf_file->addr = ((void *)0);
+    copied_ext_elf_file->size = ((uint64_t)0);
+
     return LOADER_FAILURE;
 }
 
@@ -89,43 +99,42 @@ platform_alloc_failed:
  * <!-- inputs/outputs -->
  *   @param ext_elf_files_from_user the ELF files to copy
  *   @param copied_ext_elf_files where to copy the ELF files too
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 alloc_and_copy_ext_elf_files_from_user(
-    struct span_t const *const ext_elf_files_from_user, struct span_t *const copied_ext_elf_files)
+    struct span_t const *const ext_elf_files_from_user,
+    struct elf_file_t *const copied_ext_elf_files)
 {
-    int64_t ret = LOADER_SUCCESS;
-    uint64_t idx;
+    uint64_t i;
 
-    for (idx = 0; idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
-        struct span_t *const file = &copied_ext_elf_files[idx];
-        platform_memset(file, 0, sizeof(struct span_t));
-    }
+    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_EXTENSIONS; ++i) {
+        struct span_t const *const src = &ext_elf_files_from_user[i];
+        struct elf_file_t *const dst = &copied_ext_elf_files[i];
 
-    for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
-        struct span_t const *const src = &ext_elf_files_from_user[idx];
-        struct span_t *const dst = &copied_ext_elf_files[idx];
-        if (src->addr != ((void *)0) && src->size != ((uint64_t)0)) {
-            ret = alloc_and_copy_ext_elf_file_from_user(src, dst);
-            if (ret) {
-                break;
-            }
-        }
-        else {
+        if (((void *)0) == src->addr || ((uint64_t)0) == src->size) {
             break;
         }
+
+        if (alloc_and_copy_ext_elf_file_from_user(src, dst)) {
+            bferror("platform_copy_from_user failed");
+            goto alloc_and_copy_ext_elf_file_from_user_failed;
+        }
     }
 
-    if (ret) {
-        for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
-            struct span_t *const file = &copied_ext_elf_files[idx];
-            platform_free(file->addr, file->size);
-            platform_memset(file, 0, sizeof(struct span_t));
-        }
-
-        return LOADER_FAILURE;
+    for (; i < HYPERVISOR_MAX_EXTENSIONS; ++i) {
+        copied_ext_elf_files[i].addr = ((void *)0);
+        copied_ext_elf_files[i].size = ((uint64_t)0);
     }
 
     return LOADER_SUCCESS;
+
+alloc_and_copy_ext_elf_file_from_user_failed:
+
+    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_EXTENSIONS; ++i) {
+        copied_ext_elf_files[i].addr = ((void *)0);
+        copied_ext_elf_files[i].size = ((uint64_t)0);
+    }
+
+    return LOADER_FAILURE;
 }

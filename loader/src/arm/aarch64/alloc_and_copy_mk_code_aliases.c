@@ -70,7 +70,7 @@
  * <!-- inputs/outputs -->
  *   @param a a pointer to a code_aliases_t that will store the
  *     resulting aliases.
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 alloc_and_copy_mk_code_aliases(struct code_aliases_t *const a)

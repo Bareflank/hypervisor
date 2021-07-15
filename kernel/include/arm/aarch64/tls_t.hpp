@@ -27,9 +27,9 @@
 
 #include <state_save_t.hpp>
 
+#include <bsl/array.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
-#include <bsl/details/carray.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
 
@@ -279,7 +279,7 @@ namespace mk
         bsl::uintmax vmexit_loop_sp;
 
         /// @brief reserve the rest of the TLS block for later use.
-        bsl::details::carray<bsl::uint8, TLS_T_RESERVED1_SIZE.get()> reserved1;
+        bsl::array<bsl::uint8, TLS_T_RESERVED1_SIZE.get()> reserved1;
 
         /// --------------------------------------------------------------------
         /// Context Information
@@ -338,50 +338,7 @@ namespace mk
         void *active_rpt;
 
         /// @brief reserve the rest of the TLS block for later use.
-        bsl::details::carray<bsl::uint8, TLS_T_RESERVED2_SIZE.get()> reserved2;
-
-        /// --------------------------------------------------------------------
-        /// Failure Handling
-        /// --------------------------------------------------------------------
-
-        /// @brief stores a whether or not state is changing (0x380)
-        bool state_reversal_required;
-
-        /// @brief reserves the rest of the TLS block for later use.
-        bsl::details::carray<bsl::uint8, TLS_T_RESERVED3_SIZE.get()> reserved3;
-
-        /// @brief stores the syscall return status (0x388)
-        bsl::uintmax syscall_ret_status;
-
-        /// @brief logs an extid for state reversal if needed (0x390)
-        bsl::uint16 log_extid;
-        /// @brief logs a vmid for state reversal if needed (0x392)
-        bsl::uint16 log_vmid;
-        /// @brief logs a vpid for state reversal if needed (0x394)
-        bsl::uint16 log_vpid;
-        /// @brief logs a vpsid for state reversal if needed (0x396)
-        bsl::uint16 log_vpsid;
-
-        /// @brief logs an ext for state reversal if needed (0x398)
-        void *log_ext;
-        /// @brief logs a vm for state reversal if needed (0x3A0)
-        void *log_vm;
-        /// @brief logs a vp for state reversal if needed (0x3A8)
-        void *log_vp;
-        /// @brief logs a vps for state reversal if needed (0x3B0)
-        void *log_vps;
-
-        /// @brief reserve the rest of the TLS block for later use.
-        bsl::details::carray<bsl::uint8, TLS_T_RESERVED4_SIZE.get()> reserved4;
-
-        /// --------------------------------------------------------------------
-        /// Unit Test Specific
-        /// --------------------------------------------------------------------
-
-        /// @brief reserved for unit testing
-        bsl::errc_type test_ret;
-        /// @brief reserved
-        bsl::uint32 reserved_padding4;
+        bsl::array<bsl::uint8, TLS_T_RESERVED2_SIZE.get()> reserved2;
     };
 
     /// @brief make sure the tls_t is the size of a page

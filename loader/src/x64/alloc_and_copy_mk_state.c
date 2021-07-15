@@ -24,10 +24,10 @@
  * SOFTWARE.
  */
 
-#include <bfelf/bfelf_elf64_ehdr_t.h>
 #include <constants.h>
 #include <debug.h>
 #include <disable_hve.h>
+#include <elf_file_t.h>
 #include <enable_hve.h>
 #include <esr_default.h>
 #include <esr_df.h>
@@ -178,12 +178,12 @@
  *   @param mk_stack the microkernel's stack
  *   @param mk_stack_virt the microkernel's virtual address of the stack
  *   @param state where to save the newly set up state to
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 alloc_and_copy_mk_state(
     root_page_table_t const *const rpt,
-    struct span_t const *const mk_elf_file,
+    struct elf_file_t const *const mk_elf_file,
     struct span_t const *const mk_stack,
     uint64_t const mk_stack_virt,
     struct state_save_t **const state)
@@ -191,12 +191,6 @@ alloc_and_copy_mk_state(
     int64_t ret;
     uint16_t ext_cs_selector;
     uint16_t ext_ss_selector;
-
-    struct bfelf_elf64_ehdr_t const *ehdr = ((void *)0);
-    if (get_elf64_ehdr(mk_elf_file->addr, &ehdr)) {
-        bferror("get_elf64_ehdr failed");
-        return LOADER_FAILURE;
-    }
 
     /**************************************************************************/
     /* Allocate the resulting state                                           */
@@ -231,8 +225,8 @@ alloc_and_copy_mk_state(
     /* General Purpose Registers                                              */
     /**************************************************************************/
 
-    (*state)->rip = ((uint64_t)ehdr->e_entry);
-    (*state)->rsp = ((uint64_t)(mk_stack_virt + mk_stack->size));
+    (*state)->rip = mk_elf_file->addr->e_entry;
+    (*state)->rsp = mk_stack_virt + mk_stack->size;
 
     /**************************************************************************/
     /* Flags                                                                  */

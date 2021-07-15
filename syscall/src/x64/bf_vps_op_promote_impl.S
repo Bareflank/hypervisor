@@ -31,7 +31,7 @@
     .type   bf_vps_op_promote_impl, @function
 bf_vps_op_promote_impl:
 
-    mov rax, 0x6642000000060011
+    mov rax, 0x6642000000060009
     syscall
 
     ret

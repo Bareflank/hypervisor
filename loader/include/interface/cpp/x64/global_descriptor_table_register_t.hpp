@@ -44,7 +44,7 @@ namespace loader
         /// @brief stores the size of the gdt in bytes (minus 1)
         bsl::uint16 limit;
         /// @brief stores a pointer to the gdt
-        bsl::uint64 *base;
+        bsl::uint64 base;
     };
 }
 

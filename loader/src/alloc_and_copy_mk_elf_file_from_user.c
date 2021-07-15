@@ -24,7 +24,9 @@
  * SOFTWARE.
  */
 
+#include <bfelf/bfelf_elf64_ehdr_t.h>
 #include <debug.h>
+#include <elf_file_t.h>
 #include <platform.h>
 #include <span_t.h>
 #include <types.h>
@@ -45,16 +47,16 @@
  * <!-- inputs/outputs -->
  *   @param mk_elf_file_from_user the ELF file to copy
  *   @param copied_mk_elf_file where to copy the ELF file too
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 alloc_and_copy_mk_elf_file_from_user(
-    struct span_t const *const mk_elf_file_from_user, struct span_t *const copied_mk_elf_file)
+    struct span_t const *const mk_elf_file_from_user, struct elf_file_t *const copied_mk_elf_file)
 {
     uint8_t const *const src_addr = mk_elf_file_from_user->addr;
     uint64_t const dst_size = mk_elf_file_from_user->size;
 
-    uint8_t *const dst_addr = (uint8_t *)platform_alloc(dst_size);
+    struct bfelf_elf64_ehdr_t *dst_addr = (struct bfelf_elf64_ehdr_t *)platform_alloc(dst_size);
     if (((void *)0) == dst_addr) {
         bferror("platform_alloc failed");
         goto platform_alloc_failed;
@@ -65,16 +67,24 @@ alloc_and_copy_mk_elf_file_from_user(
         goto platform_copy_from_user_failed;
     }
 
+    if (update_elf64_ehdr(dst_addr)) {
+        bferror("update_elf64_ehdr failed");
+        goto update_elf64_ehdr_failed;
+    }
+
     copied_mk_elf_file->addr = dst_addr;
     copied_mk_elf_file->size = dst_size;
 
     return LOADER_SUCCESS;
 
+update_elf64_ehdr_failed:
 platform_copy_from_user_failed:
 
     platform_free(dst_addr, dst_size);
 platform_alloc_failed:
 
-    platform_memset(copied_mk_elf_file, 0, sizeof(struct span_t));
+    copied_mk_elf_file->addr = ((void *)0);
+    copied_mk_elf_file->size = ((uint64_t)0);
+
     return LOADER_FAILURE;
 }

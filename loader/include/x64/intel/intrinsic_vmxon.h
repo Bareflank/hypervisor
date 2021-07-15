@@ -35,7 +35,7 @@
  *
  * <!-- inputs/outputs -->
  *   @param phys a pointer to the physical address of the VMXON region
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t intrinsic_vmxon(void *const phys);
 

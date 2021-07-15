@@ -61,7 +61,7 @@
  *   @param mk_stack the microkernel's stack
  *   @param mk_stack_virt the microkernel's virtual address of the stack
  *   @param state where to save the newly set up state to
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 alloc_and_copy_mk_state(

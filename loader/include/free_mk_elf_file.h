@@ -27,16 +27,16 @@
 #ifndef FREE_MK_ELF_FILE_H
 #define FREE_MK_ELF_FILE_H
 
-#include <span_t.h>
+#include <elf_file_t.h>
 
 /**
  * <!-- description -->
- *   @brief Releases a previously allocated span_t that was allocated
+ *   @brief Releases a previously allocated elf_file_t that was allocated
  *     using the alloc_and_copy_mk_elf_file function.
  *
  * <!-- inputs/outputs -->
- *   @param mk_elf_file the span_t to free.
+ *   @param mk_elf_file the elf_file_t to free.
  */
-void free_mk_elf_file(struct span_t *const mk_elf_file);
+void free_mk_elf_file(struct elf_file_t *const mk_elf_file);
 
 #endif

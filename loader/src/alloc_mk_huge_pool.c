@@ -40,7 +40,7 @@
  * <!-- inputs/outputs -->
  *   @param size the total number of pages (not bytes) to allocate
  *   @param huge_pool the mutable_span_t to store the page pool addr/size.
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 alloc_mk_huge_pool(uint32_t const size, struct mutable_span_t *const huge_pool)

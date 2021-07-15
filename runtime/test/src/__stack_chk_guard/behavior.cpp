@@ -31,7 +31,7 @@ namespace mk
     {
         /// @brief defines an extern of __stack_chk_guard
         // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-        extern bsl::uintmax ut_stack_chk_guard;
+        extern bsl::uintmax const ut_stack_chk_guard;
     }
 
     /// <!-- description -->

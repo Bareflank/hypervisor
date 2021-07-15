@@ -27,9 +27,9 @@
 
 #include <state_save_t.hpp>
 
+#include <bsl/array.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
-#include <bsl/details/carray.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
 
@@ -40,11 +40,7 @@ namespace mk
     /// @brief defines the size of the reserved1 field in the tls_t
     constexpr auto TLS_T_RESERVED1_SIZE{0x030_umax};
     /// @brief defines the size of the reserved2 field in the tls_t
-    constexpr auto TLS_T_RESERVED2_SIZE{0x008_umax};
-    /// @brief defines the size of the reserved3 field in the tls_t
-    constexpr auto TLS_T_RESERVED3_SIZE{0x007_umax};
-    /// @brief defines the size of the reserved4 field in the tls_t
-    constexpr auto TLS_T_RESERVED4_SIZE{0x040_umax};
+    constexpr auto TLS_T_RESERVED2_SIZE{0x088_umax};
 
     /// IMPORTANT:
     /// - If the size of the TLS is changed, the mk_main_entry will need to
@@ -211,7 +207,7 @@ namespace mk
         bsl::uintmax vmexit_loop_sp;
 
         /// @brief reserve the rest of the TLS block for later use.
-        bsl::details::carray<bsl::uint8, TLS_T_RESERVED1_SIZE.get()> reserved1;
+        bsl::array<bsl::uint8, TLS_T_RESERVED1_SIZE.get()> reserved1;
 
         /// --------------------------------------------------------------------
         /// Context Information
@@ -270,50 +266,7 @@ namespace mk
         void *active_rpt;
 
         /// @brief reserve the rest of the TLS block for later use.
-        bsl::details::carray<bsl::uint8, TLS_T_RESERVED2_SIZE.get()> reserved2;
-
-        /// --------------------------------------------------------------------
-        /// Failure Handling
-        /// --------------------------------------------------------------------
-
-        /// @brief stores a whether or not state is changing (0x280)
-        bool state_reversal_required;
-
-        /// @brief reserves the rest of the TLS block for later use.
-        bsl::details::carray<bsl::uint8, TLS_T_RESERVED3_SIZE.get()> reserved3;
-
-        /// @brief stores the syscall return status (0x288)
-        bsl::uintmax syscall_ret_status;
-
-        /// @brief logs an extid for state reversal if needed (0x290)
-        bsl::uint16 log_extid;
-        /// @brief logs a vmid for state reversal if needed (0x292)
-        bsl::uint16 log_vmid;
-        /// @brief logs a vpid for state reversal if needed (0x294)
-        bsl::uint16 log_vpid;
-        /// @brief logs a vpsid for state reversal if needed (0x296)
-        bsl::uint16 log_vpsid;
-
-        /// @brief logs an ext for state reversal if needed (0x298)
-        void *log_ext;
-        /// @brief logs a vm for state reversal if needed (0x2A0)
-        void *log_vm;
-        /// @brief logs a vp for state reversal if needed (0x2A8)
-        void *log_vp;
-        /// @brief logs a vps for state reversal if needed (0x2B0)
-        void *log_vps;
-
-        /// @brief reserve the rest of the TLS block for later use.
-        bsl::details::carray<bsl::uint8, TLS_T_RESERVED4_SIZE.get()> reserved4;
-
-        /// --------------------------------------------------------------------
-        /// Unit Test Specific
-        /// --------------------------------------------------------------------
-
-        /// @brief reserved for unit testing
-        bsl::errc_type test_ret;
-        /// @brief reserved
-        bsl::uint32 reserved_padding1;
+        bsl::array<bsl::uint8, TLS_T_RESERVED2_SIZE.get()> reserved2;
     };
 
     /// @brief make sure the tls_t is the size of a page

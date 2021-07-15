@@ -40,27 +40,28 @@ namespace mk
     ///   @brief Provides the ESR handler for page faults
     ///
     /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param page_pool the page_pool_t to use
-    ///   @param ext the extension that made the syscall
+    ///   @param mut_tls the current TLS block
+    ///   @param mut_page_pool the page_pool_t to use
+    ///   @param pmut_ext the extension that made the syscall
     ///   @return Returns bsl::errc_success if the exception was handled,
     ///     bsl::errc_failure otherwise
     ///
     [[nodiscard]] constexpr auto
-    dispatch_esr_page_fault(tls_t &tls, page_pool_t &page_pool, ext_t *const ext) noexcept
+    dispatch_esr_page_fault(
+        tls_t &mut_tls, page_pool_t &mut_page_pool, ext_t *const pmut_ext) noexcept
         -> bsl::errc_type
     {
         /// NOTE:
-        /// - When the microkernel is still bootstrapping, the ext field in
-        ///   the TLS has not yet been set, so ext could actually be a nullptr
+        /// - When the microkernel is still bootstrapping, the pmut_ext field in
+        ///   the TLS has not yet been set, so pmut_ext could actually be a nullptr
         ///   which is why it is not passed by reference.
         ///
 
-        if (bsl::unlikely(nullptr == ext)) {
+        if (bsl::unlikely(nullptr == pmut_ext)) {
             return bsl::errc_failure;
         }
 
-        return ext->map_page_direct(tls, page_pool, tls.esr_pf_addr);
+        return pmut_ext->map_page_direct(mut_tls, mut_page_pool, bsl::to_umax(mut_tls.esr_pf_addr));
     }
 }
 

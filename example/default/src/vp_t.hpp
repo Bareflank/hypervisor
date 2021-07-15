@@ -67,10 +67,10 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         initialize(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic,
             bsl::safe_uint16 const &i) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
@@ -136,7 +136,11 @@ namespace example
         ///   @param intrinsic the intrinsic_t to use
         ///
         constexpr void
-        release(gs_t &gs, tls_t &tls, syscall::bf_syscall_t &sys, intrinsic_t &intrinsic) noexcept
+        release(
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic) noexcept
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -168,10 +172,10 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         allocate(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic,
             bsl::safe_uint16 const &vmid,
             bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
         {

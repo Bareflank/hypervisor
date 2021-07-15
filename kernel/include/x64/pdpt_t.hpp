@@ -25,7 +25,7 @@
 #ifndef PDPT_T_HPP
 #define PDPT_T_HPP
 
-#include <pdpte_t.hpp>
+#include "pdpte_t.hpp"
 
 #include <bsl/array.hpp>
 #include <bsl/convert.hpp>

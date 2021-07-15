@@ -72,35 +72,39 @@ namespace syscall
     // -------------------------------------------------------------------------
 
     /// @brief stores the data to return for an API
-    constinit inline bsl::unordered_map<std::string, bf_uint64_t> g_data{};    // GRCOV_EXCLUDE_BR
+    constinit inline bsl::unordered_map<std::string, bf_uint64_t>
+        g_mut_data{};    // GRCOV_EXCLUDE_BR
     /// @brief stores the error code to return for an API
-    constinit inline bsl::unordered_map<std::string, bf_status_t> g_errc{};    // GRCOV_EXCLUDE_BR
+    constinit inline bsl::unordered_map<std::string, bf_status_t>
+        g_mut_errc{};    // GRCOV_EXCLUDE_BR
+    /// @brief stores the pointers to return for an API
+    constinit inline bsl::unordered_map<std::string, void *> g_mut_ptrs{};    // GRCOV_EXCLUDE_BR
 
     /// @brief stores whether or not bf_control_op_exit_impl was executed
-    constinit inline bool g_bf_control_op_exit_impl_executed{};
+    constinit inline bool g_mut_bf_control_op_exit_impl_executed{};
     /// @brief stores whether or not bf_control_op_wait_impl was executed
-    constinit inline bool g_bf_control_op_wait_impl_executed{};
+    constinit inline bool g_mut_bf_control_op_wait_impl_executed{};
 
     /// @brief stores whether or not bf_debug_op_out_impl was executed
-    constinit inline bool g_bf_debug_op_out_impl_executed{};
+    constinit inline bool g_mut_bf_debug_op_out_impl_executed{};
     /// @brief stores whether or not bf_debug_op_dump_vm_impl was executed
-    constinit inline bool g_bf_debug_op_dump_vm_impl_executed{};
+    constinit inline bool g_mut_bf_debug_op_dump_vm_impl_executed{};
     /// @brief stores whether or not bf_debug_op_dump_vp_impl was executed
-    constinit inline bool g_bf_debug_op_dump_vp_impl_executed{};
+    constinit inline bool g_mut_bf_debug_op_dump_vp_impl_executed{};
     /// @brief stores whether or not bf_debug_op_dump_vps_impl was executed
-    constinit inline bool g_bf_debug_op_dump_vps_impl_executed{};
+    constinit inline bool g_mut_bf_debug_op_dump_vps_impl_executed{};
     /// @brief stores whether or not bf_debug_op_dump_vmexit_log_impl was executed
-    constinit inline bool g_bf_debug_op_dump_vmexit_log_impl_executed{};
+    constinit inline bool g_mut_bf_debug_op_dump_vmexit_log_impl_executed{};
     /// @brief stores whether or not bf_debug_op_write_c_impl was executed
-    constinit inline bool g_bf_debug_op_write_c_impl_executed{};
+    constinit inline bool g_mut_bf_debug_op_write_c_impl_executed{};
     /// @brief stores whether or not bf_debug_op_write_str_impl was executed
-    constinit inline bool g_bf_debug_op_write_str_impl_executed{};
+    constinit inline bool g_mut_bf_debug_op_write_str_impl_executed{};
     /// @brief stores whether or not bf_debug_op_dump_ext_impl was executed
-    constinit inline bool g_bf_debug_op_dump_ext_impl_executed{};
+    constinit inline bool g_mut_bf_debug_op_dump_ext_impl_executed{};
     /// @brief stores whether or not bf_debug_op_dump_page_pool_impl was executed
-    constinit inline bool g_bf_debug_op_dump_page_pool_impl_executed{};
+    constinit inline bool g_mut_bf_debug_op_dump_page_pool_impl_executed{};
     /// @brief stores whether or not bf_debug_op_dump_huge_pool_impl was executed
-    constinit inline bool g_bf_debug_op_dump_huge_pool_impl_executed{};
+    constinit inline bool g_mut_bf_debug_op_dump_huge_pool_impl_executed{};
 
     // -------------------------------------------------------------------------
     // dummy callbacks
@@ -163,7 +167,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_rax_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_rax").get();
+        return g_mut_data.at("bf_tls_rax").get();
     }
 
     /// <!-- description -->
@@ -175,7 +179,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_rax_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_rax") = val;
+        g_mut_data.at("bf_tls_rax") = val;
     }
 
     /// <!-- description -->
@@ -187,7 +191,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_rbx_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_rbx").get();
+        return g_mut_data.at("bf_tls_rbx").get();
     }
 
     /// <!-- description -->
@@ -199,7 +203,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_rbx_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_rbx") = val;
+        g_mut_data.at("bf_tls_rbx") = val;
     }
 
     /// <!-- description -->
@@ -211,7 +215,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_rcx_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_rcx").get();
+        return g_mut_data.at("bf_tls_rcx").get();
     }
 
     /// <!-- description -->
@@ -223,7 +227,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_rcx_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_rcx") = val;
+        g_mut_data.at("bf_tls_rcx") = val;
     }
 
     /// <!-- description -->
@@ -235,7 +239,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_rdx_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_rdx").get();
+        return g_mut_data.at("bf_tls_rdx").get();
     }
 
     /// <!-- description -->
@@ -247,7 +251,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_rdx_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_rdx") = val;
+        g_mut_data.at("bf_tls_rdx") = val;
     }
 
     /// <!-- description -->
@@ -259,7 +263,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_rbp_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_rbp").get();
+        return g_mut_data.at("bf_tls_rbp").get();
     }
 
     /// <!-- description -->
@@ -271,7 +275,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_rbp_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_rbp") = val;
+        g_mut_data.at("bf_tls_rbp") = val;
     }
 
     /// <!-- description -->
@@ -283,7 +287,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_rsi_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_rsi").get();
+        return g_mut_data.at("bf_tls_rsi").get();
     }
 
     /// <!-- description -->
@@ -295,7 +299,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_rsi_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_rsi") = val;
+        g_mut_data.at("bf_tls_rsi") = val;
     }
 
     /// <!-- description -->
@@ -307,7 +311,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_rdi_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_rdi").get();
+        return g_mut_data.at("bf_tls_rdi").get();
     }
 
     /// <!-- description -->
@@ -319,7 +323,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_rdi_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_rdi") = val;
+        g_mut_data.at("bf_tls_rdi") = val;
     }
 
     /// <!-- description -->
@@ -331,7 +335,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_r8_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_r8").get();
+        return g_mut_data.at("bf_tls_r8").get();
     }
 
     /// <!-- description -->
@@ -343,7 +347,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_r8_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_r8") = val;
+        g_mut_data.at("bf_tls_r8") = val;
     }
 
     /// <!-- description -->
@@ -355,7 +359,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_r9_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_r9").get();
+        return g_mut_data.at("bf_tls_r9").get();
     }
 
     /// <!-- description -->
@@ -367,7 +371,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_r9_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_r9") = val;
+        g_mut_data.at("bf_tls_r9") = val;
     }
 
     /// <!-- description -->
@@ -379,7 +383,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_r10_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_r10").get();
+        return g_mut_data.at("bf_tls_r10").get();
     }
 
     /// <!-- description -->
@@ -391,7 +395,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_r10_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_r10") = val;
+        g_mut_data.at("bf_tls_r10") = val;
     }
 
     /// <!-- description -->
@@ -403,7 +407,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_r11_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_r11").get();
+        return g_mut_data.at("bf_tls_r11").get();
     }
 
     /// <!-- description -->
@@ -415,7 +419,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_r11_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_r11") = val;
+        g_mut_data.at("bf_tls_r11") = val;
     }
 
     /// <!-- description -->
@@ -427,7 +431,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_r12_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_r12").get();
+        return g_mut_data.at("bf_tls_r12").get();
     }
 
     /// <!-- description -->
@@ -439,7 +443,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_r12_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_r12") = val;
+        g_mut_data.at("bf_tls_r12") = val;
     }
 
     /// <!-- description -->
@@ -451,7 +455,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_r13_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_r13").get();
+        return g_mut_data.at("bf_tls_r13").get();
     }
 
     /// <!-- description -->
@@ -463,7 +467,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_r13_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_r13") = val;
+        g_mut_data.at("bf_tls_r13") = val;
     }
 
     /// <!-- description -->
@@ -475,7 +479,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_r14_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_r14").get();
+        return g_mut_data.at("bf_tls_r14").get();
     }
 
     /// <!-- description -->
@@ -487,7 +491,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_r14_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_r14") = val;
+        g_mut_data.at("bf_tls_r14") = val;
     }
 
     /// <!-- description -->
@@ -499,7 +503,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_r15_impl() noexcept -> bf_uint64_t::value_type
     {
-        return g_data.at("bf_tls_r15").get();
+        return g_mut_data.at("bf_tls_r15").get();
     }
 
     /// <!-- description -->
@@ -511,7 +515,7 @@ namespace syscall
     extern "C" inline void
     bf_tls_set_r15_impl(bf_uint64_t::value_type const val) noexcept
     {
-        g_data.at("bf_tls_r15") = val;
+        g_mut_data.at("bf_tls_r15") = val;
     }
 
     /// <!-- description -->
@@ -523,7 +527,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_extid_impl() noexcept -> bf_uint16_t::value_type
     {
-        return bsl::to_u16(g_data.at("bf_tls_extid")).get();
+        return bsl::to_u16(g_mut_data.at("bf_tls_extid")).get();
     }
 
     /// <!-- description -->
@@ -535,7 +539,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_vmid_impl() noexcept -> bf_uint16_t::value_type
     {
-        return bsl::to_u16(g_data.at("bf_tls_vmid")).get();
+        return bsl::to_u16(g_mut_data.at("bf_tls_vmid")).get();
     }
 
     /// <!-- description -->
@@ -547,7 +551,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_vpid_impl() noexcept -> bf_uint16_t::value_type
     {
-        return bsl::to_u16(g_data.at("bf_tls_vpid")).get();
+        return bsl::to_u16(g_mut_data.at("bf_tls_vpid")).get();
     }
 
     /// <!-- description -->
@@ -559,7 +563,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_vpsid_impl() noexcept -> bf_uint16_t::value_type
     {
-        return bsl::to_u16(g_data.at("bf_tls_vpsid")).get();
+        return bsl::to_u16(g_mut_data.at("bf_tls_vpsid")).get();
     }
 
     /// <!-- description -->
@@ -571,7 +575,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_ppid_impl() noexcept -> bf_uint16_t::value_type
     {
-        return bsl::to_u16(g_data.at("bf_tls_ppid")).get();
+        return bsl::to_u16(g_mut_data.at("bf_tls_ppid")).get();
     }
 
     /// <!-- description -->
@@ -583,7 +587,7 @@ namespace syscall
     extern "C" [[nodiscard]] inline auto
     bf_tls_online_pps_impl() noexcept -> bf_uint16_t::value_type
     {
-        return bsl::to_u16(g_data.at("bf_tls_online_pps")).get();
+        return bsl::to_u16(g_mut_data.at("bf_tls_online_pps")).get();
     }
 
     // -------------------------------------------------------------------------
@@ -596,7 +600,7 @@ namespace syscall
     extern "C" inline void
     bf_control_op_exit_impl() noexcept
     {
-        g_bf_control_op_exit_impl_executed = true;
+        g_mut_bf_control_op_exit_impl_executed = true;
     }
 
     /// <!-- description -->
@@ -605,7 +609,7 @@ namespace syscall
     extern "C" inline void
     bf_control_op_wait_impl() noexcept
     {
-        g_bf_control_op_wait_impl_executed = true;
+        g_mut_bf_control_op_wait_impl_executed = true;
     }
 
     // -------------------------------------------------------------------------
@@ -617,28 +621,28 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
     bf_handle_op_open_handle_impl(
-        bf_uint32_t::value_type const reg0_in, bf_uint64_t::value_type *const reg0_out) noexcept
-        -> bf_status_t::value_type
+        bf_uint32_t::value_type const reg0_in,
+        bf_uint64_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
 
-        if (bsl::unlikely(nullptr == reg0_out)) {
+        if (bsl::unlikely(nullptr == pmut_reg0_out)) {
             return BF_STATUS_FAILURE_UNKNOWN.get();
         }
 
-        if (g_errc.at("bf_handle_op_open_handle_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = g_data.at("bf_handle_op_open_handle_impl_reg0_out").get();
+        if (g_mut_errc.at("bf_handle_op_open_handle_impl") == BF_STATUS_SUCCESS) {
+            *pmut_reg0_out = g_mut_data.at("bf_handle_op_open_handle_impl_reg0_out").get();
         }
         else {
             bsl::touch();
         }
 
-        return g_errc.at("bf_handle_op_open_handle_impl").get();
+        return g_mut_errc.at("bf_handle_op_open_handle_impl").get();
     }
 
     /// <!-- description -->
@@ -653,7 +657,7 @@ namespace syscall
         -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
-        return g_errc.at("bf_handle_op_close_handle_impl").get();
+        return g_mut_errc.at("bf_handle_op_close_handle_impl").get();
     }
 
     // -------------------------------------------------------------------------
@@ -671,7 +675,7 @@ namespace syscall
     bf_debug_op_out_impl(
         bf_uint64_t::value_type const reg0_in, bf_uint64_t::value_type const reg1_in) noexcept
     {
-        g_bf_debug_op_out_impl_executed = true;
+        g_mut_bf_debug_op_out_impl_executed = true;
         // NOLINTNEXTLINE(bsl-function-name-use)
         std::cout << std::hex << "0x" << reg0_in << " 0x" << reg1_in << '\n';
     }
@@ -685,7 +689,7 @@ namespace syscall
     extern "C" inline void
     bf_debug_op_dump_vm_impl(bf_uint16_t::value_type const reg0_in) noexcept
     {
-        g_bf_debug_op_dump_vm_impl_executed = true;
+        g_mut_bf_debug_op_dump_vm_impl_executed = true;
         // NOLINTNEXTLINE(bsl-function-name-use)
         std::cout << std::hex << "vm [0x" << reg0_in << "] dump: mock empty\n";
     }
@@ -699,7 +703,7 @@ namespace syscall
     extern "C" inline void
     bf_debug_op_dump_vp_impl(bf_uint16_t::value_type const reg0_in) noexcept
     {
-        g_bf_debug_op_dump_vp_impl_executed = true;
+        g_mut_bf_debug_op_dump_vp_impl_executed = true;
         // NOLINTNEXTLINE(bsl-function-name-use)
         std::cout << std::hex << "vp [0x" << reg0_in << "] dump: mock empty\n";
     }
@@ -713,7 +717,7 @@ namespace syscall
     extern "C" inline void
     bf_debug_op_dump_vps_impl(bf_uint16_t::value_type const reg0_in) noexcept
     {
-        g_bf_debug_op_dump_vps_impl_executed = true;
+        g_mut_bf_debug_op_dump_vps_impl_executed = true;
         // NOLINTNEXTLINE(bsl-function-name-use)
         std::cout << std::hex << "vps [0x" << reg0_in << "] dump: mock empty\n";
     }
@@ -727,7 +731,7 @@ namespace syscall
     extern "C" inline void
     bf_debug_op_dump_vmexit_log_impl(bf_uint16_t::value_type const reg0_in) noexcept
     {
-        g_bf_debug_op_dump_vmexit_log_impl_executed = true;
+        g_mut_bf_debug_op_dump_vmexit_log_impl_executed = true;
         // NOLINTNEXTLINE(bsl-function-name-use)
         std::cout << std::hex << "vmexit log for pp [0x" << reg0_in << "]: mock empty\n";
     }
@@ -741,7 +745,7 @@ namespace syscall
     extern "C" inline void
     bf_debug_op_write_c_impl(bsl::char_type const reg0_in) noexcept
     {
-        g_bf_debug_op_write_c_impl_executed = true;
+        g_mut_bf_debug_op_write_c_impl_executed = true;
         std::cout << reg0_in;
     }
 
@@ -754,7 +758,7 @@ namespace syscall
     extern "C" inline void
     bf_debug_op_write_str_impl(bsl::char_type const *const reg0_in) noexcept
     {
-        g_bf_debug_op_write_str_impl_executed = true;
+        g_mut_bf_debug_op_write_str_impl_executed = true;
         std::cout << reg0_in;
     }
 
@@ -767,7 +771,7 @@ namespace syscall
     extern "C" inline void
     bf_debug_op_dump_ext_impl(bf_uint16_t::value_type const reg0_in) noexcept
     {
-        g_bf_debug_op_dump_ext_impl_executed = true;
+        g_mut_bf_debug_op_dump_ext_impl_executed = true;
         // NOLINTNEXTLINE(bsl-function-name-use)
         std::cout << std::hex << "ext [0x" << reg0_in << "] dump: mock empty\n";
     }
@@ -778,7 +782,7 @@ namespace syscall
     extern "C" inline void
     bf_debug_op_dump_page_pool_impl() noexcept
     {
-        g_bf_debug_op_dump_page_pool_impl_executed = true;
+        g_mut_bf_debug_op_dump_page_pool_impl_executed = true;
         std::cout << "page pool dump: mock empty\n";
     }
 
@@ -788,7 +792,7 @@ namespace syscall
     extern "C" inline void
     bf_debug_op_dump_huge_pool_impl() noexcept
     {
-        g_bf_debug_op_dump_huge_pool_impl_executed = true;
+        g_mut_bf_debug_op_dump_huge_pool_impl_executed = true;
         std::cout << "huge pool dump: mock empty\n";
     }
 
@@ -801,18 +805,18 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
+    ///   @param pmut_reg1_in n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
     bf_callback_op_register_bootstrap_impl(
         bf_uint64_t::value_type const reg0_in,
-        bf_callback_handler_bootstrap_t const reg1_in) noexcept -> bf_status_t::value_type
+        bf_callback_handler_bootstrap_t const pmut_reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
+        bsl::discard(pmut_reg1_in);
 
-        return g_errc.at("bf_callback_op_register_bootstrap_impl").get();
+        return g_mut_errc.at("bf_callback_op_register_bootstrap_impl").get();
     }
 
     /// <!-- description -->
@@ -820,18 +824,18 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
+    ///   @param pmut_reg1_in n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
     bf_callback_op_register_vmexit_impl(
-        bf_uint64_t::value_type const reg0_in, bf_callback_handler_vmexit_t const reg1_in) noexcept
-        -> bf_status_t::value_type
+        bf_uint64_t::value_type const reg0_in,
+        bf_callback_handler_vmexit_t const pmut_reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
+        bsl::discard(pmut_reg1_in);
 
-        return g_errc.at("bf_callback_op_register_vmexit_impl").get();
+        return g_mut_errc.at("bf_callback_op_register_vmexit_impl").get();
     }
 
     /// <!-- description -->
@@ -839,18 +843,18 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
+    ///   @param pmut_reg1_in n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
     bf_callback_op_register_fail_impl(
-        bf_uint64_t::value_type const reg0_in, bf_callback_handler_fail_t const reg1_in) noexcept
-        -> bf_status_t::value_type
+        bf_uint64_t::value_type const reg0_in,
+        bf_callback_handler_fail_t const pmut_reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
+        bsl::discard(pmut_reg1_in);
 
-        return g_errc.at("bf_callback_op_register_fail_impl").get();
+        return g_mut_errc.at("bf_callback_op_register_fail_impl").get();
     }
 
     // -------------------------------------------------------------------------
@@ -862,28 +866,28 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vm_op_create_vm_impl(
-        bf_uint64_t::value_type const reg0_in, bf_uint16_t::value_type *const reg0_out) noexcept
-        -> bf_status_t::value_type
+        bf_uint64_t::value_type const reg0_in,
+        bf_uint16_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
 
-        if (bsl::unlikely(nullptr == reg0_out)) {
+        if (bsl::unlikely(nullptr == pmut_reg0_out)) {
             return BF_STATUS_FAILURE_UNKNOWN.get();
         }
 
-        if (g_errc.at("bf_vm_op_create_vm_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = bsl::to_u16(g_data.at("bf_vm_op_create_vm_impl_reg0_out")).get();
+        if (g_mut_errc.at("bf_vm_op_create_vm_impl") == BF_STATUS_SUCCESS) {
+            *pmut_reg0_out = bsl::to_u16(g_mut_data.at("bf_vm_op_create_vm_impl_reg0_out")).get();
         }
         else {
             bsl::touch();
         }
 
-        return g_errc.at("bf_vm_op_create_vm_impl").get();
+        return g_mut_errc.at("bf_vm_op_create_vm_impl").get();
     }
 
     /// <!-- description -->
@@ -902,7 +906,7 @@ namespace syscall
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
 
-        return g_errc.at("bf_vm_op_destroy_vm_impl").get();
+        return g_mut_errc.at("bf_vm_op_destroy_vm_impl").get();
     }
 
     // -------------------------------------------------------------------------
@@ -916,7 +920,7 @@ namespace syscall
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
     ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
@@ -924,24 +928,24 @@ namespace syscall
         bf_uint64_t::value_type const reg0_in,
         bf_uint16_t::value_type const reg1_in,
         bf_uint16_t::value_type const reg2_in,
-        bf_uint16_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type
+        bf_uint16_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
         bsl::discard(reg2_in);
 
-        if (bsl::unlikely(nullptr == reg0_out)) {
+        if (bsl::unlikely(nullptr == pmut_reg0_out)) {
             return BF_STATUS_FAILURE_UNKNOWN.get();
         }
 
-        if (g_errc.at("bf_vp_op_create_vp_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = bsl::to_u16(g_data.at("bf_vp_op_create_vp_impl_reg0_out")).get();
+        if (g_mut_errc.at("bf_vp_op_create_vp_impl") == BF_STATUS_SUCCESS) {
+            *pmut_reg0_out = bsl::to_u16(g_mut_data.at("bf_vp_op_create_vp_impl_reg0_out")).get();
         }
         else {
             bsl::touch();
         }
 
-        return g_errc.at("bf_vp_op_create_vp_impl").get();
+        return g_mut_errc.at("bf_vp_op_create_vp_impl").get();
     }
 
     /// <!-- description -->
@@ -960,7 +964,7 @@ namespace syscall
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
 
-        return g_errc.at("bf_vp_op_destroy_vp_impl").get();
+        return g_mut_errc.at("bf_vp_op_destroy_vp_impl").get();
     }
 
     /// <!-- description -->
@@ -982,7 +986,7 @@ namespace syscall
         bsl::discard(reg1_in);
         bsl::discard(reg2_in);
 
-        return g_errc.at("bf_vp_op_migrate_impl").get();
+        return g_mut_errc.at("bf_vp_op_migrate_impl").get();
     }
 
     // -------------------------------------------------------------------------
@@ -996,7 +1000,7 @@ namespace syscall
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
     ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
@@ -1004,24 +1008,24 @@ namespace syscall
         bf_uint64_t::value_type const reg0_in,
         bf_uint16_t::value_type const reg1_in,
         bf_uint16_t::value_type const reg2_in,
-        bf_uint16_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type
+        bf_uint16_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
         bsl::discard(reg2_in);
 
-        if (bsl::unlikely(nullptr == reg0_out)) {
+        if (bsl::unlikely(nullptr == pmut_reg0_out)) {
             return BF_STATUS_FAILURE_UNKNOWN.get();
         }
 
-        if (g_errc.at("bf_vps_op_create_vps_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = bsl::to_u16(g_data.at("bf_vps_op_create_vps_impl_reg0_out")).get();
+        if (g_mut_errc.at("bf_vps_op_create_vps_impl") == BF_STATUS_SUCCESS) {
+            *pmut_reg0_out = bsl::to_u16(g_mut_data.at("bf_vps_op_create_vps_impl_reg0_out")).get();
         }
         else {
             bsl::touch();
         }
 
-        return g_errc.at("bf_vps_op_create_vps_impl").get();
+        return g_mut_errc.at("bf_vps_op_create_vps_impl").get();
     }
 
     /// <!-- description -->
@@ -1040,7 +1044,7 @@ namespace syscall
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
 
-        return g_errc.at("bf_vps_op_destroy_vps_impl").get();
+        return g_mut_errc.at("bf_vps_op_destroy_vps_impl").get();
     }
 
     /// <!-- description -->
@@ -1059,310 +1063,46 @@ namespace syscall
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
 
-        return g_errc.at("bf_vps_op_init_as_root_impl").get();
+        return g_mut_errc.at("bf_vps_op_init_as_root_impl").get();
     }
 
     /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_read8.
+    ///   @brief Implements the ABI for bf_vps_op_read_impl.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
     ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_vps_op_read8_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint8_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type
-    {
-        bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
-        bsl::discard(reg2_in);
-
-        if (bsl::unlikely(nullptr == reg0_out)) {
-            return BF_STATUS_FAILURE_UNKNOWN.get();
-        }
-
-        if (g_errc.at("bf_vps_op_read8_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = bsl::to_u8(g_data.at("bf_vps_op_read8_impl_reg0_out")).get();
-        }
-        else {
-            bsl::touch();
-        }
-
-        return g_errc.at("bf_vps_op_read8_impl").get();
-    }
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_read16.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] inline auto
-    bf_vps_op_read16_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint16_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type
-    {
-        bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
-        bsl::discard(reg2_in);
-
-        if (bsl::unlikely(nullptr == reg0_out)) {
-            return BF_STATUS_FAILURE_UNKNOWN.get();
-        }
-
-        if (g_errc.at("bf_vps_op_read16_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = bsl::to_u16(g_data.at("bf_vps_op_read16_impl_reg0_out")).get();
-        }
-        else {
-            bsl::touch();
-        }
-
-        return g_errc.at("bf_vps_op_read16_impl").get();
-    }
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_read32.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] inline auto
-    bf_vps_op_read32_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint32_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type
-    {
-        bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
-        bsl::discard(reg2_in);
-
-        if (bsl::unlikely(nullptr == reg0_out)) {
-            return BF_STATUS_FAILURE_UNKNOWN.get();
-        }
-
-        if (g_errc.at("bf_vps_op_read32_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = bsl::to_u32(g_data.at("bf_vps_op_read32_impl_reg0_out")).get();
-        }
-        else {
-            bsl::touch();
-        }
-
-        return g_errc.at("bf_vps_op_read32_impl").get();
-    }
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_read64.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] inline auto
-    bf_vps_op_read64_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint64_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type
-    {
-        bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
-        bsl::discard(reg2_in);
-
-        if (bsl::unlikely(nullptr == reg0_out)) {
-            return BF_STATUS_FAILURE_UNKNOWN.get();
-        }
-
-        if (g_errc.at("bf_vps_op_read64_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = bsl::to_u64(g_data.at("bf_vps_op_read64_impl_reg0_out")).get();
-        }
-        else {
-            bsl::touch();
-        }
-
-        return g_errc.at("bf_vps_op_read64_impl").get();
-    }
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_write8.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg3_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] inline auto
-    bf_vps_op_write8_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint8_t::value_type const reg3_in) noexcept -> bf_status_t::value_type
-    {
-        bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
-        bsl::discard(reg2_in);
-
-        if (g_errc.at("bf_vps_op_write8_impl") == BF_STATUS_SUCCESS) {
-            g_data.at("bf_vps_op_write8_impl") = bsl::to_u64(reg3_in);
-        }
-        else {
-            bsl::touch();
-        }
-
-        return g_errc.at("bf_vps_op_write8_impl").get();
-    }
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_write16.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg3_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] inline auto
-    bf_vps_op_write16_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint16_t::value_type const reg3_in) noexcept -> bf_status_t::value_type
-    {
-        bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
-        bsl::discard(reg2_in);
-
-        if (g_errc.at("bf_vps_op_write16_impl") == BF_STATUS_SUCCESS) {
-            g_data.at("bf_vps_op_write16_impl") = bsl::to_u64(reg3_in);
-        }
-        else {
-            bsl::touch();
-        }
-
-        return g_errc.at("bf_vps_op_write16_impl").get();
-    }
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_write32.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg3_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] inline auto
-    bf_vps_op_write32_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint32_t::value_type const reg3_in) noexcept -> bf_status_t::value_type
-    {
-        bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
-        bsl::discard(reg2_in);
-
-        if (g_errc.at("bf_vps_op_write32_impl") == BF_STATUS_SUCCESS) {
-            g_data.at("bf_vps_op_write32_impl") = bsl::to_u64(reg3_in);
-        }
-        else {
-            bsl::touch();
-        }
-
-        return g_errc.at("bf_vps_op_write32_impl").get();
-    }
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_write64.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg3_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] inline auto
-    bf_vps_op_write64_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in,
-        bf_uint64_t::value_type const reg3_in) noexcept -> bf_status_t::value_type
-    {
-        bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
-        bsl::discard(reg2_in);
-
-        if (g_errc.at("bf_vps_op_write64_impl") == BF_STATUS_SUCCESS) {
-            g_data.at("bf_vps_op_write64_impl") = bsl::to_u64(reg3_in);
-        }
-        else {
-            bsl::touch();
-        }
-
-        return g_errc.at("bf_vps_op_write64_impl").get();
-    }
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_read_reg_impl.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg0_out n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] inline auto
-    bf_vps_op_read_reg_impl(
+    bf_vps_op_read_impl(
         bf_uint64_t::value_type const reg0_in,
         bf_uint16_t::value_type const reg1_in,
         bf_reg_t const reg2_in,
-        bf_uint64_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type
+        bf_uint64_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
         bsl::discard(reg2_in);
 
-        if (bsl::unlikely(nullptr == reg0_out)) {
+        if (bsl::unlikely(nullptr == pmut_reg0_out)) {
             return BF_STATUS_FAILURE_UNKNOWN.get();
         }
 
-        if (g_errc.at("bf_vps_op_read_reg_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = g_data.at("bf_vps_op_read_reg_impl_reg0_out").get();
+        if (g_mut_errc.at("bf_vps_op_read_impl") == BF_STATUS_SUCCESS) {
+            *pmut_reg0_out = g_mut_data.at("bf_vps_op_read_impl_reg0_out").get();
         }
         else {
             bsl::touch();
         }
 
-        return g_errc.at("bf_vps_op_read_reg_impl").get();
+        return g_mut_errc.at("bf_vps_op_read_impl").get();
     }
 
     /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vps_op_write_reg.
+    ///   @brief Implements the ABI for bf_vps_op_write.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
@@ -1372,7 +1112,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_vps_op_write_reg_impl(
+    bf_vps_op_write_impl(
         bf_uint64_t::value_type const reg0_in,
         bf_uint16_t::value_type const reg1_in,
         bf_reg_t const reg2_in,
@@ -1382,14 +1122,14 @@ namespace syscall
         bsl::discard(reg1_in);
         bsl::discard(reg2_in);
 
-        if (g_errc.at("bf_vps_op_write_reg_impl") == BF_STATUS_SUCCESS) {
-            g_data.at("bf_vps_op_write_reg_impl") = bsl::to_u64(reg3_in);
+        if (g_mut_errc.at("bf_vps_op_write_impl") == BF_STATUS_SUCCESS) {
+            g_mut_data.at("bf_vps_op_write_impl") = bsl::to_u64(reg3_in);
         }
         else {
             bsl::touch();
         }
 
-        return g_errc.at("bf_vps_op_write_reg_impl").get();
+        return g_mut_errc.at("bf_vps_op_write_impl").get();
     }
 
     /// <!-- description -->
@@ -1414,7 +1154,7 @@ namespace syscall
         bsl::discard(reg2_in);
         bsl::discard(reg3_in);
 
-        return g_errc.at("bf_vps_op_run_impl").get();
+        return g_mut_errc.at("bf_vps_op_run_impl").get();
     }
 
     /// <!-- description -->
@@ -1429,7 +1169,7 @@ namespace syscall
         -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
-        return g_errc.at("bf_vps_op_run_current_impl").get();
+        return g_mut_errc.at("bf_vps_op_run_current_impl").get();
     }
 
     /// <!-- description -->
@@ -1448,7 +1188,7 @@ namespace syscall
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
 
-        return g_errc.at("bf_vps_op_advance_ip_impl").get();
+        return g_mut_errc.at("bf_vps_op_advance_ip_impl").get();
     }
 
     /// <!-- description -->
@@ -1463,7 +1203,7 @@ namespace syscall
         -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
-        return g_errc.at("bf_vps_op_advance_ip_and_run_current_impl").get();
+        return g_mut_errc.at("bf_vps_op_advance_ip_and_run_current_impl").get();
     }
 
     /// <!-- description -->
@@ -1482,7 +1222,7 @@ namespace syscall
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
 
-        return g_errc.at("bf_vps_op_promote_impl").get();
+        return g_mut_errc.at("bf_vps_op_promote_impl").get();
     }
 
     /// <!-- description -->
@@ -1501,7 +1241,7 @@ namespace syscall
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
 
-        return g_errc.at("bf_vps_op_clear_vps_impl").get();
+        return g_mut_errc.at("bf_vps_op_clear_vps_impl").get();
     }
 
     // -------------------------------------------------------------------------
@@ -1514,30 +1254,30 @@ namespace syscall
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
     bf_intrinsic_op_rdmsr_impl(
         bf_uint64_t::value_type const reg0_in,
         bf_uint32_t::value_type const reg1_in,
-        bf_uint64_t::value_type *const reg0_out) noexcept -> bf_status_t::value_type
+        bf_uint64_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
 
-        if (bsl::unlikely(nullptr == reg0_out)) {
+        if (bsl::unlikely(nullptr == pmut_reg0_out)) {
             return BF_STATUS_FAILURE_UNKNOWN.get();
         }
 
-        if (g_errc.at("bf_intrinsic_op_rdmsr_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = g_data.at("bf_intrinsic_op_rdmsr_impl_reg0_out").get();
+        if (g_mut_errc.at("bf_intrinsic_op_rdmsr_impl") == BF_STATUS_SUCCESS) {
+            *pmut_reg0_out = g_mut_data.at("bf_intrinsic_op_rdmsr_impl_reg0_out").get();
         }
         else {
             bsl::touch();
         }
 
-        return g_errc.at("bf_intrinsic_op_rdmsr_impl").get();
+        return g_mut_errc.at("bf_intrinsic_op_rdmsr_impl").get();
     }
 
     /// <!-- description -->
@@ -1558,14 +1298,14 @@ namespace syscall
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
 
-        if (g_errc.at("bf_intrinsic_op_wrmsr_impl") == BF_STATUS_SUCCESS) {
-            g_data.at("bf_intrinsic_op_wrmsr_impl") = bsl::to_u64(reg2_in);
+        if (g_mut_errc.at("bf_intrinsic_op_wrmsr_impl") == BF_STATUS_SUCCESS) {
+            g_mut_data.at("bf_intrinsic_op_wrmsr_impl") = bsl::to_u64(reg2_in);
         }
         else {
             bsl::touch();
         }
 
-        return g_errc.at("bf_intrinsic_op_wrmsr_impl").get();
+        return g_mut_errc.at("bf_intrinsic_op_wrmsr_impl").get();
     }
 
     /// <!-- description -->
@@ -1587,7 +1327,7 @@ namespace syscall
         bsl::discard(reg1_in);
         bsl::discard(reg2_in);
 
-        return g_errc.at("bf_intrinsic_op_invlpga_impl").get();
+        return g_mut_errc.at("bf_intrinsic_op_invlpga_impl").get();
     }
 
     /// <!-- description -->
@@ -1609,7 +1349,7 @@ namespace syscall
         bsl::discard(reg1_in);
         bsl::discard(reg2_in);
 
-        return g_errc.at("bf_intrinsic_op_invept_impl").get();
+        return g_mut_errc.at("bf_intrinsic_op_invept_impl").get();
     }
 
     /// <!-- description -->
@@ -1634,7 +1374,7 @@ namespace syscall
         bsl::discard(reg2_in);
         bsl::discard(reg3_in);
 
-        return g_errc.at("bf_intrinsic_op_invvpid_impl").get();
+        return g_mut_errc.at("bf_intrinsic_op_invvpid_impl").get();
     }
 
     // -------------------------------------------------------------------------
@@ -1646,35 +1386,35 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg0_out n/a
-    ///   @param reg1_out n/a
+    ///   @param pmut_reg0_out n/a
+    ///   @param pmut_reg1_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
     bf_mem_op_alloc_page_impl(
         bf_uint64_t::value_type const reg0_in,
-        void **const reg0_out,
-        bf_uint64_t::value_type *const reg1_out) noexcept -> bf_status_t::value_type
+        void **const pmut_reg0_out,
+        bf_uint64_t::value_type *const pmut_reg1_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
 
-        if (bsl::unlikely(nullptr == reg0_out)) {
+        if (bsl::unlikely(nullptr == pmut_reg0_out)) {
             return BF_STATUS_FAILURE_UNKNOWN.get();
         }
 
-        if (bsl::unlikely(nullptr == reg1_out)) {
+        if (bsl::unlikely(nullptr == pmut_reg1_out)) {
             return BF_STATUS_FAILURE_UNKNOWN.get();
         }
 
-        if (g_errc.at("bf_mem_op_alloc_page_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = bsl::to_ptr<void *>(g_data.at("bf_mem_op_alloc_page_impl_reg0_out"));
-            *reg1_out = g_data.at("bf_mem_op_alloc_page_impl_reg1_out").get();
+        if (g_mut_errc.at("bf_mem_op_alloc_page_impl") == BF_STATUS_SUCCESS) {
+            *pmut_reg0_out = g_mut_ptrs.at("bf_mem_op_alloc_page_impl_reg0_out");
+            *pmut_reg1_out = g_mut_data.at("bf_mem_op_alloc_page_impl_reg1_out").get();
         }
         else {
             bsl::touch();
         }
 
-        return g_errc.at("bf_mem_op_alloc_page_impl").get();
+        return g_mut_errc.at("bf_mem_op_alloc_page_impl").get();
     }
 
     /// <!-- description -->
@@ -1682,17 +1422,18 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
+    ///   @param pmut_reg1_in n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_mem_op_free_page_impl(bf_uint64_t::value_type const reg0_in, void *const reg1_in) noexcept
+    bf_mem_op_free_page_impl(
+        bf_uint64_t::value_type const reg0_in, void *const pmut_reg1_in) noexcept
         -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
+        bsl::discard(pmut_reg1_in);
 
-        return g_errc.at("bf_mem_op_free_page_impl").get();
+        return g_mut_errc.at("bf_mem_op_free_page_impl").get();
     }
 
     /// <!-- description -->
@@ -1701,37 +1442,37 @@ namespace syscall
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
-    ///   @param reg0_out n/a
-    ///   @param reg1_out n/a
+    ///   @param pmut_reg0_out n/a
+    ///   @param pmut_reg1_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
     bf_mem_op_alloc_huge_impl(
         bf_uint64_t::value_type const reg0_in,
         bf_uint64_t::value_type const reg1_in,
-        void **const reg0_out,
-        bf_uint64_t::value_type *const reg1_out) noexcept -> bf_status_t::value_type
+        void **const pmut_reg0_out,
+        bf_uint64_t::value_type *const pmut_reg1_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
 
-        if (bsl::unlikely(nullptr == reg0_out)) {
+        if (bsl::unlikely(nullptr == pmut_reg0_out)) {
             return BF_STATUS_FAILURE_UNKNOWN.get();
         }
 
-        if (bsl::unlikely(nullptr == reg1_out)) {
+        if (bsl::unlikely(nullptr == pmut_reg1_out)) {
             return BF_STATUS_FAILURE_UNKNOWN.get();
         }
 
-        if (g_errc.at("bf_mem_op_alloc_huge_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = bsl::to_ptr<void *>(g_data.at("bf_mem_op_alloc_huge_impl_reg0_out"));
-            *reg1_out = g_data.at("bf_mem_op_alloc_huge_impl_reg1_out").get();
+        if (g_mut_errc.at("bf_mem_op_alloc_huge_impl") == BF_STATUS_SUCCESS) {
+            *pmut_reg0_out = g_mut_ptrs.at("bf_mem_op_alloc_huge_impl_reg0_out");
+            *pmut_reg1_out = g_mut_data.at("bf_mem_op_alloc_huge_impl_reg1_out").get();
         }
         else {
             bsl::touch();
         }
 
-        return g_errc.at("bf_mem_op_alloc_huge_impl").get();
+        return g_mut_errc.at("bf_mem_op_alloc_huge_impl").get();
     }
 
     /// <!-- description -->
@@ -1739,17 +1480,18 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
+    ///   @param pmut_reg1_in n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_mem_op_free_huge_impl(bf_uint64_t::value_type const reg0_in, void *const reg1_in) noexcept
+    bf_mem_op_free_huge_impl(
+        bf_uint64_t::value_type const reg0_in, void *const pmut_reg1_in) noexcept
         -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
-        bsl::discard(reg1_in);
+        bsl::discard(pmut_reg1_in);
 
-        return g_errc.at("bf_mem_op_free_huge_impl").get();
+        return g_mut_errc.at("bf_mem_op_free_huge_impl").get();
     }
 
     /// <!-- description -->
@@ -1758,30 +1500,30 @@ namespace syscall
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
-    ///   @param reg0_out n/a
+    ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
     bf_mem_op_alloc_heap_impl(
         bf_uint64_t::value_type const reg0_in,
         bf_uint64_t::value_type const reg1_in,
-        void **const reg0_out) noexcept -> bf_status_t::value_type
+        void **const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
 
-        if (bsl::unlikely(nullptr == reg0_out)) {
+        if (bsl::unlikely(nullptr == pmut_reg0_out)) {
             return BF_STATUS_FAILURE_UNKNOWN.get();
         }
 
-        if (g_errc.at("bf_mem_op_alloc_heap_impl") == BF_STATUS_SUCCESS) {
-            *reg0_out = bsl::to_ptr<void *>(g_data.at("bf_mem_op_alloc_heap_impl_reg0_out"));
+        if (g_mut_errc.at("bf_mem_op_alloc_heap_impl") == BF_STATUS_SUCCESS) {
+            *pmut_reg0_out = g_mut_ptrs.at("bf_mem_op_alloc_heap_impl_reg0_out");
         }
         else {
             bsl::touch();
         }
 
-        return g_errc.at("bf_mem_op_alloc_heap_impl").get();
+        return g_mut_errc.at("bf_mem_op_alloc_heap_impl").get();
     }
 }
 

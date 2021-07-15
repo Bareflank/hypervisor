@@ -180,11 +180,11 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param msr n/a
-    ///   @param val n/a
+    ///   @param pmut_val n/a
     ///   @return n/a
     ///
-    extern "C" [[nodiscard]] auto intrinsic_rdmsr(bsl::uint32 msr, bsl::uint64 *const val) noexcept
-        -> bsl::exit_code;
+    extern "C" [[nodiscard]] auto
+    intrinsic_rdmsr(bsl::uint32 const msr, bsl::uint64 *const pmut_val) noexcept -> bsl::exit_code;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::wrmsr
@@ -194,8 +194,8 @@ namespace mk
     ///   @param val n/a
     ///   @return n/a
     ///
-    extern "C" [[nodiscard]] auto intrinsic_wrmsr(bsl::uint32 msr, bsl::uint64 const val) noexcept
-        -> bsl::exit_code;
+    extern "C" [[nodiscard]] auto
+    intrinsic_wrmsr(bsl::uint32 const msr, bsl::uint64 const val) noexcept -> bsl::exit_code;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::invept
@@ -204,7 +204,7 @@ namespace mk
     ///   @param desc n/a
     ///   @param type n/a
     ///
-    extern "C" void intrinsic_invept(void *const desc, bsl::uint64 const type) noexcept;
+    extern "C" void intrinsic_invept(void const *const desc, bsl::uint64 const type) noexcept;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::invvpid
@@ -213,7 +213,7 @@ namespace mk
     ///   @param desc n/a
     ///   @param type n/a
     ///
-    extern "C" void intrinsic_invvpid(void *const desc, bsl::uint64 const type) noexcept;
+    extern "C" void intrinsic_invvpid(void const *const desc, bsl::uint64 const type) noexcept;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::vmload
@@ -222,49 +222,54 @@ namespace mk
     ///   @param phys n/a
     ///   @return n/a
     ///
-    extern "C" [[nodiscard]] auto intrinsic_vmload(void *const phys) noexcept -> bsl::exit_code;
+    extern "C" [[nodiscard]] auto intrinsic_vmload(void const *const phys) noexcept
+        -> bsl::exit_code;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::vmclear
     ///
     /// <!-- inputs/outputs -->
-    ///   @param phys n/a
+    ///   @param pmut_phys n/a
     ///   @return n/a
     ///
-    extern "C" [[nodiscard]] auto intrinsic_vmclear(void *const phys) noexcept -> bsl::exit_code;
+    extern "C" [[nodiscard]] auto intrinsic_vmclear(void *const pmut_phys) noexcept
+        -> bsl::exit_code;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::vmread16
     ///
     /// <!-- inputs/outputs -->
     ///   @param field n/a
-    ///   @param val n/a
+    ///   @param pmut_val n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto
-    intrinsic_vmread16(bsl::uint64 field, bsl::uint16 *const val) noexcept -> bsl::exit_code;
+    intrinsic_vmread16(bsl::uint64 const field, bsl::uint16 *const pmut_val) noexcept
+        -> bsl::exit_code;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::vmread32
     ///
     /// <!-- inputs/outputs -->
     ///   @param field n/a
-    ///   @param val n/a
+    ///   @param pmut_val n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto
-    intrinsic_vmread32(bsl::uint64 field, bsl::uint32 *const val) noexcept -> bsl::exit_code;
+    intrinsic_vmread32(bsl::uint64 const field, bsl::uint32 *const pmut_val) noexcept
+        -> bsl::exit_code;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::vmread64
     ///
     /// <!-- inputs/outputs -->
     ///   @param field n/a
-    ///   @param val n/a
+    ///   @param pmut_val n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto
-    intrinsic_vmread64(bsl::uint64 field, bsl::uint64 *const val) noexcept -> bsl::exit_code;
+    intrinsic_vmread64(bsl::uint64 const field, bsl::uint64 *const pmut_val) noexcept
+        -> bsl::exit_code;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::vmwrite16
@@ -275,7 +280,7 @@ namespace mk
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto
-    intrinsic_vmwrite16(bsl::uint64 field, bsl::uint16 const val) noexcept -> bsl::exit_code;
+    intrinsic_vmwrite16(bsl::uint64 const field, bsl::uint16 const val) noexcept -> bsl::exit_code;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::vmwrite32
@@ -286,7 +291,7 @@ namespace mk
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto
-    intrinsic_vmwrite32(bsl::uint64 field, bsl::uint32 const val) noexcept -> bsl::exit_code;
+    intrinsic_vmwrite32(bsl::uint64 const field, bsl::uint32 const val) noexcept -> bsl::exit_code;
 
     /// <!-- description -->
     ///   @brief Implements intrinsic_t::vmwrite64
@@ -297,18 +302,30 @@ namespace mk
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto
-    intrinsic_vmwrite64(bsl::uint64 field, bsl::uint64 const val) noexcept -> bsl::exit_code;
+    intrinsic_vmwrite64(bsl::uint64 const field, bsl::uint64 const val) noexcept -> bsl::exit_code;
+
+    /// <!-- description -->
+    ///   @brief Implements intrinsic_t::vmwritefunc
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param field n/a
+    ///   @param pmut_func n/a
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] auto
+    intrinsic_vmwritefunc(bsl::uint64 const field, void (*const pmut_func)() noexcept) noexcept
+        -> bsl::exit_code;
 
     /// <!-- description -->
     ///   @brief Executes the VMLaunch/VMResume instructions. When this
     ///     function returns, a "VMExit" has occurred and must be handled.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vmcs_missing_registers a pointer to struct for where to
+    ///   @param pmut_vmcs_missing_registers a pointer to struct for where to
     ///     store the registers not saved in the VMCS
     ///   @return Returns the exit reason associated with the VMExit
     ///
-    extern "C" [[nodiscard]] auto intrinsic_vmrun(void *const vmcs_missing_registers) noexcept
+    extern "C" [[nodiscard]] auto intrinsic_vmrun(void *const pmut_vmcs_missing_registers) noexcept
         -> bsl::uintmax;
 
     /// @class mk::intrinsic_t
@@ -359,7 +376,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_es_selector();
+            return bsl::to_u16(intrinsic_es_selector());
         }
 
         /// <!-- description -->
@@ -375,7 +392,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_cs_selector();
+            return bsl::to_u16(intrinsic_cs_selector());
         }
 
         /// <!-- description -->
@@ -391,7 +408,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_ss_selector();
+            return bsl::to_u16(intrinsic_ss_selector());
         }
 
         /// <!-- description -->
@@ -407,7 +424,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_ds_selector();
+            return bsl::to_u16(intrinsic_ds_selector());
         }
 
         /// <!-- description -->
@@ -423,7 +440,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_fs_selector();
+            return bsl::to_u16(intrinsic_fs_selector());
         }
 
         /// <!-- description -->
@@ -439,7 +456,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_gs_selector();
+            return bsl::to_u16(intrinsic_gs_selector());
         }
 
         /// <!-- description -->
@@ -455,7 +472,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_tr_selector();
+            return bsl::to_u16(intrinsic_tr_selector());
         }
 
         /// <!-- description -->
@@ -471,7 +488,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_cr0();
+            return bsl::to_u64(intrinsic_cr0());
         }
 
         /// <!-- description -->
@@ -487,7 +504,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_cr3();
+            return bsl::to_u64(intrinsic_cr3());
         }
 
         /// <!-- description -->
@@ -528,7 +545,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_cr4();
+            return bsl::to_u64(intrinsic_cr4());
         }
 
         /// <!-- description -->
@@ -544,7 +561,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_tp();
+            return bsl::to_u64(intrinsic_tp());
         }
 
         /// <!-- description -->
@@ -595,7 +612,7 @@ namespace mk
                 return {};
             }
 
-            return intrinsic_tls_reg(reg.get());
+            return bsl::to_u64(intrinsic_tls_reg(reg.get()));
         }
 
         /// <!-- description -->
@@ -656,8 +673,7 @@ namespace mk
         [[nodiscard]] static constexpr auto
         rdmsr(bsl::safe_uint32 const &msr) noexcept -> bsl::safe_uint64
         {
-            bsl::exit_code ret{};
-            bsl::safe_uint64 val{};
+            bsl::safe_uint64 mut_val{};
 
             if (bsl::is_constant_evaluated()) {
                 return {};
@@ -672,8 +688,8 @@ namespace mk
                 return bsl::safe_uint64::failure();
             }
 
-            ret = intrinsic_rdmsr(msr.get(), val.data());
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            bsl::exit_code const ret{intrinsic_rdmsr(msr.get(), mut_val.data())};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 bsl::error() << "rdmsr failed for msr "    // --
                              << bsl::hex(msr)              // --
                              << bsl::endl                  // --
@@ -682,7 +698,7 @@ namespace mk
                 return bsl::safe_uint64::failure();
             }
 
-            return val;
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -697,8 +713,6 @@ namespace mk
         [[nodiscard]] static constexpr auto
         wrmsr(bsl::safe_uint32 const &msr, bsl::safe_uint64 const &val) noexcept -> bsl::errc_type
         {
-            bsl::exit_code ret{};
-
             if (bsl::is_constant_evaluated()) {
                 return bsl::errc_success;
             }
@@ -721,8 +735,8 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            ret = intrinsic_wrmsr(msr.get(), val.get());
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            bsl::exit_code const ret{intrinsic_wrmsr(msr.get(), val.get())};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 bsl::error() << "wrmsr failed for msr "    // --
                              << bsl::hex(msr)              // --
                              << " with value "             // --
@@ -773,7 +787,7 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            invept_descriptor_t desc{eptp.get(), {}};
+            invept_descriptor_t const desc{eptp.get(), {}};
             intrinsic_invept(&desc, type.get());
             return bsl::errc_success;
         }
@@ -827,7 +841,7 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            invvpid_descriptor_t desc{vpid.get(), {}, {}, {}, addr.get()};
+            invvpid_descriptor_t const desc{vpid.get(), {}, {}, {}, addr.get()};
             intrinsic_invvpid(&desc, type.get());
             return bsl::errc_success;
         }
@@ -843,7 +857,7 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
-        vmload(void *const phys) noexcept -> bsl::errc_type
+        vmload(void const *const phys) noexcept -> bsl::errc_type
         {
             if (bsl::is_constant_evaluated()) {
                 return bsl::errc_success;
@@ -859,7 +873,7 @@ namespace mk
             }
 
             bsl::exit_code const ret{intrinsic_vmload(phys)};
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 bsl::error() << "vmload failed for "    // --
                              << phys                    // --
                              << " with error code "     // --
@@ -878,31 +892,31 @@ namespace mk
         ///     of the VMCS.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param phys a pointer to the physical address of the VMCS to
+        ///   @param pmut_phys a pointer to the physical address of the VMCS to
         ///     load.
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
-        vmclear(void *const phys) noexcept -> bsl::errc_type
+        vmclear(void *const pmut_phys) noexcept -> bsl::errc_type
         {
             if (bsl::is_constant_evaluated()) {
                 return bsl::errc_success;
             }
 
-            if (bsl::unlikely(nullptr == phys)) {
-                bsl::error() << "invalid phys "    // --
-                             << phys               // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
+            if (bsl::unlikely(nullptr == pmut_phys)) {
+                bsl::error() << "invalid pmut_phys "    // --
+                             << pmut_phys               // --
+                             << bsl::endl               // --
+                             << bsl::here();            // --
 
                 return bsl::errc_failure;
             }
 
-            bsl::exit_code const ret{intrinsic_vmclear(phys)};
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            bsl::exit_code const ret{intrinsic_vmclear(pmut_phys)};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 bsl::error() << "vmclear failed for "    // --
-                             << phys                     // --
+                             << pmut_phys                // --
                              << " with error code "      // --
                              << ret                      // --
                              << bsl::endl                // --
@@ -919,12 +933,13 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param field the 16 bit VMCS field to read
-        ///   @param val the value to store the 32 bit VMCS field to
+        ///   @param pmut_val the value to store the 32 bit VMCS field to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
-        vmread16(bsl::safe_uint64 const &field, bsl::uint16 *const val) noexcept -> bsl::errc_type
+        vmread16(bsl::safe_uint64 const &field, bsl::uint16 *const pmut_val) noexcept
+            -> bsl::errc_type
         {
             if (bsl::is_constant_evaluated()) {
                 return bsl::errc_success;
@@ -939,17 +954,17 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            if (bsl::unlikely(nullptr == val)) {
-                bsl::error() << "invalid val "    // --
-                             << val               // --
-                             << bsl::endl         // --
-                             << bsl::here();      // --
+            if (bsl::unlikely(nullptr == pmut_val)) {
+                bsl::error() << "invalid pmut_val "    // --
+                             << pmut_val               // --
+                             << bsl::endl              // --
+                             << bsl::here();           // --
 
                 return bsl::errc_failure;
             }
 
-            bsl::exit_code const ret{intrinsic_vmread16(field.get(), val)};
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            bsl::exit_code const ret{intrinsic_vmread16(field.get(), pmut_val)};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 bsl::error() << "vmread failed for field "    // --
                              << bsl::hex(field)               // --
                              << " with error code "           // --
@@ -968,12 +983,13 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param field the 32 bit VMCS field to read
-        ///   @param val the value to store the 32 bit VMCS field to
+        ///   @param pmut_val the value to store the 32 bit VMCS field to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
-        vmread32(bsl::safe_uint64 const &field, bsl::uint32 *const val) noexcept -> bsl::errc_type
+        vmread32(bsl::safe_uint64 const &field, bsl::uint32 *const pmut_val) noexcept
+            -> bsl::errc_type
         {
             if (bsl::is_constant_evaluated()) {
                 return bsl::errc_success;
@@ -988,17 +1004,17 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            if (bsl::unlikely(nullptr == val)) {
-                bsl::error() << "invalid val "    // --
-                             << val               // --
-                             << bsl::endl         // --
-                             << bsl::here();      // --
+            if (bsl::unlikely(nullptr == pmut_val)) {
+                bsl::error() << "invalid pmut_val "    // --
+                             << pmut_val               // --
+                             << bsl::endl              // --
+                             << bsl::here();           // --
 
                 return bsl::errc_failure;
             }
 
-            bsl::exit_code const ret{intrinsic_vmread32(field.get(), val)};
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            bsl::exit_code const ret{intrinsic_vmread32(field.get(), pmut_val)};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 bsl::error() << "vmread failed for field "    // --
                              << bsl::hex(field)               // --
                              << " with error code "           // --
@@ -1017,12 +1033,13 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param field the 64 bit VMCS field to read
-        ///   @param val the value to store the 32 bit VMCS field to
+        ///   @param pmut_val the value to store the 32 bit VMCS field to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
-        vmread64(bsl::safe_uint64 const &field, bsl::uint64 *const val) noexcept -> bsl::errc_type
+        vmread64(bsl::safe_uint64 const &field, bsl::uint64 *const pmut_val) noexcept
+            -> bsl::errc_type
         {
             if (bsl::is_constant_evaluated()) {
                 return bsl::errc_success;
@@ -1037,17 +1054,17 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            if (bsl::unlikely(nullptr == val)) {
-                bsl::error() << "invalid val "    // --
-                             << val               // --
-                             << bsl::endl         // --
-                             << bsl::here();      // --
+            if (bsl::unlikely(nullptr == pmut_val)) {
+                bsl::error() << "invalid pmut_val "    // --
+                             << pmut_val               // --
+                             << bsl::endl              // --
+                             << bsl::here();           // --
 
                 return bsl::errc_failure;
             }
 
-            bsl::exit_code const ret{intrinsic_vmread64(field.get(), val)};
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            bsl::exit_code const ret{intrinsic_vmread64(field.get(), pmut_val)};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 bsl::error() << "vmread failed for field "    // --
                              << bsl::hex(field)               // --
                              << " with error code "           // --
@@ -1073,22 +1090,22 @@ namespace mk
         [[nodiscard]] static constexpr auto
         vmread16_quiet(bsl::safe_uint64 const &field) noexcept -> bsl::safe_uint16
         {
-            bsl::safe_uint16 val{};
+            bsl::safe_uint16 mut_val{};
 
             if (bsl::is_constant_evaluated()) {
-                return val;
+                return mut_val;
             }
 
             if (bsl::unlikely(!field)) {
                 return bsl::safe_uint16::failure();
             }
 
-            bsl::exit_code const ret{intrinsic_vmread16(field.get(), val.data())};
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            bsl::exit_code const ret{intrinsic_vmread16(field.get(), mut_val.data())};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 return bsl::safe_uint16::failure();
             }
 
-            return val;
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -1103,22 +1120,22 @@ namespace mk
         [[nodiscard]] static constexpr auto
         vmread32_quiet(bsl::safe_uint64 const &field) noexcept -> bsl::safe_uint32
         {
-            bsl::safe_uint32 val{};
+            bsl::safe_uint32 mut_val{};
 
             if (bsl::is_constant_evaluated()) {
-                return val;
+                return mut_val;
             }
 
             if (bsl::unlikely(!field)) {
                 return bsl::safe_uint32::failure();
             }
 
-            bsl::exit_code const ret{intrinsic_vmread32(field.get(), val.data())};
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            bsl::exit_code const ret{intrinsic_vmread32(field.get(), mut_val.data())};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 return bsl::safe_uint32::failure();
             }
 
-            return val;
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -1133,22 +1150,22 @@ namespace mk
         [[nodiscard]] static constexpr auto
         vmread64_quiet(bsl::safe_uint64 const &field) noexcept -> bsl::safe_uint64
         {
-            bsl::safe_uint64 val{};
+            bsl::safe_uint64 mut_val{};
 
             if (bsl::is_constant_evaluated()) {
-                return val;
+                return mut_val;
             }
 
             if (bsl::unlikely(!field)) {
                 return bsl::safe_uint64::failure();
             }
 
-            bsl::exit_code const ret{intrinsic_vmread64(field.get(), val.data())};
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            bsl::exit_code const ret{intrinsic_vmread64(field.get(), mut_val.data())};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 return bsl::safe_uint64::failure();
             }
 
-            return val;
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -1187,7 +1204,7 @@ namespace mk
             }
 
             bsl::exit_code const ret{intrinsic_vmwrite16(field.get(), val.get())};
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 bsl::error() << "vmwrite failed for field "    // --
                              << bsl::hex(field)                // --
                              << " with value "                 // --
@@ -1239,7 +1256,7 @@ namespace mk
             }
 
             bsl::exit_code const ret{intrinsic_vmwrite32(field.get(), val.get())};
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 bsl::error() << "vmwrite failed for field "    // --
                              << bsl::hex(field)                // --
                              << " with value "                 // --
@@ -1291,11 +1308,61 @@ namespace mk
             }
 
             bsl::exit_code const ret{intrinsic_vmwrite64(field.get(), val.get())};
-            if (bsl::unlikely(ret != bsl::exit_success)) {
+            if (bsl::unlikely(bsl::exit_success != ret)) {
                 bsl::error() << "vmwrite failed for field "    // --
                              << bsl::hex(field)                // --
                              << " with value "                 // --
                              << bsl::hex(val)                  // --
+                             << " with error code "            // --
+                             << ret                            // --
+                             << bsl::endl                      // --
+                             << bsl::here();                   // --
+
+                return bsl::errc_failure;
+            }
+
+            return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief Sets the value of requested 64 bit VMCS field (function
+        ///     version)
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param field the 64 bit VMCS field to write to
+        ///   @param pmut_func the function value to set the 64 bit VMCS field to
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] static constexpr auto
+        vmwritefunc(bsl::safe_uint64 const &field, void (*const pmut_func)() noexcept) noexcept
+            -> bsl::errc_type
+        {
+            if (bsl::is_constant_evaluated()) {
+                return bsl::errc_success;
+            }
+
+            if (bsl::unlikely(!field)) {
+                bsl::error() << "invalid field "    // --
+                             << bsl::hex(field)     // --
+                             << bsl::endl           // --
+                             << bsl::here();        // --
+
+                return bsl::errc_failure;
+            }
+
+            if (bsl::unlikely(nullptr == pmut_func)) {
+                bsl::error() << "invalid pmut_func "    // --
+                             << bsl::endl               // --
+                             << bsl::here();            // --
+
+                return bsl::errc_failure;
+            }
+
+            bsl::exit_code const ret{intrinsic_vmwritefunc(field.get(), pmut_func)};
+            if (bsl::unlikely(bsl::exit_success != ret)) {
+                bsl::error() << "vmwrite failed for field "    // --
+                             << bsl::hex(field)                // --
                              << " with error code "            // --
                              << ret                            // --
                              << bsl::endl                      // --

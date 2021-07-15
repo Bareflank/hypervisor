@@ -347,11 +347,11 @@ namespace syscall
     constexpr auto BF_DEBUG_OP_DUMP_HUGE_POOL_IDX_VAL{0x0000000000000009_u64};
 
     /// @brief Defines the syscall index for bf_callback_op_register_bootstrap
-    constexpr auto BF_CALLBACK_OP_REGISTER_BOOTSTRAP_IDX_VAL{0x0000000000000002_u64};
+    constexpr auto BF_CALLBACK_OP_REGISTER_BOOTSTRAP_IDX_VAL{0x0000000000000000_u64};
     /// @brief Defines the syscall index for bf_callback_op_register_vmexit
-    constexpr auto BF_CALLBACK_OP_REGISTER_VMEXIT_IDX_VAL{0x0000000000000003_u64};
+    constexpr auto BF_CALLBACK_OP_REGISTER_VMEXIT_IDX_VAL{0x0000000000000001_u64};
     /// @brief Defines the syscall index for bf_callback_op_register_fail
-    constexpr auto BF_CALLBACK_OP_REGISTER_FAIL_IDX_VAL{0x0000000000000004_u64};
+    constexpr auto BF_CALLBACK_OP_REGISTER_FAIL_IDX_VAL{0x0000000000000002_u64};
 
     /// @brief Defines the syscall index for bf_vm_op_create_vm
     constexpr auto BF_VM_OP_CREATE_VM_IDX_VAL{0x0000000000000000_u64};
@@ -371,38 +371,22 @@ namespace syscall
     constexpr auto BF_VPS_OP_DESTROY_VPS_IDX_VAL{0x0000000000000001_u64};
     /// @brief Defines the syscall index for bf_vps_op_init_as_root
     constexpr auto BF_VPS_OP_INIT_AS_ROOT_IDX_VAL{0x0000000000000002_u64};
-    /// @brief Defines the syscall index for bf_vps_op_read8
-    constexpr auto BF_VPS_OP_READ8_IDX_VAL{0x0000000000000003_u64};
-    /// @brief Defines the syscall index for bf_vps_op_read16
-    constexpr auto BF_VPS_OP_READ16_IDX_VAL{0x0000000000000004_u64};
-    /// @brief Defines the syscall index for bf_vps_op_read32
-    constexpr auto BF_VPS_OP_READ32_IDX_VAL{0x0000000000000005_u64};
-    /// @brief Defines the syscall index for bf_vps_op_read64
-    constexpr auto BF_VPS_OP_READ64_IDX_VAL{0x0000000000000006_u64};
-    /// @brief Defines the syscall index for bf_vps_op_write
-    constexpr auto BF_VPS_OP_WRITE8_IDX_VAL{0x0000000000000007_u64};
-    /// @brief Defines the syscall index for bf_vps_op_write
-    constexpr auto BF_VPS_OP_WRITE16_IDX_VAL{0x0000000000000008_u64};
-    /// @brief Defines the syscall index for bf_vps_op_write
-    constexpr auto BF_VPS_OP_WRITE32_IDX_VAL{0x0000000000000009_u64};
-    /// @brief Defines the syscall index for bf_vps_op_write
-    constexpr auto BF_VPS_OP_WRITE64_IDX_VAL{0x000000000000000A_u64};
     /// @brief Defines the syscall index for bf_vps_op_read_reg
-    constexpr auto BF_VPS_OP_READ_REG_IDX_VAL{0x000000000000000B_u64};
+    constexpr auto BF_VPS_OP_READ_IDX_VAL{0x0000000000000003_u64};
     /// @brief Defines the syscall index for bf_vps_op_write_reg
-    constexpr auto BF_VPS_OP_WRITE_REG_IDX_VAL{0x000000000000000C_u64};
+    constexpr auto BF_VPS_OP_WRITE_IDX_VAL{0x0000000000000004_u64};
     /// @brief Defines the syscall index for bf_vps_op_run
-    constexpr auto BF_VPS_OP_RUN_IDX_VAL{0x000000000000000D_u64};
+    constexpr auto BF_VPS_OP_RUN_IDX_VAL{0x0000000000000005_u64};
     /// @brief Defines the syscall index for bf_vps_op_run_current
-    constexpr auto BF_VPS_OP_RUN_CURRENT_IDX_VAL{0x000000000000000E_u64};
+    constexpr auto BF_VPS_OP_RUN_CURRENT_IDX_VAL{0x0000000000000006_u64};
     /// @brief Defines the syscall index for bf_vps_op_advance_ip
-    constexpr auto BF_VPS_OP_ADVANCE_IP_IDX_VAL{0x000000000000000F_u64};
+    constexpr auto BF_VPS_OP_ADVANCE_IP_IDX_VAL{0x0000000000000007_u64};
     /// @brief Defines the syscall index for bf_vps_op_advance_ip_and_run_current
-    constexpr auto BF_VPS_OP_ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL{0x0000000000000010_u64};
+    constexpr auto BF_VPS_OP_ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL{0x0000000000000008_u64};
     /// @brief Defines the syscall index for bf_vps_op_promote
-    constexpr auto BF_VPS_OP_PROMOTE_IDX_VAL{0x0000000000000011_u64};
+    constexpr auto BF_VPS_OP_PROMOTE_IDX_VAL{0x0000000000000009_u64};
     /// @brief Defines the syscall index for bf_vps_op_clear_vps
-    constexpr auto BF_VPS_OP_CLEAR_VPS_IDX_VAL{0x0000000000000012_u64};
+    constexpr auto BF_VPS_OP_CLEAR_VPS_IDX_VAL{0x000000000000000A_u64};
 
     /// @brief Defines the syscall index for bf_intrinsic_op_rdmsr
     constexpr auto BF_INTRINSIC_OP_RDMSR_IDX_VAL{0x0000000000000000_u64};

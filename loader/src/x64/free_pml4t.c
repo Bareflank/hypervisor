@@ -42,10 +42,10 @@
 void
 free_pml4t(struct pml4t_t *const pml4t)
 {
-    uint64_t idx;
+    uint64_t i;
 
-    for (idx = ((uint64_t)0); idx < LOADER_NUM_PML4T_ENTRIES; ++idx) {
-        struct pdpt_t *const pdpt = pml4t->tables[idx];
+    for (i = ((uint64_t)0); i < LOADER_NUM_PML4T_ENTRIES; ++i) {
+        struct pdpt_t *const pdpt = pml4t->tables[i];
         if (((void *)0) != pdpt) {
             free_pdpt(pdpt);
             platform_free(pdpt, sizeof(struct pdpt_t));

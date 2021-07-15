@@ -42,15 +42,11 @@ namespace example
     {
         bsl::ut_scenario{"initialize twice fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(vp.initialize(gs, tls, sys, intrinsic, {}));
+                    bsl::ut_required_step(mut_vp.initialize({}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!vp.initialize(gs, tls, sys, intrinsic, {}));
+                        bsl::ut_check(!mut_vp.initialize({}, {}, {}, {}, {}));
                     };
                 };
             };
@@ -58,68 +54,47 @@ namespace example
 
         bsl::ut_scenario{"initialize invalid id #1"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_check(
-                        !vp.initialize(gs, tls, sys, intrinsic, bsl::safe_uint16::failure()));
+                    bsl::ut_check(!mut_vp.initialize({}, {}, {}, {}, bsl::safe_uint16::failure()));
                 };
             };
         };
 
         bsl::ut_scenario{"initialize invalid id #2"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_check(!vp.initialize(gs, tls, sys, intrinsic, syscall::BF_INVALID_ID));
+                    bsl::ut_check(!mut_vp.initialize({}, {}, {}, {}, syscall::BF_INVALID_ID));
                 };
             };
         };
 
         bsl::ut_scenario{"initialize success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_check(vp.initialize(gs, tls, sys, intrinsic, {}));
+                    bsl::ut_check(mut_vp.initialize({}, {}, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"release executes without initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    vp.release(gs, tls, sys, intrinsic);
+                    mut_vp.release({}, {}, {}, {});
                 };
             };
         };
 
         bsl::ut_scenario{"release executes with initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(vp.initialize(gs, tls, sys, intrinsic, {}));
+                    bsl::ut_required_step(mut_vp.initialize({}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
-                        vp.release(gs, tls, sys, intrinsic);
+                        mut_vp.release({}, {}, {}, {});
                     };
                 };
             };
@@ -127,29 +102,21 @@ namespace example
 
         bsl::ut_scenario{"allocate not initialized"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(!vp.allocate(gs, tls, sys, intrinsic, {}, {}));
+                    bsl::ut_check(!mut_vp.allocate({}, {}, {}, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"allocate already allocated"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(vp.initialize(gs, tls, sys, intrinsic, {}));
-                    bsl::ut_required_step(vp.allocate(gs, tls, sys, intrinsic, {}, {}));
+                    bsl::ut_required_step(mut_vp.initialize({}, {}, {}, {}, {}));
+                    bsl::ut_required_step(mut_vp.allocate({}, {}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!vp.allocate(gs, tls, sys, intrinsic, {}, {}));
+                        bsl::ut_check(!mut_vp.allocate({}, {}, {}, {}, {}, {}));
                     };
                 };
             };
@@ -157,16 +124,12 @@ namespace example
 
         bsl::ut_scenario{"allocate invalid vmid #1"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(vp.initialize(gs, tls, sys, intrinsic, {}));
+                    bsl::ut_required_step(mut_vp.initialize({}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
-                            !vp.allocate(gs, tls, sys, intrinsic, bsl::safe_uint16::failure(), {}));
+                            !mut_vp.allocate({}, {}, {}, {}, bsl::safe_uint16::failure(), {}));
                     };
                 };
             };
@@ -174,16 +137,11 @@ namespace example
 
         bsl::ut_scenario{"allocate invalid vmid #2"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(vp.initialize(gs, tls, sys, intrinsic, {}));
+                    bsl::ut_required_step(mut_vp.initialize({}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(
-                            !vp.allocate(gs, tls, sys, intrinsic, syscall::BF_INVALID_ID, {}));
+                        bsl::ut_check(!mut_vp.allocate({}, {}, {}, {}, syscall::BF_INVALID_ID, {}));
                     };
                 };
             };
@@ -191,16 +149,12 @@ namespace example
 
         bsl::ut_scenario{"allocate invalid ppid #1"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(vp.initialize(gs, tls, sys, intrinsic, {}));
+                    bsl::ut_required_step(mut_vp.initialize({}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
-                            !vp.allocate(gs, tls, sys, intrinsic, {}, bsl::safe_uint16::failure()));
+                            !mut_vp.allocate({}, {}, {}, {}, {}, bsl::safe_uint16::failure()));
                     };
                 };
             };
@@ -208,16 +162,11 @@ namespace example
 
         bsl::ut_scenario{"allocate invalid ppid #2"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(vp.initialize(gs, tls, sys, intrinsic, {}));
+                    bsl::ut_required_step(mut_vp.initialize({}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(
-                            !vp.allocate(gs, tls, sys, intrinsic, {}, syscall::BF_INVALID_ID));
+                        bsl::ut_check(!mut_vp.allocate({}, {}, {}, {}, {}, syscall::BF_INVALID_ID));
                     };
                 };
             };
@@ -225,15 +174,11 @@ namespace example
 
         bsl::ut_scenario{"allocate success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vp_t vp{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
+                vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(vp.initialize(gs, tls, sys, intrinsic, {}));
+                    bsl::ut_required_step(mut_vp.initialize({}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(vp.allocate(gs, tls, sys, intrinsic, {}, {}));
+                        bsl::ut_check(mut_vp.allocate({}, {}, {}, {}, {}, {}));
                     };
                 };
             };

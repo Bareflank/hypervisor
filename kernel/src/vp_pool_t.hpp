@@ -67,9 +67,9 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        initialize(tls_t &tls, vps_pool_t &vps_pool) noexcept -> bsl::errc_type
+        initialize(tls_t const &tls, vps_pool_t const &vps_pool) noexcept -> bsl::errc_type
         {
-            bsl::finally_assert release_on_error{[this, &tls, &vps_pool]() noexcept -> void {
+            bsl::finally_assert mut_release_on_error{[this, &tls, &vps_pool]() noexcept -> void {
                 auto const ret{this->release(tls, vps_pool)};
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
@@ -89,7 +89,7 @@ namespace mk
                 bsl::touch();
             }
 
-            release_on_error.ignore();
+            mut_release_on_error.ignore();
             return bsl::errc_success;
         }
 
@@ -105,7 +105,7 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        release(tls_t &tls, vps_pool_t &vps_pool) noexcept -> bsl::errc_type
+        release(tls_t const &tls, vps_pool_t const &vps_pool) noexcept -> bsl::errc_type
         {
             for (auto const vp : m_pool) {
                 auto const ret{vp.data->release(tls, vps_pool)};
@@ -130,27 +130,28 @@ namespace mk
         ///   @return Returns ID of the newly allocated vp
         ///
         [[nodiscard]] constexpr auto
-        allocate(tls_t &tls, bsl::safe_uint16 const &vmid, bsl::safe_uint16 const &ppid) noexcept
+        allocate(
+            tls_t const &tls, bsl::safe_uint16 const &vmid, bsl::safe_uint16 const &ppid) noexcept
             -> bsl::safe_uint16
         {
-            lock_guard_t lock{tls, m_lock};
+            lock_guard_t mut_lock{tls, m_lock};
 
-            vp_t *vp{};
+            vp_t *pmut_mut_vp{};
             for (auto const elem : m_pool) {
                 if (elem.data->is_deallocated()) {
-                    vp = elem.data;
+                    pmut_mut_vp = elem.data;
                     break;
                 }
 
                 bsl::touch();
             }
 
-            if (bsl::unlikely(nullptr == vp)) {
+            if (bsl::unlikely(nullptr == pmut_mut_vp)) {
                 bsl::error() << "vp pool out of vps\n" << bsl::here();
                 return bsl::safe_uint16::failure();
             }
 
-            return vp->allocate(tls, vmid, ppid);
+            return pmut_mut_vp->allocate(tls, vmid, ppid);
         }
 
         /// <!-- description -->
@@ -165,11 +166,12 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        deallocate(tls_t &tls, vps_pool_t &vps_pool, bsl::safe_uint16 const &vpid) noexcept
+        deallocate(
+            tls_t const &tls, vps_pool_t const &vps_pool, bsl::safe_uint16 const &vpid) noexcept
             -> bsl::errc_type
         {
-            auto *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
+            auto *const pmut_vp{m_pool.at_if(bsl::to_umax(vpid))};
+            if (bsl::unlikely(nullptr == pmut_vp)) {
                 bsl::error()
                     << "vpid "                                                              // --
                     << bsl::hex(vpid)                                                       // --
@@ -181,7 +183,7 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            return vp->deallocate(tls, vps_pool);
+            return pmut_vp->deallocate(tls, vps_pool);
         }
 
         /// <!-- description -->
@@ -196,8 +198,8 @@ namespace mk
         [[nodiscard]] constexpr auto
         zombify(bsl::safe_uint16 const &vpid) noexcept -> bsl::errc_type
         {
-            auto *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
+            auto *const pmut_vp{m_pool.at_if(bsl::to_umax(vpid))};
+            if (bsl::unlikely(nullptr == pmut_vp)) {
                 bsl::error()
                     << "vpid "                                                              // --
                     << bsl::hex(vpid)                                                       // --
@@ -209,7 +211,7 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            vp->zombify();
+            pmut_vp->zombify();
             return bsl::errc_success;
         }
 
@@ -226,7 +228,7 @@ namespace mk
         ///     deallocated.
         ///
         [[nodiscard]] constexpr auto
-        is_deallocated(tls_t &tls, bsl::safe_uint16 const &vpid) const noexcept -> bool
+        is_deallocated(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept -> bool
         {
             bsl::discard(tls);
 
@@ -259,7 +261,7 @@ namespace mk
         ///     allocated.
         ///
         [[nodiscard]] constexpr auto
-        is_allocated(tls_t &tls, bsl::safe_uint16 const &vpid) const noexcept -> bool
+        is_allocated(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept -> bool
         {
             bsl::discard(tls);
 
@@ -292,7 +294,7 @@ namespace mk
         ///     a zombie.
         ///
         [[nodiscard]] constexpr auto
-        is_zombie(tls_t &tls, bsl::safe_uint16 const &vpid) const noexcept -> bool
+        is_zombie(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept -> bool
         {
             bsl::discard(tls);
 
@@ -325,7 +327,7 @@ namespace mk
         ///     function will return bsl::safe_uint16::failure()
         ///
         [[nodiscard]] constexpr auto
-        is_assigned_to_vm(tls_t &tls, bsl::safe_uint16 const &vmid) const noexcept
+        is_assigned_to_vm(tls_t const &tls, bsl::safe_uint16 const &vmid) const noexcept
             -> bsl::safe_uint16
         {
             bsl::discard(tls);
@@ -355,16 +357,16 @@ namespace mk
         ///   @brief Sets the requested vp_t as active.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param vpid the ID of the vp_t to set as active
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        set_active(tls_t &tls, bsl::safe_uint16 const &vpid) noexcept -> bsl::errc_type
+        set_active(tls_t &mut_tls, bsl::safe_uint16 const &vpid) noexcept -> bsl::errc_type
         {
-            auto *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
+            auto *const pmut_vp{m_pool.at_if(bsl::to_umax(vpid))};
+            if (bsl::unlikely(nullptr == pmut_vp)) {
                 bsl::error()
                     << "vpid "                                                              // --
                     << bsl::hex(vpid)                                                       // --
@@ -376,23 +378,23 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            return vp->set_active(tls);
+            return pmut_vp->set_active(mut_tls);
         }
 
         /// <!-- description -->
         ///   @brief Sets the requested vp_t as inactive.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
+        ///   @param mut_tls the current TLS block
         ///   @param vpid the ID of the vp_t to set as inactive
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        set_inactive(tls_t &tls, bsl::safe_uint16 const &vpid) noexcept -> bsl::errc_type
+        set_inactive(tls_t &mut_tls, bsl::safe_uint16 const &vpid) noexcept -> bsl::errc_type
         {
-            auto *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
+            auto *const pmut_vp{m_pool.at_if(bsl::to_umax(vpid))};
+            if (bsl::unlikely(nullptr == pmut_vp)) {
                 bsl::error()
                     << "vpid "                                                              // --
                     << bsl::hex(vpid)                                                       // --
@@ -404,7 +406,7 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            return vp->set_inactive(tls);
+            return pmut_vp->set_inactive(mut_tls);
         }
 
         /// <!-- description -->
@@ -420,7 +422,7 @@ namespace mk
         ///     vp_t is not active on the current PP.
         ///
         [[nodiscard]] constexpr auto
-        is_active(tls_t &tls, bsl::safe_uint16 const &vpid) const noexcept -> bsl::safe_uint16
+        is_active(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept -> bsl::safe_uint16
         {
             auto const *const vp{m_pool.at_if(bsl::to_umax(vpid))};
             if (bsl::unlikely(nullptr == vp)) {
@@ -451,7 +453,8 @@ namespace mk
         ///     active on the current PP.
         ///
         [[nodiscard]] constexpr auto
-        is_active_on_current_pp(tls_t &tls, bsl::safe_uint16 const &vpid) const noexcept -> bool
+        is_active_on_current_pp(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept
+            -> bool
         {
             auto const *const vp{m_pool.at_if(bsl::to_umax(vpid))};
             if (bsl::unlikely(nullptr == vp)) {
@@ -480,11 +483,12 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        migrate(tls_t &tls, bsl::safe_uint16 const &ppid, bsl::safe_uint16 const &vpid) noexcept
+        migrate(
+            tls_t const &tls, bsl::safe_uint16 const &ppid, bsl::safe_uint16 const &vpid) noexcept
             -> bsl::errc_type
         {
-            auto *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
+            auto *const pmut_vp{m_pool.at_if(bsl::to_umax(vpid))};
+            if (bsl::unlikely(nullptr == pmut_vp)) {
                 bsl::error()
                     << "vpid "                                                              // --
                     << bsl::hex(vpid)                                                       // --
@@ -496,7 +500,7 @@ namespace mk
                 return bsl::errc_index_out_of_bounds;
             }
 
-            return vp->migrate(tls, ppid);
+            return pmut_vp->migrate(tls, ppid);
         }
 
         /// <!-- description -->
@@ -559,7 +563,7 @@ namespace mk
         ///   @param vpid the ID of the VP to dump
         ///
         constexpr void
-        dump(tls_t &tls, bsl::safe_uint16 const &vpid) noexcept
+        dump(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept
         {
             if constexpr (BSL_DEBUG_LEVEL == bsl::CRITICAL_ONLY) {
                 return;

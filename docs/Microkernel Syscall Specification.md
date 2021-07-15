@@ -74,16 +74,8 @@
     - [2.12.6. bf_vps_op_create_vps, OP=0x6, IDX=0x0](#2126-bf_vps_op_create_vps-op0x6-idx0x0)
     - [2.12.7. bf_vps_op_destroy_vps, OP=0x6, IDX=0x1](#2127-bf_vps_op_destroy_vps-op0x6-idx0x1)
     - [2.12.8. bf_vps_op_init_as_root, OP=0x6, IDX=0x2](#2128-bf_vps_op_init_as_root-op0x6-idx0x2)
-    - [2.12.9. bf_vps_op_read8, OP=0x6, IDX=0x3](#2129-bf_vps_op_read8-op0x6-idx0x3)
-    - [2.12.10. bf_vps_op_read16, OP=0x6, IDX=0x4](#21210-bf_vps_op_read16-op0x6-idx0x4)
-    - [2.12.11. bf_vps_op_read32, OP=0x6, IDX=0x5](#21211-bf_vps_op_read32-op0x6-idx0x5)
-    - [2.12.12. bf_vps_op_read64, OP=0x6, IDX=0x6](#21212-bf_vps_op_read64-op0x6-idx0x6)
-    - [2.12.13. bf_vps_op_write8, OP=0x6, IDX=0x7](#21213-bf_vps_op_write8-op0x6-idx0x7)
-    - [2.12.14. bf_vps_op_write16, OP=0x6, IDX=0x8](#21214-bf_vps_op_write16-op0x6-idx0x8)
-    - [2.12.15. bf_vps_op_write32, OP=0x6, IDX=0x9](#21215-bf_vps_op_write32-op0x6-idx0x9)
-    - [2.12.16. bf_vps_op_write64, OP=0x6, IDX=0xA](#21216-bf_vps_op_write64-op0x6-idx0xa)
-    - [2.12.17. bf_vps_op_read_reg, OP=0x6, IDX=0xB](#21217-bf_vps_op_read_reg-op0x6-idx0xb)
-    - [2.12.18. bf_vps_op_write_reg, OP=0x6, IDX=0xC](#21218-bf_vps_op_write_reg-op0x6-idx0xc)
+    - [2.12.17. bf_vps_op_read, OP=0x6, IDX=0xB](#21217-bf_vps_op_read-op0x6-idx0xb)
+    - [2.12.18. bf_vps_op_write, OP=0x6, IDX=0xC](#21218-bf_vps_op_write-op0x6-idx0xc)
     - [2.12.19. bf_vps_op_run, OP=0x5, IDX=0xD](#21219-bf_vps_op_run-op0x5-idx0xd)
     - [2.12.20. bf_vps_op_run_current, OP=0x5, IDX=0xE](#21220-bf_vps_op_run_current-op0x5-idx0xe)
     - [2.12.21. bf_vps_op_advance_ip, OP=0x5, IDX=0xF](#21221-bf_vps_op_advance_ip-op0x5-idx0xf)
@@ -641,7 +633,7 @@ The microkernel defines a "thread" the same way both Intel and AMD define a thre
 The layout of the TLS block provided to each extension uses a scheme similar to the ELF TLS specification, but with some modifications. Unlike the ELF TLS specification, each TLS block is limited to two pages. The lower half of the page is dedicated to "thread_local" storage. The upper half is defined by this specification, and provides access to registers shared between the microkernel and the extension to improve performance. For example, access to a VM's general purpose registers is available from the TLS block. Each TLS register defined by this specific is an offset into the upper half of the TLS block (which can be located using the fs segment register on Intel/AMD).
 
 **IMPORTANT:**
-The general purpose registers are always accessible to an extension to read and write, but it is up to the extension to ensure the correct VPS state is being modified. Accesses to the TLS block modifies the active VPS only. For example, while an extension is executing its bootstrap handler, there is no active VPS, in which case any reads/writes to the general purpose registers from the TLS block will be lost. When an extension is executing from a VMExit handler, reads/writes to the general purpose registers from the TLS block are made to the VPS that generated the VMExit. If an extension then creates a VPS, the only way to modify the general purpose registers for the newly created VPS is through the read_reg/write_reg ABIs. Attempting to use the TLS block will modify the registers for the active VPS, not the newly created VPS. The only way to set a VPS to "active" is to use the run ABI, which on success does not return, meaning the extension has to wait for a VMExit before the newly create VPS's general purpose registers can be accessed from the TLS block.
+The general purpose registers are always accessible to an extension to read and write, but it is up to the extension to ensure the correct VPS state is being modified. Accesses to the TLS block modifies the active VPS only. For example, while an extension is executing its bootstrap handler, there is no active VPS, in which case any reads/writes to the general purpose registers from the TLS block will be lost. When an extension is executing from a VMExit handler, reads/writes to the general purpose registers from the TLS block are made to the VPS that generated the VMExit. If an extension then creates a VPS, the only way to modify the general purpose registers for the newly created VPS is through the read/write ABIs. Attempting to use the TLS block will modify the registers for the active VPS, not the newly created VPS. The only way to set a VPS to "active" is to use the run ABI, which on success does not return, meaning the extension has to wait for a VMExit before the newly create VPS's general purpose registers can be accessed from the TLS block.
 
 Although this seems overly complicated, this optimization works well for the majority of the VMExits an extension will have to handle, especially the VMExits that execute frequently as most of the time an extension will only be modifying the general purpose registers for the active VPS.
 
@@ -1095,173 +1087,7 @@ This syscall tells the microkernel to initialize a VPS using the root VP state p
 | :---- | :---------- |
 | 0x0000000000000002 | Defines the syscall index for bf_vps_op_init_as_root |
 
-### 2.12.9. bf_vps_op_read8, OP=0x6, IDX=0x3
-
-Reads an 8bit field from the VPS and returns the value. The "index" is architecture-specific. For Intel, Appendix B, "Field Encoding in VMCS," defines the index (or encoding). For AMD, Appendix B, "Layout of VMCB," defines the index (or offset).
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to read from |
-| REG1 | 63:16 | REVI |
-| REG2 | 63:0 | The HVE specific index defining which field to read |
-
-**Output:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 7:0 | The resulting value |
-| REG1 | 63:8 | REVI |
-
-**const, bf_uint64_t: BF_VPS_OP_READ8_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x0000000000000003 | Defines the syscall index for bf_vps_op_read8 |
-
-### 2.12.10. bf_vps_op_read16, OP=0x6, IDX=0x4
-
-Reads a 16bit field from the VPS and returns the value. The "index" is architecture-specific. For Intel, Appendix B, "Field Encoding in VMCS," defines the index (or encoding). For AMD, Appendix B, "Layout of VMCB," defines the index (or offset).
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to read from |
-| REG1 | 63:16 | REVI |
-| REG2 | 63:0 | The HVE specific index defining which field to read |
-
-**Output:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 15:0 | The resulting value |
-| REG1 | 63:16 | REVI |
-
-**const, bf_uint64_t: BF_VPS_OP_READ16_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x0000000000000004 | Defines the syscall index for bf_vps_op_read16 |
-
-### 2.12.11. bf_vps_op_read32, OP=0x6, IDX=0x5
-
-Reads a 32bit field from the VPS and returns the value. The "index" is architecture-specific. For Intel, Appendix B, "Field Encoding in VMCS," defines the index (or encoding). For AMD, Appendix B, "Layout of VMCB," defines the index (or offset).
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to read from |
-| REG1 | 63:16 | REVI |
-| REG2 | 63:0 | The HVE specific index defining which field to read |
-
-**Output:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 31:0 | The resulting value |
-| REG1 | 63:32 | REVI |
-
-**const, bf_uint64_t: BF_VPS_OP_READ32_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x0000000000000005 | Defines the syscall index for bf_vps_op_read32 |
-
-### 2.12.12. bf_vps_op_read64, OP=0x6, IDX=0x6
-
-Reads a 64bit field from the VPS and returns the value. The "index" is architecture-specific. For Intel, Appendix B, "Field Encoding in VMCS," defines the index (or encoding). For AMD, Appendix B, "Layout of VMCB," defines the index (or offset).
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to read from |
-| REG1 | 63:16 | REVI |
-| REG2 | 63:0 | The HVE specific index defining which field to read |
-
-**Output:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | The resulting value |
-
-**const, bf_uint64_t: BF_VPS_OP_READ64_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x0000000000000006 | Defines the syscall index for bf_vps_op_read64 |
-
-### 2.12.13. bf_vps_op_write8, OP=0x6, IDX=0x7
-
-Writes to an 8bit field in the VPS. The "index" is architecture-specific. For Intel, Appendix B, "Field Encoding in VMCS," defines the index (or encoding). For AMD, Appendix B, "Layout of VMCB," defines the index (or offset).
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to write |
-| REG1 | 63:16 | REVI |
-| REG2 | 63:0 | The HVE specific index defining which field to write |
-| REG3 | 7:0 | The value to write to the requested field |
-| REG3 | 63:8 | REVI |
-
-**const, bf_uint64_t: BF_VPS_OP_WRITE8_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x0000000000000007 | Defines the syscall index for bf_vps_op_write8 |
-
-### 2.12.14. bf_vps_op_write16, OP=0x6, IDX=0x8
-
-Writes to a 16bit field in the VPS. The "index" is architecture-specific. For Intel, Appendix B, "Field Encoding in VMCS," defines the index (or encoding). For AMD, Appendix B, "Layout of VMCB," defines the index (or offset).
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to write |
-| REG1 | 63:16 | REVI |
-| REG2 | 63:0 | The HVE specific index defining which field to write |
-| REG3 | 15:0 | The value to write to the requested field |
-| REG3 | 63:16 | REVI |
-
-**const, bf_uint64_t: BF_VPS_OP_WRITE16_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x0000000000000008 | Defines the syscall index for bf_vps_op_write16 |
-
-### 2.12.15. bf_vps_op_write32, OP=0x6, IDX=0x9
-
-Writes to a 32bit field in the VPS. The "index" is architecture-specific. For Intel, Appendix B, "Field Encoding in VMCS," defines the index (or encoding). For AMD, Appendix B, "Layout of VMCB," defines the index (or offset).
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to write |
-| REG1 | 63:16 | REVI |
-| REG2 | 63:0 | The HVE specific index defining which field to write |
-| REG3 | 7:0 | The value to write to the requested field |
-| REG3 | 63:32 | REVI |
-
-**const, bf_uint64_t: BF_VPS_OP_WRITE32_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x0000000000000009 | Defines the syscall index for bf_vps_op_write32 |
-
-### 2.12.16. bf_vps_op_write64, OP=0x6, IDX=0xA
-
-Writes to a 64bit field in the VPS. The "index" is architecture-specific. For Intel, Appendix B, "Field Encoding in VMCS," defines the index (or encoding). For AMD, Appendix B, "Layout of VMCB," defines the index (or offset).
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to write |
-| REG1 | 63:16 | REVI |
-| REG2 | 63:0 | The HVE specific index defining which field to write |
-| REG3 | 63:0 | The value to write to the requested field |
-
-**const, bf_uint64_t: BF_VPS_OP_WRITE64_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x000000000000000A | Defines the syscall index for bf_vps_op_write64 |
-
-### 2.12.17. bf_vps_op_read_reg, OP=0x6, IDX=0xB
+### 2.12.17. bf_vps_op_read, OP=0x6, IDX=0xB
 
 Reads a CPU register from the VPS given a bf_reg_t. Note that the bf_reg_t is architecture-specific.
 
@@ -1278,12 +1104,12 @@ Reads a CPU register from the VPS given a bf_reg_t. Note that the bf_reg_t is ar
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | The resulting value |
 
-**const, bf_uint64_t: BF_VPS_OP_READ_REG_IDX_VAL**
+**const, bf_uint64_t: BF_VPS_OP_READ_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x000000000000000B | Defines the syscall index for bf_vps_op_read_reg |
+| 0x000000000000000B | Defines the syscall index for bf_vps_op_read |
 
-### 2.12.18. bf_vps_op_write_reg, OP=0x6, IDX=0xC
+### 2.12.18. bf_vps_op_write, OP=0x6, IDX=0xC
 
 Writes to a CPU register in the VPS given a bf_reg_t and the value to write. Note that the bf_reg_t is architecture-specific.
 
@@ -1296,10 +1122,10 @@ Writes to a CPU register in the VPS given a bf_reg_t and the value to write. Not
 | REG2 | 63:0 | A bf_reg_t defining which register to write to |
 | REG3 | 63:0 | The value to write to the requested register |
 
-**const, bf_uint64_t: BF_VPS_OP_WRITE_REG_IDX_VAL**
+**const, bf_uint64_t: BF_VPS_OP_WRITE_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x000000000000000C | Defines the syscall index for bf_vps_op_write_reg |
+| 0x000000000000000C | Defines the syscall index for bf_vps_op_write |
 
 ### 2.12.19. bf_vps_op_run, OP=0x5, IDX=0xD
 

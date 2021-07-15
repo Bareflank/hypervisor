@@ -27,6 +27,7 @@
 #ifndef ALLOC_AND_COPY_EXT_ELF_FILES_FROM_USER_H
 #define ALLOC_AND_COPY_EXT_ELF_FILES_FROM_USER_H
 
+#include <elf_file_t.h>
 #include <span_t.h>
 
 /**
@@ -45,9 +46,10 @@
  * <!-- inputs/outputs -->
  *   @param ext_elf_files_from_user the ELF files to copy
  *   @param copied_ext_elf_files where to copy the ELF files too
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t alloc_and_copy_ext_elf_files_from_user(
-    struct span_t const *const ext_elf_files_from_user, struct span_t *const copied_ext_elf_files);
+    struct span_t const *const ext_elf_files_from_user,
+    struct elf_file_t *const copied_ext_elf_files);
 
 #endif

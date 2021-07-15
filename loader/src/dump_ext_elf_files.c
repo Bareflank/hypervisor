@@ -39,18 +39,18 @@
 void
 dump_ext_elf_files(struct span_t *const files)
 {
-    uint64_t idx;
+    uint64_t i;
 
     if (((void *)0) == files) {
         bferror("files is NULL");
         return;
     }
 
-    for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
-        if (((void *)0) != files[idx].addr) {
-            bfdebug_d32("ext elf file", (uint32_t)idx);
-            bfdebug_x64(" - addr", (uint64_t)files[idx].addr);
-            bfdebug_x64(" - size", files[idx].size);
+    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_EXTENSIONS; ++i) {
+        if (((void *)0) != files[i].addr) {
+            bfdebug_d32("ext elf file", (uint32_t)i);
+            bfdebug_x64(" - addr", (uint64_t)files[i].addr);
+            bfdebug_x64(" - size", files[i].size);
         }
     }
 }

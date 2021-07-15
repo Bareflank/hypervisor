@@ -66,12 +66,12 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         initialize(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
-            vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool) noexcept -> bsl::errc_type
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic,
+            vp_pool_t const &vp_pool,
+            vps_pool_t const &vps_pool) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -110,12 +110,12 @@ namespace example
         ///
         static constexpr void
         release(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
-            vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool) noexcept
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic,
+            vp_pool_t const &vp_pool,
+            vps_pool_t const &vps_pool) noexcept
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -143,12 +143,12 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         dispatch(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
-            vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool,
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic,
+            vp_pool_t const &vp_pool,
+            vps_pool_t const &vps_pool,
             bsl::safe_uint16 const &vpsid,
             bsl::safe_uint64 const &fail_reason) noexcept -> bsl::errc_type
         {

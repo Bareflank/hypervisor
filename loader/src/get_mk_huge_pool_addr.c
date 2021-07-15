@@ -37,7 +37,7 @@
  *   @param base_virt provide the base virtual address that the huge pool
  *     was mapped to.
  *   @param addr where to store the resulting addr of the huge pool
- *   @return 0 on success, LOADER_FAILURE on failure.
+ *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
 get_mk_huge_pool_addr(

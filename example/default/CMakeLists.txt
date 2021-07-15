@@ -69,17 +69,7 @@ endmacro(example_target_source)
 #   macros in the code.
 #
 
-target_include_directories(example_default PRIVATE
-    include
-    src
-)
-
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
-    target_include_directories(example_default PRIVATE
-        include/x64
-        src/x64
-    )
-
     if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
         target_include_directories(example_default PRIVATE
             include/x64/amd
@@ -93,6 +83,11 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
             src/x64/intel
         )
     endif()
+
+    target_include_directories(example_default PRIVATE
+        include/x64
+        src/x64
+    )
 endif()
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
@@ -101,6 +96,11 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
         src/arm/aarch64
     )
 endif()
+
+target_include_directories(example_default PRIVATE
+    include
+    src
+)
 
 # ------------------------------------------------------------------------------
 # Headers

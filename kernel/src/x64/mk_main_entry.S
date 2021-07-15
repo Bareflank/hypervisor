@@ -117,7 +117,7 @@ mk_main_entry:
     mov rax, rbx
     mov rdx, TLS_SIZE
     mul rdx
-    lea rsi, [rip + g_tls_blocks]
+    lea rsi, [rip + g_mut_tls_blocks]
     add rsi, rax
 
     /**
@@ -208,7 +208,7 @@ mk_main_entry:
      */
 
     mov rdx, [rdi + ARGS_OFFSET_DEBUG_RING]
-    lea rax, [rip + g_debug_ring]
+    lea rax, [rip + g_pmut_mut_debug_ring]
     mov [rax], rdx
 
     /**

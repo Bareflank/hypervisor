@@ -135,27 +135,24 @@ namespace integration
                 return ret;
             }
 
-            constexpr auto guest_asid_idx{0x0058_u64};
-            constexpr auto guest_asid_val{0x1_u32};
-
-            ret = sys.bf_vps_op_write32(m_id, guest_asid_idx, guest_asid_val);
+            constexpr auto guest_asid_val{0x1_u64};
+            ret = sys.bf_vps_op_write(m_id, syscall::bf_reg_t::bf_reg_t_guest_asid, guest_asid_val);
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
 
-            constexpr auto intercept_instr1_idx{0x000C_u64};
-            constexpr auto intercept_instr1_val{0x00040000_u32};
-            constexpr auto intercept_instr2_idx{0x0010_u64};
-            constexpr auto intercept_instr2_val{0x00000001_u32};
-
-            ret = sys.bf_vps_op_write32(m_id, intercept_instr1_idx, intercept_instr1_val);
+            constexpr auto intercept_instr1_val{0x00040000_u64};
+            ret = sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_intercept_instruction1, intercept_instr1_val);
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
 
-            ret = sys.bf_vps_op_write32(m_id, intercept_instr2_idx, intercept_instr2_val);
+            constexpr auto intercept_instr2_val{0x00000001_u64};
+            ret = sys.bf_vps_op_write(
+                m_id, syscall::bf_reg_t::bf_reg_t_intercept_instruction2, intercept_instr2_val);
             if (bsl::unlikely_assert(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;

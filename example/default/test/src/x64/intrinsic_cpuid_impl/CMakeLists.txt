@@ -49,11 +49,7 @@
 #   using constinit, constness and noexcept. None of the code in this test
 #   actually runs and instead it is there to ensure the code signatures make
 #   sense. The "behavior" test is where the code is actually executed to make
-#   sure it executes as expected. This code will run the tests both at compile
-#   time and at runtime. If a specific test cannot be run at compile time
-#   (which hopefully is minimal if the code is structured properly), you can
-#   use the bsl::ut_given_at_runtime instead of bsl::ut_given, which will
-#   exclude the test from compile time checks.
+#   sure it executes as expected.
 #
 # - Each test only includes the one thing that is trying to test. For example,
 #   suppose we are testing the bootstrap_t logic. This file includes a number

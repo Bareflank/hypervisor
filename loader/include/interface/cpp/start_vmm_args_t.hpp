@@ -39,10 +39,10 @@ namespace loader
     constexpr auto START_VMM_CMD{0xBF01_u32};
 
     /// @brief defines the type used for passing the ext ELF files
-    using ext_elf_file_type = bsl::span<bsl::uint8 const>;
+    using elf_file_type = bsl::span<bsl::uint8 const>;
 
     /// @brief defines the type used for passing the ext ELF files
-    using ext_elf_files_type = bsl::array<ext_elf_file_type, HYPERVISOR_MAX_EXTENSIONS.get()>;
+    using ext_elf_files_type = bsl::array<elf_file_type, HYPERVISOR_MAX_EXTENSIONS.get()>;
 
     /// @struct loader::start_vmm_args_t
     ///
@@ -64,7 +64,7 @@ namespace loader
         bsl::uint32 reserved;
 
         /// @brief stores the ELF file associated with the microkernel
-        bsl::span<bsl::uint8 const> mk_elf_file;
+        elf_file_type mk_elf_file;
         /// @brief stores the ELF files associated with the extensions
         ext_elf_files_type ext_elf_files;
     };

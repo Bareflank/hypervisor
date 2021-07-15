@@ -42,65 +42,39 @@ namespace example
     {
         bsl::ut_scenario{"initialize success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                fail_t fail{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                fail_t mut_fail{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(fail.initialize(gs, tls, sys, intrinsic, vp_pool, vps_pool));
+                    bsl::ut_check(mut_fail.initialize({}, {}, {}, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"release executes without initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                fail_t fail{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                fail_t mut_fail{};
                 bsl::ut_then{} = [&]() noexcept {
-                    fail.release(gs, tls, sys, intrinsic, vp_pool, vps_pool);
+                    mut_fail.release({}, {}, {}, {}, {}, {});
                 };
             };
         };
 
         bsl::ut_scenario{"release executes with initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                fail_t fail{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                fail_t mut_fail{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(
-                        fail.initialize(gs, tls, sys, intrinsic, vp_pool, vps_pool));
+                    bsl::ut_required_step(mut_fail.initialize({}, {}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
-                        fail.release(gs, tls, sys, intrinsic, vp_pool, vps_pool);
+                        mut_fail.release({}, {}, {}, {}, {}, {});
                     };
                 };
             };
         };
 
-        bsl::ut_scenario{"dispatch always fails"} = []() noexcept {
+        bsl::ut_scenario{"dispatch always mut_fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                fail_t fail{};
-                gs_t gs{};
-                tls_t tls{};
-                syscall::bf_syscall_t sys{};
-                intrinsic_t intrinsic{};
-                vp_pool_t vp_pool{};
-                vps_pool_t vps_pool{};
+                fail_t mut_fail{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(
-                        !fail.dispatch(gs, tls, sys, intrinsic, vp_pool, vps_pool, {}, {}));
+                    bsl::ut_check(!mut_fail.dispatch({}, {}, {}, {}, {}, {}, {}, {}));
                 };
             };
         };

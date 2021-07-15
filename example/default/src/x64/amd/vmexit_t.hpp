@@ -65,12 +65,12 @@ namespace example
         ///
         [[nodiscard]] static constexpr auto
         initialize(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
-            vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool) noexcept -> bsl::errc_type
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic,
+            vp_pool_t const &vp_pool,
+            vps_pool_t const &vps_pool) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -100,12 +100,12 @@ namespace example
         ///
         static constexpr void
         release(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
-            vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool) noexcept
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t const &sys,
+            intrinsic_t const &intrinsic,
+            vp_pool_t const &vp_pool,
+            vps_pool_t const &vps_pool) noexcept
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -126,7 +126,7 @@ namespace example
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
         ///   @param tls the tls_t to use
-        ///   @param sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
         ///   @param vps_pool the vps_pool_t to use
@@ -136,18 +136,16 @@ namespace example
         ///
         [[nodiscard]] static constexpr auto
         handle_cpuid(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
-            vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool,
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t &mut_sys,
+            intrinsic_t const &intrinsic,
+            vp_pool_t const &vp_pool,
+            vps_pool_t const &vps_pool,
             bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
         {
             bsl::discard(vp_pool);
             bsl::discard(vps_pool);
-
-            bsl::errc_type ret{};
 
             /// NOTE:
             /// - The first thing that we need to do is get the current values
@@ -157,10 +155,10 @@ namespace example
             ///   correctly.
             ///
 
-            auto rax{sys.bf_tls_rax()};
-            auto rbx{sys.bf_tls_rbx()};
-            auto rcx{sys.bf_tls_rcx()};
-            auto rdx{sys.bf_tls_rdx()};
+            auto mut_rax{mut_sys.bf_tls_rax()};
+            auto mut_rbx{mut_sys.bf_tls_rbx()};
+            auto mut_rcx{mut_sys.bf_tls_rcx()};
+            auto mut_rdx{mut_sys.bf_tls_rdx()};
 
             /// NOTE:
             /// - Before we execute CPUID, we need to check to see if we have
@@ -168,8 +166,8 @@ namespace example
             ///   CPUID differently.
             ///
 
-            if (loader::CPUID_COMMAND_EAX == bsl::to_u32_unsafe(rax)) {
-                switch (bsl::to_u32_unsafe(rcx).get()) {
+            if (loader::CPUID_COMMAND_EAX == bsl::to_u32_unsafe(mut_rax)) {
+                switch (bsl::to_u32_unsafe(mut_rcx).get()) {
                     case loader::CPUID_COMMAND_ECX_STOP.get(): {
 
                         /// NOTE:
@@ -181,7 +179,7 @@ namespace example
                         ///   being over used.
                         ///
 
-                        if (sys.bf_tls_ppid() == (sys.bf_tls_online_pps() - 1_u16)) {
+                        if (mut_sys.bf_tls_ppid() == (mut_sys.bf_tls_online_pps() - 1_u16)) {
                             bsl::print() << bsl::endl;
                             syscall::bf_debug_op_dump_page_pool();
                             bsl::print() << bsl::endl;
@@ -202,9 +200,9 @@ namespace example
                         ///   to decode anything, so that is up to you.
                         ///
 
-                        if constexpr (BSL_DEBUG_LEVEL > bsl::V) {
+                        if constexpr (bsl::debug_level_is_at_least_vv()) {
                             bsl::print() << bsl::endl;
-                            syscall::bf_debug_op_dump_vmexit_log(sys.bf_tls_ppid());
+                            syscall::bf_debug_op_dump_vmexit_log(mut_sys.bf_tls_ppid());
                         }
 
                         /// NOTE:
@@ -219,17 +217,17 @@ namespace example
                         ///   it is "done", because it might fail.
                         ///
 
-                        bsl::debug() << bsl::rst << "about to"                     // --
-                                     << bsl::red << " promote "                    // --
-                                     << bsl::rst << "root OS on pp "               // --
-                                     << bsl::cyn << bsl::hex(sys.bf_tls_ppid())    // --
-                                     << bsl::rst << bsl::endl;                     // --
+                        bsl::debug() << bsl::rst << "about to"                         // --
+                                     << bsl::red << " promote "                        // --
+                                     << bsl::rst << "root OS on pp "                   // --
+                                     << bsl::cyn << bsl::hex(mut_sys.bf_tls_ppid())    // --
+                                     << bsl::rst << bsl::endl;                         // --
 
                         /// NOTE:
                         /// - Report success
                         ///
 
-                        sys.bf_tls_set_rax(loader::CPUID_COMMAND_RAX_SUCCESS);
+                        mut_sys.bf_tls_set_rax(loader::CPUID_COMMAND_RAX_SUCCESS);
 
                         /// NOTE:
                         /// - Before we can stop, we need to advance RIP.
@@ -239,7 +237,7 @@ namespace example
                         ///   exit before then so we need to advance now.
                         ///
 
-                        ret = sys.bf_vps_op_advance_ip(vpsid);
+                        auto const ret{mut_sys.bf_vps_op_advance_ip(vpsid)};
                         if (bsl::unlikely_assert(!ret)) {
                             bsl::print<bsl::V>() << bsl::here();
                             return ret;
@@ -254,7 +252,7 @@ namespace example
                         ///   hypervisor turned off.
                         ///
 
-                        return sys.bf_vps_op_promote(vpsid);
+                        return mut_sys.bf_vps_op_promote(vpsid);
                     }
 
                     case loader::CPUID_COMMAND_ECX_REPORT_ON.get(): {
@@ -265,13 +263,13 @@ namespace example
                         ///   want here, this is just the default behavior.
                         ///
 
-                        bsl::debug() << bsl::rst << "root OS had been"             // --
-                                     << bsl::grn << " demoted "                    // --
-                                     << bsl::rst << "to vm "                       // --
-                                     << bsl::cyn << bsl::hex(sys.bf_tls_vmid())    // --
-                                     << bsl::rst << " on pp "                      // --
-                                     << bsl::cyn << bsl::hex(sys.bf_tls_ppid())    // --
-                                     << bsl::rst << bsl::endl;                     // --
+                        bsl::debug() << bsl::rst << "root OS had been"                 // --
+                                     << bsl::grn << " demoted "                        // --
+                                     << bsl::rst << "to vm "                           // --
+                                     << bsl::cyn << bsl::hex(mut_sys.bf_tls_vmid())    // --
+                                     << bsl::rst << " on pp "                          // --
+                                     << bsl::cyn << bsl::hex(mut_sys.bf_tls_ppid())    // --
+                                     << bsl::rst << bsl::endl;                         // --
 
                         break;
                     }
@@ -292,7 +290,7 @@ namespace example
 
                     default: {
                         bsl::error() << "unsupported cpuid command "    // --
-                                     << bsl::hex(rcx)                   // --
+                                     << bsl::hex(mut_rcx)               // --
                                      << bsl::endl                       // --
                                      << bsl::here();                    // --
 
@@ -305,7 +303,7 @@ namespace example
                 ///   the currently loaded VM, VP and VPS.
                 ///
 
-                return sys.bf_vps_op_advance_ip_and_run_current();
+                return mut_sys.bf_vps_op_advance_ip_and_run_current();
             }
 
             /// NOTE:
@@ -314,7 +312,7 @@ namespace example
             ///   returning the results.
             ///
 
-            intrinsic.cpuid(gs, tls, rax, rbx, rcx, rdx);
+            intrinsic.cpuid(gs, tls, mut_rax, mut_rbx, mut_rcx, mut_rdx);
 
             /// NOTE:
             /// - Write the results of CPUID to the VP's registers. Note that
@@ -323,17 +321,17 @@ namespace example
             ///   sure that we are emulating CPUID properly.
             ///
 
-            sys.bf_tls_set_rax(rax);
-            sys.bf_tls_set_rbx(rbx);
-            sys.bf_tls_set_rcx(rcx);
-            sys.bf_tls_set_rdx(rdx);
+            mut_sys.bf_tls_set_rax(mut_rax);
+            mut_sys.bf_tls_set_rbx(mut_rbx);
+            mut_sys.bf_tls_set_rcx(mut_rcx);
+            mut_sys.bf_tls_set_rdx(mut_rdx);
 
             /// NOTE:
             /// - Complete the emulation of CPUID by advancing RIP and running
             ///   the currently loaded VM, VP and VPS.
             ///
 
-            return sys.bf_vps_op_advance_ip_and_run_current();
+            return mut_sys.bf_vps_op_advance_ip_and_run_current();
         }
 
         /// <!-- description -->
@@ -342,7 +340,7 @@ namespace example
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
         ///   @param tls the tls_t to use
-        ///   @param sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
         ///   @param vps_pool the vps_pool_t to use
@@ -353,12 +351,12 @@ namespace example
         ///
         [[nodiscard]] static constexpr auto
         dispatch(
-            gs_t &gs,
-            tls_t &tls,
-            syscall::bf_syscall_t &sys,
-            intrinsic_t &intrinsic,
-            vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool,
+            gs_t const &gs,
+            tls_t const &tls,
+            syscall::bf_syscall_t &mut_sys,
+            intrinsic_t const &intrinsic,
+            vp_pool_t const &vp_pool,
+            vps_pool_t const &vps_pool,
             bsl::safe_uint16 const &vpsid,
             bsl::safe_uint64 const &exit_reason) noexcept -> bsl::errc_type
         {
@@ -375,7 +373,7 @@ namespace example
 
             switch (exit_reason.get()) {
                 case exit_reason_cpuid.get(): {
-                    return handle_cpuid(gs, tls, sys, intrinsic, vp_pool, vps_pool, vpsid);
+                    return handle_cpuid(gs, tls, mut_sys, intrinsic, vp_pool, vps_pool, vpsid);
                 }
 
                 default: {

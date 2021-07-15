@@ -27,9 +27,9 @@
 #ifndef G_MK_ELF_FILE_H
 #define G_MK_ELF_FILE_H
 
-#include <span_t.h>
+#include <elf_file_t.h>
 
 /** @brief stores ELF file associated with the microkernel */
-extern struct span_t g_mk_elf_file;
+extern struct elf_file_t g_mk_elf_file;
 
 #endif

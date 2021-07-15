@@ -42,7 +42,7 @@ namespace mk
     {
         bsl::ut_scenario{"print_thread_id executes"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                bsl::details::out_type<BSL_DEBUG_LEVEL, bsl::details::out_type_debug> o{};
+                bsl::details::out_type<BSL_DEBUG_LEVEL, bsl::details::out_type_debug> const o{};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::details::ut_print_thread_id(o);
                 };

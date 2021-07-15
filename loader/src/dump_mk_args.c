@@ -39,7 +39,7 @@
 void
 dump_mk_args(struct mk_args_t *const args, uint32_t const cpu)
 {
-    uint64_t idx;
+    uint64_t i;
 
     if (((void *)0) == args) {
         bferror("args is NULL");
@@ -51,13 +51,11 @@ dump_mk_args(struct mk_args_t *const args, uint32_t const cpu)
     bfdebug_ptr(" - mk_state", args->mk_state);
     bfdebug_ptr(" - root_vp_state", args->root_vp_state);
     bfdebug_ptr(" - debug_ring", args->debug_ring);
-    bfdebug_ptr(" - mk_elf_file.addr", args->mk_elf_file.addr);
-    bfdebug_x64(" - mk_elf_file.size", args->mk_elf_file.size);
+    bfdebug_ptr(" - mk_elf_file", args->mk_elf_file);
 
-    for (idx = ((uint64_t)0); idx < HYPERVISOR_MAX_EXTENSIONS; ++idx) {
-        if (((void *)0) != args->ext_elf_files[idx].addr) {
-            bfdebug_ptr(" - ext_elf_files.addr", args->ext_elf_files[idx].addr);
-            bfdebug_x64(" - ext_elf_files.size", args->ext_elf_files[idx].size);
+    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_EXTENSIONS; ++i) {
+        if (((void *)0) != args->ext_elf_files[i]) {
+            bfdebug_ptr(" - ext_elf_files", args->ext_elf_files[i]);
         }
     }
 
