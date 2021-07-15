@@ -92,6 +92,7 @@ list(APPEND HEADERS
 	${CMAKE_CURRENT_LIST_DIR}/include/efi/efi_file_protocol.h
 	${CMAKE_CURRENT_LIST_DIR}/include/efi/efi_guid.h
 	${CMAKE_CURRENT_LIST_DIR}/include/efi/efi_interface_type.h
+	${CMAKE_CURRENT_LIST_DIR}/include/efi/efi_loaded_image_protocol.h
 	${CMAKE_CURRENT_LIST_DIR}/include/efi/efi_locate_search_type.h
 	${CMAKE_CURRENT_LIST_DIR}/include/efi/efi_memory_descriptor.h
 	${CMAKE_CURRENT_LIST_DIR}/include/efi/efi_memory_type.h

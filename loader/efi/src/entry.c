@@ -27,7 +27,7 @@
 #include <arch_locate_protocols.h>
 #include <debug.h>
 #include <dump_vmm_on_error_if_needed.h>
-#include <efi/efi_shell_protocol.h>
+#include <efi/efi_loaded_image_protocol.h>
 #include <efi/efi_simple_file_system_protocol.h>
 #include <efi/efi_status.h>
 #include <efi/efi_system_table.h>
@@ -48,8 +48,8 @@
 /** @brief defines the global pointer to the EFI_SYSTEM_TABLE */
 EFI_SYSTEM_TABLE *g_st = NULL;
 
-/** @brief defines the global pointer to the EFI_SHELL_PROTOCOL */
-EFI_SHELL_PROTOCOL *g_shell_protocol = NULL;
+/** @brief defines the global pointer to the EFI_LOADED_IMAGE_PROTOCOL */
+EFI_LOADED_IMAGE_PROTOCOL *g_loaded_image_protocol = NULL;
 
 /** @brief defines the global pointer to the EFI_SIMPLE_FILE_SYSTEM_PROTOCOL */
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *g_simple_file_system_protocol = NULL;
@@ -59,15 +59,13 @@ EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *g_simple_file_system_protocol = NULL;
  *   @brief Returns the size (in bytes) of the provided file
  *
  * <!-- inputs/outputs -->
- *   @param file_protocol the file protocol to use to get the file info
- *   @param hndl a handle to the file to query
+ *   @param file_protocol the file protocol for the file to query
  *   @param file_size where to return the resulting file size
  *   @return returns EFI_SUCCESS on success, and a non-EFI_SUCCESS value on
  *     failure.
  */
 EFI_STATUS
-get_file_size(
-    EFI_FILE_PROTOCOL *const file_protocol, EFI_FILE_PROTOCOL *const hndl, UINTN *const file_size)
+get_file_size(EFI_FILE_PROTOCOL *const file_protocol, UINTN *const file_size)
 {
     EFI_STATUS status = EFI_SUCCESS;
     EFI_GUID efi_file_info_guid = EFI_FILE_INFO_ID;
@@ -82,7 +80,7 @@ get_file_size(
      *   get the file size, and then free this buffer.
      */
 
-    status = file_protocol->GetInfo(hndl, &efi_file_info_guid, &efi_file_info_size, NULL);
+    status = file_protocol->GetInfo(file_protocol, &efi_file_info_guid, &efi_file_info_size, NULL);
     if (status != EFI_BUFFER_TOO_SMALL) {
         bferror_x64("GetInfo failed", status);
         goto get_info_failed_size;
@@ -95,7 +93,8 @@ get_file_size(
         goto allocate_pool_failed;
     }
 
-    status = file_protocol->GetInfo(hndl, &efi_file_info_guid, &efi_file_info_size, efi_file_info);
+    status = file_protocol->GetInfo(
+        file_protocol, &efi_file_info_guid, &efi_file_info_size, efi_file_info);
     if (EFI_ERROR(status)) {
         bferror_x64("GetInfo failed", status);
         goto get_info_failed;
@@ -121,7 +120,7 @@ get_info_failed_size:
  *     provided file.
  *
  * <!-- inputs/outputs -->
- *   @param file_protocol the file protocol to use to get the file contents
+ *   @param volume_protocol the file protocol for the boot volume
  *   @param filename the file to read
  *   @param file where to store the resulting buffer containing the file
  *     contents. This buffer must be freed by the caller.
@@ -129,18 +128,20 @@ get_info_failed_size:
  *     failure.
  */
 EFI_STATUS
-read_file(EFI_FILE_PROTOCOL *const file_protocol, CHAR16 *const filename, struct span_t *const file)
+read_file(
+    EFI_FILE_PROTOCOL *const volume_protocol, CHAR16 *const filename, struct span_t *const file)
 {
     EFI_STATUS status = EFI_SUCCESS;
-    SHELL_FILE_HANDLE hndl = NULL;
+    EFI_FILE_PROTOCOL *file_protocol = NULL;
 
-    status = g_shell_protocol->OpenFileByName(filename, &hndl, EFI_FILE_MODE_READ);
+    status =
+        volume_protocol->Open(volume_protocol, &file_protocol, filename, EFI_FILE_MODE_READ, 0);
     if (EFI_ERROR(status)) {
-        bferror_x64("OpenFileByName failed", status);
-        goto get_file_size_failed;
+        bferror_x64("Open failed", status);
+        goto open_failed;
     }
 
-    status = get_file_size(file_protocol, hndl, &file->size);
+    status = get_file_size(file_protocol, &file->size);
     if (EFI_ERROR(status)) {
         bferror_x64("get_file_size failed", status);
         goto get_file_size_failed;
@@ -153,13 +154,13 @@ read_file(EFI_FILE_PROTOCOL *const file_protocol, CHAR16 *const filename, struct
         goto allocate_pool_failed;
     }
 
-    status = file_protocol->Read(hndl, &file->size, (VOID *)file->addr);
+    status = file_protocol->Read(file_protocol, &file->size, (VOID *)file->addr);
     if (EFI_ERROR(status)) {
         bferror_x64("Read failed", status);
         goto read_failed;
     }
 
-    file_protocol->Close(hndl);
+    file_protocol->Close(file_protocol);
     return EFI_SUCCESS;
 
 read_failed:
@@ -168,7 +169,7 @@ read_failed:
     file->size = ((uint64_t)0);
 allocate_pool_failed:
 get_file_size_failed:
-    file_protocol->Close(hndl);
+    file_protocol->Close(file_protocol);
 open_failed:
 
     return status;
@@ -183,10 +184,10 @@ open_failed:
  *     failure.
  */
 EFI_STATUS
-locate_protocols(void)
+locate_protocols(EFI_HANDLE ImageHandle)
 {
     EFI_STATUS status = EFI_SUCCESS;
-    EFI_GUID efi_shell_protocol_guid = EFI_SHELL_PROTOCOL_GUID;
+    EFI_GUID efi_loaded_image_protocol_guid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
     EFI_GUID efi_simple_file_system_protocol_guid = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID;
 
     status = arch_locate_protocols();
@@ -195,17 +196,19 @@ locate_protocols(void)
         return status;
     }
 
-    status = g_st->BootServices->LocateProtocol(
-        &efi_shell_protocol_guid, NULL, (VOID **)&g_shell_protocol);
+    status = g_st->BootServices->HandleProtocol(
+        ImageHandle, &efi_loaded_image_protocol_guid, (VOID **)&g_loaded_image_protocol);
     if (EFI_ERROR(status)) {
-        bferror_x64("LocateProtocol EFI_SHELL_PROTOCOL failed", status);
+        bferror_x64("HandleProtocol EFI_LOADED_IMAGE_PROTOCOL failed", status);
         return status;
     }
 
-    status = g_st->BootServices->LocateProtocol(
-        &efi_simple_file_system_protocol_guid, NULL, (VOID **)&g_simple_file_system_protocol);
+    status = g_st->BootServices->HandleProtocol(
+        g_loaded_image_protocol->DeviceHandle,
+        &efi_simple_file_system_protocol_guid,
+        (VOID **)&g_simple_file_system_protocol);
     if (EFI_ERROR(status)) {
-        bferror_x64("LocateProtocol EFI_SIMPLE_FILE_SYSTEM_PROTOCOL failed", status);
+        bferror_x64("HandleProtocol EFI_SIMPLE_FILE_SYSTEM_PROTOCOL failed", status);
         return status;
     }
 
@@ -224,24 +227,23 @@ EFI_STATUS
 load_images_and_start(void)
 {
     EFI_STATUS status = EFI_SUCCESS;
-    EFI_FILE_PROTOCOL *file_protocol = NULL;
+    EFI_FILE_PROTOCOL *volume_protocol = NULL;
     struct start_vmm_args_t start_args = {0};
 
     status =
-        g_simple_file_system_protocol->OpenVolume(g_simple_file_system_protocol, &file_protocol);
+        g_simple_file_system_protocol->OpenVolume(g_simple_file_system_protocol, &volume_protocol);
     if (EFI_ERROR(status)) {
         bferror_x64("OpenVolume failed", status);
         return status;
     }
 
-    status = read_file(file_protocol, L"fs0:\\bareflank_kernel", &start_args.mk_elf_file);
+    status = read_file(volume_protocol, L"bareflank_kernel", &start_args.mk_elf_file);
     if (EFI_ERROR(status)) {
         bferror_x64("open_kernel failed", status);
         return status;
     }
 
-    status =
-        read_file(file_protocol, L"fs0:\\bareflank_extension0", &(start_args.ext_elf_files[0]));
+    status = read_file(volume_protocol, L"bareflank_extension0", &(start_args.ext_elf_files[0]));
     if (EFI_ERROR(status)) {
         bferror_x64("open_extensions failed", status);
         return status;
@@ -290,7 +292,7 @@ efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 
     serial_init();
 
-    status = locate_protocols();
+    status = locate_protocols(ImageHandle);
     if (EFI_ERROR(status)) {
         bferror_x64("locate_protocols failed", status);
         return EFI_SUCCESS;
