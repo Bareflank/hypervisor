@@ -54,12 +54,12 @@ if(HYPERVISOR_MAX_EXTENSIONS LESS 1)
     message(FATAL_ERROR "HYPERVISOR_MAX_EXTENSIONS must be at least 1")
 endif()
 
-if(HYPERVISOR_MAX_VMS LESS 1)
-    message(FATAL_ERROR "HYPERVISOR_MAX_VMS must be at least 1")
-endif()
-
 if(HYPERVISOR_MAX_PPS LESS 1)
     message(FATAL_ERROR "HYPERVISOR_MAX_PPS must be at least 1")
+endif()
+
+if(HYPERVISOR_MAX_VMS LESS 1)
+    message(FATAL_ERROR "HYPERVISOR_MAX_VMS must be at least 1")
 endif()
 
 if(HYPERVISOR_MAX_VPS LESS HYPERVISOR_MAX_PPS)

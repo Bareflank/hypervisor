@@ -77,7 +77,7 @@ dev_release(struct inode *inode, struct file *file)
 }
 
 static long
-handle_start_vmm(void *const ioctl_args)
+dispatch_start_vmm(void *const ioctl_args)
 {
     int64_t ret;
     struct start_vmm_args_t args;
@@ -99,7 +99,7 @@ handle_start_vmm(void *const ioctl_args)
 }
 
 static long
-handle_stop_vmm(void *const ioctl_args)
+dispatch_stop_vmm(void *const ioctl_args)
 {
     int64_t ret;
     struct stop_vmm_args_t args;
@@ -121,7 +121,7 @@ handle_stop_vmm(void *const ioctl_args)
 }
 
 static long
-handle_dump_vmm(void *const ioctl_args)
+dispatch_dump_vmm(void *const ioctl_args)
 {
     int64_t ret;
     struct dump_vmm_args_t *args;
@@ -170,13 +170,13 @@ dev_unlocked_ioctl(
 {
     switch (cmd) {
         case LOADER_START_VMM: {
-            return handle_start_vmm((void *)ioctl_args);
+            return dispatch_start_vmm((void *)ioctl_args);
         }
         case LOADER_STOP_VMM: {
-            return handle_stop_vmm((void *)ioctl_args);
+            return dispatch_stop_vmm((void *)ioctl_args);
         }
         case LOADER_DUMP_VMM: {
-            return handle_dump_vmm((void *)ioctl_args);
+            return dispatch_dump_vmm((void *)ioctl_args);
         }
         default: {
             bferror_x64("invalid ioctl cmd", cmd);
