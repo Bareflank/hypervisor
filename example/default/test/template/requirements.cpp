@@ -111,8 +111,6 @@ main() noexcept -> bsl::exit_code
                 static_assert(noexcept(!mut_errc1));
                 static_assert(noexcept(mut_errc1.success()));
                 static_assert(noexcept(mut_errc1.failure()));
-                static_assert(noexcept(mut_errc1.is_checked()));
-                static_assert(noexcept(mut_errc1.is_unchecked()));
                 static_assert(noexcept(mut_errc1 == errc4));
                 static_assert(noexcept(mut_errc1 != errc4));
 
@@ -124,8 +122,6 @@ main() noexcept -> bsl::exit_code
                 static_assert(noexcept(!errc3));
                 static_assert(noexcept(errc3.success()));
                 static_assert(noexcept(errc3.failure()));
-                static_assert(noexcept(errc3.is_checked()));
-                static_assert(noexcept(errc3.is_unchecked()));
                 static_assert(noexcept(errc3 == errc4));
                 static_assert(noexcept(errc3 != errc4));
             };

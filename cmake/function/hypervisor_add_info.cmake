@@ -174,12 +174,12 @@ macro(hypervisor_add_info)
     )
 
     add_custom_command(TARGET info
-        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_MAX_VMS             ${BF_COLOR_CYN}${HYPERVISOR_MAX_VMS}${BF_COLOR_RST}"
+        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_MAX_PPS             ${BF_COLOR_CYN}${HYPERVISOR_MAX_PPS}${BF_COLOR_RST}"
         VERBATIM
     )
 
     add_custom_command(TARGET info
-        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_MAX_PPS             ${BF_COLOR_CYN}${HYPERVISOR_MAX_PPS}${BF_COLOR_RST}"
+        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_MAX_VMS             ${BF_COLOR_CYN}${HYPERVISOR_MAX_VMS}${BF_COLOR_RST}"
         VERBATIM
     )
 

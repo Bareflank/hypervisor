@@ -250,11 +250,11 @@ namespace example
             }
 
             if (bsl::unlikely_assert(syscall::BF_INVALID_ID == vpid)) {
-                bsl::error() << "vm "                                              // --
-                             << bsl::hex(vpid)                                     // --
-                             << " is invalid and a vp cannot be assigned to it"    // --
-                             << bsl::endl                                          // --
-                             << bsl::here();                                       // --
+                bsl::error() << "vp "                                               // --
+                             << bsl::hex(vpid)                                      // --
+                             << " is invalid and a vps cannot be assigned to it"    // --
+                             << bsl::endl                                           // --
+                             << bsl::here();                                        // --
 
                 return bsl::errc_invalid_argument;
             }

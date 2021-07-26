@@ -4,19 +4,17 @@
   - [1.1. Reserved Values](#11-reserved-values)
   - [1.2. Document Revision](#12-document-revision)
   - [1.3. Glossary](#13-glossary)
-  - [1.4. Scalar Types](#14-scalar-types)
   - [1.5. ID Types](#15-id-types)
   - [1.6. Constants, Structures, Enumerations, and Bit Fields](#16-constants-structures-enumerations-and-bit-fields)
-    - [1.6.1. Null](#161-null)
     - [1.6.2. Handle Type](#162-handle-type)
     - [1.6.3. Register Type](#163-register-type)
     - [1.6.4. Exit Type](#164-exit-type)
     - [1.6.5. Bootstrap Callback Handler Type](#165-bootstrap-callback-handler-type)
     - [1.6.6. VMExit Callback Handler Type](#166-vmexit-callback-handler-type)
     - [1.6.7. Fast Fail Callback Handler Type](#167-fast-fail-callback-handler-type)
-  - [1.7. Invalid ID](#17-invalid-id)
+  - [1.7. ID Constants](#17-id-constants)
+  - [1.7. Endianness](#17-endianness)
   - [1.8. Host PAT (Intel/AMD Only)](#18-host-pat-intelamd-only)
-  - [1.9. Endianness](#19-endianness)
 - [2. Syscall Interface](#2-syscall-interface)
   - [2.1. Legal Syscall Environments](#21-legal-syscall-environments)
   - [2.2. Syscall Status Codes](#22-syscall-status-codes)
@@ -135,131 +133,42 @@ This specification is specific to 64bit Intel and AMD processors conforming to t
 | Page Aligned | A region of memory whose address is divisible by 0x1000 |
 | Page | A page aligned region of memory that is 0x1000 bytes in size |
 
-## 1.4. Scalar Types
-
-| Name | Type | Description |
-| :--- | :--- | :-----------|
-| bf_status_t | uint64_t | Defines the type used for returning status from a function |
-| bf_uint8_t | uint8_t | Defines an unsigned 8bit integer |
-| bf_uint16_t | uint16_t | Defines an unsigned 16bit integer |
-| bf_uint32_t | uint32_t | Defines an unsigned 32bit integer |
-| bf_uint64_t | uint64_t | Defines an unsigned 64bit integer |
-| bf_ptr_t | void * | Defines a raw pointer type |
-| bf_cptr_t | void const * | Defines a raw const pointer type |
-
 ## 1.5. ID Types
 
 | Name | Type |
 | :--- | :--- |
-| Virtual Machine ID (VMID) | bf_uint64_t |
-| Virtual Processor ID (VPID) | bf_uint64_t |
-| Virtual Processor State ID (VPSID) | bf_uint64_t |
-| Physical Processor ID (PPID) | bf_uint64_t |
+| Virtual Machine ID (VMID) | uint64_t |
+| Virtual Processor ID (VPID) | uint64_t |
+| Virtual Processor State ID (VPSID) | uint64_t |
+| Physical Processor ID (PPID) | uint64_t |
+| Extension ID (EXTID) | uint64_t |
 
 ## 1.6. Constants, Structures, Enumerations, and Bit Fields
 
-### 1.6.1. Null
-
-**const, void *: BF_NULL**
-| Value | Description |
-| :---- | :---------- |
-| 0 | Defines the value of a null pointer |
-
 ### 1.6.2. Handle Type
 
-The bf_handle_t structure is an opaque structure containing the handle used by most of the syscalls in this specification. The opaque structure is used internally by the C wrapper interface and should not be accessed directly. The C wrapper is allowed to redefine the internal layout of this structure at any time (e.g., the C wrapper might provide an alternative layout for unit testing).
+The bf_handle_t structure is an opaque structure containing the handle used by most of the syscalls in this specification.
 
 **struct: bf_handle_t**
 | Name | Type | Offset | Size | Description |
 | :--- | :--- | :----- | :--- | :---------- |
-| hndl | bf_uint64_t | 0x0 | 8 bytes | The handle returned by bf_handle_op_open_handle |
+| hndl | uint64_t | 0x0 | 8 bytes | The handle returned by bf_handle_op_open_handle |
 
 ### 1.6.3. Register Type
 
 Defines which register a syscall is requesting.
 
-**enum, bf_uint64_t: bf_reg_t**
+**enum, uint64_t: bf_reg_t**
 | Name | Value | Description |
 | :--- | :---- | :---------- |
-| bf_reg_t_rax | 0 | defines the rax register |
-| bf_reg_t_rbx | 1 | defines the rbx register |
-| bf_reg_t_rcx | 2 | defines the rcx register |
-| bf_reg_t_rdx | 3 | defines the rdx register |
-| bf_reg_t_rbp | 4 | defines the rbp register |
-| bf_reg_t_rsi | 5 | defines the rsi register |
-| bf_reg_t_rdi | 6 | defines the rdi register |
-| bf_reg_t_r8 | 7 | defines the r8 register |
-| bf_reg_t_r9 | 8 | defines the r9 register |
-| bf_reg_t_r10 | 9 | defines the r10 register |
-| bf_reg_t_r11 | 10 | defines the r11 register |
-| bf_reg_t_r12 | 11 | defines the r12 register |
-| bf_reg_t_r13 | 12 | defines the r13 register |
-| bf_reg_t_r14 | 13 | defines the r14 register |
-| bf_reg_t_r15 | 14 | defines the r15 register |
-| bf_reg_t_rip | 15 | defines the rip register |
-| bf_reg_t_rsp | 16 | defines the rsp register |
-| bf_reg_t_rflags | 17 | defines the rflags register |
-| bf_reg_t_gdtr_base_addr | 18 | defines the gdtr_base_addr register |
-| bf_reg_t_gdtr_limit | 19 | defines the gdtr_limit register |
-| bf_reg_t_idtr_base_addr | 20 | defines the idtr_base_addr register |
-| bf_reg_t_idtr_limit | 21 | defines the idtr_limit register |
-| bf_reg_t_es | 22 | defines the es register |
-| bf_reg_t_es_base_addr | 23 | defines the es_base_addr register |
-| bf_reg_t_es_limit | 24 | defines the es_limit register |
-| bf_reg_t_es_attributes | 25 | defines the es_attributes register |
-| bf_reg_t_cs | 26 | defines the cs register |
-| bf_reg_t_cs_base_addr | 27 | defines the cs_base_addr register |
-| bf_reg_t_cs_limit | 28 | defines the cs_limit register |
-| bf_reg_t_cs_attributes | 29 | defines the cs_attributes register |
-| bf_reg_t_ss | 30 | defines the ss register |
-| bf_reg_t_ss_base_addr | 31 | defines the ss_base_addr register |
-| bf_reg_t_ss_limit | 32 | defines the ss_limit register |
-| bf_reg_t_ss_attributes | 33 | defines the ss_attributes register |
-| bf_reg_t_ds | 34 | defines the ds register |
-| bf_reg_t_ds_base_addr | 35 | defines the ds_base_addr register |
-| bf_reg_t_ds_limit | 36 | defines the ds_limit register |
-| bf_reg_t_ds_attributes | 37 | defines the ds_attributes register |
-| bf_reg_t_fs | 38 | defines the fs register |
-| bf_reg_t_fs_base_addr | 39 | defines the fs_base_addr register |
-| bf_reg_t_fs_limit | 40 | defines the fs_limit register |
-| bf_reg_t_fs_attributes | 41 | defines the fs_attributes register |
-| bf_reg_t_gs | 42 | defines the gs register |
-| bf_reg_t_gs_base_addr | 43 | defines the gs_base_addr register |
-| bf_reg_t_gs_limit | 44 | defines the gs_limit register |
-| bf_reg_t_gs_attributes | 45 | defines the gs_attributes register |
-| bf_reg_t_ldtr | 46 | defines the ldtr register |
-| bf_reg_t_ldtr_base_addr | 47 | defines the ldtr_base_addr register |
-| bf_reg_t_ldtr_limit | 48 | defines the ldtr_limit register |
-| bf_reg_t_ldtr_attributes | 49 | defines the ldtr_attributes register |
-| bf_reg_t_tr | 50 | defines the tr register |
-| bf_reg_t_tr_base_addr | 51 | defines the tr_base_addr register |
-| bf_reg_t_tr_limit | 52 | defines the tr_limit register |
-| bf_reg_t_tr_attributes | 53 | defines the tr_attributes register |
-| bf_reg_t_cr0 | 54 | defines the cr0 register |
-| bf_reg_t_cr2 | 55 | defines the cr2 register |
-| bf_reg_t_cr3 | 56 | defines the cr3 register |
-| bf_reg_t_cr4 | 57 | defines the cr4 register |
-| bf_reg_t_dr6 | 58 | defines the dr6 register |
-| bf_reg_t_dr7 | 59 | defines the dr7 register |
-| bf_reg_t_ia32_efer | 60 | defines the ia32_efer register |
-| bf_reg_t_ia32_star | 61 | defines ia32_star register |
-| bf_reg_t_ia32_lstar | 62 | defines ia32_lstar register |
-| bf_reg_t_ia32_cstar | 63 | defines ia32_cstar register |
-| bf_reg_t_ia32_fmask | 64 | defines ia32_fmask register |
-| bf_reg_t_ia32_fs_base | 65 | defines ia32_fs_base register |
-| bf_reg_t_ia32_gs_base | 66 | defines ia32_gs_base register |
-| bf_reg_t_ia32_kernel_gs_base | 67 | defines ia32_kernel_gs_base register |
-| bf_reg_t_ia32_sysenter_cs | 68 | defines ia32_sysenter_cs register |
-| bf_reg_t_ia32_sysenter_esp | 69 | defines ia32_sysenter_esp register |
-| bf_reg_t_ia32_sysenter_eip | 70 | defines ia32_sysenter_eip register |
-| bf_reg_t_ia32_pat | 71 | defines ia32_pat register |
-| bf_reg_t_ia32_debugctl | 72 | defines ia32_debugctl register |
+
+TBD
 
 ### 1.6.4. Exit Type
 
 Defines the exit type used by bf_control_op_exit
 
-**enum, bf_uint64_t: bf_exit_status_t**
+**enum, uint64_t: bf_exit_status_t**
 | Name | Value | Description |
 | :--- | :---- | :---------- |
 | bf_exit_status_t_success | 0 | Exit with a success code |
@@ -269,13 +178,13 @@ Defines the exit type used by bf_control_op_exit
 
 Defines the signature of the bootstrap callback handler
 
-**typedef, void(*bf_callback_handler_bootstrap_t)(bf_uint16_t)**
+**typedef, void(*bf_callback_handler_bootstrap_t)(uint16_t)**
 
 ### 1.6.6. VMExit Callback Handler Type
 
 Defines the signature of the VM exit callback handler
 
-**typedef, void(*bf_callback_handler_vmexit_t)(bsl::bf_uint16_t, bf_uint64_t)**
+**typedef, void(*bf_callback_handler_vmexit_t)(bsl::uint16_t, uint64_t)**
 
 ### 1.6.7. Fast Fail Callback Handler Type
 
@@ -283,37 +192,37 @@ Defines the signature of the fast fail callback handler
 
 **typedef, void(*bf_callback_handler_fail_t)(bf_status_t)**
 
-## 1.7. Invalid ID
+## 1.7. ID Constants
 
-The following defines an invalid ID which can be used for all ID types.
+The following defines some ID constants.
 
-**const, bf_uint16_t: BF_INVALID_ID**
+**const, uint16_t: BF_INVALID_ID**
 | Value | Description |
 | :---- | :---------- |
-| 0xFFFF | Defines an invalid ID for an extension, VM, VP and VPS |
+| 0xFFFF | Defines an invalid ID for an extension, VM, VP, VPS and PP |
 
-**const, bf_uint16_t: BF_BS_PPID**
+**const, uint16_t: BF_BS_PPID**
 | Value | Description |
 | :---- | :---------- |
 | 0x0 | Defines the bootstrap physical processor ID |
 
-**const, bf_uint16_t: BF_ROOT_VMID**
+**const, uint16_t: BF_ROOT_VMID**
 | Value | Description |
 | :---- | :---------- |
 | 0x0 | Defines the root virtual machine ID |
+
+## 1.7. Endianness
+
+This document only applies to 64bit Intel and AMD systems conforming to the amd64 architecture. As such, this document is limited to little endian.
 
 ## 1.8. Host PAT (Intel/AMD Only)
 
 The host PAT has the following layout. Indexes marked as XX are reserved for future use.
 
-**const, bf_uint64_t: BF_HOST_PAT**
+**const, uint64_t: BF_HOST_PAT**
 | Value | Description |
 | :---- | :---------- |
 | 0xXXXXXXXX00XXXX06 | Defines the host PAT value |
-
-## 1.9. Endianness
-
-This document only applies to 64bit Intel and AMD systems conforming to the amd64 architecture. As such, this document conforms to little-endian.
 
 # 2. Syscall Interface
 
@@ -321,7 +230,7 @@ The following section defines the syscall interface used by this specification, 
 
 ## 2.1. Legal Syscall Environments
 
-Kernel and user-space can execute syscalls from 64bit mode.
+Userspace can execute syscalls from 64bit mode.
 
 ## 2.2. Syscall Status Codes
 
@@ -333,7 +242,7 @@ Every syscall returns a bf_status_t to indicate the success or failure of a sysc
 | 47:16 | BF_STATUS_FLAGS | Contains the flags associated with the bf_status_t |
 | 15:0 | BF_STATUS_VALUE | Contains the value of the bf_status_t |
 
-BF_STATUS_VALUE defines success or which type of error occurred. BF_STATUS_FLAGS provides additional information about why the error occurred. BF_STATUS_FLAGS is optional and used solely for diagnostics. As such, the microkernel may or may not provide it.
+BF_STATUS_VALUE defines success or which type of error occurred. BF_STATUS_FLAGS provides additional information about why the error occurred.
 
 ### 2.2.1. BF_STATUS_SUCCESS, VALUE=0
 
@@ -361,8 +270,6 @@ BF_STATUS_VALUE defines success or which type of error occurred. BF_STATUS_FLAGS
 
 ### 2.2.3. BF_STATUS_INVALID_PERM, VALUE=2
 
-BF_STATUS_INVALID_PERM defines a permissions failure.
-
 **const, bf_status_t: BF_STATUS_INVALID_PERM_EXT**
 | Value | Description |
 | :---- | :---------- |
@@ -374,8 +281,6 @@ BF_STATUS_INVALID_PERM defines a permissions failure.
 | 0xDEAD000000020002 | Indicates the policy engine denied the syscall |
 
 ### 2.2.4. BF_STATUS_INVALID_PARAMS, VALUE=3
-
-BF_STATUS_INVALID_PARAMS defines that one or more input/output parameters provided to the C wrapper was invalid.
 
 **const, bf_status_t: BF_STATUS_INVALID_PARAMS0**
 | Value | Description |
@@ -426,39 +331,39 @@ Every syscall must provide information about the syscall by filling out RAX as f
 | 31:16 | BF_SYSCALL_OP | Contains the syscall's opcode |
 | 15:0 | BF_SYSCALL_IDX | Contains the syscall's index |
 
-**const, bf_uint64_t: BF_SYSCALL_SIG_VAL**
+**const, uint64_t: BF_SYSCALL_SIG_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x6642000000000000 | Defines the BF_SYSCALL_SIG field for RAX |
 
-**const, bf_uint64_t: BF_HYPERCALL_SIG_MASK**
+**const, uint64_t: BF_HYPERCALL_SIG_MASK**
 | Value | Description |
 | :---- | :---------- |
 | 0xFFFF000000000000 | Defines a mask for BF_SYSCALL_SIG |
 
-**const, bf_uint64_t: BF_HYPERCALL_FLAGS_MASK**
+**const, uint64_t: BF_HYPERCALL_FLAGS_MASK**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000FFFF00000000 | Defines a mask for BF_SYSCALL_FLAGS |
 
-**const, bf_uint64_t: BF_HYPERCALL_OPCODE_MASK**
+**const, uint64_t: BF_HYPERCALL_OPCODE_MASK**
 | Value | Description |
 | :---- | :---------- |
 | 0xFFFF0000FFFF0000 | Defines a mask for BF_SYSCALL_OP |
 
-**const, bf_uint64_t: BF_HYPERCALL_OPCODE_NOSIG_MASK**
+**const, uint64_t: BF_HYPERCALL_OPCODE_NOSIG_MASK**
 | Value | Description |
 | :---- | :---------- |
 | 0x00000000FFFF0000 | Defines a mask for BF_SYSCALL_OP (with no signature added) |
 
-**const, bf_uint64_t: BF_HYPERCALL_INDEX_MASK**
+**const, uint64_t: BF_HYPERCALL_INDEX_MASK**
 | Value | Description |
 | :---- | :---------- |
 | 0x000000000000FFFF | Defines a mask for BF_SYSCALL_IDX |
 
 BF_SYSCALL_SIG is used to ensure the syscall is, in fact, a Bareflank specific syscall. BF_SYSCALL_FLAGS is used to provide additional syscall options.
 
-BF_SYSCALL_OP determines which opcode the syscall belongs to, logically grouping syscalls based on their function. BF_SYSCALL_OP is also used internally within the microkernel to dispatch the syscall to the proper handler. BF_SYSCALL_IDX, when combined with BF_SYSCALL_OP, uniquely identifies a specific syscall. This specification tightly packs the values assigned to both BF_SYSCALL_IDX and BF_SYSCALL_OP to ensure Bareflank (and variants) can use jump tables instead of branch logic (depends on the trade-off between retpoline mitigations and branch induced pipeline stalls).
+BF_SYSCALL_OP determines which opcode the syscall belongs to, logically grouping syscalls based on their function. BF_SYSCALL_OP is also used internally within the microkernel to dispatch the syscall to the proper handler. BF_SYSCALL_IDX, when combined with BF_SYSCALL_OP, uniquely identifies a specific syscall. This specification tightly packs the values assigned to both BF_SYSCALL_IDX and BF_SYSCALL_OP to ensure Bareflank (and variants) can use jump tables instead of branch logic.
 
 The following defines the input registers for x64 based systems (i.e., x86_64 and amd64):
 
@@ -501,108 +406,108 @@ The following sections define the different opcodes that are supported by this s
 
 ### 2.5.1. Control Support
 
-**const, bf_uint64_t: BF_CONTROL_OP_VAL**
+**const, uint64_t: BF_CONTROL_OP_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x6642000000000000 | Defines the syscall opcode for bf_control_op |
 
-**const, bf_uint64_t: BF_CONTROL_OP_NOSIG_VAL**
+**const, uint64_t: BF_CONTROL_OP_NOSIG_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the syscall opcode for bf_control_op (nosig) |
 
 ### 2.5.2. Handle Support
 
-**const, bf_uint64_t: BF_HANDLE_OP_VAL**
+**const, uint64_t: BF_HANDLE_OP_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x6642000000010000 | Defines the syscall opcode for bf_handle_op |
 
-**const, bf_uint64_t: BF_HANDLE_OP_NOSIG_VAL**
+**const, uint64_t: BF_HANDLE_OP_NOSIG_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000010000 | Defines the syscall opcode for bf_handle_op (nosig) |
 
 ### 2.5.3. Debug Support
 
-**const, bf_uint64_t: BF_DEBUG_OP_VAL**
+**const, uint64_t: BF_DEBUG_OP_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x6642000000020000 | Defines the syscall opcode for bf_debug_op |
 
-**const, bf_uint64_t: BF_DEBUG_OP_NOSIG_VAL**
+**const, uint64_t: BF_DEBUG_OP_NOSIG_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x00000000000020000 | Defines the syscall opcode for bf_debug_op (nosig) |
 
 ### 2.5.4. Callback Support
 
-**const, bf_uint64_t: BF_CALLBACK_OP_VAL**
+**const, uint64_t: BF_CALLBACK_OP_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x6642000000030000 | Defines the syscall opcode for bf_callback_op |
 
-**const, bf_uint64_t: BF_CALLBACK_OP_NOSIG_VAL**
+**const, uint64_t: BF_CALLBACK_OP_NOSIG_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000030000 | Defines the syscall opcode for bf_callback_op (nosig) |
 
 ### 2.5.5. VM Support
 
-**const, bf_uint64_t: BF_VM_OP_VAL**
+**const, uint64_t: BF_VM_OP_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x6642000000040000 | Defines the syscall opcode for bf_vm_op |
 
-**const, bf_uint64_t: BF_VM_OP_NOSIG_VAL**
+**const, uint64_t: BF_VM_OP_NOSIG_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000040000 | Defines the syscall opcode for bf_vm_op (nosig) |
 
 ### 2.5.6. VP Support
 
-**const, bf_uint64_t: BF_VP_OP_VAL**
+**const, uint64_t: BF_VP_OP_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x6642000000050000 | Defines the syscall opcode for bf_vp_op |
 
-**const, bf_uint64_t: BF_VP_OP_NOSIG_VAL**
+**const, uint64_t: BF_VP_OP_NOSIG_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000050000 | Defines the syscall opcode for bf_vp_op (nosig) |
 
 ### 2.5.7. VPS Support
 
-**const, bf_uint64_t: BF_VPS_OP_VAL**
+**const, uint64_t: BF_VPS_OP_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x6642000000060000 | Defines the syscall opcode for bf_vps_op |
 
-**const, bf_uint64_t: BF_VPS_OP_NOSIG_VAL**
+**const, uint64_t: BF_VPS_OP_NOSIG_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000060000 | Defines the syscall opcode for bf_vps_op (nosig) |
 
 ### 2.5.8. Intrinsic Support
 
-**const, bf_uint64_t: BF_INTRINSIC_OP_VAL**
+**const, uint64_t: BF_INTRINSIC_OP_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x6642000000070000 | Defines the syscall opcode for bf_intrinsic_op |
 
-**const, bf_uint64_t: BF_INTRINSIC_OP_NOSIG_VAL**
+**const, uint64_t: BF_INTRINSIC_OP_NOSIG_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000070000 | Defines the syscall opcode for bf_intrinsic_op (nosig) |
 
 ### 2.5.9. Mem Support
 
-**const, bf_uint64_t: BF_MEM_OP_VAL**
+**const, uint64_t: BF_MEM_OP_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x6642000000080000 | Defines the syscall opcode for bf_mem_op |
 
-**const, bf_uint64_t: BF_MEM_OP_NOSIG_VAL**
+**const, uint64_t: BF_MEM_OP_NOSIG_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000080000 | Defines the syscall opcode for bf_mem_op (nosig) |
@@ -611,17 +516,17 @@ The following sections define the different opcodes that are supported by this s
 
 The following defines the specification IDs used when opening a handle. These provide software with a means to define which specification it implements. bf_handle_op_version defines which version of this spec the microkernel supports. For example, if bf_handle_op_version returns 0x2, it means that it supports version #1 of this spec, in which case, an extension can open a handle with BF_SPEC_ID1_VAL. If bf_handle_op_version returns a value of 0x6, it would mean that an extension could open a handle with BF_SPEC_ID1_VAL or BF_SPEC_ID2_VAL. Likewise, if bf_handle_op_version returns 0x4, it means that BF_SPEC_ID1_VAL is no longer supported, and the extension must open the handle with BF_SPEC_ID2_VAL.
 
-**const, bf_uint32_t: BF_SPEC_ID1_VAL**
+**const, uint32_t: BF_SPEC_ID1_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x31236642 | Defines the ID for version #1 of this spec |
 
-**const, bf_uint32_t: BF_SPEC_ID1_MASK**
+**const, uint32_t: BF_SPEC_ID1_MASK**
 | Value | Description |
 | :---- | :---------- |
 | 0x2 | Defines the mask for checking support for version #1 of this spec |
 
-**const, bf_uint32_t: BF_ALL_SPECS_SUPPORTED_VAL**
+**const, uint32_t: BF_ALL_SPECS_SUPPORTED_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x2 | Defines the value likely returned by bf_handle_op_version |
@@ -639,7 +544,7 @@ Although this seems overly complicated, this optimization works well for the maj
 
 ### 2.6.1. TLS Offsets
 
-**consts, void *: bf_uint64_t**
+**consts, void *: uint64_t**
 | Name | Value | Description |
 | :--- | :---- | :---------- |
 | TLS_OFFSET_RAX | 0x800U | stores the offset for rax |
@@ -670,7 +575,7 @@ Although this seems overly complicated, this optimization works well for the maj
 
 This syscall tells the microkernel to stop the execution of an extension, providing a means to fast fail.
 
-**const, bf_uint64_t: BF_CONTROL_OP_EXIT_IDX_VAL**
+**const, uint64_t: BF_CONTROL_OP_EXIT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the syscall index for bf_control_op_exit |
@@ -679,7 +584,7 @@ This syscall tells the microkernel to stop the execution of an extension, provid
 
 This syscall tells the microkernel that the extension would like to wait for a callback. This syscall is a blocking syscall that never returns and should be used to return from the _start function.
 
-**const, bf_uint64_t: BF_CONTROL_OP_WAIT_IDX_VAL**
+**const, uint64_t: BF_CONTROL_OP_WAIT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the syscall index for bf_control_op_wait |
@@ -701,7 +606,7 @@ This syscall returns the handle that is required to execute the remaining syscal
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | The value to set REG0 to for most other syscalls |
 
-**const, bf_uint64_t: BF_HANDLE_OP_OPEN_HANDLE_IDX_VAL**
+**const, uint64_t: BF_HANDLE_OP_OPEN_HANDLE_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the syscall index for bf_handle_op_open_handle |
@@ -715,7 +620,7 @@ This syscall closes a previously opened handle.
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
 
-**const, bf_uint64_t: BF_HANDLE_OP_CLOSE_HANDLE_IDX_VAL**
+**const, uint64_t: BF_HANDLE_OP_CLOSE_HANDLE_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the syscall index for bf_handle_op_close_handle |
@@ -732,7 +637,7 @@ This syscall tells the microkernel to output RDI and RSI to the console device t
 | REG0 | 63:0 | The first value to output to the microkernel's console |
 | REG1 | 63:0 | The second value to output to the microkernel's console |
 
-**const, bf_uint64_t: BF_DEBUG_OP_OUT_IDX_VAL**
+**const, uint64_t: BF_DEBUG_OP_OUT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the syscall index for bf_debug_op_out |
@@ -746,7 +651,7 @@ This syscall tells the microkernel to output a VM's state to the console device 
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | The VMID of the VM's state to output |
 
-**const, bf_uint64_t: BF_DEBUG_OP_DUMP_VM_IDX_VAL**
+**const, uint64_t: BF_DEBUG_OP_DUMP_VM_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the syscall index for bf_debug_op_dump_vm |
@@ -760,7 +665,7 @@ This syscall tells the microkernel to output a VP's state to the console device 
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | The VPID of the VP's state to output |
 
-**const, bf_uint64_t: BF_DEBUG_OP_DUMP_VP_IDX_VAL**
+**const, uint64_t: BF_DEBUG_OP_DUMP_VP_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000002 | Defines the syscall index for bf_debug_op_dump_vp |
@@ -774,7 +679,7 @@ This syscall tells the microkernel to output a VPS's state to the console device
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | The VPSID of the VPS's state to output |
 
-**const, bf_uint64_t: BF_DEBUG_OP_DUMP_VPS_IDX_VAL**
+**const, uint64_t: BF_DEBUG_OP_DUMP_VPS_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000003 | Defines the syscall index for bf_debug_op_dump_vps |
@@ -788,7 +693,7 @@ This syscall tells the microkernel to output the VMExit log. The VMExit log is a
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | The PPID of the PP to dump the log from |
 
-**const, bf_uint64_t: BF_DEBUG_OP_DUMP_VMEXIT_LOG_IDX_VAL**
+**const, uint64_t: BF_DEBUG_OP_DUMP_VMEXIT_LOG_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000003 | Defines the syscall index for bf_debug_op_dump_vmexit_log |
@@ -803,7 +708,7 @@ This syscall tells the microkernel to output a provided character to the microke
 | REG0 | 7:0 | The character to output |
 | REG0 | 63:8 | REVI |
 
-**const, bf_uint64_t: BF_DEBUG_OP_WRITE_C_IDX_VAL**
+**const, uint64_t: BF_DEBUG_OP_WRITE_C_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000005 | Defines the syscall index for bf_debug_op_write_c |
@@ -817,7 +722,7 @@ This syscall tells the microkernel to output a provided string to the microkerne
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | The virtual address of a null terminated string to output |
 
-**const, bf_uint64_t: BF_DEBUG_OP_WRITE_STR_IDX_VAL**
+**const, uint64_t: BF_DEBUG_OP_WRITE_STR_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000006 | Defines the syscall index for bf_debug_op_write_str |
@@ -831,7 +736,7 @@ This syscall tells the microkernel to output an extension's state to the console
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | The EXTID of the extensions's state to output |
 
-**const, bf_uint64_t: BF_DEBUG_OP_DUMP_EXT_IDX_VAL**
+**const, uint64_t: BF_DEBUG_OP_DUMP_EXT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000007 | Defines the syscall index for bf_debug_op_dump_ext |
@@ -840,7 +745,7 @@ This syscall tells the microkernel to output an extension's state to the console
 
 This syscall tells the microkernel to output the page pool's stats to the console device the microkernel is currently using for debugging.
 
-**const, bf_uint64_t: BF_DEBUG_OP_DUMP_PAGE_POOL_IDX_VAL**
+**const, uint64_t: BF_DEBUG_OP_DUMP_PAGE_POOL_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000008 | Defines the syscall index for bf_debug_op_dump_page_pool |
@@ -849,7 +754,7 @@ This syscall tells the microkernel to output the page pool's stats to the consol
 
 This syscall tells the microkernel to output the huge pool's stats to the console device the microkernel is currently using for debugging.
 
-**const, bf_uint64_t: BF_DEBUG_OP_DUMP_HUGE_POOL_IDX_VAL**
+**const, uint64_t: BF_DEBUG_OP_DUMP_HUGE_POOL_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000009 | Defines the syscall index for bf_debug_op_dump_huge_pool |
@@ -866,7 +771,7 @@ This syscall tells the microkernel that the extension would like to receive call
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
 | REG1 | 63:0 | Set to the virtual address of the callback |
 
-**const, bf_uint64_t: BF_CALLBACK_OP_REGISTER_BOOTSTRAP_IDX_VAL**
+**const, uint64_t: BF_CALLBACK_OP_REGISTER_BOOTSTRAP_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000002 | Defines the syscall index for bf_callback_op_register_bootstrap |
@@ -881,7 +786,7 @@ This syscall tells the microkernel that the extension would like to receive call
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
 | REG1 | 63:0 | Set to the virtual address of the callback |
 
-**const, bf_uint64_t: BF_CALLBACK_OP_REGISTER_VMEXIT_IDX_VAL**
+**const, uint64_t: BF_CALLBACK_OP_REGISTER_VMEXIT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000003 | Defines the syscall index for bf_callback_op_register_vmexit |
@@ -896,7 +801,7 @@ This syscall tells the microkernel that the extension would like to receive call
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
 | REG1 | 63:0 | Set to the virtual address of the callback |
 
-**const, bf_uint64_t: BF_CALLBACK_OP_REGISTER_FAIL_IDX_VAL**
+**const, uint64_t: BF_CALLBACK_OP_REGISTER_FAIL_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000004 | Defines the syscall index for bf_callback_op_register_fail |
@@ -909,7 +814,7 @@ One important resource within the microkernel that changes when a VM changes is 
 
 ### 2.11.1. Virtual Machine ID (VMID)
 
-The Virtual Machine ID  (VMID) is a 16bit number that uniquely identifies a VM.
+The Virtual Machine ID (VMID) is a 16bit number that uniquely identifies a VM.
 
 ### 2.11.2. bf_vm_op_create_vm, OP=0x4, IDX=0x0
 
@@ -926,7 +831,7 @@ This syscall tells the microkernel to create a VM and return its ID.
 | REG0 | 15:0 | The resulting VMID of the newly created VM |
 | REG0 | 63:16 | REVI |
 
-**const, bf_uint64_t: BF_VM_OP_CREATE_VM_IDX_VAL**
+**const, uint64_t: BF_VM_OP_CREATE_VM_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the syscall index for bf_vm_op_create_vm |
@@ -942,7 +847,7 @@ This syscall tells the microkernel to destroy a VM given an ID.
 | REG1 | 15:0 | The VMID of the VM to destroy |
 | REG1 | 63:16 | REVI |
 
-**const, bf_uint64_t: BF_VM_OP_DESTROY_VM_IDX_VAL**
+**const, uint64_t: BF_VM_OP_DESTROY_VM_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the syscall index for bf_vm_op_destroy_vm |
@@ -976,7 +881,7 @@ This syscall tells the microkernel to create a VP given the IDs of the VM and PP
 | REG0 | 15:0 | The resulting VPID of the newly created VP |
 | REG0 | 63:16 | REVI |
 
-**const, bf_uint64_t: BF_VP_OP_CREATE_VP_IDX_VAL**
+**const, uint64_t: BF_VP_OP_CREATE_VP_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the syscall index for bf_vp_op_create_vp |
@@ -992,7 +897,7 @@ This syscall tells the microkernel to destroy a VP given an ID.
 | REG1 | 15:0 | The VPID of the VP to destroy |
 | REG1 | 63:16 | REVI |
 
-**const, bf_uint64_t: BF_VP_OP_DESTROY_VP_IDX_VAL**
+**const, uint64_t: BF_VP_OP_DESTROY_VP_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the syscall index for bf_vp_op_destroy_vp |
@@ -1016,7 +921,7 @@ Any additional migration responsibilities, like TSC synchronization, must be per
 | REG2 | 15:0 | The ID of the PP to assign the provided VP to |
 | REG2 | 63:16 | REVI |
 
-**const, bf_uint64_t: BF_VP_OP_MIGRATE_IDX_VAL**
+**const, uint64_t: BF_VP_OP_MIGRATE_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000002 | Defines the syscall index for bf_vp_op_migrate |
@@ -1050,7 +955,7 @@ This syscall tells the microkernel to create a VPS given the IDs of the VP and P
 | REG0 | 15:0 | The resulting VPSID of the newly created VPS |
 | REG0 | 63:16 | REVI |
 
-**const, bf_uint64_t: BF_VPS_OP_CREATE_VPS_IDX_VAL**
+**const, uint64_t: BF_VPS_OP_CREATE_VPS_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the syscall index for bf_vps_op_create_vps |
@@ -1066,7 +971,7 @@ This syscall tells the microkernel to destroy a VPS given an ID.
 | REG1 | 15:0 | The VPSID of the VPS to destroy |
 | REG1 | 63:16 | REVI |
 
-**const, bf_uint64_t: BF_VPS_OP_DESTROY_VPS_IDX_VAL**
+**const, uint64_t: BF_VPS_OP_DESTROY_VPS_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the syscall index for bf_vps_op_destroy_vps |
@@ -1082,7 +987,7 @@ This syscall tells the microkernel to initialize a VPS using the root VP state p
 | REG1 | 15:0 | The VPSID of the VPS to initialize |
 | REG1 | 63:16 | REVI |
 
-**const, bf_uint64_t: BF_VPS_OP_INIT_AS_ROOT_IDX_VAL**
+**const, uint64_t: BF_VPS_OP_INIT_AS_ROOT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000002 | Defines the syscall index for bf_vps_op_init_as_root |
@@ -1104,7 +1009,7 @@ Reads a CPU register from the VPS given a bf_reg_t. Note that the bf_reg_t is ar
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | The resulting value |
 
-**const, bf_uint64_t: BF_VPS_OP_READ_IDX_VAL**
+**const, uint64_t: BF_VPS_OP_READ_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x000000000000000B | Defines the syscall index for bf_vps_op_read |
@@ -1122,7 +1027,7 @@ Writes to a CPU register in the VPS given a bf_reg_t and the value to write. Not
 | REG2 | 63:0 | A bf_reg_t defining which register to write to |
 | REG3 | 63:0 | The value to write to the requested register |
 
-**const, bf_uint64_t: BF_VPS_OP_WRITE_IDX_VAL**
+**const, uint64_t: BF_VPS_OP_WRITE_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x000000000000000C | Defines the syscall index for bf_vps_op_write |
@@ -1150,7 +1055,7 @@ Unlike bf_vps_op_run_current which is really just a return to microkernel execut
 | REG3 | 15:0 | The VPSID of the VPS to run |
 | REG3 | 63:16 | REVI |
 
-**const, bf_uint64_t: BF_VPS_OP_RUN_IDX_VAL**
+**const, uint64_t: BF_VPS_OP_RUN_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x000000000000000D | Defines the syscall index for bf_vps_op_run |
@@ -1164,7 +1069,7 @@ bf_vps_op_run_current tells the microkernel to execute the currently active VPS,
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
 
-**const, bf_uint64_t: BF_VPS_OP_RUN_CURRENT_IDX_VAL**
+**const, uint64_t: BF_VPS_OP_RUN_CURRENT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x000000000000000E | Defines the syscall index for bf_vps_op_run_current |
@@ -1180,7 +1085,7 @@ This syscall tells the microkernel to advance the instruction pointer in the req
 | REG1 | 15:0 | The VPSID of the VPS advance the IP in |
 | REG1 | 63:16 | REVI |
 
-**const, bf_uint64_t: BF_VPS_OP_ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL**
+**const, uint64_t: BF_VPS_OP_ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x000000000000000F | Defines the syscall index for bf_vps_op_advance_ip |
@@ -1194,7 +1099,7 @@ This syscall tells the microkernel to advance the instruction pointer in the cur
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
 
-**const, bf_uint64_t: BF_VPS_OP_ADVANCE_IP_IDX_VAL**
+**const, uint64_t: BF_VPS_OP_ADVANCE_IP_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000010 | Defines the syscall index for bf_vps_op_advance_ip_and_run_current |
@@ -1210,7 +1115,7 @@ bf_vps_op_promote tells the microkernel to promote the requested VPS. bf_vps_op_
 | REG1 | 15:0 | The VPSID of the VPS to promote |
 | REG1 | 63:16 | REVI |
 
-**const, bf_uint64_t: BF_VPS_OP_PROMOTE_IDX_VAL**
+**const, uint64_t: BF_VPS_OP_PROMOTE_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000011 | Defines the syscall index for bf_vps_op_promote |
@@ -1226,7 +1131,7 @@ bf_vps_op_clear_vps tells the microkernel to clear the VPS's hardware cache, if 
 | REG1 | 15:0 | The VPSID of the VPS to clear |
 | REG1 | 63:16 | REVI |
 
-**const, bf_uint64_t: BF_VPS_OP_CLEAR_IDX_VAL**
+**const, uint64_t: BF_VPS_OP_CLEAR_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000012 | Defines the syscall index for bf_vps_op_clear_vps |
@@ -1249,7 +1154,7 @@ Reads an MSR directly from the CPU given the address of the MSR to read. Note th
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | The resulting value |
 
-**const, bf_uint64_t: BF_INTRINSIC_OP_RDMSR_IDX_VAL**
+**const, uint64_t: BF_INTRINSIC_OP_RDMSR_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the syscall index for bf_intrinsic_op_rdmsr |
@@ -1266,7 +1171,7 @@ Writes to an MSR directly from the CPU given the address of the MSR to write and
 | REG1 | 63:32 | REVI |
 | REG2 | 63:0 | The value to write to the requested MSR |
 
-**const, bf_uint64_t: BF_INTRINSIC_OP_WRMSR_IDX_VAL**
+**const, uint64_t: BF_INTRINSIC_OP_WRMSR_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the syscall index for bf_intrinsic_op_wrmsr |
@@ -1282,7 +1187,7 @@ Invalidates the TLB mapping for a given virtual page and a given ASID. Note that
 | REG1 | 63:0 | The address to invalidate |
 | REG2 | 63:0 | The ASID to invalidate |
 
-**const, bf_uint64_t: BF_INTRINSIC_OP_INVLPGA_IDX_VAL**
+**const, uint64_t: BF_INTRINSIC_OP_INVLPGA_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000002 | Defines the syscall index for bf_intrinsic_op_invlpga |
@@ -1298,7 +1203,7 @@ Invalidates mappings in the translation lookaside buffers (TLBs) and paging-stru
 | REG1 | 63:0 | The EPTP to invalidate |
 | REG2 | 63:0 | The INVEPT type (see the Intel SDM for details) |
 
-**const, bf_uint64_t: BF_INTRINSIC_OP_INVEPT_IDX_VAL**
+**const, uint64_t: BF_INTRINSIC_OP_INVEPT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000003 | Defines the syscall index for bf_intrinsic_op_invept |
@@ -1316,7 +1221,7 @@ Invalidates mappings in the translation lookaside buffers (TLBs) and paging-stru
 | REG2 | 63:16 | REVI |
 | REG3 | 63:0 | The INVVPID type (see the Intel SDM for details) |
 
-**const, bf_uint64_t: BF_INTRINSIC_OP_INVVPID_IDX_VAL**
+**const, uint64_t: BF_INTRINSIC_OP_INVVPID_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000004 | Defines the syscall index for bf_intrinsic_op_invvpid |
@@ -1356,7 +1261,7 @@ bf_mem_op_alloc_page allocates a page, and maps this page into the direct map of
 | REG0 | 63:0 | The virtual address of the resulting page |
 | REG1 | 63:0 | The physical address of the resulting page |
 
-**const, bf_uint64_t: BF_MEM_OP_ALLOC_PAGE_IDX_VAL**
+**const, uint64_t: BF_MEM_OP_ALLOC_PAGE_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the syscall index for bf_mem_op_alloc_page |
@@ -1375,7 +1280,7 @@ Frees a page previously allocated by bf_mem_op_alloc_page. This operation is opt
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 
-**const, bf_uint64_t: BF_MEM_OP_FREE_PAGE_IDX_VAL**
+**const, uint64_t: BF_MEM_OP_FREE_PAGE_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the syscall index for bf_mem_op_free_page |
@@ -1399,7 +1304,7 @@ bf_mem_op_alloc_huge allocates a physically contiguous block of memory. When all
 | REG0 | 63:0 | The virtual address of the resulting memory |
 | REG1 | 63:0 | The physical address of the resulting memory |
 
-**const, bf_uint64_t: BF_MEM_OP_ALLOC_HUGE_IDX_VAL**
+**const, uint64_t: BF_MEM_OP_ALLOC_HUGE_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000002 | Defines the syscall index for bf_mem_op_alloc_huge |
@@ -1418,7 +1323,7 @@ Frees memory previously allocated by bf_mem_op_alloc_huge. This operation is opt
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 
-**const, bf_uint64_t: BF_MEM_OP_FREE_HUGE_IDX_VAL**
+**const, uint64_t: BF_MEM_OP_FREE_HUGE_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000003 | Defines the syscall index for bf_mem_op_free_huge |
@@ -1443,7 +1348,7 @@ bf_mem_op_alloc_heap allocates heap memory. When allocating heap memory, the ext
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | The virtual address of the previous heap location |
 
-**const, bf_uint64_t: BF_MEM_OP_ALLOC_HEAP_IDX_VAL**
+**const, uint64_t: BF_MEM_OP_ALLOC_HEAP_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000004 | Defines the syscall index for bf_mem_op_alloc_heap |

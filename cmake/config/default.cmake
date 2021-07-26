@@ -233,18 +233,18 @@ bf_add_config(
 )
 
 bf_add_config(
-    CONFIG_NAME HYPERVISOR_MAX_VMS
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "16"
-    DESCRIPTION "Defines the hypervisor's max number of virtual machines supported"
-    SKIP_VALIDATION
-)
-
-bf_add_config(
     CONFIG_NAME HYPERVISOR_MAX_PPS
     CONFIG_TYPE STRING
     DEFAULT_VAL "128"
     DESCRIPTION "Defines the hypervisor's max number of physical processors supported"
+    SKIP_VALIDATION
+)
+
+bf_add_config(
+    CONFIG_NAME HYPERVISOR_MAX_VMS
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "16"
+    DESCRIPTION "Defines the hypervisor's max number of virtual machines supported"
     SKIP_VALIDATION
 )
 
