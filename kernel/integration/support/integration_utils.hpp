@@ -101,21 +101,6 @@ namespace integration
             bsl::touch();
         }
     }
-
-    /// <!-- description -->
-    ///   @brief Exits early. This is done by sending an error code, so the
-    ///     microkernel will actually report and error, but this is intended
-    ///     so that we can return back and try the next integration test.
-    ///
-    constexpr void
-    early() noexcept
-    {
-        bsl::print<bsl::V>() << bsl::rst << bsl::endl;
-        bsl::print<bsl::V>() << bsl::mag << "return early backlog:";
-        bsl::print<bsl::V>() << bsl::rst << bsl::endl;
-
-        return syscall::bf_control_op_exit();
-    }
 }
 
 #endif

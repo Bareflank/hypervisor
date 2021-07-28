@@ -40,7 +40,7 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL CODECOV)
     hypervisor_add_ext_cross_compile(cmake/ext_cross_compile)
 
     if(BUILD_TESTS AND NOT HYPERVISOR_BUILD_TESTS_OVERRIDE)
-        include(kernel/integration/integration_targets.cmake)
+        include(kernel/integration/CMakeLists_Targets.cmake)
     endif()
 endif()
 

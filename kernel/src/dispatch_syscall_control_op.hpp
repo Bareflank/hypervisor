@@ -70,7 +70,7 @@ namespace mk
             }
         }
 
-        bsl::error() << "unknown syscall index "     //--
+        bsl::error() << "unknown syscall "           //--
                      << bsl::hex(tls.ext_syscall)    //--
                      << bsl::endl                    //--
                      << bsl::here();                 //--

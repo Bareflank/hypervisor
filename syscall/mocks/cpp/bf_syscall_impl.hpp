@@ -72,7 +72,7 @@ namespace syscall
     // -------------------------------------------------------------------------
 
     /// @brief stores the data to return for an API
-    constinit inline bsl::unordered_map<std::string, bf_uint64_t>
+    constinit inline bsl::unordered_map<std::string, bsl::safe_uint64>
         g_mut_data{};    // GRCOV_EXCLUDE_BR
     /// @brief stores the error code to return for an API
     constinit inline bsl::unordered_map<std::string, bf_status_t>
@@ -117,7 +117,7 @@ namespace syscall
     ///   @param ppid the physical process to bootstrap
     ///
     extern "C" inline void
-    dummy_bootstrap_entry(syscall::bf_uint16_t::value_type const ppid) noexcept
+    dummy_bootstrap_entry(bsl::safe_uint16::value_type const ppid) noexcept
     {
         bsl::discard(ppid);
     }
@@ -131,8 +131,8 @@ namespace syscall
     ///
     extern "C" inline void
     dummy_vmexit_entry(
-        syscall::bf_uint16_t::value_type const vpsid,
-        syscall::bf_uint64_t::value_type const exit_reason) noexcept
+        bsl::safe_uint16::value_type const vpsid,
+        bsl::safe_uint64::value_type const exit_reason) noexcept
     {
         bsl::discard(vpsid);
         bsl::discard(exit_reason);
@@ -147,7 +147,7 @@ namespace syscall
     ///
     extern "C" inline void
     dummy_fail_entry(
-        syscall::bf_uint16_t::value_type const vpsid,
+        bsl::safe_uint16::value_type const vpsid,
         syscall::bf_status_t::value_type const fail_reason) noexcept
     {
         bsl::discard(vpsid);
@@ -165,7 +165,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_rax_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_rax_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_rax").get();
     }
@@ -177,7 +177,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_rax_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_rax_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_rax") = val;
     }
@@ -189,7 +189,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_rbx_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_rbx_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_rbx").get();
     }
@@ -201,7 +201,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_rbx_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_rbx_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_rbx") = val;
     }
@@ -213,7 +213,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_rcx_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_rcx_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_rcx").get();
     }
@@ -225,7 +225,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_rcx_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_rcx_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_rcx") = val;
     }
@@ -237,7 +237,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_rdx_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_rdx_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_rdx").get();
     }
@@ -249,7 +249,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_rdx_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_rdx_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_rdx") = val;
     }
@@ -261,7 +261,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_rbp_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_rbp_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_rbp").get();
     }
@@ -273,7 +273,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_rbp_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_rbp_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_rbp") = val;
     }
@@ -285,7 +285,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_rsi_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_rsi_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_rsi").get();
     }
@@ -297,7 +297,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_rsi_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_rsi_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_rsi") = val;
     }
@@ -309,7 +309,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_rdi_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_rdi_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_rdi").get();
     }
@@ -321,7 +321,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_rdi_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_rdi_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_rdi") = val;
     }
@@ -333,7 +333,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_r8_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_r8_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_r8").get();
     }
@@ -345,7 +345,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_r8_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_r8_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_r8") = val;
     }
@@ -357,7 +357,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_r9_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_r9_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_r9").get();
     }
@@ -369,7 +369,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_r9_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_r9_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_r9") = val;
     }
@@ -381,7 +381,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_r10_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_r10_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_r10").get();
     }
@@ -393,7 +393,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_r10_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_r10_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_r10") = val;
     }
@@ -405,7 +405,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_r11_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_r11_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_r11").get();
     }
@@ -417,7 +417,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_r11_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_r11_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_r11") = val;
     }
@@ -429,7 +429,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_r12_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_r12_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_r12").get();
     }
@@ -441,7 +441,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_r12_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_r12_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_r12") = val;
     }
@@ -453,7 +453,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_r13_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_r13_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_r13").get();
     }
@@ -465,7 +465,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_r13_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_r13_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_r13") = val;
     }
@@ -477,7 +477,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_r14_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_r14_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_r14").get();
     }
@@ -489,7 +489,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_r14_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_r14_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_r14") = val;
     }
@@ -501,7 +501,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_r15_impl() noexcept -> bf_uint64_t::value_type
+    bf_tls_r15_impl() noexcept -> bsl::safe_uint64::value_type
     {
         return g_mut_data.at("bf_tls_r15").get();
     }
@@ -513,7 +513,7 @@ namespace syscall
     ///   @param val n/a
     ///
     extern "C" inline void
-    bf_tls_set_r15_impl(bf_uint64_t::value_type const val) noexcept
+    bf_tls_set_r15_impl(bsl::safe_uint64::value_type const val) noexcept
     {
         g_mut_data.at("bf_tls_r15") = val;
     }
@@ -525,7 +525,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_extid_impl() noexcept -> bf_uint16_t::value_type
+    bf_tls_extid_impl() noexcept -> bsl::safe_uint16::value_type
     {
         return bsl::to_u16(g_mut_data.at("bf_tls_extid")).get();
     }
@@ -537,7 +537,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_vmid_impl() noexcept -> bf_uint16_t::value_type
+    bf_tls_vmid_impl() noexcept -> bsl::safe_uint16::value_type
     {
         return bsl::to_u16(g_mut_data.at("bf_tls_vmid")).get();
     }
@@ -549,7 +549,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_vpid_impl() noexcept -> bf_uint16_t::value_type
+    bf_tls_vpid_impl() noexcept -> bsl::safe_uint16::value_type
     {
         return bsl::to_u16(g_mut_data.at("bf_tls_vpid")).get();
     }
@@ -561,7 +561,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_vpsid_impl() noexcept -> bf_uint16_t::value_type
+    bf_tls_vpsid_impl() noexcept -> bsl::safe_uint16::value_type
     {
         return bsl::to_u16(g_mut_data.at("bf_tls_vpsid")).get();
     }
@@ -573,7 +573,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_ppid_impl() noexcept -> bf_uint16_t::value_type
+    bf_tls_ppid_impl() noexcept -> bsl::safe_uint16::value_type
     {
         return bsl::to_u16(g_mut_data.at("bf_tls_ppid")).get();
     }
@@ -585,7 +585,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_tls_online_pps_impl() noexcept -> bf_uint16_t::value_type
+    bf_tls_online_pps_impl() noexcept -> bsl::safe_uint16::value_type
     {
         return bsl::to_u16(g_mut_data.at("bf_tls_online_pps")).get();
     }
@@ -626,8 +626,8 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_handle_op_open_handle_impl(
-        bf_uint32_t::value_type const reg0_in,
-        bf_uint64_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
+        bsl::safe_uint32::value_type const reg0_in,
+        bsl::safe_uint64::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
 
@@ -653,7 +653,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_handle_op_close_handle_impl(bf_uint64_t::value_type const reg0_in) noexcept
+    bf_handle_op_close_handle_impl(bsl::safe_uint64::value_type const reg0_in) noexcept
         -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
@@ -673,7 +673,8 @@ namespace syscall
     ///
     extern "C" inline void
     bf_debug_op_out_impl(
-        bf_uint64_t::value_type const reg0_in, bf_uint64_t::value_type const reg1_in) noexcept
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint64::value_type const reg1_in) noexcept
     {
         g_mut_bf_debug_op_out_impl_executed = true;
         // NOLINTNEXTLINE(bsl-function-name-use)
@@ -687,7 +688,7 @@ namespace syscall
     ///   @param reg0_in n/a
     ///
     extern "C" inline void
-    bf_debug_op_dump_vm_impl(bf_uint16_t::value_type const reg0_in) noexcept
+    bf_debug_op_dump_vm_impl(bsl::safe_uint16::value_type const reg0_in) noexcept
     {
         g_mut_bf_debug_op_dump_vm_impl_executed = true;
         // NOLINTNEXTLINE(bsl-function-name-use)
@@ -701,7 +702,7 @@ namespace syscall
     ///   @param reg0_in n/a
     ///
     extern "C" inline void
-    bf_debug_op_dump_vp_impl(bf_uint16_t::value_type const reg0_in) noexcept
+    bf_debug_op_dump_vp_impl(bsl::safe_uint16::value_type const reg0_in) noexcept
     {
         g_mut_bf_debug_op_dump_vp_impl_executed = true;
         // NOLINTNEXTLINE(bsl-function-name-use)
@@ -715,7 +716,7 @@ namespace syscall
     ///   @param reg0_in n/a
     ///
     extern "C" inline void
-    bf_debug_op_dump_vps_impl(bf_uint16_t::value_type const reg0_in) noexcept
+    bf_debug_op_dump_vps_impl(bsl::safe_uint16::value_type const reg0_in) noexcept
     {
         g_mut_bf_debug_op_dump_vps_impl_executed = true;
         // NOLINTNEXTLINE(bsl-function-name-use)
@@ -729,7 +730,7 @@ namespace syscall
     ///   @param reg0_in n/a
     ///
     extern "C" inline void
-    bf_debug_op_dump_vmexit_log_impl(bf_uint16_t::value_type const reg0_in) noexcept
+    bf_debug_op_dump_vmexit_log_impl(bsl::safe_uint16::value_type const reg0_in) noexcept
     {
         g_mut_bf_debug_op_dump_vmexit_log_impl_executed = true;
         // NOLINTNEXTLINE(bsl-function-name-use)
@@ -769,7 +770,7 @@ namespace syscall
     ///   @param reg0_in n/a
     ///
     extern "C" inline void
-    bf_debug_op_dump_ext_impl(bf_uint16_t::value_type const reg0_in) noexcept
+    bf_debug_op_dump_ext_impl(bsl::safe_uint16::value_type const reg0_in) noexcept
     {
         g_mut_bf_debug_op_dump_ext_impl_executed = true;
         // NOLINTNEXTLINE(bsl-function-name-use)
@@ -810,7 +811,7 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_callback_op_register_bootstrap_impl(
-        bf_uint64_t::value_type const reg0_in,
+        bsl::safe_uint64::value_type const reg0_in,
         bf_callback_handler_bootstrap_t const pmut_reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
@@ -829,7 +830,7 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_callback_op_register_vmexit_impl(
-        bf_uint64_t::value_type const reg0_in,
+        bsl::safe_uint64::value_type const reg0_in,
         bf_callback_handler_vmexit_t const pmut_reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
@@ -848,7 +849,7 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_callback_op_register_fail_impl(
-        bf_uint64_t::value_type const reg0_in,
+        bsl::safe_uint64::value_type const reg0_in,
         bf_callback_handler_fail_t const pmut_reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
@@ -871,8 +872,8 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vm_op_create_vm_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
 
@@ -900,8 +901,8 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vm_op_destroy_vm_impl(
-        bf_uint64_t::value_type const reg0_in, bf_uint16_t::value_type const reg1_in) noexcept
-        -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -925,10 +926,10 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vp_op_create_vp_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint16_t::value_type const reg2_in,
-        bf_uint16_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in,
+        bsl::safe_uint16::value_type const reg2_in,
+        bsl::safe_uint16::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -958,8 +959,8 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vp_op_destroy_vp_impl(
-        bf_uint64_t::value_type const reg0_in, bf_uint16_t::value_type const reg1_in) noexcept
-        -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -978,9 +979,9 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vp_op_migrate_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint16_t::value_type const reg2_in) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in,
+        bsl::safe_uint16::value_type const reg2_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1005,10 +1006,10 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vps_op_create_vps_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint16_t::value_type const reg2_in,
-        bf_uint16_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in,
+        bsl::safe_uint16::value_type const reg2_in,
+        bsl::safe_uint16::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1038,8 +1039,8 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vps_op_destroy_vps_impl(
-        bf_uint64_t::value_type const reg0_in, bf_uint16_t::value_type const reg1_in) noexcept
-        -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1057,8 +1058,8 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vps_op_init_as_root_impl(
-        bf_uint64_t::value_type const reg0_in, bf_uint16_t::value_type const reg1_in) noexcept
-        -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1078,10 +1079,10 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vps_op_read_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in,
         bf_reg_t const reg2_in,
-        bf_uint64_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1113,10 +1114,10 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vps_op_write_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in,
         bf_reg_t const reg2_in,
-        bf_uint64_t::value_type const reg3_in) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg3_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1144,10 +1145,10 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vps_op_run_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint16_t::value_type const reg1_in,
-        bf_uint16_t::value_type const reg2_in,
-        bf_uint16_t::value_type const reg3_in) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in,
+        bsl::safe_uint16::value_type const reg2_in,
+        bsl::safe_uint16::value_type const reg3_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1165,7 +1166,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_vps_op_run_current_impl(bf_uint64_t::value_type const reg0_in) noexcept
+    bf_vps_op_run_current_impl(bsl::safe_uint64::value_type const reg0_in) noexcept
         -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
@@ -1182,8 +1183,8 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vps_op_advance_ip_impl(
-        bf_uint64_t::value_type const reg0_in, bf_uint16_t::value_type const reg1_in) noexcept
-        -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1199,7 +1200,7 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] inline auto
-    bf_vps_op_advance_ip_and_run_current_impl(bf_uint64_t::value_type const reg0_in) noexcept
+    bf_vps_op_advance_ip_and_run_current_impl(bsl::safe_uint64::value_type const reg0_in) noexcept
         -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
@@ -1216,8 +1217,8 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vps_op_promote_impl(
-        bf_uint64_t::value_type const reg0_in, bf_uint16_t::value_type const reg1_in) noexcept
-        -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1235,8 +1236,8 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_vps_op_clear_vps_impl(
-        bf_uint64_t::value_type const reg0_in, bf_uint16_t::value_type const reg1_in) noexcept
-        -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint16::value_type const reg1_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1259,9 +1260,9 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_intrinsic_op_rdmsr_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint32_t::value_type const reg1_in,
-        bf_uint64_t::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint32::value_type const reg1_in,
+        bsl::safe_uint64::value_type *const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1291,9 +1292,9 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_intrinsic_op_wrmsr_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint32_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint32::value_type const reg1_in,
+        bsl::safe_uint64::value_type const reg2_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1319,9 +1320,9 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_intrinsic_op_invlpga_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint64_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint64::value_type const reg1_in,
+        bsl::safe_uint64::value_type const reg2_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1341,9 +1342,9 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_intrinsic_op_invept_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint64_t::value_type const reg1_in,
-        bf_uint64_t::value_type const reg2_in) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint64::value_type const reg1_in,
+        bsl::safe_uint64::value_type const reg2_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1364,10 +1365,10 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_intrinsic_op_invvpid_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint64_t::value_type const reg1_in,
-        bf_uint16_t::value_type const reg2_in,
-        bf_uint64_t::value_type const reg3_in) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint64::value_type const reg1_in,
+        bsl::safe_uint16::value_type const reg2_in,
+        bsl::safe_uint64::value_type const reg3_in) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1392,9 +1393,9 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_mem_op_alloc_page_impl(
-        bf_uint64_t::value_type const reg0_in,
+        bsl::safe_uint64::value_type const reg0_in,
         void **const pmut_reg0_out,
-        bf_uint64_t::value_type *const pmut_reg1_out) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type *const pmut_reg1_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
 
@@ -1427,7 +1428,7 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_mem_op_free_page_impl(
-        bf_uint64_t::value_type const reg0_in, void *const pmut_reg1_in) noexcept
+        bsl::safe_uint64::value_type const reg0_in, void *const pmut_reg1_in) noexcept
         -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
@@ -1448,10 +1449,10 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_mem_op_alloc_huge_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint64_t::value_type const reg1_in,
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint64::value_type const reg1_in,
         void **const pmut_reg0_out,
-        bf_uint64_t::value_type *const pmut_reg1_out) noexcept -> bf_status_t::value_type
+        bsl::safe_uint64::value_type *const pmut_reg1_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
         bsl::discard(reg1_in);
@@ -1485,7 +1486,7 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_mem_op_free_huge_impl(
-        bf_uint64_t::value_type const reg0_in, void *const pmut_reg1_in) noexcept
+        bsl::safe_uint64::value_type const reg0_in, void *const pmut_reg1_in) noexcept
         -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);
@@ -1505,8 +1506,8 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] inline auto
     bf_mem_op_alloc_heap_impl(
-        bf_uint64_t::value_type const reg0_in,
-        bf_uint64_t::value_type const reg1_in,
+        bsl::safe_uint64::value_type const reg0_in,
+        bsl::safe_uint64::value_type const reg1_in,
         void **const pmut_reg0_out) noexcept -> bf_status_t::value_type
     {
         bsl::discard(reg0_in);

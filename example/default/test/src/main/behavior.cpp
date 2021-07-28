@@ -69,7 +69,7 @@ namespace example
     /// <!-- inputs/outputs -->
     ///   @param ppid the physical process to bootstrap
     ///
-    extern "C" void bootstrap_entry(syscall::bf_uint16_t::value_type const ppid) noexcept;
+    extern "C" void bootstrap_entry(bsl::safe_uint16::value_type const ppid) noexcept;
 
     /// <!-- description -->
     ///   @brief Implements the VMExit entry function. This is registered
@@ -80,8 +80,8 @@ namespace example
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     extern "C" void vmexit_entry(
-        syscall::bf_uint16_t::value_type const vpsid,
-        syscall::bf_uint64_t::value_type const exit_reason) noexcept;
+        bsl::safe_uint16::value_type const vpsid,
+        bsl::safe_uint64::value_type const exit_reason) noexcept;
 
     /// <!-- description -->
     ///   @brief Implements the fast fail entry function. This is registered
@@ -92,8 +92,8 @@ namespace example
     ///   @param fail_reason the exit reason associated with the fail
     ///
     extern "C" void fail_entry(
-        syscall::bf_uint16_t::value_type const vpsid,
-        syscall::bf_status_t::value_type const fail_reason) noexcept;
+        bsl::safe_uint16::value_type const vpsid,
+        bsl::safe_uint64::value_type const fail_reason) noexcept;
 
     /// <!-- description -->
     ///   @brief Implements the main entry function for this example

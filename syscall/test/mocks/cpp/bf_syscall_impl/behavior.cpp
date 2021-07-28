@@ -58,7 +58,7 @@ namespace syscall
     {
         bsl::ut_scenario{"quiet dummy_bootstrap_entry"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_then{} = [&]() noexcept {
                     dummy_bootstrap_entry(arg0.get());
                 };
@@ -67,8 +67,8 @@ namespace syscall
 
         bsl::ut_scenario{"quiet dummy_vmexit_entry"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint16_t const arg0{};
-                bf_uint64_t const arg1{};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint64 const arg1{};
                 bsl::ut_then{} = [&]() noexcept {
                     dummy_vmexit_entry(arg0.get(), arg1.get());
                 };
@@ -77,8 +77,8 @@ namespace syscall
 
         bsl::ut_scenario{"quiet dummy_fail_entry"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint16_t const arg0{};
-                bf_uint64_t const arg1{};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint64 const arg1{};
                 bsl::ut_then{} = [&]() noexcept {
                     dummy_fail_entry(arg0.get(), arg1.get());
                 };
@@ -376,7 +376,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_handle_op_open_handle_impl failure"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint64_t mut_reg0_out{};
+                bsl::safe_uint64 mut_reg0_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -394,7 +394,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_handle_op_open_handle_impl success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint64_t mut_reg0_out{};
+                bsl::safe_uint64 mut_reg0_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -666,7 +666,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_vm_op_create_vm_impl failure"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint16_t mut_reg0_out{};
+                bsl::safe_uint16 mut_reg0_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -683,7 +683,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_vm_op_create_vm_impl success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint16_t mut_reg0_out{};
+                bsl::safe_uint16 mut_reg0_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -739,7 +739,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_vp_op_create_vp_impl failure"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint16_t mut_reg0_out{};
+                bsl::safe_uint16 mut_reg0_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -757,7 +757,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_vp_op_create_vp_impl success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint16_t mut_reg0_out{};
+                bsl::safe_uint16 mut_reg0_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -841,7 +841,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_vps_op_create_vps_impl failure"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint16_t mut_reg0_out{};
+                bsl::safe_uint16 mut_reg0_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -859,7 +859,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_vps_op_create_vps_impl success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint16_t mut_reg0_out{};
+                bsl::safe_uint16 mut_reg0_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -943,7 +943,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_vps_op_read_impl failure"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint64_t mut_reg0_out{};
+                bsl::safe_uint64 mut_reg0_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -960,7 +960,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_vps_op_read_impl success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint64_t mut_reg0_out{};
+                bsl::safe_uint64 mut_reg0_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1181,7 +1181,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_intrinsic_op_rdmsr_impl failure"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint64_t mut_reg0_out{};
+                bsl::safe_uint64 mut_reg0_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1199,7 +1199,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_intrinsic_op_rdmsr_impl success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint64_t mut_reg0_out{};
+                bsl::safe_uint64 mut_reg0_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1326,7 +1326,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_mem_op_alloc_page_impl invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint64_t mut_reg1_out{};
+                bsl::safe_uint64 mut_reg1_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1359,7 +1359,7 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_page_impl failure"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 void *pmut_mut_reg0_out{};
-                bf_uint64_t mut_reg1_out{};
+                bsl::safe_uint64 mut_reg1_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1378,7 +1378,7 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_page_impl success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 void *pmut_mut_reg0_out{};
-                bf_uint64_t mut_reg1_out{};
+                bsl::safe_uint64 mut_reg1_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1425,7 +1425,7 @@ namespace syscall
 
         bsl::ut_scenario{"bf_mem_op_alloc_huge_impl invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_uint64_t mut_reg1_out{};
+                bsl::safe_uint64 mut_reg1_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1458,7 +1458,7 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_huge_impl failure"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 void *pmut_mut_reg0_out{};
-                bf_uint64_t mut_reg1_out{};
+                bsl::safe_uint64 mut_reg1_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1477,7 +1477,7 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_huge_impl success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 void *pmut_mut_reg0_out{};
-                bf_uint64_t mut_reg1_out{};
+                bsl::safe_uint64 mut_reg1_out{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();

@@ -140,7 +140,7 @@ namespace mk
                          << bsl::endl                               // --
                          << bsl::here();                            // --
 
-            return syscall::BF_STATUS_INVALID_PERM_EXT;
+            return syscall::BF_STATUS_INVALID_PERM_DENIED;
         }
 
         switch (syscall::bf_syscall_index(bsl::to_u64(mut_tls.ext_syscall)).get()) {
@@ -179,7 +179,7 @@ namespace mk
             }
         }
 
-        bsl::error() << "unknown syscall index "         //--
+        bsl::error() << "unknown syscall "               //--
                      << bsl::hex(mut_tls.ext_syscall)    //--
                      << bsl::endl                        //--
                      << bsl::here();                     //--

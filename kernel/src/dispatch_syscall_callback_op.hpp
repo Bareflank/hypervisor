@@ -218,7 +218,7 @@ namespace mk
             }
         }
 
-        bsl::error() << "unknown syscall index "         //--
+        bsl::error() << "unknown syscall "               //--
                      << bsl::hex(mut_tls.ext_syscall)    //--
                      << bsl::endl                        //--
                      << bsl::here();                     //--

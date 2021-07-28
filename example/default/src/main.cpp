@@ -111,7 +111,7 @@ namespace example
     ///   @param ppid the physical process to bootstrap
     ///
     extern "C" void
-    bootstrap_entry(syscall::bf_uint16_t::value_type const ppid) noexcept
+    bootstrap_entry(bsl::safe_uint16::value_type const ppid) noexcept
     {
         /// NOTE:
         /// - Call into the bootstrap handler. This entry point serves as a
@@ -154,8 +154,8 @@ namespace example
     ///
     extern "C" void
     fail_entry(
-        syscall::bf_uint16_t::value_type const vpsid,
-        syscall::bf_status_t::value_type const fail_reason) noexcept
+        bsl::safe_uint16::value_type const vpsid,
+        bsl::safe_uint64::value_type const fail_reason) noexcept
     {
         /// NOTE:
         /// - Call into the fast fail handler. This entry point serves as a
@@ -199,8 +199,8 @@ namespace example
     ///
     extern "C" void
     vmexit_entry(
-        syscall::bf_uint16_t::value_type const vpsid,
-        syscall::bf_uint64_t::value_type const exit_reason) noexcept
+        bsl::safe_uint16::value_type const vpsid,
+        bsl::safe_uint64::value_type const exit_reason) noexcept
     {
         /// NOTE:
         /// - Call into the vmexit handler. This entry point serves as a
