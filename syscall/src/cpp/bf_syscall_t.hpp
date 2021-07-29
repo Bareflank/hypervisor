@@ -51,13 +51,13 @@ namespace syscall
     class bf_syscall_t final
     {
         /// @brief stores the handle used for making syscalls.
-        bf_uint64_t m_hndl{};
+        bsl::safe_uint64 m_hndl{};
 
     public:
         /// <!-- description -->
-        ///   @brief Initializes the bf_syscall_t by opening a handle and
-        ///     registering all of the required handlers. If this function
-        ///     fails, the handle is closed automatically.
+        ///   @brief Initializes the bf_syscall_t by verifying version
+        ///     compatibility, opening a handle and registering the provided
+        ///     callbacks.
         ///
         /// <!-- inputs/outputs -->
         ///   @param version the version provided to the extension by the
@@ -71,7 +71,7 @@ namespace syscall
         ///
         [[nodiscard]] constexpr auto
         initialize(
-            bf_uint32_t const &version,
+            bsl::safe_uint32 const &version,
             bf_callback_handler_bootstrap_t const pmut_bootstrap_handler,
             bf_callback_handler_vmexit_t const pmut_vmexit_handler,
             bf_callback_handler_fail_t const pmut_fail_handler) noexcept -> bsl::errc_type
@@ -181,7 +181,7 @@ namespace syscall
         ///   @return Returns the value of tls.rax
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_rax() noexcept -> bf_uint64_t
+        bf_tls_rax() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_rax_impl());
         }
@@ -193,7 +193,7 @@ namespace syscall
         ///   @param val The value to set tls.rax to
         ///
         static constexpr void
-        bf_tls_set_rax(bf_uint64_t const &val) noexcept
+        bf_tls_set_rax(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -210,7 +210,7 @@ namespace syscall
         ///   @return Returns the value of tls.rbx
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_rbx() noexcept -> bf_uint64_t
+        bf_tls_rbx() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_rbx_impl());
         }
@@ -222,7 +222,7 @@ namespace syscall
         ///   @param val The value to set tls.rbx to
         ///
         static constexpr void
-        bf_tls_set_rbx(bf_uint64_t const &val) noexcept
+        bf_tls_set_rbx(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -239,7 +239,7 @@ namespace syscall
         ///   @return Returns the value of tls.rcx
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_rcx() noexcept -> bf_uint64_t
+        bf_tls_rcx() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_rcx_impl());
         }
@@ -251,7 +251,7 @@ namespace syscall
         ///   @param val The value to set tls.rcx to
         ///
         static constexpr void
-        bf_tls_set_rcx(bf_uint64_t const &val) noexcept
+        bf_tls_set_rcx(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -268,7 +268,7 @@ namespace syscall
         ///   @return Returns the value of tls.rdx
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_rdx() noexcept -> bf_uint64_t
+        bf_tls_rdx() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_rdx_impl());
         }
@@ -280,7 +280,7 @@ namespace syscall
         ///   @param val The value to set tls.rdx to
         ///
         static constexpr void
-        bf_tls_set_rdx(bf_uint64_t const &val) noexcept
+        bf_tls_set_rdx(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -297,7 +297,7 @@ namespace syscall
         ///   @return Returns the value of tls.rbp
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_rbp() noexcept -> bf_uint64_t
+        bf_tls_rbp() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_rbp_impl());
         }
@@ -309,7 +309,7 @@ namespace syscall
         ///   @param val The value to set tls.rbp to
         ///
         static constexpr void
-        bf_tls_set_rbp(bf_uint64_t const &val) noexcept
+        bf_tls_set_rbp(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -326,7 +326,7 @@ namespace syscall
         ///   @return Returns the value of tls.rsi
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_rsi() noexcept -> bf_uint64_t
+        bf_tls_rsi() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_rsi_impl());
         }
@@ -338,7 +338,7 @@ namespace syscall
         ///   @param val The value to set tls.rsi to
         ///
         static constexpr void
-        bf_tls_set_rsi(bf_uint64_t const &val) noexcept
+        bf_tls_set_rsi(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -355,7 +355,7 @@ namespace syscall
         ///   @return Returns the value of tls.rdi
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_rdi() noexcept -> bf_uint64_t
+        bf_tls_rdi() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_rdi_impl());
         }
@@ -367,7 +367,7 @@ namespace syscall
         ///   @param val The value to set tls.rdi to
         ///
         static constexpr void
-        bf_tls_set_rdi(bf_uint64_t const &val) noexcept
+        bf_tls_set_rdi(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -384,7 +384,7 @@ namespace syscall
         ///   @return Returns the value of tls.r8
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_r8() noexcept -> bf_uint64_t
+        bf_tls_r8() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_r8_impl());
         }
@@ -396,7 +396,7 @@ namespace syscall
         ///   @param val The value to set tls.r8 to
         ///
         static constexpr void
-        bf_tls_set_r8(bf_uint64_t const &val) noexcept
+        bf_tls_set_r8(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -413,7 +413,7 @@ namespace syscall
         ///   @return Returns the value of tls.r9
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_r9() noexcept -> bf_uint64_t
+        bf_tls_r9() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_r9_impl());
         }
@@ -425,7 +425,7 @@ namespace syscall
         ///   @param val The value to set tls.r9 to
         ///
         static constexpr void
-        bf_tls_set_r9(bf_uint64_t const &val) noexcept
+        bf_tls_set_r9(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -442,7 +442,7 @@ namespace syscall
         ///   @return Returns the value of tls.r10
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_r10() noexcept -> bf_uint64_t
+        bf_tls_r10() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_r10_impl());
         }
@@ -454,7 +454,7 @@ namespace syscall
         ///   @param val The value to set tls.r10 to
         ///
         static constexpr void
-        bf_tls_set_r10(bf_uint64_t const &val) noexcept
+        bf_tls_set_r10(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -471,7 +471,7 @@ namespace syscall
         ///   @return Returns the value of tls.r11
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_r11() noexcept -> bf_uint64_t
+        bf_tls_r11() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_r11_impl());
         }
@@ -483,7 +483,7 @@ namespace syscall
         ///   @param val The value to set tls.r11 to
         ///
         static constexpr void
-        bf_tls_set_r11(bf_uint64_t const &val) noexcept
+        bf_tls_set_r11(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -500,7 +500,7 @@ namespace syscall
         ///   @return Returns the value of tls.r12
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_r12() noexcept -> bf_uint64_t
+        bf_tls_r12() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_r12_impl());
         }
@@ -512,7 +512,7 @@ namespace syscall
         ///   @param val The value to set tls.r12 to
         ///
         static constexpr void
-        bf_tls_set_r12(bf_uint64_t const &val) noexcept
+        bf_tls_set_r12(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -529,7 +529,7 @@ namespace syscall
         ///   @return Returns the value of tls.r13
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_r13() noexcept -> bf_uint64_t
+        bf_tls_r13() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_r13_impl());
         }
@@ -541,7 +541,7 @@ namespace syscall
         ///   @param val The value to set tls.r13 to
         ///
         static constexpr void
-        bf_tls_set_r13(bf_uint64_t const &val) noexcept
+        bf_tls_set_r13(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -558,7 +558,7 @@ namespace syscall
         ///   @return Returns the value of tls.r14
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_r14() noexcept -> bf_uint64_t
+        bf_tls_r14() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_r14_impl());
         }
@@ -570,7 +570,7 @@ namespace syscall
         ///   @param val The value to set tls.r14 to
         ///
         static constexpr void
-        bf_tls_set_r14(bf_uint64_t const &val) noexcept
+        bf_tls_set_r14(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -587,7 +587,7 @@ namespace syscall
         ///   @return Returns the value of tls.r15
         ///
         [[nodiscard]] static constexpr auto
-        bf_tls_r15() noexcept -> bf_uint64_t
+        bf_tls_r15() noexcept -> bsl::safe_uint64
         {
             return bsl::to_u64(bf_tls_r15_impl());
         }
@@ -599,7 +599,7 @@ namespace syscall
         ///   @param val The value to set tls.r15 to
         ///
         static constexpr void
-        bf_tls_set_r15(bf_uint64_t const &val) noexcept
+        bf_tls_set_r15(bsl::safe_uint64 const &val) noexcept
         {
             if (bsl::unlikely_assert(!val)) {
                 bsl::alert() << "invalid val\n" << bsl::here();
@@ -690,13 +690,13 @@ namespace syscall
         ///     and return it's ID.
         ///
         /// <!-- inputs/outputs -->
-        ///   @return Returns the resulting ID, or bf_uint16_t::failure()
+        ///   @return Returns the resulting ID, or bsl::safe_uint16::failure()
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_vm_op_create_vm() noexcept -> bf_uint16_t
+        bf_vm_op_create_vm() noexcept -> bsl::safe_uint16
         {
-            bf_uint16_t mut_vmid{};
+            bsl::safe_uint16 mut_vmid{};
 
             bf_status_t::value_type const ret{
                 bf_vm_op_create_vm_impl(m_hndl.get(), mut_vmid.data())};
@@ -706,7 +706,7 @@ namespace syscall
                              << bsl::endl                                   // --
                              << bsl::here();
 
-                return bf_uint16_t::failure();
+                return bsl::safe_uint16::failure();
             }
 
             return mut_vmid;
@@ -722,7 +722,7 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_vm_op_destroy_vm(bf_uint16_t const &vmid) noexcept -> bsl::errc_type
+        bf_vm_op_destroy_vm(bsl::safe_uint16 const &vmid) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!vmid)) {
                 bsl::error() << "invalid vmid\n" << bsl::here();
@@ -754,23 +754,24 @@ namespace syscall
         /// <!-- inputs/outputs -->
         ///   @param vmid The ID of the VM to assign the newly created VP to
         ///   @param ppid The ID of the PP to assign the newly created VP to
-        ///   @return Returns the resulting ID, or bf_uint16_t::failure()
+        ///   @return Returns the resulting ID, or bsl::safe_uint16::failure()
         ///     on failure.
         ///
         ///
         [[nodiscard]] constexpr auto
-        bf_vp_op_create_vp(bf_uint16_t const &vmid, bf_uint16_t const &ppid) noexcept -> bf_uint16_t
+        bf_vp_op_create_vp(bsl::safe_uint16 const &vmid, bsl::safe_uint16 const &ppid) noexcept
+            -> bsl::safe_uint16
         {
-            bf_uint16_t mut_vpid{};
+            bsl::safe_uint16 mut_vpid{};
 
             if (bsl::unlikely_assert(!vmid)) {
                 bsl::error() << "invalid vmid\n" << bsl::here();
-                return bf_uint16_t::failure();
+                return bsl::safe_uint16::failure();
             }
 
             if (bsl::unlikely_assert(!ppid)) {
                 bsl::error() << "invalid ppid\n" << bsl::here();
-                return bf_uint16_t::failure();
+                return bsl::safe_uint16::failure();
             }
 
             bf_status_t::value_type const ret{
@@ -781,7 +782,7 @@ namespace syscall
                              << bsl::endl                                   // --
                              << bsl::here();
 
-                return bf_uint16_t::failure();
+                return bsl::safe_uint16::failure();
             }
 
             return mut_vpid;
@@ -797,7 +798,7 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_vp_op_destroy_vp(bf_uint16_t const &vpid) noexcept -> bsl::errc_type
+        bf_vp_op_destroy_vp(bsl::safe_uint16 const &vpid) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!vpid)) {
                 bsl::error() << "invalid vpid\n" << bsl::here();
@@ -861,7 +862,7 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_vp_op_migrate(bf_uint16_t const &vpid, bf_uint16_t const &ppid) noexcept
+        bf_vp_op_migrate(bsl::safe_uint16 const &vpid, bsl::safe_uint16 const &ppid) noexcept
             -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!vpid)) {
@@ -899,24 +900,24 @@ namespace syscall
         /// <!-- inputs/outputs -->
         ///   @param vpid The ID of the VP to assign the newly created VPS to
         ///   @param ppid The resulting VPSID of the newly created VPS
-        ///   @return Returns the resulting ID, or bf_uint16_t::failure()
+        ///   @return Returns the resulting ID, or bsl::safe_uint16::failure()
         ///     on failure.
         ///
         ///
         [[nodiscard]] constexpr auto
-        bf_vps_op_create_vps(bf_uint16_t const &vpid, bf_uint16_t const &ppid) noexcept
-            -> bf_uint16_t
+        bf_vps_op_create_vps(bsl::safe_uint16 const &vpid, bsl::safe_uint16 const &ppid) noexcept
+            -> bsl::safe_uint16
         {
-            bf_uint16_t mut_vpsid{};
+            bsl::safe_uint16 mut_vpsid{};
 
             if (bsl::unlikely_assert(!vpid)) {
                 bsl::error() << "invalid vpid\n" << bsl::here();
-                return bf_uint16_t::failure();
+                return bsl::safe_uint16::failure();
             }
 
             if (bsl::unlikely_assert(!ppid)) {
                 bsl::error() << "invalid ppid\n" << bsl::here();
-                return bf_uint16_t::failure();
+                return bsl::safe_uint16::failure();
             }
 
             bf_status_t::value_type const ret{
@@ -927,7 +928,7 @@ namespace syscall
                              << bsl::endl                                     // --
                              << bsl::here();
 
-                return bf_uint16_t::failure();
+                return bsl::safe_uint16::failure();
             }
 
             return mut_vpsid;
@@ -943,7 +944,7 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_vps_op_destroy_vps(bf_uint16_t const &vpsid) noexcept -> bsl::errc_type
+        bf_vps_op_destroy_vps(bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
@@ -974,7 +975,7 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_vps_op_init_as_root(bf_uint16_t const &vpsid) noexcept -> bsl::errc_type
+        bf_vps_op_init_as_root(bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
@@ -1002,17 +1003,18 @@ namespace syscall
         /// <!-- inputs/outputs -->
         ///   @param vpsid The VPSID of the VPS to read from
         ///   @param reg A bf_reg_t defining which register to read
-        ///   @return Returns the value read, or bf_uint64_t::failure()
+        ///   @return Returns the value read, or bsl::safe_uint64::failure()
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_vps_op_read(bf_uint16_t const &vpsid, bf_reg_t const reg) const noexcept -> bf_uint64_t
+        bf_vps_op_read(bsl::safe_uint16 const &vpsid, bf_reg_t const reg) const noexcept
+            -> bsl::safe_uint64
         {
-            bf_uint64_t mut_val{};
+            bsl::safe_uint64 mut_val{};
 
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
-                return bf_uint64_t::failure();
+                return bsl::safe_uint64::failure();
             }
 
             bf_status_t::value_type const ret{
@@ -1023,7 +1025,7 @@ namespace syscall
                              << bsl::endl                               // --
                              << bsl::here();
 
-                return bf_uint64_t::failure();
+                return bsl::safe_uint64::failure();
             }
 
             return mut_val;
@@ -1042,8 +1044,9 @@ namespace syscall
         ///
         [[nodiscard]] constexpr auto
         bf_vps_op_write(
-            bf_uint16_t const &vpsid, bf_reg_t const reg, bf_uint64_t const &value) noexcept
-            -> bsl::errc_type
+            bsl::safe_uint16 const &vpsid,
+            bf_reg_t const reg,
+            bsl::safe_uint64 const &value) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
@@ -1117,8 +1120,9 @@ namespace syscall
         ///
         [[nodiscard]] constexpr auto
         bf_vps_op_run(
-            bf_uint16_t const &vmid, bf_uint16_t const &vpid, bf_uint16_t const &vpsid) noexcept
-            -> bsl::errc_type
+            bsl::safe_uint16 const &vmid,
+            bsl::safe_uint16 const &vpid,
+            bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!vmid)) {
                 bsl::error() << "invalid vmid\n" << bsl::here();
@@ -1183,7 +1187,7 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_vps_op_advance_ip(bf_uint16_t const &vpsid) noexcept -> bsl::errc_type
+        bf_vps_op_advance_ip(bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
@@ -1243,7 +1247,7 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_vps_op_promote(bf_uint16_t const &vpsid) noexcept -> bsl::errc_type
+        bf_vps_op_promote(bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
@@ -1278,7 +1282,7 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_vps_op_clear_vps(bf_uint16_t const &vpsid) noexcept -> bsl::errc_type
+        bf_vps_op_clear_vps(bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!vpsid)) {
                 bsl::error() << "invalid vpsid\n" << bsl::here();
@@ -1311,17 +1315,17 @@ namespace syscall
         ///
         /// <!-- inputs/outputs -->
         ///   @param msr The address of the MSR to read
-        ///   @return Returns the value read, or bf_uint64_t::failure()
+        ///   @return Returns the value read, or bsl::safe_uint64::failure()
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_intrinsic_op_rdmsr(bf_uint32_t const &msr) const noexcept -> bf_uint64_t
+        bf_intrinsic_op_rdmsr(bsl::safe_uint32 const &msr) const noexcept -> bsl::safe_uint64
         {
-            bf_uint64_t mut_val{};
+            bsl::safe_uint64 mut_val{};
 
             if (bsl::unlikely_assert(!msr)) {
                 bsl::error() << "invalid msr\n" << bsl::here();
-                return bf_uint64_t::failure();
+                return bsl::safe_uint64::failure();
             }
 
             bf_status_t::value_type const ret{
@@ -1332,7 +1336,7 @@ namespace syscall
                              << bsl::endl                                      // --
                              << bsl::here();
 
-                return bf_uint64_t::failure();
+                return bsl::safe_uint64::failure();
             }
 
             return mut_val;
@@ -1353,7 +1357,7 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_intrinsic_op_wrmsr(bf_uint32_t const &msr, bf_uint64_t const &value) noexcept
+        bf_intrinsic_op_wrmsr(bsl::safe_uint32 const &msr, bsl::safe_uint64 const &value) noexcept
             -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!msr)) {
@@ -1391,7 +1395,7 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_intrinsic_op_invlpga(bf_uint64_t const &addr, bf_uint64_t const &asid) noexcept
+        bf_intrinsic_op_invlpga(bsl::safe_uint64 const &addr, bsl::safe_uint64 const &asid) noexcept
             -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!addr)) {
@@ -1430,7 +1434,7 @@ namespace syscall
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_intrinsic_op_invept(bf_uint64_t const &eptp, bf_uint64_t const &type) noexcept
+        bf_intrinsic_op_invept(bsl::safe_uint64 const &eptp, bsl::safe_uint64 const &type) noexcept
             -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!eptp)) {
@@ -1471,8 +1475,9 @@ namespace syscall
         ///
         [[nodiscard]] constexpr auto
         bf_intrinsic_op_invvpid(
-            bf_uint64_t const &addr, bf_uint16_t const &vpid, bf_uint64_t const &type) noexcept
-            -> bsl::errc_type
+            bsl::safe_uint64 const &addr,
+            bsl::safe_uint16 const &vpid,
+            bsl::safe_uint64 const &type) noexcept -> bsl::errc_type
         {
             if (bsl::unlikely_assert(!addr)) {
                 bsl::error() << "invalid addr\n" << bsl::here();
@@ -1517,7 +1522,7 @@ namespace syscall
         ///     or a nullptr on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_mem_op_alloc_page(bf_uint64_t &mut_phys) noexcept -> void *
+        bf_mem_op_alloc_page(bsl::safe_uint64 &mut_phys) noexcept -> void *
         {
             void *pmut_mut_ptr{};
 
@@ -1551,7 +1556,7 @@ namespace syscall
         [[nodiscard]] constexpr auto
         bf_mem_op_alloc_page() noexcept -> void *
         {
-            bf_uint64_t mut_ignored{};
+            bsl::safe_uint64 mut_ignored{};
             return this->bf_mem_op_alloc_page(mut_ignored);
         }
 
@@ -1609,7 +1614,8 @@ namespace syscall
         ///     or a nullptr on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_mem_op_alloc_huge(bf_uint64_t const &size, bf_uint64_t &mut_phys) noexcept -> void *
+        bf_mem_op_alloc_huge(bsl::safe_uint64 const &size, bsl::safe_uint64 &mut_phys) noexcept
+            -> void *
         {
             void *pmut_mut_ptr{};
 
@@ -1664,9 +1670,9 @@ namespace syscall
         ///     or a nullptr on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_mem_op_alloc_huge(bf_uint64_t const &size) noexcept -> void *
+        bf_mem_op_alloc_huge(bsl::safe_uint64 const &size) noexcept -> void *
         {
-            bf_uint64_t mut_ignored{};
+            bsl::safe_uint64 mut_ignored{};
             return this->bf_mem_op_alloc_huge(size, mut_ignored);
         }
 
@@ -1723,7 +1729,7 @@ namespace syscall
         ///     or a nullptr on failure.
         ///
         [[nodiscard]] constexpr auto
-        bf_mem_op_alloc_heap(bf_uint64_t const &size) noexcept -> void *
+        bf_mem_op_alloc_heap(bsl::safe_uint64 const &size) noexcept -> void *
         {
             void *pmut_mut_ptr{};
 
@@ -1764,7 +1770,7 @@ namespace syscall
         ///
         template<typename T = bsl::uint64>
         [[nodiscard]] static constexpr auto
-        bf_read_phys(bf_uint64_t const &phys) noexcept -> bsl::safe_integral<T>
+        bf_read_phys(bsl::safe_uint64 const &phys) noexcept -> bsl::safe_integral<T>
         {
             static_assert(bsl::is_unsigned<T>::value);
 
@@ -1799,7 +1805,7 @@ namespace syscall
         ///
         template<typename T = bsl::uint64>
         [[nodiscard]] static constexpr auto
-        bf_write_phys(bf_uint64_t const &phys, bsl::safe_integral<T> const &val) noexcept
+        bf_write_phys(bsl::safe_uint64 const &phys, bsl::safe_integral<T> const &val) noexcept
             -> bsl::errc_type
         {
             static_assert(bsl::is_unsigned<T>::value);

@@ -35,14 +35,6 @@ namespace syscall
 
     /// @brief Defines the type used for returning status from a function
     using bf_status_t = bsl::safe_uint64;
-    /// @brief Defines an unsigned 8bit integer
-    using bf_uint8_t = bsl::safe_uint8;
-    /// @brief Defines an unsigned 16bit integer
-    using bf_uint16_t = bsl::safe_uint16;
-    /// @brief Defines an unsigned 32bit integer
-    using bf_uint32_t = bsl::safe_uint32;
-    /// @brief Defines an unsigned 64bit integer
-    using bf_uint64_t = bsl::safe_uint64;
 
     // -------------------------------------------------------------------------
     // Bootstrap Callback Handler Type
@@ -51,7 +43,7 @@ namespace syscall
     /// @brief Defines the signature of the bootstrap callback handler
     // Entry points cannot use safe integral types
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    using bf_callback_handler_bootstrap_t = void (*)(bf_uint16_t::value_type);
+    using bf_callback_handler_bootstrap_t = void (*)(bsl::safe_uint16::value_type);
 
     // -------------------------------------------------------------------------
     // VMExit Callback Handler Type
@@ -59,8 +51,9 @@ namespace syscall
 
     /// @brief Defines the signature of the VM exit callback handler
     // Entry points cannot use safe integral types
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    using bf_callback_handler_vmexit_t = void (*)(bf_uint16_t::value_type, bf_uint64_t::value_type);
+    using bf_callback_handler_vmexit_t =
+        // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+        void (*)(bsl::safe_uint16::value_type, bsl::safe_uint64::value_type);
 
     // -------------------------------------------------------------------------
     // Fast Fail Callback Handler Type
@@ -68,8 +61,9 @@ namespace syscall
 
     /// @brief Defines the signature of the fast fail callback handler
     // Entry points cannot use safe integral types
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    using bf_callback_handler_fail_t = void (*)(bf_uint16_t::value_type, bf_status_t::value_type);
+    using bf_callback_handler_fail_t =
+        // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+        void (*)(bsl::safe_uint16::value_type, bf_status_t::value_type);
 }
 
 #endif

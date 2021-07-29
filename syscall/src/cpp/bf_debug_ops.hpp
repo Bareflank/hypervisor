@@ -35,7 +35,7 @@
 namespace syscall
 {
     /// <!-- description -->
-    ///   @brief This syscall tells the microkernel to output RDI and RSI to
+    ///   @brief This syscall tells the microkernel to output reg0 and reg1 to
     ///     the console device the microkernel is currently using for
     ///     debugging.
     ///
@@ -44,7 +44,7 @@ namespace syscall
     ///   @param val2 The second value to output to the microkernel's console
     ///
     constexpr void
-    bf_debug_op_out(bf_uint64_t const &val1, bf_uint64_t const &val2) noexcept
+    bf_debug_op_out(bsl::safe_uint64 const &val1, bsl::safe_uint64 const &val2) noexcept
     {
         if (bsl::is_constant_evaluated()) {
             return;
@@ -62,7 +62,7 @@ namespace syscall
     ///   @param vmid The VMID of the VM whose state is to be outputted
     ///
     constexpr void
-    bf_debug_op_dump_vm(bf_uint16_t const &vmid) noexcept
+    bf_debug_op_dump_vm(bsl::safe_uint16 const &vmid) noexcept
     {
         if (bsl::is_constant_evaluated()) {
             return;
@@ -80,7 +80,7 @@ namespace syscall
     ///   @param vpid The VPID of the VP whose state is to be outputted
     ///
     constexpr void
-    bf_debug_op_dump_vp(bf_uint16_t const &vpid) noexcept
+    bf_debug_op_dump_vp(bsl::safe_uint16 const &vpid) noexcept
     {
         if (bsl::is_constant_evaluated()) {
             return;
@@ -98,7 +98,7 @@ namespace syscall
     ///   @param vpsid The VPSID of the VPS whose state is to be outputted
     ///
     constexpr void
-    bf_debug_op_dump_vps(bf_uint16_t const &vpsid) noexcept
+    bf_debug_op_dump_vps(bsl::safe_uint16 const &vpsid) noexcept
     {
         if (bsl::is_constant_evaluated()) {
             return;
@@ -116,7 +116,7 @@ namespace syscall
     ///   @param ppid The PPID of the PP to dump the log from
     ///
     constexpr void
-    bf_debug_op_dump_vmexit_log(bf_uint16_t const &ppid) noexcept
+    bf_debug_op_dump_vmexit_log(bsl::safe_uint16 const &ppid) noexcept
     {
         if (bsl::is_constant_evaluated()) {
             return;
@@ -168,7 +168,7 @@ namespace syscall
     ///   @param extid The EXTID of the extensions's state to output
     ///
     constexpr void
-    bf_debug_op_dump_ext(bf_uint16_t const &extid) noexcept
+    bf_debug_op_dump_ext(bsl::safe_uint16 const &extid) noexcept
     {
         if (bsl::is_constant_evaluated()) {
             return;

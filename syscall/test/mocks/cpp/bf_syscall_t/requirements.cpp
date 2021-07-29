@@ -51,7 +51,7 @@ main() noexcept -> bsl::exit_code
         bsl::ut_given{} = []() noexcept {
             syscall::bf_syscall_t mut_sys{};
             syscall::bf_syscall_t const sys{};
-            syscall::bf_uint64_t mut_phys{};
+            bsl::safe_uint64 mut_phys{};
             bsl::ut_then{} = []() noexcept {
                 static_assert(noexcept(syscall::bf_syscall_t{}));
 

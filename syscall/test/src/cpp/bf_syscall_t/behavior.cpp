@@ -73,7 +73,7 @@ namespace syscall
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(!mut_sys.initialize(    // --
-                            bf_uint32_t::failure(),           // --
+                            bsl::safe_uint32::failure(),      // --
                             &dummy_bootstrap_entry,           // --
                             &dummy_vmexit_entry,              // --
                             &dummy_fail_entry));              // --
@@ -281,7 +281,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_rax() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_rax(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_rax(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_rax() == ANSWER64);
                     };
@@ -305,7 +305,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_rbx() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_rbx(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_rbx(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_rbx() == ANSWER64);
                     };
@@ -329,7 +329,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_rcx() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_rcx(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_rcx(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_rcx() == ANSWER64);
                     };
@@ -353,7 +353,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_rdx() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_rdx(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_rdx(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_rdx() == ANSWER64);
                     };
@@ -377,7 +377,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_rbp() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_rbp(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_rbp(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_rbp() == ANSWER64);
                     };
@@ -401,7 +401,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_rsi() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_rsi(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_rsi(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_rsi() == ANSWER64);
                     };
@@ -425,7 +425,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_rdi() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_rdi(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_rdi(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_rdi() == ANSWER64);
                     };
@@ -449,7 +449,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_r8() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_r8(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_r8(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_r8() == ANSWER64);
                     };
@@ -473,7 +473,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_r9() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_r9(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_r9(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_r9() == ANSWER64);
                     };
@@ -497,7 +497,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_r10() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_r10(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_r10(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_r10() == ANSWER64);
                     };
@@ -521,7 +521,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_r11() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_r11(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_r11(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_r11() == ANSWER64);
                     };
@@ -545,7 +545,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_r12() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_r12(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_r12(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_r12() == ANSWER64);
                     };
@@ -569,7 +569,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_r13() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_r13(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_r13(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_r13() == ANSWER64);
                     };
@@ -593,7 +593,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_r14() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_r14(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_r14(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_r14() == ANSWER64);
                     };
@@ -617,7 +617,7 @@ namespace syscall
                         bsl::ut_check(mut_sys.bf_tls_r15() == ANSWER64);
                     };
 
-                    mut_sys.bf_tls_set_r15(bf_uint64_t::failure());
+                    mut_sys.bf_tls_set_r15(bsl::safe_uint64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_tls_r15() == ANSWER64);
                     };
@@ -775,7 +775,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vm_op_destroy_vm invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -788,7 +788,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vm_op_destroy_vm bf_vm_op_destroy_vm_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_errc.at("bf_vm_op_destroy_vm_impl") = BF_STATUS_FAILURE_UNKNOWN;
@@ -802,7 +802,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vm_op_destroy_vm success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -819,8 +819,8 @@ namespace syscall
         bsl::ut_scenario{"bf_vp_op_create_vp invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
-                bf_uint16_t const arg1{};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
+                bsl::safe_uint16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -835,8 +835,8 @@ namespace syscall
         bsl::ut_scenario{"bf_vp_op_create_vp invalid arg1"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{bsl::safe_uint16::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -851,8 +851,8 @@ namespace syscall
         bsl::ut_scenario{"bf_vp_op_create_vp bf_vp_op_create_vp_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -868,8 +868,8 @@ namespace syscall
         bsl::ut_scenario{"bf_vp_op_create_vp success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -884,7 +884,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vp_op_destroy_vp invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -897,7 +897,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vp_op_destroy_vp bf_vp_op_destroy_vp_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_errc.at("bf_vp_op_destroy_vp_impl") = BF_STATUS_FAILURE_UNKNOWN;
@@ -911,7 +911,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vp_op_destroy_vp success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -924,8 +924,8 @@ namespace syscall
         bsl::ut_scenario{"bf_vp_op_migrate invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
-                bf_uint16_t const arg1{};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
+                bsl::safe_uint16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -938,8 +938,8 @@ namespace syscall
         bsl::ut_scenario{"bf_vp_op_migrate invalid arg1"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{bsl::safe_uint16::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -952,8 +952,8 @@ namespace syscall
         bsl::ut_scenario{"bf_vp_op_migrate bf_vp_op_migrate_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_errc.at("bf_vp_op_migrate_impl") = BF_STATUS_FAILURE_UNKNOWN;
@@ -967,8 +967,8 @@ namespace syscall
         bsl::ut_scenario{"bf_vp_op_migrate success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -985,8 +985,8 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_create_vps invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
-                bf_uint16_t const arg1{};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
+                bsl::safe_uint16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1001,8 +1001,8 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_create_vps invalid arg1"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{bsl::safe_uint16::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1017,8 +1017,8 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_create_vps bf_vps_op_create_vps_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1034,8 +1034,8 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_create_vps success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1050,7 +1050,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_destroy_vps invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1063,7 +1063,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_destroy_vps bf_vps_op_destroy_vps_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_errc.at("bf_vps_op_destroy_vps_impl") = BF_STATUS_FAILURE_UNKNOWN;
@@ -1077,7 +1077,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_destroy_vps success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1090,7 +1090,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_init_as_root invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1104,7 +1104,7 @@ namespace syscall
             []() noexcept {
                 bsl::ut_given_at_runtime{} = []() noexcept {
                     bf_syscall_t mut_sys{};
-                    bf_uint16_t const arg0{};
+                    bsl::safe_uint16 const arg0{};
                     bsl::ut_when{} = [&]() noexcept {
                         g_mut_errc.clear();
                         g_mut_errc.at("bf_vps_op_init_as_root_impl") = BF_STATUS_FAILURE_UNKNOWN;
@@ -1118,7 +1118,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_init_as_root success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1131,7 +1131,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_read invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
                 bf_reg_t const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
@@ -1147,7 +1147,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_read bf_vps_op_read_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bf_reg_t const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
@@ -1164,7 +1164,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_read success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bf_reg_t const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
@@ -1180,9 +1180,9 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_write invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
                 bf_reg_t const arg1{};
-                bf_uint64_t const arg2{ANSWER64};
+                bsl::safe_uint64 const arg2{ANSWER64};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1196,9 +1196,9 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_write invalid arg2"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bf_reg_t const arg1{};
-                bf_uint64_t const arg2{bf_uint64_t::failure()};
+                bsl::safe_uint64 const arg2{bsl::safe_uint64::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1212,9 +1212,9 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_write bf_vps_op_write_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bf_reg_t const arg1{};
-                bf_uint64_t const arg2{ANSWER64};
+                bsl::safe_uint64 const arg2{ANSWER64};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1229,9 +1229,9 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_write success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bf_reg_t const arg1{};
-                bf_uint64_t const arg2{ANSWER64};
+                bsl::safe_uint64 const arg2{ANSWER64};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1246,9 +1246,9 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_run invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
-                bf_uint16_t const arg1{};
-                bf_uint16_t const arg2{};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
+                bsl::safe_uint16 const arg1{};
+                bsl::safe_uint16 const arg2{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1261,9 +1261,9 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_run invalid arg1"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{bf_uint16_t::failure()};
-                bf_uint16_t const arg2{};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{bsl::safe_uint16::failure()};
+                bsl::safe_uint16 const arg2{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1276,9 +1276,9 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_run invalid arg2"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{};
-                bf_uint16_t const arg2{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{};
+                bsl::safe_uint16 const arg2{bsl::safe_uint16::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1291,9 +1291,9 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_run bf_vps_op_run_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{};
-                bf_uint16_t const arg2{};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{};
+                bsl::safe_uint16 const arg2{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_errc.at("bf_vps_op_run_impl") = BF_STATUS_FAILURE_UNKNOWN;
@@ -1307,9 +1307,9 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_run success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
-                bf_uint16_t const arg1{};
-                bf_uint16_t const arg2{};
+                bsl::safe_uint16 const arg0{};
+                bsl::safe_uint16 const arg1{};
+                bsl::safe_uint16 const arg2{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1347,7 +1347,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_advance_ip invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1360,7 +1360,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_advance_ip bf_vps_op_advance_ip_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_errc.at("bf_vps_op_advance_ip_impl") = BF_STATUS_FAILURE_UNKNOWN;
@@ -1374,7 +1374,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_advance_ip success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1415,7 +1415,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_promote invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1428,7 +1428,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_promote bf_vps_op_promote_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_errc.at("bf_vps_op_promote_impl") = BF_STATUS_FAILURE_UNKNOWN;
@@ -1442,7 +1442,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_promote success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1455,7 +1455,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_clear_vps invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{bf_uint16_t::failure()};
+                bsl::safe_uint16 const arg0{bsl::safe_uint16::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1468,7 +1468,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_clear_vps bf_vps_op_clear_vps_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_errc.at("bf_vps_op_clear_vps_impl") = BF_STATUS_FAILURE_UNKNOWN;
@@ -1482,7 +1482,7 @@ namespace syscall
         bsl::ut_scenario{"bf_vps_op_clear_vps success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const arg0{};
+                bsl::safe_uint16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1499,7 +1499,7 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_rdmsr invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint32_t const arg0{bf_uint32_t::failure()};
+                bsl::safe_uint32 const arg0{bsl::safe_uint32::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1514,7 +1514,7 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_rdmsr bf_intrinsic_op_rdmsr_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint32_t const arg0{};
+                bsl::safe_uint32 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1530,7 +1530,7 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_rdmsr success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint32_t const arg0{};
+                bsl::safe_uint32 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1545,8 +1545,8 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_wrmsr invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint32_t const arg0{bf_uint32_t::failure()};
-                bf_uint64_t const arg1{ANSWER64};
+                bsl::safe_uint32 const arg0{bsl::safe_uint32::failure()};
+                bsl::safe_uint64 const arg1{ANSWER64};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1560,8 +1560,8 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_wrmsr invalid arg1"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint32_t const arg0{};
-                bf_uint64_t const arg1{bf_uint64_t::failure()};
+                bsl::safe_uint32 const arg0{};
+                bsl::safe_uint64 const arg1{bsl::safe_uint64::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1575,8 +1575,8 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_wrmsr bf_intrinsic_op_wrmsr_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint32_t const arg0{};
-                bf_uint64_t const arg1{ANSWER64};
+                bsl::safe_uint32 const arg0{};
+                bsl::safe_uint64 const arg1{ANSWER64};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1591,8 +1591,8 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_wrmsr success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint32_t const arg0{};
-                bf_uint64_t const arg1{ANSWER64};
+                bsl::safe_uint32 const arg0{};
+                bsl::safe_uint64 const arg1{ANSWER64};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1607,8 +1607,8 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_invlpga invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const arg0{bf_uint64_t::failure()};
-                bf_uint64_t const arg1{};
+                bsl::safe_uint64 const arg0{bsl::safe_uint64::failure()};
+                bsl::safe_uint64 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1621,8 +1621,8 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_invlpga invalid arg1"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const arg0{};
-                bf_uint64_t const arg1{bf_uint64_t::failure()};
+                bsl::safe_uint64 const arg0{};
+                bsl::safe_uint64 const arg1{bsl::safe_uint64::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1636,8 +1636,8 @@ namespace syscall
             []() noexcept {
                 bsl::ut_given_at_runtime{} = []() noexcept {
                     bf_syscall_t mut_sys{};
-                    bf_uint64_t const arg0{};
-                    bf_uint64_t const arg1{};
+                    bsl::safe_uint64 const arg0{};
+                    bsl::safe_uint64 const arg1{};
                     bsl::ut_when{} = [&]() noexcept {
                         g_mut_errc.clear();
                         g_mut_errc.at("bf_intrinsic_op_invlpga_impl") = BF_STATUS_FAILURE_UNKNOWN;
@@ -1651,8 +1651,8 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_invlpga success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const arg0{};
-                bf_uint64_t const arg1{};
+                bsl::safe_uint64 const arg0{};
+                bsl::safe_uint64 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1665,8 +1665,8 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_invept invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const arg0{bf_uint64_t::failure()};
-                bf_uint64_t const arg1{};
+                bsl::safe_uint64 const arg0{bsl::safe_uint64::failure()};
+                bsl::safe_uint64 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1679,8 +1679,8 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_invept invalid arg1"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const arg0{};
-                bf_uint64_t const arg1{bf_uint64_t::failure()};
+                bsl::safe_uint64 const arg0{};
+                bsl::safe_uint64 const arg1{bsl::safe_uint64::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1694,8 +1694,8 @@ namespace syscall
             []() noexcept {
                 bsl::ut_given_at_runtime{} = []() noexcept {
                     bf_syscall_t mut_sys{};
-                    bf_uint64_t const arg0{};
-                    bf_uint64_t const arg1{};
+                    bsl::safe_uint64 const arg0{};
+                    bsl::safe_uint64 const arg1{};
                     bsl::ut_when{} = [&]() noexcept {
                         g_mut_errc.clear();
                         g_mut_errc.at("bf_intrinsic_op_invept_impl") = BF_STATUS_FAILURE_UNKNOWN;
@@ -1709,8 +1709,8 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_invept success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const arg0{};
-                bf_uint64_t const arg1{};
+                bsl::safe_uint64 const arg0{};
+                bsl::safe_uint64 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1723,9 +1723,9 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_invvpid invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const arg0{bf_uint64_t::failure()};
-                bf_uint16_t const arg1{};
-                bf_uint64_t const arg2{};
+                bsl::safe_uint64 const arg0{bsl::safe_uint64::failure()};
+                bsl::safe_uint16 const arg1{};
+                bsl::safe_uint64 const arg2{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1738,9 +1738,9 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_invvpid invalid arg1"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const arg0{};
-                bf_uint16_t const arg1{bf_uint16_t::failure()};
-                bf_uint64_t const arg2{};
+                bsl::safe_uint64 const arg0{};
+                bsl::safe_uint16 const arg1{bsl::safe_uint16::failure()};
+                bsl::safe_uint64 const arg2{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1753,9 +1753,9 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_invvpid invalid arg2"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const arg0{};
-                bf_uint16_t const arg1{};
-                bf_uint64_t const arg2{bf_uint64_t::failure()};
+                bsl::safe_uint64 const arg0{};
+                bsl::safe_uint16 const arg1{};
+                bsl::safe_uint64 const arg2{bsl::safe_uint64::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1769,9 +1769,9 @@ namespace syscall
             []() noexcept {
                 bsl::ut_given_at_runtime{} = []() noexcept {
                     bf_syscall_t mut_sys{};
-                    bf_uint64_t const arg0{};
-                    bf_uint16_t const arg1{};
-                    bf_uint64_t const arg2{};
+                    bsl::safe_uint64 const arg0{};
+                    bsl::safe_uint16 const arg1{};
+                    bsl::safe_uint64 const arg2{};
                     bsl::ut_when{} = [&]() noexcept {
                         g_mut_errc.clear();
                         g_mut_errc.at("bf_intrinsic_op_invvpid_impl") = BF_STATUS_FAILURE_UNKNOWN;
@@ -1785,9 +1785,9 @@ namespace syscall
         bsl::ut_scenario{"bf_intrinsic_op_invvpid success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const arg0{};
-                bf_uint16_t const arg1{};
-                bf_uint64_t const arg2{};
+                bsl::safe_uint64 const arg0{};
+                bsl::safe_uint16 const arg1{};
+                bsl::safe_uint64 const arg2{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
@@ -1804,7 +1804,7 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_page invalid phys"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t mut_phys{bf_uint64_t::failure()};
+                bsl::safe_uint64 mut_phys{bsl::safe_uint64::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1818,7 +1818,7 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_page bf_mem_op_alloc_page_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t mut_phys{};
+                bsl::safe_uint64 mut_phys{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1834,7 +1834,7 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_page success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t mut_phys{};
+                bsl::safe_uint64 mut_phys{};
                 void *pmut_mut_ptr{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
@@ -1897,8 +1897,8 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_huge invalid size #1"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const size{bf_uint64_t::failure()};
-                bf_uint64_t mut_phys{};
+                bsl::safe_uint64 const size{bsl::safe_uint64::failure()};
+                bsl::safe_uint64 mut_phys{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1912,8 +1912,8 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_huge invalid size #2"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const size{};
-                bf_uint64_t mut_phys{};
+                bsl::safe_uint64 const size{};
+                bsl::safe_uint64 mut_phys{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1927,8 +1927,8 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_huge invalid phys"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const size{ANSWER64};
-                bf_uint64_t mut_phys{bf_uint64_t::failure()};
+                bsl::safe_uint64 const size{ANSWER64};
+                bsl::safe_uint64 mut_phys{bsl::safe_uint64::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1942,8 +1942,8 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_huge bf_mem_op_alloc_huge_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const size{ANSWER64};
-                bf_uint64_t mut_phys{};
+                bsl::safe_uint64 const size{ANSWER64};
+                bsl::safe_uint64 mut_phys{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -1959,8 +1959,8 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_huge success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const size{ANSWER64};
-                bf_uint64_t mut_phys{};
+                bsl::safe_uint64 const size{ANSWER64};
+                bsl::safe_uint64 mut_phys{};
                 void *pmut_mut_ptr{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
@@ -1998,7 +1998,7 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_free_huge failure/success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const size{ANSWER64};
+                bsl::safe_uint64 const size{ANSWER64};
                 void *pmut_mut_ptr{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
@@ -2022,7 +2022,7 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_heap invalid size"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const size{bf_uint64_t::failure()};
+                bsl::safe_uint64 const size{bsl::safe_uint64::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -2036,7 +2036,7 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_heap bf_mem_op_alloc_heap_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const size{ANSWER64};
+                bsl::safe_uint64 const size{ANSWER64};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
@@ -2051,7 +2051,7 @@ namespace syscall
         bsl::ut_scenario{"bf_mem_op_alloc_heap success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const size{ANSWER64};
+                bsl::safe_uint64 const size{ANSWER64};
                 void *pmut_mut_ptr{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
@@ -2072,7 +2072,7 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys invalid phys #1"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{bf_uint64_t::failure()};
+                bsl::safe_uint64 const phys{bsl::safe_uint64::failure()};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_read_phys<bsl::uint8>(phys));
                 };
@@ -2082,7 +2082,7 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys invalid phys #2"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{};
+                bsl::safe_uint64 const phys{};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_read_phys<bsl::uint8>(phys));
                 };
@@ -2092,7 +2092,7 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys address out of range"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{BAD_ADDR};
+                bsl::safe_uint64 const phys{BAD_ADDR};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_read_phys<bsl::uint8>(phys));
                 };
@@ -2102,10 +2102,10 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint8_t const val{};
+                bsl::safe_uint8 const val{};
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                 bsl::safe_uintmax const virt{reinterpret_cast<bsl::uintmax>(&val)};
-                bf_uint64_t const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
+                bsl::safe_uint64 const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_sys.bf_write_phys<bsl::uint8>(phys, ANSWER8));
                     bsl::ut_then{} = [&]() noexcept {
@@ -2118,7 +2118,7 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys invalid phys #1"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{bf_uint64_t::failure()};
+                bsl::safe_uint64 const phys{bsl::safe_uint64::failure()};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_read_phys<bsl::uint16>(phys));
                 };
@@ -2128,7 +2128,7 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys invalid phys #2"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{};
+                bsl::safe_uint64 const phys{};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_read_phys<bsl::uint16>(phys));
                 };
@@ -2138,7 +2138,7 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys address out of range"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{BAD_ADDR};
+                bsl::safe_uint64 const phys{BAD_ADDR};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_read_phys<bsl::uint16>(phys));
                 };
@@ -2148,10 +2148,10 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const val{};
+                bsl::safe_uint16 const val{};
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                 bsl::safe_uintmax const virt{reinterpret_cast<bsl::uintmax>(&val)};
-                bf_uint64_t const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
+                bsl::safe_uint64 const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_sys.bf_write_phys<bsl::uint16>(phys, ANSWER16));
                     bsl::ut_then{} = [&]() noexcept {
@@ -2164,7 +2164,7 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys invalid phys #1"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{bf_uint64_t::failure()};
+                bsl::safe_uint64 const phys{bsl::safe_uint64::failure()};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_read_phys<bsl::uint32>(phys));
                 };
@@ -2174,7 +2174,7 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys invalid phys #2"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{};
+                bsl::safe_uint64 const phys{};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_read_phys<bsl::uint32>(phys));
                 };
@@ -2184,7 +2184,7 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys address out of range"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{BAD_ADDR};
+                bsl::safe_uint64 const phys{BAD_ADDR};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_read_phys<bsl::uint32>(phys));
                 };
@@ -2194,10 +2194,10 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint32_t const val{};
+                bsl::safe_uint32 const val{};
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                 bsl::safe_uintmax const virt{reinterpret_cast<bsl::uintmax>(&val)};
-                bf_uint64_t const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
+                bsl::safe_uint64 const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_sys.bf_write_phys<bsl::uint32>(phys, ANSWER32));
                     bsl::ut_then{} = [&]() noexcept {
@@ -2210,7 +2210,7 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys invalid phys #1"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{bf_uint64_t::failure()};
+                bsl::safe_uint64 const phys{bsl::safe_uint64::failure()};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_read_phys<bsl::uint64>(phys));
                 };
@@ -2220,7 +2220,7 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys invalid phys #2"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{};
+                bsl::safe_uint64 const phys{};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_read_phys<bsl::uint64>(phys));
                 };
@@ -2230,7 +2230,7 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys address out of range"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{BAD_ADDR};
+                bsl::safe_uint64 const phys{BAD_ADDR};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_read_phys<bsl::uint64>(phys));
                 };
@@ -2240,10 +2240,10 @@ namespace syscall
         bsl::ut_scenario{"bf_read_phys success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const val{};
+                bsl::safe_uint64 const val{};
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                 bsl::safe_uintmax const virt{reinterpret_cast<bsl::uintmax>(&val)};
-                bf_uint64_t const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
+                bsl::safe_uint64 const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_sys.bf_write_phys<bsl::uint64>(phys, ANSWER64));
                     bsl::ut_then{} = [&]() noexcept {
@@ -2256,8 +2256,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys invalid phys #1"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{bf_uint64_t::failure()};
-                bf_uint8_t const val{ANSWER8};
+                bsl::safe_uint64 const phys{bsl::safe_uint64::failure()};
+                bsl::safe_uint8 const val{ANSWER8};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint8>(phys, val));
                 };
@@ -2267,8 +2267,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys invalid phys #2"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{};
-                bf_uint8_t const val{ANSWER8};
+                bsl::safe_uint64 const phys{};
+                bsl::safe_uint8 const val{ANSWER8};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint8>(phys, val));
                 };
@@ -2278,8 +2278,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys invalid val"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{ANSWER64};
-                bf_uint8_t const val{bf_uint8_t::failure()};
+                bsl::safe_uint64 const phys{ANSWER64};
+                bsl::safe_uint8 const val{bsl::safe_uint8::failure()};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint8>(phys, val));
                 };
@@ -2289,8 +2289,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys address out of range"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{BAD_ADDR};
-                bf_uint8_t const val{ANSWER8};
+                bsl::safe_uint64 const phys{BAD_ADDR};
+                bsl::safe_uint8 const val{ANSWER8};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint8>(phys, val));
                 };
@@ -2300,10 +2300,10 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint8_t const val{ANSWER8};
+                bsl::safe_uint8 const val{ANSWER8};
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                 bsl::safe_uintmax const virt{reinterpret_cast<bsl::uintmax>(&val)};
-                bf_uint64_t const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
+                bsl::safe_uint64 const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(mut_sys.bf_write_phys<bsl::uint8>(phys, val));
                     bsl::ut_check(mut_sys.bf_read_phys<bsl::uint8>(phys) == ANSWER8);
@@ -2314,8 +2314,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys invalid phys #1"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{bf_uint64_t::failure()};
-                bf_uint16_t const val{ANSWER16};
+                bsl::safe_uint64 const phys{bsl::safe_uint64::failure()};
+                bsl::safe_uint16 const val{ANSWER16};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint16>(phys, val));
                 };
@@ -2325,8 +2325,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys invalid phys #2"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{};
-                bf_uint16_t const val{ANSWER16};
+                bsl::safe_uint64 const phys{};
+                bsl::safe_uint16 const val{ANSWER16};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint16>(phys, val));
                 };
@@ -2336,8 +2336,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys invalid val"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{ANSWER64};
-                bf_uint16_t const val{bf_uint16_t::failure()};
+                bsl::safe_uint64 const phys{ANSWER64};
+                bsl::safe_uint16 const val{bsl::safe_uint16::failure()};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint16>(phys, val));
                 };
@@ -2347,8 +2347,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys address out of range"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{BAD_ADDR};
-                bf_uint16_t const val{ANSWER16};
+                bsl::safe_uint64 const phys{BAD_ADDR};
+                bsl::safe_uint16 const val{ANSWER16};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint16>(phys, val));
                 };
@@ -2358,10 +2358,10 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint16_t const val{ANSWER16};
+                bsl::safe_uint16 const val{ANSWER16};
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                 bsl::safe_uintmax const virt{reinterpret_cast<bsl::uintmax>(&val)};
-                bf_uint64_t const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
+                bsl::safe_uint64 const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(mut_sys.bf_write_phys<bsl::uint16>(phys, val));
                     bsl::ut_check(mut_sys.bf_read_phys<bsl::uint16>(phys) == ANSWER16);
@@ -2372,8 +2372,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys invalid phys #1"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{bf_uint64_t::failure()};
-                bf_uint32_t const val{ANSWER32};
+                bsl::safe_uint64 const phys{bsl::safe_uint64::failure()};
+                bsl::safe_uint32 const val{ANSWER32};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint32>(phys, val));
                 };
@@ -2383,8 +2383,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys invalid phys #2"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{};
-                bf_uint32_t const val{ANSWER32};
+                bsl::safe_uint64 const phys{};
+                bsl::safe_uint32 const val{ANSWER32};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint32>(phys, val));
                 };
@@ -2394,8 +2394,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys invalid val"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{ANSWER64};
-                bf_uint32_t const val{bf_uint32_t::failure()};
+                bsl::safe_uint64 const phys{ANSWER64};
+                bsl::safe_uint32 const val{bsl::safe_uint32::failure()};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint32>(phys, val));
                 };
@@ -2405,8 +2405,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys address out of range"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{BAD_ADDR};
-                bf_uint32_t const val{ANSWER32};
+                bsl::safe_uint64 const phys{BAD_ADDR};
+                bsl::safe_uint32 const val{ANSWER32};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint32>(phys, val));
                 };
@@ -2416,10 +2416,10 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint32_t const val{ANSWER32};
+                bsl::safe_uint32 const val{ANSWER32};
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                 bsl::safe_uintmax const virt{reinterpret_cast<bsl::uintmax>(&val)};
-                bf_uint64_t const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
+                bsl::safe_uint64 const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(mut_sys.bf_write_phys<bsl::uint32>(phys, val));
                     bsl::ut_check(mut_sys.bf_read_phys<bsl::uint32>(phys) == ANSWER32);
@@ -2430,8 +2430,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys invalid phys #1"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{bf_uint64_t::failure()};
-                bf_uint64_t const val{ANSWER64};
+                bsl::safe_uint64 const phys{bsl::safe_uint64::failure()};
+                bsl::safe_uint64 const val{ANSWER64};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint64>(phys, val));
                 };
@@ -2441,8 +2441,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys invalid phys #2"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{};
-                bf_uint64_t const val{ANSWER64};
+                bsl::safe_uint64 const phys{};
+                bsl::safe_uint64 const val{ANSWER64};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint64>(phys, val));
                 };
@@ -2452,8 +2452,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys invalid val"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{ANSWER64};
-                bf_uint64_t const val{bf_uint64_t::failure()};
+                bsl::safe_uint64 const phys{ANSWER64};
+                bsl::safe_uint64 const val{bsl::safe_uint64::failure()};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint64>(phys, val));
                 };
@@ -2463,8 +2463,8 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys address out of range"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const phys{BAD_ADDR};
-                bf_uint64_t const val{ANSWER64};
+                bsl::safe_uint64 const phys{BAD_ADDR};
+                bsl::safe_uint64 const val{ANSWER64};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!mut_sys.bf_write_phys<bsl::uint64>(phys, val));
                 };
@@ -2474,10 +2474,10 @@ namespace syscall
         bsl::ut_scenario{"bf_write_phys success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
-                bf_uint64_t const val{ANSWER64};
+                bsl::safe_uint64 const val{ANSWER64};
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                 bsl::safe_uintmax const virt{reinterpret_cast<bsl::uintmax>(&val)};
-                bf_uint64_t const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
+                bsl::safe_uint64 const phys{virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(mut_sys.bf_write_phys<bsl::uint64>(phys, val));
                     bsl::ut_check(mut_sys.bf_read_phys<bsl::uint64>(phys) == ANSWER64);

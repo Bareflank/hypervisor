@@ -198,10 +198,10 @@ namespace mk
             }
         }
 
-        bsl::error() << "unknown syscall signature/opcode "    //--
-                     << bsl::hex(mut_tls.ext_syscall)          //--
-                     << bsl::endl                              //--
-                     << bsl::here();                           //--
+        bsl::error() << "unknown syscall "               //--
+                     << bsl::hex(mut_tls.ext_syscall)    //--
+                     << bsl::endl                        //--
+                     << bsl::here();                     //--
 
         return syscall::BF_STATUS_FAILURE_UNSUPPORTED;
     }
