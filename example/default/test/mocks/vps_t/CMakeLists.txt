@@ -55,7 +55,7 @@
 #   suppose we are testing the bootstrap_t logic. This file includes a number
 #   of dependencies. We do not include the path to where these dependencies
 #   are located in the include path for the unit test. Instead, we include
-#   a folder than contains our mocks. All of the dependencies must be mocked.
+#   a folder than contains our MOCK. All of the dependencies must be mocked.
 #   When the bootstrap_t code is compiled, it will not realize that it is
 #   using the mocked versions of it's dependecies, similar to how a lot of this
 #   code is unaware of which arch specific code it is using and the build

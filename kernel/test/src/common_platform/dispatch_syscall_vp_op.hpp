@@ -39,7 +39,7 @@ namespace mk
     /// <!-- inputs/outputs -->
     ///   @param tls the current TLS block
     ///   @param ext the extension that made the syscall
-    ///   @param vp_pool the VP pool to use
+    ///   @param vp_pool the vp_pool_t to use
     ///   @return Returns syscall::BF_STATUS_SUCCESS on success or an error
     ///     code on failure.
     ///

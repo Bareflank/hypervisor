@@ -30,13 +30,13 @@
 #include <intrinsic_t.hpp>
 #include <tls_t.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
-#include <bsl/unlikely_assert.hpp>
+#include <bsl/unlikely.hpp>
 
 namespace integration
 {
@@ -57,7 +57,7 @@ namespace integration
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -68,14 +68,14 @@ namespace integration
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
             vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool) noexcept -> bsl::errc_type
+            vs_pool_t &vs_pool) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(sys);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             return bsl::errc_success;
         }
@@ -89,7 +89,7 @@ namespace integration
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///
         static constexpr void
         release(
@@ -98,14 +98,14 @@ namespace integration
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
             vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool) noexcept
+            vs_pool_t &vs_pool) noexcept
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(sys);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
         }
 
         /// <!-- description -->
@@ -117,8 +117,8 @@ namespace integration
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
-        ///   @param vpsid the ID of the VPS that generated the VMExit
+        ///   @param vs_pool the vs_pool_t to use
+        ///   @param vsid the ID of the VS that generated the VMExit
         ///   @param exit_reason the exit reason associated with the VMExit
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
@@ -130,9 +130,9 @@ namespace integration
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
             vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool,
-            bsl::safe_uint16 const &vpsid,
-            bsl::safe_uint64 const &exit_reason) noexcept -> bsl::errc_type
+            vs_pool_t &vs_pool,
+            bsl::safe_u16 const &vsid,
+            bsl::safe_u64 const &exit_reason) noexcept -> bsl::errc_type
         {
             switch (exit_reason.get()) {
                 default: {

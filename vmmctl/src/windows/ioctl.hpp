@@ -227,7 +227,7 @@ namespace vmmctl
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
         [[nodiscard]] constexpr auto
-        send(bsl::safe_uintmax const &req) const noexcept -> bool
+        send(bsl::safe_umx const &req) const noexcept -> bool
         {
             if (bsl::unlikely(nullptr == m_hndl)) {
                 bsl::error() << "failed to send, ioctl not properly initialized\n";
@@ -235,7 +235,7 @@ namespace vmmctl
             }
 
             auto const req32{bsl::to_u32(req)};
-            if (bsl::unlikely(!req32)) {
+            if (bsl::unlikely(req32.is_invalid())) {
                 bsl::error() << "invalid request: " << bsl::hex(req) << bsl::endl << bsl::here();
                 return false;
             }
@@ -262,7 +262,7 @@ namespace vmmctl
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
         [[nodiscard]] constexpr auto
-        read_data(bsl::safe_uintmax const &req, void *const data, bsl::safe_uintmax const &size)
+        read_data(bsl::safe_umx const &req, void *const data, bsl::safe_umx const &size)
             const noexcept -> bool
         {
             if (bsl::unlikely(nullptr == m_hndl)) {
@@ -271,7 +271,7 @@ namespace vmmctl
             }
 
             auto const req32{bsl::to_u32(req)};
-            if (bsl::unlikely(!req32)) {
+            if (bsl::unlikely(req32.is_invalid())) {
                 bsl::error() << "invalid request: " << bsl::hex(req) << bsl::endl << bsl::here();
                 return false;
             }
@@ -282,7 +282,7 @@ namespace vmmctl
             }
 
             auto const size32{bsl::to_u32(size)};
-            if (bsl::unlikely(!size32)) {
+            if (bsl::unlikely(size32.is_invalid())) {
                 bsl::error() << "invalid size: " << bsl::hex(size) << bsl::endl << bsl::here();
                 return false;
             }
@@ -309,10 +309,8 @@ namespace vmmctl
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
         [[nodiscard]] constexpr auto
-        write_data(
-            bsl::safe_uintmax const &req,
-            void const *const data,
-            bsl::safe_uintmax const &size) const noexcept -> bool
+        write_data(bsl::safe_umx const &req, void const *const data, bsl::safe_umx const &size)
+            const noexcept -> bool
         {
             void *const ptr{const_cast<void *>(data)};
 
@@ -322,7 +320,7 @@ namespace vmmctl
             }
 
             auto const req32{bsl::to_u32(req)};
-            if (bsl::unlikely(!req32)) {
+            if (bsl::unlikely(req32.is_invalid())) {
                 bsl::error() << "invalid request: " << bsl::hex(req) << bsl::endl << bsl::here();
                 return false;
             }
@@ -333,7 +331,7 @@ namespace vmmctl
             }
 
             auto const size32{bsl::to_u32(size)};
-            if (bsl::unlikely(!size32)) {
+            if (bsl::unlikely(size32.is_invalid())) {
                 bsl::error() << "invalid size: " << bsl::hex(size) << bsl::endl << bsl::here();
                 return false;
             }
@@ -360,10 +358,8 @@ namespace vmmctl
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
         [[nodiscard]] constexpr auto
-        read_write_data(
-            bsl::safe_uintmax const &req,
-            void *const data,
-            bsl::safe_uintmax const &size) const noexcept -> bool
+        read_write_data(bsl::safe_umx const &req, void *const data, bsl::safe_umx const &size)
+            const noexcept -> bool
         {
             if (bsl::unlikely(nullptr == m_hndl)) {
                 bsl::error() << "failed to read/write, ioctl not properly initialized\n";
@@ -371,7 +367,7 @@ namespace vmmctl
             }
 
             auto const req32{bsl::to_u32(req)};
-            if (bsl::unlikely(!req32)) {
+            if (bsl::unlikely(req32.is_invalid())) {
                 bsl::error() << "invalid request: " << bsl::hex(req) << bsl::endl << bsl::here();
                 return false;
             }
@@ -382,7 +378,7 @@ namespace vmmctl
             }
 
             auto const size32{bsl::to_u32(size)};
-            if (bsl::unlikely(!size32)) {
+            if (bsl::unlikely(size32.is_invalid())) {
                 bsl::error() << "invalid size: " << bsl::hex(size) << bsl::endl << bsl::here();
                 return false;
             }

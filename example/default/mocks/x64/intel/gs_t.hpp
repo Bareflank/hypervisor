@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MOCKS_GS_T_HPP
-#define MOCKS_GS_T_HPP
+#ifndef MOCK_GS_T_HPP
+#define MOCK_GS_T_HPP
 
 #include <bsl/safe_integral.hpp>
 
@@ -38,11 +38,11 @@ namespace example
     struct gs_t final
     {
         /// @brief stores the cpuid value to return from intrinsic_cpuid_impl
-        bsl::safe_uint64 cpuid_val{};
-        /// @brief stores the MSR bitmap used by this vps_t
+        bsl::safe_u64 cpuid_val{};
+        /// @brief stores the MSR bitmap used by this vs_t
         void *msr_bitmap{};
         /// @brief stores the physical address of the MSR bitmap above
-        bsl::safe_uintmax msr_bitmap_phys{};
+        bsl::safe_umx msr_bitmap_phys{};
     };
 }
 

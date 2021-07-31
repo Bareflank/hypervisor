@@ -31,476 +31,229 @@
 #include <bf_constants.hpp>
 #include <tls_t.hpp>
 #include <vp_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/array.hpp>
 #include <bsl/debug.hpp>
+#include <bsl/ensures.hpp>
 #include <bsl/errc_type.hpp>
-#include <bsl/finally_assert.hpp>
+#include <bsl/expects.hpp>
+#include <bsl/finally.hpp>
 #include <bsl/unlikely.hpp>
-#include <bsl/unlikely_assert.hpp>
 
 namespace mk
 {
-    class vm_pool_t;
+    class vp_pool_t;
 
     /// @class mk::vp_pool_t
     ///
     /// <!-- description -->
-    ///   @brief Defines the microkernel's VP pool
+    ///   @brief Defines the microkernel's vp_pool_t
     ///
     class vp_pool_t final
     {
-        /// @brief stores the pool of vp_ts
-        bsl::array<vp_t, HYPERVISOR_MAX_VPS.get()> m_pool{};
+        /// @brief stores the pool of vp_t objects
+        bsl::array<vp_t, HYPERVISOR_MAX_VSS.get()> m_pool{};
         /// @brief safe guards operations on the pool.
         mutable spinlock_t m_lock{};
+
+        /// <!-- description -->
+        ///   @brief Returns the vp_t associated with the provided vpid.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vpid the ID of the vp_t to get
+        ///   @return Returns the vp_t associated with the provided vpid.
+        ///
+        [[nodiscard]] constexpr auto
+        get_vp(bsl::safe_u16 const &vpid) noexcept -> vp_t *
+        {
+            bsl::expects(vpid.is_valid_and_checked());
+            bsl::expects(vpid < bsl::to_u16(m_pool.size()));
+            return m_pool.at_if(bsl::to_idx(vpid));
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the vp_t associated with the provided vpid.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vpid the ID of the vp_t to get
+        ///   @return Returns the vp_t associated with the provided vpid.
+        ///
+        [[nodiscard]] constexpr auto
+        get_vp(bsl::safe_u16 const &vpid) const noexcept -> vp_t const *
+        {
+            bsl::expects(vpid.is_valid_and_checked());
+            bsl::expects(vpid < bsl::to_u16(m_pool.size()));
+            return m_pool.at_if(bsl::to_idx(vpid));
+        }
 
     public:
         /// <!-- description -->
         ///   @brief Initializes this vp_pool_t
         ///
-        /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param vps_pool the VPS pool to use
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        initialize(tls_t const &tls, vps_pool_t const &vps_pool) noexcept -> bsl::errc_type
+        constexpr void
+        initialize() noexcept
         {
-            bsl::finally_assert mut_release_on_error{[this, &tls, &vps_pool]() noexcept -> void {
-                auto const ret{this->release(tls, vps_pool)};
-                if (bsl::unlikely(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return;
-                }
-
-                bsl::touch();
-            }};
-
-            for (auto const vp : m_pool) {
-                auto const ret{vp.data->initialize(tls, bsl::to_u16(vp.index))};
-                if (bsl::unlikely_assert(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
+            for (bsl::safe_idx mut_i{}; mut_i < m_pool.size(); ++mut_i) {
+                m_pool.at_if(mut_i)->initialize(bsl::to_u16(mut_i));
             }
-
-            mut_release_on_error.ignore();
-            return bsl::errc_success;
         }
 
         /// <!-- description -->
-        ///   @brief Release the vp_pool_t. Note that if this function fails,
-        ///     the microkernel is left in a corrupt state and all use of the
-        ///     vp_pool_t after calling this function will results in UB.
+        ///   @brief Release the vp_pool_t
+        ///
+        constexpr void
+        release() noexcept
+        {
+            for (auto &mut_vp : m_pool) {
+                mut_vp.release();
+            }
+        }
+
+        /// <!-- description -->
+        ///   @brief Allocates a vp_t from the vp_pool_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param vps_pool the VPS pool to use
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
+        ///   @param mut_tls the current TLS block
+        ///   @param vmid The ID of the VM to assign the newly allocated vp_t to
+        ///   @param ppid The ID of the PP to assign the newly allocated vp_t to
+        ///   @return Returns ID of the newly allocated vp_t. Returns
+        ///     bsl::safe_u16::failure() on failure.
         ///
         [[nodiscard]] constexpr auto
-        release(tls_t const &tls, vps_pool_t const &vps_pool) noexcept -> bsl::errc_type
+        allocate(tls_t &mut_tls, bsl::safe_u16 const &vmid, bsl::safe_u16 const &ppid) noexcept
+            -> bsl::safe_u16
         {
-            for (auto const vp : m_pool) {
-                auto const ret{vp.data->release(tls, vps_pool)};
-                if (bsl::unlikely(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
+            lock_guard_t mut_lock{mut_tls, m_lock};
+
+            for (auto &mut_vp : m_pool) {
+                if (mut_vp.is_deallocated()) {
+                    return mut_vp.allocate(vmid, ppid);
                 }
 
                 bsl::touch();
             }
 
-            return bsl::errc_success;
+            bsl::error() << "vp_pool_t out of vs\n" << bsl::here();
+            return bsl::safe_u16::failure();
         }
 
         /// <!-- description -->
-        ///   @brief Allocates a vp from the vp pool.
+        ///   @brief Deallocates the requested vp_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param vmid The ID of the VM to assign the newly created VP to
-        ///   @param ppid The ID of the PP to assign the newly created VP to
-        ///   @return Returns ID of the newly allocated vp
+        ///   @param mut_tls the current TLS block
+        ///   @param vpid the ID of the vp_t to deallocate
         ///
-        [[nodiscard]] constexpr auto
-        allocate(
-            tls_t const &tls, bsl::safe_uint16 const &vmid, bsl::safe_uint16 const &ppid) noexcept
-            -> bsl::safe_uint16
+        constexpr void
+        deallocate(tls_t &mut_tls, bsl::safe_u16 const &vpid) noexcept
         {
-            lock_guard_t mut_lock{tls, m_lock};
-
-            vp_t *pmut_mut_vp{};
-            for (auto const elem : m_pool) {
-                if (elem.data->is_deallocated()) {
-                    pmut_mut_vp = elem.data;
-                    break;
-                }
-
-                bsl::touch();
-            }
-
-            if (bsl::unlikely(nullptr == pmut_mut_vp)) {
-                bsl::error() << "vp pool out of vps\n" << bsl::here();
-                return bsl::safe_uint16::failure();
-            }
-
-            return pmut_mut_vp->allocate(tls, vmid, ppid);
+            lock_guard_t mut_lock{mut_tls, m_lock};
+            this->get_vp(vpid)->deallocate();
         }
 
         /// <!-- description -->
-        ///   @brief Returns a vp previously allocated using the allocate
-        ///     function to the vp pool.
+        ///   @brief Returns true if the requested vp_t is deallocated,
+        ///     false otherwise
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param vps_pool the VPS pool to use
-        ///   @param vpid the ID of the vp to deallocate
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        deallocate(
-            tls_t const &tls, vps_pool_t const &vps_pool, bsl::safe_uint16 const &vpid) noexcept
-            -> bsl::errc_type
-        {
-            auto *const pmut_vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == pmut_vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return bsl::errc_index_out_of_bounds;
-            }
-
-            return pmut_vp->deallocate(tls, vps_pool);
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the requested vp_t's status as zombified, meaning
-        ///     it is no longer usable.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpid the ID of the vp_t to set as a zombie
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        zombify(bsl::safe_uint16 const &vpid) noexcept -> bsl::errc_type
-        {
-            auto *const pmut_vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == pmut_vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return bsl::errc_index_out_of_bounds;
-            }
-
-            pmut_vp->zombify();
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns true if the requested vp_t is deallocated, false
-        ///     if the provided VPID is invalid, or if the vp_t is not
-        ///     deallocated.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
         ///   @param vpid the ID of the vp_t to query
-        ///   @return Returns true if the requested vp_t is deallocated, false
-        ///     if the provided VPID is invalid, or if the vp_t is not
-        ///     deallocated.
+        ///   @return Returns true if the requested vp_t is deallocated,
+        ///     false otherwise
         ///
         [[nodiscard]] constexpr auto
-        is_deallocated(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept -> bool
+        is_deallocated(bsl::safe_u16 const &vpid) const noexcept -> bool
         {
-            bsl::discard(tls);
-
-            auto const *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return false;
-            }
-
-            return vp->is_deallocated();
+            return this->get_vp(vpid)->is_deallocated();
         }
 
         /// <!-- description -->
-        ///   @brief Returns true if the requested vp_t is allocated, false
-        ///     if the provided VPID is invalid, or if the vp_t is not
-        ///     allocated.
+        ///   @brief Returns true if the requested vp_t is allocated,
+        ///     false otherwise
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
         ///   @param vpid the ID of the vp_t to query
-        ///   @return Returns true if the requested vp_t is allocated, false
-        ///     if the provided VPID is invalid, or if the vp_t is not
-        ///     allocated.
+        ///   @return Returns true if the requested vp_t is allocated,
+        ///     false otherwise
         ///
         [[nodiscard]] constexpr auto
-        is_allocated(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept -> bool
+        is_allocated(bsl::safe_u16 const &vpid) const noexcept -> bool
         {
-            bsl::discard(tls);
-
-            auto const *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return false;
-            }
-
-            return vp->is_allocated();
+            return this->get_vp(vpid)->is_allocated();
         }
 
         /// <!-- description -->
-        ///   @brief Returns true if the requested vp_t is a zombie, false
-        ///     if the provided VPID is invalid, or if the vp_t is not
-        ///     a zombie.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param vpid the ID of the vp_t to query
-        ///   @return Returns true if the requested vp_t is a zombie, false
-        ///     if the provided VPID is invalid, or if the vp_t is not
-        ///     a zombie.
-        ///
-        [[nodiscard]] constexpr auto
-        is_zombie(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept -> bool
-        {
-            bsl::discard(tls);
-
-            auto const *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return false;
-            }
-
-            return vp->is_zombie();
-        }
-
-        /// <!-- description -->
-        ///   @brief If a vp_t in the pool is assigned to the requested VM,
-        ///     the ID of the first vp_t found is returned. Otherwise, this
-        ///     function will return bsl::safe_uint16::failure()
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param vmid the ID fo the VM to query
-        ///   @return If a vp_t in the pool is assigned to the requested VM,
-        ///     the ID of the first vp_t found is returned. Otherwise, this
-        ///     function will return bsl::safe_uint16::failure()
-        ///
-        [[nodiscard]] constexpr auto
-        is_assigned_to_vm(tls_t const &tls, bsl::safe_uint16 const &vmid) const noexcept
-            -> bsl::safe_uint16
-        {
-            bsl::discard(tls);
-
-            if (bsl::unlikely_assert(!vmid)) {
-                bsl::error() << "invalid vmid\n" << bsl::here();
-                return bsl::safe_uint16::failure();
-            }
-
-            if (bsl::unlikely_assert(syscall::BF_INVALID_ID == vmid)) {
-                bsl::error() << "invalid vmid\n" << bsl::here();
-                return bsl::safe_uint16::failure();
-            }
-
-            for (auto const elem : m_pool) {
-                if (elem.data->assigned_vm() == vmid) {
-                    return elem.data->id();
-                }
-
-                bsl::touch();
-            }
-
-            return bsl::safe_uint16::failure();
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the requested vp_t as active.
+        ///   @brief Sets the requested vp_t as active
         ///
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param vpid the ID of the vp_t to set as active
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] constexpr auto
-        set_active(tls_t &mut_tls, bsl::safe_uint16 const &vpid) noexcept -> bsl::errc_type
+        constexpr void
+        set_active(tls_t &mut_tls, bsl::safe_u16 const &vpid) noexcept
         {
-            auto *const pmut_vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == pmut_vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return bsl::errc_index_out_of_bounds;
-            }
-
-            return pmut_vp->set_active(mut_tls);
+            this->get_vp(vpid)->set_active(mut_tls);
         }
 
         /// <!-- description -->
-        ///   @brief Sets the requested vp_t as inactive.
+        ///   @brief Sets the requested vp_t as inactive
         ///
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param vpid the ID of the vp_t to set as inactive
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] constexpr auto
-        set_inactive(tls_t &mut_tls, bsl::safe_uint16 const &vpid) noexcept -> bsl::errc_type
+        constexpr void
+        set_inactive(tls_t &mut_tls, bsl::safe_u16 const &vpid) noexcept
         {
-            auto *const pmut_vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == pmut_vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return bsl::errc_index_out_of_bounds;
+            if (bsl::unlikely(vpid == syscall::BF_INVALID_ID)) {
+                return;
             }
 
-            return pmut_vp->set_inactive(mut_tls);
+            this->get_vp(vpid)->set_inactive(mut_tls);
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the ID of the PP the requested vp_t is active on.
+        ///     If the vp_t is not active, bsl::safe_u16::failure() is returned.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vpid the ID of the vp_t to query
+        ///   @return Returns the ID of the PP the requested vp_t is active on.
+        ///     If the vp_t is not active, bsl::safe_u16::failure() is returned.
+        ///
+        [[nodiscard]] constexpr auto
+        is_active(bsl::safe_u16 const &vpid) const noexcept -> bsl::safe_u16
+        {
+            return this->get_vp(vpid)->is_active();
         }
 
         /// <!-- description -->
         ///   @brief Returns true if the requested vp_t is active on the
-        ///     current PP, false if the provided ID is invalid, or if the
-        ///     vp_t is not active on the current PP.
+        ///     current PP, false otherwise
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
         ///   @param vpid the ID of the vp_t to query
         ///   @return Returns true if the requested vp_t is active on the
-        ///     current PP, false if the provided ID is invalid, or if the
-        ///     vp_t is not active on the current PP.
+        ///     current PP, false otherwise
         ///
         [[nodiscard]] constexpr auto
-        is_active(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept -> bsl::safe_uint16
+        is_active_on_this_pp(tls_t const &tls, bsl::safe_u16 const &vpid) const noexcept -> bool
         {
-            auto const *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return bsl::safe_uint16::failure();
-            }
-
-            return vp->is_active(tls);
+            return this->get_vp(vpid)->is_active_on_this_pp(tls);
         }
 
         /// <!-- description -->
-        ///   @brief Returns true if this vp_t is active on the current PP,
-        ///     false if the provided ID is invalid, or if the vp_t is not
-        ///     active on the current PP.
+        ///   @brief Migrates the requested vp_t from one PP to another
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param vpid the ID of the vp_t to query
-        ///   @return Returns true if this vp_t is active on the current PP,
-        ///     false if the provided ID is invalid, or if the vp_t is not
-        ///     active on the current PP.
-        ///
-        [[nodiscard]] constexpr auto
-        is_active_on_current_pp(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept
-            -> bool
-        {
-            auto const *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return false;
-            }
-
-            return vp->is_active_on_current_pp(tls);
-        }
-
-        /// <!-- description -->
-        ///   @brief Migrates the requested vp_t from one PP to another.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
         ///   @param ppid the ID of the PP to migrate to
         ///   @param vpid the ID of the vp_t to migrate
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] constexpr auto
-        migrate(
-            tls_t const &tls, bsl::safe_uint16 const &ppid, bsl::safe_uint16 const &vpid) noexcept
-            -> bsl::errc_type
+        constexpr void
+        migrate(bsl::safe_u16 const &ppid, bsl::safe_u16 const &vpid) noexcept
         {
-            auto *const pmut_vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == pmut_vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return bsl::errc_index_out_of_bounds;
-            }
-
-            return pmut_vp->migrate(tls, ppid);
+            this->get_vp(vpid)->migrate(ppid);
         }
 
         /// <!-- description -->
@@ -511,22 +264,9 @@ namespace mk
         ///   @return Returns the ID of the VM the requested vp_t is assigned to
         ///
         [[nodiscard]] constexpr auto
-        assigned_vm(bsl::safe_uint16 const &vpid) const noexcept -> bsl::safe_uint16
+        assigned_vm(bsl::safe_u16 const &vpid) const noexcept -> bsl::safe_u16
         {
-            auto const *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return bsl::safe_uint16::failure();
-            }
-
-            return vp->assigned_vm();
+            return this->get_vp(vpid)->assigned_vm();
         }
 
         /// <!-- description -->
@@ -537,52 +277,53 @@ namespace mk
         ///   @return Returns the ID of the PP the requested vp_t is assigned to
         ///
         [[nodiscard]] constexpr auto
-        assigned_pp(bsl::safe_uint16 const &vpid) const noexcept -> bsl::safe_uint16
+        assigned_pp(bsl::safe_u16 const &vpid) const noexcept -> bsl::safe_u16
         {
-            auto const *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return bsl::safe_uint16::failure();
-            }
-
-            return vp->assigned_pp();
+            return this->get_vp(vpid)->assigned_pp();
         }
 
         /// <!-- description -->
-        ///   @brief Dumps the requested VP
+        ///   @brief If the requested VM is assigned to a vp_t in the pool,
+        ///     the ID of the first vp_t found is returned. Otherwise, this
+        ///     function will return bsl::safe_u16::failure()
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
-        ///   @param vpid the ID of the VP to dump
+        ///   @param vmid the ID fo the VM to query
+        ///   @return If the requested VM is assigned to a vp_t in the pool,
+        ///     the ID of the first vp_t found is returned. Otherwise, this
+        ///     function will return bsl::safe_u16::failure()
+        ///
+        [[nodiscard]] constexpr auto
+        vp_assigned_to_vm(bsl::safe_u16 const &vmid) const noexcept -> bsl::safe_u16
+        {
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(vmid != syscall::BF_INVALID_ID);
+
+            for (auto const &vp : m_pool) {
+                if (vp.assigned_vm() == vmid) {
+                    return vp.id();
+                }
+
+                bsl::touch();
+            }
+
+            return bsl::safe_u16::failure();
+        }
+
+        /// <!-- description -->
+        ///   @brief Dumps the requested vp_t
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vpid the ID of the vp_t to dump
         ///
         constexpr void
-        dump(tls_t const &tls, bsl::safe_uint16 const &vpid) const noexcept
+        dump(bsl::safe_u16 const &vpid) const noexcept
         {
             if constexpr (BSL_DEBUG_LEVEL == bsl::CRITICAL_ONLY) {
                 return;
             }
 
-            auto const *const vp{m_pool.at_if(bsl::to_umax(vpid))};
-            if (bsl::unlikely(nullptr == vp)) {
-                bsl::error()
-                    << "vpid "                                                              // --
-                    << bsl::hex(vpid)                                                       // --
-                    << " is invalid or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                    << bsl::hex(HYPERVISOR_MAX_VPS)                                         // --
-                    << bsl::endl                                                            // --
-                    << bsl::here();                                                         // --
-
-                return;
-            }
-
-            vp->dump(tls);
+            this->get_vp(vpid)->dump();
         }
     };
 }

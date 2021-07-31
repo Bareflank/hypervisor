@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MOCKS_INTRINSIC_IMPL_PROTOTYPES_HPP
-#define MOCKS_INTRINSIC_IMPL_PROTOTYPES_HPP
+#ifndef MOCK_INTRINSIC_IMPL_PROTOTYPES_HPP
+#define MOCK_INTRINSIC_IMPL_PROTOTYPES_HPP
 
 #include <gs_t.hpp>
 
@@ -31,7 +31,7 @@
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
 #include <bsl/safe_integral.hpp>
-#include <bsl/unlikely_assert.hpp>
+#include <bsl/unlikely.hpp>
 
 namespace example
 {
@@ -54,27 +54,27 @@ namespace example
         bsl::uint64 *const pmut_rcx,
         bsl::uint64 *const pmut_rdx) noexcept
     {
-        if (bsl::unlikely_assert(nullptr == gs)) {
+        if (bsl::unlikely(nullptr == gs)) {
             bsl::alert() << "gs is null\n" << bsl::here();
             return;
         }
 
-        if (bsl::unlikely_assert(nullptr == pmut_rax)) {
+        if (bsl::unlikely(nullptr == pmut_rax)) {
             bsl::alert() << "pmut_rax is null\n" << bsl::here();
             return;
         }
 
-        if (bsl::unlikely_assert(nullptr == pmut_rbx)) {
+        if (bsl::unlikely(nullptr == pmut_rbx)) {
             bsl::alert() << "pmut_rbx is null\n" << bsl::here();
             return;
         }
 
-        if (bsl::unlikely_assert(nullptr == pmut_rcx)) {
+        if (bsl::unlikely(nullptr == pmut_rcx)) {
             bsl::alert() << "pmut_rcx is null\n" << bsl::here();
             return;
         }
 
-        if (bsl::unlikely_assert(nullptr == pmut_rdx)) {
+        if (bsl::unlikely(nullptr == pmut_rdx)) {
             bsl::alert() << "pmut_rdx is null\n" << bsl::here();
             return;
         }

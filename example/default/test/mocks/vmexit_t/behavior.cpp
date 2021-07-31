@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../mocks/vmexit_t.hpp"
+#include "../../../MOCK/vmexit_t.hpp"
 
 #include <bsl/ut.hpp>
 

@@ -43,7 +43,7 @@ namespace example
     struct gs_t final
     {
         /// @brief dummy data for example purposes only.
-        bsl::safe_uintmax dummy;
+        bsl::safe_umx dummy;
     };
 }
 

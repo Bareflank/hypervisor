@@ -33,7 +33,6 @@
 #include <bsl/cstdint.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
-#include <bsl/likely.hpp>
 #include <bsl/move.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/swap.hpp>
@@ -55,7 +54,7 @@ namespace vmmctl
     class ioctl final
     {
         /// @brief stores a handle to the device driver.
-        bsl::safe_int32 m_hndl{IOCTL_INVALID_HNDL};
+        bsl::safe_i32 m_hndl{IOCTL_INVALID_HNDL};
 
     public:
         /// <!-- description -->
@@ -83,7 +82,7 @@ namespace vmmctl
         ///
         constexpr ~ioctl() noexcept
         {
-            if (bsl::likely(IOCTL_INVALID_HNDL != m_hndl)) {
+            if (IOCTL_INVALID_HNDL != m_hndl) {
                 bsl::discard(close(m_hndl.get()));
             }
             else {
@@ -159,14 +158,14 @@ namespace vmmctl
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
         [[nodiscard]] constexpr auto
-        send(bsl::safe_uintmax const &req) const noexcept -> bool
+        send(bsl::safe_umx const &req) const noexcept -> bool
         {
             if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
                 bsl::error() << "failed to send, ioctl not properly initialized\n";
                 return false;
             }
 
-            if (bsl::unlikely(!req)) {
+            if (bsl::unlikely(req.is_invalid())) {
                 bsl::error() << "invalid request: "    // --
                              << bsl::hex(req)          // --
                              << bsl::endl              // --
@@ -177,7 +176,7 @@ namespace vmmctl
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-            bsl::safe_int32 const ret{::ioctl(m_hndl.get(), req.get())};
+            bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get())};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "ioctl failed\n";
                 return false;
@@ -196,10 +195,8 @@ namespace vmmctl
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
         [[nodiscard]] constexpr auto
-        read_data(
-            bsl::safe_uintmax const &req,
-            void *const pmut_data,
-            bsl::safe_uintmax const &size) const noexcept -> bool
+        read_data(bsl::safe_umx const &req, void *const pmut_data, bsl::safe_umx const &size)
+            const noexcept -> bool
         {
             bsl::discard(size);
 
@@ -208,7 +205,7 @@ namespace vmmctl
                 return false;
             }
 
-            if (bsl::unlikely(!req)) {
+            if (bsl::unlikely(req.is_invalid())) {
                 bsl::error() << "invalid request: "    // --
                              << bsl::hex(req)          // --
                              << bsl::endl              // --
@@ -228,7 +225,7 @@ namespace vmmctl
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-            bsl::safe_int32 const ret{::ioctl(m_hndl.get(), req.get(), pmut_data)};
+            bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), pmut_data)};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "ioctl failed\n";
                 return false;
@@ -247,10 +244,8 @@ namespace vmmctl
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
         [[nodiscard]] constexpr auto
-        write_data(
-            bsl::safe_uintmax const &req,
-            void const *const data,
-            bsl::safe_uintmax const &size) const noexcept -> bool
+        write_data(bsl::safe_umx const &req, void const *const data, bsl::safe_umx const &size)
+            const noexcept -> bool
         {
             bsl::discard(size);
 
@@ -259,7 +254,7 @@ namespace vmmctl
                 return false;
             }
 
-            if (bsl::unlikely(!req)) {
+            if (bsl::unlikely(req.is_invalid())) {
                 bsl::error() << "invalid request: "    // --
                              << bsl::hex(req)          // --
                              << bsl::endl              // --
@@ -279,7 +274,7 @@ namespace vmmctl
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-            bsl::safe_int32 const ret{::ioctl(m_hndl.get(), req.get(), data)};
+            bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), data)};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "ioctl failed\n";
                 return false;
@@ -298,10 +293,8 @@ namespace vmmctl
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
         [[nodiscard]] constexpr auto
-        read_write_data(
-            bsl::safe_uintmax const &req,
-            void *const pmut_data,
-            bsl::safe_uintmax const &size) const noexcept -> bool
+        read_write_data(bsl::safe_umx const &req, void *const pmut_data, bsl::safe_umx const &size)
+            const noexcept -> bool
         {
             bsl::discard(size);
 
@@ -310,7 +303,7 @@ namespace vmmctl
                 return false;
             }
 
-            if (bsl::unlikely(!req)) {
+            if (bsl::unlikely(req.is_invalid())) {
                 bsl::error() << "invalid request: "    // --
                              << bsl::hex(req)          // --
                              << bsl::endl              // --
@@ -330,7 +323,7 @@ namespace vmmctl
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-            bsl::safe_int32 const ret{::ioctl(m_hndl.get(), req.get(), pmut_data)};
+            bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), pmut_data)};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "ioctl failed\n";
                 return false;

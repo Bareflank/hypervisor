@@ -34,7 +34,7 @@
 #include <bsl/discard.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
-#include <bsl/unlikely_assert.hpp>
+#include <bsl/unlikely.hpp>
 
 namespace integration
 {
@@ -64,7 +64,7 @@ namespace integration
             tls_t &tls,
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
-            bsl::safe_uint16 const &i) noexcept -> bsl::errc_type
+            bsl::safe_u16 const &i) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -112,8 +112,8 @@ namespace integration
             tls_t &tls,
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
-            bsl::safe_uint16 const &vmid,
-            bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
+            bsl::safe_u16 const &vmid,
+            bsl::safe_u16 const &ppid) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);

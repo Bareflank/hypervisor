@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../mocks/vps_t.hpp"
+#include "../../../MOCK/vs_t.hpp"
 
 #include <bsl/ut.hpp>
 
@@ -42,47 +42,47 @@ namespace example
     {
         bsl::ut_scenario{"initialize fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_t mut_vps{};
+                vs_t mut_vs{};
                 tls_t const tls{bsl::errc_failure};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(!mut_vps.initialize({}, tls, {}, {}, {}));
+                    bsl::ut_check(!mut_vs.initialize({}, tls, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"initialize success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_t mut_vps{};
+                vs_t mut_vs{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(mut_vps.initialize({}, {}, {}, {}, {}));
+                    bsl::ut_check(mut_vs.initialize({}, {}, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"release executes"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_t mut_vps{};
+                vs_t mut_vs{};
                 bsl::ut_then{} = [&]() noexcept {
-                    mut_vps.release({}, {}, {}, {});
+                    mut_vs.release({}, {}, {}, {});
                 };
             };
         };
 
         bsl::ut_scenario{"allocate fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_t mut_vps{};
+                vs_t mut_vs{};
                 tls_t const tls{bsl::errc_failure};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(!mut_vps.allocate({}, tls, {}, {}, {}, {}));
+                    bsl::ut_check(!mut_vs.allocate({}, tls, {}, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"allocate success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_t mut_vps{};
+                vs_t mut_vs{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(mut_vps.allocate({}, {}, {}, {}, {}, {}));
+                    bsl::ut_check(mut_vs.allocate({}, {}, {}, {}, {}, {}));
                 };
             };
         };

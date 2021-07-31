@@ -49,9 +49,14 @@ main(bsl::int32 const argc, bsl::cstr_type const *const argv) noexcept -> bsl::e
 {
     bsl::enable_color();
 
-    bsl::arguments mut_args{bsl::to_umax(argc), argv};
+    bsl::arguments mut_args{bsl::to_umx(argc), argv};
     ++mut_args;
 
     vmmctl::vmmctl_main mut_app{};
-    return mut_app.process(bsl::move(mut_args));
+    auto const ret{mut_app.process(bsl::move(mut_args))};
+    if (bsl::unlikely(!ret)) {
+        return bsl::exit_failure;
+    }
+
+    return bsl::exit_success;
 }

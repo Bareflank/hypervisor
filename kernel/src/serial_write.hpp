@@ -29,8 +29,6 @@
 
 #include <bsl/char_type.hpp>
 #include <bsl/cstr_type.hpp>
-#include <bsl/is_constant_evaluated.hpp>
-#include <bsl/safe_integral.hpp>
 
 namespace mk
 {
@@ -43,12 +41,9 @@ namespace mk
     constexpr void
     serial_write(bsl::cstr_type const str) noexcept
     {
-        if (bsl::is_constant_evaluated()) {
-            return;
-        }
-
-        for (bsl::safe_uintmax mut_i{}; '\0' != str[mut_i.get()]; ++mut_i) {
-            serial_write_c(str[mut_i.get()]);
+        // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+        for (bsl::uintmx mut_i{}; '\0' != str[mut_i]; ++mut_i) {
+            serial_write_c(str[mut_i]);
         }
     }
 }

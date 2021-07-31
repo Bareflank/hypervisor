@@ -110,7 +110,7 @@ namespace example
                     bsl::ut_required_step(mut_vmexit.initialize({}, {}, {}, {}, {}, {}));
                     mut_sys.bf_tls_set_rax(bsl::to_u64(loader::CPUID_COMMAND_EAX));
                     mut_sys.bf_tls_set_rcx(bsl::to_u64(loader::CPUID_COMMAND_ECX_STOP));
-                    mut_sys.bf_tls_set_ppid(online_pps - 1_u16);
+                    mut_sys.bf_tls_set_ppid((online_pps - 1_u16).checked());
                     mut_sys.bf_tls_set_online_pps(online_pps);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
@@ -120,7 +120,7 @@ namespace example
             };
         };
 
-        bsl::ut_scenario{"dispatch cpuid stop bf_vps_op_advance_ip fails"} = []() noexcept {
+        bsl::ut_scenario{"dispatch cpuid stop bf_vs_op_advance_ip fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 vmexit_t mut_vmexit{};
                 syscall::bf_syscall_t mut_sys{};
@@ -131,7 +131,7 @@ namespace example
                     mut_sys.bf_tls_set_rax(bsl::to_u64(loader::CPUID_COMMAND_EAX));
                     mut_sys.bf_tls_set_rcx(bsl::to_u64(loader::CPUID_COMMAND_ECX_STOP));
                     mut_sys.bf_tls_set_online_pps(online_pps);
-                    mut_sys.set_bf_vps_op_advance_ip({}, bsl::errc_failure);
+                    mut_sys.set_bf_vs_op_advance_ip({}, bsl::errc_failure);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_vmexit.dispatch({}, {}, mut_sys, {}, {}, {}, {}, exit_reason));

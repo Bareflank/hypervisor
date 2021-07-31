@@ -49,9 +49,9 @@ namespace mk
     struct ext_tcb_t final
     {
         /// @brief stores tp as defined by the ELF TLS spec
-        bsl::uintmax tp;
+        bsl::uintmx tp;
         /// @brief the rest contains the TCB, which is defined by the ABI
-        bsl::array<bsl::uint8, (HYPERVISOR_PAGE_SIZE - sizeof(bsl::uintmax)).get()> tcb;
+        bsl::array<bsl::uint8, (HYPERVISOR_PAGE_SIZE - sizeof(bsl::uintmx)).checked().get()> tcb;
     };
 
     /// @brief sanity check

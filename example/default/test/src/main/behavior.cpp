@@ -32,7 +32,7 @@
 #include <tls_t.hpp>
 #include <vmexit_t.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/ut.hpp>
 
@@ -48,9 +48,9 @@ namespace example
     /// @brief stores the pool of VPs that we will use
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     extern vp_pool_t g_mut_vp_pool;
-    /// @brief stores the pool of VPSs that we will use
+    /// @brief stores the pool of VSs that we will use
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-    extern vps_pool_t g_mut_vps_pool;
+    extern vs_pool_t g_mut_vs_pool;
 
     /// @brief stores the bootstrap_t that this code will use
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
@@ -69,31 +69,29 @@ namespace example
     /// <!-- inputs/outputs -->
     ///   @param ppid the physical process to bootstrap
     ///
-    extern "C" void bootstrap_entry(bsl::safe_uint16::value_type const ppid) noexcept;
+    extern "C" void bootstrap_entry(bsl::safe_u16::value_type const ppid) noexcept;
 
     /// <!-- description -->
     ///   @brief Implements the VMExit entry function. This is registered
     ///     by the main function to execute whenever a VMExit occurs.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the VMExit
+    ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     extern "C" void vmexit_entry(
-        bsl::safe_uint16::value_type const vpsid,
-        bsl::safe_uint64::value_type const exit_reason) noexcept;
+        bsl::safe_u16::value_type const vsid, bsl::safe_u64::value_type const exit_reason) noexcept;
 
     /// <!-- description -->
     ///   @brief Implements the fast fail entry function. This is registered
     ///     by the main function to execute whenever a fast fail occurs.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the fail
+    ///   @param vsid the ID of the VS that generated the fail
     ///   @param fail_reason the exit reason associated with the fail
     ///
     extern "C" void fail_entry(
-        bsl::safe_uint16::value_type const vpsid,
-        bsl::safe_uint64::value_type const fail_reason) noexcept;
+        bsl::safe_u16::value_type const vsid, bsl::safe_u64::value_type const fail_reason) noexcept;
 
     /// <!-- description -->
     ///   @brief Implements the main entry function for this example
@@ -205,7 +203,7 @@ main() noexcept -> bsl::exit_code
                 example::g_mut_sys.set_initialize(bsl::errc_success);
                 example::g_mut_intrinsic.set_initialize(bsl::errc_success);
                 example::g_mut_vp_pool.set_initialize(bsl::errc_success);
-                example::g_mut_vps_pool.set_initialize(bsl::errc_success);
+                example::g_mut_vs_pool.set_initialize(bsl::errc_success);
                 example::g_mut_bootstrap.set_initialize(bsl::errc_success);
                 example::g_mut_fail.set_initialize(bsl::errc_success);
                 example::g_mut_vmexit.set_initialize(bsl::errc_success);
@@ -226,7 +224,7 @@ main() noexcept -> bsl::exit_code
                 example::g_mut_sys.set_initialize(bsl::errc_failure);
                 example::g_mut_intrinsic.set_initialize(bsl::errc_success);
                 example::g_mut_vp_pool.set_initialize(bsl::errc_success);
-                example::g_mut_vps_pool.set_initialize(bsl::errc_success);
+                example::g_mut_vs_pool.set_initialize(bsl::errc_success);
                 example::g_mut_bootstrap.set_initialize(bsl::errc_success);
                 example::g_mut_fail.set_initialize(bsl::errc_success);
                 example::g_mut_vmexit.set_initialize(bsl::errc_success);
@@ -247,7 +245,7 @@ main() noexcept -> bsl::exit_code
                 example::g_mut_sys.set_initialize(bsl::errc_success);
                 example::g_mut_intrinsic.set_initialize(bsl::errc_failure);
                 example::g_mut_vp_pool.set_initialize(bsl::errc_success);
-                example::g_mut_vps_pool.set_initialize(bsl::errc_success);
+                example::g_mut_vs_pool.set_initialize(bsl::errc_success);
                 example::g_mut_bootstrap.set_initialize(bsl::errc_success);
                 example::g_mut_fail.set_initialize(bsl::errc_success);
                 example::g_mut_vmexit.set_initialize(bsl::errc_success);
@@ -268,7 +266,7 @@ main() noexcept -> bsl::exit_code
                 example::g_mut_sys.set_initialize(bsl::errc_success);
                 example::g_mut_intrinsic.set_initialize(bsl::errc_success);
                 example::g_mut_vp_pool.set_initialize(bsl::errc_failure);
-                example::g_mut_vps_pool.set_initialize(bsl::errc_success);
+                example::g_mut_vs_pool.set_initialize(bsl::errc_success);
                 example::g_mut_bootstrap.set_initialize(bsl::errc_success);
                 example::g_mut_fail.set_initialize(bsl::errc_success);
                 example::g_mut_vmexit.set_initialize(bsl::errc_success);
@@ -281,7 +279,7 @@ main() noexcept -> bsl::exit_code
         };
     };
 
-    bsl::ut_scenario{"main vps_pool_t initialize fails"} = []() noexcept {
+    bsl::ut_scenario{"main vs_pool_t initialize fails"} = []() noexcept {
         bsl::ut_given{} = []() noexcept {
             bsl::ut_when{} = []() noexcept {
                 syscall::g_mut_bf_control_op_exit_impl_executed = {};
@@ -289,7 +287,7 @@ main() noexcept -> bsl::exit_code
                 example::g_mut_sys.set_initialize(bsl::errc_success);
                 example::g_mut_intrinsic.set_initialize(bsl::errc_success);
                 example::g_mut_vp_pool.set_initialize(bsl::errc_success);
-                example::g_mut_vps_pool.set_initialize(bsl::errc_failure);
+                example::g_mut_vs_pool.set_initialize(bsl::errc_failure);
                 example::g_mut_bootstrap.set_initialize(bsl::errc_success);
                 example::g_mut_fail.set_initialize(bsl::errc_success);
                 example::g_mut_vmexit.set_initialize(bsl::errc_success);
@@ -310,7 +308,7 @@ main() noexcept -> bsl::exit_code
                 example::g_mut_sys.set_initialize(bsl::errc_success);
                 example::g_mut_intrinsic.set_initialize(bsl::errc_success);
                 example::g_mut_vp_pool.set_initialize(bsl::errc_success);
-                example::g_mut_vps_pool.set_initialize(bsl::errc_success);
+                example::g_mut_vs_pool.set_initialize(bsl::errc_success);
                 example::g_mut_bootstrap.set_initialize(bsl::errc_failure);
                 example::g_mut_fail.set_initialize(bsl::errc_success);
                 example::g_mut_vmexit.set_initialize(bsl::errc_success);
@@ -331,7 +329,7 @@ main() noexcept -> bsl::exit_code
                 example::g_mut_sys.set_initialize(bsl::errc_success);
                 example::g_mut_intrinsic.set_initialize(bsl::errc_success);
                 example::g_mut_vp_pool.set_initialize(bsl::errc_success);
-                example::g_mut_vps_pool.set_initialize(bsl::errc_success);
+                example::g_mut_vs_pool.set_initialize(bsl::errc_success);
                 example::g_mut_bootstrap.set_initialize(bsl::errc_success);
                 example::g_mut_fail.set_initialize(bsl::errc_failure);
                 example::g_mut_vmexit.set_initialize(bsl::errc_success);
@@ -352,7 +350,7 @@ main() noexcept -> bsl::exit_code
                 example::g_mut_sys.set_initialize(bsl::errc_success);
                 example::g_mut_intrinsic.set_initialize(bsl::errc_success);
                 example::g_mut_vp_pool.set_initialize(bsl::errc_success);
-                example::g_mut_vps_pool.set_initialize(bsl::errc_success);
+                example::g_mut_vs_pool.set_initialize(bsl::errc_success);
                 example::g_mut_bootstrap.set_initialize(bsl::errc_success);
                 example::g_mut_fail.set_initialize(bsl::errc_success);
                 example::g_mut_vmexit.set_initialize(bsl::errc_failure);
@@ -373,7 +371,7 @@ main() noexcept -> bsl::exit_code
                 example::g_mut_sys.set_initialize(bsl::errc_success);
                 example::g_mut_intrinsic.set_initialize(bsl::errc_success);
                 example::g_mut_vp_pool.set_initialize(bsl::errc_success);
-                example::g_mut_vps_pool.set_initialize(bsl::errc_success);
+                example::g_mut_vs_pool.set_initialize(bsl::errc_success);
                 example::g_mut_bootstrap.set_initialize(bsl::errc_success);
                 example::g_mut_fail.set_initialize(bsl::errc_success);
                 example::g_mut_vmexit.set_initialize(bsl::errc_success);

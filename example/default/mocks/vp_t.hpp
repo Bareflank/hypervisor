@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MOCKS_VP_T_HPP
-#define MOCKS_VP_T_HPP
+#ifndef MOCK_VP_T_HPP
+#define MOCK_VP_T_HPP
 
 #include <bf_syscall_t.hpp>
 #include <gs_t.hpp>
@@ -62,7 +62,7 @@ namespace example
             tls_t const &tls,
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
-            bsl::safe_uint16 const &i) noexcept -> bsl::errc_type
+            bsl::safe_u16 const &i) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(sys);
@@ -113,8 +113,8 @@ namespace example
             tls_t const &tls,
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
-            bsl::safe_uint16 const &vmid,
-            bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
+            bsl::safe_u16 const &vmid,
+            bsl::safe_u16 const &ppid) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(sys);

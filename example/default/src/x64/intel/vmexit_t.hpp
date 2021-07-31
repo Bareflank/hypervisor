@@ -32,13 +32,13 @@
 #include <intrinsic_t.hpp>
 #include <tls_t.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
-#include <bsl/unlikely_assert.hpp>
+#include <bsl/unlikely.hpp>
 
 namespace example
 {
@@ -47,7 +47,7 @@ namespace example
     /// @brief used to disable the NMI window exiting bit
     constexpr auto VMCS_CLEAR_NMI_WINDOW_EXITING{0xFFBFFFFF_u64};
     /// @brief used to inject an interrupt
-    constexpr auto VMCS_ENTRY_INTERRUPT_INFO_VAL{0x80000202_u64};
+    constexpr auto NMI_INFO{0x80000202_u64};
 
     /// @brief define the NMI exit reason
     constexpr auto EXIT_REASON_NMI{0x0_u64};
@@ -73,7 +73,7 @@ namespace example
         ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -84,15 +84,16 @@ namespace example
             syscall::bf_syscall_t &mut_sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool) noexcept -> bsl::errc_type
+            vs_pool_t const &vs_pool) noexcept -> bsl::errc_type
         {
             bsl::discard(tls);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
-            mut_gs.msr_bitmap = mut_sys.bf_mem_op_alloc_page(mut_gs.msr_bitmap_phys);
-            if (bsl::unlikely_assert(nullptr == mut_gs.msr_bitmap)) {
+            mut_gs.msr_bitmap =
+                mut_sys.bf_mem_op_alloc_page<lib::basic_page_4k_t>(mut_gs.msr_bitmap_phys);
+            if (bsl::unlikely(nullptr == mut_gs.msr_bitmap)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
@@ -114,7 +115,7 @@ namespace example
         ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///
         static constexpr void
         release(
@@ -123,26 +124,19 @@ namespace example
             syscall::bf_syscall_t &mut_sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool) noexcept
+            vs_pool_t const &vs_pool) noexcept
         {
             bsl::discard(tls);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             /// NOTE:
             /// - Release functions are usually only needed in the event of
             ///   an error, or during unit testing.
             ///
 
-            auto const ret{mut_sys.bf_mem_op_free_page(mut_gs.msr_bitmap)};
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-            }
-            else {
-                bsl::touch();
-            }
-
+            bsl::expects(mut_sys.bf_mem_op_free_page(mut_gs.msr_bitmap));
             mut_gs.msr_bitmap = {};
             mut_gs.msr_bitmap_phys = {};
         }
@@ -156,8 +150,8 @@ namespace example
         ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
-        ///   @param vpsid the ID of the VPS that generated the VMExit
+        ///   @param vs_pool the vs_pool_t to use
+        ///   @param vsid the ID of the VS that generated the VMExit
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -168,14 +162,17 @@ namespace example
             syscall::bf_syscall_t &mut_sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool,
-            bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
+            vs_pool_t const &vs_pool,
+            bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
         {
+            constexpr auto ctls_idx{
+                syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls};
+
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             /// NOTE:
             /// - If we caught an NMI, we need to inject it into the VM. To do
@@ -184,26 +181,16 @@ namespace example
             /// - Note that the microkernel will do the same thing. If an NMI
             ///   fires while the hypevisor is running, it will enable the NMI
             ///   window, which the extension will see as a VMExit, and must
-            ///   from there, inject the NMI into the appropriate VPS.
+            ///   from there, inject the NMI into the appropriate VS.
             ///
 
-            auto mut_val{mut_sys.bf_vps_op_read(
-                vpsid, syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls)};
-            if (bsl::unlikely_assert(!mut_val)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
+            auto mut_val{mut_sys.bf_vs_op_read(vsid, ctls_idx)};
+            bsl::expects(mut_val.is_valid_and_checked());
 
             mut_val |= VMCS_SET_NMI_WINDOW_EXITING;
+            bsl::expects(mut_sys.bf_vs_op_write(vsid, ctls_idx, mut_val));
 
-            auto const ret{mut_sys.bf_vps_op_write(
-                vpsid, syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls, mut_val)};
-            if (bsl::unlikely_assert(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            return mut_sys.bf_vps_op_run_current();
+            return mut_sys.bf_vs_op_run_current();
         }
 
         /// <!-- description -->
@@ -215,8 +202,8 @@ namespace example
         ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
-        ///   @param vpsid the ID of the VPS that generated the VMExit
+        ///   @param vs_pool the vs_pool_t to use
+        ///   @param vsid the ID of the VS that generated the VMExit
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -227,42 +214,35 @@ namespace example
             syscall::bf_syscall_t &mut_sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool,
-            bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
+            vs_pool_t const &vs_pool,
+            bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
         {
-            bsl::errc_type mut_ret{};
+            constexpr auto ctls_idx{
+                syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls};
+            constexpr auto info_idx{
+                syscall::bf_reg_t::bf_reg_t_vmentry_interrupt_information_field};
 
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             /// NOTE:
             /// - If we see this exit, it is because an NMI fired. There are two
             ///   situations where this could occur, either while the hypervisor
-            ///   is running, or the VPS is running. In either case, we need to
+            ///   is running, or the VS is running. In either case, we need to
             ///   clear the NMI window and inject the NMI into the appropriate
-            ///   VPS so that it can be handled. Note that Intel requires that
+            ///   VS so that it can be handled. Note that Intel requires that
             ///   we handle NMIs, and they actually happen a lot with Linux based
             ///   on what hardware you are using (e.g., a laptop).
             ///
 
-            auto mut_val{mut_sys.bf_vps_op_read(
-                vpsid, syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls)};
-            if (bsl::unlikely_assert(!mut_val)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
+            auto mut_val{mut_sys.bf_vs_op_read(vsid, ctls_idx)};
+            bsl::expects(mut_val.is_valid_and_checked());
 
             mut_val &= VMCS_CLEAR_NMI_WINDOW_EXITING;
-
-            mut_ret = mut_sys.bf_vps_op_write(
-                vpsid, syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls, mut_val);
-            if (bsl::unlikely_assert(!mut_ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return mut_ret;
-            }
+            bsl::expects(mut_sys.bf_vs_op_write(vsid, ctls_idx, mut_val));
 
             /// NOTE:
             /// - Inject an NMI. If the NMI window was enabled, it is because we
@@ -271,17 +251,8 @@ namespace example
             ///   so we are required to implement it on Intel.
             ///
 
-            mut_ret = mut_sys.bf_vps_op_write(
-                vpsid,
-                syscall::bf_reg_t::bf_reg_t_vmentry_interrupt_information_field,
-                VMCS_ENTRY_INTERRUPT_INFO_VAL);
-
-            if (bsl::unlikely_assert(!mut_ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return mut_ret;
-            }
-
-            return mut_sys.bf_vps_op_run_current();
+            bsl::expects(mut_sys.bf_vs_op_write(vsid, info_idx, NMI_INFO));
+            return mut_sys.bf_vs_op_run_current();
         }
 
         /// <!-- description -->
@@ -293,8 +264,8 @@ namespace example
         ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
-        ///   @param vpsid the ID of the VPS that generated the VMExit
+        ///   @param vs_pool the vs_pool_t to use
+        ///   @param vsid the ID of the VS that generated the VMExit
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -305,11 +276,11 @@ namespace example
             syscall::bf_syscall_t &mut_sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool,
-            bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
+            vs_pool_t const &vs_pool,
+            bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
         {
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             /// NOTE:
             /// - The first thing that we need to do is get the current values
@@ -343,7 +314,9 @@ namespace example
                         ///   being over used.
                         ///
 
-                        if (mut_sys.bf_tls_ppid() == (mut_sys.bf_tls_online_pps() - 1_u16)) {
+                        auto const last_online_ppid{
+                            (mut_sys.bf_tls_online_pps() - 1_u16).checked()};
+                        if (mut_sys.bf_tls_ppid() == last_online_ppid) {
                             bsl::print() << bsl::endl;
                             syscall::bf_debug_op_dump_page_pool();
                             bsl::print() << bsl::endl;
@@ -401,22 +374,18 @@ namespace example
                         ///   exit before then so we need to advance now.
                         ///
 
-                        auto const ret{mut_sys.bf_vps_op_advance_ip(vpsid)};
-                        if (bsl::unlikely_assert(!ret)) {
-                            bsl::print<bsl::V>() << bsl::here();
-                            return ret;
-                        }
+                        bsl::expects(mut_sys.bf_vs_op_advance_ip(vsid));
 
                         /// NOTE:
                         /// - The promote ABI will load the microkernel by
                         ///   replacing the CPU's state withthe VP state
-                        ///   associated with the provided VPSID. If all
-                        ///   goes well, bf_vps_op_promote will not return,
+                        ///   associated with the provided VSID. If all
+                        ///   goes well, bf_vs_op_promote will not return,
                         ///   and the system will continue executing with the
                         ///   hypervisor turned off.
                         ///
 
-                        return mut_sys.bf_vps_op_promote(vpsid);
+                        return mut_sys.bf_vs_op_promote(vsid);
                     }
 
                     case loader::CPUID_COMMAND_ECX_REPORT_ON.get(): {
@@ -464,10 +433,10 @@ namespace example
 
                 /// NOTE:
                 /// - Complete this command by advancing RIP and running
-                ///   the currently loaded VM, VP and VPS.
+                ///   the currently loaded VM, VP and VS.
                 ///
 
-                return mut_sys.bf_vps_op_advance_ip_and_run_current();
+                return mut_sys.bf_vs_op_advance_ip_and_run_current();
             }
 
             /// NOTE:
@@ -492,10 +461,10 @@ namespace example
 
             /// NOTE:
             /// - Complete the emulation of CPUID by advancing RIP and running
-            ///   the currently loaded VM, VP and VPS.
+            ///   the currently loaded VM, VP and VS.
             ///
 
-            return mut_sys.bf_vps_op_advance_ip_and_run_current();
+            return mut_sys.bf_vs_op_advance_ip_and_run_current();
         }
 
         /// <!-- description -->
@@ -507,8 +476,8 @@ namespace example
         ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
-        ///   @param vpsid the ID of the VPS that generated the VMExit
+        ///   @param vs_pool the vs_pool_t to use
+        ///   @param vsid the ID of the VS that generated the VMExit
         ///   @param exit_reason the exit reason associated with the VMExit
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
@@ -520,9 +489,9 @@ namespace example
             syscall::bf_syscall_t &mut_sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool,
-            bsl::safe_uint16 const &vpsid,
-            bsl::safe_uint64 const &exit_reason) noexcept -> bsl::errc_type
+            vs_pool_t const &vs_pool,
+            bsl::safe_u16 const &vsid,
+            bsl::safe_u64 const &exit_reason) noexcept -> bsl::errc_type
         {
             /// NOTE:
             /// - Dispatch and handle each VMExit.
@@ -530,15 +499,15 @@ namespace example
 
             switch (exit_reason.get()) {
                 case EXIT_REASON_NMI.get(): {
-                    return handle_nmi(gs, tls, mut_sys, intrinsic, vp_pool, vps_pool, vpsid);
+                    return handle_nmi(gs, tls, mut_sys, intrinsic, vp_pool, vs_pool, vsid);
                 }
 
                 case EXIT_REASON_NMI_WINDOW.get(): {
-                    return handle_nmi_window(gs, tls, mut_sys, intrinsic, vp_pool, vps_pool, vpsid);
+                    return handle_nmi_window(gs, tls, mut_sys, intrinsic, vp_pool, vs_pool, vsid);
                 }
 
                 case EXIT_REASON_CPUID.get(): {
-                    return handle_cpuid(gs, tls, mut_sys, intrinsic, vp_pool, vps_pool, vpsid);
+                    return handle_cpuid(gs, tls, mut_sys, intrinsic, vp_pool, vs_pool, vsid);
                 }
 
                 default: {

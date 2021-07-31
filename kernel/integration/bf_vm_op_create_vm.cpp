@@ -40,14 +40,14 @@ namespace integration
     ///   @brief Implements the VMExit entry function.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the VMExit
+    ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     void
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    vmexit_entry(bsl::uint16 const vpsid, bsl::uint64 const exit_reason) noexcept
+    vmexit_entry(bsl::uint16 const vsid, bsl::uint64 const exit_reason) noexcept
     {
-        bsl::discard(vpsid);
+        bsl::discard(vsid);
         bsl::discard(exit_reason);
 
         syscall::bf_control_op_exit();
@@ -80,7 +80,7 @@ namespace integration
         bsl::discard(ppid);
 
         bsl::errc_type ret{};
-        bsl::safe_uint16 vmid{};
+        bsl::safe_u16 vmid{};
 
         /// NOTE:
         /// - The max number of VMs an extension can create is one less than
@@ -88,7 +88,7 @@ namespace integration
         ///   automatically for the extension as it cannot be deleted.
         ///
 
-        constexpr auto one{1_umax};
+        constexpr auto one{1_umx};
         auto const max_vms{HYPERVISOR_MAX_VMS - one};
 
         // create with invalid handle
@@ -96,7 +96,7 @@ namespace integration
         integration::verify(bsl::errc_failure == ret);
 
         // create all and prove that creating one more will fail
-        for (bsl::safe_uintmax i{}; i < max_vms; ++i) {
+        for (bsl::safe_idx i{}; i < max_vms; ++i) {
             ret = syscall::bf_vm_op_create_vm(g_handle, vmid);
             integration::verify(bsl::errc_success == ret);
         }

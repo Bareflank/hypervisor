@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MOCKS_GS_T_HPP
-#define MOCKS_GS_T_HPP
+#ifndef MOCK_GS_T_HPP
+#define MOCK_GS_T_HPP
 
 namespace example
 {

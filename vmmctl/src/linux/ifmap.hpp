@@ -36,7 +36,6 @@
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
 #include <bsl/finally.hpp>
-#include <bsl/likely.hpp>
 #include <bsl/move.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/span.hpp>
@@ -61,11 +60,11 @@ namespace vmmctl
     class ifmap final
     {
         /// @brief stores a handle to the mapped file.
-        bsl::safe_int32 m_file{IFMAP_INVALID_FILE};
+        bsl::safe_i32 m_file{IFMAP_INVALID_FILE};
         /// @brief stores a pointer to the file that was opened.
         void *m_data{};
         /// @brief stores the number of bytes for the open file
-        bsl::safe_uintmax m_size{};
+        bsl::safe_umx m_size{};
 
         /// <!-- description -->
         ///   @brief Swaps *this with other
@@ -125,13 +124,13 @@ namespace vmmctl
 
             m_data = mmap(
                 nullptr,
-                static_cast<bsl::uintmax>(mut_s.st_size),
+                static_cast<bsl::uintmx>(mut_s.st_size),
                 PROT_READ,
                 // We don't have a choice here
                 // NOLINTNEXTLINE(hicpp-signed-bitwise, bsl-types-fixed-width-ints-arithmetic-check)
                 MAP_SHARED | MAP_POPULATE,
                 m_file.get(),
-                static_cast<bsl::intmax>(0));
+                static_cast<bsl::int64>(0));
 
             // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
@@ -143,7 +142,7 @@ namespace vmmctl
                 return;
             }
 
-            m_size = bsl::to_umax(mut_s.st_size);
+            m_size = bsl::to_umx(mut_s.st_size);
             mut_release_on_error.ignore();
         }
 
@@ -209,14 +208,14 @@ namespace vmmctl
         constexpr void
         release() noexcept
         {
-            if (bsl::likely(nullptr != m_data)) {
+            if (nullptr != m_data) {
                 bsl::discard(munmap(m_data, m_size.get()));
             }
             else {
                 bsl::touch();
             }
 
-            if (bsl::likely(IFMAP_INVALID_FILE != m_file)) {
+            if (IFMAP_INVALID_FILE != m_file) {
                 bsl::discard(close(m_file.get()));
             }
             else {
@@ -284,7 +283,7 @@ namespace vmmctl
         ///     mapped.
         ///
         [[nodiscard]] constexpr auto
-        size() const noexcept -> bsl::safe_uintmax
+        size() const noexcept -> bsl::safe_umx
         {
             return m_size;
         }

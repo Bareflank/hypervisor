@@ -87,10 +87,7 @@ namespace integration
         ///
         static constexpr void
         cpuid(
-            bsl::safe_uint64 &rax,
-            bsl::safe_uint64 &rbx,
-            bsl::safe_uint64 &rcx,
-            bsl::safe_uint64 &rdx) noexcept
+            bsl::safe_u64 &rax, bsl::safe_u64 &rbx, bsl::safe_u64 &rcx, bsl::safe_u64 &rdx) noexcept
         {
             intrinsic_cpuid_impl(rax.data(), rbx.data(), rcx.data(), rdx.data());
         }

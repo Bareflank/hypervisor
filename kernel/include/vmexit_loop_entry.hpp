@@ -25,20 +25,20 @@
 #ifndef VMEXIT_LOOP_ENTRY_HPP
 #define VMEXIT_LOOP_ENTRY_HPP
 
-#include <bsl/exit_code.hpp>
+#include <bsl/errc_type.hpp>
 
 namespace mk
 {
     /// <!-- description -->
     ///   @brief Executes the main VMExit loop
-    ///   @return Returns bsl::exit_success on success, bsl::exit_failure
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     ///     otherwise
     ///
     /// <!-- inputs/outputs -->
-    ///   @return Returns bsl::exit_success on success and bsl::exit_failure
+    ///   @return Returns bsl::errc_success on success and bsl::errc_failure
     ///     otherwise
     ///
-    extern "C" [[nodiscard]] auto vmexit_loop_entry() noexcept -> bsl::exit_code;
+    extern "C" [[nodiscard]] auto vmexit_loop_entry() noexcept -> bsl::errc_type;
 }
 
 #endif

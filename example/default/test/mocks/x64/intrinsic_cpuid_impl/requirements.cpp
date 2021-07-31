@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../../mocks/x64/intrinsic_cpuid_impl.hpp"
+#include "../../../../MOCK/x64/intrinsic_cpuid_impl.hpp"
 
 #include <bsl/discard.hpp>
 #include <bsl/ut.hpp>

@@ -22,14 +22,14 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../../../src/x64/intel/vps_t.hpp"
+#include "../../../../../src/x64/intel/vs_t.hpp"
 
 #include <bsl/discard.hpp>
 #include <bsl/ut.hpp>
 
 namespace
 {
-    constinit example::vps_t const g_verify_constinit{};
+    constinit example::vs_t const g_verify_constinit{};
 }
 
 /// <!-- description -->
@@ -49,13 +49,13 @@ main() noexcept -> bsl::exit_code
 
     bsl::ut_scenario{"verify noexcept"} = []() noexcept {
         bsl::ut_given{} = []() noexcept {
-            example::vps_t mut_vps{};
+            example::vs_t mut_vs{};
             syscall::bf_syscall_t mut_sys{};
             bsl::ut_then{} = []() noexcept {
-                static_assert(noexcept(example::vps_t{}));
-                static_assert(noexcept(mut_vps.initialize({}, {}, {}, {}, {})));
-                static_assert(noexcept(mut_vps.release({}, {}, {}, {})));
-                static_assert(noexcept(mut_vps.allocate({}, {}, mut_sys, {}, {}, {})));
+                static_assert(noexcept(example::vs_t{}));
+                static_assert(noexcept(mut_vs.initialize({}, {}, {}, {}, {})));
+                static_assert(noexcept(mut_vs.release({}, {}, {}, {})));
+                static_assert(noexcept(mut_vs.allocate({}, {}, mut_sys, {}, {}, {})));
             };
         };
     };

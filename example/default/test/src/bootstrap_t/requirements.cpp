@@ -52,13 +52,13 @@ main() noexcept -> bsl::exit_code
             example::bootstrap_t mut_bootstrap{};
             syscall::bf_syscall_t mut_sys{};
             example::vp_pool_t mut_vp_pool{};
-            example::vps_pool_t mut_vps_pool{};
+            example::vs_pool_t mut_vs_pool{};
             bsl::ut_then{} = []() noexcept {
                 static_assert(noexcept(example::bootstrap_t{}));
                 static_assert(noexcept(mut_bootstrap.initialize({}, {}, {}, {}, {}, {})));
                 static_assert(noexcept(mut_bootstrap.release({}, {}, {}, {}, {}, {})));
                 static_assert(noexcept(
-                    mut_bootstrap.dispatch({}, {}, mut_sys, {}, mut_vp_pool, mut_vps_pool, {})));
+                    mut_bootstrap.dispatch({}, {}, mut_sys, {}, mut_vp_pool, mut_vs_pool, {})));
             };
         };
     };

@@ -25,22 +25,12 @@
 #ifndef ALLOC_PAGE_T_HPP
 #define ALLOC_PAGE_T_HPP
 
-#include <bsl/safe_integral.hpp>
+#include <basic_alloc_page_t.hpp>
 
 namespace mk
 {
-    /// @struct mk::alloc_page_t
-    ///
-    /// <!-- description -->
-    ///   @brief Defines a alloc_page_t
-    ///
-    struct alloc_page_t final
-    {
-        /// @brief stores the virtual address of the page
-        bsl::safe_uintmax virt;
-        /// @brief stores the physical address of the page
-        bsl::safe_uintmax phys;
-    };
+    /// @brief defines the alloc_page_t used by the microkernel
+    using alloc_page_t = lib::basic_alloc_page_t;
 }
 
 #endif

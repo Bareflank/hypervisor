@@ -75,30 +75,30 @@ namespace example
                 bootstrap_t mut_bootstrap{};
                 syscall::bf_syscall_t mut_sys{};
                 vp_pool_t mut_vp_pool{};
-                vps_pool_t mut_vps_pool{};
+                vs_pool_t mut_vs_pool{};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_bootstrap.initialize({}, {}, {}, {}, {}, {}));
-                    mut_vp_pool.set_allocate(bsl::safe_uint16::failure());
+                    mut_vp_pool.set_allocate(bsl::safe_u16::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(!mut_bootstrap.dispatch(
-                            {}, {}, mut_sys, {}, mut_vp_pool, mut_vps_pool, {}));
+                            {}, {}, mut_sys, {}, mut_vp_pool, mut_vs_pool, {}));
                     };
                 };
             };
         };
 
-        bsl::ut_scenario{"dispatch vps_pool allocate fails"} = []() noexcept {
+        bsl::ut_scenario{"dispatch vs_pool allocate fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bootstrap_t mut_bootstrap{};
                 syscall::bf_syscall_t mut_sys{};
                 vp_pool_t mut_vp_pool{};
-                vps_pool_t mut_vps_pool{};
+                vs_pool_t mut_vs_pool{};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_bootstrap.initialize({}, {}, {}, {}, {}, {}));
-                    mut_vps_pool.set_allocate(bsl::safe_uint16::failure());
+                    mut_vs_pool.set_allocate(bsl::safe_u16::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(!mut_bootstrap.dispatch(
-                            {}, {}, mut_sys, {}, mut_vp_pool, mut_vps_pool, {}));
+                            {}, {}, mut_sys, {}, mut_vp_pool, mut_vs_pool, {}));
                     };
                 };
             };
@@ -109,12 +109,12 @@ namespace example
                 bootstrap_t mut_bootstrap{};
                 syscall::bf_syscall_t mut_sys{};
                 vp_pool_t mut_vp_pool{};
-                vps_pool_t mut_vps_pool{};
+                vs_pool_t mut_vs_pool{};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_bootstrap.initialize({}, {}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_bootstrap.dispatch(
-                            {}, {}, mut_sys, {}, mut_vp_pool, mut_vps_pool, {}));
+                            {}, {}, mut_sys, {}, mut_vp_pool, mut_vs_pool, {}));
                     };
                 };
             };

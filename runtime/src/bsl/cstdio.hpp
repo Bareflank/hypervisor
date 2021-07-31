@@ -25,23 +25,33 @@
 #ifndef BSL_CSTDIO_HPP
 #define BSL_CSTDIO_HPP
 
-#include <bf_debug_ops.hpp>
+#include <bf_syscall_impl.hpp>
 
 #include <bsl/char_type.hpp>
 #include <bsl/cstr_type.hpp>
+#include <bsl/discard.hpp>
+#include <bsl/is_constant_evaluated.hpp>
 
 namespace bsl
 {
+    /// @brief defines the stdout file stream
+    // NOLINTNEXTLINE(bsl-name-case)
+    constexpr void const *const stdout{};
+
     /// <!-- description -->
     ///   @brief Outputs a character.
     ///
     /// <!-- inputs/outputs -->
     ///   @param c the character to output
     ///
-    constexpr void
-    fputc(bsl::char_type const c) noexcept
+    extern "C" constexpr void
+    putchar(bsl::char_type const c) noexcept
     {
-        syscall::bf_debug_op_write_c(c);
+        if (bsl::is_constant_evaluated()) {
+            return;
+        }
+
+        syscall::bf_debug_op_write_c_impl(c);
     }
 
     /// <!-- description -->
@@ -49,11 +59,18 @@ namespace bsl
     ///
     /// <!-- inputs/outputs -->
     ///   @param str the string to output
+    ///   @param ignored ignored
     ///
-    constexpr void
-    fputs(bsl::cstr_type const str) noexcept
+    extern "C" constexpr void
+    fputs(bsl::cstr_type const str, void const *const ignored) noexcept
     {
-        syscall::bf_debug_op_write_str(str);
+        bsl::discard(ignored);
+
+        if (bsl::is_constant_evaluated()) {
+            return;
+        }
+
+        syscall::bf_debug_op_write_str_impl(str);
     }
 }
 

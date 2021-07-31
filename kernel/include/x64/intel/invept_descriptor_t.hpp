@@ -39,9 +39,9 @@ namespace mk
     struct invept_descriptor_t final
     {
         /// @brief stores the eptp to invalidate
-        bsl::uintmax eptp;
+        bsl::uintmx eptp;
         /// @brief reserved
-        bsl::uintmax reserved;
+        bsl::uintmx reserved;
     };
 }
 

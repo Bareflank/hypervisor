@@ -35,42 +35,42 @@ namespace mk
     ///
     /// <!-- description -->
     ///   @brief Stores the state of the general purpose registers. Note
-    ///     that this storage is only used when swapping from one VPS to
+    ///     that this storage is only used when swapping from one VS to
     ///     another. Otherwise, an extension's TLS block is used instead
     ///     to access the general purpose registers as they are faster.
     ///
     struct general_purpose_regs_t final
     {
         /// @brief stores the value of rax (0x000)
-        bsl::uintmax rax;
+        bsl::uintmx rax;
         /// @brief stores the value of rbx (0x008)
-        bsl::uintmax rbx;
+        bsl::uintmx rbx;
         /// @brief stores the value of rcx (0x010)
-        bsl::uintmax rcx;
+        bsl::uintmx rcx;
         /// @brief stores the value of rdx (0x018)
-        bsl::uintmax rdx;
+        bsl::uintmx rdx;
         /// @brief stores the value of rbp (0x020)
-        bsl::uintmax rbp;
+        bsl::uintmx rbp;
         /// @brief stores the value of rsi (0x028)
-        bsl::uintmax rsi;
+        bsl::uintmx rsi;
         /// @brief stores the value of rdi (0x030)
-        bsl::uintmax rdi;
+        bsl::uintmx rdi;
         /// @brief stores the value of r8 (0x038)
-        bsl::uintmax r8;
+        bsl::uintmx r8;
         /// @brief stores the value of r9 (0x040)
-        bsl::uintmax r9;
+        bsl::uintmx r9;
         /// @brief stores the value of r10 (0x048)
-        bsl::uintmax r10;
+        bsl::uintmx r10;
         /// @brief stores the value of r11 (0x050)
-        bsl::uintmax r11;
+        bsl::uintmx r11;
         /// @brief stores the value of r12 (0x058)
-        bsl::uintmax r12;
+        bsl::uintmx r12;
         /// @brief stores the value of r13 (0x060)
-        bsl::uintmax r13;
+        bsl::uintmx r13;
         /// @brief stores the value of r14 (0x068)
-        bsl::uintmax r14;
+        bsl::uintmx r14;
         /// @brief stores the value of r15 (0x070)
-        bsl::uintmax r15;
+        bsl::uintmx r15;
     };
 }
 

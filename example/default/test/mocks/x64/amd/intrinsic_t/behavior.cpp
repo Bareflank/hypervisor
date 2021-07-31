@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../../../mocks/x64/amd/intrinsic_t.hpp"
+#include "../../../../../MOCK/x64/amd/intrinsic_t.hpp"
 
 #include <bsl/ut.hpp>
 

@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MOCKS_VP_POOL_T_HPP
-#define MOCKS_VP_POOL_T_HPP
+#ifndef MOCK_VP_POOL_T_HPP
+#define MOCK_VP_POOL_T_HPP
 
 #include <bf_syscall_t.hpp>
 #include <gs_t.hpp>
@@ -46,7 +46,7 @@ namespace example
         /// @brief stores the return value for initialize
         bsl::errc_type m_initialize{};
         /// @brief stores the return value for allocate
-        bsl::safe_uint16 m_allocate{};
+        bsl::safe_u16 m_allocate{};
 
     public:
         /// <!-- description -->
@@ -122,7 +122,7 @@ namespace example
         ///   @param vmid the ID of the VM to assign the newly created VP to
         ///   @param ppid the ID of the PP to assign the newly created VP to
         ///   @return Returns the ID of the newly created VP on
-        ///     success, or bsl::safe_uint16::failure() on failure.
+        ///     success, or bsl::safe_u16::failure() on failure.
         ///
         [[nodiscard]] constexpr auto
         allocate(
@@ -130,8 +130,8 @@ namespace example
             tls_t const &tls,
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
-            bsl::safe_uint16 const &vmid,
-            bsl::safe_uint16 const &ppid) noexcept -> bsl::safe_uint16
+            bsl::safe_u16 const &vmid,
+            bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -148,11 +148,11 @@ namespace example
         ///     (unit testing only)
         ///
         /// <!-- inputs/outputs -->
-        ///   @param val the bsl::safe_uint16 to return when executing
+        ///   @param val the bsl::safe_u16 to return when executing
         ///     allocate
         ///
         constexpr void
-        set_allocate(bsl::safe_uint16 const &val) noexcept
+        set_allocate(bsl::safe_u16 const &val) noexcept
         {
             m_allocate = val;
         }

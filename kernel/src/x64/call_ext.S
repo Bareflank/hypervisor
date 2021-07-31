@@ -95,7 +95,7 @@ call_ext_fast_fail_entry:
     mov rbp, gs:[0x008]
     mov rbx, gs:[0x000]
 
-    mov rax, 0x1
+    mov rax, 0xFFFFFFFFFFFFFFFF
     ret
     int 3
 

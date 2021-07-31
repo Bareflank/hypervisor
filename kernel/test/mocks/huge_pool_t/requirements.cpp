@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../mocks/huge_pool_t.hpp"
+#include "../../../MOCK/huge_pool_t.hpp"
 
 #include <page_t.hpp>
 
@@ -58,7 +58,7 @@ main() noexcept -> bsl::exit_code
             bsl::ut_then{} = []() noexcept {
                 static_assert(noexcept(mk::huge_pool_t{}));
 
-                static_assert(noexcept(mut_pool.allocate(tls, 42_umax)));
+                static_assert(noexcept(mut_pool.allocate(tls, 42_umx)));
                 static_assert(noexcept(mut_pool.deallocate(tls, {})));
                 static_assert(noexcept(mut_pool.dump()));
 

@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef TEST_DISPATCH_SYSCALL_VPS_OP_HPP
-#define TEST_DISPATCH_SYSCALL_VPS_OP_HPP
+#ifndef TEST_DISPATCH_SYSCALL_VS_OP_HPP
+#define TEST_DISPATCH_SYSCALL_VS_OP_HPP
 
 #include <bf_constants.hpp>
 #include <tls_t.hpp>
@@ -34,33 +34,33 @@
 namespace mk
 {
     /// <!-- description -->
-    ///   @brief Dispatches the bf_vps_op syscalls
+    ///   @brief Dispatches the bf_vs_op syscalls
     ///
     /// <!-- inputs/outputs -->
     ///   @param tls the current TLS block
-    ///   @param ext_pool the extension pool to use
+    ///   @param ext_pool the ext_pool_t to use
     ///   @param ext the extension that made the syscall
-    ///   @param vm_pool the VM pool to use
-    ///   @param vp_pool the VP pool to use
-    ///   @param vps_pool the VPS pool to use
+    ///   @param vm_pool the vm_pool_t to use
+    ///   @param vp_pool the vp_pool_t to use
+    ///   @param vs_pool the vs_pool_t to use
     ///   @return Returns syscall::BF_STATUS_SUCCESS on success or an error
     ///     code on failure.
     ///
     [[nodiscard]] constexpr auto
-    dispatch_syscall_vps_op(
+    dispatch_syscall_vs_op(
         tls_t &tls,
         ext_pool_t &ext_pool,
         ext_t &ext,
         vm_pool_t &vm_pool,
         vp_pool_t &vp_pool,
-        vps_pool_t &vps_pool) noexcept -> bsl::errc_type
+        vs_pool_t &vs_pool) noexcept -> bsl::errc_type
     {
         bsl::discard(tls);
         bsl::discard(ext_pool);
         bsl::discard(ext);
         bsl::discard(vm_pool);
         bsl::discard(vp_pool);
-        bsl::discard(vps_pool);
+        bsl::discard(vs_pool);
 
         return bsl::errc_success;
     }

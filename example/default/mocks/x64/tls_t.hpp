@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MOCKS_TLS_T_HPP
-#define MOCKS_TLS_T_HPP
+#ifndef MOCK_TLS_T_HPP
+#define MOCK_TLS_T_HPP
 
 #include <bsl/errc_type.hpp>
 
@@ -38,7 +38,7 @@ namespace example
     ///
     struct tls_t final
     {
-        /// @brief tells certain mocks when to fail
+        /// @brief tells certain MOCK when to fail
         bsl::errc_type test_ret;
     };
 }

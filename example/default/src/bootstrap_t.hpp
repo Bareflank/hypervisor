@@ -31,13 +31,13 @@
 #include <intrinsic_t.hpp>
 #include <tls_t.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
-#include <bsl/unlikely_assert.hpp>
+#include <bsl/unlikely.hpp>
 
 namespace example
 {
@@ -58,7 +58,7 @@ namespace example
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -69,14 +69,14 @@ namespace example
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool) noexcept -> bsl::errc_type
+            vs_pool_t const &vs_pool) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(sys);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             /// NOTE:
             /// - Add initialization code here if needed. Otherwise, this
@@ -95,7 +95,7 @@ namespace example
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///
         static constexpr void
         release(
@@ -104,14 +104,14 @@ namespace example
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool) noexcept
+            vs_pool_t const &vs_pool) noexcept
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(sys);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             /// NOTE:
             /// - Release functions are usually only needed in the event of
@@ -130,7 +130,7 @@ namespace example
         ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param mut_vp_pool the vp_pool_t to use
-        ///   @param mut_vps_pool the vps_pool_t to use
+        ///   @param mut_vs_pool the vs_pool_t to use
         ///   @param ppid the ID of the PP to bootstrap
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
@@ -142,12 +142,15 @@ namespace example
             syscall::bf_syscall_t &mut_sys,
             intrinsic_t const &intrinsic,
             vp_pool_t &mut_vp_pool,
-            vps_pool_t &mut_vps_pool,
-            bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
+            vs_pool_t &mut_vs_pool,
+            bsl::safe_u16 const &ppid) noexcept -> bsl::errc_type
         {
+            bsl::expects(ppid.is_valid_and_checked());
+            bsl::expects(ppid != syscall::BF_INVALID_ID);
+
             /// NOTE:
-            /// - In order to execcute bf_vps_op_run, which is what executes
-            ///   the hypervisor, we must have a VM, VP and VPS.
+            /// - In order to execcute bf_vs_op_run, which is what executes
+            ///   the hypervisor, we must have a VM, VP and VS.
             /// - The root VM is already created for us, so we don't need to
             ///   create this ourselves. You only need to create VM's if you
             ///   plan to add guest support with your extensions.
@@ -157,35 +160,35 @@ namespace example
 
             /// NOTE:
             /// - The VP in this simple example does nothing, but we still need
-            ///   to create one. The VP is used when you have more than one VPS
+            ///   to create one. The VP is used when you have more than one VS
             ///   per VP (e.g., if you are implementing HyperV's VSM, or nested
             ///   virtualization support). Otherwise, you will always have one
-            ///   VPS for each VP, and they will appear as the same thing.
-            /// - The VPS is what stores the state associated with the VPS. It
+            ///   VS for each VP, and they will appear as the same thing.
+            /// - The VS is what stores the state associated with the VS. It
             ///   is the thing that does most of the work, including storing
             ///   the VMCS/VMCB and other CPU register state that is needed.
             ///
 
             auto const vpid{mut_vp_pool.allocate(gs, tls, mut_sys, intrinsic, vmid, ppid)};
-            if (bsl::unlikely_assert(!vpid)) {
+            if (bsl::unlikely(vpid.is_invalid())) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            auto const vpsid{mut_vps_pool.allocate(gs, tls, mut_sys, intrinsic, vpid, ppid)};
-            if (bsl::unlikely_assert(!vpsid)) {
+            auto const vsid{mut_vs_pool.allocate(gs, tls, mut_sys, intrinsic, vpid, ppid)};
+            if (bsl::unlikely(vsid.is_invalid())) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
             /// NOTE:
             /// - Run the newly created VP on behalf of the root VM using the
-            ///   newly created and initialized VPS. Note that this version of
+            ///   newly created and initialized VS. Note that this version of
             ///   the run function should only be used when starting the
-            ///   hypervisor, or switching the VM, VP or VPS as it is slow.
+            ///   hypervisor, or switching the VM, VP or VS as it is slow.
             ///
 
-            return mut_sys.bf_vps_op_run(vmid, vpid, vpsid);
+            return mut_sys.bf_vs_op_run(vmid, vpid, vsid);
         }
     };
 }

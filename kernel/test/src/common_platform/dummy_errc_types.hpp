@@ -45,20 +45,20 @@ namespace mk
     // NOLINTNEXTLINE(bsl-name-case)
     constexpr bsl::errc_type errc_fail_release{0x00FF0003_i32};
 
-    /// @brief Defines the "vm pool failure" case
+    /// @brief Defines the "vm_pool_t failure" case
     // We want our implementation to mimic C++ here.
     // NOLINTNEXTLINE(bsl-name-case)
     constexpr bsl::errc_type errc_vm_pool_failure{0x00FF0004_i32};
 
-    /// @brief Defines the "vp pool failure" case
+    /// @brief Defines the "vp_pool_t failure" case
     // We want our implementation to mimic C++ here.
     // NOLINTNEXTLINE(bsl-name-case)
     constexpr bsl::errc_type errc_vp_pool_failure{0x00FF0005_i32};
 
-    /// @brief Defines the "vps pool failure" case
+    /// @brief Defines the "vs_pool_t failure" case
     // We want our implementation to mimic C++ here.
     // NOLINTNEXTLINE(bsl-name-case)
-    constexpr bsl::errc_type errc_vps_pool_failure{0x00FF0006_i32};
+    constexpr bsl::errc_type errc_vs_pool_failure{0x00FF0006_i32};
 
     /// @brief Defines the "ext pool failure" case
     // We want our implementation to mimic C++ here.

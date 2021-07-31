@@ -27,7 +27,6 @@
 
 #include <alloc_huge_t.hpp>
 #include <alloc_page_t.hpp>
-#include <allocate_tags.hpp>
 #include <bf_constants.hpp>
 #include <bfelf/elf64_ehdr_t.hpp>
 #include <bfelf/elf64_phdr_t.hpp>
@@ -37,9 +36,9 @@
 #include <intrinsic_t.hpp>
 #include <map_page_flags.hpp>
 #include <mk_args_t.hpp>
+#include <page_4k_t.hpp>
 #include <page_aligned_bytes_t.hpp>
 #include <page_pool_t.hpp>
-#include <page_t.hpp>
 #include <root_page_table_t.hpp>
 #include <start_vmm_args_t.hpp>
 #include <tls_t.hpp>
@@ -49,7 +48,6 @@
 #include <bsl/finally.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
-#include <bsl/unlikely_assert.hpp>
 
 /// TODO:
 /// - Add support for multiple extensions. For this to work, we will need
@@ -105,27 +103,26 @@ namespace mk
     ///
     class ext_t final
     {
+        /// @brief stores the ID associated with this ext_t
+        bsl::safe_u16 m_id{};
+        /// @brief stores the extension's handle
+        bsl::safe_u16 m_handle{};
         /// @brief stores true if start() has been executed
         bool m_started{};
-        /// @brief stores the ID associated with this ext_t
-        bsl::safe_uint16 m_id{bsl::safe_uint16::failure()};
 
         /// @brief stores the main rpt
         root_page_table_t m_main_rpt{};
         /// @brief stores the direct map rpts
         bsl::array<root_page_table_t, HYPERVISOR_MAX_VMS.get()> m_direct_map_rpts{};
+
         /// @brief stores the main IP registered by the extension
-        bsl::safe_uintmax m_entry_ip{bsl::safe_uintmax::failure()};
+        bsl::safe_umx m_entry_ip{};
         /// @brief stores the bootstrap IP registered by the extension
-        bsl::safe_uintmax m_bootstrap_ip{bsl::safe_uintmax::failure()};
+        bsl::safe_umx m_bootstrap_ip{};
         /// @brief stores the vmexit IP registered by the extension
-        bsl::safe_uintmax m_vmexit_ip{bsl::safe_uintmax::failure()};
+        bsl::safe_umx m_vmexit_ip{};
         /// @brief stores the fail IP registered by the extension
-        bsl::safe_uintmax m_fail_ip{bsl::safe_uintmax::failure()};
-        /// @brief stores the extension's handle
-        bsl::safe_uintmax m_handle{bsl::safe_uintmax::failure()};
-        /// @brief stores the extension's heap cursor
-        bsl::safe_uintmax m_heap_virt{HYPERVISOR_EXT_HEAP_POOL_ADDR};
+        bsl::safe_umx m_fail_ip{};
 
         /// <!-- description -->
         ///   @brief Returns the program header table
@@ -138,7 +135,7 @@ namespace mk
         get_phdrtab(bfelf::elf64_ehdr_t const *const file) noexcept
             -> bsl::span<bfelf::elf64_phdr_t const>
         {
-            return {file->e_phdr, bsl::to_umax(file->e_phnum)};
+            return {file->e_phdr, bsl::to_umx(file->e_phnum)};
         }
 
         /// <!-- description -->
@@ -146,29 +143,29 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param size the number of bytes to convert
-        ///   @return Returns "size" as a "page_aligned_bytes_t"
+        ///   @return Returns "size" as a "page_aligned_bytes_t". On error,
+        ///     check the bytes field.
         ///
         [[nodiscard]] static constexpr auto
-        size_to_page_aligned_bytes(bsl::safe_uintmax const &size) noexcept -> page_aligned_bytes_t
+        size_to_page_aligned_bytes(bsl::safe_umx const &size) noexcept -> page_aligned_bytes_t
         {
-            constexpr auto one{1_umax};
-            constexpr auto zero{0_umax};
-
-            if (bsl::unlikely(size.is_zero_or_invalid())) {
-                bsl::error() << "invalid size "    // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
-
-                return {bsl::safe_uintmax::failure(), bsl::safe_uintmax::failure()};
+            bsl::safe_umx mut_pages{};
+            if ((size % HYPERVISOR_PAGE_SIZE).checked().is_zero()) {
+                mut_pages = size >> HYPERVISOR_PAGE_SHIFT;
+            }
+            else {
+                mut_pages = (size >> HYPERVISOR_PAGE_SHIFT) + bsl::safe_umx::magic_1();
             }
 
-            if ((size % HYPERVISOR_PAGE_SIZE) != zero) {
-                auto const pages{(size >> HYPERVISOR_PAGE_SHIFT) + one};
-                return {pages * HYPERVISOR_PAGE_SIZE, pages};
-            }
+            /// NOTE:
+            /// - We do not validate the bytes field. This is because the size
+            ///   field could be anything as it comes from the syscall
+            ///   interface, which means it absolutely could overflow. Callers
+            ///   of this function will have to check for this.
+            /// - We do mark pages as checked as it is impossible for it to
+            ///   overflow.
 
-            auto const pages{(size >> HYPERVISOR_PAGE_SHIFT)};
-            return {pages * HYPERVISOR_PAGE_SIZE, pages};
+            return {mut_pages * HYPERVISOR_PAGE_SIZE, mut_pages.checked()};
         }
 
         /// <!-- description -->
@@ -177,52 +174,19 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param file a pointer to the elf file
-        ///   @return Returns 0 on success or an error code on failure.
         ///
-        [[nodiscard]] static constexpr auto
-        validate_elf64_ehdr(bfelf::elf64_ehdr_t const *const file) noexcept -> bsl::errc_type
+        static constexpr void
+        validate_elf64_ehdr(bfelf::elf64_ehdr_t const *const file) noexcept
         {
-            if (nullptr == file) {
-                bsl::error() << "invalid file\n" << bsl::here();
-                return bsl::errc_failure;
-            }
+            bsl::expects(nullptr != file);
 
-            if (*file->e_ident.at_if(bfelf::EI_MAG0) != bfelf::ELFMAG0) {
-                bsl::error() << "invalid ELF magic number\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (*file->e_ident.at_if(bfelf::EI_MAG1) != bfelf::ELFMAG1) {
-                bsl::error() << "invalid ELF magic number\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (*file->e_ident.at_if(bfelf::EI_MAG2) != bfelf::ELFMAG2) {
-                bsl::error() << "invalid ELF magic number\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (*file->e_ident.at_if(bfelf::EI_MAG3) != bfelf::ELFMAG3) {
-                bsl::error() << "invalid ELF magic number\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (*file->e_ident.at_if(bfelf::EI_CLASS) != bfelf::ELFCLASS64) {
-                bsl::error() << "invalid ELF class\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (*file->e_ident.at_if(bfelf::EI_OSABI) != bfelf::ELFOSABI_SYSV) {
-                bsl::error() << "invalid ELF OSABI\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (file->e_type != bfelf::ET_EXEC) {
-                bsl::error() << "invalid ELF type\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
+            bsl::expects(file->e_type == bfelf::ET_EXEC);
+            bsl::expects(*file->e_ident.at_if(bfelf::EI_MAG0) == bfelf::ELFMAG0);
+            bsl::expects(*file->e_ident.at_if(bfelf::EI_MAG1) == bfelf::ELFMAG1);
+            bsl::expects(*file->e_ident.at_if(bfelf::EI_MAG2) == bfelf::ELFMAG2);
+            bsl::expects(*file->e_ident.at_if(bfelf::EI_MAG3) == bfelf::ELFMAG3);
+            bsl::expects(*file->e_ident.at_if(bfelf::EI_CLASS) == bfelf::ELFCLASS64);
+            bsl::expects(*file->e_ident.at_if(bfelf::EI_OSABI) == bfelf::ELFOSABI_SYSV);
         }
 
         /// <!-- description -->
@@ -230,46 +194,33 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param phdr the pt_load segment to validate
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] static constexpr auto
-        validate_pt_load(bfelf::elf64_phdr_t const *const phdr) noexcept -> bsl::errc_type
+        static constexpr void
+        validate_pt_load(bfelf::elf64_phdr_t const *const phdr) noexcept
         {
-            constexpr auto lower{HYPERVISOR_EXT_CODE_ADDR};
-            constexpr auto upper{HYPERVISOR_EXT_CODE_ADDR + HYPERVISOR_EXT_CODE_SIZE};
+            bsl::expects(nullptr != phdr);
 
-            auto const addr{bsl::to_umax(phdr->p_vaddr)};
-            auto const size{bsl::to_umax(phdr->p_memsz)};
+            constexpr auto min_vaddr{HYPERVISOR_EXT_CODE_ADDR};
+            constexpr auto max_vaddr{(min_vaddr + HYPERVISOR_EXT_CODE_SIZE).checked()};
 
-            if ((bsl::to_u32(phdr->p_flags) & bfelf::PF_W).is_pos()) {
-                if (bsl::unlikely((bsl::to_u32(phdr->p_flags) & bfelf::PF_X).is_pos())) {
-                    bsl::error() << "ELF code segment flags not supported\n" << bsl::here();
-                    return bsl::errc_failure;
-                }
+            bsl::expects((phdr->p_vaddr) >= min_vaddr);
+            bsl::expects((phdr->p_vaddr + bsl::to_umx(phdr->p_memsz)).checked() <= max_vaddr);
 
-                bsl::touch();
+            if (bsl::safe_u32::magic_1() == (phdr->p_flags & bfelf::PF_W)) {
+                bsl::expects(bsl::safe_u32::magic_0() == (phdr->p_flags & bfelf::PF_X));
             }
             else {
                 bsl::touch();
             }
 
-            if (bsl::unlikely(addr < lower)) {
-                bsl::error() << "ELF code segment not supported\n" << bsl::here();
-                return bsl::errc_failure;
+            if (bsl::safe_u32::magic_1() == (phdr->p_flags & bfelf::PF_X)) {
+                bsl::expects(bsl::safe_u32::magic_0() == (phdr->p_flags & bfelf::PF_W));
+            }
+            else {
+                bsl::touch();
             }
 
-            if (bsl::unlikely(addr + size > upper)) {
-                bsl::error() << "ELF code segment not supported\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (bsl::unlikely(phdr->p_align != HYPERVISOR_PAGE_SIZE)) {
-                bsl::error() << "ELF code segment alignment not supported\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
+            bsl::expects(phdr->p_align == HYPERVISOR_PAGE_SIZE);
         }
 
         /// <!-- description -->
@@ -277,18 +228,12 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param phdr the pt_gnu_stack segment to validate
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] static constexpr auto
-        validate_pt_gnu_stack(bfelf::elf64_phdr_t const *const phdr) noexcept -> bsl::errc_type
+        static constexpr void
+        validate_pt_gnu_stack(bfelf::elf64_phdr_t const *const phdr) noexcept
         {
-            if (bsl::unlikely((bsl::to_u32(phdr->p_flags) & bfelf::PF_X).is_pos())) {
-                bsl::error() << "Executable stacks are not supported\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
+            bsl::expects(nullptr != phdr);
+            bsl::expects(bsl::safe_u32::magic_0() == (phdr->p_flags & bfelf::PF_X));
         }
 
         /// <!-- description -->
@@ -296,78 +241,53 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param phdr the pt_tls segment to validate
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] static constexpr auto
-        validate_pt_tls(bfelf::elf64_phdr_t const *const phdr) noexcept -> bsl::errc_type
+        static constexpr void
+        validate_pt_tls(bfelf::elf64_phdr_t const *const phdr) noexcept
         {
-            if (bsl::unlikely((bsl::to_u32(phdr->p_flags) & bfelf::PF_X).is_pos())) {
-                bsl::error() << "Executable TLS segment are not supported\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (bsl::unlikely(bsl::to_umax(phdr->p_memsz) > HYPERVISOR_PAGE_SIZE)) {
-                bsl::error() << "ELF TLS segment memsz not supported\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
+            bsl::expects(nullptr != phdr);
+            bsl::expects(phdr->p_memsz <= HYPERVISOR_PAGE_SIZE);
+            bsl::expects(bsl::safe_u32::magic_0() == (phdr->p_flags & bfelf::PF_X));
         }
 
         /// <!-- description -->
         ///   @brief Validates the provided ELF file.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param elf_file the elf file to validate
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
+        ///   @param file the elf file to validate
         ///
-        [[nodiscard]] static constexpr auto
-        validate(loader::ext_elf_file_t const *const elf_file) noexcept -> bsl::errc_type
+        static constexpr void
+        validate(loader::ext_elf_file_t const *const file) noexcept
         {
-            if constexpr (BSL_RELEASE_MODE) {
-                return bsl::errc_success;
-            }
-
-            if (bsl::unlikely(!validate_elf64_ehdr(elf_file))) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            /// TODO:
-            /// - Add support for GNU RELOC segments so that we can set
-            ///   the RW permissions properly
+            /// NOTE:
+            /// - The point of this function is to provide some sanity checks
+            ///   in debug mode which is why everything uses bsl::expects.
+            ///   None of these are needed in a release build because it
+            ///   will have gone through testing to ensure they all pass.
+            /// - Removing this logic in a release build helps to keep the
+            ///   binary size smaller.
             ///
 
-            bool mut_found_pt_load{};
-            bool mut_found_pt_gnu_stack{};
+            bsl::expects(nullptr != file);
+            validate_elf64_ehdr(file);
 
-            for (auto const elem : get_phdrtab(elf_file)) {
-                switch (elem.data->p_type) {
+            auto const phdrtab{get_phdrtab(file)};
+            for (bsl::safe_idx mut_i{}; mut_i < phdrtab.size(); ++mut_i) {
+                auto const *const phdr{phdrtab.at_if(mut_i)};
+
+                switch (phdr->p_type) {
                     case bfelf::PT_LOAD.get(): {
-                        mut_found_pt_load = true;
-                        if (bsl::unlikely(!validate_pt_load(elem.data))) {
-                            bsl::print<bsl::V>() << bsl::here();
-                            return bsl::errc_failure;
-                        }
+                        validate_pt_load(phdr);
                         break;
                     }
 
                     case bfelf::PT_GNU_STACK.get(): {
-                        mut_found_pt_gnu_stack = true;
-                        if (bsl::unlikely(!validate_pt_gnu_stack(elem.data))) {
-                            bsl::print<bsl::V>() << bsl::here();
-                            return bsl::errc_failure;
-                        }
+                        validate_pt_gnu_stack(phdr);
                         break;
                     }
 
                     case bfelf::PT_TLS.get(): {
-                        if (bsl::unlikely(!validate_pt_tls(elem.data))) {
-                            bsl::print<bsl::V>() << bsl::here();
-                            return bsl::errc_failure;
-                        }
+                        validate_pt_tls(phdr);
                         break;
                     }
 
@@ -376,18 +296,6 @@ namespace mk
                     }
                 }
             }
-
-            if (bsl::unlikely(!mut_found_pt_load)) {
-                bsl::error() << "PT_LOAD segments missing from ELF file\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (bsl::unlikely(!mut_found_pt_gnu_stack)) {
-                bsl::error() << "PT_GNU_STACK segment missing from ELF file\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
         }
 
         /// <!-- description -->
@@ -409,15 +317,27 @@ namespace mk
             page_pool_t &mut_page_pool,
             root_page_table_t &mut_rpt,
             bfelf::elf64_phdr_t const *const phdr,
-            bsl::safe_uintmax const &offset) noexcept -> page_t *
+            bsl::safe_idx const &offset) noexcept -> page_4k_t *
         {
+            page_4k_t *pmut_mut_page{};
+
+            /// NOTE:
+            /// - The validation code above ensures that phdr->p_vaddr +
+            ///   the offset will never overflow, which is why this is
+            ///   marked as checked.
+            ///
+
+            auto const virt{(phdr->p_vaddr + bsl::to_umx(offset)).checked()};
             if ((phdr->p_flags & bfelf::PF_X).is_pos()) {
-                return mut_rpt.allocate_page_rx<page_t>(
-                    mut_tls, mut_page_pool, phdr->p_vaddr + offset, MAP_PAGE_AUTO_RELEASE_ELF);
+                pmut_mut_page =
+                    mut_rpt.allocate_page<page_4k_t>(mut_tls, mut_page_pool, virt, MAP_PAGE_RE);
+            }
+            else {
+                pmut_mut_page =
+                    mut_rpt.allocate_page<page_4k_t>(mut_tls, mut_page_pool, virt, MAP_PAGE_RW);
             }
 
-            return mut_rpt.allocate_page_rw<page_t>(
-                mut_tls, mut_page_pool, phdr->p_vaddr + offset, MAP_PAGE_AUTO_RELEASE_ELF);
+            return pmut_mut_page;
         }
 
         /// <!-- description -->
@@ -439,14 +359,28 @@ namespace mk
             root_page_table_t &mut_rpt,
             bfelf::elf64_phdr_t const *const phdr) noexcept -> bsl::errc_type
         {
-            bsl::span const segment{phdr->p_offset, bsl::to_umax(phdr->p_filesz)};
-            for (bsl::safe_uintmax mut_i{}; mut_i < phdr->p_memsz; mut_i += HYPERVISOR_PAGE_SIZE) {
+            constexpr auto inc{bsl::to_idx(HYPERVISOR_PAGE_SIZE)};
+            bsl::span const segment{phdr->p_offset, bsl::to_umx(phdr->p_filesz)};
+
+            for (bsl::safe_idx mut_i{}; mut_i < phdr->p_memsz; mut_i += inc) {
+
                 auto *const pmut_page{
                     allocate_page_for_add_segment(mut_tls, mut_page_pool, mut_rpt, phdr, mut_i)};
+
                 if (bsl::unlikely(nullptr == pmut_page)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return bsl::errc_failure;
                 }
+
+                /// NOTE:
+                /// - Due to the BSS section, the memsz might not actually
+                ///   be the same size as the filesz. For this reason, we
+                ///   need to keep allocating pages, but might not want to
+                ///   copy these pages.
+                /// - The subspan figures this out for us. Once the file has
+                ///   been completely copies, the subspan will start
+                ///   returning an empty subspan, telling us to stop copying.
+                ///
 
                 auto const src{segment.subspan(mut_i, HYPERVISOR_PAGE_SIZE)};
                 if (src.empty()) {
@@ -467,7 +401,7 @@ namespace mk
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param mut_rpt the root page table to add too
-        ///   @param elf_file the ELF file for this ext_t
+        ///   @param file the ELF file for this ext_t
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -476,14 +410,40 @@ namespace mk
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             root_page_table_t &mut_rpt,
-            loader::ext_elf_file_t const *const elf_file) noexcept -> bsl::errc_type
+            loader::ext_elf_file_t const *const file) noexcept -> bsl::errc_type
         {
-            for (auto const elem : get_phdrtab(elf_file)) {
-                if (bfelf::PT_LOAD != elem.data->p_type) {
+            auto mut_tls_vaddr{bsl::safe_umx::max_value()};
+
+            auto const phdrtab{get_phdrtab(file)};
+            for (bsl::safe_idx mut_i{}; mut_i < phdrtab.size(); ++mut_i) {
+                auto const *const phdr{phdrtab.at_if(mut_i)};
+
+                if (bfelf::PT_TLS == phdr->p_type) {
+                    mut_tls_vaddr = bsl::to_umx(phdr->p_vaddr);
+                    break;
+                }
+
+                bsl::touch();
+            }
+
+            for (bsl::safe_idx mut_i{}; mut_i < phdrtab.size(); ++mut_i) {
+                auto const *const phdr{phdrtab.at_if(mut_i)};
+
+                if (bfelf::PT_LOAD != phdr->p_type) {
                     continue;
                 }
 
-                auto const ret{add_segment(mut_tls, mut_page_pool, mut_rpt, elem.data)};
+                /// NOTE:
+                /// - Sometimes, you can end up with a PT_LOAD segment that
+                ///   is actually the TLS. It will have an alignment that
+                ///   is not supported as well. We need to skip these.
+                ///
+
+                if (phdr->p_vaddr == mut_tls_vaddr) {
+                    continue;
+                }
+
+                auto const ret{add_segment(mut_tls, mut_page_pool, mut_rpt, phdr)};
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return bsl::errc_failure;
@@ -512,12 +472,21 @@ namespace mk
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             root_page_table_t &mut_rpt,
-            bsl::safe_uintmax const &addr) noexcept -> bsl::errc_type
+            bsl::safe_umx const &addr) noexcept -> bsl::errc_type
         {
             constexpr auto size{HYPERVISOR_EXT_STACK_SIZE};
-            for (bsl::safe_uintmax mut_i{}; mut_i < size; mut_i += HYPERVISOR_PAGE_SIZE) {
-                auto const *const page{mut_rpt.allocate_page_rw<page_t>(
-                    mut_tls, mut_page_pool, addr + mut_i, MAP_PAGE_AUTO_RELEASE_STACK)};
+            for (bsl::safe_idx mut_i{}; mut_i < size; mut_i += bsl::to_idx(HYPERVISOR_PAGE_SIZE)) {
+                auto const virt{(addr + bsl::to_umx(mut_i)).checked()};
+
+                /// NOTE:
+                /// - The virtual address provided to allocate_page cannot
+                ///   overflow because add_stacks ensures that this is not
+                ///   possible, which is why it is marked as checked.
+                ///
+
+                auto const *const page{
+                    mut_rpt.allocate_page<page_4k_t>(mut_tls, mut_page_pool, virt, MAP_PAGE_RW)};
+
                 if (bsl::unlikely(nullptr == page)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return bsl::errc_failure;
@@ -544,9 +513,22 @@ namespace mk
         add_stacks(tls_t &mut_tls, page_pool_t &mut_page_pool, root_page_table_t &mut_rpt) noexcept
             -> bsl::errc_type
         {
-            for (bsl::safe_uintmax mut_i{}; mut_i < bsl::to_umax(mut_tls.online_pps); ++mut_i) {
-                auto const offs{(HYPERVISOR_EXT_STACK_SIZE + HYPERVISOR_PAGE_SIZE) * mut_i};
-                auto const addr{(HYPERVISOR_EXT_STACK_ADDR + offs)};
+            constexpr auto stack_addr{HYPERVISOR_EXT_STACK_ADDR};
+            constexpr auto stack_size{HYPERVISOR_EXT_STACK_SIZE};
+
+            for (bsl::safe_idx mut_i{}; mut_i < bsl::to_idx(mut_tls.online_pps); ++mut_i) {
+                auto const offs{(stack_size + HYPERVISOR_PAGE_SIZE) * bsl::to_umx(mut_i)};
+                auto const addr{(stack_addr + offs).checked()};
+
+                /// NOTE:
+                /// - CMake is responsible for ensuring that the values for
+                ///   stack_addr and stack_size make sense. The only way the
+                ///   the math above could overflow is if the provided online
+                ///   PPs is invalid while at the same time CMake was
+                ///   configured with values that could result in overflow.
+                ///   This is considered extremely unlikely and therefore
+                ///   undefined, which is why addr is marked as checked.
+                ///
 
                 auto const ret{this->add_stack(mut_tls, mut_page_pool, mut_rpt, addr)};
                 if (bsl::unlikely(!ret)) {
@@ -589,14 +571,26 @@ namespace mk
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             root_page_table_t &mut_rpt,
-            bsl::safe_uintmax const &addr,
+            bsl::safe_umx const &addr,
             bfelf::elf64_phdr_t const *const phdr) noexcept -> bsl::errc_type
         {
-            auto *const pmut_page{mut_rpt.allocate_page_rw<page_t>(
-                mut_tls, mut_page_pool, addr, MAP_PAGE_AUTO_RELEASE_TLS)};
+            auto *const pmut_page{
+                mut_rpt.allocate_page<page_4k_t>(mut_tls, mut_page_pool, addr, MAP_PAGE_RW)};
+
             if (bsl::unlikely(nullptr == pmut_page)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
+            }
+
+            /// NOTE:
+            /// - Since the validation code above ensures that the TLB block
+            ///   in the phdr is no larger than a page, dst_idx cannot
+            ///   underflow, which is why it is marked as checked().
+            ///
+
+            bsl::span const src{phdr->p_offset, bsl::to_umx(phdr->p_filesz)};
+            if (src.empty()) {
+                return bsl::errc_success;
             }
 
             /// NOTE:
@@ -604,14 +598,9 @@ namespace mk
             ///   right justified. Meaning, we allocate a full page, but if
             ///   the extension only uses 100 bytes, the data starts at the
             ///   last 100 bytes of the page.
-            /// - The dst_idx does not need to be checked because the
-            ///   validation code checks for this already, and the memcpy
-            ///   function will not attempt to use an invalid size as a
-            ///   nie backup.
             ///
 
-            bsl::span const src{phdr->p_offset, bsl::to_umax(phdr->p_filesz)};
-            auto const dst_idx{HYPERVISOR_PAGE_SIZE - bsl::to_umax(phdr->p_memsz)};
+            auto const dst_idx{bsl::to_idx((HYPERVISOR_PAGE_SIZE - phdr->p_memsz).checked())};
             bsl::builtin_memcpy(pmut_page->data.at_if(dst_idx), src.data(), src.size());
 
             return bsl::errc_success;
@@ -634,10 +623,11 @@ namespace mk
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             root_page_table_t &mut_rpt,
-            bsl::safe_uintmax const &addr) noexcept -> bsl::errc_type
+            bsl::safe_umx const &addr) noexcept -> bsl::errc_type
         {
-            auto *const pmut_page{mut_rpt.allocate_page_rw<ext_tcb_t>(
-                mut_tls, mut_page_pool, addr, MAP_PAGE_AUTO_RELEASE_TCB)};
+            auto *const pmut_page{
+                mut_rpt.allocate_page<ext_tcb_t>(mut_tls, mut_page_pool, addr, MAP_PAGE_RW)};
+
             if (bsl::unlikely(nullptr == pmut_page)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -655,7 +645,7 @@ namespace mk
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param mut_rpt the root page table to add too
-        ///   @param elf_file the ELF file that contains the TLS info
+        ///   @param file the ELF file that contains the TLS info
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -664,14 +654,27 @@ namespace mk
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             root_page_table_t &mut_rpt,
-            loader::ext_elf_file_t const *const elf_file) noexcept -> bsl::errc_type
+            loader::ext_elf_file_t const *const file) noexcept -> bsl::errc_type
         {
-            for (bsl::safe_uintmax mut_i{}; mut_i < bsl::to_umax(mut_tls.online_pps); ++mut_i) {
-                auto const offs{(HYPERVISOR_EXT_TLS_SIZE + HYPERVISOR_PAGE_SIZE) * mut_i};
-                auto const addr{(HYPERVISOR_EXT_TLS_ADDR + offs)};
+            bfelf::elf64_phdr_t const *mut_phdr{};
+            constexpr auto tls_addr{HYPERVISOR_EXT_TLS_ADDR};
+            constexpr auto tls_size{HYPERVISOR_EXT_TLS_SIZE};
 
-                auto const ret{
-                    this->add_tcb(mut_tls, mut_page_pool, mut_rpt, addr + HYPERVISOR_PAGE_SIZE)};
+            for (bsl::safe_idx mut_i{}; mut_i < bsl::to_umx(mut_tls.online_pps); ++mut_i) {
+                auto const offs{(tls_size + HYPERVISOR_PAGE_SIZE) * bsl::to_umx(mut_i)};
+                auto const addr{(tls_addr + offs + HYPERVISOR_PAGE_SIZE).checked()};
+
+                /// NOTE:
+                /// - CMake is responsible for ensuring that the values for
+                ///   tls_addr and tls_size make sense. The only way the
+                ///   the math above could overflow is if the provided online
+                ///   PPs is invalid while at the same time CMake was
+                ///   configured with values that could result in overflow.
+                ///   This is considered extremely unlikely and therefore
+                ///   undefined, which is why addr is marked as checked.
+                ///
+
+                auto const ret{this->add_tcb(mut_tls, mut_page_pool, mut_rpt, addr)};
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -680,10 +683,12 @@ namespace mk
                 bsl::touch();
             }
 
-            bfelf::elf64_phdr_t const *mut_phdr{};
-            for (auto const elem : get_phdrtab(elf_file)) {
-                if (bfelf::PT_TLS == elem.data->p_type) {
-                    mut_phdr = elem.data;
+            auto const phdrtab{get_phdrtab(file)};
+            for (bsl::safe_idx mut_i{}; mut_i < phdrtab.size(); ++mut_i) {
+                auto const *const phdr{phdrtab.at_if(mut_i)};
+
+                if (bfelf::PT_TLS == phdr->p_type) {
+                    mut_phdr = phdr;
                     break;
                 }
 
@@ -694,9 +699,19 @@ namespace mk
                 return bsl::errc_success;
             }
 
-            for (bsl::safe_uintmax mut_i{}; mut_i < bsl::to_umax(mut_tls.online_pps); ++mut_i) {
-                auto const offs{(HYPERVISOR_EXT_TLS_SIZE + HYPERVISOR_PAGE_SIZE) * mut_i};
-                auto const addr{(HYPERVISOR_EXT_TLS_ADDR + offs)};
+            for (bsl::safe_idx mut_i{}; mut_i < bsl::to_umx(mut_tls.online_pps); ++mut_i) {
+                auto const offs{(tls_size + HYPERVISOR_PAGE_SIZE) * bsl::to_umx(mut_i)};
+                auto const addr{(tls_addr + offs).checked()};
+
+                /// NOTE:
+                /// - CMake is responsible for ensuring that the values for
+                ///   tls_addr and tls_size make sense. The only way the
+                ///   the math above could overflow is if the provided online
+                ///   PPs is invalid while at the same time CMake was
+                ///   configured with values that could result in overflow.
+                ///   This is considered extremely unlikely and therefore
+                ///   undefined, which is why addr is marked as checked.
+                ///
 
                 auto const ret{this->add_tls(mut_tls, mut_page_pool, mut_rpt, addr, mut_phdr)};
                 if (bsl::unlikely(!ret)) {
@@ -719,7 +734,7 @@ namespace mk
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param mut_rpt the root page table to initialize
         ///   @param system_rpt the system root page table to initialize with
-        ///   @param elf_file the ELF file that contains the segment and TLS
+        ///   @param file the ELF file that contains the segment and TLS
         ///      info need to initialize the provided rpt
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
@@ -730,9 +745,12 @@ namespace mk
             page_pool_t &mut_page_pool,
             root_page_table_t &mut_rpt,
             root_page_table_t const &system_rpt,
-            loader::ext_elf_file_t const *const elf_file) noexcept -> bsl::errc_type
+            loader::ext_elf_file_t const *const file) noexcept -> bsl::errc_type
         {
-            if (bsl::unlikely(!mut_rpt.initialize(mut_tls, mut_page_pool))) {
+            bsl::errc_type mut_ret{};
+
+            mut_ret = mut_rpt.initialize(mut_tls, mut_page_pool);
+            if (bsl::unlikely(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
@@ -742,22 +760,22 @@ namespace mk
                     mut_rpt.release(mut_tls, mut_page_pool);
                 }};
 
-            if (bsl::unlikely(!mut_rpt.add_tables(mut_tls, system_rpt))) {
+            mut_rpt.add_tables(mut_tls, system_rpt);
+
+            mut_ret = this->add_segments(mut_tls, mut_page_pool, mut_rpt, file);
+            if (bsl::unlikely(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            if (bsl::unlikely(!this->add_segments(mut_tls, mut_page_pool, mut_rpt, elf_file))) {
+            mut_ret = this->add_stacks(mut_tls, mut_page_pool, mut_rpt);
+            if (bsl::unlikely(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            if (bsl::unlikely(!this->add_stacks(mut_tls, mut_page_pool, mut_rpt))) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (bsl::unlikely(!this->add_tls_blocks(mut_tls, mut_page_pool, mut_rpt, elf_file))) {
+            mut_ret = this->add_tls_blocks(mut_tls, mut_page_pool, mut_rpt, file);
+            if (bsl::unlikely(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
@@ -774,31 +792,22 @@ namespace mk
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
-        ///   @param mut_rpt the root page table to initialize
+        ///   @param pmut_rpt the root page table to initialize
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
         initialize_direct_map_rpt(
-            tls_t &mut_tls, page_pool_t &mut_page_pool, root_page_table_t &mut_rpt) noexcept
+            tls_t &mut_tls, page_pool_t &mut_page_pool, root_page_table_t *const pmut_rpt) noexcept
             -> bsl::errc_type
         {
-            if (bsl::unlikely(!mut_rpt.initialize(mut_tls, mut_page_pool))) {
+            auto const ret{pmut_rpt->initialize(mut_tls, mut_page_pool)};
+            if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
+                return ret;
             }
 
-            bsl::finally mut_release_on_error{
-                [&mut_tls, &mut_rpt, &mut_page_pool]() noexcept -> void {
-                    mut_rpt.release(mut_tls, mut_page_pool);
-                }};
-
-            if (bsl::unlikely(!mut_rpt.add_tables(mut_tls, m_main_rpt))) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            mut_release_on_error.ignore();
+            pmut_rpt->add_tables(mut_tls, m_main_rpt);
             return bsl::errc_success;
         }
 
@@ -871,17 +880,12 @@ namespace mk
         [[nodiscard]] constexpr auto
         update_direct_map_rpts(tls_t &mut_tls) noexcept -> bsl::errc_type
         {
-            for (auto const rpt : m_direct_map_rpts) {
-                if (!rpt.data->is_initialized()) {
+            for (auto &mut_rpt : m_direct_map_rpts) {
+                if (!mut_rpt.is_initialized()) {
                     continue;
                 }
 
-                if (bsl::unlikely(!rpt.data->add_tables(mut_tls, m_main_rpt))) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return bsl::errc_failure;
-                }
-
-                bsl::touch();
+                mut_rpt.add_tables(mut_tls, m_main_rpt);
             }
 
             return bsl::errc_success;
@@ -907,37 +911,20 @@ namespace mk
         execute(
             tls_t &mut_tls,
             intrinsic_t &mut_intrinsic,
-            bsl::safe_uintmax const &ip,
-            bsl::safe_uintmax const &arg0 = {},
-            bsl::safe_uintmax const &arg1 = {}) noexcept -> bsl::errc_type
+            bsl::safe_umx const &ip,
+            bsl::safe_umx const &arg0 = {},
+            bsl::safe_umx const &arg1 = {}) noexcept -> bsl::errc_type
         {
-            if (bsl::unlikely_assert(!m_id)) {
-                bsl::error() << "ext_t not initialized\n" << bsl::here();
-                return bsl::errc_failure;
-            }
+            bsl::expects(ip.is_valid_and_checked());
+            bsl::expects(ip.is_pos());
+            bsl::expects(arg0.is_valid_and_checked());
+            bsl::expects(arg1.is_valid_and_checked());
 
-            if (bsl::unlikely_assert(!ip)) {
-                bsl::error() << "invalid instruction pointer\n" << bsl::here();
-                return bsl::errc_failure;
-            }
+            auto *const pmut_rpt{m_direct_map_rpts.at_if(bsl::to_idx(mut_tls.active_vmid))};
+            bsl::expects(nullptr != pmut_rpt);
 
-            auto *const pmut_rpt{m_direct_map_rpts.at_if(bsl::to_umax(mut_tls.active_vmid))};
-            if (bsl::unlikely_assert(nullptr == pmut_rpt)) {
-                bsl::error() << "invalid active_vmid "           // --
-                             << bsl::hex(mut_tls.active_vmid)    // --
-                             << bsl::endl                        // --
-                             << bsl::here();                     // --
-
-                return bsl::errc_failure;
-            }
-
-            if (mut_tls.active_rpt != pmut_rpt) {
-                if (bsl::unlikely_assert(!pmut_rpt->activate(mut_tls, mut_intrinsic))) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return bsl::errc_failure;
-                }
-
-                mut_tls.active_rpt = pmut_rpt;
+            if (pmut_rpt->is_inactive(mut_tls)) {
+                pmut_rpt->activate(mut_tls, mut_intrinsic);
             }
             else {
                 bsl::touch();
@@ -951,13 +938,7 @@ namespace mk
                 bsl::touch();
             }
 
-            bsl::exit_code const ret{call_ext(ip.get(), mut_tls.sp, arg0.get(), arg1.get())};
-            if (bsl::unlikely(bsl::exit_success != ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
+            return call_ext(ip.get(), mut_tls.sp, arg0.get(), arg1.get());
         }
 
     public:
@@ -968,7 +949,7 @@ namespace mk
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param i the ID for this ext_t
-        ///   @param elf_file the ELF file for this ext_t
+        ///   @param file the ELF file for this ext_t
         ///   @param system_rpt the system RPT provided by the loader
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
@@ -977,49 +958,29 @@ namespace mk
         initialize(
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
-            bsl::safe_uint16 const &i,
-            loader::ext_elf_file_t const *const elf_file,
+            bsl::safe_u16 const &i,
+            loader::ext_elf_file_t const *const file,
             root_page_table_t const &system_rpt) noexcept -> bsl::errc_type
         {
-            bsl::errc_type mut_ret{};
+            bsl::expects(i.is_valid_and_checked());
+            bsl::expects(i != syscall::BF_INVALID_ID);
+            bsl::expects(nullptr != file);
 
-            if (bsl::unlikely_assert(m_id)) {
-                bsl::error() << "ext_t already initialized\n" << bsl::here();
-                return bsl::errc_failure;
-            }
+            validate(file);
+            m_entry_ip = file->e_entry;
 
-            bsl::finally mut_release_on_error{[this, &mut_tls, &mut_page_pool]() noexcept -> void {
-                this->release(mut_tls, mut_page_pool);
-            }};
+            auto const ret{
+                this->initialize_rpt(mut_tls, mut_page_pool, m_main_rpt, system_rpt, file)};
 
-            if (bsl::unlikely_assert(!i)) {
-                bsl::error() << "invalid id\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            if (bsl::unlikely_assert(nullptr == elf_file)) {
-                bsl::error() << "invalid elf_file\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
-            mut_ret = validate(elf_file);
-            if (bsl::unlikely_assert(!mut_ret)) {
+            if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return mut_ret;
+                return ret;
             }
 
-            mut_ret =
-                this->initialize_rpt(mut_tls, mut_page_pool, m_main_rpt, system_rpt, elf_file);
-            if (bsl::unlikely(!mut_ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return mut_ret;
-            }
-
-            m_entry_ip = elf_file->e_entry;
+            m_handle = i;
             m_id = i;
 
-            mut_release_on_error.ignore();
-            return mut_ret;
+            return ret;
         }
 
         /// <!-- description -->
@@ -1032,21 +993,20 @@ namespace mk
         constexpr void
         release(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept
         {
-            m_heap_virt = {HYPERVISOR_EXT_HEAP_POOL_ADDR};
-            m_handle = bsl::safe_uintmax::failure();
-            m_fail_ip = bsl::safe_uintmax::failure();
-            m_vmexit_ip = bsl::safe_uintmax::failure();
-            m_bootstrap_ip = bsl::safe_uintmax::failure();
-            m_entry_ip = bsl::safe_uintmax::failure();
+            m_fail_ip = {};
+            m_vmexit_ip = {};
+            m_bootstrap_ip = {};
+            m_entry_ip = {};
 
-            for (auto const rpt : m_direct_map_rpts) {
-                rpt.data->release(mut_tls, mut_page_pool);
+            for (auto &mut_rpt : m_direct_map_rpts) {
+                mut_rpt.release(mut_tls, mut_page_pool);
             }
 
             m_main_rpt.release(mut_tls, mut_page_pool);
 
-            m_id = bsl::safe_uint16::failure();
             m_started = {};
+            m_handle = {};
+            m_id = {};
         }
 
         /// <!-- description -->
@@ -1056,8 +1016,10 @@ namespace mk
         ///   @return Returns the ID of this ext_t
         ///
         [[nodiscard]] constexpr auto
-        id() const noexcept -> bsl::safe_uint16 const &
+        id() const noexcept -> bsl::safe_u16 const &
         {
+            bsl::ensures(m_id.is_valid_and_checked());
+            bsl::ensures(m_id != syscall::BF_INVALID_ID);
             return m_id;
         }
 
@@ -1068,8 +1030,9 @@ namespace mk
         ///   @return Returns the bootstrap IP for this extension.
         ///
         [[nodiscard]] constexpr auto
-        bootstrap_ip() const noexcept -> bsl::safe_uintmax const &
+        bootstrap_ip() const noexcept -> bsl::safe_umx const &
         {
+            bsl::ensures(m_bootstrap_ip.is_valid_and_checked());
             return m_bootstrap_ip;
         }
 
@@ -1083,8 +1046,11 @@ namespace mk
         ///   @param ip the bootstrap IP to use
         ///
         constexpr void
-        set_bootstrap_ip(bsl::safe_uintmax const &ip) noexcept
+        set_bootstrap_ip(bsl::safe_umx const &ip) noexcept
         {
+            bsl::expects(ip.is_valid_and_checked());
+            bsl::expects(ip.is_pos());
+
             m_bootstrap_ip = ip;
         }
 
@@ -1095,8 +1061,9 @@ namespace mk
         ///   @return Returns the VMExit IP for this extension.
         ///
         [[nodiscard]] constexpr auto
-        vmexit_ip() const noexcept -> bsl::safe_uintmax const &
+        vmexit_ip() const noexcept -> bsl::safe_umx const &
         {
+            bsl::ensures(m_vmexit_ip.is_valid_and_checked());
             return m_vmexit_ip;
         }
 
@@ -1110,8 +1077,11 @@ namespace mk
         ///   @param ip the VMExit IP to use
         ///
         constexpr void
-        set_vmexit_ip(bsl::safe_uintmax const &ip) noexcept
+        set_vmexit_ip(bsl::safe_umx const &ip) noexcept
         {
+            bsl::expects(ip.is_valid_and_checked());
+            bsl::expects(ip.is_pos());
+
             m_vmexit_ip = ip;
         }
 
@@ -1122,8 +1092,9 @@ namespace mk
         ///   @return Returns the fast fail IP for this extension.
         ///
         [[nodiscard]] constexpr auto
-        fail_ip() const noexcept -> bsl::safe_uintmax const &
+        fail_ip() const noexcept -> bsl::safe_umx const &
         {
+            bsl::ensures(m_fail_ip.is_valid_and_checked());
             return m_fail_ip;
         }
 
@@ -1137,8 +1108,11 @@ namespace mk
         ///   @param ip the fail IP to use
         ///
         constexpr void
-        set_fail_ip(bsl::safe_uintmax const &ip) noexcept
+        set_fail_ip(bsl::safe_umx const &ip) noexcept
         {
+            bsl::expects(ip.is_valid_and_checked());
+            bsl::expects(ip.is_pos());
+
             m_fail_ip = ip;
         }
 
@@ -1149,16 +1123,21 @@ namespace mk
         ///   @return Opens a handle and returns the resulting handle
         ///
         [[nodiscard]] constexpr auto
-        open_handle() noexcept -> bsl::safe_uintmax
+        open_handle() noexcept -> bsl::safe_umx
         {
-            if (bsl::unlikely(m_handle)) {
+            if (bsl::unlikely(m_handle != this->id())) {
                 bsl::error() << "handle already opened\n" << bsl::here();
-                return bsl::safe_uintmax::failure();
+                return bsl::safe_umx::failure();
             }
 
-            constexpr auto offset{1_umax};
-            m_handle = bsl::to_umax(this->id()) + offset;
-            return m_handle;
+            /// NOTE:
+            /// - Since the id field cannot be an invalid id, this
+            ///   math will never overflow which is why it is marked
+            ///   as checked.
+            ///
+
+            m_handle = (m_handle + bsl::safe_u16::magic_1()).checked();
+            return bsl::to_umx(m_handle);
         }
 
         /// <!-- description -->
@@ -1167,7 +1146,7 @@ namespace mk
         constexpr void
         close_handle() noexcept
         {
-            m_handle = bsl::safe_uintmax::failure();
+            m_handle = this->id();
         }
 
         /// <!-- description -->
@@ -1179,7 +1158,7 @@ namespace mk
         [[nodiscard]] constexpr auto
         is_handle_open() const noexcept -> bool
         {
-            return !!m_handle;
+            return m_handle != this->id();
         }
 
         /// <!-- description -->
@@ -1190,9 +1169,10 @@ namespace mk
         ///   @return Returns true if provided handle is valid
         ///
         [[nodiscard]] constexpr auto
-        is_handle_valid(bsl::safe_uintmax const &handle) const noexcept -> bool
+        is_handle_valid(bsl::safe_umx const &handle) const noexcept -> bool
         {
-            return handle == m_handle;
+            bsl::expects(handle.is_valid_and_checked());
+            return handle == bsl::to_umx(m_handle);
         }
 
         /// <!-- description -->
@@ -1223,30 +1203,6 @@ namespace mk
         [[nodiscard]] constexpr auto
         alloc_page(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept -> alloc_page_t
         {
-            if (bsl::unlikely_assert(!m_id)) {
-                bsl::error() << "ext_t not initialized\n" << bsl::here();
-                return {bsl::safe_uintmax::failure(), bsl::safe_uintmax::failure()};
-            }
-
-            auto const *const page{
-                mut_page_pool.allocate<page_t>(mut_tls, ALLOCATE_TAG_BF_MEM_OP_ALLOC_PAGE)};
-            if (bsl::unlikely(nullptr == page)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_uintmax::failure(), bsl::safe_uintmax::failure()};
-            }
-
-            auto const page_phys{mut_page_pool.virt_to_phys(page)};
-            if (bsl::unlikely_assert(!page_phys)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_uintmax::failure(), bsl::safe_uintmax::failure()};
-            }
-
-            auto const page_virt{HYPERVISOR_EXT_PAGE_POOL_ADDR + page_phys};
-            if (bsl::unlikely_assert(!page_virt)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_uintmax::failure(), bsl::safe_uintmax::failure()};
-            }
-
             /// NOTE:
             /// - See update_direct_map_rpts for more details on how this
             ///   works, but the TL;DR is, we map the page into VM 0's direct
@@ -1260,20 +1216,8 @@ namespace mk
             ///   would any other physical address.
             ///
 
-            auto const ret{m_direct_map_rpts.front().map_page(
-                mut_tls,
-                mut_page_pool,
-                page_virt,
-                page_phys,
-                MAP_PAGE_READ | MAP_PAGE_WRITE,
-                MAP_PAGE_AUTO_RELEASE_ALLOC_PAGE)};
-
-            if (bsl::unlikely(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_uintmax::failure(), bsl::safe_uintmax::failure()};
-            }
-
-            return {page_virt, page_phys};
+            constexpr auto min_addr{HYPERVISOR_EXT_PAGE_POOL_ADDR};
+            return m_direct_map_rpts.front().allocate_page<min_addr.get()>(mut_tls, mut_page_pool);
         }
 
         /// <!-- description -->
@@ -1286,9 +1230,10 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
-        free_page(bsl::safe_uintmax const &page_virt) noexcept -> bsl::errc_type
+        free_page(bsl::safe_umx const &page_virt) noexcept -> bsl::errc_type
         {
-            bsl::discard(page_virt);
+            bsl::expects(page_virt.is_valid_and_checked());
+            bsl::expects(page_virt.is_pos());
 
             bsl::error() << "free_page is currently unsupported\n" << bsl::here();
             return bsl::errc_failure;
@@ -1312,36 +1257,30 @@ namespace mk
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             huge_pool_t &mut_huge_pool,
-            bsl::safe_uintmax const &size) noexcept -> alloc_huge_t
+            bsl::safe_umx const &size) noexcept -> alloc_huge_t
         {
-            if (bsl::unlikely_assert(!m_id)) {
-                bsl::error() << "ext_t not initialized\n" << bsl::here();
-                return {bsl::safe_uintmax::failure(), bsl::safe_uintmax::failure()};
+            bsl::expects(size.is_valid_and_checked());
+            bsl::expects(size.is_pos());
+
+            auto [mut_bytes, mut_pages]{size_to_page_aligned_bytes(size)};
+            if (bsl::unlikely(mut_bytes.is_poisoned())) {
+                bsl::print<bsl::V>() << bsl::here();
+                return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
             }
 
-            auto const [bytes, pages]{size_to_page_aligned_bytes(size)};
-            if (bsl::unlikely(!pages)) {
+            auto mut_huge{mut_huge_pool.allocate(mut_tls, mut_bytes)};
+            if (bsl::unlikely(mut_huge.is_invalid())) {
                 bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_uintmax::failure(), bsl::safe_uintmax::failure()};
+                return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
             }
 
-            auto const huge{mut_huge_pool.allocate(mut_tls, bytes)};
-            if (bsl::unlikely(!huge)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_uintmax::failure(), bsl::safe_uintmax::failure()};
-            }
+            auto const huge_phys{mut_huge_pool.virt_to_phys(mut_huge.data())};
+            bsl::expects(huge_phys.is_valid_and_checked());
+            bsl::expects(huge_phys.is_pos());
 
-            auto const huge_phys{mut_huge_pool.virt_to_phys(huge.data())};
-            if (bsl::unlikely_assert(!huge_phys)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_uintmax::failure(), bsl::safe_uintmax::failure()};
-            }
-
-            auto const huge_virt{HYPERVISOR_EXT_PAGE_POOL_ADDR + huge_phys};
-            if (bsl::unlikely_assert(!huge_virt)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_uintmax::failure(), bsl::safe_uintmax::failure()};
-            }
+            auto const huge_virt{(HYPERVISOR_EXT_PAGE_POOL_ADDR + huge_phys).checked()};
+            bsl::expects(huge_virt.is_valid_and_checked());
+            bsl::expects(huge_virt.is_pos());
 
             /// NOTE:
             /// - See update_direct_map_rpts for more details on how this
@@ -1356,18 +1295,31 @@ namespace mk
             ///   would any other physical address.
             ///
 
-            for (bsl::safe_uintmax mut_i{}; mut_i < pages; ++mut_i) {
+            /// NOTE:
+            /// - Huge allocations come from the kernel's direct map, which
+            ///   is the same size as the extension's direct map, something
+            ///   that is validated by CMake. As a result, the virtual and
+            ///   physical addresses below can never overflow which is why
+            ///   they are marked as checked().
+            ///
+
+            /// TODO:
+            /// - If the map fails for any reason, this function should
+            ///   return the allocated memory to the huge pool and remove
+            ///   any maps that did succeed. This is not a huge issued right
+            ///   now because we cannot free to the huge pool anyway.
+            ///
+
+            for (bsl::safe_idx mut_i{}; mut_i < mut_pages; ++mut_i) {
+                auto const page_virt{(huge_virt + bsl::to_umx(mut_i)).checked()};
+                auto const page_phys{(huge_phys + bsl::to_umx(mut_i)).checked()};
+
                 auto const ret{m_direct_map_rpts.front().map_page(
-                    mut_tls,
-                    mut_page_pool,
-                    huge_virt + mut_i,
-                    huge_phys + mut_i,
-                    MAP_PAGE_READ | MAP_PAGE_WRITE,
-                    MAP_PAGE_NO_AUTO_RELEASE)};
+                    mut_tls, mut_page_pool, page_virt, page_phys, MAP_PAGE_RW, true)};
 
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
-                    return {bsl::safe_uintmax::failure(), bsl::safe_uintmax::failure()};
+                    return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
                 }
 
                 bsl::touch();
@@ -1386,9 +1338,10 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
-        free_huge(bsl::safe_uintmax const &huge_virt) noexcept -> bsl::errc_type
+        free_huge(bsl::safe_umx const &huge_virt) noexcept -> bsl::errc_type
         {
-            bsl::discard(huge_virt);
+            bsl::expects(huge_virt.is_valid_and_checked());
+            bsl::expects(huge_virt.is_pos());
 
             bsl::error() << "free_huge is currently unsupported\n" << bsl::here();
             return bsl::errc_failure;
@@ -1405,73 +1358,74 @@ namespace mk
         ///     to the heap.
         ///   @return On success, alloc_heap returns the previous address
         ///     virtual address of the heap. If an error occurs, this
-        ///     function returns bsl::safe_uintmax::failure().
+        ///     function returns bsl::safe_umx::failure().
+        ///
+        [[nodiscard]] static constexpr auto
+        alloc_heap(tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_umx const &size) noexcept
+            -> bsl::safe_umx
+        {
+            bsl::discard(mut_tls);
+            bsl::discard(mut_page_pool);
+            bsl::expects(size.is_valid_and_checked());
+            bsl::expects(size.is_pos());
+
+            bsl::error() << "alloc_heap not implemented\n" << bsl::endl;
+            return bsl::safe_umx::failure();
+        }
+
+        /// <!-- description -->
+        ///   @brief Maps a page into the direct map portion of the requested
+        ///     VM's direct map RPT given a physical address to map.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param vmid the ID of the VM to map page_phys to
+        ///   @param page_phys the physical address to map
+        ///   @return Returns the virtual address the physical address was
+        ///     mapped to in the direct map. On failure returns
+        ///     bsl::safe_umx::failure().
         ///
         [[nodiscard]] constexpr auto
-        alloc_heap(
-            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_uintmax const &size) noexcept
-            -> bsl::safe_uintmax
+        map_page_direct(
+            tls_t &mut_tls,
+            page_pool_t &mut_page_pool,
+            bsl::safe_u16 const &vmid,
+            bsl::safe_umx const &page_phys) noexcept -> bsl::safe_umx
         {
-            auto const old_heap_virt{m_heap_virt};
-            constexpr auto pool_addr{HYPERVISOR_EXT_HEAP_POOL_ADDR};
-            constexpr auto pool_size{HYPERVISOR_EXT_HEAP_POOL_SIZE};
+            constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
 
-            if (bsl::unlikely_assert(!m_id)) {
-                bsl::error() << "ext_t not initialized\n" << bsl::here();
-                return bsl::safe_uintmax::failure();
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(bsl::to_umx(vmid) < m_direct_map_rpts.size());
+            bsl::expects(page_phys.is_valid_and_checked());
+            bsl::expects(page_phys.is_pos());
+            bsl::expects(page_phys < min_addr);
+
+            /// NOTE:
+            /// - CMake ensures that the addr and size make sense which is why
+            ///   the following is marked as checked.
+            ///
+
+            auto const page_virt{(page_phys + min_addr).checked()};
+            bsl::expects(page_virt.is_valid_and_checked());
+            bsl::expects(page_virt.is_pos());
+
+            auto *const pmut_direct_map_rpt{m_direct_map_rpts.at_if(bsl::to_idx(vmid))};
+            bsl::expects(nullptr != pmut_direct_map_rpt);
+
+            auto const ret{pmut_direct_map_rpt->map_page(
+                mut_tls, mut_page_pool, page_virt, page_phys, MAP_PAGE_RW)};
+
+            if (ret == bsl::errc_already_exists) {
+                return page_virt;
             }
 
-            auto const [bytes, pages]{size_to_page_aligned_bytes(size)};
-            if (bsl::unlikely(!pages)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uintmax::failure();
-            }
-
-            if (bsl::unlikely((m_heap_virt + bytes) > (pool_addr + pool_size))) {
-                bsl::error() << "the extension's heap pool is out of memory"    // --
-                             << bsl::endl                                       // --
-                             << bsl::here();                                    // --
-
-                return bsl::safe_uintmax::failure();
-            }
-
-            for (bsl::safe_uintmax mut_i{}; mut_i < pages; ++mut_i) {
-                auto const *const page{
-                    mut_page_pool.allocate<page_t>(mut_tls, ALLOCATE_TAG_BF_MEM_OP_ALLOC_HEAP)};
-                if (bsl::unlikely(nullptr == page)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return bsl::safe_uintmax::failure();
-                }
-
-                auto const page_phys{mut_page_pool.virt_to_phys(page)};
-                if (bsl::unlikely_assert(!page_phys)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return bsl::safe_uintmax::failure();
-                }
-
-                auto const ret{m_main_rpt.map_page(
-                    mut_tls,
-                    mut_page_pool,
-                    m_heap_virt,
-                    page_phys,
-                    MAP_PAGE_READ | MAP_PAGE_WRITE,
-                    MAP_PAGE_AUTO_RELEASE_ALLOC_HEAP)};
-
-                if (bsl::unlikely(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return bsl::safe_uintmax::failure();
-                }
-
-                m_heap_virt += HYPERVISOR_PAGE_SIZE;
-            }
-
-            auto const ret{this->update_direct_map_rpts(mut_tls)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uintmax::failure();
+                return bsl::safe_umx::failure();
             }
 
-            return old_heap_virt;
+            return page_virt;
         }
 
         /// <!-- description -->
@@ -1487,42 +1441,83 @@ namespace mk
         ///
         [[nodiscard]] constexpr auto
         map_page_direct(
-            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_uintmax const &page_virt) noexcept
+            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_umx const &page_virt) noexcept
             -> bsl::errc_type
         {
-            constexpr auto dm_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
-            constexpr auto dm_size{HYPERVISOR_EXT_DIRECT_MAP_SIZE};
+            constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
+            constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_DIRECT_MAP_SIZE).checked()};
 
-            if (bsl::unlikely(page_virt < dm_addr)) {
-                return bsl::errc_failure;
-            }
-
-            if (bsl::unlikely(page_virt >= dm_addr + dm_size)) {
-                return bsl::errc_failure;
-            }
+            bsl::expects(bsl::to_umx(mut_tls.active_vmid) < m_direct_map_rpts.size());
+            bsl::expects(page_virt.is_valid_and_checked());
+            bsl::expects(page_virt.is_pos());
+            bsl::expects(page_virt >= min_addr);
+            bsl::expects(page_virt <= max_addr);
 
             auto *const pmut_direct_map_rpt{
-                m_direct_map_rpts.at_if(bsl::to_umax(mut_tls.active_vmid))};
-            if (bsl::unlikely(nullptr == pmut_direct_map_rpt)) {
-                bsl::error() << "invalid active_vmid "           // --
-                             << bsl::hex(mut_tls.active_vmid)    // --
-                             << bsl::endl                        // --
-                             << bsl::here();                     // --
+                m_direct_map_rpts.at_if(bsl::to_idx(mut_tls.active_vmid))};
+            bsl::expects(nullptr != pmut_direct_map_rpt);
 
-                return bsl::errc_failure;
-            }
+            auto const aligned_virt{syscall::bf_page_aligned(page_virt)};
+            auto const aligned_phys{(page_virt - min_addr).checked()};
 
-            auto const ret{pmut_direct_map_rpt->map_page_unaligned(
-                mut_tls,
-                mut_page_pool,
-                page_virt,
-                page_virt - dm_addr,
-                MAP_PAGE_READ | MAP_PAGE_WRITE,
-                MAP_PAGE_NO_AUTO_RELEASE)};
+            /// NOTE:
+            /// - The validity of page_virt is performed above which is why
+            ///   the math below is marked as checked.
+            ///
+
+            auto const ret{pmut_direct_map_rpt->map_page(
+                mut_tls, mut_page_pool, aligned_virt, aligned_phys, MAP_PAGE_RW)};
 
             if (ret == bsl::errc_already_exists) {
                 return bsl::errc_success;
             }
+
+            if (bsl::unlikely(!ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return ret;
+            }
+
+            return ret;
+        }
+
+        /// <!-- description -->
+        ///   @brief Unmaps a page from the direct map portion of the requested
+        ///     VM's direct map RPT given a virtual address to unmap.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param intrinsic the intrinsic_t to use
+        ///   @param vmid the ID of the VM to unmap page_virt to
+        ///   @param page_virt the virtual address to map
+        ///   @param type the type of TLB flush to perform
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        unmap_page_direct(
+            tls_t &mut_tls,
+            page_pool_t &mut_page_pool,
+            intrinsic_t const &intrinsic,
+            bsl::safe_u16 const &vmid,
+            bsl::safe_umx const &page_virt,
+            tlb_flush_type_t const type) noexcept -> bsl::errc_type
+        {
+            constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
+            constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_DIRECT_MAP_SIZE).checked()};
+
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(bsl::to_umx(vmid) < m_direct_map_rpts.size());
+            bsl::expects(page_virt.is_valid_and_checked());
+            bsl::expects(page_virt.is_pos());
+            bsl::expects(page_virt >= min_addr);
+            bsl::expects(page_virt <= max_addr);
+
+            auto *const pmut_direct_map_rpt{m_direct_map_rpts.at_if(bsl::to_idx(vmid))};
+            bsl::expects(nullptr != pmut_direct_map_rpt);
+
+            auto const ret{pmut_direct_map_rpt->unmap_page(
+                mut_tls, mut_page_pool, intrinsic, page_virt, type)};
 
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
@@ -1545,27 +1540,15 @@ namespace mk
         ///
         [[nodiscard]] constexpr auto
         signal_vm_created(
-            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_uint16 const &vmid) noexcept
+            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_u16 const &vmid) noexcept
             -> bsl::errc_type
         {
-            if (bsl::unlikely_assert(!m_id)) {
-                bsl::error() << "ext_t not initialized\n" << bsl::here();
-                return bsl::errc_failure;
-            }
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(bsl::to_umx(vmid) < m_direct_map_rpts.size());
 
-            auto *const pmut_rpt{m_direct_map_rpts.at_if(bsl::to_umax(vmid))};
-            if (bsl::unlikely_assert(nullptr == pmut_rpt)) {
-                bsl::error() << "vmid "                                                  // --
-                             << bsl::hex(vmid)                                           // --
-                             << " is invalid or greater than the HYPERVISOR_MAX_VMS "    // --
-                             << bsl::hex(HYPERVISOR_MAX_VMS)                             // --
-                             << bsl::endl                                                // --
-                             << bsl::here();                                             // --
+            auto const ret{this->initialize_direct_map_rpt(
+                mut_tls, mut_page_pool, m_direct_map_rpts.at_if(bsl::to_idx(vmid)))};
 
-                return bsl::errc_failure;
-            }
-
-            auto const ret{this->initialize_direct_map_rpt(mut_tls, mut_page_pool, *pmut_rpt)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
@@ -1582,33 +1565,15 @@ namespace mk
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param vmid the VMID of the VM that was destroyed.
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] constexpr auto
+        constexpr void
         signal_vm_destroyed(
-            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_uint16 const &vmid) noexcept
-            -> bsl::errc_type
+            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_u16 const &vmid) noexcept
         {
-            if (bsl::unlikely_assert(!m_id)) {
-                bsl::error() << "ext_t not initialized\n" << bsl::here();
-                return bsl::errc_failure;
-            }
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(bsl::to_umx(vmid) < m_direct_map_rpts.size());
 
-            auto *const pmut_rpt{m_direct_map_rpts.at_if(bsl::to_umax(vmid))};
-            if (bsl::unlikely_assert(nullptr == pmut_rpt)) {
-                bsl::error() << "vmid "                                                  // --
-                             << bsl::hex(vmid)                                           // --
-                             << " is invalid or greater than the HYPERVISOR_MAX_VMS "    // --
-                             << bsl::hex(HYPERVISOR_MAX_VMS)                             // --
-                             << bsl::endl                                                // --
-                             << bsl::here();                                             // --
-
-                return bsl::errc_failure;
-            }
-
-            pmut_rpt->release(mut_tls, mut_page_pool);
-            return bsl::errc_success;
+            m_direct_map_rpts.at_if(bsl::to_idx(vmid))->release(mut_tls, mut_page_pool);
         }
 
         /// <!-- description -->
@@ -1625,7 +1590,7 @@ namespace mk
         [[nodiscard]] constexpr auto
         start(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept -> bsl::errc_type
         {
-            auto const arg{bsl::to_umax(syscall::BF_ALL_SPECS_SUPPORTED_VAL)};
+            auto const arg{bsl::to_umx(syscall::BF_ALL_SPECS_SUPPORTED_VAL)};
             auto const ret{this->execute(mut_tls, mut_intrinsic, m_entry_ip, arg)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
@@ -1650,12 +1615,16 @@ namespace mk
         [[nodiscard]] constexpr auto
         bootstrap(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept -> bsl::errc_type
         {
-            if (bsl::unlikely(!m_bootstrap_ip)) {
-                bsl::error() << "a bootstrap handler was never registered\n" << bsl::here();
+            if (bsl::unlikely(m_bootstrap_ip.is_zero())) {
+                bsl::error() << "a bootstrap handler was not registered for ext "    // --
+                             << bsl::hex(m_id)                                       // --
+                             << bsl::endl                                            // --
+                             << bsl::here();                                         // --
+
                 return bsl::errc_failure;
             }
 
-            auto const arg{bsl::to_umax(mut_tls.ppid)};
+            auto const arg{bsl::to_umx(mut_tls.ppid)};
             auto const ret{this->execute(mut_tls, mut_intrinsic, m_bootstrap_ip, arg)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
@@ -1679,11 +1648,10 @@ namespace mk
         ///
         [[nodiscard]] constexpr auto
         vmexit(
-            tls_t &mut_tls,
-            intrinsic_t &mut_intrinsic,
-            bsl::safe_uintmax const &exit_reason) noexcept -> bsl::errc_type
+            tls_t &mut_tls, intrinsic_t &mut_intrinsic, bsl::safe_umx const &exit_reason) noexcept
+            -> bsl::errc_type
         {
-            auto const arg0{bsl::to_umax(mut_tls.active_vpsid)};
+            auto const arg0{bsl::to_umx(mut_tls.active_vsid)};
             auto const arg1{exit_reason};
 
             auto const ret{this->execute(mut_tls, mut_intrinsic, m_vmexit_ip, arg0, arg1)};
@@ -1709,8 +1677,8 @@ namespace mk
         [[nodiscard]] constexpr auto
         fail(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept -> bsl::errc_type
         {
-            auto const arg0{syscall::BF_STATUS_FAILURE_UNKNOWN};
-            auto const ret{this->execute(mut_tls, mut_intrinsic, m_fail_ip, arg0)};
+            auto const arg{syscall::BF_STATUS_FAILURE_UNKNOWN};
+            auto const ret{this->execute(mut_tls, mut_intrinsic, m_fail_ip, arg)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
@@ -1724,17 +1692,11 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
-        ///   @param page_pool the page_pool_t to use
         ///
         constexpr void
-        dump(tls_t const &tls, page_pool_t const &page_pool) const noexcept
+        dump(tls_t const &tls) const noexcept
         {
             if constexpr (BSL_DEBUG_LEVEL == bsl::CRITICAL_ONLY) {
-                return;
-            }
-
-            if (bsl::unlikely_assert(!m_id)) {
-                bsl::print() << "[error]" << bsl::endl;
                 return;
             }
 
@@ -1805,7 +1767,7 @@ namespace mk
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<14s", "bootstrap ip "};
             bsl::print() << bsl::ylw << "| ";
-            if (m_bootstrap_ip) {
+            if (m_bootstrap_ip.is_pos()) {
                 bsl::print() << bsl::rst << bsl::hex(m_bootstrap_ip) << ' ';
             }
             else {
@@ -1820,7 +1782,7 @@ namespace mk
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<14s", "vmexit ip "};
             bsl::print() << bsl::ylw << "| ";
-            if (m_vmexit_ip) {
+            if (m_vmexit_ip.is_pos()) {
                 bsl::print() << bsl::rst << bsl::hex(m_vmexit_ip) << ' ';
             }
             else {
@@ -1835,7 +1797,7 @@ namespace mk
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<14s", "fail ip "};
             bsl::print() << bsl::ylw << "| ";
-            if (m_fail_ip) {
+            if (m_fail_ip.is_pos()) {
                 bsl::print() << bsl::rst << bsl::hex(m_fail_ip) << ' ';
             }
             else {
@@ -1850,26 +1812,11 @@ namespace mk
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<14s", "handle "};
             bsl::print() << bsl::ylw << "| ";
-            if (m_handle) {
+            if (m_handle.is_pos()) {
                 bsl::print() << bsl::rst << bsl::hex(m_handle) << ' ';
             }
             else {
                 bsl::print() << bsl::red << bsl::fmt{"^19s", "not opened "};
-            }
-            bsl::print() << bsl::ylw << "| ";
-            bsl::print() << bsl::rst << bsl::endl;
-
-            /// Heap Cursor
-            ///
-
-            bsl::print() << bsl::ylw << "| ";
-            bsl::print() << bsl::rst << bsl::fmt{"<14s", "heap cursor "};
-            bsl::print() << bsl::ylw << "| ";
-            if (!m_heap_virt.is_zero()) {
-                bsl::print() << bsl::rst << bsl::hex(m_heap_virt) << ' ';
-            }
-            else {
-                bsl::print() << bsl::red << bsl::fmt{"^19s", "not allocated "};
             }
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;
@@ -1879,26 +1826,6 @@ namespace mk
 
             bsl::print() << bsl::ylw << "+------------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
-
-            auto const *const direct_map_rpt{
-                m_direct_map_rpts.at_if(bsl::to_umax(tls.active_vmid))};
-            if (bsl::unlikely(nullptr == direct_map_rpt)) {
-                bsl::error() << "invalid active_vmid "       // --
-                             << bsl::hex(tls.active_vmid)    // --
-                             << bsl::endl                    // --
-                             << bsl::here();                 // --
-
-                return;
-            }
-
-            bsl::print() << bsl::rst << bsl::endl;
-
-            bsl::print() << bsl::mag << "ext [";
-            bsl::print() << bsl::rst << bsl::hex(m_id);
-            bsl::print() << bsl::mag << "] direct map dump: ";
-            bsl::print() << bsl::rst << bsl::endl;
-
-            direct_map_rpt->dump(page_pool);
         }
     };
 }

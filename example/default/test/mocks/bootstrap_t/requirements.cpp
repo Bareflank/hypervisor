@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../mocks/bootstrap_t.hpp"
+#include "../../../MOCK/bootstrap_t.hpp"
 
 #include <bsl/discard.hpp>
 #include <bsl/ut.hpp>

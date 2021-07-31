@@ -25,7 +25,7 @@
 #ifndef RETURN_TO_MK_HPP
 #define RETURN_TO_MK_HPP
 
-#include <bsl/exit_code.hpp>
+#include <bsl/errc_type.hpp>
 
 namespace mk
 {
@@ -36,7 +36,7 @@ namespace mk
     ///   @param status the status code from the extension to forward to
     ///     the microkernel
     ///
-    extern "C" void return_to_mk(bsl::exit_code const status) noexcept;
+    extern "C" void return_to_mk(bsl::errc_type const status) noexcept;
 }
 
 #endif

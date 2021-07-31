@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../../../mocks/x64/amd/intrinsic_t.hpp"
+#include "../../../../../MOCK/x64/amd/intrinsic_t.hpp"
 
 #include <bsl/discard.hpp>
 #include <bsl/ut.hpp>
@@ -51,10 +51,10 @@ main() noexcept -> bsl::exit_code
         bsl::ut_given{} = []() noexcept {
             example::intrinsic_t mut_intrinsic{};
             example::intrinsic_t const intrinsic{};
-            bsl::safe_uintmax mut_rax{};
-            bsl::safe_uintmax mut_rbx{};
-            bsl::safe_uintmax mut_rcx{};
-            bsl::safe_uintmax mut_rdx{};
+            bsl::safe_umx mut_rax{};
+            bsl::safe_umx mut_rbx{};
+            bsl::safe_umx mut_rcx{};
+            bsl::safe_umx mut_rdx{};
             bsl::ut_then{} = []() noexcept {
                 static_assert(noexcept(example::intrinsic_t{}));
 

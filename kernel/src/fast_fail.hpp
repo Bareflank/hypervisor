@@ -30,7 +30,6 @@
 #include <tls_t.hpp>
 
 #include <bsl/debug.hpp>
-#include <bsl/exit_code.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
@@ -45,12 +44,12 @@ namespace mk
     ///   @param mut_tls the current TLS block
     ///   @param mut_intrinsic the intrinsic_t to use
     ///   @param pmut_ext the ext_t to handle the fail
-    ///   @return Returns bsl::exit_success if the fail was handled,
-    ///     bsl::exit_failure otherwise.
+    ///   @return Returns bsl::errc_success if the fail was handled,
+    ///     bsl::errc_failure otherwise.
     ///
     [[nodiscard]] constexpr auto
     fast_fail(tls_t &mut_tls, intrinsic_t &mut_intrinsic, ext_t *const pmut_ext) noexcept
-        -> bsl::exit_code
+        -> bsl::errc_type
     {
         bsl::print() << bsl::red << "\nfast failing:";
         bsl::print() << bsl::rst << bsl::endl;
@@ -59,13 +58,13 @@ namespace mk
             auto const ret{pmut_ext->fail(mut_tls, mut_intrinsic)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return bsl::exit_failure;
+                return bsl::errc_failure;
             }
 
-            return bsl::exit_success;
+            return bsl::errc_success;
         }
 
-        return bsl::exit_failure;
+        return bsl::errc_failure;
     }
 }
 

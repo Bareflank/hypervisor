@@ -105,7 +105,7 @@ namespace example
             };
         };
 
-        bsl::ut_scenario{"dispatch nmi bf_vps_op_read fails for proc ctls"} = []() noexcept {
+        bsl::ut_scenario{"dispatch nmi bf_vs_op_read fails for proc ctls"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 vmexit_t mut_vmexit{};
                 gs_t mut_gs{};
@@ -113,10 +113,10 @@ namespace example
                 constexpr auto exit_reason{0_u64};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_vmexit.initialize(mut_gs, {}, mut_sys, {}, {}, {}));
-                    mut_sys.set_bf_vps_op_read(
+                    mut_sys.set_bf_vs_op_read(
                         {},
                         syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls,
-                        bsl::safe_uint64::failure());
+                        bsl::safe_u64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_vmexit.dispatch({}, {}, mut_sys, {}, {}, {}, {}, exit_reason));
@@ -126,7 +126,7 @@ namespace example
             };
         };
 
-        bsl::ut_scenario{"dispatch nmi bf_vps_op_write fails for proc ctls"} = []() noexcept {
+        bsl::ut_scenario{"dispatch nmi bf_vs_op_write fails for proc ctls"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 vmexit_t mut_vmexit{};
                 gs_t mut_gs{};
@@ -135,7 +135,7 @@ namespace example
                 constexpr auto val{0x400000_u64};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_vmexit.initialize(mut_gs, {}, mut_sys, {}, {}, {}));
-                    mut_sys.set_bf_vps_op_write(
+                    mut_sys.set_bf_vs_op_write(
                         {},
                         syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls,
                         val,
@@ -166,7 +166,7 @@ namespace example
             };
         };
 
-        bsl::ut_scenario{"dispatch nmi window bf_vps_op_read fails for proc ctls"} = []() noexcept {
+        bsl::ut_scenario{"dispatch nmi window bf_vs_op_read fails for proc ctls"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 vmexit_t mut_vmexit{};
                 gs_t mut_gs{};
@@ -174,10 +174,10 @@ namespace example
                 constexpr auto exit_reason{0x8_u64};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_vmexit.initialize(mut_gs, {}, mut_sys, {}, {}, {}));
-                    mut_sys.set_bf_vps_op_read(
+                    mut_sys.set_bf_vs_op_read(
                         {},
                         syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls,
-                        bsl::safe_uint64::failure());
+                        bsl::safe_u64::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_vmexit.dispatch({}, {}, mut_sys, {}, {}, {}, {}, exit_reason));
@@ -187,7 +187,7 @@ namespace example
             };
         };
 
-        bsl::ut_scenario{"dispatch nmi bf_vps_op_write fails for proc ctls"} = []() noexcept {
+        bsl::ut_scenario{"dispatch nmi bf_vs_op_write fails for proc ctls"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 vmexit_t mut_vmexit{};
                 gs_t mut_gs{};
@@ -196,7 +196,7 @@ namespace example
                 constexpr auto val{0x0_u64};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_vmexit.initialize(mut_gs, {}, mut_sys, {}, {}, {}));
-                    mut_sys.set_bf_vps_op_write(
+                    mut_sys.set_bf_vs_op_write(
                         {},
                         syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls,
                         val,
@@ -210,7 +210,7 @@ namespace example
             };
         };
 
-        bsl::ut_scenario{"dispatch nmi bf_vps_op_write fails for int info"} = []() noexcept {
+        bsl::ut_scenario{"dispatch nmi bf_vs_op_write fails for int info"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 vmexit_t mut_vmexit{};
                 gs_t mut_gs{};
@@ -219,7 +219,7 @@ namespace example
                 constexpr auto val{0x80000202_u64};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_vmexit.initialize(mut_gs, {}, mut_sys, {}, {}, {}));
-                    mut_sys.set_bf_vps_op_write(
+                    mut_sys.set_bf_vs_op_write(
                         {},
                         syscall::bf_reg_t::bf_reg_t_vmentry_interrupt_information_field,
                         val,
@@ -282,7 +282,7 @@ namespace example
                     bsl::ut_required_step(mut_vmexit.initialize(mut_gs, {}, mut_sys, {}, {}, {}));
                     mut_sys.bf_tls_set_rax(bsl::to_u64(loader::CPUID_COMMAND_EAX));
                     mut_sys.bf_tls_set_rcx(bsl::to_u64(loader::CPUID_COMMAND_ECX_STOP));
-                    mut_sys.bf_tls_set_ppid(online_pps - 1_u16);
+                    mut_sys.bf_tls_set_ppid((online_pps - 1_u16).checked());
                     mut_sys.bf_tls_set_online_pps(online_pps);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
@@ -293,7 +293,7 @@ namespace example
             };
         };
 
-        bsl::ut_scenario{"dispatch cpuid stop bf_vps_op_advance_ip fails"} = []() noexcept {
+        bsl::ut_scenario{"dispatch cpuid stop bf_vs_op_advance_ip fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 vmexit_t mut_vmexit{};
                 gs_t mut_gs{};
@@ -305,7 +305,7 @@ namespace example
                     mut_sys.bf_tls_set_rax(bsl::to_u64(loader::CPUID_COMMAND_EAX));
                     mut_sys.bf_tls_set_rcx(bsl::to_u64(loader::CPUID_COMMAND_ECX_STOP));
                     mut_sys.bf_tls_set_online_pps(online_pps);
-                    mut_sys.set_bf_vps_op_advance_ip({}, bsl::errc_failure);
+                    mut_sys.set_bf_vs_op_advance_ip({}, bsl::errc_failure);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_vmexit.dispatch({}, {}, mut_sys, {}, {}, {}, {}, exit_reason));

@@ -37,10 +37,13 @@
 
 namespace mk
 {
+    /// @brief ext_t prototype
+    class ext_t;
+
     /// @brief defines the size of the reserved1 field in the tls_t
-    constexpr auto TLS_T_RESERVED1_SIZE{0x030_umax};
+    constexpr auto TLS_T_RESERVED1_SIZE{0x030_umx};
     /// @brief defines the size of the reserved2 field in the tls_t
-    constexpr auto TLS_T_RESERVED2_SIZE{0x088_umax};
+    constexpr auto TLS_T_RESERVED2_SIZE{0x088_umx};
 
     /// IMPORTANT:
     /// - If the size of the TLS is changed, the mk_main_entry will need to
@@ -50,7 +53,7 @@ namespace mk
     ///
 
     /// @brief defines the the total size of the TLS block
-    constexpr auto TLS_T_SIZE{0x300_umax};
+    constexpr auto TLS_T_SIZE{0x300_umx};
 
     /// @struct mk::tls_t
     ///
@@ -67,144 +70,144 @@ namespace mk
         /// --------------------------------------------------------------------
 
         /// @brief stores the value of rbx for the microkernel (0x000)
-        bsl::uintmax mk_rbx;
+        bsl::uintmx mk_rbx;
         /// @brief stores the value of rbp for the microkernel (0x008)
-        bsl::uintmax mk_rbp;
+        bsl::uintmx mk_rbp;
         /// @brief stores the value of r12 for the microkernel (0x010)
-        bsl::uintmax mk_r12;
+        bsl::uintmx mk_r12;
         /// @brief stores the value of r13 for the microkernel (0x018)
-        bsl::uintmax mk_r13;
+        bsl::uintmx mk_r13;
         /// @brief stores the value of r14 for the microkernel (0x020)
-        bsl::uintmax mk_r14;
+        bsl::uintmx mk_r14;
         /// @brief stores the value of r15 for the microkernel (0x028)
-        bsl::uintmax mk_r15;
+        bsl::uintmx mk_r15;
 
         /// --------------------------------------------------------------------
         /// Extension State
         /// --------------------------------------------------------------------
 
         /// @brief RAX, stores the extension's syscall (0x030)
-        bsl::uintmax ext_syscall;
+        bsl::uintmx ext_syscall;
         /// @brief RBX, reserved (0x038)
-        bsl::uintmax reserved_reg1;
+        bsl::uintmx reserved_reg1;
         /// @brief RCX, reserved (0x040)
-        bsl::uintmax reserved_reg2;
+        bsl::uintmx reserved_reg2;
         /// @brief RDX, stores the value of REG2 for the extension (0x048)
-        bsl::uintmax ext_reg2;
+        bsl::uintmx ext_reg2;
         /// @brief RBP, reserved (0x050)
-        bsl::uintmax reserved_reg3;
+        bsl::uintmx reserved_reg3;
         /// @brief RSI, stores the value of REG1 for the extension (0x058)
-        bsl::uintmax ext_reg1;
+        bsl::uintmx ext_reg1;
         /// @brief RDI, stores the value of REG0 for the extension (0x060)
-        bsl::uintmax ext_reg0;
+        bsl::uintmx ext_reg0;
         /// @brief R8, stores the value of REG4 for the extension (0x068)
-        bsl::uintmax ext_reg4;
+        bsl::uintmx ext_reg4;
         /// @brief R9, stores the value of REG5 for the extension (0x070)
-        bsl::uintmax ext_reg5;
+        bsl::uintmx ext_reg5;
         /// @brief R10, stores the value of REG3 for the extension (0x078)
-        bsl::uintmax ext_reg3;
+        bsl::uintmx ext_reg3;
         /// @brief R11, reserved (0x080)
-        bsl::uintmax reserved_reg4;
+        bsl::uintmx reserved_reg4;
         /// @brief R12, reserved (0x088)
-        bsl::uintmax reserved_reg5;
+        bsl::uintmx reserved_reg5;
         /// @brief R13, reserved (0x090)
-        bsl::uintmax reserved_reg6;
+        bsl::uintmx reserved_reg6;
         /// @brief R14, reserved (0x098)
-        bsl::uintmax reserved_reg7;
+        bsl::uintmx reserved_reg7;
         /// @brief R15, reserved (0x0A0)
-        bsl::uintmax reserved_reg8;
+        bsl::uintmx reserved_reg8;
         /// @brief RSP, reserved (0x0A8)
-        bsl::uintmax reserved_reg9;
+        bsl::uintmx reserved_reg9;
 
         /// --------------------------------------------------------------------
         /// ESR State
         /// --------------------------------------------------------------------
 
         /// @brief stores the value of rax for the ESR (0x0B0)
-        bsl::uintmax esr_rax;
+        bsl::uintmx esr_rax;
         /// @brief stores the value of rbx for the ESR (0x0B8)
-        bsl::uintmax esr_rbx;
+        bsl::uintmx esr_rbx;
         /// @brief stores the value of rcx for the ESR (0x0C0)
-        bsl::uintmax esr_rcx;
+        bsl::uintmx esr_rcx;
         /// @brief stores the value of rdx for the ESR (0x0C8)
-        bsl::uintmax esr_rdx;
+        bsl::uintmx esr_rdx;
         /// @brief stores the value of rbp for the ESR (0x0D0)
-        bsl::uintmax esr_rbp;
+        bsl::uintmx esr_rbp;
         /// @brief stores the value of rsi for the ESR (0x0D8)
-        bsl::uintmax esr_rsi;
+        bsl::uintmx esr_rsi;
         /// @brief stores the value of rdi for the ESR (0x0E0)
-        bsl::uintmax esr_rdi;
+        bsl::uintmx esr_rdi;
         /// @brief stores the value of r8 for the ESR (0x0E8)
-        bsl::uintmax esr_r8;
+        bsl::uintmx esr_r8;
         /// @brief stores the value of r9 for the ESR (0x0F0)
-        bsl::uintmax esr_r9;
+        bsl::uintmx esr_r9;
         /// @brief stores the value of r10 for the ESR (0x0F8)
-        bsl::uintmax esr_r10;
+        bsl::uintmx esr_r10;
         /// @brief stores the value of r11 for the ESR (0x100)
-        bsl::uintmax esr_r11;
+        bsl::uintmx esr_r11;
         /// @brief stores the value of r12 for the ESR (0x108)
-        bsl::uintmax esr_r12;
+        bsl::uintmx esr_r12;
         /// @brief stores the value of r13 for the ESR (0x110)
-        bsl::uintmax esr_r13;
+        bsl::uintmx esr_r13;
         /// @brief stores the value of r14 for the ESR (0x118)
-        bsl::uintmax esr_r14;
+        bsl::uintmx esr_r14;
         /// @brief stores the value of r15 for the ESR (0x120)
-        bsl::uintmax esr_r15;
+        bsl::uintmx esr_r15;
         /// @brief stores the value of rip for the ESR (0x128)
-        bsl::uintmax esr_ip;
+        bsl::uintmx esr_ip;
         /// @brief stores the value of rsp for the ESR (0x130)
-        bsl::uintmax esr_sp;
+        bsl::uintmx esr_sp;
 
         /// @brief stores the value of the ESR vector (0x138)
-        bsl::uintmax esr_vector;
+        bsl::uintmx esr_vector;
         /// @brief stores the value of the ESR error code (0x140)
-        bsl::uintmax esr_error_code;
+        bsl::uintmx esr_error_code;
 
         /// @brief stores the value of cr0 for the ESR (0x148)
-        bsl::uintmax esr_cr0;
+        bsl::uintmx esr_cr0;
         /// @brief stores the value of cr2 for the ESR (0x150)
-        bsl::uintmax esr_pf_addr;
+        bsl::uintmx esr_pf_addr;
         /// @brief stores the value of cr3 for the ESR (0x158)
-        bsl::uintmax esr_cr3;
+        bsl::uintmx esr_cr3;
         /// @brief stores the value of cr4 for the ESR (0x160)
-        bsl::uintmax esr_cr4;
+        bsl::uintmx esr_cr4;
 
         /// @brief stores the value of cs for the ESR (0x168)
-        bsl::uintmax esr_cs;
+        bsl::uintmx esr_cs;
         /// @brief stores the value of ss for the ESR (0x170)
-        bsl::uintmax esr_ss;
+        bsl::uintmx esr_ss;
 
         /// @brief stores the value of ss for the ESR (0x178)
-        bsl::uintmax esr_rflags;
+        bsl::uintmx esr_rflags;
 
         /// --------------------------------------------------------------------
         /// Fast Fail Information
         /// --------------------------------------------------------------------
 
         /// @brief stores the current fast fail address (0x180)
-        bsl::uintmax current_fast_fail_ip;
+        bsl::uintmx current_fast_fail_ip;
         /// @brief stores the current fast fail stack (0x188)
-        bsl::uintmax current_fast_fail_sp;
+        bsl::uintmx current_fast_fail_sp;
 
         /// @brief stores the mk_main fast fail address (0x190)
-        bsl::uintmax mk_main_fast_fail_ip;
+        bsl::uintmx mk_main_fast_fail_ip;
         /// @brief stores the mk_main fast fail stack (0x198)
-        bsl::uintmax mk_main_fast_fail_sp;
+        bsl::uintmx mk_main_fast_fail_sp;
 
         /// @brief stores the call_ext fast fail address (0x1A0)
-        bsl::uintmax call_ext_fast_fail_ip;
+        bsl::uintmx call_ext_fast_fail_ip;
         /// @brief stores the call_ext fast fail stack (0x1A8)
-        bsl::uintmax call_ext_fast_fail_sp;
+        bsl::uintmx call_ext_fast_fail_sp;
 
         /// @brief stores the dispatch_syscall fast fail address (0x1B0)
-        bsl::uintmax dispatch_syscall_fast_fail_ip;
+        bsl::uintmx dispatch_syscall_fast_fail_ip;
         /// @brief stores the dispatch_syscall fast fail stack (0x1B8)
-        bsl::uintmax dispatch_syscall_fast_fail_sp;
+        bsl::uintmx dispatch_syscall_fast_fail_sp;
 
         /// @brief stores the vmexit loop address (0x1C0)
-        bsl::uintmax vmexit_loop_ip;
+        bsl::uintmx vmexit_loop_ip;
         /// @brief stores the vmexit loop stack (0x1C8)
-        bsl::uintmax vmexit_loop_sp;
+        bsl::uintmx vmexit_loop_sp;
 
         /// @brief reserve the rest of the TLS block for later use.
         bsl::array<bsl::uint8, TLS_T_RESERVED1_SIZE.get()> reserved1;
@@ -220,17 +223,17 @@ namespace mk
         bsl::uint16 ppid;
         /// @brief stores the total number of online PPs (0x20A)
         bsl::uint16 online_pps;
-        /// @brief stores the VPSID whose VMCS is loaded on Intel (0x20C)
-        bsl::uint16 loaded_vpsid;
+        /// @brief stores the VSID whose VMCS is loaded on Intel (0x20C)
+        bsl::uint16 loaded_vsid;
         /// @brief reserved (0x20E)
         bsl::uint16 reserved_padding0;
 
         /// @brief stores the currently active extension (0x210)
-        void *ext;
+        ext_t *ext;
         /// @brief stores the extension registered for VMExits (0x218)
-        void *ext_vmexit;
+        ext_t *ext_vmexit;
         /// @brief stores the extension registered for fast fail events (0x220)
-        void *ext_fail;
+        ext_t *ext_fail;
 
         /// @brief stores the loader provided state for the microkernel (0x228)
         loader::state_save_t *mk_state;
@@ -243,24 +246,24 @@ namespace mk
         bsl::uint16 active_vmid;
         /// @brief stores the currently active VPID (0x23C)
         bsl::uint16 active_vpid;
-        /// @brief stores the currently active VPSID (0x23E)
-        bsl::uint16 active_vpsid;
+        /// @brief stores the currently active VSID (0x23E)
+        bsl::uint16 active_vsid;
 
         /// @brief stores the sp used by extensions for callbacks (0x240)
-        bsl::uintmax sp;
+        bsl::uintmx sp;
         /// @brief stores the tps used by extensions for callbacks (0x248)
-        bsl::uintmax tp;
+        bsl::uintmx tp;
 
         /// @brief used to store a return address for unsafe ops (0x250)
-        bsl::uintmax unsafe_rip;
+        bsl::uintmx unsafe_rip;
 
         /// @brief used to signal NMIs are not safe (0x258)
-        bsl::uintmax nmi_lock;
+        bsl::uintmx nmi_lock;
         /// @brief used to singal an NMI has fired (0x260)
-        bsl::uintmax nmi_pending;
+        bsl::uintmx nmi_pending;
 
         /// @brief stores whether or not the first launch succeeded (0x268)
-        bsl::uintmax first_launch_succeeded;
+        bsl::uintmx first_launch_succeeded;
 
         /// @brief stores the currently active root page table (0x270)
         void *active_rpt;

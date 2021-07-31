@@ -37,9 +37,9 @@ namespace example
     ///   @return Returns true if val is correct
     ///
     [[nodiscard]] auto
-    runtime_only_function_that_knows_all(bsl::safe_uintmax const &val) noexcept -> bool
+    runtime_only_function_that_knows_all(bsl::safe_umx const &val) noexcept -> bool
     {
-        constexpr auto the_answer_to_everything{42_umax};
+        constexpr auto the_answer_to_everything{42_umx};
         return val == the_answer_to_everything;
     }
 
@@ -100,19 +100,19 @@ namespace example
 
         bsl::ut_scenario{"verify +="} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                constexpr auto data1{42_umax};
-                bsl::safe_uintmax mut_data2{};
+                constexpr auto data1{42_umx};
+                bsl::safe_umx mut_data2{};
                 bsl::ut_when{} = [&]() noexcept {
                     mut_data2 += data1;
                     bsl::ut_then{"adds correctly"} = [&]() noexcept {
-                        bsl::ut_check(mut_data2 == data1);
+                        bsl::ut_check(mut_data2.checked() == data1);
                     };
                 };
             };
 
             bsl::ut_given_at_runtime{} = []() noexcept {
-                constexpr auto data1{42_umax};
-                auto mut_data2{bsl::safe_uintmax::failure()};
+                constexpr auto data1{42_umx};
+                auto mut_data2{bsl::safe_umx::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     mut_data2 += data1;
                     bsl::ut_then{"preserves the error flag"} = [&]() noexcept {
@@ -134,12 +134,12 @@ namespace example
 
         bsl::ut_scenario{"verify += adds correctly"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                constexpr auto data1{42_umax};
-                bsl::safe_uintmax mut_data2{};
+                constexpr auto data1{42_umx};
+                bsl::safe_umx mut_data2{};
                 bsl::ut_when{} = [&]() noexcept {
                     mut_data2 += data1;
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_data2 == data1);
+                        bsl::ut_check(mut_data2.checked() == data1);
                     };
                 };
             };
@@ -147,8 +147,8 @@ namespace example
 
         bsl::ut_scenario{"verify += preserves the error flag"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                constexpr auto data1{42_umax};
-                auto mut_data2{bsl::safe_uintmax::failure()};
+                constexpr auto data1{42_umx};
+                auto mut_data2{bsl::safe_umx::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     mut_data2 += data1;
                     bsl::ut_then{} = [&]() noexcept {
@@ -169,14 +169,14 @@ namespace example
 
         bsl::ut_scenario{"test something at runtime only"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                constexpr auto val{42_umax};
+                constexpr auto val{42_umx};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(runtime_only_function_that_knows_all(val));
                 };
             };
 
             bsl::ut_given_at_runtime{} = []() noexcept {
-                constexpr auto val{23_umax};
+                constexpr auto val{23_umx};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!runtime_only_function_that_knows_all(val));
                 };
@@ -195,8 +195,8 @@ namespace example
 
         bsl::ut_scenario{"verify += preserves the error flag"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                constexpr auto data1{42_umax};
-                auto mut_data2{bsl::safe_uintmax::failure()};
+                constexpr auto data1{42_umx};
+                auto mut_data2{bsl::safe_umx::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(!mut_data2);
                     mut_data2 += data1;
@@ -221,19 +221,19 @@ namespace example
 
         bsl::ut_scenario{"verify two different conditions"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                constexpr auto data1{42_umax};
-                bsl::safe_uintmax mut_data2{};
+                constexpr auto data1{42_umx};
+                bsl::safe_umx mut_data2{};
                 bsl::ut_when{} = [&, mut_data2]() mutable noexcept {
                     mut_data2 += data1;
                     bsl::ut_then{} = [&, mut_data2]() noexcept {
-                        bsl::ut_check(mut_data2 == data1);
+                        bsl::ut_check(mut_data2.checked() == data1);
                     };
                 };
 
                 bsl::ut_when{} = [&, mut_data2]() mutable noexcept {
                     mut_data2 += (data1 * data1);
                     bsl::ut_then{} = [&, mut_data2]() noexcept {
-                        bsl::ut_check(mut_data2 == (data1 * data1));
+                        bsl::ut_check(mut_data2.checked() == (data1 * data1).checked());
                     };
                 };
             };

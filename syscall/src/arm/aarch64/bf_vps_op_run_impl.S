@@ -26,9 +26,9 @@
 
     .text
 
-    .globl  bf_vps_op_run_impl
-    .type   bf_vps_op_run_impl, @function
-bf_vps_op_run_impl:
+    .globl  bf_vs_op_run_impl
+    .type   bf_vs_op_run_impl, @function
+bf_vs_op_run_impl:
 
 /*
     mov r10, rcx
@@ -38,4 +38,4 @@ bf_vps_op_run_impl:
 */
     ret
 
-    .size bf_vps_op_run_impl, .-bf_vps_op_run_impl
+    .size bf_vs_op_run_impl, .-bf_vs_op_run_impl

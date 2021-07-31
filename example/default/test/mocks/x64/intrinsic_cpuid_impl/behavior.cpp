@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../../mocks/x64/intrinsic_cpuid_impl.hpp"
+#include "../../../../MOCK/x64/intrinsic_cpuid_impl.hpp"
 
 #include <bsl/convert.hpp>
 #include <bsl/ut.hpp>
@@ -44,10 +44,10 @@ namespace example
         bsl::ut_scenario{"intrinsic_cpuid_impl invalid inputs doesn't crash"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 gs_t const gs{};
-                bsl::safe_uintmax mut_rax{};
-                bsl::safe_uintmax mut_rbx{};
-                bsl::safe_uintmax mut_rcx{};
-                bsl::safe_uintmax mut_rdx{};
+                bsl::safe_umx mut_rax{};
+                bsl::safe_umx mut_rbx{};
+                bsl::safe_umx mut_rcx{};
+                bsl::safe_umx mut_rdx{};
                 bsl::ut_when{} = [&]() noexcept {
                     intrinsic_cpuid_impl(
                         nullptr, mut_rax.data(), mut_rbx.data(), mut_rcx.data(), mut_rdx.data());
@@ -66,10 +66,10 @@ namespace example
         bsl::ut_scenario{"intrinsic_cpuid_impl"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 gs_t mut_gs{};
-                bsl::safe_uintmax mut_rax{};
-                bsl::safe_uintmax mut_rbx{};
-                bsl::safe_uintmax mut_rcx{};
-                bsl::safe_uintmax mut_rdx{};
+                bsl::safe_umx mut_rax{};
+                bsl::safe_umx mut_rbx{};
+                bsl::safe_umx mut_rcx{};
+                bsl::safe_umx mut_rdx{};
                 constexpr auto expected_result{42_u64};
                 bsl::ut_when{} = [&]() noexcept {
                     mut_gs.cpuid_val = expected_result;

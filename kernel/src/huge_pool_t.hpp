@@ -26,7 +26,7 @@
 #define HUGE_POOL_T_HPP
 
 #include <lock_guard_t.hpp>
-#include <page_t.hpp>
+#include <page_4k_t.hpp>
 #include <spinlock_t.hpp>
 #include <tls_t.hpp>
 
@@ -55,11 +55,84 @@ namespace mk
     class huge_pool_t final
     {
         /// @brief stores the range of memory used by this allocator
-        bsl::span<page_t> m_pool{};
+        bsl::span<page_4k_t> m_pool{};
         /// @brief stores the huge pool's cursor
-        bsl::safe_uintmax m_crsr{};
+        bsl::safe_umx m_crsr{};
         /// @brief safe guards operations on the pool.
         mutable spinlock_t m_lock{};
+
+        /// <!-- description -->
+        ///   @brief Converts a virtual address to a physical address.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param virt the virtual address to convert
+        ///   @return the resulting physical address
+        ///
+        [[nodiscard]] static constexpr auto
+        virt_to_phys(bsl::safe_umx const &virt) noexcept -> bsl::safe_umx
+        {
+            constexpr auto min_addr{HYPERVISOR_MK_DIRECT_MAP_ADDR};
+            constexpr auto max_addr{(min_addr + HYPERVISOR_MK_DIRECT_MAP_SIZE).checked()};
+
+            bsl::expects(virt > min_addr);
+            bsl::expects(virt < max_addr);
+
+            auto const phys{(virt - min_addr).checked()};
+
+            bsl::ensures(phys.is_valid_and_checked());
+            return phys;
+        }
+
+        /// <!-- description -->
+        ///   @brief Converts a physical address to a virtual address.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param phys the physical address to convert
+        ///   @return the resulting virtual address
+        ///
+        [[nodiscard]] static constexpr auto
+        phys_to_virt(bsl::safe_umx const &phys) noexcept -> bsl::safe_umx
+        {
+            bsl::expects(phys < HYPERVISOR_MK_DIRECT_MAP_SIZE);
+            auto const virt{(phys + HYPERVISOR_MK_DIRECT_MAP_ADDR).checked()};
+
+            bsl::ensures(virt.is_valid_and_checked());
+            return virt;
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the number of bytes allocated.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the number of bytes allocated.
+        ///
+        [[nodiscard]] constexpr auto
+        allocated() const noexcept -> bsl::safe_umx
+        {
+            /// NOTE:
+            /// - The following is marked checked because the allocation
+            ///   function ensures this math will never overflow.
+            ///
+
+            return (m_crsr * HYPERVISOR_PAGE_SIZE).checked();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns this->size() - this->allocated().
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns this->size() - this->allocated().
+        ///
+        [[nodiscard]] constexpr auto
+        remaining() const noexcept -> bsl::safe_umx
+        {
+            /// NOTE:
+            /// - The following is marked checked because the allocation
+            ///   function ensures this math will never overflow.
+            ///
+
+            return (this->size() - this->allocated()).checked();
+        }
 
     public:
         /// <!-- description -->
@@ -71,8 +144,9 @@ namespace mk
         ///   @param mut_pool the mutable_buffer_t of the huge pool
         ///
         constexpr void
-        initialize(bsl::span<page_t> &mut_pool) noexcept
+        initialize(bsl::span<page_4k_t> &mut_pool) noexcept
         {
+            bsl::expects(mut_pool.is_valid());
             m_pool = mut_pool;
         }
 
@@ -85,28 +159,30 @@ namespace mk
         ///   @return Returns bsl::span containing the allocated memory
         ///
         [[nodiscard]] constexpr auto
-        allocate(tls_t &mut_tls, bsl::safe_uintmax const &pages) noexcept -> bsl::span<page_t>
+        allocate(tls_t &mut_tls, bsl::safe_umx const &pages) noexcept -> bsl::span<page_4k_t>
         {
             lock_guard_t mut_lock{mut_tls, m_lock};
 
-            if (bsl::unlikely(pages.is_zero_or_invalid())) {
-                bsl::error() << "invalid pages "    // --
-                             << bsl::hex(pages)     // --
-                             << bsl::endl           // --
-                             << bsl::here();        // --
+            bsl::expects(pages.is_valid_and_checked());
+            bsl::expects(pages.is_pos());
+            bsl::expects(syscall::bf_is_page_aligned(pages));
 
-                return {};
-            }
-
-            auto mut_buf{m_pool.subspan(m_crsr, pages)};
+            auto mut_buf{m_pool.subspan(bsl::to_idx(m_crsr), pages)};
             if (bsl::unlikely(mut_buf.size() != pages)) {
                 bsl::error() << "huge pool out of memory\n" << bsl::here();
                 return {};
             }
 
-            m_crsr += pages;
+            /// NOTE:
+            /// - It is impossible for the following to overflow because if
+            ///   it did, the span above would fail first, which is why it
+            ///   is marked as checked.
+            ///
+
+            m_crsr = (m_crsr + pages).checked();
             bsl::builtin_memset(mut_buf.data(), '\0', mut_buf.size_bytes());
 
+            bsl::ensures(m_crsr.is_valid_and_checked());
             return mut_buf;
         }
 
@@ -118,7 +194,7 @@ namespace mk
         ///   @param buf the bsl::span containing the memory to deallocate
         ///
         constexpr void
-        deallocate(tls_t &mut_tls, bsl::span<page_t> const &buf) noexcept
+        deallocate(tls_t &mut_tls, bsl::span<page_4k_t> const &buf) noexcept
         {
             lock_guard_t mut_lock{mut_tls, m_lock};
             bsl::discard(buf);
@@ -143,13 +219,52 @@ namespace mk
         }
 
         /// <!-- description -->
-        ///   @brief Converts a virtual address to a physical address for
-        ///     any page allocated by the page pool. If the provided virt
-        ///     was not allocated using the allocate function by the same
-        ///     page pool, this results of this function are UB. It should
-        ///     be noted that any virtual address may be used meaning the
-        ///     provided address does not have to be page aligned, it simply
-        ///     needs to be allocated using the same page pool.
+        ///   @brief Returns the number of bytes in the pool.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the number of bytes in the pool.
+        ///
+        [[nodiscard]] constexpr auto
+        size() const noexcept -> bsl::safe_umx
+        {
+            /// NOTE:
+            /// - The following is marked checked because the initialize
+            ///   function ensures this math will never overflow.
+            ///
+
+            return (m_pool.size() * HYPERVISOR_PAGE_SIZE).checked();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the number of bytes allocated.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///   @return Returns the number of bytes allocated.
+        ///
+        [[nodiscard]] constexpr auto
+        allocated(tls_t &mut_tls) const noexcept -> bsl::safe_umx
+        {
+            lock_guard_t mut_lock{mut_tls, m_lock};
+            return this->allocated();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns this->size() - this->allocated().
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///   @return Returns this->size() - this->allocated().
+        ///
+        [[nodiscard]] constexpr auto
+        remaining(tls_t &mut_tls) const noexcept -> bsl::safe_umx
+        {
+            lock_guard_t mut_lock{mut_tls, m_lock};
+            return this->remaining();
+        }
+
+        /// <!-- description -->
+        ///   @brief Converts a virtual address to a physical address.
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T defines the type of virtual address being converted
@@ -158,23 +273,14 @@ namespace mk
         ///
         template<typename T>
         [[nodiscard]] constexpr auto
-        virt_to_phys(T const *const virt) const noexcept -> bsl::safe_uintmax
+        virt_to_phys(T const *const virt) const noexcept -> bsl::safe_umx
         {
-            static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);
-
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-            auto const virt_int{bsl::to_umax(reinterpret_cast<bsl::uintmax>(virt))};
-            return virt_int - HYPERVISOR_MK_HUGE_POOL_ADDR;
+            return this->virt_to_phys(bsl::to_umx(reinterpret_cast<bsl::uintmx>(virt)));
         }
 
         /// <!-- description -->
-        ///   @brief Converts a physical address to a virtual address for
-        ///     any page allocated by the page pool. If the provided address
-        ///     was not allocated using the allocate function by the same
-        ///     page pool, this results of this function are UB. It should
-        ///     be noted that any physical address may be used meaning the
-        ///     provided address does not have to be page aligned, it simply
-        ///     needs to be allocated using the same page pool.
+        ///   @brief Converts a physical address to a virtual address.
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T defines the type of virtual address to convert to
@@ -183,22 +289,24 @@ namespace mk
         ///
         template<typename T>
         [[nodiscard]] constexpr auto
-        phys_to_virt(bsl::safe_uintmax const &phys) const noexcept -> T *
+        phys_to_virt(bsl::safe_umx const &phys) const noexcept -> T *
         {
-            static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);
-
-            auto const phys_int{phys + HYPERVISOR_MK_HUGE_POOL_ADDR};
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-            return reinterpret_cast<T *>(phys_int.get());
+            return reinterpret_cast<T *>(this->phys_to_virt(phys).get());
         }
 
         /// <!-- description -->
         ///   @brief Dumps the page_pool_t
         ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///
         constexpr void
-        dump() const noexcept
+        dump(tls_t &mut_tls) const noexcept
         {
-            constexpr auto kb{1024_umax};
+            lock_guard_t mut_lock{mut_tls, m_lock};
+
+            constexpr auto kb{1024_umx};
             constexpr auto mb{kb * kb};
 
             bsl::print() << bsl::mag << "huge pool dump: ";
@@ -223,14 +331,17 @@ namespace mk
             /// Total
             ///
 
+            auto const total_kb{(this->size() / kb).checked()};
+            auto const total_mb{(this->size() / mb).checked()};
+
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<12s", "total "};
             bsl::print() << bsl::ylw << "| ";
-            if ((m_pool.size() / mb).is_zero()) {
-                bsl::print() << bsl::rst << bsl::fmt{"4d", m_pool.size() / kb} << " KB ";
+            if (total_mb.is_zero()) {
+                bsl::print() << bsl::rst << bsl::fmt{"4d", total_kb} << " KB ";
             }
             else {
-                bsl::print() << bsl::rst << bsl::fmt{"4d", m_pool.size() / mb} << " MB ";
+                bsl::print() << bsl::rst << bsl::fmt{"4d", total_mb} << " MB ";
             }
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;
@@ -238,14 +349,17 @@ namespace mk
             /// Used
             ///
 
+            auto const used_kb{(this->allocated() / kb).checked()};
+            auto const used_mb{(this->allocated() / mb).checked()};
+
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<12s", "used "};
             bsl::print() << bsl::ylw << "| ";
-            if ((m_crsr / mb).is_zero()) {
-                bsl::print() << bsl::rst << bsl::fmt{"4d", m_crsr / kb} << " KB ";
+            if (used_mb.is_zero()) {
+                bsl::print() << bsl::rst << bsl::fmt{"4d", used_kb} << " KB ";
             }
             else {
-                bsl::print() << bsl::rst << bsl::fmt{"4d", m_crsr / mb} << " MB ";
+                bsl::print() << bsl::rst << bsl::fmt{"4d", used_mb} << " MB ";
             }
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;
@@ -253,14 +367,17 @@ namespace mk
             /// Remaining
             ///
 
+            auto const remaining_kb{(this->remaining() / kb).checked()};
+            auto const remaining_mb{(this->remaining() / mb).checked()};
+
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<12s", "remaining "};
             bsl::print() << bsl::ylw << "| ";
-            if (((m_pool.size() - m_crsr) / mb).is_zero()) {
-                bsl::print() << bsl::rst << bsl::fmt{"4d", (m_pool.size() - m_crsr) / kb} << " KB ";
+            if (remaining_mb.checked().is_zero()) {
+                bsl::print() << bsl::rst << bsl::fmt{"4d", remaining_kb} << " KB ";
             }
             else {
-                bsl::print() << bsl::rst << bsl::fmt{"4d", (m_pool.size() - m_crsr) / mb} << " MB ";
+                bsl::print() << bsl::rst << bsl::fmt{"4d", remaining_mb} << " MB ";
             }
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;

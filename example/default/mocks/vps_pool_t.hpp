@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MOCKS_VPS_POOL_T_HPP
-#define MOCKS_VPS_POOL_T_HPP
+#ifndef MOCK_VS_POOL_T_HPP
+#define MOCK_VS_POOL_T_HPP
 
 #include <bf_syscall_t.hpp>
 #include <gs_t.hpp>
@@ -36,21 +36,21 @@
 
 namespace example
 {
-    /// @class example::vps_pool_t
+    /// @class example::vs_pool_t
     ///
     /// <!-- description -->
-    ///   @brief Defines the extension's VPS pool
+    ///   @brief Defines the extension's VS pool
     ///
-    class vps_pool_t final
+    class vs_pool_t final
     {
         /// @brief stores the return value for initialize
         bsl::errc_type m_initialize{};
         /// @brief stores the return value for allocate
-        bsl::safe_uint16 m_allocate{};
+        bsl::safe_u16 m_allocate{};
 
     public:
         /// <!-- description -->
-        ///   @brief Initializes this vps_pool_t
+        ///   @brief Initializes this vs_pool_t
         ///
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
@@ -90,7 +90,7 @@ namespace example
         }
 
         /// <!-- description -->
-        ///   @brief Release the vps_pool_t.
+        ///   @brief Release the vs_pool_t.
         ///
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
@@ -112,17 +112,17 @@ namespace example
         }
 
         /// <!-- description -->
-        ///   @brief Allocates a VPS and returns it's ID
+        ///   @brief Allocates a VS and returns it's ID
         ///
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
         ///   @param tls the tls_t to use
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
-        ///   @param vpid the ID of the VP to assign the newly created VPS to
-        ///   @param ppid the ID of the PP to assign the newly created VPS to
-        ///   @return Returns the ID of the newly created VPS on
-        ///     success, or bsl::safe_uint16::failure() on failure.
+        ///   @param vpid the ID of the VP to assign the newly created VS to
+        ///   @param ppid the ID of the PP to assign the newly created VS to
+        ///   @return Returns the ID of the newly created VS on
+        ///     success, or bsl::safe_u16::failure() on failure.
         ///
         [[nodiscard]] constexpr auto
         allocate(
@@ -130,8 +130,8 @@ namespace example
             tls_t const &tls,
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
-            bsl::safe_uint16 const &vpid,
-            bsl::safe_uint16 const &ppid) noexcept -> bsl::safe_uint16
+            bsl::safe_u16 const &vpid,
+            bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -148,11 +148,11 @@ namespace example
         ///     (unit testing only)
         ///
         /// <!-- inputs/outputs -->
-        ///   @param val the bsl::safe_uint16 to return when executing
+        ///   @param val the bsl::safe_u16 to return when executing
         ///     allocate
         ///
         constexpr void
-        set_allocate(bsl::safe_uint16 const &val) noexcept
+        set_allocate(bsl::safe_u16 const &val) noexcept
         {
             m_allocate = val;
         }

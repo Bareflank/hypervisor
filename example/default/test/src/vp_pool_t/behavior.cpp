@@ -89,7 +89,7 @@ namespace example
                 syscall::bf_syscall_t mut_sys{};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_vp_pool.initialize({}, {}, {}, {}));
-                    mut_sys.set_bf_vp_op_create_vp({}, {}, bsl::safe_uint16::failure());
+                    mut_sys.set_bf_vp_op_create_vp({}, {}, bsl::safe_u16::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(!mut_vp_pool.allocate({}, {}, mut_sys, {}, {}, {}));
                     };

@@ -32,13 +32,13 @@
 #include <intrinsic_t.hpp>
 #include <tls_t.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
-#include <bsl/unlikely_assert.hpp>
+#include <bsl/unlikely.hpp>
 
 namespace integration
 {
@@ -59,7 +59,7 @@ namespace integration
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -70,15 +70,15 @@ namespace integration
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
             vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool) noexcept -> bsl::errc_type
+            vs_pool_t &vs_pool) noexcept -> bsl::errc_type
         {
             bsl::discard(tls);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             gs.msr_bitmap = sys.bf_mem_op_alloc_page(gs.msr_bitmap_phys);
-            if (bsl::unlikely_assert(nullptr == gs.msr_bitmap)) {
+            if (bsl::unlikely(nullptr == gs.msr_bitmap)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
@@ -95,7 +95,7 @@ namespace integration
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///
         static constexpr void
         release(
@@ -104,17 +104,17 @@ namespace integration
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
             vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool) noexcept
+            vs_pool_t &vs_pool) noexcept
         {
             bsl::errc_type ret{};
 
             bsl::discard(tls);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             ret = sys.bf_mem_op_free_page(gs.msr_bitmap);
-            if (bsl::unlikely_assert(!ret)) {
+            if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
             }
             else {
@@ -134,8 +134,8 @@ namespace integration
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
-        ///   @param vpsid the ID of the VPS that generated the VMExit
+        ///   @param vs_pool the vs_pool_t to use
+        ///   @param vsid the ID of the VS that generated the VMExit
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -146,36 +146,36 @@ namespace integration
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
             vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool,
-            bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
+            vs_pool_t &vs_pool,
+            bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             constexpr auto vmcs_procbased_ctls_idx{0x4002_u64};
             constexpr auto vmcs_set_nmi_window_exiting{0x400000_u32};
 
-            bsl::safe_uint32 val{};
+            bsl::safe_u32 val{};
             bsl::errc_type ret{};
 
-            val = sys.bf_vps_op_read32(vpsid, vmcs_procbased_ctls_idx);
-            if (bsl::unlikely_assert(!val)) {
+            mut_val = sys.bf_vs_op_read32(vsid, vmcs_procbased_ctls_idx);
+            if (bsl::unlikely(!val)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
             val |= vmcs_set_nmi_window_exiting;
 
-            ret = sys.bf_vps_op_write32(vpsid, vmcs_procbased_ctls_idx, val);
-            if (bsl::unlikely_assert(!ret)) {
+            ret = sys.bf_vs_op_write32(vsid, vmcs_procbased_ctls_idx, val);
+            if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
 
-            return sys.bf_vps_op_run_current();
+            return sys.bf_vs_op_run_current();
         }
 
         /// <!-- description -->
@@ -187,8 +187,8 @@ namespace integration
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
-        ///   @param vpsid the ID of the VPS that generated the VMExit
+        ///   @param vs_pool the vs_pool_t to use
+        ///   @param vsid the ID of the VS that generated the VMExit
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -199,31 +199,31 @@ namespace integration
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
             vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool,
-            bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
+            vs_pool_t &vs_pool,
+            bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             constexpr auto vmcs_procbased_ctls_idx{0x4002_u64};
             constexpr auto vmcs_clear_nmi_window_exiting{0xFFBFFFFF_u32};
 
-            bsl::safe_uint32 val{};
+            bsl::safe_u32 val{};
             bsl::errc_type ret{};
 
-            val = sys.bf_vps_op_read32(vpsid, vmcs_procbased_ctls_idx);
-            if (bsl::unlikely_assert(!val)) {
+            val = sys.bf_vs_op_read32(vsid, vmcs_procbased_ctls_idx);
+            if (bsl::unlikely(!val)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
             val &= vmcs_clear_nmi_window_exiting;
 
-            ret = sys.bf_vps_op_write32(vpsid, vmcs_procbased_ctls_idx, val);
-            if (bsl::unlikely_assert(!ret)) {
+            ret = sys.bf_vs_op_write32(vsid, vmcs_procbased_ctls_idx, val);
+            if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
@@ -231,14 +231,14 @@ namespace integration
             constexpr auto vmcs_entry_interrupt_info_idx{0x4016_u64};
             constexpr auto vmcs_entry_interrupt_info_val{0x80000202_u32};
 
-            ret = sys.bf_vps_op_write32(
-                vpsid, vmcs_entry_interrupt_info_idx, vmcs_entry_interrupt_info_val);
-            if (bsl::unlikely_assert(!ret)) {
+            ret = sys.bf_vs_op_write32(
+                vsid, vmcs_entry_interrupt_info_idx, vmcs_entry_interrupt_info_val);
+            if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
 
-            return sys.bf_vps_op_run_current();
+            return sys.bf_vs_op_run_current();
         }
 
         /// <!-- description -->
@@ -250,8 +250,8 @@ namespace integration
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
-        ///   @param vpsid the ID of the VPS that generated the VMExit
+        ///   @param vs_pool the vs_pool_t to use
+        ///   @param vsid the ID of the VS that generated the VMExit
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -262,13 +262,13 @@ namespace integration
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
             vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool,
-            bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
+            vs_pool_t &vs_pool,
+            bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             bsl::errc_type ret{};
 
@@ -282,13 +282,13 @@ namespace integration
                     case loader::CPUID_COMMAND_ECX_STOP.get(): {
                         sys.bf_tls_set_rax(loader::CPUID_COMMAND_RAX_SUCCESS);
 
-                        ret = sys.bf_vps_op_advance_ip(vpsid);
-                        if (bsl::unlikely_assert(!ret)) {
+                        ret = sys.bf_vs_op_advance_ip(vsid);
+                        if (bsl::unlikely(!ret)) {
                             bsl::print<bsl::V>() << bsl::here();
                             return ret;
                         }
 
-                        return sys.bf_vps_op_promote(vpsid);
+                        return sys.bf_vs_op_promote(vsid);
                     }
 
                     case loader::CPUID_COMMAND_ECX_REPORT_ON.get(): {
@@ -309,7 +309,7 @@ namespace integration
                     }
                 }
 
-                return sys.bf_vps_op_advance_ip_and_run_current();
+                return sys.bf_vs_op_advance_ip_and_run_current();
             }
 
             intrinsic.cpuid(rax, rbx, rcx, rdx);
@@ -319,7 +319,7 @@ namespace integration
             sys.bf_tls_set_rcx(rcx);
             sys.bf_tls_set_rdx(rdx);
 
-            return sys.bf_vps_op_advance_ip_and_run_current();
+            return sys.bf_vs_op_advance_ip_and_run_current();
         }
 
         /// <!-- description -->
@@ -331,8 +331,8 @@ namespace integration
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
-        ///   @param vpsid the ID of the VPS that generated the VMExit
+        ///   @param vs_pool the vs_pool_t to use
+        ///   @param vsid the ID of the VS that generated the VMExit
         ///   @param exit_reason the exit reason associated with the VMExit
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
@@ -344,9 +344,9 @@ namespace integration
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
             vp_pool_t &vp_pool,
-            vps_pool_t &vps_pool,
-            bsl::safe_uint16 const &vpsid,
-            bsl::safe_uint64 const &exit_reason) noexcept -> bsl::errc_type
+            vs_pool_t &vs_pool,
+            bsl::safe_u16 const &vsid,
+            bsl::safe_u64 const &exit_reason) noexcept -> bsl::errc_type
         {
             constexpr auto exit_reason_nmi{0x0_u64};
             constexpr auto exit_reason_nmi_window{0x8_u64};
@@ -354,15 +354,15 @@ namespace integration
 
             switch (exit_reason.get()) {
                 case exit_reason_nmi.get(): {
-                    return handle_nmi(gs, tls, sys, intrinsic, vp_pool, vps_pool, vpsid);
+                    return handle_nmi(gs, tls, sys, intrinsic, vp_pool, vs_pool, vsid);
                 }
 
                 case exit_reason_nmi_window.get(): {
-                    return handle_nmi_window(gs, tls, sys, intrinsic, vp_pool, vps_pool, vpsid);
+                    return handle_nmi_window(gs, tls, sys, intrinsic, vp_pool, vs_pool, vsid);
                 }
 
                 case exit_reason_cpuid.get(): {
-                    return handle_cpuid(gs, tls, sys, intrinsic, vp_pool, vps_pool, vpsid);
+                    return handle_cpuid(gs, tls, sys, intrinsic, vp_pool, vs_pool, vsid);
                 }
 
                 default: {

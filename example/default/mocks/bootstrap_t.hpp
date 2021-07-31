@@ -22,15 +22,15 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MOCKS_BOOTSTRAP_T_HPP
-#define MOCKS_BOOTSTRAP_T_HPP
+#ifndef MOCK_BOOTSTRAP_T_HPP
+#define MOCK_BOOTSTRAP_T_HPP
 
 #include <bf_syscall_t.hpp>
 #include <gs_t.hpp>
 #include <intrinsic_t.hpp>
 #include <tls_t.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/discard.hpp>
 #include <bsl/errc_type.hpp>
@@ -61,7 +61,7 @@ namespace example
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -72,14 +72,14 @@ namespace example
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool) noexcept -> bsl::errc_type
+            vs_pool_t const &vs_pool) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(sys);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             return m_initialize;
         }
@@ -107,7 +107,7 @@ namespace example
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///
         static constexpr void
         release(
@@ -116,14 +116,14 @@ namespace example
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool) noexcept
+            vs_pool_t const &vs_pool) noexcept
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(sys);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
         }
 
         /// <!-- description -->
@@ -137,7 +137,7 @@ namespace example
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///   @param ppid the ID of the PP to bootstrap
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
@@ -149,15 +149,15 @@ namespace example
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool,
-            bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
+            vs_pool_t const &vs_pool,
+            bsl::safe_u16 const &ppid) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(sys);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
             bsl::discard(ppid);
 
             return m_dispatch;

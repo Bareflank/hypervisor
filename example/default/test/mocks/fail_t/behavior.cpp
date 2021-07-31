@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../mocks/fail_t.hpp"
+#include "../../../MOCK/fail_t.hpp"
 
 #include <bsl/ut.hpp>
 

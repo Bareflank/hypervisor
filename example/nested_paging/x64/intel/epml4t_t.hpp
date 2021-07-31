@@ -36,7 +36,7 @@
 namespace example
 {
     /// @brief defined the expected size of the epml4t_t struct
-    constexpr bsl::safe_uintmax NUM_EPML4T_ENTRIES{bsl::to_umax(512)};
+    constexpr bsl::safe_umx NUM_EPML4T_ENTRIES{bsl::to_umx(512)};
 
     /// @struct example::epml4t_t
     ///

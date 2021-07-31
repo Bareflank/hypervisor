@@ -52,14 +52,14 @@ namespace mk
         };
 
         bsl::ut_scenario{"no segments"} = []() {
-            bsl::array<elf_segment_t, bsl::to_umax(HYPERVISOR_MAX_SEGMENTS).get()> segments{};
+            bsl::array<elf_segment_t, bsl::to_umx(HYPERVISOR_MAX_SEGMENTS).get()> segments{};
             bsl::ut_then{} = [&]() {
                 dump_mk_elf_segments(segments.data());
             };
         };
 
         bsl::ut_scenario{"success"} = []() {
-            bsl::array<elf_segment_t, bsl::to_umax(HYPERVISOR_MAX_SEGMENTS).get()> segments{};
+            bsl::array<elf_segment_t, bsl::to_umx(HYPERVISOR_MAX_SEGMENTS).get()> segments{};
             uint8_t data{};
             segments.front().addr = &data;
             segments.front().size = sizeof(data);

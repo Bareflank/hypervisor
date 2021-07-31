@@ -30,7 +30,7 @@
 #include <intrinsic_t.hpp>
 #include <tls_t.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/discard.hpp>
 #include <bsl/errc_type.hpp>
@@ -55,7 +55,7 @@ namespace example
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -66,14 +66,14 @@ namespace example
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool) noexcept -> bsl::errc_type
+            vs_pool_t const &vs_pool) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(sys);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             /// NOTE:
             /// - Add initialization code here if needed. Otherwise, this
@@ -92,7 +92,7 @@ namespace example
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
+        ///   @param vs_pool the vs_pool_t to use
         ///
         static constexpr void
         release(
@@ -101,14 +101,14 @@ namespace example
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool) noexcept
+            vs_pool_t const &vs_pool) noexcept
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(sys);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             /// NOTE:
             /// - Release functions are usually only needed in the event of
@@ -126,8 +126,8 @@ namespace example
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vp_pool the vp_pool_t to use
-        ///   @param vps_pool the vps_pool_t to use
-        ///   @param vpsid the ID of the VPS that generated the fail
+        ///   @param vs_pool the vs_pool_t to use
+        ///   @param vsid the ID of the VS that generated the fail
         ///   @param fail_reason the exit reason associated with the fail
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
@@ -139,27 +139,28 @@ namespace example
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
             vp_pool_t const &vp_pool,
-            vps_pool_t const &vps_pool,
-            bsl::safe_uint16 const &vpsid,
-            bsl::safe_uint64 const &fail_reason) noexcept -> bsl::errc_type
+            vs_pool_t const &vs_pool,
+            bsl::safe_u16 const &vsid,
+            bsl::safe_u64 const &fail_reason) noexcept -> bsl::errc_type
         {
+            bsl::expects(vsid.is_valid_and_checked());
+            bsl::expects(fail_reason.is_valid_and_checked());
+
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(sys);
             bsl::discard(intrinsic);
             bsl::discard(vp_pool);
-            bsl::discard(vps_pool);
-            bsl::discard(vpsid);
-            bsl::discard(fail_reason);
+            bsl::discard(vs_pool);
 
             /// NOTE:
             /// - Tells the microkernel that we didn't handle the fast fail.
             ///   When this occurs, the microkernel will halt this PP. In most
             ///   cases, there are only two options for how to handle a fail:
             ///   - Do the following, and report an error and halt.
-            ///   - Return to a parent VPS and continue execution from there,
+            ///   - Return to a parent VS and continue execution from there,
             ///     which is typically only possible if you are implementing
-            ///     more than one VP/VPS per PP (e.g., when implementing guest
+            ///     more than one VP/VS per PP (e.g., when implementing guest
             ///     support, VSM support or nested virtualization support).
             ///
             /// - Another use case is integration testing. We can also use this

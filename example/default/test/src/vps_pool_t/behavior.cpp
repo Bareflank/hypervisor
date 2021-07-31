@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../src/vps_pool_t.hpp"
+#include "../../../src/vs_pool_t.hpp"
 
 #include <bsl/ut.hpp>
 
@@ -40,14 +40,14 @@ namespace example
     [[nodiscard]] constexpr auto
     tests() noexcept -> bsl::exit_code
     {
-        bsl::ut_scenario{"initialize vps_t reports failure"} = []() noexcept {
+        bsl::ut_scenario{"initialize vs_t reports failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t mut_vps_pool{};
+                vs_pool_t mut_vs_pool{};
                 tls_t mut_tls{};
                 bsl::ut_when{} = [&]() noexcept {
                     mut_tls.test_ret = bsl::errc_failure;
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_vps_pool.initialize({}, mut_tls, {}, {}));
+                        bsl::ut_check(!mut_vs_pool.initialize({}, mut_tls, {}, {}));
                     };
                 };
             };
@@ -55,72 +55,72 @@ namespace example
 
         bsl::ut_scenario{"initialize success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t mut_vps_pool{};
+                vs_pool_t mut_vs_pool{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(mut_vps_pool.initialize({}, {}, {}, {}));
+                    bsl::ut_check(mut_vs_pool.initialize({}, {}, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"release executes without initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t mut_vps_pool{};
+                vs_pool_t mut_vs_pool{};
                 bsl::ut_then{} = [&]() noexcept {
-                    mut_vps_pool.release({}, {}, {}, {});
+                    mut_vs_pool.release({}, {}, {}, {});
                 };
             };
         };
 
         bsl::ut_scenario{"release executes with initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t mut_vps_pool{};
+                vs_pool_t mut_vs_pool{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(mut_vps_pool.initialize({}, {}, {}, {}));
+                    bsl::ut_required_step(mut_vs_pool.initialize({}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
-                        mut_vps_pool.release({}, {}, {}, {});
+                        mut_vs_pool.release({}, {}, {}, {});
                     };
                 };
             };
         };
 
-        bsl::ut_scenario{"allocate bf_vps_op_create_vps fails"} = []() noexcept {
+        bsl::ut_scenario{"allocate bf_vs_op_create_vs fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t mut_vps_pool{};
+                vs_pool_t mut_vs_pool{};
                 syscall::bf_syscall_t mut_sys{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(mut_vps_pool.initialize({}, {}, {}, {}));
-                    mut_sys.set_bf_vps_op_create_vps({}, {}, bsl::safe_uint16::failure());
+                    bsl::ut_required_step(mut_vs_pool.initialize({}, {}, {}, {}));
+                    mut_sys.set_bf_vs_op_create_vs({}, {}, bsl::safe_u16::failure());
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_vps_pool.allocate({}, {}, mut_sys, {}, {}, {}));
+                        bsl::ut_check(!mut_vs_pool.allocate({}, {}, mut_sys, {}, {}, {}));
                     };
                 };
             };
         };
 
-        bsl::ut_scenario{"allocate bf_vps_op_create_vps returns invalid id"} = []() noexcept {
+        bsl::ut_scenario{"allocate bf_vs_op_create_vs returns invalid id"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t mut_vps_pool{};
+                vs_pool_t mut_vs_pool{};
                 syscall::bf_syscall_t mut_sys{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(mut_vps_pool.initialize({}, {}, {}, {}));
-                    mut_sys.set_bf_vps_op_create_vps({}, {}, syscall::BF_INVALID_ID);
+                    bsl::ut_required_step(mut_vs_pool.initialize({}, {}, {}, {}));
+                    mut_sys.set_bf_vs_op_create_vs({}, {}, syscall::BF_INVALID_ID);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_vps_pool.allocate({}, {}, mut_sys, {}, {}, {}));
+                        bsl::ut_check(!mut_vs_pool.allocate({}, {}, mut_sys, {}, {}, {}));
                     };
                 };
             };
         };
 
-        bsl::ut_scenario{"allocate vps_t allocate fails"} = []() noexcept {
+        bsl::ut_scenario{"allocate vs_t allocate fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t mut_vps_pool{};
+                vs_pool_t mut_vs_pool{};
                 tls_t mut_tls{};
                 syscall::bf_syscall_t mut_sys{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(mut_vps_pool.initialize({}, {}, {}, {}));
+                    bsl::ut_required_step(mut_vs_pool.initialize({}, {}, {}, {}));
                     mut_tls.test_ret = bsl::errc_failure;
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_vps_pool.allocate({}, mut_tls, mut_sys, {}, {}, {}));
+                        bsl::ut_check(!mut_vs_pool.allocate({}, mut_tls, mut_sys, {}, {}, {}));
                     };
                 };
             };
@@ -128,12 +128,12 @@ namespace example
 
         bsl::ut_scenario{"allocate success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vps_pool_t mut_vps_pool{};
+                vs_pool_t mut_vs_pool{};
                 syscall::bf_syscall_t mut_sys{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(mut_vps_pool.initialize({}, {}, {}, {}));
+                    bsl::ut_required_step(mut_vs_pool.initialize({}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_vps_pool.allocate({}, {}, mut_sys, {}, {}, {}));
+                        bsl::ut_check(mut_vs_pool.allocate({}, {}, mut_sys, {}, {}, {}));
                     };
                 };
             };

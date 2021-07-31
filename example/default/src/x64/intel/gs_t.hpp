@@ -26,6 +26,7 @@
 #define GS_T_HPP
 
 #include <bsl/safe_integral.hpp>
+#include <basic_page_4k_t.hpp>
 
 namespace example
 {
@@ -42,10 +43,10 @@ namespace example
     ///
     struct gs_t final
     {
-        /// @brief stores the MSR bitmap used by this vps_t
-        void *msr_bitmap{};
+        /// @brief stores the MSR bitmap used by this vs_t
+        lib::basic_page_4k_t *msr_bitmap{};
         /// @brief stores the physical address of the MSR bitmap above
-        bsl::safe_uintmax msr_bitmap_phys{};
+        bsl::safe_umx msr_bitmap_phys{};
     };
 }
 

@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../mocks/huge_pool_t.hpp"
+#include "../../../MOCK/huge_pool_t.hpp"
 
 #include <bsl/convert.hpp>
 #include <bsl/ut.hpp>
@@ -46,7 +46,7 @@ namespace mk
                 huge_pool_t huge_pool{};
                 tls_t tls{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(!huge_pool.allocate(tls, bsl::safe_uintmax::failure()));
+                    bsl::ut_check(!huge_pool.allocate(tls, bsl::safe_umx::failure()));
                 };
             };
         };
@@ -65,7 +65,7 @@ namespace mk
             bsl::ut_given{} = []() noexcept {
                 huge_pool_t huge_pool{};
                 tls_t tls{};
-                constexpr auto size{42_umax};
+                constexpr auto size{42_umx};
                 bsl::ut_when{} = [&]() noexcept {
                     huge_pool.set_allocate_fails(true);
                     bsl::ut_then{} = [&]() noexcept {
@@ -79,7 +79,7 @@ namespace mk
             bsl::ut_given{} = []() noexcept {
                 huge_pool_t huge_pool{};
                 tls_t tls{};
-                constexpr auto size{42_umax};
+                constexpr auto size{42_umx};
                 bsl::span<bsl::uint8> buf{};
                 bsl::ut_when{} = [&]() noexcept {
                     buf = huge_pool.allocate(tls, size);
@@ -108,7 +108,7 @@ namespace mk
             bsl::ut_given{} = []() noexcept {
                 huge_pool_t huge_pool{};
                 tls_t tls{};
-                constexpr auto size{42_umax};
+                constexpr auto size{42_umx};
                 bsl::span<bsl::uint8> buf{};
                 bsl::ut_when{} = [&]() noexcept {
                     buf = huge_pool.allocate(tls, size);

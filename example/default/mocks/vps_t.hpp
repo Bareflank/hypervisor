@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MOCKS_VPS_T_HPP
-#define MOCKS_VPS_T_HPP
+#ifndef MOCK_VS_T_HPP
+#define MOCK_VS_T_HPP
 
 #include <bf_syscall_t.hpp>
 #include <gs_t.hpp>
@@ -36,23 +36,23 @@
 
 namespace example
 {
-    /// @class example::vps_t
+    /// @class example::vs_t
     ///
     /// <!-- description -->
-    ///   @brief Defines the extension's notion of a VPS for unit testing.
+    ///   @brief Defines the extension's notion of a VS for unit testing.
     ///
-    class vps_t final
+    class vs_t final
     {
     public:
         /// <!-- description -->
-        ///   @brief Initializes this vps_t
+        ///   @brief Initializes this vs_t
         ///
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
         ///   @param tls the tls_t to use
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
-        ///   @param i the ID for this vps_t
+        ///   @param i the ID for this vs_t
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -62,7 +62,7 @@ namespace example
             tls_t const &tls,
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
-            bsl::safe_uint16 const &i) noexcept -> bsl::errc_type
+            bsl::safe_u16 const &i) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(sys);
@@ -73,7 +73,7 @@ namespace example
         }
 
         /// <!-- description -->
-        ///   @brief Release the vps_t.
+        ///   @brief Release the vs_t.
         ///
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
@@ -95,15 +95,15 @@ namespace example
         }
 
         /// <!-- description -->
-        ///   @brief Allocates a vps_t and returns it's ID
+        ///   @brief Allocates a vs_t and returns it's ID
         ///
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
         ///   @param tls the tls_t to use
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
-        ///   @param vpid the ID of the VP to assign the vps_t to
-        ///   @param ppid the ID of the PP to assign the vps_t to
+        ///   @param vpid the ID of the VP to assign the vs_t to
+        ///   @param ppid the ID of the PP to assign the vs_t to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -113,8 +113,8 @@ namespace example
             tls_t const &tls,
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
-            bsl::safe_uint16 const &vpid,
-            bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
+            bsl::safe_u16 const &vpid,
+            bsl::safe_u16 const &ppid) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(sys);

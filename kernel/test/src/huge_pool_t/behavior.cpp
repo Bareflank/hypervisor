@@ -29,9 +29,9 @@
 namespace mk
 {
     /// @brief used by most of the tests
-    constexpr auto POOL_SIZE{0x3000_umax};
+    constexpr auto POOL_SIZE{0x3000_umx};
     /// @brief only used by the dump test as this is too large for the stack
-    constexpr auto LARGE_POOL_SIZE{0x1000000_umax};
+    constexpr auto LARGE_POOL_SIZE{0x1000000_umx};
 
     /// @brief used for dump to prevent the unit test from running out of stack
     bsl::array<bsl::uint8, LARGE_POOL_SIZE.get()> g_pool{};
@@ -57,7 +57,7 @@ namespace mk
                 bsl::ut_when{} = [&]() noexcept {
                     huge_pool.initialize(view);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!huge_pool.allocate(tls, bsl::safe_uintmax::failure()));
+                        bsl::ut_check(!huge_pool.allocate(tls, bsl::safe_umx::failure()));
                     };
                 };
             };
@@ -72,10 +72,10 @@ namespace mk
                 bsl::ut_when{} = [&]() noexcept {
                     huge_pool.initialize(view);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(huge_pool.allocate(tls, 0x1000_umax).size() == 0x1000_umax);
-                        bsl::ut_check(huge_pool.allocate(tls, 0x1000_umax).size() == 0x1000_umax);
-                        bsl::ut_check(huge_pool.allocate(tls, 0x1000_umax).size() == 0x1000_umax);
-                        bsl::ut_check(!huge_pool.allocate(tls, 0x1000_umax));
+                        bsl::ut_check(huge_pool.allocate(tls, 0x1000_umx).size() == 0x1000_umx);
+                        bsl::ut_check(huge_pool.allocate(tls, 0x1000_umx).size() == 0x1000_umx);
+                        bsl::ut_check(huge_pool.allocate(tls, 0x1000_umx).size() == 0x1000_umx);
+                        bsl::ut_check(!huge_pool.allocate(tls, 0x1000_umx));
                     };
                 };
             };
@@ -90,8 +90,8 @@ namespace mk
                 bsl::ut_when{} = [&]() noexcept {
                     huge_pool.initialize(view);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(huge_pool.allocate(tls, 0x2000_umax).size() == 0x2000_umax);
-                        bsl::ut_check(!huge_pool.allocate(tls, 0x2000_umax));
+                        bsl::ut_check(huge_pool.allocate(tls, 0x2000_umx).size() == 0x2000_umx);
+                        bsl::ut_check(!huge_pool.allocate(tls, 0x2000_umx));
                     };
                 };
             };
@@ -106,10 +106,10 @@ namespace mk
                 bsl::ut_when{} = [&]() noexcept {
                     huge_pool.initialize(view);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(huge_pool.allocate(tls, 0xFFF_umax).size() == 0x1000_umax);
-                        bsl::ut_check(huge_pool.allocate(tls, 0x001_umax).size() == 0x1000_umax);
-                        bsl::ut_check(huge_pool.allocate(tls, 0x800_umax).size() == 0x1000_umax);
-                        bsl::ut_check(!huge_pool.allocate(tls, 0x001_umax));
+                        bsl::ut_check(huge_pool.allocate(tls, 0xFFF_umx).size() == 0x1000_umx);
+                        bsl::ut_check(huge_pool.allocate(tls, 0x001_umx).size() == 0x1000_umx);
+                        bsl::ut_check(huge_pool.allocate(tls, 0x800_umx).size() == 0x1000_umx);
+                        bsl::ut_check(!huge_pool.allocate(tls, 0x001_umx));
                     };
                 };
             };
@@ -131,9 +131,9 @@ namespace mk
                 tls_t tls{};
                 bsl::ut_when{} = [&]() noexcept {
                     huge_pool.initialize(view);
-                    bsl::ut_required_step(!!huge_pool.allocate(tls, 0x1000_umax));
-                    bsl::ut_required_step(!!huge_pool.allocate(tls, 0x1000_umax));
-                    bsl::ut_required_step(!!huge_pool.allocate(tls, 0x1000_umax));
+                    bsl::ut_required_step(!!huge_pool.allocate(tls, 0x1000_umx));
+                    bsl::ut_required_step(!!huge_pool.allocate(tls, 0x1000_umx));
+                    bsl::ut_required_step(!!huge_pool.allocate(tls, 0x1000_umx));
                     bsl::ut_then{} = [&]() noexcept {
                         huge_pool.dump();
                     };
@@ -146,8 +146,8 @@ namespace mk
                 tls_t tls{};
                 bsl::ut_when{} = [&]() noexcept {
                     huge_pool.initialize(view);
-                    for (bsl::safe_uintmax i{}; i < 1024_umax; ++i) {
-                        bsl::ut_required_step(!!huge_pool.allocate(tls, 0x1000_umax));
+                    for (bsl::safe_idx i{}; i < 1024_umx; ++i) {
+                        bsl::ut_required_step(!!huge_pool.allocate(tls, 0x1000_umx));
                     }
                     bsl::ut_then{} = [&]() noexcept {
                         huge_pool.dump();

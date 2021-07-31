@@ -25,40 +25,20 @@
 #ifndef MAP_PAGE_FLAGS_HPP
 #define MAP_PAGE_FLAGS_HPP
 
-#include <bsl/convert.hpp>
-#include <bsl/safe_integral.hpp>
+#include <basic_map_page_flags.hpp>
 
 namespace mk
 {
-    /// @brief Map a page with read permmissions (has no effect)
-    constexpr auto MAP_PAGE_READ{0x0000000000000001_umax};
-    /// @brief Map a page with write permmissions
-    constexpr auto MAP_PAGE_WRITE{0x0000000000000002_umax};
-    /// @brief Map a page with execute permmissions
-    constexpr auto MAP_PAGE_EXECUTE{0x0000000000000004_umax};
-
-    /// @brief Defines the auto release tag for no auto release
-    constexpr auto MAP_PAGE_NO_AUTO_RELEASE{0_umax};
-    /// @brief Defines the auto release tag for alloc_page allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_ALLOC_PAGE{1_umax};
-    /// @brief Defines the auto release tag for alloc_heap allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_ALLOC_HEAP{2_umax};
-    /// @brief Defines the auto release tag for stack allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_STACK{3_umax};
-    /// @brief Defines the auto release tag for tls allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_TLS{4_umax};
-    /// @brief Defines the auto release tag for tls allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_TCB{5_umax};
-    /// @brief Defines the auto release tag for ELF allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_ELF{6_umax};
-
-    /// NOTE:
-    /// - Likely to support more architectures, we can only support a max
-    ///   of 8 (i.e., 3 bits in a pte).
-    ///
-
-    /// @brief Defines the auto release tag for ELF allocations
-    constexpr auto MAP_PAGE_AUTO_RELEASE_MAX{8_umax};
+    /// @brief map a page with read permmissions
+    constexpr auto MAP_PAGE_READ{lib::BASIC_MAP_PAGE_READ};
+    /// @brief map a page with write permmissions
+    constexpr auto MAP_PAGE_WRITE{lib::BASIC_MAP_PAGE_WRITE};
+    /// @brief map a page with execute permmissions
+    constexpr auto MAP_PAGE_EXECUTE{lib::BASIC_MAP_PAGE_EXECUTE};
+    /// @brief map a page with read/write permmissions
+    constexpr auto MAP_PAGE_RW{lib::BASIC_MAP_PAGE_RW};
+    /// @brief map a page with read/execute permmissions
+    constexpr auto MAP_PAGE_RE{lib::BASIC_MAP_PAGE_RE};
 }
 
 #endif

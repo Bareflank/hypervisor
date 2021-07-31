@@ -56,7 +56,7 @@ namespace example
             bsl::ut_given{} = []() noexcept {
                 vp_t mut_vp{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_check(!mut_vp.initialize({}, {}, {}, {}, bsl::safe_uint16::failure()));
+                    bsl::ut_check(!mut_vp.initialize({}, {}, {}, {}, bsl::safe_u16::failure()));
                 };
             };
         };
@@ -129,7 +129,7 @@ namespace example
                     bsl::ut_required_step(mut_vp.initialize({}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
-                            !mut_vp.allocate({}, {}, {}, {}, bsl::safe_uint16::failure(), {}));
+                            !mut_vp.allocate({}, {}, {}, {}, bsl::safe_u16::failure(), {}));
                     };
                 };
             };
@@ -154,7 +154,7 @@ namespace example
                     bsl::ut_required_step(mut_vp.initialize({}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
-                            !mut_vp.allocate({}, {}, {}, {}, {}, bsl::safe_uint16::failure()));
+                            !mut_vp.allocate({}, {}, {}, {}, {}, bsl::safe_u16::failure()));
                     };
                 };
             };

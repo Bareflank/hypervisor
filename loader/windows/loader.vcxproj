@@ -114,16 +114,16 @@
     <ClInclude Include="..\include\bfelf\bfelf_elf64_ehdr_t.h "/>
     <ClInclude Include="..\include\bfelf\bfelf_elf64_phdr_t.h "/>
     <ClInclude Include="..\include\bfelf\bfelf_types.h "/>
-    <ClInclude Include="..\include\interface\c\debug_ring_t.h" />
-    <ClInclude Include="..\include\interface\c\dump_vmm_args_t.h" />
-    <ClInclude Include="..\include\interface\c\mk_args_t.h" />
-    <ClInclude Include="..\include\interface\c\start_vmm_args_t.h" />
-    <ClInclude Include="..\include\interface\c\stop_vmm_args_t.h" />
-    <ClInclude Include="..\include\interface\c\x64\cpuid_commands.h" />
-    <ClInclude Include="..\include\interface\c\x64\global_descriptor_table_register_t.h" />
-    <ClInclude Include="..\include\interface\c\x64\interrupt_descriptor_table_register_t.h" />
-    <ClInclude Include="..\include\interface\c\x64\state_save_t.h" />
-    <ClInclude Include="..\include\interface\c\x64\tss_t.h" />
+    <ClInclude Include="..\include\interface\debug_ring_t.h" />
+    <ClInclude Include="..\include\interface\dump_vmm_args_t.h" />
+    <ClInclude Include="..\include\interface\mk_args_t.h" />
+    <ClInclude Include="..\include\interface\start_vmm_args_t.h" />
+    <ClInclude Include="..\include\interface\stop_vmm_args_t.h" />
+    <ClInclude Include="..\include\interface\x64\cpuid_commands.h" />
+    <ClInclude Include="..\include\interface\x64\global_descriptor_table_register_t.h" />
+    <ClInclude Include="..\include\interface\x64\interrupt_descriptor_table_register_t.h" />
+    <ClInclude Include="..\include\interface\x64\state_save_t.h" />
+    <ClInclude Include="..\include\interface\x64\tss_t.h" />
     <ClInclude Include="..\include\x64\alloc_pdpt.h" />
     <ClInclude Include="..\include\x64\alloc_pdt.h" />
     <ClInclude Include="..\include\x64\alloc_pt.h" />
@@ -366,10 +366,10 @@
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Arch)'=='AuthenticAMD'">
-    <IncludePath>$(IncludePath);$(CMAKE_BINARY_DIR)\include;include;include\std;include\platform_interface\c;..\include;..\include\interface\c;include\x64;include\x64\amd;..\include\x64;..\include\x64\amd;..\include\interface\c\x64;..\include\interface\c\x64\amd</IncludePath>
+    <IncludePath>$(IncludePath);$(CMAKE_BINARY_DIR)\include;include;include\std;include\platform_interface;..\include;..\include\interface;include\x64;include\x64\amd;..\include\x64;..\include\x64\amd;..\include\interface\x64;..\include\interface\x64\amd</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Arch)'=='GenuineIntel'">
-    <IncludePath>$(IncludePath);$(CMAKE_BINARY_DIR)\include;include;include\std;include\platform_interface\c;..\include;..\include\interface\c;include\x64;include\x64\intel;..\include\x64;..\include\x64\intel;..\include\interface\c\x64;..\include\interface\c\x64\intel</IncludePath>
+    <IncludePath>$(IncludePath);$(CMAKE_BINARY_DIR)\include;include;include\std;include\platform_interface;..\include;..\include\interface;include\x64;include\x64\intel;..\include\x64;..\include\x64\intel;..\include\interface\x64;..\include\interface\x64\intel</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

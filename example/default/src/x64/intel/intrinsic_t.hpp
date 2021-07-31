@@ -103,13 +103,12 @@ namespace example
         cpuid(
             gs_t const &gs,
             tls_t const &tls,
-            bsl::safe_uint64 &mut_rax,
-            bsl::safe_uint64 &mut_rbx,
-            bsl::safe_uint64 &mut_rcx,
-            bsl::safe_uint64 &mut_rdx) noexcept
+            bsl::safe_u64 &mut_rax,
+            bsl::safe_u64 &mut_rbx,
+            bsl::safe_u64 &mut_rcx,
+            bsl::safe_u64 &mut_rdx) noexcept
         {
             bsl::discard(tls);
-
             intrinsic_cpuid_impl(
                 &gs, mut_rax.data(), mut_rbx.data(), mut_rcx.data(), mut_rdx.data());
         }

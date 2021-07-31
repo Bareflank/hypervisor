@@ -31,7 +31,7 @@
 #include <tls_t.hpp>
 
 #include <bsl/debug.hpp>
-#include <bsl/exit_code.hpp>
+#include <bsl/errc_type.hpp>
 #include <bsl/finally.hpp>
 #include <bsl/likely.hpp>
 #include <bsl/safe_integral.hpp>
@@ -46,18 +46,18 @@ namespace mk
     /// <!-- inputs/outputs -->
     ///   @param tls the current TLS block
     ///   @param ext the extension that made the syscall
-    ///   @param intrinsic the intrinsics to use
-    ///   @return Returns bsl::exit_success if the exception was handled,
-    ///     bsl::exit_failure otherwise
+    ///   @param intrinsic the intrinsic_t to use
+    ///   @return Returns bsl::errc_success if the exception was handled,
+    ///     bsl::errc_failure otherwise
     ///
     [[nodiscard]] constexpr auto
-    dispatch_esr(tls_t &tls, ext_t *const ext, intrinsic_t &intrinsic) noexcept -> bsl::exit_code
+    dispatch_esr(tls_t &tls, ext_t *const ext, intrinsic_t &intrinsic) noexcept -> bsl::errc_type
     {
         bsl::discard(tls);
         bsl::discard(ext);
         bsl::discard(intrinsic);
 
-        return bsl::exit_failure;
+        return bsl::errc_failure;
     }
 }
 

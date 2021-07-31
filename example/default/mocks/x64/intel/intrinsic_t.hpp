@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MOCKS_INTRINSIC_HPP
-#define MOCKS_INTRINSIC_HPP
+#ifndef MOCK_INTRINSIC_HPP
+#define MOCK_INTRINSIC_HPP
 
 #include <gs_t.hpp>
 #include <tls_t.hpp>
@@ -46,13 +46,13 @@ namespace example
         /// @brief stores the return value for initialize
         bsl::errc_type m_initialize{};
         /// @brief stores the return value for eax with cpuid
-        bsl::safe_uint32 m_eax{};
+        bsl::safe_u32 m_eax{};
         /// @brief stores the return value for ebx with cpuid
-        bsl::safe_uint32 m_ebx{};
+        bsl::safe_u32 m_ebx{};
         /// @brief stores the return value for ecx with cpuid
-        bsl::safe_uint32 m_ecx{};
+        bsl::safe_u32 m_ecx{};
         /// @brief stores the return value for edx with cpuid
-        bsl::safe_uint32 m_edx{};
+        bsl::safe_u32 m_edx{};
 
     public:
         /// <!-- description -->
@@ -117,20 +117,20 @@ namespace example
         cpuid(
             gs_t const &gs,
             tls_t const &tls,
-            bsl::safe_uint64 &mut_rax,
-            bsl::safe_uint64 &mut_rbx,
-            bsl::safe_uint64 &mut_rcx,
-            bsl::safe_uint64 &mut_rdx) const noexcept
+            bsl::safe_u64 &mut_rax,
+            bsl::safe_u64 &mut_rbx,
+            bsl::safe_u64 &mut_rcx,
+            bsl::safe_u64 &mut_rdx) const noexcept
         {
             bsl::discard(gs);
             bsl::discard(tls);
 
             constexpr auto mask{0xFFFFFFFF00000000_u64};
 
-            mut_rax = ((mut_rax & mask) | bsl::to_u64(m_eax));
-            mut_rbx = ((mut_rbx & mask) | bsl::to_u64(m_ebx));
-            mut_rcx = ((mut_rcx & mask) | bsl::to_u64(m_ecx));
-            mut_rdx = ((mut_rdx & mask) | bsl::to_u64(m_edx));
+            mut_rax = ((mut_rax & mask) | bsl::to_u64(m_eax)).checked();
+            mut_rbx = ((mut_rbx & mask) | bsl::to_u64(m_ebx)).checked();
+            mut_rcx = ((mut_rcx & mask) | bsl::to_u64(m_ecx)).checked();
+            mut_rdx = ((mut_rdx & mask) | bsl::to_u64(m_edx)).checked();
         }
 
         /// <!-- description -->
@@ -145,10 +145,10 @@ namespace example
         ///
         constexpr void
         set_cpuid(
-            bsl::safe_uint32 const &eax,
-            bsl::safe_uint32 const &ebx,
-            bsl::safe_uint32 const &ecx,
-            bsl::safe_uint32 const &edx) noexcept
+            bsl::safe_u32 const &eax,
+            bsl::safe_u32 const &ebx,
+            bsl::safe_u32 const &ecx,
+            bsl::safe_u32 const &edx) noexcept
         {
             m_eax = eax;
             m_ebx = ebx;

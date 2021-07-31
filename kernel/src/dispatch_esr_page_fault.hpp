@@ -53,15 +53,15 @@ namespace mk
     {
         /// NOTE:
         /// - When the microkernel is still bootstrapping, the pmut_ext field in
-        ///   the TLS has not yet been set, so pmut_ext could actually be a nullptr
-        ///   which is why it is not passed by reference.
+        ///   the TLS has not yet been set, so pmut_ext could actually be a
+        ///   nullptr which is why it is not passed by reference.
         ///
 
         if (bsl::unlikely(nullptr == pmut_ext)) {
             return bsl::errc_failure;
         }
 
-        return pmut_ext->map_page_direct(mut_tls, mut_page_pool, bsl::to_umax(mut_tls.esr_pf_addr));
+        return pmut_ext->map_page_direct(mut_tls, mut_page_pool, bsl::to_umx(mut_tls.esr_pf_addr));
     }
 }
 

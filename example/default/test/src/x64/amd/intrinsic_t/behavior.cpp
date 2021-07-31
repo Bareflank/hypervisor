@@ -75,10 +75,10 @@ namespace example
             bsl::ut_given{} = []() noexcept {
                 intrinsic_t const intrinsic{};
                 gs_t mut_gs{};
-                bsl::safe_uintmax mut_rax{};
-                bsl::safe_uintmax mut_rbx{};
-                bsl::safe_uintmax mut_rcx{};
-                bsl::safe_uintmax mut_rdx{};
+                bsl::safe_umx mut_rax{};
+                bsl::safe_umx mut_rbx{};
+                bsl::safe_umx mut_rcx{};
+                bsl::safe_umx mut_rdx{};
                 constexpr auto expected_result{42_u64};
                 bsl::ut_when{} = [&]() noexcept {
                     mut_gs.cpuid_val = expected_result;
