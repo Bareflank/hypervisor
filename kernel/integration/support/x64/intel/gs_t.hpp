@@ -36,10 +36,10 @@ namespace integration
     ///
     struct gs_t final
     {
-        /// @brief stores the MSR bitmap used by this vps_t
+        /// @brief stores the MSR bitmap used by this vs_t
         void *msr_bitmap{};
         /// @brief stores the physical address of the MSR bitmap above
-        bsl::safe_uintmax msr_bitmap_phys{};
+        bsl::safe_umx msr_bitmap_phys{};
     };
 }
 

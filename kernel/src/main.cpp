@@ -37,12 +37,11 @@
 #include <vmexit_log_t.hpp>
 #include <vmexit_loop.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/array.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
-#include <bsl/exit_code.hpp>
 
 namespace mk
 {
@@ -55,7 +54,7 @@ namespace mk
     /// @brief stores the vmexit log used by the microkernel
     constinit inline vmexit_log_t g_mut_vmexit_log{};
 
-    /// @brief stores the page pool used by the microkernel
+    /// @brief stores the page_pool_t used by the microkernel
     constinit inline page_pool_t g_mut_page_pool{};
 
     /// @brief stores the huge pool used by the microkernel
@@ -64,14 +63,14 @@ namespace mk
     /// @brief stores the intrinsics used by the microkernel
     constinit inline intrinsic_t g_mut_intrinsic{};
 
-    /// @brief stores the vm pool used by the microkernel
+    /// @brief stores the vm_pool_t used by the microkernel
     constinit inline vm_pool_t g_mut_vm_pool{};
 
-    /// @brief stores the vp pool used by the microkernel
+    /// @brief stores the vp_pool_t used by the microkernel
     constinit inline vp_pool_t g_mut_vp_pool{};
 
-    /// @brief stores the vps pool used by the microkernel
-    constinit inline vps_pool_t g_mut_vps_pool{};
+    /// @brief stores the vs_pool_t used by the microkernel
+    constinit inline vs_pool_t g_mut_vs_pool{};
 
     /// @brief stores the ext pool used by the microkernel
     constinit inline ext_pool_t g_mut_ext_pool{};
@@ -87,12 +86,14 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param pmut_tls the current TLS block
-    ///   @return Returns bsl::exit_success if the exception was handled,
-    ///     bsl::exit_failure otherwise
+    ///   @return Returns bsl::errc_success if the exception was handled,
+    ///     bsl::errc_failure otherwise
     ///
     extern "C" [[nodiscard]] auto
-    dispatch_esr_trampoline(tls_t *const pmut_tls) noexcept -> bsl::exit_code
+    dispatch_esr_trampoline(tls_t *const pmut_tls) noexcept -> bsl::errc_type
     {
+        bsl::expects(nullptr != pmut_tls);
+
         return dispatch_esr(
             *pmut_tls, g_mut_page_pool, g_mut_intrinsic, static_cast<ext_t *>(pmut_tls->ext));
     }
@@ -102,12 +103,15 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param pmut_tls the current TLS block
-    ///   @return Returns bsl::exit_success on success, bsl::exit_failure
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     ///     otherwise
     ///
     [[nodiscard]] extern "C" auto
     dispatch_syscall_trampoline(tls_t *const pmut_tls) noexcept -> syscall::bf_status_t::value_type
     {
+        bsl::expects(nullptr != pmut_tls);
+        bsl::expects(nullptr != pmut_tls->ext);
+
         return dispatch_syscall(
                    *pmut_tls,
                    g_mut_page_pool,
@@ -115,9 +119,8 @@ namespace mk
                    g_mut_intrinsic,
                    g_mut_vm_pool,
                    g_mut_vp_pool,
-                   g_mut_vps_pool,
+                   g_mut_vs_pool,
                    g_mut_ext_pool,
-                   *static_cast<ext_t *>(pmut_tls->ext),
                    g_mut_vmexit_log)
             .get();
     }
@@ -127,16 +130,18 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param pmut_tls the current TLS block
-    ///   @return Returns bsl::exit_success on success, bsl::exit_failure
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     ///     otherwise
     ///
     extern "C" [[nodiscard]] auto
-    vmexit_loop_trampoline(tls_t *const pmut_tls) noexcept -> bsl::exit_code
+    vmexit_loop_trampoline(tls_t *const pmut_tls) noexcept -> bsl::errc_type
     {
+        bsl::expects(nullptr != pmut_tls);
+
         return vmexit_loop(
             *pmut_tls,
             g_mut_intrinsic,
-            g_mut_vps_pool,
+            g_mut_vs_pool,
             *static_cast<ext_t *>(pmut_tls->ext),
             g_mut_vmexit_log);
     }
@@ -146,12 +151,13 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param pmut_tls the current TLS block
-    ///   @return Returns bsl::exit_success if the fail was handled,
-    ///     bsl::exit_failure otherwise.
+    ///   @return Returns bsl::errc_success if the fail was handled,
+    ///     bsl::errc_failure otherwise.
     ///
     extern "C" [[nodiscard]] auto
-    fast_fail_trampoline(tls_t *const pmut_tls) noexcept -> bsl::exit_code
+    fast_fail_trampoline(tls_t *const pmut_tls) noexcept -> bsl::errc_type
     {
+        bsl::expects(nullptr != pmut_tls);
         return fast_fail(*pmut_tls, g_mut_intrinsic, static_cast<ext_t *>(pmut_tls->ext));
     }
 
@@ -163,12 +169,15 @@ namespace mk
     /// <!-- inputs/outputs -->
     ///   @param pmut_args the loader provided arguments to the microkernel.
     ///   @param pmut_tls the current TLS block
-    ///   @return Returns bsl::exit_success on success, bsl::exit_failure
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     ///     otherwise
     ///
     [[nodiscard]] extern "C" auto
-    mk_main(loader::mk_args_t *const pmut_args, tls_t *const pmut_tls) noexcept -> bsl::exit_code
+    mk_main(loader::mk_args_t *const pmut_args, tls_t *const pmut_tls) noexcept -> bsl::errc_type
     {
+        bsl::expects(nullptr != pmut_tls);
+        bsl::expects(nullptr != pmut_args);
+
         return g_mut_mk_main.process(
             *pmut_tls,
             g_mut_page_pool,
@@ -176,7 +185,7 @@ namespace mk
             g_mut_intrinsic,
             g_mut_vm_pool,
             g_mut_vp_pool,
-            g_mut_vps_pool,
+            g_mut_vs_pool,
             g_mut_ext_pool,
             g_mut_system_rpt,
             *pmut_args);

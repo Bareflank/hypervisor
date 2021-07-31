@@ -27,6 +27,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../init_cross_compile_build.cmake)
 add_subdirectory(../../loader loader)
 add_subdirectory(../../runtime runtime)
 add_subdirectory(../../syscall syscall)
+add_subdirectory(../../lib lib)
 # add_subdirectory(../../kernel/integration integration)
 
 if(DEFINED HYPERVISOR_EXTENSIONS_DIR)

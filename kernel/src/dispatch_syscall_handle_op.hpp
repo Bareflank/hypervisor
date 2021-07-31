@@ -25,8 +25,9 @@
 #ifndef DISPATCH_SYSCALL_HANDLE_OP_HPP
 #define DISPATCH_SYSCALL_HANDLE_OP_HPP
 
+#include "dispatch_syscall_helpers.hpp"
+
 #include <bf_constants.hpp>
-#include <ext_t.hpp>
 #include <tls_t.hpp>
 
 #include <bsl/debug.hpp>
@@ -39,23 +40,19 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param mut_tls the current TLS block
-    ///   @param mut_ext the extension that made the syscall
     ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
-    syscall_handle_op_open_handle(tls_t &mut_tls, ext_t &mut_ext) noexcept -> syscall::bf_status_t
+    syscall_handle_op_open_handle(tls_t &mut_tls) noexcept -> syscall::bf_status_t
     {
-        if (bsl::unlikely(bsl::to_u32(mut_tls.ext_reg0) != syscall::BF_SPEC_ID1_VAL)) {
-            bsl::error() << "unsupported syscall ABI "    //--
-                         << bsl::hex(mut_tls.ext_reg0)    //--
-                         << bsl::endl                     //--
-                         << bsl::here();                  //--
-
+        bool const version_supported{is_version_supported(mut_tls.ext_reg0)};
+        if (bsl::unlikely(!version_supported)) {
+            bsl::print<bsl::V>() << bsl::here();
             return syscall::BF_STATUS_FAILURE_UNSUPPORTED;
         }
 
-        auto const handle{mut_ext.open_handle()};
-        if (bsl::unlikely(!handle)) {
+        auto const handle{mut_tls.ext->open_handle()};
+        if (bsl::unlikely(handle.is_invalid())) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
@@ -68,23 +65,18 @@ namespace mk
     ///   @brief Implements the bf_handle_op_close_handle syscall
     ///
     /// <!-- inputs/outputs -->
-    ///   @param mut_tls the current TLS block
-    ///   @param mut_ext the extension that made the syscall
+    ///   @param tls the current TLS block
     ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
-    syscall_handle_op_close_handle(tls_t &mut_tls, ext_t &mut_ext) noexcept -> syscall::bf_status_t
+    syscall_handle_op_close_handle(tls_t const &tls) noexcept -> syscall::bf_status_t
     {
-        if (bsl::unlikely(!mut_ext.is_handle_valid(bsl::to_u64(mut_tls.ext_reg0)))) {
-            bsl::error() << "invalid handle "             // --
-                         << bsl::hex(mut_tls.ext_reg0)    // --
-                         << bsl::endl                     // --
-                         << bsl::here();                  // --
-
+        if (bsl::unlikely(!verify_handle_for_current_ext(tls))) {
+            bsl::print<bsl::V>() << bsl::here();
             return syscall::BF_STATUS_FAILURE_INVALID_HANDLE;
         }
 
-        mut_ext.close_handle();
+        tls.ext->close_handle();
         return syscall::BF_STATUS_SUCCESS;
     }
 
@@ -93,15 +85,14 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param mut_tls the current TLS block
-    ///   @param mut_ext the extension that made the syscall
     ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
-    dispatch_syscall_handle_op(tls_t &mut_tls, ext_t &mut_ext) noexcept -> syscall::bf_status_t
+    dispatch_syscall_handle_op(tls_t &mut_tls) noexcept -> syscall::bf_status_t
     {
-        switch (syscall::bf_syscall_index(bsl::to_u64(mut_tls.ext_syscall)).get()) {
+        switch (syscall::bf_syscall_index(mut_tls.ext_syscall).get()) {
             case syscall::BF_HANDLE_OP_OPEN_HANDLE_IDX_VAL.get(): {
-                auto const ret{syscall_handle_op_open_handle(mut_tls, mut_ext)};
+                auto const ret{syscall_handle_op_open_handle(mut_tls)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -111,7 +102,7 @@ namespace mk
             }
 
             case syscall::BF_HANDLE_OP_CLOSE_HANDLE_IDX_VAL.get(): {
-                auto const ret{syscall_handle_op_close_handle(mut_tls, mut_ext)};
+                auto const ret{syscall_handle_op_close_handle(mut_tls)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -125,12 +116,7 @@ namespace mk
             }
         }
 
-        bsl::error() << "unknown syscall "               //--
-                     << bsl::hex(mut_tls.ext_syscall)    //--
-                     << bsl::endl                        //--
-                     << bsl::here();                     //--
-
-        return syscall::BF_STATUS_FAILURE_UNSUPPORTED;
+        return report_syscall_unknown_unsupported(mut_tls);
     }
 }
 

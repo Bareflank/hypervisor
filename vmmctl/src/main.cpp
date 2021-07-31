@@ -24,17 +24,15 @@
 
 #include "vmmctl_main.hpp"
 
-#include <ifmap.hpp>
-#include <ioctl.hpp>
-
 #include <bsl/arguments.hpp>
+#include <bsl/basic_errc_type.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
 #include <bsl/cstr_type.hpp>
-#include <bsl/debug.hpp>
 #include <bsl/enable_color.hpp>
 #include <bsl/exit_code.hpp>
 #include <bsl/move.hpp>
+#include <bsl/unlikely.hpp>
 
 /// <!-- description -->
 ///   @brief Provides the main entry point for this application.
@@ -49,9 +47,14 @@ main(bsl::int32 const argc, bsl::cstr_type const *const argv) noexcept -> bsl::e
 {
     bsl::enable_color();
 
-    bsl::arguments mut_args{bsl::to_umax(argc), argv};
+    bsl::arguments mut_args{bsl::to_umx(argc), argv};
     ++mut_args;
 
     vmmctl::vmmctl_main mut_app{};
-    return mut_app.process(bsl::move(mut_args));
+    auto const ret{mut_app.process(bsl::move(mut_args))};
+    if (bsl::unlikely(!ret)) {
+        return bsl::exit_failure;
+    }
+
+    return bsl::exit_success;
 }

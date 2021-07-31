@@ -26,9 +26,9 @@
 
     .text
 
-    .globl  bf_debug_op_dump_vps_impl
-    .type   bf_debug_op_dump_vps_impl, @function
-bf_debug_op_dump_vps_impl:
+    .globl  bf_debug_op_dump_vs_impl
+    .type   bf_debug_op_dump_vs_impl, @function
+bf_debug_op_dump_vs_impl:
 
 /*
     mov rax, 0x6642000000020003
@@ -37,4 +37,4 @@ bf_debug_op_dump_vps_impl:
 
     ret
 
-    .size bf_debug_op_dump_vps_impl, .-bf_debug_op_dump_vps_impl
+    .size bf_debug_op_dump_vs_impl, .-bf_debug_op_dump_vs_impl

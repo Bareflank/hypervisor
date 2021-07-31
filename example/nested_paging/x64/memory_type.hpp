@@ -31,15 +31,15 @@
 namespace example
 {
     /// @brief defines the uncacheable memory type
-    constexpr bsl::safe_uintmax MEMORY_TYPE_UC{bsl::to_umax(0)};
+    constexpr bsl::safe_umx MEMORY_TYPE_UC{bsl::to_umx(0)};
     /// @brief defines the write-combine memory type
-    constexpr bsl::safe_uintmax MEMORY_TYPE_WC{bsl::to_umax(1)};
+    constexpr bsl::safe_umx MEMORY_TYPE_WC{bsl::to_umx(1)};
     /// @brief defines the write-through memory type
-    constexpr bsl::safe_uintmax MEMORY_TYPE_WT{bsl::to_umax(4)};
+    constexpr bsl::safe_umx MEMORY_TYPE_WT{bsl::to_umx(4)};
     /// @brief defines the write-protect memory type
-    constexpr bsl::safe_uintmax MEMORY_TYPE_WP{bsl::to_umax(5)};
+    constexpr bsl::safe_umx MEMORY_TYPE_WP{bsl::to_umx(5)};
     /// @brief defines the write-back memory type
-    constexpr bsl::safe_uintmax MEMORY_TYPE_WB{bsl::to_umax(6)};
+    constexpr bsl::safe_umx MEMORY_TYPE_WB{bsl::to_umx(6)};
 }
 
 #endif

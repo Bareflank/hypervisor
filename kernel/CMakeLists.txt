@@ -65,23 +65,14 @@ target_include_directories(kernel PRIVATE
 # ------------------------------------------------------------------------------
 
 list(APPEND HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/include/alloc_huge_t.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/alloc_page_t.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/allocate_tags.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/allocated_status_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/call_ext.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/execution_status_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/get_current_tls.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/map_page_flags.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/page_pool_record_t.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/page_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/promote.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/return_to_mk.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/return_to_vmexit_loop.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/serial_write_c.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/serial_write_hex.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/vmexit_loop_entry.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/yield.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/bfelf/elf64_ehdr_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/bfelf/elf64_phdr_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/bfelf/elf64_shdr_t.hpp
@@ -95,45 +86,32 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_mem_op.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_vm_op.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_vp_op.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_vps_op.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_syscall_vs_op.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ext_pool_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ext_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/fast_fail.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/huge_pool_t.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/lock_guard_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/mk_main_t.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/page_pool_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/root_page_table_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/serial_write.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/spinlock_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vm_pool_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vm_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vmexit_loop.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vp_pool_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vp_t.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/vps_pool_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/vs_pool_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/bsl/cstdio.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/print_thread_id.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/putc_stderr.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/putc_stdout.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/puts_stderr.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/puts_stdout.hpp)
+)
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
     list(APPEND HEADERS
         ${CMAKE_CURRENT_LIST_DIR}/include/x64/general_purpose_regs_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/include/x64/pdpt_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/include/x64/pdpte_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/include/x64/pdt_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/include/x64/pdte_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/include/x64/pml4t_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/include/x64/pml4te_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/include/x64/pt_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/include/x64/pte_t.hpp
         ${CMAKE_CURRENT_LIST_DIR}/include/x64/tls_t.hpp
         ${CMAKE_CURRENT_LIST_DIR}/include/x64/vmexit_log_pp_t.hpp
         ${CMAKE_CURRENT_LIST_DIR}/include/x64/vmexit_log_record_t.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/x64/dispatch_esr.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/x64/root_page_table_t.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/x64/dispatch_syscall_intrinsic_op.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/x64/vmexit_log_t.hpp
     )
 
@@ -141,9 +119,8 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
         list(APPEND HEADERS
             ${CMAKE_CURRENT_LIST_DIR}/include/x64/amd/vmcb_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/dispatch_esr_nmi.hpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/dispatch_syscall_intrinsic_op.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/intrinsic_t.hpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/vps_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/vs_t.hpp
         )
     endif()
 
@@ -154,9 +131,8 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
             ${CMAKE_CURRENT_LIST_DIR}/include/x64/intel/vmcs_missing_registers_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/include/x64/intel/vmcs_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/dispatch_esr_nmi.hpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/dispatch_syscall_intrinsic_op.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/intrinsic_t.hpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/vps_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/vs_t.hpp
         )
     endif()
 endif()
@@ -181,7 +157,7 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
         ${CMAKE_CURRENT_LIST_DIR}/src/arm/aarch64/intrinsic_t.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/arm/aarch64/root_page_table_t.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/arm/aarch64/vmexit_log_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/arm/aarch64/vps_t.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/arm/aarch64/vs_t.hpp
     )
 endif()
 
@@ -201,6 +177,7 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
     hypervisor_target_source(kernel src/x64/fast_fail_entry.S ${HEADERS})
     hypervisor_target_source(kernel src/x64/get_current_tls.S ${HEADERS})
     hypervisor_target_source(kernel src/x64/mk_main_entry.S ${HEADERS})
+    hypervisor_target_source(kernel src/x64/pause.S ${HEADERS})
     hypervisor_target_source(kernel src/x64/return_to_current_fast_fail.S ${HEADERS})
     hypervisor_target_source(kernel src/x64/return_to_mk.S ${HEADERS})
     hypervisor_target_source(kernel src/x64/return_to_vmexit_loop.S ${HEADERS})
@@ -208,7 +185,6 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
     hypervisor_target_source(kernel src/x64/serial_write_hex.S ${HEADERS})
     hypervisor_target_source(kernel src/x64/set_esr.S ${HEADERS})
     hypervisor_target_source(kernel src/x64/vmexit_loop_entry.S ${HEADERS})
-    hypervisor_target_source(kernel src/x64/yield.S ${HEADERS})
 
     if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
         hypervisor_target_source(kernel src/x64/amd/intrinsic_t.S ${HEADERS})
@@ -230,6 +206,7 @@ endif()
 #     hypervisor_target_source(kernel src/arm/aarch64/get_current_tls.S ${HEADERS})
 #     hypervisor_target_source(kernel src/arm/aarch64/intrinsic_t.S ${HEADERS})
 #     hypervisor_target_source(kernel src/arm/aarch64/mk_main_entry.S ${HEADERS})
+#     hypervisor_target_source(kernel src/arm/aarch64/pause.S ${HEADERS})
 #     hypervisor_target_source(kernel src/arm/aarch64/promote.S ${HEADERS})
 #     hypervisor_target_source(kernel src/arm/aarch64/return_to_current_fast_fail.S ${HEADERS})
 #     hypervisor_target_source(kernel src/arm/aarch64/return_to_mk.S ${HEADERS})
@@ -237,7 +214,6 @@ endif()
 #     hypervisor_target_source(kernel src/arm/aarch64/serial_write_c.S ${HEADERS})
 #     hypervisor_target_source(kernel src/arm/aarch64/serial_write_hex.S ${HEADERS})
 #     hypervisor_target_source(kernel src/arm/aarch64/vmexit_loop_entry.S ${HEADERS})
-#     hypervisor_target_source(kernel src/arm/aarch64/yield.S ${HEADERS})
 # endif()
 
 # ------------------------------------------------------------------------------
@@ -249,6 +225,7 @@ target_link_libraries(kernel PRIVATE
     loader
     syscall
     hypervisor
+    lib
 )
 
 # ------------------------------------------------------------------------------

@@ -28,10 +28,10 @@
 #include <ext_t.hpp>
 #include <intrinsic_t.hpp>
 #include <vmexit_log_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/debug.hpp>
-#include <bsl/exit_code.hpp>
+#include <bsl/errc_type.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
@@ -42,35 +42,35 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param mut_tls the current TLS block
-    ///   @param mut_intrinsic the intrinsics to use
-    ///   @param mut_vps_pool the VPS pool to use
+    ///   @param mut_intrinsic the intrinsic_t to use
+    ///   @param mut_vs_pool the VPS pool to use
     ///   @param mut_ext the ext_t to handle the VMExit
     ///   @param mut_log the VMExit log to use
-    ///   @return Returns bsl::exit_success on success, bsl::exit_failure
+    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     ///     otherwise
     ///
     [[nodiscard]] constexpr auto
     vmexit_loop(
         tls_t &mut_tls,
         intrinsic_t &mut_intrinsic,
-        vps_pool_t &mut_vps_pool,
+        vs_pool_t &mut_vs_pool,
         ext_t &mut_ext,
-        vmexit_log_t &mut_log) noexcept -> bsl::exit_code
+        vmexit_log_t &mut_log) noexcept -> bsl::errc_type
     {
-        auto const exit_reason{
-            mut_vps_pool.run(mut_tls, mut_intrinsic, mut_log, bsl::to_u16(mut_tls.active_vpsid))};
-        if (bsl::unlikely(!exit_reason)) {
+        auto mut_exit_reason{
+            mut_vs_pool.run(mut_tls, mut_intrinsic, mut_log, bsl::to_u16(mut_tls.active_vsid))};
+        if (bsl::unlikely(mut_exit_reason.is_invalid())) {
             bsl::print<bsl::V>() << bsl::here();
-            return bsl::exit_failure;
+            return bsl::errc_failure;
         }
 
-        auto const ret{mut_ext.vmexit(mut_tls, mut_intrinsic, exit_reason)};
+        auto const ret{mut_ext.vmexit(mut_tls, mut_intrinsic, mut_exit_reason)};
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
-            return bsl::exit_failure;
+            return ret;
         }
 
-        return bsl::exit_success;
+        return ret;
     }
 }
 

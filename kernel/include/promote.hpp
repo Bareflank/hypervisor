@@ -40,7 +40,7 @@ namespace mk
     ///   @param state the state to promote to
     ///   @param ec the exit code to provide
     ///
-    extern "C" void promote(void const *const state, bsl::uintmax const ec = {}) noexcept;
+    extern "C" void promote(void const *const state, bsl::uintmx const ec = {}) noexcept;
 }
 
 #endif

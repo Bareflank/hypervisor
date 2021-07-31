@@ -63,7 +63,7 @@ namespace mk
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
                 pml4t_t mut_virt{};
-                bsl::safe_uintmax const phys{bsl::safe_uintmax::failure()};
+                bsl::safe_umx const phys{bsl::safe_umx::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     mut_page_pool.set_allocate<pml4t_t>(ALLOCATE_TAG_PML4TS, &mut_virt, {});
                     mut_page_pool.set_virt_to_phys(&mut_virt, phys);
@@ -185,8 +185,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_then{} = [&]() noexcept {
@@ -201,8 +201,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -223,8 +223,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{bsl::safe_uintmax::failure()};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{bsl::safe_umx::failure()};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -245,8 +245,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{42_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{42_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -267,8 +267,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -289,8 +289,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{bsl::safe_uintmax::failure()};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{bsl::safe_umx::failure()};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -311,8 +311,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{42_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{42_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -333,9 +333,9 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
-                constexpr auto flgs{0_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
+                constexpr auto flgs{0_umx};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -355,9 +355,9 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
-                constexpr auto flgs{bsl::safe_uintmax::failure()};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
+                constexpr auto flgs{bsl::safe_umx::failure()};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -377,8 +377,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_WRITE | MAP_PAGE_EXECUTE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -399,10 +399,10 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-                constexpr auto atrl{bsl::safe_uintmax::failure()};
+                constexpr auto atrl{bsl::safe_umx::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_then{} = [&]() noexcept {
@@ -421,10 +421,10 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-                constexpr auto atrl{9_umax};
+                constexpr auto atrl{9_umx};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_then{} = [&]() noexcept {
@@ -443,8 +443,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -467,8 +467,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -491,14 +491,14 @@ namespace mk
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
                 pdpt_t mut_pdpt{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     mut_page_pool.set_allocate<pdpt_t>(ALLOCATE_TAG_PDPTS, &mut_pdpt, phys);
-                    mut_page_pool.set_virt_to_phys(&mut_pdpt, bsl::safe_uintmax::failure());
+                    mut_page_pool.set_virt_to_phys(&mut_pdpt, bsl::safe_umx::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
@@ -515,8 +515,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -539,14 +539,14 @@ namespace mk
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
                 pdt_t mut_pdt{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     mut_page_pool.set_allocate<pdt_t>(ALLOCATE_TAG_PDTS, &mut_pdt, phys);
-                    mut_page_pool.set_virt_to_phys(&mut_pdt, bsl::safe_uintmax::failure());
+                    mut_page_pool.set_virt_to_phys(&mut_pdt, bsl::safe_umx::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
@@ -563,8 +563,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -587,14 +587,14 @@ namespace mk
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
                 pt_t mut_pt{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     mut_page_pool.set_allocate<pt_t>(ALLOCATE_TAG_PTS, &mut_pt, phys);
-                    mut_page_pool.set_virt_to_phys(&mut_pt, bsl::safe_uintmax::failure());
+                    mut_page_pool.set_virt_to_phys(&mut_pt, bsl::safe_umx::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
@@ -612,13 +612,13 @@ namespace mk
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
                 pml4t_t mut_pml4t{};
-                constexpr auto pml4t_phys{0x200000_umax};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto pml4t_phys{0x200000_umx};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-                constexpr auto enable{1_umax};
-                constexpr auto disable{0_umax};
+                constexpr auto enable{1_umx};
+                constexpr auto disable{0_umx};
                 bsl::ut_when{} = [&]() noexcept {
                     mut_page_pool.set_allocate<pml4t_t>(
                         ALLOCATE_TAG_PML4TS, &mut_pml4t, pml4t_phys);
@@ -641,8 +641,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -663,8 +663,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_EXECUTE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -685,15 +685,15 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt1{0x1000_umax};
-                constexpr auto virt2{0x2000_umax};
-                constexpr auto virt3{0x201000_umax};
-                constexpr auto virt4{0x202000_umax};
-                constexpr auto virt5{0x40001000_umax};
-                constexpr auto virt6{0x40002000_umax};
-                constexpr auto virt7{0x8000001000_umax};
-                constexpr auto virt8{0x8000002000_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt1{0x1000_umx};
+                constexpr auto virt2{0x2000_umx};
+                constexpr auto virt3{0x201000_umx};
+                constexpr auto virt4{0x202000_umx};
+                constexpr auto virt5{0x40001000_umx};
+                constexpr auto virt6{0x40002000_umx};
+                constexpr auto virt7{0x8000001000_umx};
+                constexpr auto virt8{0x8000002000_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -728,8 +728,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1042_umax};
-                constexpr auto phys{0x1000_umax};
+                constexpr auto virt{0x1042_umx};
+                constexpr auto phys{0x1000_umx};
                 constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
                 bsl::ut_when{} = [&]() noexcept {
@@ -750,7 +750,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(
@@ -768,7 +768,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -792,7 +792,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TLS};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -816,7 +816,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TCB};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -840,7 +840,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_ELF};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -864,7 +864,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0_umax};
+                constexpr auto virt{0_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -888,7 +888,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{bsl::safe_uintmax::failure()};
+                constexpr auto virt{bsl::safe_umx::failure()};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -912,7 +912,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{42_umax};
+                constexpr auto virt{42_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -936,8 +936,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto atrl{0_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto atrl{0_umx};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_then{} = [&]() noexcept {
@@ -960,8 +960,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto atrl{bsl::safe_uintmax::failure()};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto atrl{bsl::safe_umx::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_then{} = [&]() noexcept {
@@ -985,12 +985,12 @@ namespace mk
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
                 page_t mut_page{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     mut_page_pool.set_allocate<page_t>(ALLOCATE_TAG_EXT_STACK, &mut_page, {});
-                    mut_page_pool.set_virt_to_phys(&mut_page, bsl::safe_uintmax::failure());
+                    mut_page_pool.set_virt_to_phys(&mut_page, bsl::safe_umx::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             nullptr ==
@@ -1009,12 +1009,12 @@ namespace mk
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
                 ext_tcb_t mut_page{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TCB};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     mut_page_pool.set_allocate<ext_tcb_t>(ALLOCATE_TAG_EXT_TCB, &mut_page, {});
-                    mut_page_pool.set_virt_to_phys(&mut_page, bsl::safe_uintmax::failure());
+                    mut_page_pool.set_virt_to_phys(&mut_page, bsl::safe_umx::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             nullptr == mut_rpt.allocate_page_rw<ext_tcb_t>(
@@ -1032,7 +1032,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1053,7 +1053,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TLS};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1074,7 +1074,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TCB};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1095,7 +1095,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_ELF};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1116,7 +1116,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(
@@ -1134,7 +1134,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1158,7 +1158,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TLS};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1182,7 +1182,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TCB};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1206,7 +1206,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_ELF};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1230,7 +1230,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0_umax};
+                constexpr auto virt{0_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1254,7 +1254,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{bsl::safe_uintmax::failure()};
+                constexpr auto virt{bsl::safe_umx::failure()};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1278,7 +1278,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{42_umax};
+                constexpr auto virt{42_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1302,8 +1302,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto atrl{0_umax};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto atrl{0_umx};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_then{} = [&]() noexcept {
@@ -1326,8 +1326,8 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
-                constexpr auto atrl{bsl::safe_uintmax::failure()};
+                constexpr auto virt{0x1000_umx};
+                constexpr auto atrl{bsl::safe_umx::failure()};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_then{} = [&]() noexcept {
@@ -1351,12 +1351,12 @@ namespace mk
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
                 page_t mut_page{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     mut_page_pool.set_allocate<page_t>(ALLOCATE_TAG_EXT_STACK, &mut_page, {});
-                    mut_page_pool.set_virt_to_phys(&mut_page, bsl::safe_uintmax::failure());
+                    mut_page_pool.set_virt_to_phys(&mut_page, bsl::safe_umx::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             nullptr ==
@@ -1375,12 +1375,12 @@ namespace mk
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
                 ext_tcb_t mut_page{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TCB};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     mut_page_pool.set_allocate<ext_tcb_t>(ALLOCATE_TAG_EXT_TCB, &mut_page, {});
-                    mut_page_pool.set_virt_to_phys(&mut_page, bsl::safe_uintmax::failure());
+                    mut_page_pool.set_virt_to_phys(&mut_page, bsl::safe_umx::failure());
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             nullptr == mut_rpt.allocate_page_rx<ext_tcb_t>(
@@ -1398,7 +1398,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1419,7 +1419,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TLS};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1440,7 +1440,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TCB};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1461,7 +1461,7 @@ namespace mk
                 root_page_table_t mut_rpt{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt{0x1000_umax};
+                constexpr auto virt{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_ELF};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -1501,7 +1501,7 @@ namespace mk
                 root_page_table_t mut_rpt2{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt1{0x1000_umax};
+                constexpr auto virt1{0x1000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt1.initialize(mut_tls, mut_page_pool));
@@ -1524,8 +1524,8 @@ namespace mk
                 root_page_table_t mut_rpt2{};
                 page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
-                constexpr auto virt1{0x1000_umax};
-                constexpr auto virt2{0x2000_umax};
+                constexpr auto virt1{0x1000_umx};
+                constexpr auto virt2{0x2000_umx};
                 constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt1.initialize(mut_tls, mut_page_pool));
@@ -1570,21 +1570,21 @@ namespace mk
                 ext_tcb_t *pmut_mut_page5{};
                 page_t *pmut_mut_page6{};
                 pml4t_t mut_pml4t{};
-                constexpr auto pml4t_phys{0x200000_umax};
-                constexpr auto virt0{0x1000_umax};
-                constexpr auto virt1{0x2000_umax};
-                constexpr auto virt2{0x3000_umax};
-                constexpr auto virt3{0x4000_umax};
-                constexpr auto virt4{0x5000_umax};
-                constexpr auto virt5{0x6000_umax};
-                constexpr auto virt6{0x7000_umax};
-                bsl::safe_uintmax mut_phys0{};
-                bsl::safe_uintmax mut_phys1{};
-                bsl::safe_uintmax mut_phys2{};
-                bsl::safe_uintmax mut_phys3{};
-                bsl::safe_uintmax mut_phys4{};
-                bsl::safe_uintmax mut_phys5{};
-                bsl::safe_uintmax mut_phys6{};
+                constexpr auto pml4t_phys{0x200000_umx};
+                constexpr auto virt0{0x1000_umx};
+                constexpr auto virt1{0x2000_umx};
+                constexpr auto virt2{0x3000_umx};
+                constexpr auto virt3{0x4000_umx};
+                constexpr auto virt4{0x5000_umx};
+                constexpr auto virt5{0x6000_umx};
+                constexpr auto virt6{0x7000_umx};
+                bsl::safe_umx mut_phys0{};
+                bsl::safe_umx mut_phys1{};
+                bsl::safe_umx mut_phys2{};
+                bsl::safe_umx mut_phys3{};
+                bsl::safe_umx mut_phys4{};
+                bsl::safe_umx mut_phys5{};
+                bsl::safe_umx mut_phys6{};
                 constexpr auto flgs0{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto flgs1{MAP_PAGE_READ | MAP_PAGE_WRITE};
                 constexpr auto flgs2{MAP_PAGE_READ | MAP_PAGE_WRITE};
@@ -1599,10 +1599,10 @@ namespace mk
                 constexpr auto atrl4{MAP_PAGE_AUTO_RELEASE_TLS};
                 constexpr auto atrl5{MAP_PAGE_AUTO_RELEASE_TCB};
                 constexpr auto atrl6{MAP_PAGE_AUTO_RELEASE_ELF};
-                constexpr auto enable{1_umax};
-                constexpr auto disable{0_umax};
-                constexpr auto pml4te_index0{510_umax};
-                constexpr auto pml4te_index1{511_umax};
+                constexpr auto enable{1_umx};
+                constexpr auto disable{0_umx};
+                constexpr auto pml4te_index0{510_umx};
+                constexpr auto pml4te_index1{511_umx};
                 bsl::ut_when{} = [&]() noexcept {
                     pmut_mut_page0 =
                         mut_page_pool.allocate<page_t>(mut_tls, ALLOCATE_TAG_BF_MEM_OP_ALLOC_PAGE);

@@ -32,20 +32,21 @@
 
 #include <bsl/char_type.hpp>
 #include <bsl/cstr_type.hpp>
+#include <bsl/discard.hpp>
 #include <bsl/is_constant_evaluated.hpp>
 
 namespace bsl
 {
     /// <!-- description -->
-    ///   @brief Outputs a character.
+    ///   @brief Output a character to stdout
     ///
     /// <!-- inputs/outputs -->
     ///   @param c the character to output
     ///
     constexpr void
-    fputc(bsl::char_type const c) noexcept
+    stdio_out_char(bsl::char_type const c) noexcept
     {
-        if (is_constant_evaluated()) {
+        if (bsl::is_constant_evaluated()) {
             return;
         }
 
@@ -54,15 +55,15 @@ namespace bsl
     }
 
     /// <!-- description -->
-    ///   @brief Outputs a string.
+    ///   @brief Output a string to stdout
     ///
     /// <!-- inputs/outputs -->
     ///   @param str the string to output
     ///
     constexpr void
-    fputs(bsl::cstr_type const str) noexcept
+    stdio_out_cstr(bsl::cstr_type const str) noexcept
     {
-        if (is_constant_evaluated()) {
+        if (bsl::is_constant_evaluated()) {
             return;
         }
 

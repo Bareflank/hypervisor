@@ -25,6 +25,9 @@
 #ifndef MOCKS_GS_T_HPP
 #define MOCKS_GS_T_HPP
 
+#include <basic_page_4k_t.hpp>
+
+#include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
 
 namespace example
@@ -37,12 +40,14 @@ namespace example
     ///
     struct gs_t final
     {
+        /// @brief tells certain mocks when to fail
+        bsl::errc_type test_ret;
         /// @brief stores the cpuid value to return from intrinsic_cpuid_impl
-        bsl::safe_uint64 cpuid_val{};
-        /// @brief stores the MSR bitmap used by this vps_t
-        void *msr_bitmap{};
+        bsl::safe_u64 cpuid_val{};
+        /// @brief stores the MSR bitmap used by this vs_t
+        lib::basic_page_4k_t *msr_bitmap{};
         /// @brief stores the physical address of the MSR bitmap above
-        bsl::safe_uintmax msr_bitmap_phys{};
+        bsl::safe_umx msr_bitmap_phys{};
     };
 }
 

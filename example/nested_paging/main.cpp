@@ -30,7 +30,6 @@
 #include <bsl/exit_code.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
-#include <bsl/unlikely_assert.hpp>
 
 namespace example
 {
@@ -42,14 +41,14 @@ namespace example
     ///     by the main function to execute whenever a VMExit occurs.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the VMExit
+    ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     void
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    vmexit_entry(bsl::uint16 const vpsid, bsl::uint64 const exit_reason) noexcept
+    vmexit_entry(bsl::uint16 const vsid, bsl::uint64 const exit_reason) noexcept
     {
-        vmexit(g_handle, vpsid, exit_reason);
+        vmexit(g_handle, vsid, exit_reason);
 
         /// NOTE:
         /// - This code is only reached if an error occurs. Executing this
@@ -79,9 +78,9 @@ namespace example
         ///   When this occurs, the microkernel will halt this PP. In most
         ///   cases, there are only two options here:
         ///   - Do the following, and report an error and halt.
-        ///   - Return to a parent VPS and continue execution from there,
+        ///   - Return to a parent VS and continue execution from there,
         ///     which is typically only possible if you are implementing
-        ///     more than one VPS/VP per PP (e.g., when implementing guest
+        ///     more than one VS/VP per PP (e.g., when implementing guest
         ///     support or VSM support).
         ///
         /// - Another use case is integration testing. We can also use this
@@ -92,10 +91,10 @@ namespace example
         /// NOTE:
         /// - To report success, i.e., you can continue, nothing to see here,
         ///   you need to execute a run API. If you are doing integration
-        ///   testing, this would be bf_vps_op_advance_ip_and_run_current.
+        ///   testing, this would be bf_vs_op_advance_ip_and_run_current.
         ///   If you are cleaning up from a VM failure, you would typically
-        ///   run bf_vps_op_run as you should know exactly what parameters
-        ///   to give it. If you need to know what VM, VP and VPS are
+        ///   run bf_vs_op_run as you should know exactly what parameters
+        ///   to give it. If you need to know what VM, VP and VS are
         ///   currently running, you can use the TLS functions.
         ///
 
@@ -120,63 +119,63 @@ namespace example
     {
         bsl::errc_type ret{};
 
-        bsl::safe_uint16 vpid{};
-        bsl::safe_uint16 vpsid{};
+        bsl::safe_u16 vpid{};
+        bsl::safe_u16 vsid{};
 
         /// NOTE:
-        /// - Create the root VP and root VPS that we will start.
+        /// - Create the root VP and root VS that we will start.
         ///   Since we are not implementing nested virtualization or VSM
-        ///   support, the VPID and VPSID are always identical.
+        ///   support, the VPID and VSID are always identical.
         /// - There is no need to create the root VM as this is created
         ///   for you. You only need to create VMs if you plan to add guest
         ///   VM support to your extension.
         ///
 
         ret = syscall::bf_vp_op_create_vp(g_handle, syscall::BF_ROOT_VMID, ppid, vpid);
-        if (bsl::unlikely_assert(!ret)) {
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
 
-        ret = syscall::bf_vps_op_create_vps(g_handle, vpid, ppid, vpsid);
-        if (bsl::unlikely_assert(!ret)) {
+        ret = syscall::bf_vs_op_create_vs(g_handle, vpid, ppid, vsid);
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
 
         /// NOTE:
-        /// - Initialize the VPS as a root VPS. When the microkernel was
+        /// - Initialize the VS as a root VS. When the microkernel was
         ///   started, the loader saved the state of the root VP. This
-        ///   syscall tells the microkernel to load the VPS with this saved
+        ///   syscall tells the microkernel to load the VS with this saved
         ///   state so that when we run the VP, it will contain the state
         ///   just before the microkernel was started.
         ///
 
-        ret = syscall::bf_vps_op_init_as_root(g_handle, vpsid);
-        if (bsl::unlikely_assert(!ret)) {
+        ret = syscall::bf_vs_op_init_as_root(g_handle, vsid);
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
 
         /// NOTE:
-        /// - Initialize architecture specific logic in the VPS.
+        /// - Initialize architecture specific logic in the VS.
         ///
 
-        if (bsl::unlikely_assert(!init_vps(g_handle, vpsid))) {
+        if (bsl::unlikely(!)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
 
         /// NOTE:
         /// - Run the newly created VP on behalf of the root VM using the
-        ///   newly created and initialized VPS.
-        /// - It should be noted that if bf_vps_op_run succeeds, it will
+        ///   newly created and initialized VS.
+        /// - It should be noted that if bf_vs_op_run succeeds, it will
         ///   not return. Like the rest of the code in this example, we
         ///   return success for unit testing purposes. If this function
         ///   returns, it is actually an error.
         ///
 
-        bsl::discard(syscall::bf_vps_op_run(g_handle, syscall::BF_ROOT_VMID, vpid, vpsid));
+        bsl::discard(syscall::bf_vs_op_run(g_handle, syscall::BF_ROOT_VMID, vpid, vsid));
 
         /// NOTE:
         /// - The following is only called if an error occurs. Failure to
@@ -220,7 +219,7 @@ namespace example
         ///
 
         ret = syscall::bf_handle_op_open_handle(syscall::BF_SPEC_ID1_VAL, g_handle);
-        if (bsl::unlikely_assert(!ret)) {
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
@@ -231,7 +230,7 @@ namespace example
         ///
 
         ret = syscall::bf_callback_op_register_bootstrap(g_handle, &bootstrap_entry);
-        if (bsl::unlikely_assert(!ret)) {
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
@@ -242,7 +241,7 @@ namespace example
         ///
 
         ret = syscall::bf_callback_op_register_vmexit(g_handle, &vmexit_entry);
-        if (bsl::unlikely_assert(!ret)) {
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
@@ -253,7 +252,7 @@ namespace example
         ///
 
         ret = syscall::bf_callback_op_register_fail(g_handle, &fail_entry);
-        if (bsl::unlikely_assert(!ret)) {
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }

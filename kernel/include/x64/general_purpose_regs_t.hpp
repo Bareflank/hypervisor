@@ -35,7 +35,7 @@ namespace mk
     ///
     /// <!-- description -->
     ///   @brief Stores the state of the general purpose registers. Note
-    ///     that this storage is only used when swapping from one VPS to
+    ///     that this storage is only used when swapping from one VS to
     ///     another. Otherwise, an extension's TLS block is used instead
     ///     to access the general purpose registers as they are faster.
     ///

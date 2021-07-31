@@ -39,17 +39,13 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param tls the current TLS block
-    ///   @param intrinsic the intrinsics to use
-    ///   @return Returns bsl::errc_success if the exception was handled,
-    ///     bsl::errc_failure otherwise
+    ///   @param intrinsic the intrinsic_t to use
     ///
-    [[nodiscard]] constexpr auto
-    dispatch_esr_nmi(tls_t const &tls, intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
+    constexpr void
+    dispatch_esr_nmi(tls_t const &tls, intrinsic_t const &intrinsic) noexcept
     {
         bsl::discard(tls);
         bsl::discard(intrinsic);
-
-        return bsl::errc_success;
     }
 }
 

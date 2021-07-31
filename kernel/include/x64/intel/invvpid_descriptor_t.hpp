@@ -47,7 +47,7 @@ namespace mk
         /// @brief reserved
         bsl::uint16 reserved3;
         /// @brief stores the address to invalidate
-        bsl::uintmax addr;
+        bsl::uintmx addr;
     };
 }
 

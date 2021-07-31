@@ -51,6 +51,7 @@ string(CONCAT HYPERVISOR_EXT_LINK_FLAGS
     "-static "
     "-nostdlib "
     "-z noexecstack "
+    "--gc-sections "
     "-T ${CMAKE_BINARY_DIR}/toolchain/x64/ext.ld "
 )
 

@@ -31,18 +31,18 @@
 namespace example
 {
     /// @brief Map a page with read permmissions (has no effect)
-    constexpr bsl::safe_uintmax MAP_PAGE_READ{bsl::to_umax(0x0000000000000001U)};
+    constexpr bsl::safe_umx MAP_PAGE_READ{bsl::to_umx(0x0000000000000001U)};
     /// @brief Map a page with write permmissions
-    constexpr bsl::safe_uintmax MAP_PAGE_WRITE{bsl::to_umax(0x0000000000000002U)};
+    constexpr bsl::safe_umx MAP_PAGE_WRITE{bsl::to_umx(0x0000000000000002U)};
     /// @brief Map a page with execute permmissions
-    constexpr bsl::safe_uintmax MAP_PAGE_EXECUTE{bsl::to_umax(0x0000000000000004U)};
+    constexpr bsl::safe_umx MAP_PAGE_EXECUTE{bsl::to_umx(0x0000000000000004U)};
 
     /// @brief Map a page with read/execute permmissions
-    constexpr bsl::safe_uintmax MAP_PAGE_RE{MAP_PAGE_READ | MAP_PAGE_EXECUTE};
+    constexpr bsl::safe_umx MAP_PAGE_RE{MAP_PAGE_READ | MAP_PAGE_EXECUTE};
     /// @brief Map a page with read/write permmissions
-    constexpr bsl::safe_uintmax MAP_PAGE_RW{MAP_PAGE_READ | MAP_PAGE_WRITE};
+    constexpr bsl::safe_umx MAP_PAGE_RW{MAP_PAGE_READ | MAP_PAGE_WRITE};
     /// @brief Map a page with read/write/execute permmissions
-    constexpr bsl::safe_uintmax MAP_PAGE_RWE{MAP_PAGE_READ | MAP_PAGE_WRITE | MAP_PAGE_EXECUTE};
+    constexpr bsl::safe_umx MAP_PAGE_RWE{MAP_PAGE_READ | MAP_PAGE_WRITE | MAP_PAGE_EXECUTE};
 }
 
 #endif

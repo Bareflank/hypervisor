@@ -36,6 +36,7 @@
 #include <bsl/as_const.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
+#include <bsl/expects.hpp>
 #include <bsl/finally.hpp>
 #include <bsl/move.hpp>
 #include <bsl/touch.hpp>
@@ -52,6 +53,21 @@ namespace mk
     {
         /// @brief stores all of the extensions.
         bsl::array<ext_t, HYPERVISOR_MAX_EXTENSIONS.get()> m_pool{};
+
+        /// <!-- description -->
+        ///   @brief Returns the ext_t associated with the provided extid.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param extid the ID of the ext_t to get
+        ///   @return Returns the ext_t associated with the provided extid.
+        ///
+        [[nodiscard]] constexpr auto
+        get_ext(bsl::safe_u16 const &extid) const noexcept -> ext_t const *
+        {
+            bsl::expects(extid.is_valid_and_checked());
+            bsl::expects(extid < bsl::to_u16(m_pool.size()));
+            return m_pool.at_if(bsl::to_idx(extid));
+        }
 
     public:
         /// <!-- description -->
@@ -76,16 +92,18 @@ namespace mk
                 this->release(mut_tls, mut_page_pool);
             }};
 
-            for (auto const ext : m_pool) {
-                if (nullptr == *elf_files.at_if(ext.index)) {
+            for (bsl::safe_idx mut_i{}; mut_i < m_pool.size(); ++mut_i) {
+                auto *const pmut_ext{m_pool.at_if(mut_i)};
+
+                if (nullptr == *elf_files.at_if(mut_i)) {
                     break;
                 }
 
-                auto const ret{ext.data->initialize(
+                auto const ret{pmut_ext->initialize(
                     mut_tls,
                     mut_page_pool,
-                    bsl::to_u16(ext.index),
-                    *elf_files.at_if(ext.index),
+                    bsl::to_u16(mut_i),
+                    *elf_files.at_if(mut_i),
                     system_rpt)};
 
                 if (bsl::unlikely(!ret)) {
@@ -110,8 +128,8 @@ namespace mk
         constexpr void
         release(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept
         {
-            for (auto const ext : m_pool) {
-                ext.data->release(mut_tls, mut_page_pool);
+            for (auto &mut_ext : m_pool) {
+                mut_ext.release(mut_tls, mut_page_pool);
             }
         }
 
@@ -128,11 +146,11 @@ namespace mk
         ///
         [[nodiscard]] constexpr auto
         signal_vm_created(
-            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_uint16 const &vmid) noexcept
+            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_u16 const &vmid) noexcept
             -> bsl::errc_type
         {
-            for (auto const ext : m_pool) {
-                auto const ret{ext.data->signal_vm_created(mut_tls, mut_page_pool, vmid)};
+            for (auto &mut_ext : m_pool) {
+                auto const ret{mut_ext.signal_vm_created(mut_tls, mut_page_pool, vmid)};
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -152,25 +170,14 @@ namespace mk
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param vmid the VMID of the VM that was destroyed.
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] constexpr auto
+        constexpr void
         signal_vm_destroyed(
-            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_uint16 const &vmid) noexcept
-            -> bsl::errc_type
+            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_u16 const &vmid) noexcept
         {
-            for (auto const ext : m_pool) {
-                auto const ret{ext.data->signal_vm_destroyed(mut_tls, mut_page_pool, vmid)};
-                if (bsl::unlikely(!ret)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                bsl::touch();
+            for (auto &mut_ext : m_pool) {
+                mut_ext.signal_vm_destroyed(mut_tls, mut_page_pool, vmid);
             }
-
-            return bsl::errc_success;
         }
 
         /// <!-- description -->
@@ -186,8 +193,8 @@ namespace mk
         [[nodiscard]] constexpr auto
         start(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept -> bsl::errc_type
         {
-            for (auto const ext : m_pool) {
-                auto const ret{ext.data->start(mut_tls, mut_intrinsic)};
+            for (auto &mut_ext : m_pool) {
+                auto const ret{mut_ext.start(mut_tls, mut_intrinsic)};
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -212,8 +219,8 @@ namespace mk
         [[nodiscard]] constexpr auto
         bootstrap(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept -> bsl::errc_type
         {
-            for (auto const ext : m_pool) {
-                auto const ret{ext.data->bootstrap(mut_tls, mut_intrinsic)};
+            for (auto &mut_ext : m_pool) {
+                auto const ret{mut_ext.bootstrap(mut_tls, mut_intrinsic)};
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -230,28 +237,16 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
-        ///   @param page_pool the page_pool_t to use
         ///   @param extid the ID of the extension to dump
         ///
         constexpr void
-        dump(tls_t const &tls, page_pool_t const &page_pool, bsl::safe_uint16 const &extid)
-            const noexcept
+        dump(tls_t const &tls, bsl::safe_u16 const &extid) const noexcept
         {
             if constexpr (BSL_DEBUG_LEVEL == bsl::CRITICAL_ONLY) {
                 return;
             }
 
-            auto const *const ext{m_pool.at_if(bsl::to_umax(extid))};
-            if (bsl::unlikely(nullptr == ext)) {
-                bsl::error() << "invalid extid "    // --
-                             << bsl::hex(extid)     // --
-                             << bsl::endl           // --
-                             << bsl::here();        // --
-
-                return;
-            }
-
-            ext->dump(tls, page_pool);
+            this->get_ext(extid)->dump(tls);
         }
     };
 }

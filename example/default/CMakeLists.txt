@@ -112,51 +112,40 @@ target_include_directories(example_default PRIVATE
 #
 
 list(APPEND HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/include/dummy_t.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bootstrap_t.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/fail_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/allocated_status_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_bootstrap.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_fail.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vp_pool_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vp_t.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/vps_pool_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/vs_pool_t.hpp
 )
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
     list(APPEND HEADERS
+        ${CMAKE_CURRENT_LIST_DIR}/src/x64/dispatch_vmexit_cpuid.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/x64/intrinsic_cpuid_impl.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/x64/intrinsic_t.hpp
     )
 
     if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
         list(APPEND HEADERS
-            ${CMAKE_CURRENT_LIST_DIR}/include/x64/amd/arch_dummy_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/dispatch_vmexit.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/gs_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/tls_t.hpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/intrinsic_t.hpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/vmexit_t.hpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/vps_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/vs_t.hpp
         )
     endif()
 
     if(HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
         list(APPEND HEADERS
-            ${CMAKE_CURRENT_LIST_DIR}/include/x64/intel/arch_dummy_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/dispatch_vmexit_nmi_window.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/dispatch_vmexit_nmi.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/dispatch_vmexit.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/gs_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/tls_t.hpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/intrinsic_t.hpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/vmexit_t.hpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/vps_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/vs_t.hpp
         )
     endif()
-endif()
-
-if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
-    list(APPEND HEADERS
-        ${CMAKE_CURRENT_LIST_DIR}/include/arm/aarch64/arch_dummy_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/arm/aarch64/gs_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/arm/aarch64/tls_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/arm/aarch64/intrinsic_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/arm/aarch64/vmexit_t.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/arm/aarch64/vps_t.hpp
-    )
 endif()
 
 # ------------------------------------------------------------------------------
@@ -193,10 +182,11 @@ target_link_libraries(example_default PRIVATE
     bsl
     loader
     syscall
+    lib
 )
 
 # ------------------------------------------------------------------------------
-# Install
+# Strip
 # ------------------------------------------------------------------------------
 
 # NOTE:
@@ -208,12 +198,3 @@ target_link_libraries(example_default PRIVATE
 if(CMAKE_BUILD_TYPE STREQUAL RELEASE OR CMAKE_BUILD_TYPE STREQUAL MINSIZEREL)
     add_custom_command(TARGET example_default POST_BUILD COMMAND ${CMAKE_STRIP} example_default)
 endif()
-
-# NOTE:
-# - You can install wherever you want. We install into the bin folder,
-#   which the build system can find for starting/stopping the hypervisor.
-#   If you provide your own tools, you can install to wherever is easier
-#   for you.
-#
-
-install(TARGETS example_default DESTINATION bin)

@@ -55,7 +55,7 @@ namespace mk
         ///     deallocated.
         ///
         [[nodiscard]] static constexpr auto
-        is_deallocated(tls_t &tls, bsl::safe_uint16 const &vmid) noexcept -> bool
+        is_deallocated(tls_t &tls, bsl::safe_u16 const &vmid) noexcept -> bool
         {
             bsl::discard(vmid);
             return tls.test_ret == errc_vm_is_deallocated_failure;
@@ -74,7 +74,7 @@ namespace mk
         ///     allocated.
         ///
         [[nodiscard]] static constexpr auto
-        is_allocated(tls_t &tls, bsl::safe_uint16 const &vmid) noexcept -> bool
+        is_allocated(tls_t &tls, bsl::safe_u16 const &vmid) noexcept -> bool
         {
             bsl::discard(vmid);
             return tls.test_ret != errc_vm_is_allocated_failure;
@@ -93,7 +93,7 @@ namespace mk
         ///     a zombie.
         ///
         [[nodiscard]] static constexpr auto
-        is_zombie(tls_t &tls, bsl::safe_uint16 const &vmid) noexcept -> bool
+        is_zombie(tls_t &tls, bsl::safe_u16 const &vmid) noexcept -> bool
         {
             bsl::discard(vmid);
             return tls.test_ret == errc_vm_is_zombie_failure;

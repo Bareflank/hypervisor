@@ -40,14 +40,14 @@ namespace integration
     ///   @brief Implements the VMExit entry function.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the VMExit
+    ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     void
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    vmexit_entry(bsl::uint16 const vpsid, bsl::uint64 const exit_reason) noexcept
+    vmexit_entry(bsl::uint16 const vsid, bsl::uint64 const exit_reason) noexcept
     {
-        bsl::discard(vpsid);
+        bsl::discard(vsid);
         bsl::discard(exit_reason);
 
         syscall::bf_control_op_exit();

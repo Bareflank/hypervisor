@@ -30,6 +30,7 @@
 
 namespace
 {
+    /// @brief verify constinit it supported
     constinit mk::huge_pool_t const g_verify_constinit{};
 }
 

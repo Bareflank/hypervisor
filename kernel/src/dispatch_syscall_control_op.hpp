@@ -25,12 +25,11 @@
 #ifndef DISPATCH_SYSCALL_CONTROL_OP_HPP
 #define DISPATCH_SYSCALL_CONTROL_OP_HPP
 
+#include "dispatch_syscall_helpers.hpp"
+
 #include <bf_constants.hpp>
-#include <ext_t.hpp>
 #include <return_to_mk.hpp>
 #include <tls_t.hpp>
-
-#include <bsl/debug.hpp>
 
 namespace mk
 {
@@ -39,26 +38,25 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param tls the current TLS block
-    ///   @param ext the extension that made the syscall
     ///   @return Returns a bf_status_t containing success or failure
     ///
     [[nodiscard]] constexpr auto
-    dispatch_syscall_control_op(tls_t const &tls, ext_t const &ext) noexcept -> syscall::bf_status_t
+    dispatch_syscall_control_op(tls_t const &tls) noexcept -> syscall::bf_status_t
     {
-        switch (syscall::bf_syscall_index(bsl::to_umax(tls.ext_syscall)).get()) {
+        switch (syscall::bf_syscall_index(tls.ext_syscall).get()) {
             case syscall::BF_CONTROL_OP_EXIT_IDX_VAL.get(): {
-                return_to_mk(bsl::exit_failure);
+                return_to_mk(bsl::errc_failure);
 
                 // Unreachable
                 return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_CONTROL_OP_WAIT_IDX_VAL.get(): {
-                if (ext.is_started()) {
-                    return_to_mk(bsl::exit_failure);
+                if (tls.ext->is_started()) {
+                    return_to_mk(bsl::errc_failure);
                 }
                 else {
-                    return_to_mk(bsl::exit_success);
+                    return_to_mk(bsl::errc_success);
                 }
 
                 // Unreachable
@@ -70,12 +68,7 @@ namespace mk
             }
         }
 
-        bsl::error() << "unknown syscall "           //--
-                     << bsl::hex(tls.ext_syscall)    //--
-                     << bsl::endl                    //--
-                     << bsl::here();                 //--
-
-        return syscall::BF_STATUS_FAILURE_UNSUPPORTED;
+        return report_syscall_unknown_unsupported(tls);
     }
 }
 

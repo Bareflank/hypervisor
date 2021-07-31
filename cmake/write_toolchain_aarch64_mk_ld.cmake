@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-if (NOT EXISTS ${CMAKE_BINARY_DIR}/toolchain/arm/aarch64/mk.ld)
+if(NOT EXISTS ${CMAKE_BINARY_DIR}/toolchain/arm/aarch64/mk.ld)
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/toolchain)
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/toolchain/arm)
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/toolchain/arm/aarch64)

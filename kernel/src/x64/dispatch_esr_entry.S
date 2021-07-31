@@ -246,70 +246,7 @@ dispatch_esr_entry_2:
     .type   dispatch_esr_entry_3, @function
 dispatch_esr_entry_3:
 
-    mov gs:[0x0B0], rax
-    mov gs:[0x0B8], rbx
-    mov gs:[0x0C0], rcx
-    mov gs:[0x0C8], rdx
-    mov gs:[0x0D0], rbp
-    mov gs:[0x0D8], rsi
-    mov gs:[0x0E0], rdi
-    mov gs:[0x0E8], r8
-    mov gs:[0x0F0], r9
-    mov gs:[0x0F8], r10
-    mov gs:[0x100], r11
-    mov gs:[0x108], r12
-    mov gs:[0x110], r13
-    mov gs:[0x118], r14
-    mov gs:[0x120], r15
-
-    mov rax, [rsp + 0x00]
-    mov gs:[0x128], rax
-    mov rax, [rsp + 0x18]
-    mov gs:[0x130], rax
-
-    mov rax, 0x3
-    mov gs:[0x138], rax
-    mov rax, 0x0
-    mov gs:[0x140], rax
-
-    mov rax, cr0
-    mov gs:[0x148], rax
-    mov rax, cr2
-    mov gs:[0x150], rax
-    mov rax, cr3
-    mov gs:[0x158], rax
-    mov rax, cr4
-    mov gs:[0x160], rax
-
-    mov rax, [rsp + 0x08]
-    mov gs:[0x168], rax
-    mov rax, [rsp + 0x20]
-    mov gs:[0x170], rax
-
-    mov rax, [rsp + 0x10]
-    mov gs:[0x178], rax
-
-    call dispatch_esr_entry
-
-    mov r15, gs:[0x120]
-    mov r14, gs:[0x118]
-    mov r13, gs:[0x110]
-    mov r12, gs:[0x108]
-    mov r11, gs:[0x100]
-    mov r10, gs:[0x0F8]
-    mov r9,  gs:[0x0F0]
-    mov r8,  gs:[0x0E8]
-    mov rdi, gs:[0x0E0]
-    mov rsi, gs:[0x0D8]
-    mov rbp, gs:[0x0D0]
-    mov rdx, gs:[0x0C8]
-    mov rcx, gs:[0x0C0]
-    mov rbx, gs:[0x0B8]
-    mov rax, gs:[0x0B0]
-
-    iretq
-    int 3
-
+    jne return_to_current_fast_fail
     .size dispatch_esr_entry_3, .-dispatch_esr_entry_3
 
 

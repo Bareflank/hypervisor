@@ -25,12 +25,6 @@
 #ifndef MOCKS_INTRINSIC_HPP
 #define MOCKS_INTRINSIC_HPP
 
-#include <gs_t.hpp>
-#include <tls_t.hpp>
-
-#include <bsl/discard.hpp>
-#include <bsl/errc_type.hpp>
-
 namespace example
 {
     /// @class example::intrinsic_t
@@ -41,57 +35,7 @@ namespace example
     ///     for all architectures.
     ///
     class intrinsic_t final
-    {
-        /// @brief stores the return value for initialize
-        bsl::errc_type m_initialize{};
-
-    public:
-        /// <!-- description -->
-        ///   @brief Initializes this intrinsic_t.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param gs the gs_t to use
-        ///   @param tls the tls_t to use
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        initialize(gs_t const &gs, tls_t const &tls) noexcept -> bsl::errc_type
-        {
-            bsl::discard(gs);
-            bsl::discard(tls);
-
-            return m_initialize;
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the return value of initialize.
-        ///     (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param errc the bsl::errc_type to return when executing
-        ///     initialize
-        ///
-        constexpr void
-        set_initialize(bsl::errc_type const &errc) noexcept
-        {
-            m_initialize = errc;
-        }
-
-        /// <!-- description -->
-        ///   @brief Release the intrinsic_t.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param gs the gs_t to use
-        ///   @param tls the tls_t to use
-        ///
-        static constexpr void
-        release(gs_t const &gs, tls_t const &tls) noexcept
-        {
-            bsl::discard(gs);
-            bsl::discard(tls);
-        }
-    };
+    {};
 }
 
 #endif

@@ -41,16 +41,16 @@ namespace integration
     ///   @brief Implements the VMExit entry function.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the VMExit
+    ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     void
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    vmexit_entry(bsl::uint16 const vpsid, bsl::uint64 const exit_reason) noexcept
+    vmexit_entry(bsl::uint16 const vsid, bsl::uint64 const exit_reason) noexcept
     {
         bsl::errc_type ret{};
 
-        bsl::discard(vpsid);
+        bsl::discard(vsid);
         bsl::discard(exit_reason);
 
         // ---------------------------------------------------------------------
@@ -98,9 +98,9 @@ namespace integration
     {
         bsl::errc_type ret{};
 
-        bsl::safe_uint16 vmid{};
-        bsl::safe_uint16 vpid{};
-        bsl::safe_uint16 vpsid{};
+        bsl::safe_u16 vmid{};
+        bsl::safe_u16 vpid{};
+        bsl::safe_u16 vsid{};
 
         /// NOTE:
         /// - The max number of VMs an extension can create is one less than
@@ -149,13 +149,13 @@ namespace integration
         integration::verify(bsl::errc_failure == ret);
 
         // create all, then destroy all, prove that we can still create
-        constexpr auto one{1_umax};
-        for (bsl::safe_uintmax i{one}; i < HYPERVISOR_MAX_VMS; ++i) {
+        constexpr auto one{1_umx};
+        for (bsl::safe_idx i{one}; i < HYPERVISOR_MAX_VMS; ++i) {
             ret = syscall::bf_vm_op_create_vm(g_handle, vmid);
             integration::require_success(ret);
         }
 
-        for (bsl::safe_uintmax i{HYPERVISOR_MAX_VMS}; i > one; --i) {
+        for (bsl::safe_idx i{HYPERVISOR_MAX_VMS}; i > one; --i) {
             ret = syscall::bf_vm_op_destroy_vm(g_handle, bsl::to_u16(i - one));
             integration::verify(bsl::errc_success == ret);
         }
@@ -171,16 +171,16 @@ namespace integration
         ret = syscall::bf_vp_op_create_vp(g_handle, vmid, ppid, vpid);
         integration::require_success(ret);
 
-        ret = syscall::bf_vps_op_create_vps(g_handle, vpid, ppid, vpsid);
+        ret = syscall::bf_vs_op_create_vs(g_handle, vpid, ppid, vsid);
         integration::require_success(ret);
 
-        ret = syscall::bf_vps_op_init_as_root(g_handle, vpsid);
+        ret = syscall::bf_vs_op_init_as_root(g_handle, vsid);
         integration::require_success(ret);
 
-        ret = init_vps(g_handle, vpsid);
+        ret = init_vs(g_handle, vsid);
         integration::require_success(ret);
 
-        ret = syscall::bf_vps_op_run(g_handle, vmid, vpid, vpsid);
+        ret = syscall::bf_vs_op_run(g_handle, vmid, vpid, vsid);
         integration::require_success(ret);
 
         bsl::print<bsl::V>() << bsl::here();

@@ -44,13 +44,13 @@ namespace mk
     class dummy_vp_t final
     {
         /// @brief stores the ID associated with this vp_t
-        bsl::safe_uint16 m_id{bsl::safe_uint16::failure()};
+        bsl::safe_u16 m_id{bsl::safe_u16::failure()};
         /// @brief stores whether or not this vp_t is allocated.
         allocated_status_t m_allocated{allocated_status_t::deallocated};
         /// @brief stores the ID of the VM this vp_t is assigned to
-        bsl::safe_uint16 m_assigned_vmid{syscall::BF_INVALID_ID};
+        bsl::safe_u16 m_assigned_vmid{syscall::BF_INVALID_ID};
         /// @brief stores the ID of the PP this vp_t is assigned to
-        bsl::safe_uint16 m_assigned_ppid{syscall::BF_INVALID_ID};
+        bsl::safe_u16 m_assigned_ppid{syscall::BF_INVALID_ID};
         /// @brief stores whether or not this vp_t is active.
         bool m_active{};
 
@@ -65,7 +65,7 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        initialize(tls_t &tls, bsl::safe_uint16 const &i) noexcept -> bsl::errc_type
+        initialize(tls_t &tls, bsl::safe_u16 const &i) noexcept -> bsl::errc_type
         {
             if (tls.test_ret == errc_fail_initialize) {
                 return bsl::errc_failure;
@@ -84,14 +84,14 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
-        ///   @param vps_pool the VPS pool to use
+        ///   @param vs_pool the vs_pool_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        release(tls_t &tls, vps_pool_t &vps_pool) noexcept -> bsl::errc_type
+        release(tls_t &tls, vs_pool_t &vs_pool) noexcept -> bsl::errc_type
         {
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             if (tls.test_ret == errc_fail_initialize_and_release) {
                 return bsl::errc_failure;
@@ -111,7 +111,7 @@ namespace mk
         ///   @return Returns the ID of this vp_t
         ///
         [[nodiscard]] constexpr auto
-        id() const noexcept -> bsl::safe_uint16 const &
+        id() const noexcept -> bsl::safe_u16 const &
         {
             return m_id;
         }
@@ -121,7 +121,7 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
-        ///   @param vm_pool the VM pool to use
+        ///   @param vm_pool the vm_pool_t to use
         ///   @param vmid The ID of the VM to assign the newly created VP to
         ///   @param ppid The ID of the PP to assign the newly created VP to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
@@ -131,13 +131,13 @@ namespace mk
         allocate(
             tls_t &tls,
             vm_pool_t &vm_pool,
-            bsl::safe_uint16 const &vmid,
-            bsl::safe_uint16 const &ppid) noexcept -> bsl::safe_uint16
+            bsl::safe_u16 const &vmid,
+            bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
         {
             bsl::discard(vm_pool);
 
             if (!tls.test_ret) {
-                return bsl::safe_uint16::failure();
+                return bsl::safe_u16::failure();
             }
 
             m_assigned_vmid = vmid;
@@ -152,14 +152,14 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
-        ///   @param vps_pool the VPS pool to use
+        ///   @param vs_pool the vs_pool_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        deallocate(tls_t &tls, vps_pool_t &vps_pool) noexcept -> bsl::errc_type
+        deallocate(tls_t &tls, vs_pool_t &vs_pool) noexcept -> bsl::errc_type
         {
-            bsl::discard(vps_pool);
+            bsl::discard(vs_pool);
 
             m_assigned_ppid = syscall::BF_INVALID_ID;
             m_assigned_vmid = syscall::BF_INVALID_ID;
@@ -247,16 +247,16 @@ namespace mk
         /// <!-- description -->
         ///   @brief Returns the ID of the first PP identified that this VP
         ///     is still active on. If the VP is inactive, this function
-        ///     returns bsl::safe_uint16::failure()
+        ///     returns bsl::safe_u16::failure()
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
         ///   @return Returns the ID of the first PP identified that this VP
         ///     is still active on. If the VP is inactive, this function
-        ///     returns bsl::safe_uint16::failure()
+        ///     returns bsl::safe_u16::failure()
         ///
         [[nodiscard]] constexpr auto
-        is_active(tls_t &tls) const noexcept -> bsl::safe_uint16
+        is_active(tls_t &tls) const noexcept -> bsl::safe_u16
         {
             bsl::discard(tls);
 
@@ -264,7 +264,7 @@ namespace mk
                 return {};
             }
 
-            return bsl::safe_uint16::failure();
+            return bsl::safe_u16::failure();
         }
 
         /// <!-- description -->
@@ -285,15 +285,15 @@ namespace mk
 
         /// <!-- description -->
         ///   @brief Migrates this vp_t from one PP to another. If this calls
-        ///     completes successfully, the VPS's assigned PP will not
+        ///     completes successfully, the VS's assigned PP will not
         ///     match the VP's assigned PP. Future calls to the run ABI
-        ///     will be able to detect this an migrate mismatched VPSs to
+        ///     will be able to detect this an migrate mismatched VSs to
         ///     the proper PP as needed. Note that since the VP doesn't control
         ///     any hardware state, all we have to do here is set which PP
-        ///     this VP is allowed to execute on. The VPS is what actually
+        ///     this VP is allowed to execute on. The VS is what actually
         ///     needs to be migrated, and that will not happen until a call
         ///     to the run ABIs made. Once the run ABI detects a mismatch with
-        ///     the VPS and it's assigned VP, it will be migrated then.
+        ///     the VS and it's assigned VP, it will be migrated then.
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
@@ -302,7 +302,7 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        migrate(tls_t &tls, bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
+        migrate(tls_t &tls, bsl::safe_u16 const &ppid) noexcept -> bsl::errc_type
         {
             bsl::discard(tls);
             bsl::discard(ppid);
@@ -318,10 +318,10 @@ namespace mk
         ///   @return Returns the ID of the VM this vp_t is assigned to
         ///
         [[nodiscard]] constexpr auto
-        assigned_vm() const noexcept -> bsl::safe_uint16
+        assigned_vm() const noexcept -> bsl::safe_u16
         {
             if (bsl::unlikely(syscall::BF_INVALID_ID == m_assigned_vmid)) {
-                return bsl::safe_uint16::failure();
+                return bsl::safe_u16::failure();
             }
 
             return m_assigned_vmid;
@@ -334,10 +334,10 @@ namespace mk
         ///   @return Returns the ID of the PP this vp_t is assigned to
         ///
         [[nodiscard]] constexpr auto
-        assigned_pp() const noexcept -> bsl::safe_uint16
+        assigned_pp() const noexcept -> bsl::safe_u16
         {
             if (bsl::unlikely(syscall::BF_INVALID_ID == m_assigned_ppid)) {
-                return bsl::safe_uint16::failure();
+                return bsl::safe_u16::failure();
             }
 
             return m_assigned_ppid;

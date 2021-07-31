@@ -32,7 +32,7 @@
 #include <bsl/discard.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
-#include <bsl/unlikely_assert.hpp>
+#include <bsl/unlikely.hpp>
 
 namespace example
 {
@@ -41,34 +41,34 @@ namespace example
     ///
     /// <!-- inputs/outputs -->
     ///   @param handle the handle to use
-    ///   @param vpsid the ID of the VPS that generated the VMExit
+    ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     constexpr void
     vmexit(
         syscall::bf_handle_t &handle,
-        bsl::safe_uint16 const &vpsid,
-        bsl::safe_uint64 const &exit_reason) noexcept
+        bsl::safe_u16 const &vsid,
+        bsl::safe_u64 const &exit_reason) noexcept
     {
         bsl::discard(handle);
-        bsl::discard(vpsid);
+        bsl::discard(vsid);
         bsl::discard(exit_reason);
     }
 
     /// <!-- description -->
-    ///   @brief Initializes a VPS with architecture specific stuff.
+    ///   @brief Initializes a VS with architecture specific stuff.
     ///
     /// <!-- inputs/outputs -->
     ///   @param handle the handle to use
-    ///   @param vpsid the VPS being intialized
+    ///   @param vsid the VS being intialized
     ///   @return Returns bsl::errc_success on success and bsl::errc_failure
     ///     on failure.
     ///
     [[nodiscard]] constexpr auto
-    init_vps(syscall::bf_handle_t &handle, bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
+    init_vs(syscall::bf_handle_t &handle, bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
     {
         bsl::discard(handle);
-        bsl::discard(vpsid);
+        bsl::discard(vsid);
 
         return bsl::errc_success;
     }

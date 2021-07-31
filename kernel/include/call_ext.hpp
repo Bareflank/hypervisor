@@ -26,7 +26,7 @@
 #define CALL_EXT_HPP
 
 #include <bsl/cstdint.hpp>
-#include <bsl/exit_code.hpp>
+#include <bsl/errc_type.hpp>
 
 namespace mk
 {
@@ -47,10 +47,10 @@ namespace mk
     ///   @return returns the exit status from the extension
     ///
     extern "C" [[nodiscard]] auto call_ext(
-        bsl::uintmax const ip,
-        bsl::uintmax const sp,
-        bsl::uintmax const arg0,
-        bsl::uintmax const arg1) noexcept -> bsl::exit_code;
+        bsl::uintmx const ip,
+        bsl::uintmx const sp,
+        bsl::uintmx const arg0,
+        bsl::uintmx const arg1) noexcept -> bsl::errc_type;
 }
 
 #endif

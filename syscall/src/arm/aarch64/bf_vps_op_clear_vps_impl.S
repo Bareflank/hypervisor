@@ -26,9 +26,9 @@
 
     .text
 
-    .globl  bf_vps_op_clear_vps_impl
-    .type   bf_vps_op_clear_vps_impl, @function
-bf_vps_op_clear_vps_impl:
+    .globl  bf_vs_op_clear_vs_impl
+    .type   bf_vs_op_clear_vs_impl, @function
+bf_vs_op_clear_vs_impl:
 
 /*
     mov rax, 0x664200000006000A
@@ -36,4 +36,4 @@ bf_vps_op_clear_vps_impl:
 */
     ret
 
-    .size bf_vps_op_clear_vps_impl, .-bf_vps_op_clear_vps_impl
+    .size bf_vs_op_clear_vs_impl, .-bf_vs_op_clear_vs_impl

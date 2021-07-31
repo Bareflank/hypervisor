@@ -25,6 +25,7 @@
 #ifndef MOCKS_GS_T_HPP
 #define MOCKS_GS_T_HPP
 
+#include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
 
 namespace example
@@ -37,8 +38,10 @@ namespace example
     ///
     struct gs_t final
     {
+        /// @brief tells certain mocks when to fail
+        bsl::errc_type test_ret;
         /// @brief stores the cpuid value to return from intrinsic_cpuid_impl
-        bsl::safe_uint64 cpuid_val{};
+        bsl::safe_u64 cpuid_val{};
     };
 }
 

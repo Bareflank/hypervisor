@@ -53,6 +53,12 @@ function(hypervisor_add_mk_cross_compile SOURCE_DIR)
         -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/mk_cross_compile
     )
 
+    # TODO
+    # - If we add support for more than one extension, we will need to copy
+    #   all of the extensions to CMAKE_BINARY_DIR. Might need a CMake script
+    #   to do that.
+    #
+
     ExternalProject_Add(
         mk_cross_compile
         PREFIX          ${CMAKE_BINARY_DIR}/mk_cross_compile
@@ -62,7 +68,8 @@ function(hypervisor_add_mk_cross_compile SOURCE_DIR)
         LOG_DIR         ${CMAKE_BINARY_DIR}/mk_cross_compile/logs
         SOURCE_DIR      ${CMAKE_CURRENT_LIST_DIR}/${SOURCE_DIR}
         CMAKE_ARGS      ${CMAKE_ARGS}
-        UPDATE_COMMAND  cmake -E echo -- Checking for changes
+        UPDATE_COMMAND  cmake -E echo -- Skip
+        INSTALL_COMMAND cmake -E copy_if_different ${CMAKE_BINARY_DIR}/mk_cross_compile/build/kernel/kernel ${CMAKE_BINARY_DIR}/kernel
     )
 
     ExternalProject_Add_Step(

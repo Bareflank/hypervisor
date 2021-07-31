@@ -69,14 +69,12 @@ namespace example
     ///
     class page_pool_t final
     {
-        /// @brief stores true if initialized() has been executed
-        bool m_initialized{};
         /// @brief stores the handle used to communicate with the kernel
         syscall::bf_handle_t m_handle{};
         /// @brief stores the head of the page pool stack.
         void *m_head{};
         /// @brief stores the total number of bytes in the page pool.
-        bsl::safe_uintmax m_size{};
+        bsl::safe_umx m_size{};
         /// @brief safe guards operations on the pool.
         mutable spinlock m_pool_lock{};
 
@@ -92,11 +90,6 @@ namespace example
         [[nodiscard]] constexpr auto
         initialize(syscall::bf_handle_t const &handle) noexcept -> bsl::errc_type
         {
-            if (bsl::unlikely(m_initialized)) {
-                bsl::error() << "page_pool_t already initialized\n" << bsl::here();
-                return bsl::errc_failure;
-            }
-
             bsl::finally release_on_error{[this]() noexcept -> void {
                 this->release();
             }};
@@ -104,8 +97,6 @@ namespace example
             m_handle = handle;
 
             release_on_error.ignore();
-            m_initialized = true;
-
             return bsl::errc_success;
         }
 
@@ -119,7 +110,6 @@ namespace example
             m_head = {};
 
             m_handle = {};
-            m_initialized = {};
         }
 
         /// <!-- description -->
@@ -134,11 +124,6 @@ namespace example
         allocate() noexcept -> T *
         {
             lock_guard lock{m_pool_lock};
-
-            if (bsl::unlikely(!m_initialized)) {
-                bsl::error() << "page_pool_t not initialized\n" << bsl::here();
-                return nullptr;
-            }
 
             if (bsl::unlikely(nullptr == m_head)) {
                 m_head = syscall::bf_mem_op_alloc_page(m_handle);
@@ -156,7 +141,7 @@ namespace example
             void *const ptr{m_head};
             m_head = *static_cast<void **>(m_head);
 
-            bsl::builtin_memset(ptr, '\0', bsl::to_umax(HYPERVISOR_PAGE_SIZE).get());
+            bsl::builtin_memset(ptr, '\0', bsl::to_umx(HYPERVISOR_PAGE_SIZE).get());
 
             if constexpr (!bsl::is_void<T>::value) {
                 static_assert(bsl::is_standard_layout<T>::value, "T must be a standard layout");
@@ -178,16 +163,11 @@ namespace example
         {
             lock_guard lock{m_pool_lock};
 
-            if (bsl::unlikely(!m_initialized)) {
-                bsl::error() << "page_pool_t not initialized\n" << bsl::here();
-                return;
-            }
-
             if (bsl::unlikely(nullptr == ptr)) {
                 return;
             }
 
-            if (bsl::to_umax(ptr) < bsl::to_umax(HYPERVISOR_EXT_PAGE_POOL_ADDR)) {
+            if (bsl::to_umx(ptr) < bsl::to_umx(HYPERVISOR_EXT_PAGE_POOL_ADDR)) {
                 bsl::error() << "invalid ptr"    // --
                              << ptr              // --
                              << bsl::endl        // --
@@ -216,10 +196,10 @@ namespace example
         ///
         template<typename T>
         [[nodiscard]] constexpr auto
-        virt_to_phys(T const *const virt) const noexcept -> bsl::safe_uintmax
+        virt_to_phys(T const *const virt) const noexcept -> bsl::safe_umx
         {
             static_assert(bsl::disjunction<bsl::is_void<T>, bsl::is_standard_layout<T>>::value);
-            return bsl::to_umax(virt) - bsl::to_umax(HYPERVISOR_EXT_PAGE_POOL_ADDR);
+            return bsl::to_umx(virt) - bsl::to_umx(HYPERVISOR_EXT_PAGE_POOL_ADDR);
         }
 
         /// <!-- description -->
@@ -238,10 +218,10 @@ namespace example
         ///
         template<typename T>
         [[nodiscard]] constexpr auto
-        phys_to_virt(bsl::safe_uintmax const &phys) const noexcept -> T *
+        phys_to_virt(bsl::safe_umx const &phys) const noexcept -> T *
         {
             static_assert(bsl::disjunction<bsl::is_void<T>, bsl::is_standard_layout<T>>::value);
-            return bsl::to_ptr<T *>(phys + bsl::to_umax(HYPERVISOR_EXT_PAGE_POOL_ADDR));
+            return bsl::to_ptr<T *>(phys + bsl::to_umx(HYPERVISOR_EXT_PAGE_POOL_ADDR));
         }
     };
 }

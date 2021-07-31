@@ -28,29 +28,29 @@ add_library(syscall INTERFACE)
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
     if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
         target_include_directories(syscall INTERFACE
-            include/cpp/x64/amd
+            include/x64/amd
         )
     endif()
 
     if(HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
         target_include_directories(syscall INTERFACE
-            include/cpp/x64/intel
+            include/x64/intel
         )
     endif()
 
     target_include_directories(syscall INTERFACE
-        include/cpp/x64
+        include/x64
     )
 endif()
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     target_include_directories(syscall INTERFACE
-        include/cpp/arm/aarch64
+        include/arm/aarch64
     )
 endif()
 
 target_include_directories(syscall INTERFACE
-    include/cpp
+    include
 )
 
 # ------------------------------------------------------------------------------

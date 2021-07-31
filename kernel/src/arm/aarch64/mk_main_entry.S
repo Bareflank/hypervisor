@@ -132,7 +132,7 @@ mk_main_entry:
 
     /**
      * NOTE:
-     * - To start, there are no active extensions, VMs, VPs or VPSs.
+     * - To start, there are no active extensions, VMs, VPs or VSs.
      */
 
     mvn  x22, xzr

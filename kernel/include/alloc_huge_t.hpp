@@ -25,22 +25,12 @@
 #ifndef ALLOC_HUGE_T_HPP
 #define ALLOC_HUGE_T_HPP
 
-#include <bsl/safe_integral.hpp>
+#include <basic_alloc_huge_t.hpp>
 
 namespace mk
 {
-    /// @struct mk::alloc_huge_t
-    ///
-    /// <!-- description -->
-    ///   @brief Defines a alloc_huge_t
-    ///
-    struct alloc_huge_t final
-    {
-        /// @brief stores the virtual address of the memory
-        bsl::safe_uintmax virt;
-        /// @brief stores the physical address of the memory
-        bsl::safe_uintmax phys;
-    };
+    /// @brief defines the alloc_huge_t used by the microkernel
+    using alloc_huge_t = lib::basic_alloc_huge_t;
 }
 
 #endif

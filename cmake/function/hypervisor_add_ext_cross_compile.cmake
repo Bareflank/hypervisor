@@ -62,7 +62,8 @@ function(hypervisor_add_ext_cross_compile SOURCE_DIR)
         LOG_DIR         ${CMAKE_BINARY_DIR}/ext_cross_compile/logs
         SOURCE_DIR      ${CMAKE_CURRENT_LIST_DIR}/${SOURCE_DIR}
         CMAKE_ARGS      ${CMAKE_ARGS}
-        UPDATE_COMMAND  cmake -E echo -- Checking for changes
+        UPDATE_COMMAND  cmake -E echo -- Skip
+        INSTALL_COMMAND cmake -E copy_if_different ${CMAKE_BINARY_DIR}/ext_cross_compile/build/extension/${HYPERVISOR_EXTENSIONS} ${CMAKE_BINARY_DIR}/${HYPERVISOR_EXTENSIONS}
     )
 
     ExternalProject_Add_Step(

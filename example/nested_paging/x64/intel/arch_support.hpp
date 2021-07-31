@@ -44,7 +44,7 @@ namespace example
     /// @brief stores the MSR bitmap used by this extension
     constinit inline void *g_msr_bitmaps{};
     /// @brief stores the physical address of the MSR bitmap
-    constinit inline bsl::safe_uintmax g_msr_bitmaps_phys{};
+    constinit inline bsl::safe_umx g_msr_bitmaps_phys{};
 
     /// @brief stores the page pool to use for page allocation
     constinit inline page_pool_t g_page_pool{};
@@ -58,12 +58,12 @@ namespace example
     ///
     /// <!-- inputs/outputs -->
     ///   @param handle the handle to use
-    ///   @param vpsid the ID of the VPS that caused the VMExit
+    ///   @param vsid the ID of the VS that caused the VMExit
     ///   @return Returns bsl::errc_success on success and bsl::errc_failure
     ///     on failure.
     ///
     [[nodiscard]] constexpr auto
-    handle_vmexit_nmi(syscall::bf_handle_t &handle, bsl::safe_uint16 const &vpsid) noexcept
+    handle_vmexit_nmi(syscall::bf_handle_t &handle, bsl::safe_u16 const &vsid) noexcept
         -> bsl::errc_type
     {
         /// NOTE:
@@ -73,16 +73,16 @@ namespace example
         /// - Note that the microkernel will do the same thing. If an NMI
         ///   fires while the hypevisor is running, it will enable the NMI
         ///   window, which the extension will see as a VMExit, and must
-        ///   from there, inject the NMI into the appropriate VPS.
+        ///   from there, inject the NMI into the appropriate VS.
         ///
 
-        constexpr bsl::safe_uintmax vmcs_procbased_ctls_idx{bsl::to_umax(0x4002U)};
-        constexpr bsl::safe_uint32 vmcs_set_nmi_window_exiting{bsl::to_u32(0x400000U)};
+        constexpr bsl::safe_umx vmcs_procbased_ctls_idx{bsl::to_umx(0x4002U)};
+        constexpr bsl::safe_u32 vmcs_set_nmi_window_exiting{bsl::to_u32(0x400000U)};
 
         bsl::errc_type ret{};
-        bsl::safe_uint32 val{};
+        bsl::safe_u32 val{};
 
-        ret = syscall::bf_vps_op_read32(handle, vpsid, vmcs_procbased_ctls_idx, val);
+        ret = syscall::bf_vs_op_read32(handle, vsid, vmcs_procbased_ctls_idx, val);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -90,7 +90,7 @@ namespace example
 
         val |= vmcs_set_nmi_window_exiting;
 
-        ret = syscall::bf_vps_op_write32(handle, vpsid, vmcs_procbased_ctls_idx, val);
+        ret = syscall::bf_vs_op_write32(handle, vsid, vmcs_procbased_ctls_idx, val);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -104,31 +104,31 @@ namespace example
     ///
     /// <!-- inputs/outputs -->
     ///   @param handle the handle to use
-    ///   @param vpsid the ID of the VPS that caused the VMExit
+    ///   @param vsid the ID of the VS that caused the VMExit
     ///   @return Returns bsl::errc_success on success and bsl::errc_failure
     ///     on failure.
     ///
     [[nodiscard]] constexpr auto
-    handle_vmexit_nmi_window(syscall::bf_handle_t &handle, bsl::safe_uint16 const &vpsid) noexcept
+    handle_vmexit_nmi_window(syscall::bf_handle_t &handle, bsl::safe_u16 const &vsid) noexcept
         -> bsl::errc_type
     {
         /// NOTE:
         /// - If we see this exit, it is because an NMI fired. There are two
         ///   situations where this could occur, either while the hypervisor
-        ///   is running, or the VPS is running. In either case, we need to
+        ///   is running, or the VS is running. In either case, we need to
         ///   clear the NMI window and inject the NMI into the appropriate
-        ///   VPS so that it can be handled. Note that Intel requires that
+        ///   VS so that it can be handled. Note that Intel requires that
         ///   we handle NMIs, and they actually happen a lot with Linux based
         ///   on what hardware you are using (e.g., a laptop).
         ///
 
-        constexpr bsl::safe_uintmax vmcs_procbased_ctls_idx{bsl::to_umax(0x4002U)};
-        constexpr bsl::safe_uint32 vmcs_clear_nmi_window_exiting{bsl::to_u32(0xFFBFFFFFU)};
+        constexpr bsl::safe_umx vmcs_procbased_ctls_idx{bsl::to_umx(0x4002U)};
+        constexpr bsl::safe_u32 vmcs_clear_nmi_window_exiting{bsl::to_u32(0xFFBFFFFFU)};
 
         bsl::errc_type ret{};
-        bsl::safe_uint32 val{};
+        bsl::safe_u32 val{};
 
-        ret = syscall::bf_vps_op_read32(handle, vpsid, vmcs_procbased_ctls_idx, val);
+        ret = syscall::bf_vs_op_read32(handle, vsid, vmcs_procbased_ctls_idx, val);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -136,7 +136,7 @@ namespace example
 
         val &= vmcs_clear_nmi_window_exiting;
 
-        ret = syscall::bf_vps_op_write32(handle, vpsid, vmcs_procbased_ctls_idx, val);
+        ret = syscall::bf_vs_op_write32(handle, vsid, vmcs_procbased_ctls_idx, val);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -149,11 +149,11 @@ namespace example
         ///   so we are required to implement it on Intel.
         ///
 
-        constexpr bsl::safe_uintmax vmcs_entry_interrupt_info_idx{bsl::to_umax(0x4016U)};
-        constexpr bsl::safe_uint32 vmcs_entry_interrupt_info_val{bsl::to_u32(0x80000202U)};
+        constexpr bsl::safe_umx vmcs_entry_interrupt_info_idx{bsl::to_umx(0x4016U)};
+        constexpr bsl::safe_u32 vmcs_entry_interrupt_info_val{bsl::to_u32(0x80000202U)};
 
-        ret = syscall::bf_vps_op_write32(
-            handle, vpsid, vmcs_entry_interrupt_info_idx, vmcs_entry_interrupt_info_val);
+        ret = syscall::bf_vs_op_write32(
+            handle, vsid, vmcs_entry_interrupt_info_idx, vmcs_entry_interrupt_info_val);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -167,19 +167,19 @@ namespace example
     ///
     /// <!-- inputs/outputs -->
     ///   @param handle the handle to use
-    ///   @param vpsid the ID of the VPS that generated the VMExit
+    ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     constexpr void
     vmexit(
         syscall::bf_handle_t &handle,
-        bsl::safe_uint16 const &vpsid,
-        bsl::safe_uint64 const &exit_reason) noexcept
+        bsl::safe_u16 const &vsid,
+        bsl::safe_u64 const &exit_reason) noexcept
     {
         bsl::errc_type ret{};
-        constexpr bsl::safe_uintmax exit_reason_nmi{bsl::to_umax(0x0)};
-        constexpr bsl::safe_uintmax exit_reason_nmi_window{bsl::to_umax(0x8)};
-        constexpr bsl::safe_uintmax exit_reason_cpuid{bsl::to_umax(0xA)};
+        constexpr bsl::safe_umx exit_reason_nmi{bsl::to_umx(0x0)};
+        constexpr bsl::safe_umx exit_reason_nmi_window{bsl::to_umx(0x8)};
+        constexpr bsl::safe_umx exit_reason_cpuid{bsl::to_umx(0xA)};
 
         /// NOTE:
         /// - At a minimum, we need to handle CPUID and NMIs on Intel. Note
@@ -192,37 +192,37 @@ namespace example
 
         switch (exit_reason.get()) {
             case exit_reason_nmi.get(): {
-                ret = handle_vmexit_nmi(handle, vpsid);
+                ret = handle_vmexit_nmi(handle, vsid);
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return;
                 }
 
-                bsl::discard(syscall::bf_vps_op_run_current(handle));
+                bsl::discard(syscall::bf_vs_op_run_current(handle));
                 bsl::print<bsl::V>() << bsl::here();
                 return;
             }
 
             case exit_reason_nmi_window.get(): {
-                ret = handle_vmexit_nmi_window(handle, vpsid);
+                ret = handle_vmexit_nmi_window(handle, vsid);
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return;
                 }
 
-                bsl::discard(syscall::bf_vps_op_run_current(handle));
+                bsl::discard(syscall::bf_vs_op_run_current(handle));
                 bsl::print<bsl::V>() << bsl::here();
                 return;
             }
 
             case exit_reason_cpuid.get(): {
-                ret = handle_vmexit_cpuid(handle, vpsid);
+                ret = handle_vmexit_cpuid(handle, vsid);
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return;
                 }
 
-                bsl::discard(syscall::bf_vps_op_advance_ip_and_run_current(handle));
+                bsl::discard(syscall::bf_vs_op_advance_ip_and_run_current(handle));
                 bsl::print<bsl::V>() << bsl::here();
                 return;
             }
@@ -232,7 +232,7 @@ namespace example
             }
         }
 
-        syscall::bf_debug_op_dump_vps(vpsid);
+        syscall::bf_debug_op_dump_vs(vsid);
 
         bsl::error() << "unknown exit_reason: "    // --
                      << bsl::hex(exit_reason)      // --
@@ -251,24 +251,24 @@ namespace example
     ///   @return Returns the masked version of the control
     ///
     [[nodiscard]] constexpr auto
-    mask_enabled_and_disabled(bsl::safe_uintmax const &val) noexcept -> bsl::safe_uint32
+    mask_enabled_and_disabled(bsl::safe_umx const &val) noexcept -> bsl::safe_u32
     {
-        constexpr bsl::safe_uintmax ctls_mask{bsl::to_umax(0x00000000FFFFFFFFU)};
-        constexpr bsl::safe_uintmax ctls_shift{bsl::to_umax(32)};
+        constexpr bsl::safe_umx ctls_mask{bsl::to_umx(0x00000000FFFFFFFFU)};
+        constexpr bsl::safe_umx ctls_shift{bsl::to_umx(32)};
         return bsl::to_u32_unsafe((val & ctls_mask) & (val >> ctls_shift));
     };
 
     /// <!-- description -->
-    ///   @brief Initializes a VPS with architecture specific stuff.
+    ///   @brief Initializes a VS with architecture specific stuff.
     ///
     /// <!-- inputs/outputs -->
     ///   @param handle the handle to use
-    ///   @param vpsid the VPS being intialized
+    ///   @param vsid the VS being intialized
     ///   @return Returns bsl::errc_success on success and bsl::errc_failure
     ///     on failure.
     ///
     [[nodiscard]] constexpr auto
-    init_vps(syscall::bf_handle_t &handle, bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
+    init_vs(syscall::bf_handle_t &handle, bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
     {
         bsl::errc_type ret{};
 
@@ -276,10 +276,10 @@ namespace example
         /// - Set up VPID
         ///
 
-        constexpr bsl::safe_uintmax vmcs_vpid_idx{bsl::to_umax(0x0000U)};
-        constexpr bsl::safe_uint16 vmcs_vpid_val{bsl::to_u16(0x1)};
+        constexpr bsl::safe_umx vmcs_vpid_idx{bsl::to_umx(0x0000U)};
+        constexpr bsl::safe_u16 vmcs_vpid_val{bsl::to_u16(0x1)};
 
-        ret = syscall::bf_vps_op_write16(handle, vpsid, vmcs_vpid_idx, vmcs_vpid_val);
+        ret = syscall::bf_vs_op_write16(handle, vsid, vmcs_vpid_idx, vmcs_vpid_val);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -289,10 +289,10 @@ namespace example
         /// - Set up the VMCS link pointer
         ///
 
-        constexpr bsl::safe_uintmax vmcs_link_ptr_idx{bsl::to_umax(0x2800U)};
-        constexpr bsl::safe_uintmax vmcs_link_ptr_val{bsl::to_umax(0xFFFFFFFFFFFFFFFFU)};
+        constexpr bsl::safe_umx vmcs_link_ptr_idx{bsl::to_umx(0x2800U)};
+        constexpr bsl::safe_umx vmcs_link_ptr_val{bsl::to_umx(0xFFFFFFFFFFFFFFFFU)};
 
-        ret = syscall::bf_vps_op_write64(handle, vpsid, vmcs_link_ptr_idx, vmcs_link_ptr_val);
+        ret = syscall::bf_vs_op_write64(handle, vsid, vmcs_link_ptr_idx, vmcs_link_ptr_val);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -321,19 +321,19 @@ namespace example
         ///   project.
         ///
 
-        constexpr bsl::safe_uintmax vmcs_pinbased_ctls_idx{bsl::to_umax(0x4000U)};
-        constexpr bsl::safe_uintmax vmcs_procbased_ctls_idx{bsl::to_umax(0x4002U)};
-        constexpr bsl::safe_uintmax vmcs_exit_ctls_idx{bsl::to_umax(0x400CU)};
-        constexpr bsl::safe_uintmax vmcs_entry_ctls_idx{bsl::to_umax(0x4012U)};
-        constexpr bsl::safe_uintmax vmcs_procbased_ctls2_idx{bsl::to_umax(0x401EU)};
+        constexpr bsl::safe_umx vmcs_pinbased_ctls_idx{bsl::to_umx(0x4000U)};
+        constexpr bsl::safe_umx vmcs_procbased_ctls_idx{bsl::to_umx(0x4002U)};
+        constexpr bsl::safe_umx vmcs_exit_ctls_idx{bsl::to_umx(0x400CU)};
+        constexpr bsl::safe_umx vmcs_entry_ctls_idx{bsl::to_umx(0x4012U)};
+        constexpr bsl::safe_umx vmcs_procbased_ctls2_idx{bsl::to_umx(0x401EU)};
 
-        constexpr bsl::safe_uint32 ia32_vmx_true_pinbased_ctls{bsl::to_u32(0x48DU)};
-        constexpr bsl::safe_uint32 ia32_vmx_true_procbased_ctls{bsl::to_u32(0x48EU)};
-        constexpr bsl::safe_uint32 ia32_vmx_true_exit_ctls{bsl::to_u32(0x48FU)};
-        constexpr bsl::safe_uint32 ia32_vmx_true_entry_ctls{bsl::to_u32(0x490U)};
-        constexpr bsl::safe_uint32 ia32_vmx_true_procbased_ctls2{bsl::to_u32(0x48BU)};
+        constexpr bsl::safe_u32 ia32_vmx_true_pinbased_ctls{bsl::to_u32(0x48DU)};
+        constexpr bsl::safe_u32 ia32_vmx_true_procbased_ctls{bsl::to_u32(0x48EU)};
+        constexpr bsl::safe_u32 ia32_vmx_true_exit_ctls{bsl::to_u32(0x48FU)};
+        constexpr bsl::safe_u32 ia32_vmx_true_entry_ctls{bsl::to_u32(0x490U)};
+        constexpr bsl::safe_u32 ia32_vmx_true_procbased_ctls2{bsl::to_u32(0x48BU)};
 
-        bsl::safe_uintmax ctls{};
+        bsl::safe_umx ctls{};
 
         /// NOTE:
         /// - Configure the pin based controls
@@ -345,8 +345,8 @@ namespace example
             return ret;
         }
 
-        ret = syscall::bf_vps_op_write32(
-            handle, vpsid, vmcs_pinbased_ctls_idx, mask_enabled_and_disabled(ctls));
+        ret = syscall::bf_vs_op_write32(
+            handle, vsid, vmcs_pinbased_ctls_idx, mask_enabled_and_disabled(ctls));
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -356,8 +356,8 @@ namespace example
         /// - Configure the proc based controls
         ///
 
-        constexpr bsl::safe_uintmax enable_msr_bitmaps{bsl::to_umax(0x10000000U)};
-        constexpr bsl::safe_uintmax enable_procbased_ctls2{bsl::to_umax(0x80000000U)};
+        constexpr bsl::safe_umx enable_msr_bitmaps{bsl::to_umx(0x10000000U)};
+        constexpr bsl::safe_umx enable_procbased_ctls2{bsl::to_umx(0x80000000U)};
 
         ret = syscall::bf_intrinsic_op_rdmsr(handle, ia32_vmx_true_procbased_ctls, ctls);
         if (bsl::unlikely(!ret)) {
@@ -368,8 +368,8 @@ namespace example
         ctls |= enable_msr_bitmaps;
         ctls |= enable_procbased_ctls2;
 
-        ret = syscall::bf_vps_op_write32(
-            handle, vpsid, vmcs_procbased_ctls_idx, mask_enabled_and_disabled(ctls));
+        ret = syscall::bf_vs_op_write32(
+            handle, vsid, vmcs_procbased_ctls_idx, mask_enabled_and_disabled(ctls));
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -385,8 +385,8 @@ namespace example
             return ret;
         }
 
-        ret = syscall::bf_vps_op_write32(
-            handle, vpsid, vmcs_exit_ctls_idx, mask_enabled_and_disabled(ctls));
+        ret = syscall::bf_vs_op_write32(
+            handle, vsid, vmcs_exit_ctls_idx, mask_enabled_and_disabled(ctls));
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -402,8 +402,8 @@ namespace example
             return ret;
         }
 
-        ret = syscall::bf_vps_op_write32(
-            handle, vpsid, vmcs_entry_ctls_idx, mask_enabled_and_disabled(ctls));
+        ret = syscall::bf_vs_op_write32(
+            handle, vsid, vmcs_entry_ctls_idx, mask_enabled_and_disabled(ctls));
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -413,12 +413,12 @@ namespace example
         /// - Configure the secondary proc controls.
         ///
 
-        constexpr bsl::safe_uintmax enable_vpid{bsl::to_umax(0x00000020U)};
-        constexpr bsl::safe_uintmax enable_rdtscp{bsl::to_umax(0x00000008U)};
-        constexpr bsl::safe_uintmax enable_invpcid{bsl::to_umax(0x00001000U)};
-        constexpr bsl::safe_uintmax enable_xsave{bsl::to_umax(0x00100000U)};
-        constexpr bsl::safe_uintmax enable_uwait{bsl::to_umax(0x04000000U)};
-        constexpr bsl::safe_uintmax enable_ept{bsl::to_umax(0x00000002U)};
+        constexpr bsl::safe_umx enable_vpid{bsl::to_umx(0x00000020U)};
+        constexpr bsl::safe_umx enable_rdtscp{bsl::to_umx(0x00000008U)};
+        constexpr bsl::safe_umx enable_invpcid{bsl::to_umx(0x00001000U)};
+        constexpr bsl::safe_umx enable_xsave{bsl::to_umx(0x00100000U)};
+        constexpr bsl::safe_umx enable_uwait{bsl::to_umx(0x04000000U)};
+        constexpr bsl::safe_umx enable_ept{bsl::to_umx(0x00000002U)};
 
         ret = syscall::bf_intrinsic_op_rdmsr(handle, ia32_vmx_true_procbased_ctls2, ctls);
         if (bsl::unlikely(!ret)) {
@@ -433,8 +433,8 @@ namespace example
         ctls |= enable_uwait;
         ctls |= enable_ept;
 
-        ret = syscall::bf_vps_op_write32(
-            handle, vpsid, vmcs_procbased_ctls2_idx, mask_enabled_and_disabled(ctls));
+        ret = syscall::bf_vs_op_write32(
+            handle, vsid, vmcs_procbased_ctls2_idx, mask_enabled_and_disabled(ctls));
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -447,7 +447,7 @@ namespace example
         ///   CPUs you are running on.
         ///
 
-        constexpr bsl::safe_uintmax vmcs_msr_bitmaps{bsl::to_umax(0x2004U)};
+        constexpr bsl::safe_umx vmcs_msr_bitmaps{bsl::to_umx(0x2004U)};
 
         if (nullptr == g_msr_bitmaps) {
             ret = syscall::bf_mem_op_alloc_page(handle, g_msr_bitmaps, g_msr_bitmaps_phys);
@@ -462,7 +462,7 @@ namespace example
             bsl::touch();
         }
 
-        ret = syscall::bf_vps_op_write64(handle, vpsid, vmcs_msr_bitmaps, g_msr_bitmaps_phys);
+        ret = syscall::bf_vs_op_write64(handle, vsid, vmcs_msr_bitmaps, g_msr_bitmaps_phys);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -478,7 +478,7 @@ namespace example
         ///   checking to see if EPT was actually enabled.
         ///
 
-        ret = syscall::bf_vps_op_read64(handle, vpsid, vmcs_procbased_ctls2_idx, ctls);
+        ret = syscall::bf_vs_op_read64(handle, vsid, vmcs_procbased_ctls2_idx, ctls);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -546,7 +546,7 @@ namespace example
         ///   returned by the MTRRs instead.
         ///
 
-        constexpr bsl::safe_uint64 max_physical_mem{bsl::to_umax(0x8000000000U)};
+        constexpr bsl::safe_u64 max_physical_mem{bsl::to_umx(0x8000000000U)};
 
         if (syscall::bf_tls_ppid(handle) == bsl::ZERO_U16) {
             ret = g_ept.initialize(&g_page_pool);
@@ -582,12 +582,12 @@ namespace example
         ///   to walk and that the default memory type is WB.
         ///
 
-        constexpr bsl::safe_uintmax eptp_fields{bsl::to_umax(0x1EU)};
-        constexpr bsl::safe_uintmax vmcs_ept_pointer{bsl::to_umax(0x201AU)};
+        constexpr bsl::safe_umx eptp_fields{bsl::to_umx(0x1EU)};
+        constexpr bsl::safe_umx vmcs_ept_pointer{bsl::to_umx(0x201AU)};
 
-        bsl::safe_uintmax eptp{g_ept.phys() | eptp_fields};
+        bsl::safe_umx eptp{g_ept.phys() | eptp_fields};
 
-        ret = syscall::bf_vps_op_write64(handle, vpsid, vmcs_ept_pointer, eptp);
+        ret = syscall::bf_vs_op_write64(handle, vsid, vmcs_ept_pointer, eptp);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;

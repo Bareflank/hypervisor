@@ -33,12 +33,12 @@
 namespace mk
 {
     /// @brief defines the max number of PPs used in testing
-    constexpr bsl::safe_uint16 INTEGRATION_MAX_PPS{bsl::to_u16(3)};
+    constexpr bsl::safe_u16 INTEGRATION_MAX_PPS{bsl::to_u16(3)};
 
     /// @brief defines VMID0
-    constexpr bsl::safe_uint16 VMID0{bsl::to_u16(0)};
+    constexpr bsl::safe_u16 VMID0{bsl::to_u16(0)};
     /// @brief defines VMID1
-    constexpr bsl::safe_uint16 VMID1{bsl::to_u16(1)};
+    constexpr bsl::safe_u16 VMID1{bsl::to_u16(1)};
 
     /// <!-- description -->
     ///   @brief Implements a yield for the spinlock
@@ -61,17 +61,17 @@ namespace mk
     {
         bsl::ut_scenario{"initialize invalid id version #1"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_then{} = [&vm, &tls]() {
-                    bsl::ut_check(!vm.initialize(tls, bsl::safe_uint16::failure()));
+                    bsl::ut_check(!vm.initialize(tls, bsl::safe_u16::failure()));
                 };
             };
         };
 
         bsl::ut_scenario{"initialize invalid id version #2"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_then{} = [&vm, &tls]() {
                     bsl::ut_check(!vm.initialize(tls, syscall::BF_INVALID_ID));
@@ -81,7 +81,7 @@ namespace mk
 
         bsl::ut_scenario{"initialize success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_then{} = [&vm, &tls]() {
                     bsl::ut_check(vm.initialize(tls, VMID0));
@@ -91,7 +91,7 @@ namespace mk
 
         bsl::ut_scenario{"initialize more than once failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_when{} = [&vm, &tls]() {
                     bsl::ut_required_step(vm.initialize(tls, VMID0));
@@ -104,7 +104,7 @@ namespace mk
 
         bsl::ut_scenario{"release of the root VM is ignored"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -120,7 +120,7 @@ namespace mk
 
         bsl::ut_scenario{"release success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -136,7 +136,7 @@ namespace mk
 
         bsl::ut_scenario{"release success after allocate"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -154,7 +154,7 @@ namespace mk
 
         bsl::ut_scenario{"release of a zombie vm is ignored"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -173,7 +173,7 @@ namespace mk
         bsl::ut_scenario{"release of a vm that is still assigned results in a zombie"} =
             []() noexcept {
                 bsl::ut_given{} = []() noexcept {
-                    vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                    vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                     tls_t tls{};
                     dummy_ext_pool_t ext_pool{};
                     dummy_vp_pool_t vp_pool{};
@@ -192,7 +192,7 @@ namespace mk
         bsl::ut_scenario{"release of a vm that is still active results in a zombie"} =
             []() noexcept {
                 bsl::ut_given{} = []() noexcept {
-                    vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                    vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                     tls_t tls{};
                     dummy_ext_pool_t ext_pool{};
                     dummy_vp_pool_t vp_pool{};
@@ -213,7 +213,7 @@ namespace mk
 
         bsl::ut_scenario{"release with extension failure results in zombie"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -231,7 +231,7 @@ namespace mk
 
         bsl::ut_scenario{"allocate without initialize failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_then{} = [&vm, &tls, &ext_pool]() {
@@ -242,7 +242,7 @@ namespace mk
 
         bsl::ut_scenario{"allocate zombie failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -257,7 +257,7 @@ namespace mk
 
         bsl::ut_scenario{"allocate with extension failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -274,7 +274,7 @@ namespace mk
 
         bsl::ut_scenario{"allocate success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -290,7 +290,7 @@ namespace mk
 
         bsl::ut_scenario{"allocate more than once failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -305,7 +305,7 @@ namespace mk
 
         bsl::ut_scenario{"deallocate not initialized failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -317,7 +317,7 @@ namespace mk
 
         bsl::ut_scenario{"deallocate root vm failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -333,7 +333,7 @@ namespace mk
 
         bsl::ut_scenario{"deallocate zombie failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -350,7 +350,7 @@ namespace mk
 
         bsl::ut_scenario{"deallocate already deallocated failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -367,7 +367,7 @@ namespace mk
 
         bsl::ut_scenario{"deallocate assigned failure results in zombie"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -386,7 +386,7 @@ namespace mk
 
         bsl::ut_scenario{"deallocate still active failure results in zombie"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -407,7 +407,7 @@ namespace mk
 
         bsl::ut_scenario{"deallocate with extension failure results in zombie"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -426,7 +426,7 @@ namespace mk
 
         bsl::ut_scenario{"deallocate success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -443,7 +443,7 @@ namespace mk
 
         bsl::ut_scenario{"zombify without initialize success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 bsl::ut_when{} = [&vm]() {
                     vm.zombify();
                     bsl::ut_then{} = [&vm]() {
@@ -455,7 +455,7 @@ namespace mk
 
         bsl::ut_scenario{"zombify success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_when{} = [&vm, &tls]() {
                     bsl::ut_required_step(vm.initialize(tls, VMID1));
@@ -469,7 +469,7 @@ namespace mk
 
         bsl::ut_scenario{"zombify root vm is ignored"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_when{} = [&vm, &tls]() {
                     bsl::ut_required_step(vm.initialize(tls, VMID0));
@@ -483,7 +483,7 @@ namespace mk
 
         bsl::ut_scenario{"zombify more than once is ignored"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_when{} = [&vm, &tls]() {
                     bsl::ut_required_step(vm.initialize(tls, VMID1));
@@ -498,7 +498,7 @@ namespace mk
 
         bsl::ut_scenario{"status without initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 bsl::ut_then{} = [&vm]() {
                     bsl::ut_check(vm.is_deallocated());
                     bsl::ut_check(!vm.is_allocated());
@@ -509,7 +509,7 @@ namespace mk
 
         bsl::ut_scenario{"status after initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_when{} = [&vm, &tls]() {
                     bsl::ut_required_step(vm.initialize(tls, VMID1));
@@ -524,7 +524,7 @@ namespace mk
 
         bsl::ut_scenario{"status after allocation"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -541,7 +541,7 @@ namespace mk
 
         bsl::ut_scenario{"status after deallocation"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 dummy_vp_pool_t vp_pool{};
@@ -560,7 +560,7 @@ namespace mk
 
         bsl::ut_scenario{"status after zombify"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_when{} = [&vm, &tls]() {
                     bsl::ut_required_step(vm.initialize(tls, VMID1));
@@ -576,7 +576,7 @@ namespace mk
 
         bsl::ut_scenario{"set_active without initialize failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_then{} = [&tls, &vm]() {
                     bsl::ut_check(!vm.set_active(tls));
@@ -586,7 +586,7 @@ namespace mk
 
         bsl::ut_scenario{"set_active without allocate failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_when{} = [&tls, &vm]() {
                     tls.online_pps = INTEGRATION_MAX_PPS.get();
@@ -601,7 +601,7 @@ namespace mk
 
         bsl::ut_scenario{"set_active zombie failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -619,7 +619,7 @@ namespace mk
 
         bsl::ut_scenario{"set_active already active"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -637,7 +637,7 @@ namespace mk
 
         bsl::ut_scenario{"set_active corrupt already active"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -656,7 +656,7 @@ namespace mk
 
         bsl::ut_scenario{"set_active another vm is active failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -673,7 +673,7 @@ namespace mk
 
         bsl::ut_scenario{"set_active invalid ppid failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -691,7 +691,7 @@ namespace mk
 
         bsl::ut_scenario{"set_active success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -708,7 +708,7 @@ namespace mk
 
         bsl::ut_scenario{"set_inactive without initialize failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_then{} = [&tls, &vm]() {
                     bsl::ut_check(!vm.set_inactive(tls));
@@ -718,7 +718,7 @@ namespace mk
 
         bsl::ut_scenario{"set_inactive without activate failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_when{} = [&tls, &vm]() {
                     tls.online_pps = INTEGRATION_MAX_PPS.get();
@@ -733,7 +733,7 @@ namespace mk
 
         bsl::ut_scenario{"set_inactive zombie is allowed"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -752,7 +752,7 @@ namespace mk
 
         bsl::ut_scenario{"set_inactive already inactive"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -771,7 +771,7 @@ namespace mk
 
         bsl::ut_scenario{"set_inactive active vm is not this vm"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -790,7 +790,7 @@ namespace mk
 
         bsl::ut_scenario{"set_inactive invalid ppid failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -809,7 +809,7 @@ namespace mk
 
         bsl::ut_scenario{"set_inactive more than once failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -828,7 +828,7 @@ namespace mk
 
         bsl::ut_scenario{"set_inactive corrupt active vm"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -848,7 +848,7 @@ namespace mk
 
         bsl::ut_scenario{"set_inactive success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -866,7 +866,7 @@ namespace mk
 
         bsl::ut_scenario{"is_active reports true"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -884,7 +884,7 @@ namespace mk
 
         bsl::ut_scenario{"is_active reports false"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -901,7 +901,7 @@ namespace mk
 
         bsl::ut_scenario{"is_active reports false with corrupt online_pps"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -918,7 +918,7 @@ namespace mk
 
         bsl::ut_scenario{"is_active reports false with no online_pps"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -934,7 +934,7 @@ namespace mk
 
         bsl::ut_scenario{"is_active_on_current_pp reports true"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -952,7 +952,7 @@ namespace mk
 
         bsl::ut_scenario{"is_active_on_current_pp reports false"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -969,7 +969,7 @@ namespace mk
 
         bsl::ut_scenario{"is_active_on_current_pp invalid ppid"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -989,7 +989,7 @@ namespace mk
         bsl::ut_scenario{"is_active_on_current_pp reports false with corrupt online_pps"} =
             []() noexcept {
                 bsl::ut_given{} = []() noexcept {
-                    vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                    vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                     tls_t tls{};
                     dummy_ext_pool_t ext_pool{};
                     bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -1006,7 +1006,7 @@ namespace mk
 
         bsl::ut_scenario{"dump without initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_then{} = [&tls, &vm]() {
                     vm.dump(tls);
@@ -1016,7 +1016,7 @@ namespace mk
 
         bsl::ut_scenario{"dump with initialize"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 bsl::ut_when{} = [&tls, &vm]() {
                     bsl::ut_required_step(vm.initialize(tls, VMID1));
@@ -1029,7 +1029,7 @@ namespace mk
 
         bsl::ut_scenario{"dump with allocate"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {
@@ -1044,7 +1044,7 @@ namespace mk
 
         bsl::ut_scenario{"dump with active"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vm_t<bsl::to_umax(INTEGRATION_MAX_PPS).get()> vm{};
+                vm_t<bsl::to_umx(INTEGRATION_MAX_PPS).get()> vm{};
                 tls_t tls{};
                 dummy_ext_pool_t ext_pool{};
                 bsl::ut_when{} = [&vm, &tls, &ext_pool]() {

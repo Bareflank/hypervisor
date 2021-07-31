@@ -37,53 +37,53 @@ namespace mk
     struct vmexit_log_record_t final
     {
         /// @brief stores the VMID that generated the exit
-        bsl::safe_uint16 vmid;
+        bsl::safe_u16 vmid;
         /// @brief stores the VPID that generated the exit
-        bsl::safe_uint16 vpid;
-        /// @brief stores the VPSID that generated the exit
-        bsl::safe_uint16 vpsid;
+        bsl::safe_u16 vpid;
+        /// @brief stores the VSID that generated the exit
+        bsl::safe_u16 vsid;
         /// @brief stores the exit reason
-        bsl::safe_uintmax exit_reason;
+        bsl::safe_umx exit_reason;
         /// @brief stores the exit qualification (Intel) or exit_info1 (AMD)
-        bsl::safe_uintmax ei1;
+        bsl::safe_umx ei1;
         /// @brief stores the exit information (Intel) or exit_info2 (AMD)
-        bsl::safe_uintmax ei2;
+        bsl::safe_umx ei2;
         /// @brief stores the exit input information (AMD) or ignored (Intel)
-        bsl::safe_uintmax ei3;
+        bsl::safe_umx ei3;
         /// @brief stores rax
-        bsl::safe_uintmax rax;
+        bsl::safe_umx rax;
         /// @brief stores rbx
-        bsl::safe_uintmax rbx;
+        bsl::safe_umx rbx;
         /// @brief stores rcx
-        bsl::safe_uintmax rcx;
+        bsl::safe_umx rcx;
         /// @brief stores rdx
-        bsl::safe_uintmax rdx;
+        bsl::safe_umx rdx;
         /// @brief stores rbp
-        bsl::safe_uintmax rbp;
+        bsl::safe_umx rbp;
         /// @brief stores rsi
-        bsl::safe_uintmax rsi;
+        bsl::safe_umx rsi;
         /// @brief stores rdi
-        bsl::safe_uintmax rdi;
+        bsl::safe_umx rdi;
         /// @brief stores r8
-        bsl::safe_uintmax r8;
+        bsl::safe_umx r8;
         /// @brief stores r9
-        bsl::safe_uintmax r9;
+        bsl::safe_umx r9;
         /// @brief stores r10
-        bsl::safe_uintmax r10;
+        bsl::safe_umx r10;
         /// @brief stores r11
-        bsl::safe_uintmax r11;
+        bsl::safe_umx r11;
         /// @brief stores r12
-        bsl::safe_uintmax r12;
+        bsl::safe_umx r12;
         /// @brief stores r13
-        bsl::safe_uintmax r13;
+        bsl::safe_umx r13;
         /// @brief stores r14
-        bsl::safe_uintmax r14;
+        bsl::safe_umx r14;
         /// @brief stores r15
-        bsl::safe_uintmax r15;
+        bsl::safe_umx r15;
         /// @brief stores rsp
-        bsl::safe_uintmax rsp;
+        bsl::safe_umx rsp;
         /// @brief stores rip
-        bsl::safe_uintmax rip;
+        bsl::safe_umx rip;
     };
 }
 

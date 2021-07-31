@@ -26,9 +26,9 @@
 
     .text
 
-    .globl  bf_tls_vpsid_impl
-    .type   bf_tls_vpsid_impl, @function
-bf_tls_vpsid_impl:
+    .globl  bf_tls_vsid_impl
+    .type   bf_tls_vsid_impl, @function
+bf_tls_vsid_impl:
 
 /*
     xor rax, rax
@@ -36,4 +36,4 @@ bf_tls_vpsid_impl:
 */
     ret
 
-    .size bf_tls_vpsid_impl, .-bf_tls_vpsid_impl
+    .size bf_tls_vsid_impl, .-bf_tls_vsid_impl

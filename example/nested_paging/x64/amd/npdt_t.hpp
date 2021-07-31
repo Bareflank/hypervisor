@@ -36,7 +36,7 @@
 namespace example
 {
     /// @brief defined the expected size of the npdt_t struct
-    constexpr bsl::safe_uintmax NUM_NPDT_ENTRIES{bsl::to_umax(512)};
+    constexpr bsl::safe_umx NUM_NPDT_ENTRIES{bsl::to_umx(512)};
 
     /// @struct example::npdt_t
     ///

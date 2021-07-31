@@ -29,7 +29,7 @@
 #include <tls_t.hpp>
 #include <vm_pool_t.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/discard.hpp>
 #include <bsl/errc_type.hpp>
@@ -41,21 +41,21 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param tls the current TLS block
-    ///   @param vm_pool the VM pool to use
-    ///   @param vp_pool the VP pool to use
-    ///   @param vps_pool the VPS pool to use
+    ///   @param vm_pool the vm_pool_t to use
+    ///   @param vp_pool the vp_pool_t to use
+    ///   @param vs_pool the vs_pool_t to use
     ///   @return Returns syscall::BF_STATUS_SUCCESS on success or an error
     ///     code on failure.
     ///
     [[nodiscard]] constexpr auto
     dispatch_syscall_debug_op(
-        tls_t &tls, vm_pool_t &vm_pool, vp_pool_t &vp_pool, vps_pool_t &vps_pool) noexcept
+        tls_t &tls, vm_pool_t &vm_pool, vp_pool_t &vp_pool, vs_pool_t &vs_pool) noexcept
         -> bsl::errc_type
     {
         bsl::discard(tls);
         bsl::discard(vm_pool);
         bsl::discard(vp_pool);
-        bsl::discard(vps_pool);
+        bsl::discard(vs_pool);
 
         return bsl::errc_success;
     }

@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef DUMMY_VPS_POOL_T_HPP
-#define DUMMY_VPS_POOL_T_HPP
+#ifndef DUMMY_VS_POOL_T_HPP
+#define DUMMY_VS_POOL_T_HPP
 
 #include "dummy_errc_types.hpp"
 
@@ -34,34 +34,34 @@
 
 namespace mk
 {
-    /// @class mk::dummy_vps_pool_t
+    /// @class mk::dummy_vs_pool_t
     ///
     /// <!-- description -->
-    ///   @brief Provides the base vps_pool_t for testing.
+    ///   @brief Provides the base vs_pool_t for testing.
     ///
-    class dummy_vps_pool_t final
+    class dummy_vs_pool_t final
     {
     public:
         /// <!-- description -->
-        ///   @brief If a vps_t is assigned to the requested VP, the ID of
-        ///     the vps_t is returned. Otherwise, this function will return
-        ///     bsl::safe_uint16::failure()
+        ///   @brief If a vs_t is assigned to the requested VP, the ID of
+        ///     the vs_t is returned. Otherwise, this function will return
+        ///     bsl::safe_u16::failure()
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
         ///   @param vpid the ID fo the VP to query
-        ///   @return If a vps_t is assigned to the requested VP, the ID of
-        ///     the vps_t is returned. Otherwise, this function will return
-        ///     bsl::safe_uint16::failure()
+        ///   @return If a vs_t is assigned to the requested VP, the ID of
+        ///     the vs_t is returned. Otherwise, this function will return
+        ///     bsl::safe_u16::failure()
         ///
         [[nodiscard]] static constexpr auto
-        is_assigned_to_vp(tls_t &tls, bsl::safe_uint16 const &vpid) noexcept -> bsl::safe_uint16
+        is_assigned_to_vp(tls_t &tls, bsl::safe_u16 const &vpid) noexcept -> bsl::safe_u16
         {
-            if (tls.test_ret == errc_vps_pool_failure) {
+            if (tls.test_ret == errc_vs_pool_failure) {
                 return vpid;
             }
 
-            return bsl::safe_uint16::failure();
+            return bsl::safe_u16::failure();
         }
     };
 }

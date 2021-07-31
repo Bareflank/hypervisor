@@ -30,7 +30,7 @@ list(APPEND INCLUDES
 )
 
 list(APPEND SYSTEM_INCLUDES
-    ${CMAKE_CURRENT_LIST_DIR}/../../loader/include/interface/cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../loader/include/interface
 )
 
 # ------------------------------------------------------------------------------

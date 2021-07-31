@@ -47,7 +47,7 @@ list(APPEND COMMON_SYSTEM_INCLUDES
 list(APPEND X64_INCLUDES
     ${INCLUDES}
     ${CMAKE_CURRENT_LIST_DIR}/../include/x64
-    ${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/x64
+    ${CMAKE_CURRENT_LIST_DIR}/../include/interface/x64
 )
 
 list(APPEND X64_SYSTEM_INCLUDES
@@ -57,7 +57,7 @@ list(APPEND X64_SYSTEM_INCLUDES
 list(APPEND AMD_INCLUDES
     ${X64_INCLUDES}
     ${CMAKE_CURRENT_LIST_DIR}/../include/x64/amd
-    ${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/x64/amd
+    ${CMAKE_CURRENT_LIST_DIR}/../include/interface/x64/amd
 )
 
 list(APPEND AMD_SYSTEM_INCLUDES
@@ -67,7 +67,7 @@ list(APPEND AMD_SYSTEM_INCLUDES
 list(APPEND INTEL_INCLUDES
     ${X64_INCLUDES}
     ${CMAKE_CURRENT_LIST_DIR}/../include/x64/intel
-    ${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/x64/intel
+    ${CMAKE_CURRENT_LIST_DIR}/../include/interface/x64/intel
 )
 
 list(APPEND INTEL_SYSTEM_INCLUDES
@@ -77,7 +77,7 @@ list(APPEND INTEL_SYSTEM_INCLUDES
 list(APPEND AARCH64_INCLUDES
     ${INCLUDES}
     ${CMAKE_CURRENT_LIST_DIR}/../include/arm/aarch64
-    ${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/arm/aarch64
+    ${CMAKE_CURRENT_LIST_DIR}/../include/interface/arm/aarch64
 )
 
 list(APPEND AARCH64_SYSTEM_INCLUDES

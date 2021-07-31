@@ -40,14 +40,14 @@ namespace integration
     ///   @brief Implements the VMExit entry function.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the VMExit
+    ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     void
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    vmexit_entry(bsl::uint16 const vpsid, bsl::uint64 const exit_reason) noexcept
+    vmexit_entry(bsl::uint16 const vsid, bsl::uint64 const exit_reason) noexcept
     {
-        bsl::discard(vpsid);
+        bsl::discard(vsid);
         bsl::discard(exit_reason);
 
         syscall::bf_control_op_exit();
@@ -79,8 +79,8 @@ namespace integration
     {
         bsl::errc_type ret{};
 
-        bsl::safe_uint16 vpid{};
-        bsl::safe_uint16 vpsid{};
+        bsl::safe_u16 vpid{};
+        bsl::safe_u16 vsid{};
 
         // ---------------------------------------------------------------------
         // Setup
@@ -95,34 +95,34 @@ namespace integration
         // ---------------------------------------------------------------------
 
         // create with invalid handle
-        ret = syscall::bf_vps_op_create_vps({}, vpid, ppid, vpsid);
+        ret = syscall::bf_vs_op_create_vs({}, vpid, ppid, vsid);
         integration::verify(bsl::errc_failure == ret);
 
         // create with invalid vmid
-        ret = syscall::bf_vps_op_create_vps(g_handle, syscall::BF_INVALID_ID, ppid, vpsid);
+        ret = syscall::bf_vs_op_create_vs(g_handle, syscall::BF_INVALID_ID, ppid, vsid);
         integration::verify(bsl::errc_failure == ret);
 
         // create with vmid that has not been created
-        constexpr auto invalid_vpsid{2_u16};
-        ret = syscall::bf_vps_op_create_vps(g_handle, invalid_vpsid, ppid, vpsid);
+        constexpr auto invalid_vsid{2_u16};
+        ret = syscall::bf_vs_op_create_vs(g_handle, invalid_vsid, ppid, vsid);
         integration::verify(bsl::errc_failure == ret);
 
         // create with invalid ppid
-        ret = syscall::bf_vps_op_create_vps(g_handle, vpid, syscall::BF_INVALID_ID, vpsid);
+        ret = syscall::bf_vs_op_create_vs(g_handle, vpid, syscall::BF_INVALID_ID, vsid);
         integration::verify(bsl::errc_failure == ret);
 
         // create with ppid that is create than the total number of online pps
-        ret = syscall::bf_vps_op_create_vps(
-            g_handle, vpid, syscall::bf_tls_online_pps(g_handle), vpsid);
+        ret =
+            syscall::bf_vs_op_create_vs(g_handle, vpid, syscall::bf_tls_online_pps(g_handle), vsid);
         integration::verify(bsl::errc_failure == ret);
 
         // create all and prove that creating one more will fail
-        for (bsl::safe_uintmax i{}; i < HYPERVISOR_MAX_VPSS; ++i) {
-            ret = syscall::bf_vps_op_create_vps(g_handle, vpid, ppid, vpsid);
+        for (bsl::safe_idx i{}; i < HYPERVISOR_MAX_VSS; ++i) {
+            ret = syscall::bf_vs_op_create_vs(g_handle, vpid, ppid, vsid);
             integration::verify(bsl::errc_success == ret);
         }
 
-        ret = syscall::bf_vps_op_create_vps(g_handle, vpid, ppid, vpsid);
+        ret = syscall::bf_vs_op_create_vs(g_handle, vpid, ppid, vsid);
         integration::verify(bsl::errc_failure == ret);
 
         syscall::bf_control_op_exit();

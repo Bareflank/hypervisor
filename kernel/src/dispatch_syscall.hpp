@@ -34,7 +34,7 @@
 #include <dispatch_syscall_mem_op.hpp>
 #include <dispatch_syscall_vm_op.hpp>
 #include <dispatch_syscall_vp_op.hpp>
-#include <dispatch_syscall_vps_op.hpp>
+#include <dispatch_syscall_vs_op.hpp>
 #include <ext_pool_t.hpp>
 #include <ext_t.hpp>
 #include <huge_pool_t.hpp>
@@ -44,7 +44,7 @@
 #include <vm_pool_t.hpp>
 #include <vmexit_log_t.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
@@ -58,14 +58,13 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param mut_tls the current TLS block
-    ///   @param mut_page_pool the page pool to use
+    ///   @param mut_page_pool the page_pool_t to use
     ///   @param mut_huge_pool the huge pool to use
-    ///   @param mut_intrinsic the intrinsics to use
-    ///   @param mut_vm_pool the VM pool to use
-    ///   @param mut_vp_pool the VP pool to use
-    ///   @param mut_vps_pool the VPS pool to use
-    ///   @param mut_ext_pool the extension pool to use
-    ///   @param mut_ext the extension that made the syscall
+    ///   @param mut_intrinsic the intrinsic_t to use
+    ///   @param mut_vm_pool the vm_pool_t to use
+    ///   @param mut_vp_pool the vp_pool_t to use
+    ///   @param mut_vs_pool the vs_pool_t to use
+    ///   @param mut_ext_pool the ext_pool_t to use
     ///   @param mut_log the VMExit log to use
     ///   @return Returns a bf_status_t containing success or failure
     ///
@@ -77,14 +76,15 @@ namespace mk
         intrinsic_t &mut_intrinsic,
         vm_pool_t &mut_vm_pool,
         vp_pool_t &mut_vp_pool,
-        vps_pool_t &mut_vps_pool,
+        vs_pool_t &mut_vs_pool,
         ext_pool_t &mut_ext_pool,
-        ext_t &mut_ext,
         vmexit_log_t &mut_log) noexcept -> syscall::bf_status_t
     {
-        switch (syscall::bf_syscall_opcode(bsl::to_u64(mut_tls.ext_syscall)).get()) {
+        bsl::expects(nullptr != mut_tls.ext);
+
+        switch (syscall::bf_syscall_opcode(mut_tls.ext_syscall).get()) {
             case syscall::BF_CONTROL_OP_VAL.get(): {
-                auto const ret{dispatch_syscall_control_op(mut_tls, mut_ext)};
+                auto const ret{dispatch_syscall_control_op(mut_tls)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -94,7 +94,7 @@ namespace mk
             }
 
             case syscall::BF_HANDLE_OP_VAL.get(): {
-                auto const ret{dispatch_syscall_handle_op(mut_tls, mut_ext)};
+                auto const ret{dispatch_syscall_handle_op(mut_tls)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -111,7 +111,7 @@ namespace mk
                     mut_intrinsic,
                     mut_vm_pool,
                     mut_vp_pool,
-                    mut_vps_pool,
+                    mut_vs_pool,
                     mut_ext_pool,
                     mut_log)};
 
@@ -124,7 +124,7 @@ namespace mk
             }
 
             case syscall::BF_CALLBACK_OP_VAL.get(): {
-                auto const ret{dispatch_syscall_callback_op(mut_tls, mut_ext)};
+                auto const ret{dispatch_syscall_callback_op(mut_tls)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -135,7 +135,7 @@ namespace mk
 
             case syscall::BF_VM_OP_VAL.get(): {
                 auto const ret{dispatch_syscall_vm_op(
-                    mut_tls, mut_page_pool, mut_vm_pool, mut_vp_pool, mut_ext_pool, mut_ext)};
+                    mut_tls, mut_page_pool, mut_intrinsic, mut_vm_pool, mut_vp_pool, mut_ext_pool)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -145,7 +145,8 @@ namespace mk
             }
 
             case syscall::BF_VP_OP_VAL.get(): {
-                auto const ret{dispatch_syscall_vp_op(mut_tls, mut_vp_pool, mut_vps_pool, mut_ext)};
+                auto const ret{
+                    dispatch_syscall_vp_op(mut_tls, mut_vm_pool, mut_vp_pool, mut_vs_pool)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -154,16 +155,9 @@ namespace mk
                 return ret;
             }
 
-            case syscall::BF_VPS_OP_VAL.get(): {
-                auto const ret{dispatch_syscall_vps_op(
-                    mut_tls,
-                    mut_page_pool,
-                    mut_intrinsic,
-                    mut_vm_pool,
-                    mut_vp_pool,
-                    mut_vps_pool,
-                    mut_ext)};
-
+            case syscall::BF_VS_OP_VAL.get(): {
+                auto const ret{dispatch_syscall_vs_op(
+                    mut_tls, mut_page_pool, mut_intrinsic, mut_vm_pool, mut_vp_pool, mut_vs_pool)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -173,7 +167,7 @@ namespace mk
             }
 
             case syscall::BF_INTRINSIC_OP_VAL.get(): {
-                auto const ret{dispatch_syscall_intrinsic_op(mut_tls, mut_intrinsic, mut_ext)};
+                auto const ret{dispatch_syscall_intrinsic_op(mut_tls, mut_intrinsic)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -183,8 +177,7 @@ namespace mk
             }
 
             case syscall::BF_MEM_OP_VAL.get(): {
-                auto const ret{
-                    dispatch_syscall_mem_op(mut_tls, mut_page_pool, mut_huge_pool, mut_ext)};
+                auto const ret{dispatch_syscall_mem_op(mut_tls, mut_page_pool, mut_huge_pool)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -198,12 +191,7 @@ namespace mk
             }
         }
 
-        bsl::error() << "unknown syscall "               //--
-                     << bsl::hex(mut_tls.ext_syscall)    //--
-                     << bsl::endl                        //--
-                     << bsl::here();                     //--
-
-        return syscall::BF_STATUS_FAILURE_UNSUPPORTED;
+        return report_syscall_unknown_unsupported(mut_tls);
     }
 }
 

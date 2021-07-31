@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../mocks/page_pool_t.hpp"
+#include "../../../MOCK/page_pool_t.hpp"
 
 #include <ext_tcb_t.hpp>
 #include <page_t.hpp>
@@ -64,7 +64,7 @@ namespace mk
                 T *pmut_mut_virt0{};
                 T *pmut_mut_virt1{};
                 T *pmut_mut_virt2{};
-                constexpr auto phys{0xFF000_umax};
+                constexpr auto phys{0xFF000_umx};
                 bsl::ut_when{} = [&]() noexcept {
                     mut_page_pool.set_allocate("42", &mut_virt, phys);
                     mut_page_pool.set_allocate<T>("null", {}, phys);
@@ -139,7 +139,7 @@ namespace mk
                 T *pmut_mut_virt1{};
                 T *pmut_mut_virt2{};
                 T *pmut_mut_virt3{};
-                constexpr auto expected{HYPERVISOR_PAGE_SIZE * 2_umax};
+                constexpr auto expected{(HYPERVISOR_PAGE_SIZE * 2_umx).checked()};
                 bsl::ut_when{} = [&]() noexcept {
                     pmut_mut_virt0 = mut_page_pool.allocate<T>({}, "42");
                     pmut_mut_virt1 = mut_page_pool.allocate<T>({}, "42");
@@ -189,7 +189,7 @@ namespace mk
                 T *pmut_mut_virt1{};
                 T *pmut_mut_virt2{};
                 T *pmut_mut_virt3{};
-                constexpr auto expected{HYPERVISOR_PAGE_SIZE * 2_umax};
+                constexpr auto expected{(HYPERVISOR_PAGE_SIZE * 2_umx).checked()};
                 bsl::ut_when{} = [&]() noexcept {
                     pmut_mut_virt0 = mut_page_pool.allocate<T>({}, "42");
                     pmut_mut_virt1 = mut_page_pool.allocate<T>({}, "42");
@@ -222,7 +222,7 @@ namespace mk
                 T *pmut_mut_virt1{};
                 T *pmut_mut_virt2{};
                 T *pmut_mut_virt3{};
-                constexpr auto expected{HYPERVISOR_PAGE_SIZE * 2_umax};
+                constexpr auto expected{(HYPERVISOR_PAGE_SIZE * 2_umx).checked()};
                 bsl::ut_when{} = [&]() noexcept {
                     pmut_mut_virt0 = mut_page_pool.allocate<T>({}, "42");
                     pmut_mut_virt1 = mut_page_pool.allocate<T>({}, "42");
@@ -253,7 +253,7 @@ namespace mk
                 page_pool_t mut_page_pool{};
                 T *pmut_mut_virt0{};
                 T *pmut_mut_virt1{};
-                constexpr auto expected{HYPERVISOR_PAGE_SIZE * 2_umax};
+                constexpr auto expected{(HYPERVISOR_PAGE_SIZE * 2_umx).checked()};
                 bsl::ut_when{} = [&]() noexcept {
                     pmut_mut_virt0 = mut_page_pool.allocate<T>({}, "42");
                     pmut_mut_virt1 = mut_page_pool.allocate<T>({}, "42");
@@ -292,12 +292,12 @@ namespace mk
                     bsl::ut_then_at_runtime{"nullptr failure"} = [&]() noexcept {
                         bsl::ut_check(!mut_page_pool.virt_to_phys<T>(nullptr));
                     };
-                    constexpr auto my_bad_phys{bsl::safe_uintmax::failure()};
+                    constexpr auto my_bad_phys{bsl::safe_umx::failure()};
                     mut_page_pool.set_virt_to_phys(pmut_mut_virt0, my_bad_phys);
                     bsl::ut_then{"my bad phys fails"} = [&]() noexcept {
                         bsl::ut_check(!mut_page_pool.virt_to_phys(pmut_mut_virt0));
                     };
-                    constexpr auto my_good_phys{42_umax};
+                    constexpr auto my_good_phys{42_umx};
                     mut_page_pool.set_virt_to_phys(pmut_mut_virt0, my_good_phys);
                     bsl::ut_then{"my good phys succeeds"} = [&]() noexcept {
                         bsl::ut_check(mut_page_pool.virt_to_phys(pmut_mut_virt0) == my_good_phys);
@@ -327,12 +327,12 @@ namespace mk
                     bsl::ut_then_at_runtime{"nullptr failure"} = [&]() noexcept {
                         bsl::ut_check(!mut_page_pool.virt_to_phys<T const>(nullptr));
                     };
-                    constexpr auto my_bad_phys{bsl::safe_uintmax::failure()};
+                    constexpr auto my_bad_phys{bsl::safe_umx::failure()};
                     mut_page_pool.set_virt_to_phys(pmut_mut_virt0, my_bad_phys);
                     bsl::ut_then{"my bad phys fails"} = [&]() noexcept {
                         bsl::ut_check(!mut_page_pool.virt_to_phys<T const>(pmut_mut_virt0));
                     };
-                    constexpr auto my_good_phys{42_umax};
+                    constexpr auto my_good_phys{42_umx};
                     mut_page_pool.set_virt_to_phys(pmut_mut_virt0, my_good_phys);
                     bsl::ut_then{"my good phys succeeds"} = [&]() noexcept {
                         bsl::ut_check(
@@ -349,7 +349,7 @@ namespace mk
             bsl::ut_given{} = []() noexcept {
                 page_pool_t mut_page_pool{};
                 T *pmut_mut_virt0{};
-                bsl::safe_uintmax mut_phys{};
+                bsl::safe_umx mut_phys{};
                 bsl::ut_when{} = [&]() noexcept {
                     pmut_mut_virt0 = mut_page_pool.allocate<T>({}, "42");
                     bsl::ut_required_step(nullptr != pmut_mut_virt0);
@@ -360,15 +360,15 @@ namespace mk
                     };
                     bsl::ut_then_at_runtime{"not allocated by mut_page_pool failure"} =
                         [&]() noexcept {
-                            constexpr auto bad_phys{0xFFFFFFFFFFFFFFFF_umax};
+                            constexpr auto bad_phys{0xFFFFFFFFFFFFFFFF_umx};
                             bsl::ut_check(mut_page_pool.phys_to_virt<T>(bad_phys) == nullptr);
                         };
                     bsl::ut_then_at_runtime{"invalid failure"} = [&]() noexcept {
-                        constexpr auto bad_phys{bsl::safe_uintmax::failure()};
+                        constexpr auto bad_phys{bsl::safe_umx::failure()};
                         bsl::ut_check(mut_page_pool.phys_to_virt<T>(bad_phys) == nullptr);
                     };
                     bsl::ut_then_at_runtime{"nullptr failure"} = [&]() noexcept {
-                        constexpr auto bad_phys{0_umax};
+                        constexpr auto bad_phys{0_umx};
                         bsl::ut_check(mut_page_pool.phys_to_virt<T>(bad_phys) == nullptr);
                     };
                     mut_page_pool.set_phys_to_virt<T>(mut_phys, nullptr);
@@ -390,7 +390,7 @@ namespace mk
             bsl::ut_given{} = []() noexcept {
                 page_pool_t mut_page_pool{};
                 T *pmut_mut_virt0{};
-                bsl::safe_uintmax mut_phys{};
+                bsl::safe_umx mut_phys{};
                 bsl::ut_when{} = [&]() noexcept {
                     pmut_mut_virt0 = mut_page_pool.allocate<T>({}, "42");
                     bsl::ut_required_step(nullptr != pmut_mut_virt0);
@@ -402,15 +402,15 @@ namespace mk
                     };
                     bsl::ut_then_at_runtime{"not allocated by mut_page_pool failure"} =
                         [&]() noexcept {
-                            constexpr auto bad_phys{0xFFFFFFFFFFFFFFFF_umax};
+                            constexpr auto bad_phys{0xFFFFFFFFFFFFFFFF_umx};
                             bsl::ut_check(mut_page_pool.phys_to_virt<T const>(bad_phys) == nullptr);
                         };
                     bsl::ut_then_at_runtime{"invalid failure"} = [&]() noexcept {
-                        constexpr auto bad_phys{bsl::safe_uintmax::failure()};
+                        constexpr auto bad_phys{bsl::safe_umx::failure()};
                         bsl::ut_check(mut_page_pool.phys_to_virt<T const>(bad_phys) == nullptr);
                     };
                     bsl::ut_then_at_runtime{"nullptr failure"} = [&]() noexcept {
-                        constexpr auto bad_phys{0_umax};
+                        constexpr auto bad_phys{0_umx};
                         bsl::ut_check(mut_page_pool.phys_to_virt<T const>(bad_phys) == nullptr);
                     };
                     mut_page_pool.set_phys_to_virt<T>(mut_phys, nullptr);

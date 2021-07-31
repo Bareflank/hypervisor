@@ -38,9 +38,9 @@ namespace mk
     struct page_aligned_bytes_t final
     {
         /// @brief stores the total number of bytes (page aligned)
-        bsl::safe_uintmax bytes;
+        bsl::safe_umx bytes;
         /// @brief stores the total number of pages
-        bsl::safe_uintmax pages;
+        bsl::safe_umx pages;
     };
 }
 

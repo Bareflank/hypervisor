@@ -39,19 +39,18 @@
 #include <bsl/finally_assert.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
-#include <bsl/unlikely_assert.hpp>
 
 namespace integration
 {
     /// @class integration::vp_pool_t
     ///
     /// <!-- description -->
-    ///   @brief Defines the extension's VP pool
+    ///   @brief Defines the extension's vp_pool_t
     ///
     class vp_pool_t final
     {
         /// @brief stores the pool of VPs
-        bsl::array<vp_t, HYPERVISOR_MAX_VPS.get()> m_pool{};
+        bsl::array<vp_t, HYPERVISOR_MAX_VS.get()> m_pool{};
 
     public:
         /// <!-- description -->
@@ -76,9 +75,9 @@ namespace integration
                 }};
 
             bsl::errc_type ret{};
-            for (bsl::safe_uintmax i{}; i < m_pool.size(); ++i) {
+            for (bsl::safe_umx i{}; i < m_pool.size(); ++i) {
                 ret = m_pool.at_if(i)->initialize(gs, tls, sys, intrinsic, bsl::to_u16(i));
-                if (bsl::unlikely_assert(!ret)) {
+                if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
                 }
@@ -102,7 +101,7 @@ namespace integration
         constexpr void
         release(gs_t &gs, tls_t &tls, syscall::bf_syscall_t &sys, intrinsic_t &intrinsic) noexcept
         {
-            for (bsl::safe_uintmax i{}; i < m_pool.size(); ++i) {
+            for (bsl::safe_umx i{}; i < m_pool.size(); ++i) {
                 m_pool.at_if(i)->release(gs, tls, sys, intrinsic);
             }
         }
@@ -118,7 +117,7 @@ namespace integration
         ///   @param vmid the ID of the VM to assign the newly created VP to
         ///   @param ppid the ID of the PP to assign the newly created VP to
         ///   @return Returns the ID of the newly created VP on
-        ///     success, or bsl::safe_uint16::failure() on failure.
+        ///     success, or bsl::safe_u16::failure() on failure.
         ///
         [[nodiscard]] constexpr auto
         allocate(
@@ -126,43 +125,42 @@ namespace integration
             tls_t &tls,
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
-            bsl::safe_uint16 const &vmid,
-            bsl::safe_uint16 const &ppid) noexcept -> bsl::safe_uint16
+            bsl::safe_u16 const &vmid,
+            bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
         {
             bsl::errc_type ret{};
-            bsl::safe_uint16 vpid{};
 
-            vpid = sys.bf_vp_op_create_vp(vmid, ppid);
-            if (bsl::unlikely_assert(!vpid)) {
+            auto mut_vpid{sys.bf_vp_op_create_vp(vmid, ppid)};
+            if (bsl::unlikely(!mut_vpid)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uint16::failure();
+                return bsl::safe_u16::failure();
             }
 
-            bsl::finally destroy_vp_on_error{[&sys, &vpid]() noexcept -> void {
-                bsl::discard(sys.bf_vp_op_destroy_vp(vpid));
+            bsl::finally destroy_vp_on_error{[&sys, &mut_vpid]() noexcept -> void {
+                bsl::discard(sys.bf_vp_op_destroy_vp(mut_vpid));
             }};
 
-            auto *const vp{m_pool.at_if(bsl::to_umax(vpid))};
+            auto *const vp{m_pool.at_if(bsl::to_idx(mut_vpid))};
             if (bsl::unlikely(nullptr == vp)) {
-                bsl::error() << "vpid "                                                   // --
-                             << bsl::hex(vpid)                                            // --
-                             << " provided by the microkernel is invalid"                 // --
-                             << " or greater than or equal to the HYPERVISOR_MAX_VPS "    // --
-                             << bsl::hex(HYPERVISOR_MAX_VPS)                              // --
-                             << bsl::endl                                                 // --
-                             << bsl::here();                                              // --
+                bsl::error() << "mut_vpid "                                              // --
+                             << bsl::hex(mut_vpid)                                       // --
+                             << " provided by the microkernel is invalid"                // --
+                             << " or greater than or equal to the HYPERVISOR_MAX_VS "    // --
+                             << bsl::hex(HYPERVISOR_MAX_VS)                              // --
+                             << bsl::endl                                                // --
+                             << bsl::here();                                             // --
 
-                return bsl::safe_uint16::failure();
+                return bsl::safe_u16::failure();
             }
 
             ret = vp->allocate(gs, tls, sys, intrinsic, vmid, ppid);
-            if (bsl::unlikely_assert(!ret)) {
+            if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_uint16::failure();
+                return bsl::safe_u16::failure();
             }
 
             destroy_vp_on_error.ignore();
-            return vpid;
+            return mut_vpid;
         }
     };
 }

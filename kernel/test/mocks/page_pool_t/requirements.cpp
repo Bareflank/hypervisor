@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../mocks/page_pool_t.hpp"
+#include "../../../MOCK/page_pool_t.hpp"
 
 #include <page_t.hpp>
 
@@ -32,6 +32,7 @@
 
 namespace
 {
+    /// @brief verify constinit it supported
     constinit mk::page_pool_t const g_verify_constinit{};
 }
 

@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef VPS_T_HPP
-#define VPS_T_HPP
+#ifndef VS_T_HPP
+#define VS_T_HPP
 
 #include <bf_constants.hpp>
 #include <bf_syscall_t.hpp>
@@ -35,30 +35,30 @@
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/touch.hpp>
-#include <bsl/unlikely_assert.hpp>
+#include <bsl/unlikely.hpp>
 
 namespace integration
 {
-    /// @class integration::vps_t
+    /// @class integration::vs_t
     ///
     /// <!-- description -->
-    ///   @brief Defines the extension's notion of a VPS
+    ///   @brief Defines the extension's notion of a VS
     ///
-    class vps_t final
+    class vs_t final
     {
-        /// @brief stores the ID associated with this vps_t
-        bsl::safe_uint16 m_id{bsl::safe_uint16::failure()};
+        /// @brief stores the ID associated with this vs_t
+        bsl::safe_u16 m_id{bsl::safe_u16::failure()};
 
     public:
         /// <!-- description -->
-        ///   @brief Initializes this vps_t
+        ///   @brief Initializes this vs_t
         ///
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
         ///   @param tls the tls_t to use
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
-        ///   @param i the ID for this vps_t
+        ///   @param i the ID for this vs_t
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -68,7 +68,7 @@ namespace integration
             tls_t &tls,
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
-            bsl::safe_uint16 const &i) noexcept -> bsl::errc_type
+            bsl::safe_u16 const &i) noexcept -> bsl::errc_type
         {
             bsl::discard(gs);
             bsl::discard(tls);
@@ -80,7 +80,7 @@ namespace integration
         }
 
         /// <!-- description -->
-        ///   @brief Release the vps_t.
+        ///   @brief Release the vs_t.
         ///
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
@@ -96,19 +96,19 @@ namespace integration
             bsl::discard(sys);
             bsl::discard(intrinsic);
 
-            m_id = bsl::safe_uint16::failure();
+            m_id = bsl::safe_u16::failure();
         }
 
         /// <!-- description -->
-        ///   @brief Allocates a vps_t and returns it's ID
+        ///   @brief Allocates a vs_t and returns it's ID
         ///
         /// <!-- inputs/outputs -->
         ///   @param gs the gs_t to use
         ///   @param tls the tls_t to use
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
-        ///   @param vpid the ID of the VP to assign the vps_t to
-        ///   @param ppid the ID of the PP to assign the vps_t to
+        ///   @param vpid the ID of the VP to assign the vs_t to
+        ///   @param ppid the ID of the PP to assign the vs_t to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -118,8 +118,8 @@ namespace integration
             tls_t &tls,
             syscall::bf_syscall_t &sys,
             intrinsic_t &intrinsic,
-            bsl::safe_uint16 const &vpid,
-            bsl::safe_uint16 const &ppid) noexcept -> bsl::errc_type
+            bsl::safe_u16 const &vpid,
+            bsl::safe_u16 const &ppid) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
 
@@ -129,31 +129,31 @@ namespace integration
             bsl::discard(vpid);
             bsl::discard(ppid);
 
-            ret = sys.bf_vps_op_init_as_root(m_id);
-            if (bsl::unlikely_assert(!ret)) {
+            ret = sys.bf_vs_op_init_as_root(m_id);
+            if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
 
             constexpr auto guest_asid_val{0x1_u64};
-            ret = sys.bf_vps_op_write(m_id, syscall::bf_reg_t::bf_reg_t_guest_asid, guest_asid_val);
-            if (bsl::unlikely_assert(!ret)) {
+            ret = sys.bf_vs_op_write(m_id, syscall::bf_reg_t::bf_reg_t_guest_asid, guest_asid_val);
+            if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
 
             constexpr auto intercept_instr1_val{0x00040000_u64};
-            ret = sys.bf_vps_op_write(
+            ret = sys.bf_vs_op_write(
                 m_id, syscall::bf_reg_t::bf_reg_t_intercept_instruction1, intercept_instr1_val);
-            if (bsl::unlikely_assert(!ret)) {
+            if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
 
             constexpr auto intercept_instr2_val{0x00000001_u64};
-            ret = sys.bf_vps_op_write(
+            ret = sys.bf_vs_op_write(
                 m_id, syscall::bf_reg_t::bf_reg_t_intercept_instruction2, intercept_instr2_val);
-            if (bsl::unlikely_assert(!ret)) {
+            if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
