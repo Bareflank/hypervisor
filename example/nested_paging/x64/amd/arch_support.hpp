@@ -49,17 +49,17 @@ namespace example
     ///
     /// <!-- inputs/outputs -->
     ///   @param handle the handle to use
-    ///   @param vpsid the ID of the VPS that generated the VMExit
+    ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     constexpr void
     vmexit(
         syscall::bf_handle_t &handle,
-        bsl::safe_uint16 const &vpsid,
-        bsl::safe_uint64 const &exit_reason) noexcept
+        bsl::safe_u16 const &vsid,
+        bsl::safe_u64 const &exit_reason) noexcept
     {
         bsl::errc_type ret{};
-        constexpr bsl::safe_uintmax exit_reason_cpuid{bsl::to_umax(0x72U)};
+        constexpr bsl::safe_umx exit_reason_cpuid{bsl::to_umx(0x72U)};
 
         /// NOTE:
         /// - At a minimum, we need to handle CPUID on AMD. Note that the
@@ -72,13 +72,13 @@ namespace example
 
         switch (exit_reason.get()) {
             case exit_reason_cpuid.get(): {
-                ret = handle_vmexit_cpuid(handle, vpsid);
-                if (bsl::unlikely_assert(!ret)) {
+                ret = handle_vmexit_cpuid(handle, vsid);
+                if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return;
                 }
 
-                bsl::discard(syscall::bf_vps_op_advance_ip_and_run_current(handle));
+                bsl::discard(syscall::bf_vs_op_advance_ip_and_run_current(handle));
                 bsl::print<bsl::V>() << bsl::here();
                 return;
             }
@@ -88,7 +88,7 @@ namespace example
             }
         }
 
-        syscall::bf_debug_op_dump_vps(vpsid);
+        syscall::bf_debug_op_dump_vs(vsid);
 
         bsl::error() << "unknown exit_reason: "    // --
                      << bsl::hex(exit_reason)      // --
@@ -97,33 +97,33 @@ namespace example
     }
 
     /// <!-- description -->
-    ///   @brief Initializes a VPS with architecture specific stuff.
+    ///   @brief Initializes a VS with architecture specific stuff.
     ///
     /// <!-- inputs/outputs -->
     ///   @param handle the handle to use
-    ///   @param vpsid the VPS being intialized
+    ///   @param vsid the VS being intialized
     ///   @return Returns bsl::errc_success on success and bsl::errc_failure
     ///     on failure.
     ///
     [[nodiscard]] constexpr auto
-    init_vps(syscall::bf_handle_t &handle, bsl::safe_uint16 const &vpsid) noexcept -> bsl::errc_type
+    init_vs(syscall::bf_handle_t &handle, bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
     {
         bsl::errc_type ret{};
 
-        bsl::safe_uintmax rax{};
-        bsl::safe_uintmax rbx{};
-        bsl::safe_uintmax rcx{};
-        bsl::safe_uintmax rdx{};
+        bsl::safe_umx rax{};
+        bsl::safe_umx rbx{};
+        bsl::safe_umx rcx{};
+        bsl::safe_umx rdx{};
 
         /// NOTE:
         /// - Set up ASID
         ///
 
-        constexpr bsl::safe_uint64 guest_asid_idx{bsl::to_u64(0x0058U)};
-        constexpr bsl::safe_uint32 guest_asid_val{bsl::to_u32(0x1U)};
+        constexpr bsl::safe_u64 guest_asid_idx{bsl::to_u64(0x0058U)};
+        constexpr bsl::safe_u32 guest_asid_val{bsl::to_u32(0x1U)};
 
-        ret = syscall::bf_vps_op_write32(handle, vpsid, guest_asid_idx, guest_asid_val);
-        if (bsl::unlikely_assert(!ret)) {
+        ret = syscall::bf_vs_op_write32(handle, vsid, guest_asid_idx, guest_asid_val);
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
         }
@@ -133,21 +133,21 @@ namespace example
         ///   VMRun, and CPUID if we plan to support reporting and stopping.
         ///
 
-        constexpr bsl::safe_uint64 intercept_instruction1_idx{bsl::to_u64(0x000CU)};
-        constexpr bsl::safe_uint32 intercept_instruction1_val{bsl::to_u32(0x00040000U)};
-        constexpr bsl::safe_uint64 intercept_instruction2_idx{bsl::to_u64(0x0010U)};
-        constexpr bsl::safe_uint32 intercept_instruction2_val{bsl::to_u32(0x00000001U)};
+        constexpr bsl::safe_u64 intercept_instruction1_idx{bsl::to_u64(0x000CU)};
+        constexpr bsl::safe_u32 intercept_instruction1_val{bsl::to_u32(0x00040000U)};
+        constexpr bsl::safe_u64 intercept_instruction2_idx{bsl::to_u64(0x0010U)};
+        constexpr bsl::safe_u32 intercept_instruction2_val{bsl::to_u32(0x00000001U)};
 
-        ret = syscall::bf_vps_op_write32(
-            handle, vpsid, intercept_instruction1_idx, intercept_instruction1_val);
-        if (bsl::unlikely_assert(!ret)) {
+        ret = syscall::bf_vs_op_write32(
+            handle, vsid, intercept_instruction1_idx, intercept_instruction1_val);
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
         }
 
-        ret = syscall::bf_vps_op_write32(
-            handle, vpsid, intercept_instruction2_idx, intercept_instruction2_val);
-        if (bsl::unlikely_assert(!ret)) {
+        ret = syscall::bf_vs_op_write32(
+            handle, vsid, intercept_instruction2_idx, intercept_instruction2_val);
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
         }
@@ -159,8 +159,8 @@ namespace example
         ///   check on the first physical processor and be done.
         ///
 
-        constexpr bsl::safe_uintmax cpuid_svm_feature_identification{bsl::to_umax(0x8000000AU)};
-        constexpr bsl::safe_uintmax cpuid_svm_feature_identification_np{bsl::to_umax(0x00000001U)};
+        constexpr bsl::safe_umx cpuid_svm_feature_identification{bsl::to_umx(0x8000000AU)};
+        constexpr bsl::safe_umx cpuid_svm_feature_identification_np{bsl::to_umx(0x00000001U)};
 
         rax = cpuid_svm_feature_identification;
         rcx = {};
@@ -175,10 +175,10 @@ namespace example
         /// - The next step is to enable nested paging in the VMCB.
         ///
 
-        constexpr bsl::safe_uint64 guest_ctls1_idx{bsl::to_u64(0x0090U)};
-        constexpr bsl::safe_uint64 guest_ctls1_val{bsl::to_u64(0x1U)};
+        constexpr bsl::safe_u64 guest_ctls1_idx{bsl::to_u64(0x0090U)};
+        constexpr bsl::safe_u64 guest_ctls1_val{bsl::to_u64(0x1U)};
 
-        ret = syscall::bf_vps_op_write64(handle, vpsid, guest_ctls1_idx, guest_ctls1_val);
+        ret = syscall::bf_vs_op_write64(handle, vsid, guest_ctls1_idx, guest_ctls1_val);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -239,8 +239,8 @@ namespace example
         ///   not safe, but is good enough for an example.
         ///
 
-        constexpr bsl::safe_uint64 page_size_2m{bsl::to_umax(0x200000U)};
-        constexpr bsl::safe_uint64 max_physical_mem{bsl::to_umax(0x8000000000U)};
+        constexpr bsl::safe_u64 page_size_2m{bsl::to_umx(0x200000U)};
+        constexpr bsl::safe_u64 max_physical_mem{bsl::to_umx(0x8000000000U)};
 
         if (syscall::bf_tls_ppid(handle) == bsl::ZERO_U16) {
             ret = g_npt.initialize(&g_page_pool);
@@ -249,7 +249,7 @@ namespace example
                 return ret;
             }
 
-            for (bsl::safe_uintmax gpa{}; gpa < max_physical_mem; gpa += page_size_2m) {
+            for (bsl::safe_idx gpa{}; gpa < max_physical_mem; gpa += page_size_2m) {
                 ret = g_npt.map_2m_page(gpa, gpa, MAP_PAGE_RWE, MEMORY_TYPE_WB);
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
@@ -268,9 +268,9 @@ namespace example
         ///   knows where to find our nested page tables.
         ///
 
-        constexpr bsl::safe_uint64 guest_n_cr3_idx{bsl::to_u64(0x00B0U)};
+        constexpr bsl::safe_u64 guest_n_cr3_idx{bsl::to_u64(0x00B0U)};
 
-        ret = syscall::bf_vps_op_write64(handle, vpsid, guest_n_cr3_idx, g_npt.phys());
+        ret = syscall::bf_vs_op_write64(handle, vsid, guest_n_cr3_idx, g_npt.phys());
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;

@@ -37,11 +37,11 @@ namespace example
     struct range_t final
     {
         /// @brief Defines the range's address
-        bsl::safe_uintmax addr;
+        bsl::safe_umx addr;
         /// @brief Defines the range's size in bytes
-        bsl::safe_uintmax size;
+        bsl::safe_umx size;
         /// @brief Defines the range's memory type
-        bsl::safe_uintmax type;
+        bsl::safe_umx type;
         /// @brief Defines if the range is the default range
         bool dflt;
     };

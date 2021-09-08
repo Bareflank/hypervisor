@@ -250,6 +250,16 @@ intrinsic_set_tls_reg:
 
 
 
+    .globl  intrinsic_assert
+    .type   intrinsic_assert, @function
+intrinsic_assert:
+
+    int 3
+
+    .size intrinsic_assert, .-intrinsic_assert
+
+
+
     .globl  intrinsic_halt
     .type   intrinsic_halt, @function
 intrinsic_halt:
@@ -391,18 +401,18 @@ intrinsic_invvpid:
 
 
 
-    .globl  intrinsic_vmload
-    .type   intrinsic_vmload, @function
-intrinsic_vmload:
+    .globl  intrinsic_vmld
+    .type   intrinsic_vmld, @function
+intrinsic_vmld:
 
     vmptrld [rdi]
-    jbe intrinsic_vmload_failure
+    jbe intrinsic_vmld_failure
 
     xor rax, rax
     ret
     int 3
 
-intrinsic_vmload_failure:
+intrinsic_vmld_failure:
 
     mov rax, 0x4400
     vmread rax, rax
@@ -410,23 +420,23 @@ intrinsic_vmload_failure:
     ret
     int 3
 
-    .size intrinsic_vmload, .-intrinsic_vmload
+    .size intrinsic_vmld, .-intrinsic_vmld
 
 
 
 
-    .globl  intrinsic_vmclear
-    .type   intrinsic_vmclear, @function
-intrinsic_vmclear:
+    .globl  intrinsic_vmcl
+    .type   intrinsic_vmcl, @function
+intrinsic_vmcl:
 
     vmclear [rdi]
-    jbe intrinsic_vmclear_failure
+    jbe intrinsic_vmcl_failure
 
     xor rax, rax
     ret
     int 3
 
-intrinsic_vmclear_failure:
+intrinsic_vmcl_failure:
 
     mov rax, 0x4400
     vmread rax, rax
@@ -434,23 +444,23 @@ intrinsic_vmclear_failure:
     ret
     int 3
 
-    .size intrinsic_vmclear, .-intrinsic_vmclear
+    .size intrinsic_vmcl, .-intrinsic_vmcl
 
 
 
-    .globl  intrinsic_vmread16
-    .type   intrinsic_vmread16, @function
-intrinsic_vmread16:
+    .globl  intrinsic_vmrd16
+    .type   intrinsic_vmrd16, @function
+intrinsic_vmrd16:
 
     vmread rax, rdi
-    jbe intrinsic_vmread16_failure
+    jbe intrinsic_vmrd16_failure
 
     mov [rsi], ax
     xor rax, rax
     ret
     int 3
 
-intrinsic_vmread16_failure:
+intrinsic_vmrd16_failure:
 
     mov rax, 0x4400
     vmread rax, rax
@@ -458,23 +468,23 @@ intrinsic_vmread16_failure:
     ret
     int 3
 
-    .size intrinsic_vmread16, .-intrinsic_vmread16
+    .size intrinsic_vmrd16, .-intrinsic_vmrd16
 
 
 
-    .globl  intrinsic_vmread32
-    .type   intrinsic_vmread32, @function
-intrinsic_vmread32:
+    .globl  intrinsic_vmrd32
+    .type   intrinsic_vmrd32, @function
+intrinsic_vmrd32:
 
     vmread rax, rdi
-    jbe intrinsic_vmread32_failure
+    jbe intrinsic_vmrd32_failure
 
     mov [rsi], eax
     xor rax, rax
     ret
     int 3
 
-intrinsic_vmread32_failure:
+intrinsic_vmrd32_failure:
 
     mov rax, 0x4400
     vmread rax, rax
@@ -482,23 +492,23 @@ intrinsic_vmread32_failure:
     ret
     int 3
 
-    .size intrinsic_vmread32, .-intrinsic_vmread32
+    .size intrinsic_vmrd32, .-intrinsic_vmrd32
 
 
 
-    .globl  intrinsic_vmread64
-    .type   intrinsic_vmread64, @function
-intrinsic_vmread64:
+    .globl  intrinsic_vmrd64
+    .type   intrinsic_vmrd64, @function
+intrinsic_vmrd64:
 
     vmread rax, rdi
-    jbe intrinsic_vmread64_failure
+    jbe intrinsic_vmrd64_failure
 
     mov [rsi], rax
     xor rax, rax
     ret
     int 3
 
-intrinsic_vmread64_failure:
+intrinsic_vmrd64_failure:
 
     mov rax, 0x4400
     vmread rax, rax
@@ -506,22 +516,22 @@ intrinsic_vmread64_failure:
     ret
     int 3
 
-    .size intrinsic_vmread64, .-intrinsic_vmread64
+    .size intrinsic_vmrd64, .-intrinsic_vmrd64
 
 
 
-    .globl  intrinsic_vmwrite16
-    .type   intrinsic_vmwrite16, @function
-intrinsic_vmwrite16:
+    .globl  intrinsic_vmwr16
+    .type   intrinsic_vmwr16, @function
+intrinsic_vmwr16:
 
     vmwrite rdi, rsi
-    jbe intrinsic_vmwrite16_failure
+    jbe intrinsic_vmwr16_failure
 
     xor rax, rax
     ret
     int 3
 
-intrinsic_vmwrite16_failure:
+intrinsic_vmwr16_failure:
 
     mov rax, 0x4400
     vmread rax, rax
@@ -529,22 +539,22 @@ intrinsic_vmwrite16_failure:
     ret
     int 3
 
-    .size intrinsic_vmwrite16, .-intrinsic_vmwrite16
+    .size intrinsic_vmwr16, .-intrinsic_vmwr16
 
 
 
-    .globl  intrinsic_vmwrite32
-    .type   intrinsic_vmwrite32, @function
-intrinsic_vmwrite32:
+    .globl  intrinsic_vmwr32
+    .type   intrinsic_vmwr32, @function
+intrinsic_vmwr32:
 
     vmwrite rdi, rsi
-    jbe intrinsic_vmwrite32_failure
+    jbe intrinsic_vmwr32_failure
 
     xor rax, rax
     ret
     int 3
 
-intrinsic_vmwrite32_failure:
+intrinsic_vmwr32_failure:
 
     mov rax, 0x4400
     vmread rax, rax
@@ -552,22 +562,22 @@ intrinsic_vmwrite32_failure:
     ret
     int 3
 
-    .size intrinsic_vmwrite32, .-intrinsic_vmwrite32
+    .size intrinsic_vmwr32, .-intrinsic_vmwr32
 
 
 
-    .globl  intrinsic_vmwrite64
-    .type   intrinsic_vmwrite64, @function
-intrinsic_vmwrite64:
+    .globl  intrinsic_vmwr64
+    .type   intrinsic_vmwr64, @function
+intrinsic_vmwr64:
 
     vmwrite rdi, rsi
-    jbe intrinsic_vmwrite64_failure
+    jbe intrinsic_vmwr64_failure
 
     xor rax, rax
     ret
     int 3
 
-intrinsic_vmwrite64_failure:
+intrinsic_vmwr64_failure:
 
     mov rax, 0x4400
     vmread rax, rax
@@ -575,22 +585,22 @@ intrinsic_vmwrite64_failure:
     ret
     int 3
 
-    .size intrinsic_vmwrite64, .-intrinsic_vmwrite64
+    .size intrinsic_vmwr64, .-intrinsic_vmwr64
 
 
 
-    .globl  intrinsic_vmwritefunc
-    .type   intrinsic_vmwritefunc, @function
-intrinsic_vmwritefunc:
+    .globl  intrinsic_vmwrfunc
+    .type   intrinsic_vmwrfunc, @function
+intrinsic_vmwrfunc:
 
     vmwrite rdi, rsi
-    jbe intrinsic_vmwritefunc_failure
+    jbe intrinsic_vmwrfunc_failure
 
     xor rax, rax
     ret
     int 3
 
-intrinsic_vmwritefunc_failure:
+intrinsic_vmwrfunc_failure:
 
     mov rax, 0x4400
     vmread rax, rax
@@ -598,7 +608,7 @@ intrinsic_vmwritefunc_failure:
     ret
     int 3
 
-    .size intrinsic_vmwritefunc, .-intrinsic_vmwritefunc
+    .size intrinsic_vmwrfunc, .-intrinsic_vmwrfunc
 
 
 

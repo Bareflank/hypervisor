@@ -32,14 +32,14 @@
 namespace mk
 {
     /// @brief defines the 3 max VMs used in testing
-    constexpr bsl::safe_uintmax INTEGRATION_MAX_VMS{bsl::to_umax(3)};
+    constexpr bsl::safe_umx INTEGRATION_MAX_VMS{bsl::to_umx(3)};
 
     /// @brief defines VMID0
-    constexpr bsl::safe_uint16 VMID0{bsl::to_u16(0)};
+    constexpr bsl::safe_u16 VMID0{bsl::to_u16(0)};
     /// @brief defines VMID1
-    constexpr bsl::safe_uint16 VMID1{bsl::to_u16(1)};
+    constexpr bsl::safe_u16 VMID1{bsl::to_u16(1)};
     /// @brief defines VMID2
-    constexpr bsl::safe_uint16 VMID2{bsl::to_u16(2)};
+    constexpr bsl::safe_u16 VMID2{bsl::to_u16(2)};
 
     /// <!-- description -->
     ///   @brief Implements a yield for the spinlock

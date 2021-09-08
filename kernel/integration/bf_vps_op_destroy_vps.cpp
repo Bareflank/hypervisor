@@ -41,16 +41,16 @@ namespace integration
     ///   @brief Implements the VPExit entry function.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the VPExit
+    ///   @param vsid the ID of the VS that generated the VPExit
     ///   @param exit_reason the exit reason associated with the VPExit
     ///
     void
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    vmexit_entry(bsl::uint16 const vpsid, bsl::uint64 const exit_reason) noexcept
+    vmexit_entry(bsl::uint16 const vsid, bsl::uint64 const exit_reason) noexcept
     {
         bsl::errc_type ret{};
 
-        bsl::discard(vpsid);
+        bsl::discard(vsid);
         bsl::discard(exit_reason);
 
         // ---------------------------------------------------------------------
@@ -98,8 +98,8 @@ namespace integration
     {
         bsl::errc_type ret{};
 
-        bsl::safe_uint16 vpid{};
-        bsl::safe_uint16 vpsid{};
+        bsl::safe_u16 vpid{};
+        bsl::safe_u16 vsid{};
 
         /// NOTE:
         /// - The max number of VPs an extension can create is one less than
@@ -126,8 +126,8 @@ namespace integration
         ret = syscall::bf_vp_op_destroy_vp(g_handle, syscall::BF_INVALID_ID);
         integration::verify(bsl::errc_failure == ret);
 
-        // destroy with ID that is greater than or equal to MAX_VPS
-        ret = syscall::bf_vp_op_destroy_vp(g_handle, bsl::to_u16(HYPERVISOR_MAX_VPS));
+        // destroy with ID that is greater than or equal to MAX_VS
+        ret = syscall::bf_vp_op_destroy_vp(g_handle, bsl::to_u16(HYPERVISOR_MAX_VS));
         integration::verify(bsl::errc_failure == ret);
 
         // destroy with VP that has not been created
@@ -144,12 +144,12 @@ namespace integration
         integration::verify(bsl::errc_failure == ret);
 
         // create all, then destroy all, prove that we can still create
-        for (bsl::safe_uintmax i{}; i < HYPERVISOR_MAX_VPS; ++i) {
+        for (bsl::safe_idx i{}; i < HYPERVISOR_MAX_VS; ++i) {
             ret = syscall::bf_vp_op_create_vp(g_handle, syscall::BF_ROOT_VMID, ppid, vpid);
             integration::require_success(ret);
         }
 
-        for (bsl::safe_uintmax i{}; i < HYPERVISOR_MAX_VPS; ++i) {
+        for (bsl::safe_idx i{}; i < HYPERVISOR_MAX_VS; ++i) {
             ret = syscall::bf_vp_op_destroy_vp(g_handle, bsl::to_u16(i));
             integration::verify(bsl::errc_success == ret);
         }
@@ -162,16 +162,16 @@ namespace integration
         // The following is needed to setup the remaining tests
         // ---------------------------------------------------------------------
 
-        ret = syscall::bf_vps_op_create_vps(g_handle, vpid, ppid, vpsid);
+        ret = syscall::bf_vs_op_create_vs(g_handle, vpid, ppid, vsid);
         integration::require_success(ret);
 
-        ret = syscall::bf_vps_op_init_as_root(g_handle, vpsid);
+        ret = syscall::bf_vs_op_init_as_root(g_handle, vsid);
         integration::require_success(ret);
 
-        ret = init_vps(g_handle, vpsid);
+        ret = init_vs(g_handle, vsid);
         integration::require_success(ret);
 
-        ret = syscall::bf_vps_op_run(g_handle, vpid, vpid, vpsid);
+        ret = syscall::bf_vs_op_run(g_handle, vpid, vpid, vsid);
         integration::require_success(ret);
 
         bsl::print<bsl::V>() << bsl::here();

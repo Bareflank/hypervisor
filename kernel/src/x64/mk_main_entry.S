@@ -55,8 +55,8 @@
     #define TLS_OFFSET_PPID 0x208
     /** @brief defines the offset of tls_t.online_pps */
     #define TLS_OFFSET_ONLINE_PPS 0x20A
-    /** @brief defines the offset of tls_t.loaded_vpsid */
-    #define TLS_OFFSET_LOADED_VPSID 0x20C
+    /** @brief defines the offset of tls_t.loaded_vsid */
+    #define TLS_OFFSET_LOADED_VSID 0x20C
     /** @brief defines the offset of tls_t.mk_state */
     #define TLS_OFFSET_MK_STATE 0x228
     /** @brief defines the offset of tls_t.root_vp_state */
@@ -144,7 +144,7 @@ mk_main_entry:
 
     /**
      * NOTE:
-     * - To start, there are no active extensions, VMs, VPs or VPSs.
+     * - To start, there are no active extensions, VMs, VPs or VSs.
      */
 
     mov rax, INVALID_IDS
@@ -176,14 +176,14 @@ mk_main_entry:
 
     /**
      * NOTE:
-     * - Next we need to invalidate the loaded VPSID. This is only used on
+     * - Next we need to invalidate the loaded VSID. This is only used on
      *   Intel CPUs and is used to determine which VMCS is currently loaded.
-     *   We cannot use the active VPSID here because an extension can read
-     *   and write to any VPS it wants, even if it is not active.
+     *   We cannot use the active VSID here because an extension can read
+     *   and write to any VS it wants, even if it is not active.
      */
 
     mov rax, INVALID_IDS
-    mov gs:[TLS_OFFSET_LOADED_VPSID], ax
+    mov gs:[TLS_OFFSET_LOADED_VSID], ax
 
     /**
      * NOTE:
@@ -393,7 +393,7 @@ mk_main_fast_fail_entry:
      */
 
     mov rdi, [rdi + ARGS_OFFSET_ROOT_VP_STATE]
-    mov rsi, 1
+    mov rsi, 0xFFFFFFFFFFFFFFFF
     jmp promote
 
     .size mk_main_fast_fail_entry, .-mk_main_fast_fail_entry

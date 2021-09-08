@@ -53,7 +53,7 @@ namespace example
     struct tls_t final
     {
         /// @brief dummy data for example purposes only.
-        bsl::safe_uintmax dummy;
+        bsl::safe_umx dummy;
     };
 
     /// @brief defines the max size supported for the TLS block

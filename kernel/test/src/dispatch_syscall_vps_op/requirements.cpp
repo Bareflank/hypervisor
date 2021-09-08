@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../src/dispatch_syscall_vps_op.hpp"
+#include "../../../src/dispatch_syscall_vs_op.hpp"
 
 #include <bsl/ut.hpp>
 

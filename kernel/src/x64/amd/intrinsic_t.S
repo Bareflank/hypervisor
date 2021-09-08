@@ -40,16 +40,18 @@ intrinsic_invlpg:
 
 
 
-    .globl  intrinsic_cr3
-    .type   intrinsic_cr3, @function
-intrinsic_cr3:
+    .globl  intrinsic_invlpga
+    .type   intrinsic_invlpga, @function
+intrinsic_invlpga:
 
-    mov rax, cr3
+    mov rax, rdi
+    mov rcx, rsi
+    invlpga rax, ecx
 
     ret
     int 3
 
-    .size intrinsic_cr3, .-intrinsic_cr3
+    .size intrinsic_invlpga, .-intrinsic_invlpga
 
 
 
@@ -63,23 +65,6 @@ intrinsic_set_cr3:
     int 3
 
     .size intrinsic_set_cr3, .-intrinsic_set_cr3
-
-
-
-    .globl  intrinsic_tp
-    .type   intrinsic_tp, @function
-intrinsic_tp:
-
-    mov ecx, 0xC0000100
-    xor rax, rax
-    rdmsr
-    shl rdx, 32
-    or rax, rdx
-
-    ret
-    int 3
-
-    .size intrinsic_tp, .-intrinsic_tp
 
 
 
@@ -123,6 +108,16 @@ intrinsic_set_tls_reg:
     int 3
 
     .size intrinsic_set_tls_reg, .-intrinsic_set_tls_reg
+
+
+
+    .globl  intrinsic_assert
+    .type   intrinsic_assert, @function
+intrinsic_assert:
+
+    int 3
+
+    .size intrinsic_assert, .-intrinsic_assert
 
 
 
@@ -238,21 +233,6 @@ intrinsic_wrmsr_unsafe:
     int 3
 
     .size intrinsic_wrmsr_unsafe, .-intrinsic_wrmsr_unsafe
-
-
-
-    .globl  intrinsic_invlpga
-    .type   intrinsic_invlpga, @function
-intrinsic_invlpga:
-
-    mov rax, rdi
-    mov rcx, rsi
-    invlpga rax, ecx
-
-    ret
-    int 3
-
-    .size intrinsic_invlpga, .-intrinsic_invlpga
 
 
 

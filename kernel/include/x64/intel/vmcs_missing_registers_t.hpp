@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef VPS_STATE_SAVE_T_HPP
-#define VPS_STATE_SAVE_T_HPP
+#ifndef VS_STATE_SAVE_T_HPP
+#define VS_STATE_SAVE_T_HPP
 
 #include <bsl/cstdint.hpp>
 
@@ -34,41 +34,41 @@ namespace mk
     /// @struct mk::vmcs_missing_registers_t
     ///
     /// <!-- description -->
-    ///   @brief Stores the state for the VPS that the VMCB/VMCS cannot like
+    ///   @brief Stores the state for the VS that the VMCB/VMCS cannot like
     ///     the general purpose registers, debug registers, control registers,
     ///     some MSRs, etc...
     ///
     struct vmcs_missing_registers_t final
     {
         /// @brief stores the value of cr2 (0x000)
-        bsl::uintmax guest_cr2;
+        bsl::uintmx guest_cr2;
         /// @brief stores the value of dr6 (0x008)
-        bsl::uintmax guest_dr6;
+        bsl::uintmx guest_dr6;
 
         /// @brief stores the guest value of ia32_star (0x010)
-        bsl::uintmax guest_ia32_star;
+        bsl::uintmx guest_ia32_star;
         /// @brief stores the guest value of ia32_lstar (0x018)
-        bsl::uintmax guest_ia32_lstar;
+        bsl::uintmx guest_ia32_lstar;
         /// @brief stores the guest value of ia32_cstar (0x020)
-        bsl::uintmax guest_ia32_cstar;
+        bsl::uintmx guest_ia32_cstar;
         /// @brief stores the guest value of ia32_fmask (0x028)
-        bsl::uintmax guest_ia32_fmask;
+        bsl::uintmx guest_ia32_fmask;
         /// @brief stores the guest value of ia32_kernel_gs_base (0x030)
-        bsl::uintmax guest_ia32_kernel_gs_base;
+        bsl::uintmx guest_ia32_kernel_gs_base;
 
         /// @brief stores the host value of ia32_star (0x038)
-        bsl::uintmax host_ia32_star;
+        bsl::uintmx host_ia32_star;
         /// @brief stores the host value of ia32_lstar (0x040)
-        bsl::uintmax host_ia32_lstar;
+        bsl::uintmx host_ia32_lstar;
         /// @brief stores the host value of ia32_cstar (0x048)
-        bsl::uintmax host_ia32_cstar;
+        bsl::uintmx host_ia32_cstar;
         /// @brief stores the host value of ia32_fmask (0x050)
-        bsl::uintmax host_ia32_fmask;
+        bsl::uintmx host_ia32_fmask;
         /// @brief stores the host value of ia32_kernel_gs_base (0x058)
-        bsl::uintmax host_ia32_kernel_gs_base;
+        bsl::uintmx host_ia32_kernel_gs_base;
 
         /// @brief stores the launch status of the hypervisor (0x060)
-        bsl::uintmax launched;
+        bsl::uintmx launched;
     };
 }
 

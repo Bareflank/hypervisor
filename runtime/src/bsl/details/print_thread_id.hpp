@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef RUNTIME_BSL_DETAILS_PRINT_THREAD_ID_HPP
-#define RUNTIME_BSL_DETAILS_PRINT_THREAD_ID_HPP
+#ifndef BSL_DETAILS_PRINT_THREAD_ID_HPP
+#define BSL_DETAILS_PRINT_THREAD_ID_HPP
 
 #include <bf_syscall_impl.hpp>
 
@@ -43,7 +43,7 @@ namespace bsl::details
     ///
     template<typename T>
     constexpr void
-    HYPERVISOR_PRINT_THREAD_ID_NAME(out<T> const o) noexcept
+    print_thread_id(out<T> const o) noexcept
     {
         if (bsl::is_constant_evaluated()) {
             return;
@@ -56,7 +56,7 @@ namespace bsl::details
           << bsl::rst << ":"                                              // --
           << bsl::cyn << bsl::fmt{"04x", syscall::bf_tls_vpid_impl()}     // --
           << bsl::rst << ":"                                              // --
-          << bsl::cyn << bsl::fmt{"04x", syscall::bf_tls_vpsid_impl()}    // --
+          << bsl::cyn << bsl::fmt{"04x", syscall::bf_tls_vsid_impl()}     // --
           << bsl::rst << ":"                                              // --
           << bsl::cyn << bsl::fmt{"04x", syscall::bf_tls_ppid_impl()}     // --
           << bsl::rst << ":"                                              // --

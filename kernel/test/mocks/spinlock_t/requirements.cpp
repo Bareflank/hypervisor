@@ -22,13 +22,14 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../mocks/spinlock_t.hpp"
+#include "../../../MOCK/spinlock_t.hpp"
 
 #include <bsl/discard.hpp>
 #include <bsl/ut.hpp>
 
 namespace mk
 {
+    /// @brief verify constinit it supported
     constinit spinlock_t const g_verify_constinit{};
 }
 

@@ -66,7 +66,7 @@ vmexit_loop_entry:
      *   we can return from this function, and a proper exit will occur
      */
 
-    mov rax, 0x1
+    mov rax, 0xFFFFFFFFFFFFFFFF
     ret
     int 3
 
@@ -82,7 +82,7 @@ install_fast_fail_and_continue_loop:
      *   error occuring.
      */
 
-    mov rax, 0x1
+    mov rax, 0xFFFFFFFFFFFFFFFF
     mov gs:[0x268], rax
 
     lea rax, [rip + fast_fail_entry]

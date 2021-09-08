@@ -30,8 +30,8 @@ list(APPEND INCLUDES
 )
 
 list(APPEND SYSTEM_INCLUDES
-    ${CMAKE_SOURCE_DIR}/syscall/include/cpp
-    ${CMAKE_SOURCE_DIR}/syscall/mocks/cpp
+    ${CMAKE_SOURCE_DIR}/syscall/include
+    ${CMAKE_SOURCE_DIR}/syscall/mocks
 )
 
 # ------------------------------------------------------------------------------
@@ -49,6 +49,7 @@ list(APPEND DEFINES
     HYPERVISOR_PUTC_STDOUT_NAME=ut_putc_stdout
     HYPERVISOR_PUTS_STDERR_NAME=ut_puts_stderr
     HYPERVISOR_PUTS_STDOUT_NAME=ut_puts_stdout
+    HYPERVISOR_PAGE_SIZE=0x1000_umx
 )
 
 # ------------------------------------------------------------------------------

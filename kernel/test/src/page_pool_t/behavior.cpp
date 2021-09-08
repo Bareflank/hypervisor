@@ -28,11 +28,11 @@
 #include <bsl/ut.hpp>
 
 /// NOTE:
-/// - The page pool is unit tested using constexpr. How this works is really
+/// - the page_pool_t is unit tested using constexpr. How this works is really
 ///   simple. There are two different points of view to pay attention to here:
-///   - The unit test for the page pool (this file)
-///   - The unit test for something else that uses the page pool
-/// - This unit test is responsible for unit testing the page pool itself, and
+///   - The unit test for the page_pool_t (this file)
+///   - The unit test for something else that uses the page_pool_t
+/// - This unit test is responsible for unit testing the page_pool_t itself, and
 ///   it has to do this as a constexpr. This ensures that we do not invoke
 ///   undefined behavior. This is really important as the allocator is not only
 ///   managing memory in a way that could lead to really bad things if not
@@ -43,7 +43,7 @@
 ///   allocates page_pool_node_t nodes, and deallocates them. The
 ///   runtime logic allocates things like page tables and uint8 buffers for
 ///   random memory used by an extension. In a constexpr however, you cannot
-///   change the type of memory. So for example, the page pool is managing a
+///   change the type of memory. So for example, the page_pool_t is managing a
 ///   linked list of pages, with each page in the list being a node. The page
 ///   pool cannot change a node from a node to a page table. This is not
 ///   allowed from a constexpr. That is not because it invokes UB, it is just
@@ -54,10 +54,10 @@
 ///   something other than a node, which makes the unit test compile.
 /// - The other point of view is from code that uses the page mut_pool. That code
 ///   will use a mocked version of the page mut_pool. So when that code calls
-///   allocate from the page pool, it will allocate memory using new and then
+///   allocate from the page_pool_t, it will allocate memory using new and then
 ///   deallocate memory using delete. These operators are allowed from a
 ///   constexpr, and they properly construct as required. Therefor, that mocked
-///   version of the page pool can also be used in a constexpr, which means
+///   version of the page_pool_t can also be used in a constexpr, which means
 ///   that UB cannot occur there are well, including forgetting to deallocate
 ///   or deallocating using the wrong memory or wrong types.
 /// - Using this approach, all of the code can be unit tested as a constexpr,
@@ -74,13 +74,13 @@
 ///     T *base{};
 ///     auto *const addr{&base[(HYPERVISOR_MK_PAGE_POOL_ADDR / HYPERVISOR_PAGE_SIZE).get()]};
 ///     auto *const phys{virt - addr};
-///     for (bsl::safe_uintmax i{}; i < bsl::safe_uintmax::max(); ++i) {
+///     for (bsl::safe_idx i{}; i < bsl::safe_umx::max(); ++i) {
 ///         if (&base[i.get()] == phys) {
 ///             return i;
 ///         }
 ///     }
 ///
-///     return bsl::safe_uintmax::failure();
+///     return bsl::safe_umx::failure();
 ///     @endcode
 ///
 ///     This example works because we never actually dereference the nullptr,
@@ -112,7 +112,7 @@
 ///     AUTOSAR, so no matter what, we would need an exception for this
 ///     operation.
 ///   - The only code that would need to be runtime only is in this unit test.
-///     Any code that uses a mocked version of the page pool can use a map
+///     Any code that uses a mocked version of the page_pool_t can use a map
 ///     of the allocated pointers to generate a physical address that can
 ///     then be used by the code in a constexpr, so at the end of the day,
 ///     yes it can be done, but no it should not be.
@@ -121,11 +121,11 @@
 namespace mk
 {
     /// @brief used by most of the tests
-    constexpr auto POOL_SIZE{3_umax};
+    constexpr auto POOL_SIZE{3_umx};
     /// @brief used by the fill tag buffer test
-    constexpr auto TAG_POOL_SIZE{11_umax};
+    constexpr auto TAG_POOL_SIZE{11_umx};
     /// @brief only used by the dump test as this is too large for the stack
-    constexpr auto LARGE_POOL_SIZE{2048_umax};
+    constexpr auto LARGE_POOL_SIZE{2048_umx};
 
     /// @brief used for dump to prevent the unit test from running out of stack
     bsl::array<page_pool_node_t, LARGE_POOL_SIZE.get()> g_mut_pool{};
@@ -139,7 +139,7 @@ namespace mk
     ///     be spare in their layout the virtual addresses of each page are
     ///     based on their physical address as they are in the direct map.
     ///     This spare nature of the pages is not a requirement of the page
-    ///     mut_pool. All the page pool cares about is that it is given a linked
+    ///     mut_pool. All the page_pool_t cares about is that it is given a linked
     ///     list of pages. How those pages are layed out in memory does not
     ///     matter, so in the case of the unit test, we use a simple array.
     ///
@@ -149,9 +149,9 @@ namespace mk
     constexpr void
     initialize_pool(bsl::span<page_pool_node_t> &mut_pool) noexcept
     {
-        constexpr auto one{1_umax};
-        for (bsl::safe_uintmax mut_i{}; mut_i < mut_pool.size() - one; ++mut_i) {
-            mut_pool.at_if(mut_i)->next = mut_pool.at_if(mut_i + one);
+        auto const size{(mut_pool.size() - bsl::safe_umx::magic_1()).checked()};
+        for (bsl::safe_idx mut_i{}; mut_i < size; ++mut_i) {
+            mut_pool.at_if(mut_i)->next = mut_pool.at_if(mut_i + bsl::safe_idx::magic_1());
         }
 
         mut_pool.back_if()->next = nullptr;
@@ -210,11 +210,11 @@ namespace mk
                     mut_page_pool.initialize(mut_view);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "*") == mut_pool.at_if(0_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "*") == mut_pool.at_if(0_idx));
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "*") == mut_pool.at_if(1_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "*") == mut_pool.at_if(1_idx));
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "*") == mut_pool.at_if(2_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "*") == mut_pool.at_if(2_idx));
                         bsl::ut_check(mut_page_pool.allocate<nd_t>(mut_tls, "*") == nullptr);
                     };
                 };
@@ -232,25 +232,25 @@ namespace mk
                     mut_page_pool.initialize(mut_view);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "0") == mut_pool.at_if(0_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "0") == mut_pool.at_if(0_idx));
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "1") == mut_pool.at_if(1_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "1") == mut_pool.at_if(1_idx));
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "2") == mut_pool.at_if(2_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "2") == mut_pool.at_if(2_idx));
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "3") == mut_pool.at_if(3_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "3") == mut_pool.at_if(3_idx));
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "4") == mut_pool.at_if(4_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "4") == mut_pool.at_if(4_idx));
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "5") == mut_pool.at_if(5_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "5") == mut_pool.at_if(5_idx));
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "6") == mut_pool.at_if(6_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "6") == mut_pool.at_if(6_idx));
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "7") == mut_pool.at_if(7_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "7") == mut_pool.at_if(7_idx));
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "8") == mut_pool.at_if(8_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "8") == mut_pool.at_if(8_idx));
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "9") == mut_pool.at_if(9_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "9") == mut_pool.at_if(9_idx));
                         bsl::ut_check(mut_page_pool.allocate<nd_t>(mut_tls, "42") == nullptr);
                     };
                 };
@@ -380,9 +380,9 @@ namespace mk
                 bsl::array<page_pool_node_t, POOL_SIZE.get()> mut_pool{};
                 bsl::span mut_view{mut_pool};
                 tls_t mut_tls{};
-                constexpr auto expected1{HYPERVISOR_PAGE_SIZE * 1_umax};
-                constexpr auto expected2{HYPERVISOR_PAGE_SIZE * 2_umax};
-                constexpr auto expected3{HYPERVISOR_PAGE_SIZE * 3_umax};
+                constexpr auto expected1{(HYPERVISOR_PAGE_SIZE * 1_umx).checked()};
+                constexpr auto expected2{(HYPERVISOR_PAGE_SIZE * 2_umx).checked()};
+                constexpr auto expected3{(HYPERVISOR_PAGE_SIZE * 3_umx).checked()};
                 bsl::ut_when{} = [&]() noexcept {
                     initialize_pool(mut_view);
                     mut_page_pool.initialize(mut_view);
@@ -390,13 +390,13 @@ namespace mk
                         bsl::ut_check(!mut_page_pool.allocated(mut_tls, ""));
                         bsl::ut_check(!mut_page_pool.allocated(mut_tls, "*"));
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "*") == mut_pool.at_if(0_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "*") == mut_pool.at_if(0_idx));
                         bsl::ut_check(mut_page_pool.allocated(mut_tls, "*") == expected1);
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "*") == mut_pool.at_if(1_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "*") == mut_pool.at_if(1_idx));
                         bsl::ut_check(mut_page_pool.allocated(mut_tls, "*") == expected2);
                         bsl::ut_check(
-                            mut_page_pool.allocate<nd_t>(mut_tls, "*") == mut_pool.at_if(2_umax));
+                            mut_page_pool.allocate<nd_t>(mut_tls, "*") == mut_pool.at_if(2_idx));
                         bsl::ut_check(mut_page_pool.allocated(mut_tls, "*") == expected3);
                         bsl::ut_check(!mut_page_pool.allocated(mut_tls, "42"));
                     };
@@ -409,8 +409,8 @@ namespace mk
                 page_pool_t const page_pool{};
                 nd_t mut_node{};
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-                bsl::safe_uintmax const virt{reinterpret_cast<bsl::uintmax>(&mut_node)};
-                bsl::safe_uintmax const phys{virt - HYPERVISOR_MK_PAGE_POOL_ADDR};
+                bsl::safe_umx const virt{reinterpret_cast<bsl::uintmx>(&mut_node)};
+                bsl::safe_umx const phys{virt - HYPERVISOR_MK_PAGE_POOL_ADDR};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!page_pool.virt_to_phys<nd_t>(nullptr));
                     bsl::ut_check(page_pool.virt_to_phys<nd_t>(&mut_node) == phys);
@@ -422,10 +422,10 @@ namespace mk
             bsl::ut_given_at_runtime{} = []() noexcept {
                 page_pool_t const page_pool{};
                 nd_t mut_node{};
-                constexpr auto bad_phys{0xFFFFFFFFFFFFFFFF_umax};
+                constexpr auto bad_phys{0xFFFFFFFFFFFFFFFF_umx};
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-                bsl::safe_uintmax const virt{reinterpret_cast<bsl::uintmax>(&mut_node)};
-                bsl::safe_uintmax const phys{virt - HYPERVISOR_MK_PAGE_POOL_ADDR};
+                bsl::safe_umx const virt{reinterpret_cast<bsl::uintmx>(&mut_node)};
+                bsl::safe_umx const phys{virt - HYPERVISOR_MK_PAGE_POOL_ADDR};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(nullptr == page_pool.phys_to_virt<nd_t>(bad_phys));
                     bsl::ut_check(page_pool.phys_to_virt<nd_t>(phys) == &mut_node);
@@ -458,7 +458,7 @@ namespace mk
                 bsl::ut_when{} = [&]() noexcept {
                     initialize_pool(mut_view);
                     mut_page_pool.initialize(mut_view);
-                    for (bsl::safe_uintmax mut_i{}; mut_i < 1024_umax; ++mut_i) {
+                    for (bsl::safe_idx mut_i{}; mut_i < 1024_umx; ++mut_i) {
                         bsl::ut_required_step(
                             mut_page_pool.allocate<nd_t>(mut_tls, "memory hog") != nullptr);
                     }

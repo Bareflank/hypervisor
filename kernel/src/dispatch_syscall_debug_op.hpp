@@ -25,6 +25,8 @@
 #ifndef DISPATCH_SYSCALL_DEBUG_OP_HPP
 #define DISPATCH_SYSCALL_DEBUG_OP_HPP
 
+#include "dispatch_syscall_helpers.hpp"
+
 #include <bf_constants.hpp>
 #include <ext_pool_t.hpp>
 #include <huge_pool_t.hpp>
@@ -34,7 +36,7 @@
 #include <vm_pool_t.hpp>
 #include <vmexit_log_t.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/char_type.hpp>
 #include <bsl/cstr_type.hpp>
@@ -48,13 +50,13 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param mut_tls the current TLS block
-    ///   @param page_pool the page pool to use
+    ///   @param page_pool the page_pool_t to use
     ///   @param huge_pool the huge pool to use
-    ///   @param intrinsic the intrinsics to use
-    ///   @param vm_pool the VM pool to use
-    ///   @param vp_pool the VP pool to use
-    ///   @param vps_pool the VPS pool to use
-    ///   @param ext_pool the extension pool to use
+    ///   @param intrinsic the intrinsic_t to use
+    ///   @param vm_pool the vm_pool_t to use
+    ///   @param vp_pool the vp_pool_t to use
+    ///   @param vs_pool the vs_pool_t to use
+    ///   @param ext_pool the ext_pool_t to use
     ///   @param log the VMExit log to use
     ///   @return Returns a bf_status_t containing success or failure
     ///
@@ -66,11 +68,11 @@ namespace mk
         intrinsic_t const &intrinsic,
         vm_pool_t const &vm_pool,
         vp_pool_t const &vp_pool,
-        vps_pool_t const &vps_pool,
+        vs_pool_t const &vs_pool,
         ext_pool_t const &ext_pool,
         vmexit_log_t const &log) noexcept -> syscall::bf_status_t
     {
-        switch (syscall::bf_syscall_index(bsl::to_u64(mut_tls.ext_syscall)).get()) {
+        switch (syscall::bf_syscall_index(mut_tls.ext_syscall).get()) {
             case syscall::BF_DEBUG_OP_OUT_IDX_VAL.get(): {
                 bsl::print() << bsl::hex(mut_tls.ext_reg0)    //--
                              << " "                           //--
@@ -85,12 +87,12 @@ namespace mk
             }
 
             case syscall::BF_DEBUG_OP_DUMP_VP_IDX_VAL.get(): {
-                vp_pool.dump(mut_tls, bsl::to_u16_unsafe(mut_tls.ext_reg0));
+                vp_pool.dump(bsl::to_u16_unsafe(mut_tls.ext_reg0));
                 return syscall::BF_STATUS_SUCCESS;
             }
 
-            case syscall::BF_DEBUG_OP_DUMP_VPS_IDX_VAL.get(): {
-                vps_pool.dump(mut_tls, intrinsic, bsl::to_u16_unsafe(mut_tls.ext_reg0));
+            case syscall::BF_DEBUG_OP_DUMP_VS_IDX_VAL.get(): {
+                vs_pool.dump(mut_tls, intrinsic, bsl::to_u16_unsafe(mut_tls.ext_reg0));
                 return syscall::BF_STATUS_SUCCESS;
             }
 
@@ -122,17 +124,17 @@ namespace mk
             }
 
             case syscall::BF_DEBUG_OP_DUMP_EXT_IDX_VAL.get(): {
-                ext_pool.dump(mut_tls, page_pool, bsl::to_u16_unsafe(mut_tls.ext_reg0));
+                ext_pool.dump(mut_tls, bsl::to_u16_unsafe(mut_tls.ext_reg0));
                 return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_PAGE_POOL_IDX_VAL.get(): {
-                page_pool.dump();
+                page_pool.dump(mut_tls);
                 return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_HUGE_POOL_IDX_VAL.get(): {
-                huge_pool.dump();
+                huge_pool.dump(mut_tls);
                 return syscall::BF_STATUS_SUCCESS;
             }
 
@@ -141,12 +143,7 @@ namespace mk
             }
         }
 
-        bsl::error() << "unknown syscall "               //--
-                     << bsl::hex(mut_tls.ext_syscall)    //--
-                     << bsl::endl                        //--
-                     << bsl::here();                     //--
-
-        return syscall::BF_STATUS_FAILURE_UNSUPPORTED;
+        return report_syscall_unknown_unsupported(mut_tls);
     }
 }
 

@@ -67,6 +67,28 @@ jobs:
         ninja
       shell: bash
 
+  IWYU:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        path: hypervisor
+    - name: Setup
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang cmake ninja-build
+      shell: bash
+    - name: Validate Compliance
+      run: |
+        sudo tar -xzvf hypervisor/utils/linux/llvm-bareflank.tar.gz -C /usr/lib/
+        chmod +x hypervisor/utils/linux/include-what-you-use
+        sudo cp hypervisor/utils/linux/include-what-you-use /usr/lib/llvm-bareflank/bin/
+        export PATH="/usr/lib/llvm-bareflank/bin:$PATH"
+        mkdir build && cd build
+        cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DBSL_DEBUG_LEVEL=bsl::VVV ../hypervisor
+        ninja iwyu
+      shell: bash
+
   ASAN:
     runs-on: ubuntu-20.04
     steps:

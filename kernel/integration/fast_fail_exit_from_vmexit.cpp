@@ -31,7 +31,7 @@
 #include <intrinsic_t.hpp>
 #include <tls_t.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/debug.hpp>
 
@@ -44,8 +44,8 @@ namespace integration
 
     /// @brief stores the pool of VPs that we will use
     constinit vp_pool_t g_vp_pool{};
-    /// @brief stores the pool of VPSs that we will use
-    constinit vps_pool_t g_vps_pool{};
+    /// @brief stores the pool of VSs that we will use
+    constinit vs_pool_t g_vs_pool{};
 
     /// @brief stores the bootstrap_t that this code will use
     constinit bootstrap_t g_bootstrap{};
@@ -73,10 +73,10 @@ namespace integration
             g_sys,                     // --
             g_intrinsic,               // --
             g_vp_pool,                 // --
-            g_vps_pool,                // --
+            g_vs_pool,                 // --
             bsl::to_u16(ppid));
 
-        if (bsl::unlikely_assert(!ret)) {
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
@@ -89,15 +89,15 @@ namespace integration
     ///     by the main function to execute whenever a fast fail occurs.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the fail
+    ///   @param vsid the ID of the VS that generated the fail
     ///   @param fail_reason the exit reason associated with the fail
     ///
     extern "C" void
     fail_entry(
-        syscall::bf_uint16_t::value_type const vpsid,
+        syscall::bf_uint16_t::value_type const vsid,
         syscall::bf_status_t::value_type const fail_reason) noexcept
     {
-        bsl::discard(vpsid);
+        bsl::discard(vsid);
         bsl::discard(fail_reason);
 
         return syscall::bf_control_op_exit();
@@ -108,15 +108,15 @@ namespace integration
     ///     by the main function to execute whenever a VMExit occurs.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the VMExit
+    ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     extern "C" void
     vmexit_entry(
-        syscall::bf_uint16_t::value_type const vpsid,
+        syscall::bf_uint16_t::value_type const vsid,
         syscall::bf_uint64_t::value_type const exit_reason) noexcept
     {
-        bsl::discard(vpsid);
+        bsl::discard(vsid);
         bsl::discard(exit_reason);
 
         bsl::error() << "extension purposely exiting early\n";
@@ -145,10 +145,10 @@ namespace integration
         ret = g_vp_pool.initialize(g_gs, g_tls, g_sys, g_intrinsic);
         integration::require_success(ret);
 
-        ret = g_vps_pool.initialize(g_gs, g_tls, g_sys, g_intrinsic);
+        ret = g_vs_pool.initialize(g_gs, g_tls, g_sys, g_intrinsic);
         integration::require_success(ret);
 
-        ret = g_bootstrap.initialize(g_gs, g_tls, g_sys, g_intrinsic, g_vp_pool, g_vps_pool);
+        ret = g_bootstrap.initialize(g_gs, g_tls, g_sys, g_intrinsic, g_vp_pool, g_vs_pool);
         integration::require_success(ret);
 
         return syscall::bf_control_op_wait();

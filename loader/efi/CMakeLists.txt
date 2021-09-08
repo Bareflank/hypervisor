@@ -32,7 +32,7 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
 		target_include_directories(bareflank_efi_loader PUBLIC
 			include/x64/amd
 			../include/x64/amd
-			../include/interface/c/x64/amd
+			../include/interface/x64/amd
 		)
 	endif()
 
@@ -40,14 +40,14 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
 		target_include_directories(bareflank_efi_loader PUBLIC
 			include/x64/intel
 			../include/x64/intel
-			../include/interface/c/x64/intel
+			../include/interface/x64/intel
 		)
 	endif()
 
     target_include_directories(bareflank_efi_loader PUBLIC
 		include/x64
 		../include/x64/
-		../include/interface/c/x64
+		../include/interface/x64
     )
 endif()
 
@@ -55,16 +55,16 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
 	target_include_directories(bareflank_efi_loader PUBLIC
 		include/arm/aarch64
 		../include/arm/aarch64
-		../include/interface/c/arm/aarch64
+		../include/interface/arm/aarch64
 	)
 endif()
 
 target_include_directories(bareflank_efi_loader PUBLIC
 	include
 	include/std
-	include/platform_interface/c
+	include/platform_interface
 	../include
-	../include/interface/c
+	../include/interface
     ${CMAKE_BINARY_DIR}/include
 )
 
@@ -205,11 +205,11 @@ list(APPEND HEADERS
 	${CMAKE_CURRENT_LIST_DIR}/../include/bfelf/bfelf_elf64_ehdr_t.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/bfelf/bfelf_elf64_phdr_t.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/bfelf/bfelf_elf64_shdr_t.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/debug_ring_t.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/dump_vmm_args_t.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/mk_args_t.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/start_vmm_args_t.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/stop_vmm_args_t.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/interface/debug_ring_t.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/interface/dump_vmm_args_t.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/interface/mk_args_t.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/interface/start_vmm_args_t.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/interface/stop_vmm_args_t.h
 )
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
@@ -217,11 +217,11 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
 		${CMAKE_CURRENT_LIST_DIR}/include/x64/setup_cr0.h
 		${CMAKE_CURRENT_LIST_DIR}/include/x64/setup_cr4.h
 		${CMAKE_CURRENT_LIST_DIR}/include/x64/setup_tss.h
-		${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/x64/cpuid_commands.h
-		${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/x64/global_descriptor_table_register_t.h
-		${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/x64/interrupt_descriptor_table_register_t.h
-		${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/x64/state_save_t.h
-		${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/x64/tss_t.h
+		${CMAKE_CURRENT_LIST_DIR}/../include/interface/x64/cpuid_commands.h
+		${CMAKE_CURRENT_LIST_DIR}/../include/interface/x64/global_descriptor_table_register_t.h
+		${CMAKE_CURRENT_LIST_DIR}/../include/interface/x64/interrupt_descriptor_table_register_t.h
+		${CMAKE_CURRENT_LIST_DIR}/../include/interface/x64/state_save_t.h
+		${CMAKE_CURRENT_LIST_DIR}/../include/interface/x64/tss_t.h
 		${CMAKE_CURRENT_LIST_DIR}/../include/x64/alloc_pdpt.h
 		${CMAKE_CURRENT_LIST_DIR}/../include/x64/alloc_pdt.h
 		${CMAKE_CURRENT_LIST_DIR}/../include/x64/alloc_pt.h
@@ -287,8 +287,8 @@ endif()
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
 	list(APPEND HEADERS
-		${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/arm/aarch64/cpuid_commands.h
-		${CMAKE_CURRENT_LIST_DIR}/../include/interface/c/arm/aarch64/state_save_t.h
+		${CMAKE_CURRENT_LIST_DIR}/../include/interface/arm/aarch64/cpuid_commands.h
+		${CMAKE_CURRENT_LIST_DIR}/../include/interface/arm/aarch64/state_save_t.h
 		${CMAKE_CURRENT_LIST_DIR}/../include/arm/aarch64/alloc_l1t.h
 		${CMAKE_CURRENT_LIST_DIR}/../include/arm/aarch64/alloc_l2t.h
 		${CMAKE_CURRENT_LIST_DIR}/../include/arm/aarch64/alloc_l3t.h

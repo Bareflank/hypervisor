@@ -42,7 +42,7 @@ namespace mk
         /// @brief stores the VMExit log
         bsl::array<vmexit_log_record_t, HYPERVISOR_VMEXIT_LOG_SIZE> log;
         /// @brief stores the VMExit log circular cursor
-        bsl::safe_uintmax crsr;
+        bsl::safe_umx crsr;
     };
 }
 

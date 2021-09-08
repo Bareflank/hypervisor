@@ -22,14 +22,15 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MK_BSL_DETAILS_PRINT_THREAD_ID_HPP
-#define MK_BSL_DETAILS_PRINT_THREAD_ID_HPP
+#ifndef BSL_DETAILS_PRINT_THREAD_ID_HPP
+#define BSL_DETAILS_PRINT_THREAD_ID_HPP
 
 #include <get_current_tls.hpp>
 
-#include <bsl/convert.hpp>
+#include <bsl/color.hpp>
+#include <bsl/details/out.hpp>
+#include <bsl/fmt.hpp>
 #include <bsl/is_constant_evaluated.hpp>
-#include <bsl/safe_integral.hpp>
 
 namespace bsl::details
 {
@@ -44,7 +45,7 @@ namespace bsl::details
     constexpr void
     print_thread_id(out<T> const o) noexcept
     {
-        if (is_constant_evaluated()) {
+        if (bsl::is_constant_evaluated()) {
             return;
         }
 
@@ -55,7 +56,7 @@ namespace bsl::details
           << bsl::rst << ":"                                                     // --
           << bsl::cyn << bsl::fmt{"04x", mk::get_current_tls()->active_vpid}     // --
           << bsl::rst << ":"                                                     // --
-          << bsl::cyn << bsl::fmt{"04x", mk::get_current_tls()->active_vpsid}    // --
+          << bsl::cyn << bsl::fmt{"04x", mk::get_current_tls()->active_vsid}     // --
           << bsl::rst << ":"                                                     // --
           << bsl::cyn << bsl::fmt{"04x", mk::get_current_tls()->ppid}            // --
           << bsl::rst << ":"                                                     // --

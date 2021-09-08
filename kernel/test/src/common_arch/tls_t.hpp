@@ -47,65 +47,65 @@ namespace mk
         /// --------------------------------------------------------------------
 
         /// @brief RAX, stores the extension's syscall
-        bsl::uintmax ext_syscall;
+        bsl::uintmx ext_syscall;
         /// @brief RDI, stores the value of REG0 for the extension
-        bsl::uintmax ext_reg0;
+        bsl::uintmx ext_reg0;
         /// @brief RSI, stores the value of REG1 for the extension
-        bsl::uintmax ext_reg1;
+        bsl::uintmx ext_reg1;
         /// @brief RDX, stores the value of REG2 for the extension
-        bsl::uintmax ext_reg2;
+        bsl::uintmx ext_reg2;
         /// @brief R10, stores the value of REG3 for the extension
-        bsl::uintmax ext_reg3;
+        bsl::uintmx ext_reg3;
         /// @brief R8, stores the value of REG4 for the extension
-        bsl::uintmax ext_reg4;
+        bsl::uintmx ext_reg4;
         /// @brief R9, stores the value of REG5 for the extension
-        bsl::uintmax ext_reg5;
+        bsl::uintmx ext_reg5;
 
         /// --------------------------------------------------------------------
         /// ESR State
         /// --------------------------------------------------------------------
 
         /// @brief stores the value of ip for the ESR
-        bsl::uintmax esr_ip;
+        bsl::uintmx esr_ip;
         /// @brief stores the value of sp for the ESR
-        bsl::uintmax esr_sp;
+        bsl::uintmx esr_sp;
 
         /// @brief stores the value of the ESR vector
-        bsl::uintmax esr_vector;
+        bsl::uintmx esr_vector;
         /// @brief stores the value of the ESR error code
-        bsl::uintmax esr_error_code;
+        bsl::uintmx esr_error_code;
 
         /// @brief stores the value of a page fault address for the ESR
-        bsl::uintmax esr_pf_addr;
+        bsl::uintmx esr_pf_addr;
 
         /// --------------------------------------------------------------------
         /// Fast Fail Information
         /// --------------------------------------------------------------------
 
         /// @brief stores the current fast fail address
-        bsl::uintmax current_fast_fail_ip;
+        bsl::uintmx current_fast_fail_ip;
         /// @brief stores the current fast fail stack
-        bsl::uintmax current_fast_fail_sp;
+        bsl::uintmx current_fast_fail_sp;
 
         /// @brief stores the mk_main fast fail address
-        bsl::uintmax mk_main_fast_fail_ip;
+        bsl::uintmx mk_main_fast_fail_ip;
         /// @brief stores the mk_main fast fail stack
-        bsl::uintmax mk_main_fast_fail_sp;
+        bsl::uintmx mk_main_fast_fail_sp;
 
         /// @brief stores the call_ext fast fail address
-        bsl::uintmax call_ext_fast_fail_ip;
+        bsl::uintmx call_ext_fast_fail_ip;
         /// @brief stores the call_ext fast fail stack
-        bsl::uintmax call_ext_fast_fail_sp;
+        bsl::uintmx call_ext_fast_fail_sp;
 
         /// @brief stores the dispatch_syscall fast fail address
-        bsl::uintmax dispatch_syscall_fast_fail_ip;
+        bsl::uintmx dispatch_syscall_fast_fail_ip;
         /// @brief stores the dispatch_syscall fast fail stack
-        bsl::uintmax dispatch_syscall_fast_fail_sp;
+        bsl::uintmx dispatch_syscall_fast_fail_sp;
 
         /// @brief stores the vmexit loop address
-        bsl::uintmax vmexit_loop_ip;
+        bsl::uintmx vmexit_loop_ip;
         /// @brief stores the vmexit loop stack
-        bsl::uintmax vmexit_loop_sp;
+        bsl::uintmx vmexit_loop_sp;
 
         /// --------------------------------------------------------------------
         /// Context Information
@@ -141,24 +141,24 @@ namespace mk
         bsl::uint16 active_vmid;
         /// @brief stores the currently active VPID
         bsl::uint16 active_vpid;
-        /// @brief stores the currently active VPSID
-        bsl::uint16 active_vpsid;
+        /// @brief stores the currently active VSID
+        bsl::uint16 active_vsid;
 
         /// @brief stores the sp used by extensions for callbacks
-        bsl::uintmax sp;
+        bsl::uintmx sp;
         /// @brief stores the tps used by extensions for callbacks
-        bsl::uintmax tp;
+        bsl::uintmx tp;
 
         /// @brief used to store a return address for unsafe ops
-        bsl::uintmax unsafe_rip;
+        bsl::uintmx unsafe_rip;
 
         /// @brief reserved
-        bsl::uintmax reserved_padding2;
+        bsl::uintmx reserved_padding2;
         /// @brief reserved
-        bsl::uintmax reserved_padding3;
+        bsl::uintmx reserved_padding3;
 
         /// @brief stores whether or not the first launch succeeded
-        bsl::uintmax first_launch_succeeded;
+        bsl::uintmx first_launch_succeeded;
 
         /// @brief stores the currently active root page table
         void *active_rpt;
@@ -171,7 +171,7 @@ namespace mk
         bool state_reversal_required;
 
         /// @brief stores the syscall return status
-        bsl::uintmax syscall_ret_status;
+        bsl::uintmx syscall_ret_status;
 
         /// @brief logs an extid for state reversal if needed
         bsl::uint16 log_extid;
@@ -179,8 +179,8 @@ namespace mk
         bsl::uint16 log_vmid;
         /// @brief logs a vpid for state reversal if needed
         bsl::uint16 log_vpid;
-        /// @brief logs a vpsid for state reversal if needed
-        bsl::uint16 log_vpsid;
+        /// @brief logs a vsid for state reversal if needed
+        bsl::uint16 log_vsid;
 
         /// @brief logs an ext for state reversal if needed
         void *log_ext;
@@ -188,8 +188,8 @@ namespace mk
         void *log_vm;
         /// @brief logs a vp for state reversal if needed
         void *log_vp;
-        /// @brief logs a vps for state reversal if needed
-        void *log_vps;
+        /// @brief logs a vs for state reversal if needed
+        void *log_vs;
 
         /// --------------------------------------------------------------------
         /// Unit Test Specific

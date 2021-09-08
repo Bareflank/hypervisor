@@ -31,7 +31,7 @@
     - [2.6.4. Callback Support](#264-callback-support)
     - [2.6.5. VM Support](#265-vm-support)
     - [2.6.6. VP Support](#266-vp-support)
-    - [2.6.7. VPS Support](#267-vps-support)
+    - [2.6.7. VS Support](#267-vs-support)
     - [2.6.8. Intrinsic Support](#268-intrinsic-support)
     - [2.6.9. Mem Support](#269-mem-support)
   - [2.7. Syscall Specification IDs](#27-syscall-specification-ids)
@@ -47,7 +47,7 @@
     - [2.11.1. bf_debug_op_out, OP=0x2, IDX=0x0](#2111-bf_debug_op_out-op0x2-idx0x0)
     - [2.11.2. bf_debug_op_dump_vm, OP=0x2, IDX=0x1](#2112-bf_debug_op_dump_vm-op0x2-idx0x1)
     - [2.11.3. bf_debug_op_dump_vp, OP=0x2, IDX=0x2](#2113-bf_debug_op_dump_vp-op0x2-idx0x2)
-    - [2.11.4. bf_debug_op_dump_vps, OP=0x2, IDX=0x3](#2114-bf_debug_op_dump_vps-op0x2-idx0x3)
+    - [2.11.4. bf_debug_op_dump_vs, OP=0x2, IDX=0x3](#2114-bf_debug_op_dump_vs-op0x2-idx0x3)
     - [2.11.5. bf_debug_op_dump_vmexit_log, OP=0x2, IDX=0x4](#2115-bf_debug_op_dump_vmexit_log-op0x2-idx0x4)
     - [2.11.6. bf_debug_op_write_c, OP=0x2, IDX=0x5](#2116-bf_debug_op_write_c-op0x2-idx0x5)
     - [2.11.7. bf_debug_op_write_str, OP=0x2, IDX=0x6](#2117-bf_debug_op_write_str-op0x2-idx0x6)
@@ -55,28 +55,31 @@
     - [2.11.9. bf_debug_op_dump_page_pool, OP=0x2, IDX=0x8](#2119-bf_debug_op_dump_page_pool-op0x2-idx0x8)
     - [2.11.10. bf_debug_op_dump_huge_pool, OP=0x2, IDX=0x9](#21110-bf_debug_op_dump_huge_pool-op0x2-idx0x9)
   - [2.12. Callback Syscalls](#212-callback-syscalls)
-    - [2.12.1. bf_callback_op_register_bootstrap, OP=0x3, IDX=0x2](#2121-bf_callback_op_register_bootstrap-op0x3-idx0x2)
-    - [2.12.2. bf_callback_op_register_vmexit, OP=0x3, IDX=0x3](#2122-bf_callback_op_register_vmexit-op0x3-idx0x3)
-    - [2.12.3. bf_callback_op_register_fail, OP=0x3, IDX=0x4](#2123-bf_callback_op_register_fail-op0x3-idx0x4)
+    - [2.12.1. bf_callback_op_register_bootstrap, OP=0x3, IDX=0x0](#2121-bf_callback_op_register_bootstrap-op0x3-idx0x0)
+    - [2.12.2. bf_callback_op_register_vmexit, OP=0x3, IDX=0x1](#2122-bf_callback_op_register_vmexit-op0x3-idx0x1)
+    - [2.12.3. bf_callback_op_register_fail, OP=0x3, IDX=0x2](#2123-bf_callback_op_register_fail-op0x3-idx0x2)
   - [2.13. Virtual Machine Syscalls](#213-virtual-machine-syscalls)
     - [2.13.2. bf_vm_op_create_vm, OP=0x4, IDX=0x0](#2132-bf_vm_op_create_vm-op0x4-idx0x0)
     - [2.13.3. bf_vm_op_destroy_vm, OP=0x4, IDX=0x1](#2133-bf_vm_op_destroy_vm-op0x4-idx0x1)
+    - [2.13.3. bf_vm_op_map_direct, OP=0x4, IDX=0x2](#2133-bf_vm_op_map_direct-op0x4-idx0x2)
+    - [2.13.3. bf_vm_op_unmap_direct, OP=0x4, IDX=0x3](#2133-bf_vm_op_unmap_direct-op0x4-idx0x3)
+    - [2.13.3. bf_vm_op_unmap_direct_broadcast, OP=0x4, IDX=0x4](#2133-bf_vm_op_unmap_direct_broadcast-op0x4-idx0x4)
   - [2.14. Virtual Processor Syscalls](#214-virtual-processor-syscalls)
     - [2.14.2. bf_vp_op_create_vp, OP=0x5, IDX=0x0](#2142-bf_vp_op_create_vp-op0x5-idx0x0)
     - [2.14.3. bf_vp_op_destroy_vp, OP=0x5, IDX=0x1](#2143-bf_vp_op_destroy_vp-op0x5-idx0x1)
     - [2.14.4. bf_vp_op_migrate, OP=0x5, IDX=0x2](#2144-bf_vp_op_migrate-op0x5-idx0x2)
   - [2.14.5. Virtual Processor State Syscalls](#2145-virtual-processor-state-syscalls)
-    - [2.14.7. bf_vps_op_create_vps, OP=0x6, IDX=0x0](#2147-bf_vps_op_create_vps-op0x6-idx0x0)
-    - [2.14.8. bf_vps_op_destroy_vps, OP=0x6, IDX=0x1](#2148-bf_vps_op_destroy_vps-op0x6-idx0x1)
-    - [2.14.9. bf_vps_op_init_as_root, OP=0x6, IDX=0x2](#2149-bf_vps_op_init_as_root-op0x6-idx0x2)
-    - [2.14.10. bf_vps_op_read, OP=0x6, IDX=0xB](#21410-bf_vps_op_read-op0x6-idx0xb)
-    - [2.14.11. bf_vps_op_write, OP=0x6, IDX=0xC](#21411-bf_vps_op_write-op0x6-idx0xc)
-    - [2.14.12. bf_vps_op_run, OP=0x5, IDX=0xD](#21412-bf_vps_op_run-op0x5-idx0xd)
-    - [2.14.13. bf_vps_op_run_current, OP=0x5, IDX=0xE](#21413-bf_vps_op_run_current-op0x5-idx0xe)
-    - [2.14.14. bf_vps_op_advance_ip, OP=0x5, IDX=0xF](#21414-bf_vps_op_advance_ip-op0x5-idx0xf)
-    - [2.14.15. bf_vps_op_advance_ip_and_run_current, OP=0x5, IDX=0x10](#21415-bf_vps_op_advance_ip_and_run_current-op0x5-idx0x10)
-    - [2.14.16. bf_vps_op_promote, OP=0x5, IDX=0x11](#21416-bf_vps_op_promote-op0x5-idx0x11)
-    - [2.14.17. bf_vps_op_clear_vps, OP=0x5, IDX=0x11](#21417-bf_vps_op_clear_vps-op0x5-idx0x11)
+    - [2.14.7. bf_vs_op_create_vs, OP=0x6, IDX=0x0](#2147-bf_vs_op_create_vs-op0x6-idx0x0)
+    - [2.14.8. bf_vs_op_destroy_vs, OP=0x6, IDX=0x1](#2148-bf_vs_op_destroy_vs-op0x6-idx0x1)
+    - [2.14.9. bf_vs_op_init_as_root, OP=0x6, IDX=0x2](#2149-bf_vs_op_init_as_root-op0x6-idx0x2)
+    - [2.14.10. bf_vs_op_read, OP=0x6, IDX=0x3](#21410-bf_vs_op_read-op0x6-idx0x3)
+    - [2.14.11. bf_vs_op_write, OP=0x6, IDX=0x4](#21411-bf_vs_op_write-op0x6-idx0x4)
+    - [2.14.12. bf_vs_op_run, OP=0x5, IDX=0x5](#21412-bf_vs_op_run-op0x5-idx0x5)
+    - [2.14.13. bf_vs_op_run_current, OP=0x5, IDX=0x6](#21413-bf_vs_op_run_current-op0x5-idx0x6)
+    - [2.14.14. bf_vs_op_advance_ip, OP=0x5, IDX=0x7](#21414-bf_vs_op_advance_ip-op0x5-idx0x7)
+    - [2.14.15. bf_vs_op_advance_ip_and_run_current, OP=0x5, IDX=0x8](#21415-bf_vs_op_advance_ip_and_run_current-op0x5-idx0x8)
+    - [2.14.16. bf_vs_op_promote, OP=0x5, IDX=0x9](#21416-bf_vs_op_promote-op0x5-idx0x9)
+    - [2.14.17. bf_vs_op_clear_vs, OP=0x5, IDX=0xA](#21417-bf_vs_op_clear_vs-op0x5-idx0xa)
   - [2.15. Intrinsic Syscalls](#215-intrinsic-syscalls)
     - [2.15.1. bf_intrinsic_op_rdmsr, OP=0x7, IDX=0x0](#2151-bf_intrinsic_op_rdmsr-op0x7-idx0x0)
     - [2.15.2. bf_intrinsic_op_wrmsr, OP=0x7, IDX=0x1](#2152-bf_intrinsic_op_wrmsr-op0x7-idx0x1)
@@ -113,14 +116,14 @@ This specification is specific to 64bit Intel and AMD processors conforming to t
 
 | Abbreviation | Description |
 | :----------- | :---------- |
+| PP | Physical Processor |
 | VM | Virtual Machine |
 | VP | Virtual Processor |
-| VPS | Virtual Processor State |
-| PP | Physical Processor |
+| VS | Virtual processor State |
+| PPID | Physical Processor Identifier |
 | VMID | Virtual Machine Identifier |
 | VPID | Virtual Processor Identifier |
-| VPSID | Virtual Processor State Identifier |
-| PPID | Physical Processor Identifier |
+| VSID | Virtual Processor State Identifier |
 | OS | Operating System |
 | BIOS | Basic Input/Output System |
 | UEFI | Unified Extensible Firmware Interface |
@@ -186,7 +189,7 @@ The following defines some ID constants.
 **const, uint16_t: BF_INVALID_ID**
 | Value | Description |
 | :---- | :---------- |
-| 0xFFFF | Defines an invalid ID for an extension, VM, VP, VPS and PP |
+| 0xFFFF | Defines an invalid ID for an extension, VM, VP, VS and PP |
 
 **const, uint16_t: BF_BS_PPID**
 | Value | Description |
@@ -268,35 +271,65 @@ BF_STATUS_VALUE defines success or which type of error occurred. BF_STATUS_FLAGS
 
 ### 2.3.4. BF_STATUS_INVALID_PARAMS, VALUE=3
 
-**const, bf_status_t: BF_STATUS_INVALID_PARAMS0**
+**const, mv_status_t: MV_STATUS_INVALID_INPUT_REG0**
 | Value | Description |
 | :---- | :---------- |
-| 0xDEAD000000010003 | Indicates param 0 is invalid |
+| 0xDEAD000000010003 | Indicates input reg0 is invalid |
 
-**const, bf_status_t: BF_STATUS_INVALID_PARAMS1**
+**const, mv_status_t: MV_STATUS_INVALID_INPUT_REG1**
 | Value | Description |
 | :---- | :---------- |
-| 0xDEAD000000020003 | Indicates param 1 is invalid |
+| 0xDEAD000000020003 | Indicates input reg1 is invalid |
 
-**const, bf_status_t: BF_STATUS_INVALID_PARAMS2**
+**const, mv_status_t: MV_STATUS_INVALID_INPUT_REG2**
 | Value | Description |
 | :---- | :---------- |
-| 0xDEAD000000040003 | Indicates param 2 is invalid |
+| 0xDEAD000000040003 | Indicates input reg2 is invalid |
 
-**const, bf_status_t: BF_STATUS_INVALID_PARAMS3**
+**const, mv_status_t: MV_STATUS_INVALID_INPUT_REG3**
 | Value | Description |
 | :---- | :---------- |
-| 0xDEAD000000080003 | Indicates param 3 is invalid |
+| 0xDEAD000000080003 | Indicates input reg3 is invalid |
 
-**const, bf_status_t: BF_STATUS_INVALID_PARAMS4**
+**const, mv_status_t: MV_STATUS_INVALID_INPUT_REG4**
 | Value | Description |
 | :---- | :---------- |
-| 0xDEAD000000100003 | Indicates param 4 is invalid |
+| 0xDEAD000000100003 | Indicates input reg4 is invalid |
 
-**const, bf_status_t: BF_STATUS_INVALID_PARAMS5**
+**const, mv_status_t: MV_STATUS_INVALID_INPUT_REG5**
 | Value | Description |
 | :---- | :---------- |
-| 0xDEAD000000200003 | Indicates param 5 is invalid |
+| 0xDEAD000000200003 | Indicates input reg5 is invalid |
+
+**const, mv_status_t: MV_STATUS_INVALID_OUTPUT_REG0**
+| Value | Description |
+| :---- | :---------- |
+| 0xDEAD000000400003 | Indicates output reg0 is invalid |
+
+**const, mv_status_t: MV_STATUS_INVALID_OUTPUT_REG1**
+| Value | Description |
+| :---- | :---------- |
+| 0xDEAD000000800003 | Indicates output reg1 is invalid |
+
+**const, mv_status_t: MV_STATUS_INVALID_OUTPUT_REG2**
+| Value | Description |
+| :---- | :---------- |
+| 0xDEAD000001000003 | Indicates output reg2 is invalid |
+
+**const, mv_status_t: MV_STATUS_INVALID_OUTPUT_REG3**
+| Value | Description |
+| :---- | :---------- |
+| 0xDEAD000002000003 | Indicates output reg3 is invalid |
+
+**const, mv_status_t: MV_STATUS_INVALID_OUTPUT_REG4**
+| Value | Description |
+| :---- | :---------- |
+| 0xDEAD000004000003 | Indicates output reg4 is invalid |
+
+**const, mv_status_t: MV_STATUS_INVALID_OUTPUT_REG5**
+| Value | Description |
+| :---- | :---------- |
+| 0xDEAD000008000003 | Indicates output reg5 is invalid |
 
 ## 2.4. Syscall Inputs
 
@@ -462,17 +495,17 @@ The following sections define the different opcodes that are supported by this s
 | :---- | :---------- |
 | 0x0000000000050000 | Defines the syscall opcode for bf_vp_op (nosig) |
 
-### 2.6.7. VPS Support
+### 2.6.7. VS Support
 
-**const, uint64_t: BF_VPS_OP_VAL**
+**const, uint64_t: BF_VS_OP_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x6642000000060000 | Defines the syscall opcode for bf_vps_op |
+| 0x6642000000060000 | Defines the syscall opcode for bf_vs_op |
 
-**const, uint64_t: BF_VPS_OP_NOSIG_VAL**
+**const, uint64_t: BF_VS_OP_NOSIG_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x0000000000060000 | Defines the syscall opcode for bf_vps_op (nosig) |
+| 0x0000000000060000 | Defines the syscall opcode for bf_vs_op (nosig) |
 
 ### 2.6.8. Intrinsic Support
 
@@ -529,9 +562,9 @@ The microkernel defines a "thread" the same way both Intel and AMD define a thre
 The layout of the TLS block provided to each extension uses a scheme similar to the ELF TLS specification, but with some modifications. Unlike the ELF TLS specification, each TLS block is limited to two pages. The lower half of the page is dedicated to "thread_local" storage. The upper half is defined by this specification, and provides access to registers shared between the microkernel and the extension to improve performance. For example, access to a VM's general purpose registers is available from the TLS block. Each TLS register defined by this specific is an offset into the upper half of the TLS block (which can be located using the fs segment register on Intel/AMD).
 
 **IMPORTANT:**
-The general purpose registers are always accessible to an extension to read and write, but it is up to the extension to ensure the correct VPS state is being modified. Accesses to the TLS block modifies the active VPS only. For example, while an extension is executing its bootstrap handler, there is no active VPS, in which case any reads/writes to the general purpose registers from the TLS block will be lost. When an extension is executing from a VMExit handler, reads/writes to the general purpose registers from the TLS block are made to the VPS that generated the VMExit. If an extension then creates a VPS, the only way to modify the general purpose registers for the newly created VPS is through the read/write ABIs. Attempting to use the TLS block will modify the registers for the active VPS, not the newly created VPS. The only way to set a VPS to "active" is to use the run ABI, which on success does not return, meaning the extension has to wait for a VMExit before the newly create VPS's general purpose registers can be accessed from the TLS block.
+The general purpose registers are always accessible to an extension to read and write, but it is up to the extension to ensure the correct VS state is being modified. Accesses to the TLS block modifies the active VS only. For example, while an extension is executing its bootstrap handler, there is no active VS, in which case any reads/writes to the general purpose registers from the TLS block will be lost. When an extension is executing from a VMExit handler, reads/writes to the general purpose registers from the TLS block are made to the VS that generated the VMExit. If an extension then creates a VS, the only way to modify the general purpose registers for the newly created VS is through the read/write ABIs. Attempting to use the TLS block will modify the registers for the active VS, not the newly created VS. The only way to set a VS to "active" is to use the run ABI, which on success does not return, meaning the extension has to wait for a VMExit before the newly create VS's general purpose registers can be accessed from the TLS block.
 
-Although this seems overly complicated, this optimization works well for the majority of the VMExits an extension will have to handle, especially the VMExits that execute frequently as most of the time an extension will only be modifying the general purpose registers for the active VPS.
+Although this seems overly complicated, this optimization works well for the majority of the VMExits an extension will have to handle, especially the VMExits that execute frequently as most of the time an extension will only be modifying the general purpose registers for the active VS.
 
 ### 2.8.1. TLS Offsets
 
@@ -556,7 +589,7 @@ Although this seems overly complicated, this optimization works well for the maj
 | TLS_OFFSET_ACTIVE_EXTID | 0xFF0U | stores the offset of the active extid |
 | TLS_OFFSET_ACTIVE_VMID | 0xFF2U | stores the offset of the active vmid |
 | TLS_OFFSET_ACTIVE_VPID | 0xFF4U | stores the offset of the active vpid |
-| TLS_OFFSET_ACTIVE_VPSID | 0xFF6U | stores the offset of the active vpsid |
+| TLS_OFFSET_ACTIVE_VSID | 0xFF6U | stores the offset of the active vsid |
 | TLS_OFFSET_ACTIVE_PPID | 0xFF8U | stores the offset of the active ppid |
 | TLS_OFFSET_ONLINE_PPS | 0xFFAU | stores the number of PPs that are online |
 
@@ -666,19 +699,19 @@ This syscall tells the microkernel to output a VP's state to the console device 
 | :---- | :---------- |
 | 0x0000000000000002 | Defines the index for bf_debug_op_dump_vp |
 
-### 2.11.4. bf_debug_op_dump_vps, OP=0x2, IDX=0x3
+### 2.11.4. bf_debug_op_dump_vs, OP=0x2, IDX=0x3
 
-This syscall tells the microkernel to output a VPS's state to the console device the microkernel is currently using for debugging.
+This syscall tells the microkernel to output a VS's state to the console device the microkernel is currently using for debugging.
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
-| REG0 | 63:0 | The VPSID of the VPS's state to output |
+| REG0 | 63:0 | The VSID of the VS's state to output |
 
-**const, uint64_t: BF_DEBUG_OP_DUMP_VPS_IDX_VAL**
+**const, uint64_t: BF_DEBUG_OP_DUMP_VS_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x0000000000000003 | Defines the index for bf_debug_op_dump_vps |
+| 0x0000000000000003 | Defines the index for bf_debug_op_dump_vs |
 
 ### 2.11.5. bf_debug_op_dump_vmexit_log, OP=0x2, IDX=0x4
 
@@ -757,7 +790,7 @@ This syscall tells the microkernel to output the huge pool's stats to the consol
 
 ## 2.12. Callback Syscalls
 
-### 2.12.1. bf_callback_op_register_bootstrap, OP=0x3, IDX=0x2
+### 2.12.1. bf_callback_op_register_bootstrap, OP=0x3, IDX=0x0
 
 This syscall tells the microkernel that the extension would like to receive callbacks for bootstrap events.
 
@@ -770,9 +803,9 @@ This syscall tells the microkernel that the extension would like to receive call
 **const, uint64_t: BF_CALLBACK_OP_REGISTER_BOOTSTRAP_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x0000000000000002 | Defines the index for bf_callback_op_register_bootstrap |
+| 0x0000000000000000 | Defines the index for bf_callback_op_register_bootstrap |
 
-### 2.12.2. bf_callback_op_register_vmexit, OP=0x3, IDX=0x3
+### 2.12.2. bf_callback_op_register_vmexit, OP=0x3, IDX=0x1
 
 This syscall tells the microkernel that the extension would like to receive callbacks for VM exits.
 
@@ -785,9 +818,9 @@ This syscall tells the microkernel that the extension would like to receive call
 **const, uint64_t: BF_CALLBACK_OP_REGISTER_VMEXIT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x0000000000000003 | Defines the index for bf_callback_op_register_vmexit |
+| 0x0000000000000001 | Defines the index for bf_callback_op_register_vmexit |
 
-### 2.12.3. bf_callback_op_register_fail, OP=0x3, IDX=0x4
+### 2.12.3. bf_callback_op_register_fail, OP=0x3, IDX=0x2
 
 This syscall tells the microkernel that the extension would like to receive callbacks for fast fail events. If a fast fail event occurs, something terrible has happened, and the extension must take action, or the physical processor will halt.
 
@@ -800,7 +833,7 @@ This syscall tells the microkernel that the extension would like to receive call
 **const, uint64_t: BF_CALLBACK_OP_REGISTER_FAIL_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x0000000000000004 | Defines the index for bf_callback_op_register_fail |
+| 0x0000000000000002 | Defines the index for bf_callback_op_register_fail |
 
 ## 2.13. Virtual Machine Syscalls
 
@@ -843,6 +876,66 @@ This syscall tells the microkernel to destroy a VM given an ID.
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the index for bf_vm_op_destroy_vm |
+
+### 2.13.3. bf_vm_op_map_direct, OP=0x4, IDX=0x2
+
+This syscall tells the microkernel to map a physical address into the VM's direct map. This is the same as directly accessing the direct map with the difference being that software can provide a physical address and receive the precalculated virtual address.
+
+**Input:**
+| Register Name | Bits | Description |
+| :------------ | :--- | :---------- |
+| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
+| REG1 | 15:0 | The VMID of the VM to map the physical address to |
+| REG1 | 63:16 | REVI |
+| REG2 | 12:0 | REV0 |
+| REG2 | 63:12 | The physical address to map |
+
+**Output:**
+| Register Name | Bits | Description |
+| :------------ | :--- | :---------- |
+| REG0 | 12:0 | REV0 |
+| REG0 | 63:12 | The resulting virtual address of the map |
+
+**const, uint64_t: BF_VM_OP_MAP_DIRECT_IDX_VAL**
+| Value | Description |
+| :---- | :---------- |
+| 0x0000000000000002 | Defines the index for bf_vm_op_map_direct |
+
+### 2.13.3. bf_vm_op_unmap_direct, OP=0x4, IDX=0x3
+
+This syscall tells the microkernel to unmap a previously mapped virtual address in the direct map. Unlike bf_vm_op_unmap_direct_broadcast, this syscall does not flush the TLB on any other PP, meaning this unmap is local to the PP the call is made on. Attempting to unmap a virtual address from the direct map that has been accessed on any other PP other than the PP this syscall is executed on will result in undefined behavior. This syscall is designed to support mapping and then immediately unmapping a physical address on a single PP during a single VMExit. It can also be used to map on a PP and then use unmap on the same PP during multiple VMExits, but special care must be taken to ensure no other PP can access the map, otherwise UB will occur.
+
+**Input:**
+| Register Name | Bits | Description |
+| :------------ | :--- | :---------- |
+| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
+| REG1 | 15:0 | The VMID of the VM to unmap the virtual address from |
+| REG1 | 63:16 | REVI |
+| REG2 | 12:0 | REV0 |
+| REG2 | 63:12 | The virtual address to unmap |
+
+**const, uint64_t: BF_VM_OP_UNMAP_DIRECT_IDX_VAL**
+| Value | Description |
+| :---- | :---------- |
+| 0x0000000000000003 | Defines the index for bf_vm_op_unmap_direct |
+
+### 2.13.3. bf_vm_op_unmap_direct_broadcast, OP=0x4, IDX=0x4
+
+This syscall tells the microkernel to unmap a previously mapped virtual address in the direct map. Unlike bf_vm_op_unmap_direct, this syscall performs a broadcast TLB flush which means it can be safely used on all direct mapped addresses. The downside of using this function is that it can be a lot slower than bf_vm_op_unmap_direct, especially on systems with a lot of cores.
+
+**Input:**
+| Register Name | Bits | Description |
+| :------------ | :--- | :---------- |
+| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
+| REG1 | 15:0 | The VMID of the VM to unmap the virtual address from |
+| REG1 | 63:16 | REVI |
+| REG2 | 12:0 | REV0 |
+| REG2 | 63:12 | The virtual address to unmap |
+
+**const, uint64_t: BF_VM_OP_UNMAP_DIRECT_REMOTE_IDX_VAL**
+| Value | Description |
+| :---- | :---------- |
+| 0x0000000000000004 | Defines the index for bf_vm_op_unmap_direct_broadcast |
 
 ## 2.14. Virtual Processor Syscalls
 
@@ -892,11 +985,11 @@ This syscall tells the microkernel to destroy a VP given an ID.
 
 ### 2.14.4. bf_vp_op_migrate, OP=0x5, IDX=0x2
 
-This syscall tells the microkernel to migrate a VP from one PP to another PP. This function does not execute the VP (use bf_vps_op_run for that), but instead allows bf_vps_op_run to execute a VP on a PP that it was not originally assigned to.
+This syscall tells the microkernel to migrate a VP from one PP to another PP. This function does not execute the VP (use bf_vs_op_run for that), but instead allows bf_vs_op_run to execute a VP on a PP that it was not originally assigned to.
 
-When a VP is migrated, all of the VPSs that are assigned to the requested VP are also migrated to this new PP as well. From an AMD/Intel point of view, this clears the VMCS/VMCB for each VPS assigned to the VP. On Intel, it also loads the newly cleared VPS and sets the launched state to false, ensuring the next bf_vps_op_run will use VMLaunch instead of VMResume.
+When a VP is migrated, all of the VSs that are assigned to the requested VP are also migrated to this new PP as well. From an AMD/Intel point of view, this clears the VMCS/VMCB for each VS assigned to the VP. On Intel, it also loads the newly cleared VS and sets the launched state to false, ensuring the next bf_vs_op_run will use VMLaunch instead of VMResume.
 
-It should be noted that the migration of a VPS from one PP to another does not happen during the execution of this ABI. This ABI simply tells the microkernel that the requested VP may now execute on the requested PP. This will cause a mismatch between the assigned PP for a VP and the assigned PP for a VPS. The microkernel will detect this mismatch when an extension attempts to execute bf_vps_op_run. When this occurs, the microkernel will ensure the VP is being run on the PP it was assigned to during migration, and then it will check to see if the PP of the VPS matches. If it doesn't, it will then perform a migration of that VPS at that time. This ensures that the microkernel is only migrations VPSs when it needs to, and it ensures the VPS is cleared an loaded (in the case of Intel) on the PP it will be executed on, which is a requirement for VMCS migration. An extension can determine which VPSs have been migrated by looking at the assigned PP of a VPS. If it doesn't match the VP it was assigned to, it has not been migrated. Finally, an extension is free to read/write to the VPSs state, even if it has not been migrated. The only requirement for migration is execution (meaning VMRun/VMLaunch/VMResume).
+It should be noted that the migration of a VS from one PP to another does not happen during the execution of this ABI. This ABI simply tells the microkernel that the requested VP may now execute on the requested PP. This will cause a mismatch between the assigned PP for a VP and the assigned PP for a VS. The microkernel will detect this mismatch when an extension attempts to execute bf_vs_op_run. When this occurs, the microkernel will ensure the VP is being run on the PP it was assigned to during migration, and then it will check to see if the PP of the VS matches. If it doesn't, it will then perform a migration of that VS at that time. This ensures that the microkernel is only migrations VSs when it needs to, and it ensures the VS is cleared an loaded (in the case of Intel) on the PP it will be executed on, which is a requirement for VMCS migration. An extension can determine which VSs have been migrated by looking at the assigned PP of a VS. If it doesn't match the VP it was assigned to, it has not been migrated. Finally, an extension is free to read/write to the VSs state, even if it has not been migrated. The only requirement for migration is execution (meaning VMRun/VMLaunch/VMResume).
 
 Any additional migration responsibilities, like TSC synchronization, must be performed by the extension.
 
@@ -916,75 +1009,75 @@ Any additional migration responsibilities, like TSC synchronization, must be per
 
 ## 2.14.5. Virtual Processor State Syscalls
 
-A Virtual Processor State or VPS encapsulates the state associated with a virtual process. For example, on Intel this would be the VMCS, the registers that must be saved that the VMCS does not manage, and the general purpose registers.
+A Virtual Processor State or VS encapsulates the state associated with a virtual process. For example, on Intel this would be the VMCS, the registers that must be saved that the VMCS does not manage, and the general purpose registers.
 
-Once a VPS is run, it is assigned to the VP it was run on, and cannot be run on any other VP for the remainder of it's lifetime. Since a VP is also assigned to a specific PP (physical processor), so is the VPS. When a VP is migrated, all VPSs assigned to that VP are also migrated.
+Once a VS is run, it is assigned to the VP it was run on, and cannot be run on any other VP for the remainder of it's lifetime. Since a VP is also assigned to a specific PP (physical processor), so is the VS. When a VP is migrated, all VSs assigned to that VP are also migrated.
 
-### 2.14.7. bf_vps_op_create_vps, OP=0x6, IDX=0x0
+### 2.14.7. bf_vs_op_create_vs, OP=0x6, IDX=0x0
 
-This syscall tells the microkernel to create a VPS given the IDs of the VP and PP the VPS will be assigned to. Upon success, this syscall returns the ID of the newly created VPS.
+This syscall tells the microkernel to create a VS given the IDs of the VP and PP the VS will be assigned to. Upon success, this syscall returns the ID of the newly created VS.
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The ID of the VP to assign the newly created VPS to |
+| REG1 | 15:0 | The ID of the VP to assign the newly created VS to |
 | REG1 | 63:16 | REVI |
-| REG2 | 15:0 | The ID of the PP to assign the newly created VPS to |
+| REG2 | 15:0 | The ID of the PP to assign the newly created VS to |
 | REG2 | 63:16 | REVI |
 
 **Output:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
-| REG0 | 15:0 | The resulting VPSID of the newly created VPS |
+| REG0 | 15:0 | The resulting VSID of the newly created VS |
 | REG0 | 63:16 | REVI |
 
-**const, uint64_t: BF_VPS_OP_CREATE_VPS_IDX_VAL**
+**const, uint64_t: BF_VS_OP_CREATE_VS_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x0000000000000000 | Defines the index for bf_vps_op_create_vps |
+| 0x0000000000000000 | Defines the index for bf_vs_op_create_vs |
 
-### 2.14.8. bf_vps_op_destroy_vps, OP=0x6, IDX=0x1
+### 2.14.8. bf_vs_op_destroy_vs, OP=0x6, IDX=0x1
 
-This syscall tells the microkernel to destroy a VPS given an ID.
+This syscall tells the microkernel to destroy a VS given an ID.
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to destroy |
+| REG1 | 15:0 | The VSID of the VS to destroy |
 | REG1 | 63:16 | REVI |
 
-**const, uint64_t: BF_VPS_OP_DESTROY_VPS_IDX_VAL**
+**const, uint64_t: BF_VS_OP_DESTROY_VS_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x0000000000000001 | Defines the index for bf_vps_op_destroy_vps |
+| 0x0000000000000001 | Defines the index for bf_vs_op_destroy_vs |
 
-### 2.14.9. bf_vps_op_init_as_root, OP=0x6, IDX=0x2
+### 2.14.9. bf_vs_op_init_as_root, OP=0x6, IDX=0x2
 
-This syscall tells the microkernel to initialize a VPS using the root VP state provided by the loader using the current PPID.
+This syscall tells the microkernel to initialize a VS using the root VP state provided by the loader using the current PPID.
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to initialize |
+| REG1 | 15:0 | The VSID of the VS to initialize |
 | REG1 | 63:16 | REVI |
 
-**const, uint64_t: BF_VPS_OP_INIT_AS_ROOT_IDX_VAL**
+**const, uint64_t: BF_VS_OP_INIT_AS_ROOT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x0000000000000002 | Defines the index for bf_vps_op_init_as_root |
+| 0x0000000000000002 | Defines the index for bf_vs_op_init_as_root |
 
-### 2.14.10. bf_vps_op_read, OP=0x6, IDX=0xB
+### 2.14.10. bf_vs_op_read, OP=0x6, IDX=0x3
 
-Reads a CPU register from the VPS given a bf_reg_t. Note that the bf_reg_t is architecture-specific.
+Reads a CPU register from the VS given a bf_reg_t. Note that the bf_reg_t is architecture-specific.
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to read from |
+| REG1 | 15:0 | The VSID of the VS to read from |
 | REG1 | 63:16 | REVI |
 | REG2 | 63:0 | A bf_reg_t defining which register to read |
 
@@ -993,40 +1086,40 @@ Reads a CPU register from the VPS given a bf_reg_t. Note that the bf_reg_t is ar
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | The resulting value |
 
-**const, uint64_t: BF_VPS_OP_READ_IDX_VAL**
+**const, uint64_t: BF_VS_OP_READ_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x000000000000000B | Defines the index for bf_vps_op_read |
+| 0x0000000000000003 | Defines the index for bf_vs_op_read |
 
-### 2.14.11. bf_vps_op_write, OP=0x6, IDX=0xC
+### 2.14.11. bf_vs_op_write, OP=0x6, IDX=0x4
 
-Writes to a CPU register in the VPS given a bf_reg_t and the value to write. Note that the bf_reg_t is architecture-specific.
+Writes to a CPU register in the VS given a bf_reg_t and the value to write. Note that the bf_reg_t is architecture-specific.
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to write to |
+| REG1 | 15:0 | The VSID of the VS to write to |
 | REG1 | 63:16 | REVI |
 | REG2 | 63:0 | A bf_reg_t defining which register to write to |
 | REG3 | 63:0 | The value to write to the requested register |
 
-**const, uint64_t: BF_VPS_OP_WRITE_IDX_VAL**
+**const, uint64_t: BF_VS_OP_WRITE_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x000000000000000C | Defines the index for bf_vps_op_write |
+| 0x0000000000000004 | Defines the index for bf_vs_op_write |
 
-### 2.14.12. bf_vps_op_run, OP=0x5, IDX=0xD
+### 2.14.12. bf_vs_op_run, OP=0x5, IDX=0x5
 
-bf_vps_op_run tells the microkernel to execute a given VPS on behalf of a given VP and VM. This system call only returns if an error occurs. On success, this system call will physically execute the requested VM and VP using the requested VPS, and the extension will only execute again on the next VMExit.
+bf_vs_op_run tells the microkernel to execute a given VS on behalf of a given VP and VM. This system call only returns if an error occurs. On success, this system call will physically execute the requested VM and VP using the requested VS, and the extension will only execute again on the next VMExit.
 
-Unless an extension needs to change the active VM, VP or VPS, the extension should use bf_vps_op_run_current instead of bf_vps_op_run. bf_vps_op_run is slow as it must perform a series of checks to determine if it has any work to perform before execution of a VM can occur.
+Unless an extension needs to change the active VM, VP or VS, the extension should use bf_vs_op_run_current instead of bf_vs_op_run. bf_vs_op_run is slow as it must perform a series of checks to determine if it has any work to perform before execution of a VM can occur.
 
-Unlike bf_vps_op_run_current which is really just a return to microkernel execution, bf_vps_op_run must perform the following operations:
-- It first verifies that the provided VM, VP and VPS are all created. Meaning, and extension must first use the create ABI to properly create a VM, VP and VPS before it may be used.
-- Next, it must ensure VM, VP and VPS assignment is correct. A newly created VP and VPS are unassigned. Once bf_vps_op_run is executed, the VP is assigned to the provided VM and the VPS is assigned to the provided VP. The VP and VPS are also both assigned to the PP bf_vps_op_run is executed on. Once these assignments take place, an extension cannot change them, and any attempt to run a VP or VPS on a VM, VP or PP they are not assigned to will fail. It is impossible to change the assigned of a VM or VP, but an extension can change the assignment of a VP and VPSs PP by using the bf_vp_op_migrate function.
-- Next, bf_vps_op_run must determine if it needs to migrate a VPS to the PP the VPS is being executed on by bf_vps_op_run. For more information about how this works, please see bf_vp_op_migrate.
-- Finally, bf_vps_op_run must ensure the active VM, VP and VPS are set to the VM, VP and VPS provided to this ABI. Any changes in the active state could cause additional operations to take place. For example, the VPS must transfer the TLS state of the general purpose registers to its internal cache so that the VPS that is about to become active can use the TLS block instead.
+Unlike bf_vs_op_run_current which is really just a return to microkernel execution, bf_vs_op_run must perform the following operations:
+- It first verifies that the provided VM, VP and VS are all created. Meaning, and extension must first use the create ABI to properly create a VM, VP and VS before it may be used.
+- Next, it must ensure VM, VP and VS assignment is correct. A newly created VP and VS are unassigned. Once bf_vs_op_run is executed, the VP is assigned to the provided VM and the VS is assigned to the provided VP. The VP and VS are also both assigned to the PP bf_vs_op_run is executed on. Once these assignments take place, an extension cannot change them, and any attempt to run a VP or VS on a VM, VP or PP they are not assigned to will fail. It is impossible to change the assigned of a VM or VP, but an extension can change the assignment of a VP and VSs PP by using the bf_vp_op_migrate function.
+- Next, bf_vs_op_run must determine if it needs to migrate a VS to the PP the VS is being executed on by bf_vs_op_run. For more information about how this works, please see bf_vp_op_migrate.
+- Finally, bf_vs_op_run must ensure the active VM, VP and VS are set to the VM, VP and VS provided to this ABI. Any changes in the active state could cause additional operations to take place. For example, the VS must transfer the TLS state of the general purpose registers to its internal cache so that the VS that is about to become active can use the TLS block instead.
 
 **Input:**
 | Register Name | Bits | Description |
@@ -1036,89 +1129,89 @@ Unlike bf_vps_op_run_current which is really just a return to microkernel execut
 | REG1 | 63:16 | REVI |
 | REG2 | 15:0 | The VPID of the VP to run |
 | REG2 | 63:16 | REVI |
-| REG3 | 15:0 | The VPSID of the VPS to run |
+| REG3 | 15:0 | The VSID of the VS to run |
 | REG3 | 63:16 | REVI |
 
-**const, uint64_t: BF_VPS_OP_RUN_IDX_VAL**
+**const, uint64_t: BF_VS_OP_RUN_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x000000000000000D | Defines the index for bf_vps_op_run |
+| 0x0000000000000005 | Defines the index for bf_vs_op_run |
 
-### 2.14.13. bf_vps_op_run_current, OP=0x5, IDX=0xE
+### 2.14.13. bf_vs_op_run_current, OP=0x5, IDX=0x6
 
-bf_vps_op_run_current tells the microkernel to execute the currently active VPS, VP and VM.
+bf_vs_op_run_current tells the microkernel to execute the currently active VS, VP and VM.
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
 
-**const, uint64_t: BF_VPS_OP_RUN_CURRENT_IDX_VAL**
+**const, uint64_t: BF_VS_OP_RUN_CURRENT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x000000000000000E | Defines the index for bf_vps_op_run_current |
+| 0x0000000000000006 | Defines the index for bf_vs_op_run_current |
 
-### 2.14.14. bf_vps_op_advance_ip, OP=0x5, IDX=0xF
+### 2.14.14. bf_vs_op_advance_ip, OP=0x5, IDX=0x7
 
-This syscall tells the microkernel to advance the instruction pointer in the requested VPS.
+This syscall tells the microkernel to advance the instruction pointer in the requested VS.
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS advance the IP in |
+| REG1 | 15:0 | The VSID of the VS advance the IP in |
 | REG1 | 63:16 | REVI |
 
-**const, uint64_t: BF_VPS_OP_ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL**
+**const, uint64_t: BF_VS_OP_ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x000000000000000F | Defines the index for bf_vps_op_advance_ip |
+| 0x0000000000000007 | Defines the index for bf_vs_op_advance_ip |
 
-### 2.14.15. bf_vps_op_advance_ip_and_run_current, OP=0x5, IDX=0x10
+### 2.14.15. bf_vs_op_advance_ip_and_run_current, OP=0x5, IDX=0x8
 
-This syscall tells the microkernel to advance the instruction pointer in the currently active VPS and run the currently active VPS, VP and VM (i.e., this combines bf_vps_op_advance_ip and bf_vps_op_advance_ip).
+This syscall tells the microkernel to advance the instruction pointer in the currently active VS and run the currently active VS, VP and VM (i.e., this combines bf_vs_op_advance_ip and bf_vs_op_advance_ip).
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
 
-**const, uint64_t: BF_VPS_OP_ADVANCE_IP_IDX_VAL**
+**const, uint64_t: BF_VS_OP_ADVANCE_IP_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x0000000000000010 | Defines the index for bf_vps_op_advance_ip_and_run_current |
+| 0x0000000000000008 | Defines the index for bf_vs_op_advance_ip_and_run_current |
 
-### 2.14.16. bf_vps_op_promote, OP=0x5, IDX=0x11
+### 2.14.16. bf_vs_op_promote, OP=0x5, IDX=0x9
 
-bf_vps_op_promote tells the microkernel to promote the requested VPS. bf_vps_op_promote will stop the hypervisor on the physical processor and replace its state with the state in the given VPS. Note that this syscall only returns on error.
+bf_vs_op_promote tells the microkernel to promote the requested VS. bf_vs_op_promote will stop the hypervisor on the physical processor and replace its state with the state in the given VS. Note that this syscall only returns on error.
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to promote |
+| REG1 | 15:0 | The VSID of the VS to promote |
 | REG1 | 63:16 | REVI |
 
-**const, uint64_t: BF_VPS_OP_PROMOTE_IDX_VAL**
+**const, uint64_t: BF_VS_OP_PROMOTE_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x0000000000000011 | Defines the index for bf_vps_op_promote |
+| 0x0000000000000009 | Defines the index for bf_vs_op_promote |
 
-### 2.14.17. bf_vps_op_clear_vps, OP=0x5, IDX=0x11
+### 2.14.17. bf_vs_op_clear_vs, OP=0x5, IDX=0xA
 
-bf_vps_op_clear_vps tells the microkernel to clear the VPS's hardware cache, if one exists. How this is used depends entirely on the hardware and is associated with AMD's VMCB Clean Bits, and Intel's VMClear instruction. See the associated documentation for more details. On AMD, this ABI clears the entire VMCB. For more fine grained control, use the write ABIs to manually modify the VMCB.
+bf_vs_op_clear_vs tells the microkernel to clear the VS's hardware cache, if one exists. How this is used depends entirely on the hardware and is associated with AMD's VMCB Clean Bits, and Intel's VMClear instruction. See the associated documentation for more details. On AMD, this ABI clears the entire VMCB. For more fine grained control, use the write ABIs to manually modify the VMCB.
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPSID of the VPS to clear |
+| REG1 | 15:0 | The VSID of the VS to clear |
 | REG1 | 63:16 | REVI |
 
-**const, uint64_t: BF_VPS_OP_CLEAR_IDX_VAL**
+**const, uint64_t: BF_VS_OP_CLEAR_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x0000000000000012 | Defines the index for bf_vps_op_clear_vps |
+| 0x000000000000000A | Defines the index for bf_vs_op_clear_vs |
 
 ## 2.15. Intrinsic Syscalls
 

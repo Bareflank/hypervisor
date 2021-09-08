@@ -24,18 +24,21 @@
 
 #include <bf_control_ops.hpp>
 #include <bf_syscall_t.hpp>
-#include <bootstrap_t.hpp>
-#include <fail_t.hpp>
+#include <dispatch_bootstrap.hpp>
+#include <dispatch_fail.hpp>
+#include <dispatch_vmexit.hpp>
+#include <gs_initialize.hpp>
 #include <gs_t.hpp>
 #include <intrinsic_t.hpp>
 #include <tls_t.hpp>
-#include <vmexit_t.hpp>
 #include <vp_pool_t.hpp>
-#include <vps_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
 #include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
-#include <bsl/unlikely_assert.hpp>
+#include <bsl/errc_type.hpp>
+#include <bsl/safe_integral.hpp>
+#include <bsl/unlikely.hpp>
 
 namespace example
 {
@@ -61,7 +64,7 @@ namespace example
     ///   source file and head file is compiled in isolation, meaning they are
     ///   not given include folder access to all of the code. This means that
     ///   each of these must be mocked, and the unit tests are given include
-    ///   access to the mocks. This prevents the need for templates, and
+    ///   access to the MOCK. This prevents the need for templates, and
     ///   instead, all mock injection is done using the build system, greatly
     ///   simplifying both the code and branch analysis during unit tests as
     ///   the removal of templates also removes issues with branches being
@@ -82,26 +85,16 @@ namespace example
     /// @brief stores the pool of VPs that we will use
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit vp_pool_t g_mut_vp_pool{};
-    /// @brief stores the pool of VPSs that we will use
+    /// @brief stores the pool of VSs that we will use
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-    constinit vps_pool_t g_mut_vps_pool{};
-
-    /// @brief stores the bootstrap_t that this code will use
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-    constinit bootstrap_t g_mut_bootstrap{};
-    /// @brief stores the fail_t that this code will use
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-    constinit fail_t g_mut_fail{};
-    /// @brief stores the vmexit_t that this code will use
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-    constinit vmexit_t g_mut_vmexit{};
+    constinit vs_pool_t g_mut_vs_pool{};
 
     /// @brief stores the Global Storage for this extension
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit gs_t g_mut_gs{};
     /// @brief stores the Thread Local Storage for this extension on this PP
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-    thread_local tls_t g_mut_tls{};
+    constinit thread_local tls_t g_mut_tls{};
 
     /// <!-- description -->
     ///   @brief Implements the bootstrap entry function. This function is
@@ -111,7 +104,7 @@ namespace example
     ///   @param ppid the physical process to bootstrap
     ///
     extern "C" void
-    bootstrap_entry(bsl::safe_uint16::value_type const ppid) noexcept
+    bootstrap_entry(bsl::safe_u16::value_type const ppid) noexcept
     {
         /// NOTE:
         /// - Call into the bootstrap handler. This entry point serves as a
@@ -120,16 +113,16 @@ namespace example
         ///   a C style function.
         ///
 
-        auto const ret{g_mut_bootstrap.dispatch(    // --
-            g_mut_gs,                               // --
-            g_mut_tls,                              // --
-            g_mut_sys,                              // --
-            g_mut_intrinsic,                        // --
-            g_mut_vp_pool,                          // --
-            g_mut_vps_pool,                         // --
+        auto const ret{dispatch_bootstrap(    // --
+            g_mut_gs,                         // --
+            g_mut_tls,                        // --
+            g_mut_sys,                        // --
+            g_mut_intrinsic,                  // --
+            g_mut_vp_pool,                    // --
+            g_mut_vs_pool,                    // --
             bsl::to_u16(ppid))};
 
-        if (bsl::unlikely_assert(!ret)) {
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
@@ -149,13 +142,12 @@ namespace example
     ///     by the main function to execute whenever a fast fail occurs.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the fail
+    ///   @param vsid the ID of the VS that generated the fail
     ///   @param fail_reason the exit reason associated with the fail
     ///
     extern "C" void
     fail_entry(
-        bsl::safe_uint16::value_type const vpsid,
-        bsl::safe_uint64::value_type const fail_reason) noexcept
+        bsl::safe_u16::value_type const vsid, bsl::safe_u64::value_type const fail_reason) noexcept
     {
         /// NOTE:
         /// - Call into the fast fail handler. This entry point serves as a
@@ -164,17 +156,17 @@ namespace example
         ///   a C style function.
         ///
 
-        auto const ret{g_mut_fail.dispatch(    // --
-            g_mut_gs,                          // --
-            g_mut_tls,                         // --
-            g_mut_sys,                         // --
-            g_mut_intrinsic,                   // --
-            g_mut_vp_pool,                     // --
-            g_mut_vps_pool,                    // --
-            bsl::to_u16(vpsid),                // --
+        auto const ret{dispatch_fail(    // --
+            g_mut_gs,                    // --
+            g_mut_tls,                   // --
+            g_mut_sys,                   // --
+            g_mut_intrinsic,             // --
+            g_mut_vp_pool,               // --
+            g_mut_vs_pool,               // --
+            bsl::to_u16(vsid),           // --
             bsl::to_u64(fail_reason))};
 
-        if (bsl::unlikely_assert(!ret)) {
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
@@ -194,13 +186,12 @@ namespace example
     ///     by the main function to execute whenever a VMExit occurs.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the VMExit
+    ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     extern "C" void
     vmexit_entry(
-        bsl::safe_uint16::value_type const vpsid,
-        bsl::safe_uint64::value_type const exit_reason) noexcept
+        bsl::safe_u16::value_type const vsid, bsl::safe_u64::value_type const exit_reason) noexcept
     {
         /// NOTE:
         /// - Call into the vmexit handler. This entry point serves as a
@@ -209,17 +200,17 @@ namespace example
         ///   a C style function.
         ///
 
-        auto const ret{g_mut_vmexit.dispatch(    // --
-            g_mut_gs,                            // --
-            g_mut_tls,                           // --
-            g_mut_sys,                           // --
-            g_mut_intrinsic,                     // --
-            g_mut_vp_pool,                       // --
-            g_mut_vps_pool,                      // --
-            bsl::to_u16(vpsid),                  // --
+        auto const ret{dispatch_vmexit(    // --
+            g_mut_gs,                      // --
+            g_mut_tls,                     // --
+            g_mut_sys,                     // --
+            g_mut_intrinsic,               // --
+            g_mut_vp_pool,                 // --
+            g_mut_vs_pool,                 // --
+            bsl::to_u16(vsid),             // --
             bsl::to_u64(exit_reason))};
 
-        if (bsl::unlikely_assert(!ret)) {
+        if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
@@ -261,18 +252,13 @@ namespace example
             &vmexit_entry,                 // --
             &fail_entry);                  // --
 
-        if (bsl::unlikely_assert(!mut_ret)) {
+        if (bsl::unlikely(!mut_ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
 
-        /// NOTE:
-        /// - Initialize the g_mut_intrinsic. This can be used to add any init
-        ///   logic that might be needed, otherwise it can be removed.
-        ///
-
-        mut_ret = g_mut_intrinsic.initialize(g_mut_gs, g_mut_tls);
-        if (bsl::unlikely_assert(!mut_ret)) {
+        mut_ret = gs_initialize(g_mut_gs, g_mut_sys, g_mut_intrinsic);
+        if (bsl::unlikely(!mut_ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
@@ -282,58 +268,14 @@ namespace example
         ///   their IDs so that they can be allocated.
         ///
 
-        mut_ret = g_mut_vp_pool.initialize(g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic);
-        if (bsl::unlikely_assert(!mut_ret)) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::bf_control_op_exit();
-        }
+        g_mut_vp_pool.initialize(g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic);
 
         /// NOTE:
-        /// - Initialize the vps_pool_t. This will give all of our vps_t's
+        /// - Initialize the vs_pool_t. This will give all of our vs_t's
         ///   their IDs so that they can be allocated.
         ///
 
-        mut_ret = g_mut_vps_pool.initialize(g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic);
-        if (bsl::unlikely_assert(!mut_ret)) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::bf_control_op_exit();
-        }
-
-        /// NOTE:
-        /// - Initialize the g_mut_bootstrap. This can be used to add any init
-        ///   logic that might be needed, otherwise it can be removed.
-        ///
-
-        mut_ret = g_mut_bootstrap.initialize(
-            g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic, g_mut_vp_pool, g_mut_vps_pool);
-        if (bsl::unlikely_assert(!mut_ret)) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::bf_control_op_exit();
-        }
-
-        /// NOTE:
-        /// - Initialize the g_mut_fail. This can be used to add any init
-        ///   logic that might be needed, otherwise it can be removed.
-        ///
-
-        mut_ret = g_mut_fail.initialize(
-            g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic, g_mut_vp_pool, g_mut_vps_pool);
-        if (bsl::unlikely_assert(!mut_ret)) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::bf_control_op_exit();
-        }
-
-        /// NOTE:
-        /// - Initialize the g_mut_vmexit. This can be used to add any init
-        ///   logic that might be needed, otherwise it can be removed.
-        ///
-
-        mut_ret = g_mut_vmexit.initialize(
-            g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic, g_mut_vp_pool, g_mut_vps_pool);
-        if (bsl::unlikely_assert(!mut_ret)) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::bf_control_op_exit();
-        }
+        g_mut_vs_pool.initialize(g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic);
 
         /// NOTE:
         /// - Wait for callbacks. Note that this function does not return.

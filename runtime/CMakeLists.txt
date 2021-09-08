@@ -37,11 +37,8 @@ target_include_directories(runtime PUBLIC
 
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/src/bsl/cstdio.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/cstdlib.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/print_thread_id.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/putc_stderr.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/putc_stdout.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/puts_stderr.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bsl/details/puts_stdout.hpp
 )
 
 # ------------------------------------------------------------------------------
@@ -55,10 +52,6 @@ target_compile_definitions(runtime PUBLIC
     HYPERVISOR_MEMCPY_NAME=memcpy
     HYPERVISOR_MEMSET_NAME=memset
     HYPERVISOR_PRINT_THREAD_ID_NAME=print_thread_id
-    HYPERVISOR_PUTC_STDERR_NAME=putc_stderr
-    HYPERVISOR_PUTC_STDOUT_NAME=putc_stdout
-    HYPERVISOR_PUTS_STDERR_NAME=puts_stderr
-    HYPERVISOR_PUTS_STDOUT_NAME=puts_stdout
 )
 
 # ------------------------------------------------------------------------------

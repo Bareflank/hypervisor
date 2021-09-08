@@ -31,9 +31,9 @@ list(APPEND INCLUDES
 )
 
 list(APPEND SYSTEM_INCLUDES
-    ${CMAKE_SOURCE_DIR}/syscall/include/cpp
-    ${CMAKE_SOURCE_DIR}/syscall/mocks/cpp
-    ${CMAKE_SOURCE_DIR}/loader/include/interface/cpp
+    ${CMAKE_SOURCE_DIR}/syscall/include
+    ${CMAKE_SOURCE_DIR}/syscall/mocks
+    ${CMAKE_SOURCE_DIR}/loader/include/interface
 )
 
 list(APPEND COMMON_INCLUDES
@@ -51,9 +51,9 @@ list(APPEND X64_INCLUDES
 )
 
 list(APPEND X64_SYSTEM_INCLUDES
-    ${CMAKE_SOURCE_DIR}/syscall/include/cpp/x64
-    ${CMAKE_SOURCE_DIR}/syscall/mocks/cpp/x64
-    ${CMAKE_SOURCE_DIR}/loader/include/interface/cpp/x64
+    ${CMAKE_SOURCE_DIR}/syscall/include/x64
+    ${CMAKE_SOURCE_DIR}/syscall/mocks/x64
+    ${CMAKE_SOURCE_DIR}/loader/include/interface/x64
     ${SYSTEM_INCLUDES}
 )
 
@@ -64,9 +64,9 @@ list(APPEND AMD_INCLUDES
 )
 
 list(APPEND AMD_SYSTEM_INCLUDES
-    ${CMAKE_SOURCE_DIR}/syscall/include/cpp/x64/amd
-    ${CMAKE_SOURCE_DIR}/syscall/mocks/cpp/x64/amd
-    ${CMAKE_SOURCE_DIR}/loader/include/interface/cpp/x64/amd
+    ${CMAKE_SOURCE_DIR}/syscall/include/x64/amd
+    ${CMAKE_SOURCE_DIR}/syscall/mocks/x64/amd
+    ${CMAKE_SOURCE_DIR}/loader/include/interface/x64/amd
     ${X64_SYSTEM_INCLUDES}
 )
 
@@ -77,9 +77,9 @@ list(APPEND INTEL_INCLUDES
 )
 
 list(APPEND INTEL_SYSTEM_INCLUDES
-    ${CMAKE_SOURCE_DIR}/syscall/include/cpp/x64/intel
-    ${CMAKE_SOURCE_DIR}/syscall/mocks/cpp/x64/intel
-    ${CMAKE_SOURCE_DIR}/loader/include/interface/cpp/x64/intel
+    ${CMAKE_SOURCE_DIR}/syscall/include/x64/intel
+    ${CMAKE_SOURCE_DIR}/syscall/mocks/x64/intel
+    ${CMAKE_SOURCE_DIR}/loader/include/interface/x64/intel
     ${X64_SYSTEM_INCLUDES}
 )
 
@@ -90,9 +90,9 @@ list(APPEND AARCH64_INCLUDES
 )
 
 list(APPEND AARCH64_SYSTEM_INCLUDES
-    ${CMAKE_SOURCE_DIR}/syscall/include/cpp/arm/aarch64
-    ${CMAKE_SOURCE_DIR}/syscall/mocks/cpp/arm/aarch64
-    ${CMAKE_SOURCE_DIR}/loader/include/interface/cpp/arm/aarch64
+    ${CMAKE_SOURCE_DIR}/syscall/include/arm/aarch64
+    ${CMAKE_SOURCE_DIR}/syscall/mocks/arm/aarch64
+    ${CMAKE_SOURCE_DIR}/loader/include/interface/arm/aarch64
     ${SYSTEM_INCLUDES}
 )
 
@@ -102,13 +102,13 @@ list(APPEND AARCH64_SYSTEM_INCLUDES
 
 list(APPEND DEFINES
     HYPERVISOR_DEBUG_RING_SIZE=0x7FF0
-    HYPERVISOR_PAGE_SIZE=0x1000_umax
-    HYPERVISOR_PAGE_SHIFT=12_umax
-    HYPERVISOR_MAX_VMS=2_umax
-    HYPERVISOR_MAX_VPS=2_umax
-    HYPERVISOR_MAX_VPSS=2_umax
-    HYPERVISOR_MK_PAGE_POOL_ADDR=0x1000_umax
-    HYPERVISOR_MK_HUGE_POOL_ADDR=0x1000_umax
+    HYPERVISOR_PAGE_SIZE=0x1000_umx
+    HYPERVISOR_PAGE_SHIFT=12_umx
+    HYPERVISOR_MAX_VMS=2_umx
+    HYPERVISOR_MAX_VS=2_umx
+    HYPERVISOR_MAX_VSS=2_umx
+    HYPERVISOR_MK_PAGE_POOL_ADDR=0x1000_umx
+    HYPERVISOR_MK_HUGE_POOL_ADDR=0x1000_umx
 )
 
 list(APPEND COMMON_DEFINES
@@ -153,7 +153,7 @@ list(APPEND AARCH64_DEFINES
 # add_subdirectory(mocks/dispatch_syscall_mem_op)
 # add_subdirectory(mocks/dispatch_syscall_vm_op)
 # add_subdirectory(mocks/dispatch_syscall_vp_op)
-# add_subdirectory(mocks/dispatch_syscall_vps_op)
+# add_subdirectory(mocks/dispatch_syscall_vs_op)
 # add_subdirectory(mocks/ext_pool_t)
 # add_subdirectory(mocks/ext_t)
 # add_subdirectory(mocks/fast_fail)
@@ -170,24 +170,24 @@ add_subdirectory(mocks/page_pool_t)
 # add_subdirectory(mocks/vmexit_loop)
 # add_subdirectory(mocks/vp_pool_t)
 # add_subdirectory(mocks/vp_t)
-# add_subdirectory(mocks/vps_pool_t)
+# add_subdirectory(mocks/vs_pool_t)
 # add_subdirectory(mocks/x64/dispatch_esr)
 # add_subdirectory(mocks/x64/root_page_table_t)
 # add_subdirectory(mocks/x64/vmexit_log_t)
 # add_subdirectory(mocks/x64/amd/dispatch_esr_nmi)
 # add_subdirectory(mocks/x64/amd/dispatch_syscall_intrinsic_op)
 # add_subdirectory(mocks/x64/amd/intrinsic_t)
-# add_subdirectory(mocks/x64/amd/vps_t)
+# add_subdirectory(mocks/x64/amd/vs_t)
 # add_subdirectory(mocks/x64/intel/dispatch_esr_nmi)
 # add_subdirectory(mocks/x64/intel/dispatch_syscall_intrinsic_op)
 # add_subdirectory(mocks/x64/intel/intrinsic_t)
-# add_subdirectory(mocks/x64/intel/vps_t)
+# add_subdirectory(mocks/x64/intel/vs_t)
 # add_subdirectory(mocks/arm/aarch64/dispatch_esr)
 # add_subdirectory(mocks/arm/aarch64/dispatch_syscall_intrinsic_op)
 # add_subdirectory(mocks/arm/aarch64/intrinsic_t)
 # add_subdirectory(mocks/arm/aarch64/root_page_table_t)
 # add_subdirectory(mocks/arm/aarch64/vmexit_log_t)
-# add_subdirectory(mocks/arm/aarch64/vps_t)
+# add_subdirectory(mocks/arm/aarch64/vs_t)
 
 
 # add_subdirectory(src/bfelf/elf64_ehdr_t)
@@ -215,8 +215,8 @@ add_subdirectory(mocks/page_pool_t)
 # add_subdirectory(src/dispatch_syscall_vm_op_failure)
 # add_subdirectory(src/dispatch_syscall_vp_op)
 # add_subdirectory(src/dispatch_syscall_vp_op_failure)
-# add_subdirectory(src/dispatch_syscall_vps_op)
-# add_subdirectory(src/dispatch_syscall_vps_op_failure)
+# add_subdirectory(src/dispatch_syscall_vs_op)
+# add_subdirectory(src/dispatch_syscall_vs_op_failure)
 # add_subdirectory(src/ext_pool_t)
 # add_subdirectory(src/ext_t)
 # add_subdirectory(src/fast_fail)
@@ -233,21 +233,21 @@ add_subdirectory(src/spinlock_t)
 # add_subdirectory(src/vmexit_loop)
 # add_subdirectory(src/vp_pool_t)
 # add_subdirectory(src/vp_t)
-# add_subdirectory(src/vps_pool_t)
+# add_subdirectory(src/vs_pool_t)
 # add_subdirectory(src/x64/dispatch_esr)
 add_subdirectory(src/x64/root_page_table_t)
 # add_subdirectory(src/x64/vmexit_log_t)
 # add_subdirectory(src/x64/amd/dispatch_esr_nmi)
 # add_subdirectory(src/x64/amd/dispatch_syscall_intrinsic_op)
 # add_subdirectory(src/x64/amd/intrinsic_t)
-# add_subdirectory(src/x64/amd/vps_t)
+# add_subdirectory(src/x64/amd/vs_t)
 # add_subdirectory(src/x64/intel/dispatch_esr_nmi)
 # add_subdirectory(src/x64/intel/dispatch_syscall_intrinsic_op)
 # add_subdirectory(src/x64/intel/intrinsic_t)
-# add_subdirectory(src/x64/intel/vps_t)
+# add_subdirectory(src/x64/intel/vs_t)
 # add_subdirectory(src/arm/aarch64/dispatch_esr)
 # add_subdirectory(src/arm/aarch64/dispatch_syscall_intrinsic_op)
 # add_subdirectory(src/arm/aarch64/intrinsic_t)
 # add_subdirectory(src/arm/aarch64/root_page_table_t)
 # add_subdirectory(src/arm/aarch64/vmexit_log_t)
-# add_subdirectory(src/arm/aarch64/vps_t)
+# add_subdirectory(src/arm/aarch64/vs_t)

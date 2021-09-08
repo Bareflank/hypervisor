@@ -39,9 +39,9 @@ namespace mk
     ///
     /// <!-- description -->
     ///   @brief Stores a log of all VMExits that occur. Each PP has one log
-    ///     that is shared between all of the VPSs so that you get a consistent
+    ///     that is shared between all of the VSs so that you get a consistent
     ///     view of what actually happened during execution, which is more
-    ///     important when implementing guest support as VPSs can swap between
+    ///     important when implementing guest support as VSs can swap between
     ///     execution on the same PP as the hypervisor is moving between VMs.
     ///
     class vmexit_log_t final
@@ -57,7 +57,7 @@ namespace mk
         ///   @param val the value of the field
         ///
         constexpr void
-        dump_field(bsl::string_view const &str, bsl::safe_uintmax const &val) noexcept
+        dump_field(bsl::string_view const &str, bsl::safe_umx const &val) noexcept
         {
             if (val.is_zero()) {
                 bsl::print() << bsl::ylw << str << bsl::blk << bsl::hex(val);
@@ -76,13 +76,13 @@ namespace mk
         ///   @param rec the record to add to the log
         ///
         constexpr void
-        add(bsl::safe_uint16 const &ppid, vmexit_log_record_t const &rec) noexcept
+        add(bsl::safe_u16 const &ppid, vmexit_log_record_t const &rec) noexcept
         {
             if constexpr (BSL_DEBUG_LEVEL < bsl::VV) {
                 return;
             }
 
-            auto *const pp_log{m_vmexit_logs.at_if(bsl::to_umax(ppid))};
+            auto *const pp_log{m_vmexit_logs.at_if(bsl::to_idx(ppid))};
             if (bsl::unlikely(nullptr == pp_log)) {
                 return;
             }
@@ -105,13 +105,13 @@ namespace mk
         ///   @param ppid the ID of the PP whose log should be dumped
         ///
         constexpr void
-        dump(bsl::safe_uint16 const &ppid) noexcept
+        dump(bsl::safe_u16 const &ppid) noexcept
         {
             if constexpr (BSL_DEBUG_LEVEL < bsl::VV) {
                 return;
             }
 
-            auto *const pp_log{m_vmexit_logs.at_if(bsl::to_umax(ppid))};
+            auto *const pp_log{m_vmexit_logs.at_if(bsl::to_idx(ppid))};
             if (bsl::unlikely(nullptr == pp_log)) {
                 bsl::error() << "invalid ppid "    // --
                              << bsl::hex(ppid)     // --
@@ -131,7 +131,7 @@ namespace mk
             bsl::print() << bsl::ylw << "----------------------------------+";
             bsl::print() << bsl::rst << bsl::endl;
 
-            // for (bsl::safe_uintmax i{}; i < pp_log->log.size(); ++i) {
+            // for (bsl::safe_idx i{}; i < pp_log->log.size(); ++i) {
             //     auto const rec{pp_log->log.at_if(pp_log->crsr)};
 
             //     if (rec->rip.is_pos()) {
@@ -142,8 +142,8 @@ namespace mk
             //         bsl::print() << bsl::blu << "VP:";
             //         bsl::print() << bsl::cyn << bsl::fmt{"04x", rec->vpid};
             //         bsl::print() << bsl::rst << ", ";
-            //         bsl::print() << bsl::blu << "VPS:";
-            //         bsl::print() << bsl::cyn << bsl::fmt{"04x", rec->vpsid};
+            //         bsl::print() << bsl::blu << "VS:";
+            //         bsl::print() << bsl::cyn << bsl::fmt{"04x", rec->vsid};
             //         bsl::print() << bsl::rst << ", ";
             //         bsl::print() << bsl::blu << "REASON:";
             //         bsl::print() << bsl::cyn << bsl::fmt{">2d", rec->exit_reason};

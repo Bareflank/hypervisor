@@ -35,33 +35,33 @@
 namespace mk
 {
     /// @brief defines the size of the reserved1 field in the VMCB
-    constexpr auto VMCB_RESERVED1_SIZE{0x24_umax};
+    constexpr auto VMCB_RESERVED1_SIZE{0x24_umx};
     /// @brief defines the size of the reserved2 field in the VMCB
-    constexpr auto VMCB_RESERVED2_SIZE{0x3_umax};
+    constexpr auto VMCB_RESERVED2_SIZE{0x3_umx};
     /// @brief defines the size of the reserved3 field in the VMCB
-    constexpr auto VMCB_RESERVED3_SIZE{0x4_umax};
+    constexpr auto VMCB_RESERVED3_SIZE{0x4_umx};
     /// @brief defines the size of the reserved4 field in the VMCB
-    constexpr auto VMCB_RESERVED4_SIZE{0x8_umax};
+    constexpr auto VMCB_RESERVED4_SIZE{0x8_umx};
     /// @brief defines the size of the reserved5 field in the VMCB
-    constexpr auto VMCB_RESERVED5_SIZE{0x8_umax};
+    constexpr auto VMCB_RESERVED5_SIZE{0x8_umx};
     /// @brief defines the size of the reserved6 field in the VMCB
-    constexpr auto VMCB_RESERVED6_SIZE{0x2F0_umax};
+    constexpr auto VMCB_RESERVED6_SIZE{0x2F0_umx};
     /// @brief defines the size of the reserved7 field in the VMCB
-    constexpr auto VMCB_RESERVED7_SIZE{0x2B_umax};
+    constexpr auto VMCB_RESERVED7_SIZE{0x2B_umx};
     /// @brief defines the size of the reserved8 field in the VMCB
-    constexpr auto VMCB_RESERVED8_SIZE{0x4_umax};
+    constexpr auto VMCB_RESERVED8_SIZE{0x4_umx};
     /// @brief defines the size of the reserved9 field in the VMCB
-    constexpr auto VMCB_RESERVED9_SIZE{0x70_umax};
+    constexpr auto VMCB_RESERVED9_SIZE{0x70_umx};
     /// @brief defines the size of the reserved10 field in the VMCB
-    constexpr auto VMCB_RESERVED10_SIZE{0x58_umax};
+    constexpr auto VMCB_RESERVED10_SIZE{0x58_umx};
     /// @brief defines the size of the reserved11 field in the VMCB
-    constexpr auto VMCB_RESERVED11_SIZE{0x18_umax};
+    constexpr auto VMCB_RESERVED11_SIZE{0x18_umx};
     /// @brief defines the size of the reserved12 field in the VMCB
-    constexpr auto VMCB_RESERVED12_SIZE{0x20_umax};
+    constexpr auto VMCB_RESERVED12_SIZE{0x20_umx};
     /// @brief defines the size of the reserved13 field in the VMCB
-    constexpr auto VMCB_RESERVED13_SIZE{0x968_umax};
+    constexpr auto VMCB_RESERVED13_SIZE{0x968_umx};
     /// @brief defines the size of the reserved13 field in the VMCB
-    constexpr auto VMCB_GIB_SIZE{0xF_umax};
+    constexpr auto VMCB_GIB_SIZE{0xF_umx};
 
     /// @struct mk::vmcb_t
     ///

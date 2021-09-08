@@ -41,16 +41,16 @@ namespace integration
     ///   @brief Implements the VPExit entry function.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the VPExit
+    ///   @param vsid the ID of the VS that generated the VPExit
     ///   @param exit_reason the exit reason associated with the VPExit
     ///
     void
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    vmexit_entry(bsl::uint16 const vpsid, bsl::uint64 const exit_reason) noexcept
+    vmexit_entry(bsl::uint16 const vsid, bsl::uint64 const exit_reason) noexcept
     {
         bsl::errc_type ret{};
 
-        bsl::discard(vpsid);
+        bsl::discard(vsid);
         bsl::discard(exit_reason);
 
         // ---------------------------------------------------------------------
@@ -58,11 +58,11 @@ namespace integration
         // ---------------------------------------------------------------------
 
         // destroy assigned VP (turns VP into zombie)
-        ret = syscall::bf_vps_op_destroy_vps(g_handle, syscall::bf_tls_vpsid());
+        ret = syscall::bf_vs_op_destroy_vs(g_handle, syscall::bf_tls_vsid());
         integration::verify(bsl::errc_failure == ret);
 
         // destroy zombie
-        ret = syscall::bf_vps_op_destroy_vps(g_handle, syscall::bf_tls_vpsid());
+        ret = syscall::bf_vs_op_destroy_vs(g_handle, syscall::bf_tls_vsid());
         integration::verify(bsl::errc_failure == ret);
 
         // ---------------------------------------------------------------------
@@ -98,8 +98,8 @@ namespace integration
     {
         bsl::errc_type ret{};
 
-        bsl::safe_uint16 vpid{};
-        bsl::safe_uint16 vpsid{};
+        bsl::safe_u16 vpid{};
+        bsl::safe_u16 vsid{};
 
         // ---------------------------------------------------------------------
         // Setup
@@ -108,7 +108,7 @@ namespace integration
         ret = syscall::bf_vp_op_create_vp(g_handle, syscall::BF_ROOT_VMID, ppid, vpid);
         integration::require_success(ret);
 
-        ret = syscall::bf_vps_op_create_vps(g_handle, vpid, ppid, vpsid);
+        ret = syscall::bf_vs_op_create_vs(g_handle, vpid, ppid, vsid);
         integration::require_success(ret);
 
         // ---------------------------------------------------------------------
@@ -116,27 +116,27 @@ namespace integration
         // ---------------------------------------------------------------------
 
         // init with invalid handle
-        ret = syscall::bf_vps_op_init_as_root({}, vpsid);
+        ret = syscall::bf_vs_op_init_as_root({}, vsid);
         integration::require_success(ret);
 
         // destroy with invalid ID
-        ret = syscall::bf_vps_op_init_as_root({}, syscall::BF_INVALID_ID);
+        ret = syscall::bf_vs_op_init_as_root({}, syscall::BF_INVALID_ID);
         integration::require_success(ret);
 
         // ---------------------------------------------------------------------
         // The following is needed to setup the remaining tests
         // ---------------------------------------------------------------------
 
-        ret = syscall::bf_vps_op_create_vps(g_handle, vpid, ppid, vpsid);
+        ret = syscall::bf_vs_op_create_vs(g_handle, vpid, ppid, vsid);
         integration::require_success(ret);
 
-        ret = syscall::bf_vps_op_init_as_root(g_handle, vpsid);
+        ret = syscall::bf_vs_op_init_as_root(g_handle, vsid);
         integration::require_success(ret);
 
-        ret = init_vps(g_handle, vpsid);
+        ret = init_vs(g_handle, vsid);
         integration::require_success(ret);
 
-        ret = syscall::bf_vps_op_run(g_handle, syscall::BF_ROOT_VMID, vpid, vpsid);
+        ret = syscall::bf_vs_op_run(g_handle, syscall::BF_ROOT_VMID, vpid, vsid);
         integration::require_success(ret);
 
         bsl::print<bsl::V>() << bsl::here();

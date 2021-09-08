@@ -25,22 +25,12 @@
 #ifndef ALLOCATED_STATUS_T_HPP
 #define ALLOCATED_STATUS_T_HPP
 
-#include <bsl/cstdint.hpp>
+#include <basic_allocated_status_t.hpp>
 
 namespace mk
 {
-    /// <!-- description -->
-    ///   @brief Defines the layout of a page pool tag
-    ///
-    enum class allocated_status_t : bsl::uint8
-    {
-        /// @brief defines the deallocated state for a resource
-        deallocated,
-        /// @brief defines the allocated state for a resource
-        allocated,
-        /// @brief defines the zombie state for a resource
-        zombie
-    };
+    /// @brief defines the allocated_status_t used by the microkernel
+    using allocated_status_t = lib::basic_allocated_status_t;
 }
 
 #endif

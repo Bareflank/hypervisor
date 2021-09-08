@@ -53,7 +53,7 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
-        signal_vm_created(tls_t &tls, bsl::safe_uint16 const &vmid) noexcept -> bsl::errc_type
+        signal_vm_created(tls_t &tls, bsl::safe_u16 const &vmid) noexcept -> bsl::errc_type
         {
             bsl::discard(vmid);
 
@@ -75,7 +75,7 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] static constexpr auto
-        signal_vm_destroyed(tls_t &tls, bsl::safe_uint16 const &vmid) noexcept -> bsl::errc_type
+        signal_vm_destroyed(tls_t &tls, bsl::safe_u16 const &vmid) noexcept -> bsl::errc_type
         {
             bsl::discard(vmid);
 

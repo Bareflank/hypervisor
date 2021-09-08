@@ -26,9 +26,9 @@
 
     .text
 
-    .globl  bf_vps_op_advance_ip_and_run_current_impl
-    .type   bf_vps_op_advance_ip_and_run_current_impl, @function
-bf_vps_op_advance_ip_and_run_current_impl:
+    .globl  bf_vs_op_advance_ip_and_run_current_impl
+    .type   bf_vs_op_advance_ip_and_run_current_impl, @function
+bf_vs_op_advance_ip_and_run_current_impl:
 
 /*
     mov rax, 0x6642000000060009
@@ -36,4 +36,4 @@ bf_vps_op_advance_ip_and_run_current_impl:
 */
     ret
 
-    .size bf_vps_op_advance_ip_and_run_current_impl, .-bf_vps_op_advance_ip_and_run_current_impl
+    .size bf_vs_op_advance_ip_and_run_current_impl, .-bf_vs_op_advance_ip_and_run_current_impl

@@ -36,7 +36,7 @@
 namespace mk
 {
     /// @brief defines total number of entries in the L1T
-    constexpr auto NUM_L1T_ENTRIES{512_umax};
+    constexpr auto NUM_L1T_ENTRIES{512_umx};
 
     /// @struct mk::l1t_t
     ///

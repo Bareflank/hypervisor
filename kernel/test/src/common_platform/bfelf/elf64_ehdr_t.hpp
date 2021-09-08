@@ -39,25 +39,25 @@
 namespace bfelf
 {
     /// @brief e_ident[EI_MAG0] contains 0x7FU for file identification
-    constexpr auto EI_MAG0{0_umax};
+    constexpr auto EI_MAG0{0_umx};
     /// @brief e_ident[EI_MAG1] contains 0x45U for file identification
-    constexpr auto EI_MAG1{1_umax};
+    constexpr auto EI_MAG1{1_umx};
     /// @brief e_ident[EI_MAG2] contains 0x4CU for file identification
-    constexpr auto EI_MAG2{2_umax};
+    constexpr auto EI_MAG2{2_umx};
     /// @brief e_ident[EI_MAG3] contains 0x46U for file identification
-    constexpr auto EI_MAG3{3_umax};
+    constexpr auto EI_MAG3{3_umx};
     /// @brief e_ident[EI_CLASS] identifies if the file is 32bit or 64 bit
-    constexpr auto EI_CLASS{4_umax};
+    constexpr auto EI_CLASS{4_umx};
     /// @brief e_ident[EI_DATA] specifies the data bit encoding of the file
-    constexpr auto EI_DATA{5_umax};
+    constexpr auto EI_DATA{5_umx};
     /// @brief e_ident[EI_VERSION] identifies the version of the file
-    constexpr auto EI_VERSION{6_umax};
+    constexpr auto EI_VERSION{6_umx};
     /// @brief e_ident[EI_OSABI] identifies file's ABI scheme
-    constexpr auto EI_OSABI{7_umax};
+    constexpr auto EI_OSABI{7_umx};
     /// @brief e_ident[EI_ABIVERSION] identifies file's ABI version
-    constexpr auto EI_ABIVERSION{8_umax};
+    constexpr auto EI_ABIVERSION{8_umx};
     /// @brief defines the size of e_ident
-    constexpr auto EI_NIDENT{16_umax};
+    constexpr auto EI_NIDENT{16_umx};
 
     /// @brief defines the expected e_ident[EI_MAG0] value
     constexpr auto ELFMAG0{0x7F_u8};
@@ -173,20 +173,20 @@ namespace bfelf
 
     /// <!-- description -->
     ///   @brief Returns the ELF entry point given an ELF file, or
-    ///     bsl::safe_uintmax::failure() if a entry point does not exist or
+    ///     bsl::safe_umx::failure() if a entry point does not exist or
     ///     a failure occurs.
     ///
     /// <!-- inputs/outputs -->
     ///   @param file the ELF file to get the ELF entry point from
     ///   @return Returns the ELF entry point given an ELF file, or
-    ///     bsl::safe_uintmax::failure() if a entry point does not exist or
+    ///     bsl::safe_umx::failure() if a entry point does not exist or
     ///     a failure occurs.
     ///
     [[nodiscard]] constexpr auto
-    get_elf64_ip(bsl::span<bsl::uint8 const> const &file) noexcept -> bsl::safe_uintmax
+    get_elf64_ip(bsl::span<bsl::uint8 const> const &file) noexcept -> bsl::safe_umx
     {
         bsl::discard(file);
-        return bsl::safe_uintmax::failure();
+        return bsl::safe_umx::failure();
     }
 }
 

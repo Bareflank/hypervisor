@@ -25,29 +25,29 @@
 #include "../../../src/vp_t.hpp"
 
 #include <dummy_vm_pool_t.hpp>
-#include <dummy_vps_pool_t.hpp>
+#include <dummy_vs_pool_t.hpp>
 
 #include <bsl/ut.hpp>
 
 namespace mk
 {
     /// @brief defines the max number of VMs used in testing
-    constexpr bsl::safe_uint16 INTEGRATION_MAX_PPS{bsl::to_u16(2)};
+    constexpr bsl::safe_u16 INTEGRATION_MAX_PPS{bsl::to_u16(2)};
 
     /// @brief defines VMID0
-    constexpr bsl::safe_uint16 VMID0{bsl::to_u16(0)};
+    constexpr bsl::safe_u16 VMID0{bsl::to_u16(0)};
 
     /// @brief defines PPID0
-    constexpr bsl::safe_uint16 PPID0{bsl::to_u16(0)};
+    constexpr bsl::safe_u16 PPID0{bsl::to_u16(0)};
     /// @brief defines PPID1
-    constexpr bsl::safe_uint16 PPID1{bsl::to_u16(1)};
+    constexpr bsl::safe_u16 PPID1{bsl::to_u16(1)};
     /// @brief defines PPID2
-    constexpr bsl::safe_uint16 PPID2{bsl::to_u16(2)};
+    constexpr bsl::safe_u16 PPID2{bsl::to_u16(2)};
 
     /// @brief defines VPID0
-    constexpr bsl::safe_uint16 VPID0{bsl::to_u16(0)};
+    constexpr bsl::safe_u16 VPID0{bsl::to_u16(0)};
     /// @brief defines VPID1
-    constexpr bsl::safe_uint16 VPID1{bsl::to_u16(1)};
+    constexpr bsl::safe_u16 VPID1{bsl::to_u16(1)};
 
     /// <!-- description -->
     ///   @brief Used to execute the actual checks. We put the checks in this
@@ -66,7 +66,7 @@ namespace mk
                 vp_t vp{};
                 tls_t tls{};
                 bsl::ut_then{} = [&vp, &tls]() {
-                    bsl::ut_check(!vp.initialize(tls, bsl::safe_uint16::failure()));
+                    bsl::ut_check(!vp.initialize(tls, bsl::safe_u16::failure()));
                 };
             };
         };
@@ -108,11 +108,11 @@ namespace mk
             bsl::ut_given{} = []() noexcept {
                 vp_t vp{};
                 tls_t tls{};
-                dummy_vps_pool_t vps_pool{};
-                bsl::ut_when{} = [&vp, &tls, &vps_pool]() {
+                dummy_vs_pool_t vs_pool{};
+                bsl::ut_when{} = [&vp, &tls, &vs_pool]() {
                     bsl::ut_required_step(vp.initialize(tls, VPID1));
-                    bsl::ut_then{} = [&vp, &tls, &vps_pool]() {
-                        bsl::ut_check(vp.release(tls, vps_pool));
+                    bsl::ut_then{} = [&vp, &tls, &vs_pool]() {
+                        bsl::ut_check(vp.release(tls, vs_pool));
                         bsl::ut_check(!vp.id());
                     };
                 };
@@ -124,13 +124,13 @@ namespace mk
                 vp_t vp{};
                 tls_t tls{};
                 dummy_vm_pool_t vm_pool{};
-                dummy_vps_pool_t vps_pool{};
-                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vps_pool]() {
+                dummy_vs_pool_t vs_pool{};
+                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vs_pool]() {
                     tls.online_pps = INTEGRATION_MAX_PPS.get();
                     bsl::ut_required_step(vp.initialize(tls, VPID1));
                     bsl::ut_required_step(vp.allocate(tls, vm_pool, VMID0, PPID0));
-                    bsl::ut_then{} = [&vp, &tls, &vps_pool]() {
-                        bsl::ut_check(vp.release(tls, vps_pool));
+                    bsl::ut_then{} = [&vp, &tls, &vs_pool]() {
+                        bsl::ut_check(vp.release(tls, vs_pool));
                         bsl::ut_check(!vp.id());
                         bsl::ut_check(!vp.is_allocated());
                         bsl::ut_check(!vp.assigned_vm());
@@ -144,12 +144,12 @@ namespace mk
             bsl::ut_given{} = []() noexcept {
                 vp_t vp{};
                 tls_t tls{};
-                dummy_vps_pool_t vps_pool{};
-                bsl::ut_when{} = [&vp, &tls, &vps_pool]() {
+                dummy_vs_pool_t vs_pool{};
+                bsl::ut_when{} = [&vp, &tls, &vs_pool]() {
                     bsl::ut_required_step(vp.initialize(tls, VPID1));
                     vp.zombify();
-                    bsl::ut_then{} = [&vp, &tls, &vps_pool]() {
-                        bsl::ut_check(vp.release(tls, vps_pool));
+                    bsl::ut_then{} = [&vp, &tls, &vs_pool]() {
+                        bsl::ut_check(vp.release(tls, vs_pool));
                         bsl::ut_check(vp.id());
                         bsl::ut_check(vp.is_zombie());
                     };
@@ -162,12 +162,12 @@ namespace mk
                 bsl::ut_given{} = []() noexcept {
                     vp_t vp{};
                     tls_t tls{};
-                    dummy_vps_pool_t vps_pool{};
-                    bsl::ut_when{} = [&vp, &tls, &vps_pool]() {
+                    dummy_vs_pool_t vs_pool{};
+                    bsl::ut_when{} = [&vp, &tls, &vs_pool]() {
                         bsl::ut_required_step(vp.initialize(tls, VPID1));
-                        tls.test_ret = errc_vps_pool_failure;
-                        bsl::ut_then{} = [&vp, &tls, &vps_pool]() {
-                            bsl::ut_check(!vp.release(tls, vps_pool));
+                        tls.test_ret = errc_vs_pool_failure;
+                        bsl::ut_then{} = [&vp, &tls, &vs_pool]() {
+                            bsl::ut_check(!vp.release(tls, vs_pool));
                             bsl::ut_check(vp.id());
                             bsl::ut_check(vp.is_zombie());
                         };
@@ -181,15 +181,15 @@ namespace mk
                     vp_t vp{};
                     tls_t tls{};
                     dummy_vm_pool_t vm_pool{};
-                    dummy_vps_pool_t vps_pool{};
-                    bsl::ut_when{} = [&vp, &tls, &vm_pool, &vps_pool]() {
+                    dummy_vs_pool_t vs_pool{};
+                    bsl::ut_when{} = [&vp, &tls, &vm_pool, &vs_pool]() {
                         tls.online_pps = INTEGRATION_MAX_PPS.get();
                         tls.active_vpid = syscall::BF_INVALID_ID.get();
                         bsl::ut_required_step(vp.initialize(tls, VPID1));
                         bsl::ut_required_step(vp.allocate(tls, vm_pool, VMID0, PPID0));
                         bsl::ut_required_step(vp.set_active(tls));
-                        bsl::ut_then{} = [&vp, &tls, &vps_pool]() {
-                            bsl::ut_check(!vp.release(tls, vps_pool));
+                        bsl::ut_then{} = [&vp, &tls, &vs_pool]() {
+                            bsl::ut_check(!vp.release(tls, vs_pool));
                             bsl::ut_check(vp.id());
                             bsl::ut_check(vp.is_zombie());
                         };
@@ -217,8 +217,7 @@ namespace mk
                     tls.online_pps = INTEGRATION_MAX_PPS.get();
                     bsl::ut_required_step(vp.initialize(tls, VPID1));
                     bsl::ut_then{} = [&vp, &tls, &vm_pool]() {
-                        bsl::ut_check(
-                            !vp.allocate(tls, vm_pool, bsl::safe_uint16::failure(), PPID0));
+                        bsl::ut_check(!vp.allocate(tls, vm_pool, bsl::safe_u16::failure(), PPID0));
                     };
                 };
             };
@@ -280,8 +279,7 @@ namespace mk
                     tls.online_pps = INTEGRATION_MAX_PPS.get();
                     bsl::ut_required_step(vp.initialize(tls, VPID1));
                     bsl::ut_then{} = [&vp, &tls, &vm_pool]() {
-                        bsl::ut_check(
-                            !vp.allocate(tls, vm_pool, VMID0, bsl::safe_uint16::failure()));
+                        bsl::ut_check(!vp.allocate(tls, vm_pool, VMID0, bsl::safe_u16::failure()));
                     };
                 };
             };
@@ -353,9 +351,9 @@ namespace mk
             bsl::ut_given{} = []() noexcept {
                 vp_t vp{};
                 tls_t tls{};
-                dummy_vps_pool_t vps_pool{};
-                bsl::ut_then{} = [&vp, &tls, &vps_pool]() {
-                    bsl::ut_check(!vp.deallocate(tls, vps_pool));
+                dummy_vs_pool_t vs_pool{};
+                bsl::ut_then{} = [&vp, &tls, &vs_pool]() {
+                    bsl::ut_check(!vp.deallocate(tls, vs_pool));
                 };
             };
         };
@@ -365,14 +363,14 @@ namespace mk
                 vp_t vp{};
                 tls_t tls{};
                 dummy_vm_pool_t vm_pool{};
-                dummy_vps_pool_t vps_pool{};
-                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vps_pool]() {
+                dummy_vs_pool_t vs_pool{};
+                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vs_pool]() {
                     tls.online_pps = INTEGRATION_MAX_PPS.get();
                     bsl::ut_required_step(vp.initialize(tls, VPID1));
                     bsl::ut_required_step(vp.allocate(tls, vm_pool, VMID0, PPID0));
                     vp.zombify();
-                    bsl::ut_then{} = [&vp, &tls, &vps_pool]() {
-                        bsl::ut_check(!vp.deallocate(tls, vps_pool));
+                    bsl::ut_then{} = [&vp, &tls, &vs_pool]() {
+                        bsl::ut_check(!vp.deallocate(tls, vs_pool));
                     };
                 };
             };
@@ -383,14 +381,14 @@ namespace mk
                 vp_t vp{};
                 tls_t tls{};
                 dummy_vm_pool_t vm_pool{};
-                dummy_vps_pool_t vps_pool{};
-                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vps_pool]() {
+                dummy_vs_pool_t vs_pool{};
+                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vs_pool]() {
                     tls.online_pps = INTEGRATION_MAX_PPS.get();
                     bsl::ut_required_step(vp.initialize(tls, VPID1));
                     bsl::ut_required_step(vp.allocate(tls, vm_pool, VMID0, PPID0));
-                    bsl::ut_required_step(vp.deallocate(tls, vps_pool));
-                    bsl::ut_then{} = [&vp, &tls, &vps_pool]() {
-                        bsl::ut_check(!vp.deallocate(tls, vps_pool));
+                    bsl::ut_required_step(vp.deallocate(tls, vs_pool));
+                    bsl::ut_then{} = [&vp, &tls, &vs_pool]() {
+                        bsl::ut_check(!vp.deallocate(tls, vs_pool));
                     };
                 };
             };
@@ -401,14 +399,14 @@ namespace mk
                 dummy_vm_pool_t vm_pool{};
                 vp_t vp{};
                 tls_t tls{};
-                dummy_vps_pool_t vps_pool{};
-                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vps_pool]() {
+                dummy_vs_pool_t vs_pool{};
+                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vs_pool]() {
                     tls.online_pps = INTEGRATION_MAX_PPS.get();
                     bsl::ut_required_step(vp.initialize(tls, VPID1));
                     bsl::ut_required_step(vp.allocate(tls, vm_pool, VMID0, PPID0));
-                    tls.test_ret = errc_vps_pool_failure;
-                    bsl::ut_then{} = [&vp, &tls, &vps_pool]() {
-                        bsl::ut_check(!vp.deallocate(tls, vps_pool));
+                    tls.test_ret = errc_vs_pool_failure;
+                    bsl::ut_then{} = [&vp, &tls, &vs_pool]() {
+                        bsl::ut_check(!vp.deallocate(tls, vs_pool));
                         bsl::ut_check(vp.is_zombie());
                         bsl::ut_check(tls.state_reversal_required);
                     };
@@ -421,15 +419,15 @@ namespace mk
                 vp_t vp{};
                 tls_t tls{};
                 dummy_vm_pool_t vm_pool{};
-                dummy_vps_pool_t vps_pool{};
-                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vps_pool]() {
+                dummy_vs_pool_t vs_pool{};
+                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vs_pool]() {
                     tls.online_pps = INTEGRATION_MAX_PPS.get();
                     tls.active_vpid = syscall::BF_INVALID_ID.get();
                     bsl::ut_required_step(vp.initialize(tls, VPID1));
                     bsl::ut_required_step(vp.allocate(tls, vm_pool, VMID0, PPID0));
                     bsl::ut_required_step(vp.set_active(tls));
-                    bsl::ut_then{} = [&vp, &tls, &vps_pool]() {
-                        bsl::ut_check(!vp.deallocate(tls, vps_pool));
+                    bsl::ut_then{} = [&vp, &tls, &vs_pool]() {
+                        bsl::ut_check(!vp.deallocate(tls, vs_pool));
                         bsl::ut_check(vp.is_zombie());
                         bsl::ut_check(tls.state_reversal_required);
                     };
@@ -442,13 +440,13 @@ namespace mk
                 vp_t vp{};
                 tls_t tls{};
                 dummy_vm_pool_t vm_pool{};
-                dummy_vps_pool_t vps_pool{};
-                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vps_pool]() {
+                dummy_vs_pool_t vs_pool{};
+                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vs_pool]() {
                     tls.online_pps = INTEGRATION_MAX_PPS.get();
                     bsl::ut_required_step(vp.initialize(tls, VPID1));
                     bsl::ut_required_step(vp.allocate(tls, vm_pool, VMID0, PPID0));
-                    bsl::ut_then{} = [&vp, &tls, &vps_pool]() {
-                        bsl::ut_check(vp.deallocate(tls, vps_pool));
+                    bsl::ut_then{} = [&vp, &tls, &vs_pool]() {
+                        bsl::ut_check(vp.deallocate(tls, vs_pool));
                         bsl::ut_check(tls.state_reversal_required);
                     };
                 };
@@ -545,12 +543,12 @@ namespace mk
                 vp_t vp{};
                 tls_t tls{};
                 dummy_vm_pool_t vm_pool{};
-                dummy_vps_pool_t vps_pool{};
-                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vps_pool]() {
+                dummy_vs_pool_t vs_pool{};
+                bsl::ut_when{} = [&vp, &tls, &vm_pool, &vs_pool]() {
                     tls.online_pps = INTEGRATION_MAX_PPS.get();
                     bsl::ut_required_step(vp.initialize(tls, VPID1));
                     bsl::ut_required_step(vp.allocate(tls, vm_pool, VMID0, PPID0));
-                    bsl::ut_required_step(vp.deallocate(tls, vps_pool));
+                    bsl::ut_required_step(vp.deallocate(tls, vs_pool));
                     bsl::ut_then{} = [&vp]() {
                         bsl::ut_check(vp.is_deallocated());
                         bsl::ut_check(!vp.is_allocated());
@@ -1043,7 +1041,7 @@ namespace mk
                     bsl::ut_required_step(vp.initialize(tls, VPID1));
                     bsl::ut_required_step(vp.allocate(tls, vm_pool, VMID0, PPID0));
                     bsl::ut_then{} = [&tls, &vp]() {
-                        bsl::ut_check(!vp.migrate(tls, bsl::safe_uint16::failure()));
+                        bsl::ut_check(!vp.migrate(tls, bsl::safe_u16::failure()));
                     };
                 };
             };

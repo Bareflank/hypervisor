@@ -52,6 +52,12 @@
 *.out
 *.app
 
+# Rust
+*.lock
+cmake/rust/constants.rs
+example/default_rust/src/target/
+syscall/tests/target/
+
 # Others
 .vscode/
 build/

@@ -42,113 +42,113 @@
 namespace example
 {
     /// @brief defines the CPUID feature identifier bit for MTRR
-    constexpr bsl::safe_uintmax MAX_RANGES{bsl::to_umax(512)};
+    constexpr bsl::safe_umx MAX_RANGES{bsl::to_umx(512)};
 
     /// @brief defines the CPUID feature identifier index
-    constexpr bsl::safe_uintmax CPUID_FEATURE_IDENTIFIERS{bsl::to_umax(0x00000001U)};
+    constexpr bsl::safe_umx CPUID_FEATURE_IDENTIFIERS{bsl::to_umx(0x00000001U)};
     /// @brief defines the CPUID feature identifier bit for MTRR
-    constexpr bsl::safe_uintmax CPUID_FEATURE_IDENTIFIERS_MTRR{bsl::to_umax(0x00001000U)};
+    constexpr bsl::safe_umx CPUID_FEATURE_IDENTIFIERS_MTRR{bsl::to_umx(0x00001000U)};
 
     /// @brief defines the CPUID linear/physical address size index
-    constexpr bsl::safe_uintmax CPUID_LP_ADDRESS_SIZE{bsl::to_umax(0x80000008U)};
+    constexpr bsl::safe_umx CPUID_LP_ADDRESS_SIZE{bsl::to_umx(0x80000008U)};
     /// @brief defines the CPUID linear/physical address size phys addr bits
-    constexpr bsl::safe_uintmax CPUID_LP_ADDRESS_SIZE_PHYS_ADDR_BITS{bsl::to_umax(0x000000FFU)};
+    constexpr bsl::safe_umx CPUID_LP_ADDRESS_SIZE_PHYS_ADDR_BITS{bsl::to_umx(0x000000FFU)};
 
     /// @brief defines the MTRRcap MSR
-    constexpr bsl::safe_uint32 IA32_MTRRCAP{bsl::to_u32(0x000000FEU)};
+    constexpr bsl::safe_u32 IA32_MTRRCAP{bsl::to_u32(0x000000FEU)};
     /// @brief defines the MTRRcap MSR VCNT field
-    constexpr bsl::safe_uintmax IA32_MTRRCAP_VCNT{bsl::to_umax(0x00000000000000FFU)};
+    constexpr bsl::safe_umx IA32_MTRRCAP_VCNT{bsl::to_umx(0x00000000000000FFU)};
     /// @brief defines the MTRRcap MSR FIX field
-    constexpr bsl::safe_uintmax IA32_MTRRCAP_FIX{bsl::to_umax(0x0000000000000100U)};
+    constexpr bsl::safe_umx IA32_MTRRCAP_FIX{bsl::to_umx(0x0000000000000100U)};
 
     /// @brief defines the MTRRdefType MSR
-    constexpr bsl::safe_uint32 IA32_MTRRDEFTYPE{bsl::to_u32(0x000002FFU)};
+    constexpr bsl::safe_u32 IA32_MTRRDEFTYPE{bsl::to_u32(0x000002FFU)};
     /// @brief defines the MTRRdefType MSR type field
-    constexpr bsl::safe_uintmax IA32_MTRRDEFTYPE_TYPE{bsl::to_umax(0x00000000000000FFU)};
+    constexpr bsl::safe_umx IA32_MTRRDEFTYPE_TYPE{bsl::to_umx(0x00000000000000FFU)};
     /// @brief defines the MTRRdefType MSR fixed range enable field
-    constexpr bsl::safe_uintmax IA32_MTRRDEFTYPE_FE{bsl::to_umax(0x0000000000000400U)};
+    constexpr bsl::safe_umx IA32_MTRRDEFTYPE_FE{bsl::to_umx(0x0000000000000400U)};
     /// @brief defines the MTRRdefType MSR enable field
-    constexpr bsl::safe_uintmax IA32_MTRRDEFTYPE_E{bsl::to_umax(0x0000000000000800U)};
+    constexpr bsl::safe_umx IA32_MTRRDEFTYPE_E{bsl::to_umx(0x0000000000000800U)};
 
     /// @brief defines the MTRRfix64K_00000 MSR
-    constexpr bsl::safe_uint32 IA32_MTRRFIX64K_00000{bsl::to_u32(0x000000250U)};
+    constexpr bsl::safe_u32 IA32_MTRRFIX64K_00000{bsl::to_u32(0x000000250U)};
     /// @brief defines the MTRRfix16K_80000 MSR
-    constexpr bsl::safe_uint32 IA32_MTRRFIX16K_80000{bsl::to_u32(0x000000258U)};
+    constexpr bsl::safe_u32 IA32_MTRRFIX16K_80000{bsl::to_u32(0x000000258U)};
     /// @brief defines the MTRRfix16K_A0000 MSR
-    constexpr bsl::safe_uint32 IA32_MTRRFIX16K_A0000{bsl::to_u32(0x000000259U)};
+    constexpr bsl::safe_u32 IA32_MTRRFIX16K_A0000{bsl::to_u32(0x000000259U)};
     /// @brief defines the MTRRfix4K_C0000 MSR
-    constexpr bsl::safe_uint32 IA32_MTRRFIX4K_C0000{bsl::to_u32(0x000000268U)};
+    constexpr bsl::safe_u32 IA32_MTRRFIX4K_C0000{bsl::to_u32(0x000000268U)};
     /// @brief defines the MTRRfix4K_C8000 MSR
-    constexpr bsl::safe_uint32 IA32_MTRRFIX4K_C8000{bsl::to_u32(0x000000269U)};
+    constexpr bsl::safe_u32 IA32_MTRRFIX4K_C8000{bsl::to_u32(0x000000269U)};
     /// @brief defines the MTRRfix4K_D0000 MSR
-    constexpr bsl::safe_uint32 IA32_MTRRFIX4K_D0000{bsl::to_u32(0x00000026AU)};
+    constexpr bsl::safe_u32 IA32_MTRRFIX4K_D0000{bsl::to_u32(0x00000026AU)};
     /// @brief defines the MTRRfix4K_D8000 MSR
-    constexpr bsl::safe_uint32 IA32_MTRRFIX4K_D8000{bsl::to_u32(0x00000026BU)};
+    constexpr bsl::safe_u32 IA32_MTRRFIX4K_D8000{bsl::to_u32(0x00000026BU)};
     /// @brief defines the MTRRfix4K_E0000 MSR
-    constexpr bsl::safe_uint32 IA32_MTRRFIX4K_E0000{bsl::to_u32(0x00000026CU)};
+    constexpr bsl::safe_u32 IA32_MTRRFIX4K_E0000{bsl::to_u32(0x00000026CU)};
     /// @brief defines the MTRRfix4K_E8000 MSR
-    constexpr bsl::safe_uint32 IA32_MTRRFIX4K_E8000{bsl::to_u32(0x00000026DU)};
+    constexpr bsl::safe_u32 IA32_MTRRFIX4K_E8000{bsl::to_u32(0x00000026DU)};
     /// @brief defines the MTRRfix4K_F0000 MSR
-    constexpr bsl::safe_uint32 IA32_MTRRFIX4K_F0000{bsl::to_u32(0x00000026EU)};
+    constexpr bsl::safe_u32 IA32_MTRRFIX4K_F0000{bsl::to_u32(0x00000026EU)};
     /// @brief defines the MTRRfix4K_F8000 MSR
-    constexpr bsl::safe_uint32 IA32_MTRRFIX4K_F8000{bsl::to_u32(0x00000026FU)};
+    constexpr bsl::safe_u32 IA32_MTRRFIX4K_F8000{bsl::to_u32(0x00000026FU)};
 
     /// @brief defines the memory type mask for fixed ranges
-    constexpr bsl::safe_uintmax MTRR_FIX_MASK{bsl::to_umax(0x00000000000000FFU)};
+    constexpr bsl::safe_umx MTRR_FIX_MASK{bsl::to_umx(0x00000000000000FFU)};
     /// @brief defines the memory type shift for fixed ranges
-    constexpr bsl::safe_uintmax MTRR_FIX_SHFT{bsl::to_umax(8)};
+    constexpr bsl::safe_umx MTRR_FIX_SHFT{bsl::to_umx(8)};
     /// @brief defines the total number of MTRRs per MSR for fixed ranges
-    constexpr bsl::safe_uintmax MTRR_FIX_MTRRS_PER_MSR{bsl::to_umax(8)};
+    constexpr bsl::safe_umx MTRR_FIX_MTRRS_PER_MSR{bsl::to_umx(8)};
 
     /// @brief defines the address of MTRRFIX64K_00000
-    constexpr bsl::safe_uintmax MTRRFIX64K_00000_ADDR{bsl::to_umax(0x0000000000000000U)};
+    constexpr bsl::safe_umx MTRRFIX64K_00000_ADDR{bsl::to_umx(0x0000000000000000U)};
     /// @brief defines the size of MTRRFIX64K_00000
-    constexpr bsl::safe_uintmax MTRRFIX64K_00000_SIZE{bsl::to_umax(0x10000U)};
+    constexpr bsl::safe_umx MTRRFIX64K_00000_SIZE{bsl::to_umx(0x10000U)};
     /// @brief defines the address of MTRRFIX16K_80000
-    constexpr bsl::safe_uintmax MTRRFIX16K_80000_ADDR{bsl::to_umax(0x0000000000080000U)};
+    constexpr bsl::safe_umx MTRRFIX16K_80000_ADDR{bsl::to_umx(0x0000000000080000U)};
     /// @brief defines the size of MTRRFIX16K_80000
-    constexpr bsl::safe_uintmax MTRRFIX16K_80000_SIZE{bsl::to_umax(0x4000U)};
+    constexpr bsl::safe_umx MTRRFIX16K_80000_SIZE{bsl::to_umx(0x4000U)};
     /// @brief defines the address of MTRRFIX16K_A0000
-    constexpr bsl::safe_uintmax MTRRFIX16K_A0000_ADDR{bsl::to_umax(0x00000000000A0000U)};
+    constexpr bsl::safe_umx MTRRFIX16K_A0000_ADDR{bsl::to_umx(0x00000000000A0000U)};
     /// @brief defines the size of MTRRFIX16K_A0000
-    constexpr bsl::safe_uintmax MTRRFIX16K_A0000_SIZE{bsl::to_umax(0x4000U)};
+    constexpr bsl::safe_umx MTRRFIX16K_A0000_SIZE{bsl::to_umx(0x4000U)};
     /// @brief defines the address of MTRRFIX4K_C0000
-    constexpr bsl::safe_uintmax MTRRFIX4K_C0000_ADDR{bsl::to_umax(0x00000000000C0000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_C0000_ADDR{bsl::to_umx(0x00000000000C0000U)};
     /// @brief defines the size of MTRRFIX4K_C0000
-    constexpr bsl::safe_uintmax MTRRFIX4K_C0000_SIZE{bsl::to_umax(0x1000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_C0000_SIZE{bsl::to_umx(0x1000U)};
     /// @brief defines the address of MTRRFIX4K_C8000
-    constexpr bsl::safe_uintmax MTRRFIX4K_C8000_ADDR{bsl::to_umax(0x00000000000C8000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_C8000_ADDR{bsl::to_umx(0x00000000000C8000U)};
     /// @brief defines the size of MTRRFIX4K_C8000
-    constexpr bsl::safe_uintmax MTRRFIX4K_C8000_SIZE{bsl::to_umax(0x1000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_C8000_SIZE{bsl::to_umx(0x1000U)};
     /// @brief defines the address of MTRRFIX4K_D0000
-    constexpr bsl::safe_uintmax MTRRFIX4K_D0000_ADDR{bsl::to_umax(0x00000000000D0000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_D0000_ADDR{bsl::to_umx(0x00000000000D0000U)};
     /// @brief defines the size of MTRRFIX4K_D0000
-    constexpr bsl::safe_uintmax MTRRFIX4K_D0000_SIZE{bsl::to_umax(0x1000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_D0000_SIZE{bsl::to_umx(0x1000U)};
     /// @brief defines the address of MTRRFIX4K_D8000
-    constexpr bsl::safe_uintmax MTRRFIX4K_D8000_ADDR{bsl::to_umax(0x00000000000D8000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_D8000_ADDR{bsl::to_umx(0x00000000000D8000U)};
     /// @brief defines the size of MTRRFIX4K_D8000
-    constexpr bsl::safe_uintmax MTRRFIX4K_D8000_SIZE{bsl::to_umax(0x1000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_D8000_SIZE{bsl::to_umx(0x1000U)};
     /// @brief defines the address of MTRRFIX4K_E0000
-    constexpr bsl::safe_uintmax MTRRFIX4K_E0000_ADDR{bsl::to_umax(0x00000000000E0000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_E0000_ADDR{bsl::to_umx(0x00000000000E0000U)};
     /// @brief defines the size of MTRRFIX4K_E0000
-    constexpr bsl::safe_uintmax MTRRFIX4K_E0000_SIZE{bsl::to_umax(0x1000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_E0000_SIZE{bsl::to_umx(0x1000U)};
     /// @brief defines the address of MTRRFIX4K_E8000
-    constexpr bsl::safe_uintmax MTRRFIX4K_E8000_ADDR{bsl::to_umax(0x00000000000E8000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_E8000_ADDR{bsl::to_umx(0x00000000000E8000U)};
     /// @brief defines the size of MTRRFIX4K_E8000
-    constexpr bsl::safe_uintmax MTRRFIX4K_E8000_SIZE{bsl::to_umax(0x1000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_E8000_SIZE{bsl::to_umx(0x1000U)};
     /// @brief defines the address of MTRRFIX4K_F0000
-    constexpr bsl::safe_uintmax MTRRFIX4K_F0000_ADDR{bsl::to_umax(0x00000000000F0000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_F0000_ADDR{bsl::to_umx(0x00000000000F0000U)};
     /// @brief defines the size of MTRRFIX4K_F0000
-    constexpr bsl::safe_uintmax MTRRFIX4K_F0000_SIZE{bsl::to_umax(0x1000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_F0000_SIZE{bsl::to_umx(0x1000U)};
     /// @brief defines the address of MTRRFIX4K_F8000
-    constexpr bsl::safe_uintmax MTRRFIX4K_F8000_ADDR{bsl::to_umax(0x00000000000F8000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_F8000_ADDR{bsl::to_umx(0x00000000000F8000U)};
     /// @brief defines the size of MTRRFIX4K_F8000
-    constexpr bsl::safe_uintmax MTRRFIX4K_F8000_SIZE{bsl::to_umax(0x1000U)};
+    constexpr bsl::safe_umx MTRRFIX4K_F8000_SIZE{bsl::to_umx(0x1000U)};
 
     /// @brief defines the MTRRphysBase MSR
-    constexpr bsl::safe_uint32 IA32_MTRRPHYSBASE{bsl::to_u32(0x000000200U)};
+    constexpr bsl::safe_u32 IA32_MTRRPHYSBASE{bsl::to_u32(0x000000200U)};
     /// @brief defines the MTRRphysMask MSR
-    constexpr bsl::safe_uint32 IA32_MTRRPHYSMASK{bsl::to_u32(0x000000201U)};
+    constexpr bsl::safe_u32 IA32_MTRRPHYSMASK{bsl::to_u32(0x000000201U)};
 
     /// <!-- description -->
     ///   @brief Implements the sort function that we use for a range_t
@@ -183,7 +183,7 @@ namespace example
         /// @brief stores the ranges associated with this mtrrs_t
         bsl::array<range_t, MAX_RANGES.get()> m_ranges{};
         /// @brief stores the number of ranges in the list.
-        bsl::safe_uintmax m_ranges_count{};
+        bsl::safe_umx m_ranges_count{};
 
         /// <!-- description -->
         ///   @brief Returns true if the provided address is 4k page aligned
@@ -193,9 +193,9 @@ namespace example
         ///   @return Returns true if the provided address is 4k page aligned
         ///
         [[nodiscard]] static constexpr auto
-        is_page_4k_aligned(bsl::safe_uintmax const &addr) noexcept -> bool
+        is_page_4k_aligned(bsl::safe_umx const &addr) noexcept -> bool
         {
-            constexpr bsl::safe_uint64 mask_4k{bsl::to_umax(0xFFFU)};
+            constexpr bsl::safe_u64 mask_4k{bsl::to_umx(0xFFFU)};
             return (addr & mask_4k) == bsl::ZERO_UMAX;
         }
 
@@ -207,9 +207,9 @@ namespace example
         ///   @return Returns true if the provided address is 2m page aligned
         ///
         [[nodiscard]] static constexpr auto
-        is_page_2m_aligned(bsl::safe_uintmax const &addr) noexcept -> bool
+        is_page_2m_aligned(bsl::safe_umx const &addr) noexcept -> bool
         {
-            constexpr bsl::safe_uint64 mask_2m{bsl::to_umax(0x1FFFFFU)};
+            constexpr bsl::safe_u64 mask_2m{bsl::to_umx(0x1FFFFFU)};
             return (addr & mask_2m) == bsl::ZERO_UMAX;
         }
         /// <!-- description -->
@@ -223,7 +223,7 @@ namespace example
         ///     memory combining rules defined in the AMD/Intel manuals.
         ///
         [[nodiscard]] static constexpr auto
-        combine(range_t const &r1, range_t const &r2) noexcept -> bsl::safe_uintmax
+        combine(range_t const &r1, range_t const &r2) noexcept -> bsl::safe_umx
         {
             if (r1.dflt) {
                 return r2.type;
@@ -333,9 +333,9 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         add_range(
-            bsl::safe_uintmax const &addr,
-            bsl::safe_uintmax const &size,
-            bsl::safe_uintmax const &type) noexcept -> bsl::errc_type
+            bsl::safe_umx const &addr,
+            bsl::safe_umx const &size,
+            bsl::safe_umx const &type) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
             range_t r1{addr, size, type, false};
@@ -358,7 +358,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < m_ranges_count; ++i) {
+            for (bsl::safe_idx i{}; i < m_ranges_count; ++i) {
                 auto *const r2{m_ranges.at_if(i)};
 
                 auto const r1_l{r1.addr};
@@ -490,9 +490,9 @@ namespace example
                         r1.size = r1_r - r2_r;
                     }
 
-                    r2->addr = bsl::safe_uintmax::failure();
-                    r2->size = bsl::safe_uintmax::failure();
-                    r2->type = bsl::safe_uintmax::failure();
+                    r2->addr = bsl::safe_umx::failure();
+                    r2->size = bsl::safe_umx::failure();
+                    r2->type = bsl::safe_umx::failure();
                     r2->dflt = false;
                     --m_ranges_count;
 
@@ -587,9 +587,9 @@ namespace example
                         r1.size = r1_r - r2_r;
                     }
 
-                    r2->addr = bsl::safe_uintmax::failure();
-                    r2->size = bsl::safe_uintmax::failure();
-                    r2->type = bsl::safe_uintmax::failure();
+                    r2->addr = bsl::safe_umx::failure();
+                    r2->size = bsl::safe_umx::failure();
+                    r2->type = bsl::safe_umx::failure();
                     r2->dflt = false;
                     --m_ranges_count;
 
@@ -614,7 +614,7 @@ namespace example
         constexpr void
         compress_ranges() noexcept
         {
-            bsl::safe_uintmax i{bsl::ONE_UMAX};
+            bsl::safe_umx i{bsl::ONE_UMAX};
 
             if (m_ranges.size() == bsl::ONE_UMAX) {
                 return;
@@ -627,9 +627,9 @@ namespace example
                 if (r1->type == r2->type) {
                     r1->size += r2->size;
 
-                    r2->addr = bsl::safe_uintmax::failure();
-                    r2->size = bsl::safe_uintmax::failure();
-                    r2->type = bsl::safe_uintmax::failure();
+                    r2->addr = bsl::safe_umx::failure();
+                    r2->size = bsl::safe_umx::failure();
+                    r2->type = bsl::safe_umx::failure();
                     r2->dflt = false;
                     --m_ranges_count;
 
@@ -653,8 +653,8 @@ namespace example
         add_ia32_mtrr_fix64k_00000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
-            bsl::safe_uintmax mtrr{};
-            bsl::safe_uintmax shft{};
+            bsl::safe_umx mtrr{};
+            bsl::safe_umx shft{};
 
             ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX64K_00000, mtrr);
             if (bsl::unlikely(!ret)) {
@@ -662,7 +662,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
+            for (bsl::safe_idx i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
                 auto const size{MTRRFIX64K_00000_SIZE};
                 auto const addr{MTRRFIX64K_00000_ADDR + (size * i)};
                 auto const mask{MTRR_FIX_MASK << shft};
@@ -692,8 +692,8 @@ namespace example
         add_ia32_mtrr_fix16k_80000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
-            bsl::safe_uintmax mtrr{};
-            bsl::safe_uintmax shft{};
+            bsl::safe_umx mtrr{};
+            bsl::safe_umx shft{};
 
             ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX16K_80000, mtrr);
             if (bsl::unlikely(!ret)) {
@@ -701,7 +701,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
+            for (bsl::safe_idx i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
                 auto const size{MTRRFIX16K_80000_SIZE};
                 auto const addr{MTRRFIX16K_80000_ADDR + (size * i)};
                 auto const mask{MTRR_FIX_MASK << shft};
@@ -731,8 +731,8 @@ namespace example
         add_ia32_mtrr_fix16k_a0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
-            bsl::safe_uintmax mtrr{};
-            bsl::safe_uintmax shft{};
+            bsl::safe_umx mtrr{};
+            bsl::safe_umx shft{};
 
             ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX16K_A0000, mtrr);
             if (bsl::unlikely(!ret)) {
@@ -740,7 +740,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
+            for (bsl::safe_idx i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
                 auto const size{MTRRFIX16K_A0000_SIZE};
                 auto const addr{MTRRFIX16K_A0000_ADDR + (size * i)};
                 auto const mask{MTRR_FIX_MASK << shft};
@@ -770,8 +770,8 @@ namespace example
         add_ia32_mtrr_fix4k_c0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
-            bsl::safe_uintmax mtrr{};
-            bsl::safe_uintmax shft{};
+            bsl::safe_umx mtrr{};
+            bsl::safe_umx shft{};
 
             ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_C0000, mtrr);
             if (bsl::unlikely(!ret)) {
@@ -779,7 +779,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
+            for (bsl::safe_idx i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
                 auto const size{MTRRFIX4K_C0000_SIZE};
                 auto const addr{MTRRFIX4K_C0000_ADDR + (size * i)};
                 auto const mask{MTRR_FIX_MASK << shft};
@@ -809,8 +809,8 @@ namespace example
         add_ia32_mtrr_fix4k_c8000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
-            bsl::safe_uintmax mtrr{};
-            bsl::safe_uintmax shft{};
+            bsl::safe_umx mtrr{};
+            bsl::safe_umx shft{};
 
             ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_C8000, mtrr);
             if (bsl::unlikely(!ret)) {
@@ -818,7 +818,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
+            for (bsl::safe_idx i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
                 auto const size{MTRRFIX4K_C8000_SIZE};
                 auto const addr{MTRRFIX4K_C8000_ADDR + (size * i)};
                 auto const mask{MTRR_FIX_MASK << shft};
@@ -848,8 +848,8 @@ namespace example
         add_ia32_mtrr_fix4k_d0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
-            bsl::safe_uintmax mtrr{};
-            bsl::safe_uintmax shft{};
+            bsl::safe_umx mtrr{};
+            bsl::safe_umx shft{};
 
             ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_D0000, mtrr);
             if (bsl::unlikely(!ret)) {
@@ -857,7 +857,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
+            for (bsl::safe_idx i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
                 auto const size{MTRRFIX4K_D0000_SIZE};
                 auto const addr{MTRRFIX4K_D0000_ADDR + (size * i)};
                 auto const mask{MTRR_FIX_MASK << shft};
@@ -887,8 +887,8 @@ namespace example
         add_ia32_mtrr_fix4k_d8000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
-            bsl::safe_uintmax mtrr{};
-            bsl::safe_uintmax shft{};
+            bsl::safe_umx mtrr{};
+            bsl::safe_umx shft{};
 
             ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_D8000, mtrr);
             if (bsl::unlikely(!ret)) {
@@ -896,7 +896,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
+            for (bsl::safe_idx i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
                 auto const size{MTRRFIX4K_D8000_SIZE};
                 auto const addr{MTRRFIX4K_D8000_ADDR + (size * i)};
                 auto const mask{MTRR_FIX_MASK << shft};
@@ -926,8 +926,8 @@ namespace example
         add_ia32_mtrr_fix4k_e0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
-            bsl::safe_uintmax mtrr{};
-            bsl::safe_uintmax shft{};
+            bsl::safe_umx mtrr{};
+            bsl::safe_umx shft{};
 
             ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_E0000, mtrr);
             if (bsl::unlikely(!ret)) {
@@ -935,7 +935,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
+            for (bsl::safe_idx i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
                 auto const size{MTRRFIX4K_E0000_SIZE};
                 auto const addr{MTRRFIX4K_E0000_ADDR + (size * i)};
                 auto const mask{MTRR_FIX_MASK << shft};
@@ -965,8 +965,8 @@ namespace example
         add_ia32_mtrr_fix4k_e8000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
-            bsl::safe_uintmax mtrr{};
-            bsl::safe_uintmax shft{};
+            bsl::safe_umx mtrr{};
+            bsl::safe_umx shft{};
 
             ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_E8000, mtrr);
             if (bsl::unlikely(!ret)) {
@@ -974,7 +974,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
+            for (bsl::safe_idx i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
                 auto const size{MTRRFIX4K_E8000_SIZE};
                 auto const addr{MTRRFIX4K_E8000_ADDR + (size * i)};
                 auto const mask{MTRR_FIX_MASK << shft};
@@ -1004,8 +1004,8 @@ namespace example
         add_ia32_mtrr_fix4k_f0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
-            bsl::safe_uintmax mtrr{};
-            bsl::safe_uintmax shft{};
+            bsl::safe_umx mtrr{};
+            bsl::safe_umx shft{};
 
             ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_F0000, mtrr);
             if (bsl::unlikely(!ret)) {
@@ -1013,7 +1013,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
+            for (bsl::safe_idx i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
                 auto const size{MTRRFIX4K_F0000_SIZE};
                 auto const addr{MTRRFIX4K_F0000_ADDR + (size * i)};
                 auto const mask{MTRR_FIX_MASK << shft};
@@ -1043,8 +1043,8 @@ namespace example
         add_ia32_mtrr_fix4k_f8000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
-            bsl::safe_uintmax mtrr{};
-            bsl::safe_uintmax shft{};
+            bsl::safe_umx mtrr{};
+            bsl::safe_umx shft{};
 
             ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_F8000, mtrr);
             if (bsl::unlikely(!ret)) {
@@ -1052,7 +1052,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
+            for (bsl::safe_idx i{}; i < MTRR_FIX_MTRRS_PER_MSR; ++i) {
                 auto const size{MTRRFIX4K_F8000_SIZE};
                 auto const addr{MTRRFIX4K_F8000_ADDR + (size * i)};
                 auto const mask{MTRR_FIX_MASK << shft};
@@ -1078,9 +1078,9 @@ namespace example
         ///   @return Returns the base address portion of physbase
         ///
         [[nodiscard]] static constexpr auto
-        physbase_to_addr(bsl::safe_uintmax const &physbase) noexcept -> bsl::safe_uintmax
+        physbase_to_addr(bsl::safe_umx const &physbase) noexcept -> bsl::safe_umx
         {
-            constexpr bsl::safe_uintmax mask{bsl::to_umax(0xFFFFFFFFFFFFF000U)};
+            constexpr bsl::safe_umx mask{bsl::to_umx(0xFFFFFFFFFFFFF000U)};
             return physbase & mask;
         }
 
@@ -1095,11 +1095,11 @@ namespace example
         ///     logic defined in the manual.
         ///
         [[nodiscard]] static constexpr auto
-        physmask_to_size(                         // --
-            bsl::safe_uintmax const &physmask,    // --
-            bsl::safe_uintmax const &pas) noexcept -> bsl::safe_uintmax
+        physmask_to_size(                     // --
+            bsl::safe_umx const &physmask,    // --
+            bsl::safe_umx const &pas) noexcept -> bsl::safe_umx
         {
-            constexpr bsl::safe_uintmax mask{bsl::to_umax(0xFFFFFFFFFFFFF000U)};
+            constexpr bsl::safe_umx mask{bsl::to_umx(0xFFFFFFFFFFFFF000U)};
             return (~(physmask & mask) & ((bsl::ONE_UMAX << pas) - bsl::ONE_UMAX)) + bsl::ONE_UMAX;
         }
 
@@ -1111,9 +1111,9 @@ namespace example
         ///   @return Returns the memory type portion of physbase
         ///
         [[nodiscard]] static constexpr auto
-        physbase_to_type(bsl::safe_uintmax const &physbase) noexcept -> bsl::safe_uintmax
+        physbase_to_type(bsl::safe_umx const &physbase) noexcept -> bsl::safe_umx
         {
-            constexpr bsl::safe_uintmax mask{bsl::to_umax(0x00000000000000FFU)};
+            constexpr bsl::safe_umx mask{bsl::to_umx(0x00000000000000FFU)};
             return physbase & mask;
         }
 
@@ -1127,9 +1127,9 @@ namespace example
         ///     false otherwise.
         ///
         [[nodiscard]] static constexpr auto
-        physmask_to_valid(bsl::safe_uintmax const &physmask) noexcept -> bool
+        physmask_to_valid(bsl::safe_umx const &physmask) noexcept -> bool
         {
-            constexpr bsl::safe_uintmax mask{bsl::to_umax(0x0000000000000800U)};
+            constexpr bsl::safe_umx mask{bsl::to_umx(0x0000000000000800U)};
             return (physmask & mask).is_pos();
         }
 
@@ -1147,15 +1147,15 @@ namespace example
         [[nodiscard]] constexpr auto
         add_variable_range(
             syscall::bf_handle_t &handle,
-            bsl::safe_uint32 const &vcnt,
-            bsl::safe_uintmax const &pas) noexcept -> bsl::errc_type
+            bsl::safe_u32 const &vcnt,
+            bsl::safe_umx const &pas) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
-            bsl::safe_uintmax physbase{};
-            bsl::safe_uintmax physmask{};
+            bsl::safe_umx physbase{};
+            bsl::safe_umx physmask{};
 
             constexpr auto msrs_per_iteration{bsl::to_u32(2)};
-            for (bsl::safe_uint32 i{}; i < (vcnt * msrs_per_iteration); i += msrs_per_iteration) {
+            for (bsl::safe_idx i{}; i < (vcnt * msrs_per_iteration); i += msrs_per_iteration) {
                 auto ia32_mtrrphysbasen{IA32_MTRRPHYSBASE + i};
                 auto ia32_mtrrphysmaskn{IA32_MTRRPHYSMASK + i};
 
@@ -1208,10 +1208,10 @@ namespace example
         {
             bsl::errc_type ret{};
 
-            bsl::safe_uintmax rax{};
-            bsl::safe_uintmax rbx{};
-            bsl::safe_uintmax rcx{};
-            bsl::safe_uintmax rdx{};
+            bsl::safe_umx rax{};
+            bsl::safe_umx rbx{};
+            bsl::safe_umx rcx{};
+            bsl::safe_umx rdx{};
 
             /// NOTE:
             /// - Before we start, we need to ensure that the ranges are
@@ -1220,11 +1220,11 @@ namespace example
             ///   last in the list.
             ///
 
-            for (auto const elem : m_ranges) {
-                *elem.data = {
-                    bsl::safe_uintmax::failure(),
-                    bsl::safe_uintmax::failure(),
-                    bsl::safe_uintmax::failure(),
+            for (auto &mut_range : m_ranges) {
+                mut_range = {
+                    bsl::safe_umx::failure(),
+                    bsl::safe_umx::failure(),
+                    bsl::safe_umx::failure(),
                     false};
             }
 
@@ -1269,8 +1269,8 @@ namespace example
             ///   We have to ask the kernel for this information.
             ///
 
-            bsl::safe_uintmax cap{};
-            bsl::safe_uintmax deftype{};
+            bsl::safe_umx cap{};
+            bsl::safe_umx deftype{};
 
             ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRCAP, cap);
             if (bsl::unlikely(!ret)) {
@@ -1438,14 +1438,14 @@ namespace example
         [[nodiscard]] constexpr auto
         identity_map_4k(
             MAP_T &map,
-            bsl::safe_uintmax const &gpa,
-            bsl::safe_uintmax const &size,
-            bsl::safe_uintmax const &flags) noexcept -> bsl::errc_type
+            bsl::safe_umx const &gpa,
+            bsl::safe_umx const &size,
+            bsl::safe_umx const &flags) noexcept -> bsl::errc_type
         {
-            constexpr bsl::safe_uint64 page_size_4k{bsl::to_umax(0x001000U)};
+            constexpr bsl::safe_u64 page_size_4k{bsl::to_umx(0x001000U)};
 
             bsl::errc_type ret{};
-            bsl::safe_uintmax crsr{gpa};
+            bsl::safe_umx crsr{gpa};
 
             if (bsl::unlikely(!gpa)) {
                 bsl::error() << "guest physical address is invalid: "    // --
@@ -1483,7 +1483,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < m_ranges_count; ++i) {
+            for (bsl::safe_idx i{}; i < m_ranges_count; ++i) {
                 auto *const range{m_ranges.at_if(i)};
 
                 if (range->addr + range->size < crsr) {
@@ -1531,15 +1531,15 @@ namespace example
         [[nodiscard]] constexpr auto
         identity_map_2m(
             MAP_T &map,
-            bsl::safe_uintmax const &gpa,
-            bsl::safe_uintmax const &size,
-            bsl::safe_uintmax const &flags) noexcept -> bsl::errc_type
+            bsl::safe_umx const &gpa,
+            bsl::safe_umx const &size,
+            bsl::safe_umx const &flags) noexcept -> bsl::errc_type
         {
-            constexpr bsl::safe_uint64 page_size_4k{bsl::to_umax(0x001000U)};
-            constexpr bsl::safe_uint64 page_size_2m{bsl::to_umax(0x200000U)};
+            constexpr bsl::safe_u64 page_size_4k{bsl::to_umx(0x001000U)};
+            constexpr bsl::safe_u64 page_size_2m{bsl::to_umx(0x200000U)};
 
             bsl::errc_type ret{};
-            bsl::safe_uintmax crsr{gpa};
+            bsl::safe_umx crsr{gpa};
 
             if (bsl::unlikely(!gpa)) {
                 bsl::error() << "guest physical address is invalid: "    // --
@@ -1577,7 +1577,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            for (bsl::safe_uintmax i{}; i < m_ranges_count; ++i) {
+            for (bsl::safe_idx i{}; i < m_ranges_count; ++i) {
                 auto *const range{m_ranges.at_if(i)};
 
                 if (range->addr + range->size < crsr) {
@@ -1632,18 +1632,18 @@ namespace example
 
         /// <!-- description -->
         ///   @brief Returns the max physical address in the MTRRs on success,
-        ///     or bsl::safe_uintmax::failure() on failure.
+        ///     or bsl::safe_umx::failure() on failure.
         ///
         /// <!-- inputs/outputs -->
         ///   @return Returns the max physical address in the MTRRs on success,
-        ///     or bsl::safe_uintmax::failure() on failure.
+        ///     or bsl::safe_umx::failure() on failure.
         ///
         [[nodiscard]] constexpr auto
-        max_phys() noexcept -> bsl::safe_uintmax
+        max_phys() noexcept -> bsl::safe_umx
         {
             if (m_ranges_count.is_zero()) {
                 bsl::error() << "mtrrs has not been parsed yet\n" << bsl::here();
-                return bsl::safe_uintmax::failure();
+                return bsl::safe_umx::failure();
             }
 
             auto const *const range{m_ranges.at_if(m_ranges_count - bsl::ONE_UMAX)};
@@ -1684,12 +1684,12 @@ namespace example
             /// MTRRs
             ///
 
-            for (bsl::safe_uintmax i{}; i < m_ranges_count; ++i) {
+            for (bsl::safe_idx i{}; i < m_ranges_count; ++i) {
                 auto const *rowcolor{bsl::rst};
                 auto const *const range{m_ranges.at_if(i)};
 
-                bsl::safe_uintmax const srt{range->addr};
-                bsl::safe_uintmax const end{range->addr + range->size - bsl::ONE_UMAX};
+                bsl::safe_umx const srt{range->addr};
+                bsl::safe_umx const end{range->addr + range->size - bsl::ONE_UMAX};
 
                 if (MEMORY_TYPE_UC == range->type) {
                     rowcolor = bsl::blk;

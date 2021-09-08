@@ -50,15 +50,15 @@ namespace integration
     ///     by the main function to execute whenever a fast fail occurs.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the fail
+    ///   @param vsid the ID of the VS that generated the fail
     ///   @param fail_reason the exit reason associated with the fail
     ///
     extern "C" void
     fail_entry(
-        syscall::bf_uint16_t::value_type const vpsid,
+        syscall::bf_uint16_t::value_type const vsid,
         syscall::bf_status_t::value_type const fail_reason) noexcept
     {
-        bsl::discard(vpsid);
+        bsl::discard(vsid);
         bsl::discard(fail_reason);
 
         return syscall::bf_control_op_exit();
@@ -75,7 +75,7 @@ namespace integration
     extern "C" void
     ext_main_entry(bsl::uint32 const version) noexcept
     {
-        bsl::safe_uintmax hndl{};
+        bsl::safe_umx hndl{};
         syscall::bf_status_t ret{};
 
         if (bsl::unlikely(!syscall::bf_is_spec1_supported(bsl::to_u32(version)))) {

@@ -30,34 +30,34 @@ add_library(syscall)
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
     if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
         target_include_directories(syscall PUBLIC
-            include/cpp/x64/amd
-            src/cpp/x64/amd
+            include/x64/amd
+            src/x64/amd
         )
     endif()
 
     if(HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
         target_include_directories(syscall PUBLIC
-            include/cpp/x64/intel
-            src/cpp/x64/intel
+            include/x64/intel
+            src/x64/intel
         )
     endif()
 
     target_include_directories(syscall PUBLIC
-        include/cpp/x64
-        src/cpp/x64
+        include/x64
+        src/x64
     )
 endif()
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     target_include_directories(syscall PUBLIC
-        include/cpp/arm/aarch64
-        src/cpp/arm/aarch64
+        include/arm/aarch64
+        src/arm/aarch64
     )
 endif()
 
 target_include_directories(syscall PUBLIC
-    include/cpp
-    src/cpp
+    include
+    src
 )
 
 # ------------------------------------------------------------------------------
@@ -65,31 +65,31 @@ target_include_directories(syscall PUBLIC
 # ------------------------------------------------------------------------------
 
 list(APPEND HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/include/cpp/bf_constants.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/cpp/bf_types.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/cpp/bf_control_ops.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/cpp/bf_debug_ops.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/cpp/bf_syscall_impl.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/cpp/bf_syscall_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/bf_constants.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/bf_types.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bf_control_ops.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bf_debug_ops.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bf_syscall_impl.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bf_syscall_t.hpp
 )
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
     if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
         list(APPEND HEADERS
-            ${CMAKE_CURRENT_LIST_DIR}/include/cpp/x64/amd/bf_reg_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/include/x64/amd/bf_reg_t.hpp
         )
     endif()
 
     if(HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
         list(APPEND HEADERS
-            ${CMAKE_CURRENT_LIST_DIR}/include/cpp/x64/intel/bf_reg_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/include/x64/intel/bf_reg_t.hpp
         )
     endif()
 endif()
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     list(APPEND HEADERS
-        ${CMAKE_CURRENT_LIST_DIR}/include/cpp/arm/aarch64/bf_reg_t.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/include/arm/aarch64/bf_reg_t.hpp
     )
 endif()
 
@@ -109,18 +109,14 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
     hypervisor_target_source(syscall src/x64/bf_debug_op_dump_vm_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_debug_op_dump_vmexit_log_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_debug_op_dump_vp_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_debug_op_dump_vps_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_debug_op_dump_vs_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_debug_op_out_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_debug_op_write_c_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_debug_op_write_str_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_handle_op_close_handle_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_handle_op_open_handle_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_intrinsic_op_invept_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_intrinsic_op_invlpga_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_intrinsic_op_invvpid_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_intrinsic_op_rdmsr_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_intrinsic_op_wrmsr_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_mem_op_alloc_heap_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_mem_op_alloc_huge_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_mem_op_alloc_page_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_mem_op_free_huge_impl.S ${HEADERS})
@@ -161,23 +157,26 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
     hypervisor_target_source(syscall src/x64/bf_tls_thread_id_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_tls_vmid_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_tls_vpid_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_tls_vpsid_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_tls_vsid_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vm_op_create_vm_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vm_op_destroy_vm_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vm_op_map_direct_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vm_op_unmap_direct_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vm_op_unmap_direct_broadcast_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vp_op_create_vp_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vp_op_destroy_vp_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vp_op_migrate_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_advance_ip_and_run_current_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_advance_ip_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_clear_vps_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_create_vps_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_destroy_vps_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_init_as_root_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_promote_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_read_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_run_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_run_current_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_vps_op_write_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vs_op_advance_ip_and_run_current_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vs_op_advance_ip_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vs_op_clear_vs_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vs_op_create_vs_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vs_op_destroy_vs_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vs_op_init_as_root_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vs_op_promote_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vs_op_read_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vs_op_run_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vs_op_run_current_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vs_op_write_impl.S ${HEADERS})
 endif()
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
@@ -192,18 +191,14 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     hypervisor_target_source(syscall src/arm/aarch64/bf_debug_op_dump_vm_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_debug_op_dump_vmexit_log_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_debug_op_dump_vp_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_debug_op_dump_vps_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_debug_op_dump_vs_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_debug_op_out_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_debug_op_write_c_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_debug_op_write_str_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_handle_op_close_handle_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_handle_op_open_handle_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_intrinsic_op_invept_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_intrinsic_op_invlpga_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_intrinsic_op_invvpid_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_intrinsic_op_rdmsr_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_intrinsic_op_wrmsr_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_mem_op_alloc_heap_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_mem_op_alloc_huge_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_mem_op_alloc_page_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_mem_op_free_huge_impl.S ${HEADERS})
@@ -244,23 +239,26 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     hypervisor_target_source(syscall src/arm/aarch64/bf_tls_thread_id_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_tls_vmid_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_tls_vpid_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_tls_vpsid_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_tls_vsid_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_vm_op_create_vm_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_vm_op_destroy_vm_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vm_op_map_direct_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vm_op_unmap_direct_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vm_op_unmap_direct_broadcast_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_vp_op_create_vp_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_vp_op_destroy_vp_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/arm/aarch64/bf_vp_op_migrate_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_advance_ip_and_run_current_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_advance_ip_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_clear_vps_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_create_vps_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_destroy_vps_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_init_as_root_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_promote_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_read_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_run_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_run_current_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/arm/aarch64/bf_vps_op_write_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vs_op_advance_ip_and_run_current_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vs_op_advance_ip_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vs_op_clear_vs_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vs_op_create_vs_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vs_op_destroy_vs_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vs_op_init_as_root_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vs_op_promote_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vs_op_read_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vs_op_run_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vs_op_run_current_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/arm/aarch64/bf_vs_op_write_impl.S ${HEADERS})
 endif()
 
 # ------------------------------------------------------------------------------

@@ -44,7 +44,7 @@ namespace mk
     class dummy_vm_t final
     {
         /// @brief stores the ID associated with this vm_t
-        bsl::safe_uint16 m_id{bsl::safe_uint16::failure()};
+        bsl::safe_u16 m_id{bsl::safe_u16::failure()};
         /// @brief stores whether or not this vm_t is allocated.
         allocated_status_t m_allocated{allocated_status_t::deallocated};
         /// @brief stores whether or not this vm_t is active.
@@ -61,7 +61,7 @@ namespace mk
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        initialize(tls_t &tls, bsl::safe_uint16 const &i) noexcept -> bsl::errc_type
+        initialize(tls_t &tls, bsl::safe_u16 const &i) noexcept -> bsl::errc_type
         {
             if (tls.test_ret == errc_fail_initialize) {
                 return bsl::errc_failure;
@@ -80,8 +80,8 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
-        ///   @param ext_pool the extension pool to use
-        ///   @param vp_pool the VP pool to use
+        ///   @param ext_pool the ext_pool_t to use
+        ///   @param vp_pool the vp_pool_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -106,16 +106,16 @@ namespace mk
         ///   @brief Allocates this vm_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param ext_pool the extension pool to use
+        ///   @param ext_pool the ext_pool_t to use
         ///   @return Returns ID of the newly allocated vm
         ///
         [[nodiscard]] constexpr auto
-        allocate(tls_t &tls, ext_pool_t &ext_pool) noexcept -> bsl::safe_uint16
+        allocate(tls_t &tls, ext_pool_t &ext_pool) noexcept -> bsl::safe_u16
         {
             bsl::discard(ext_pool);
 
             if (!tls.test_ret) {
-                return bsl::safe_uint16::failure();
+                return bsl::safe_u16::failure();
             }
 
             m_allocated = allocated_status_t::allocated;
@@ -127,8 +127,8 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
-        ///   @param ext_pool the extension pool to use
-        ///   @param vp_pool the VP pool to use
+        ///   @param ext_pool the ext_pool_t to use
+        ///   @param vp_pool the vp_pool_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -221,16 +221,16 @@ namespace mk
         /// <!-- description -->
         ///   @brief Returns the ID of the first PP identified that this VM
         ///     is still active on. If the VM is inactive, this function
-        ///     returns bsl::safe_uint16::failure()
+        ///     returns bsl::safe_u16::failure()
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
         ///   @return Returns the ID of the first PP identified that this VM
         ///     is still active on. If the VM is inactive, this function
-        ///     returns bsl::safe_uint16::failure()
+        ///     returns bsl::safe_u16::failure()
         ///
         [[nodiscard]] constexpr auto
-        is_active(tls_t &tls) const noexcept -> bsl::safe_uint16
+        is_active(tls_t &tls) const noexcept -> bsl::safe_u16
         {
             bsl::discard(tls);
 
@@ -238,7 +238,7 @@ namespace mk
                 return {};
             }
 
-            return bsl::safe_uint16::failure();
+            return bsl::safe_u16::failure();
         }
 
         /// <!-- description -->

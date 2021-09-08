@@ -65,7 +65,7 @@ namespace example
         /// @brief stores a pointer to the npml4t
         npml4t_t *m_npml4t{};
         /// @brief stores the physical address of the npml4t
-        bsl::safe_uintmax m_npml4t_phys{bsl::safe_uintmax::failure()};
+        bsl::safe_umx m_npml4t_phys{bsl::safe_umx::failure()};
         /// @brief safe guards operations on the NPT.
         mutable spinlock m_npt_lock{};
 
@@ -78,10 +78,10 @@ namespace example
         ///   @return the NPML4T offset from the guest physical address
         ///
         [[nodiscard]] static constexpr auto
-        npml4to(bsl::safe_uintmax const &gpa) noexcept -> bsl::safe_uintmax
+        npml4to(bsl::safe_umx const &gpa) noexcept -> bsl::safe_umx
         {
-            constexpr bsl::safe_uintmax mask{bsl::to_umax(0x1FF)};
-            constexpr bsl::safe_uintmax shift{bsl::to_umax(39)};
+            constexpr bsl::safe_umx mask{bsl::to_umx(0x1FF)};
+            constexpr bsl::safe_umx shift{bsl::to_umx(39)};
             return (gpa >> shift) & mask;
         }
 
@@ -108,7 +108,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            npml4te->phys = (table_phys >> bsl::to_umax(HYPERVISOR_PAGE_SHIFT)).get();
+            npml4te->phys = (table_phys >> bsl::to_umx(HYPERVISOR_PAGE_SHIFT)).get();
             npml4te->p = bsl::ONE_UMAX.get();
             npml4te->rw = bsl::ONE_UMAX.get();
             npml4te->us = bsl::ONE_UMAX.get();
@@ -148,8 +148,8 @@ namespace example
         [[nodiscard]] constexpr auto
         get_npdpt(npml4te_t *const npml4te) noexcept -> npdpt_t *
         {
-            bsl::safe_uintmax entry_phys{npml4te->phys};
-            entry_phys <<= bsl::to_umax(HYPERVISOR_PAGE_SHIFT);
+            bsl::safe_umx entry_phys{npml4te->phys};
+            entry_phys <<= bsl::to_umx(HYPERVISOR_PAGE_SHIFT);
 
             return m_page_pool->template phys_to_virt<npdpt_t>(entry_phys);
         }
@@ -165,8 +165,8 @@ namespace example
         [[nodiscard]] constexpr auto
         get_npdpt(npml4te_t const *const npml4te) const noexcept -> npdpt_t const *
         {
-            bsl::safe_uintmax entry_phys{npml4te->phys};
-            entry_phys <<= bsl::to_umax(HYPERVISOR_PAGE_SHIFT);
+            bsl::safe_umx entry_phys{npml4te->phys};
+            entry_phys <<= bsl::to_umx(HYPERVISOR_PAGE_SHIFT);
 
             return m_page_pool->template phys_to_virt<npdpt_t const>(entry_phys);
         }
@@ -180,10 +180,10 @@ namespace example
         ///   @return the NPDPT offset from the guest physical address
         ///
         [[nodiscard]] static constexpr auto
-        npdpto(bsl::safe_uintmax const &gpa) noexcept -> bsl::safe_uintmax
+        npdpto(bsl::safe_umx const &gpa) noexcept -> bsl::safe_umx
         {
-            constexpr bsl::safe_uintmax mask{bsl::to_umax(0x1FF)};
-            constexpr bsl::safe_uintmax shift{bsl::to_umax(30)};
+            constexpr bsl::safe_umx mask{bsl::to_umx(0x1FF)};
+            constexpr bsl::safe_umx shift{bsl::to_umx(30)};
             return (gpa >> shift) & mask;
         }
 
@@ -210,7 +210,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            npdpte->phys = (table_phys >> bsl::to_umax(HYPERVISOR_PAGE_SHIFT)).get();
+            npdpte->phys = (table_phys >> bsl::to_umx(HYPERVISOR_PAGE_SHIFT)).get();
             npdpte->p = bsl::ONE_UMAX.get();
             npdpte->rw = bsl::ONE_UMAX.get();
             npdpte->us = bsl::ONE_UMAX.get();
@@ -250,8 +250,8 @@ namespace example
         [[nodiscard]] constexpr auto
         get_npdt(npdpte_t *const npdpte) noexcept -> npdt_t *
         {
-            bsl::safe_uintmax entry_phys{npdpte->phys};
-            entry_phys <<= bsl::to_umax(HYPERVISOR_PAGE_SHIFT);
+            bsl::safe_umx entry_phys{npdpte->phys};
+            entry_phys <<= bsl::to_umx(HYPERVISOR_PAGE_SHIFT);
 
             return m_page_pool->template phys_to_virt<npdt_t>(entry_phys);
         }
@@ -267,8 +267,8 @@ namespace example
         [[nodiscard]] constexpr auto
         get_npdt(npdpte_t const *const npdpte) const noexcept -> npdt_t const *
         {
-            bsl::safe_uintmax entry_phys{npdpte->phys};
-            entry_phys <<= bsl::to_umax(HYPERVISOR_PAGE_SHIFT);
+            bsl::safe_umx entry_phys{npdpte->phys};
+            entry_phys <<= bsl::to_umx(HYPERVISOR_PAGE_SHIFT);
 
             return m_page_pool->template phys_to_virt<npdt_t const>(entry_phys);
         }
@@ -282,10 +282,10 @@ namespace example
         ///   @return the NPDT offset from the guest physical address.
         ///
         [[nodiscard]] static constexpr auto
-        npdto(bsl::safe_uintmax const &gpa) noexcept -> bsl::safe_uintmax
+        npdto(bsl::safe_umx const &gpa) noexcept -> bsl::safe_umx
         {
-            constexpr bsl::safe_uintmax mask{bsl::to_umax(0x1FF)};
-            constexpr bsl::safe_uintmax shift{bsl::to_umax(21)};
+            constexpr bsl::safe_umx mask{bsl::to_umx(0x1FF)};
+            constexpr bsl::safe_umx shift{bsl::to_umx(21)};
             return (gpa >> shift) & mask;
         }
 
@@ -312,7 +312,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            npdte->phys = (table_phys >> bsl::to_umax(HYPERVISOR_PAGE_SHIFT)).get();
+            npdte->phys = (table_phys >> bsl::to_umx(HYPERVISOR_PAGE_SHIFT)).get();
             npdte->p = bsl::ONE_UMAX.get();
             npdte->rw = bsl::ONE_UMAX.get();
             npdte->us = bsl::ONE_UMAX.get();
@@ -343,8 +343,8 @@ namespace example
         [[nodiscard]] constexpr auto
         get_npt(npdte_t *const npdte) noexcept -> npt_t *
         {
-            bsl::safe_uintmax entry_phys{npdte->phys};
-            entry_phys <<= bsl::to_umax(HYPERVISOR_PAGE_SHIFT);
+            bsl::safe_umx entry_phys{npdte->phys};
+            entry_phys <<= bsl::to_umx(HYPERVISOR_PAGE_SHIFT);
 
             return m_page_pool->template phys_to_virt<npt_t>(entry_phys);
         }
@@ -360,8 +360,8 @@ namespace example
         [[nodiscard]] constexpr auto
         get_npt(npdte_t const *const npdte) const noexcept -> npt_t const *
         {
-            bsl::safe_uintmax entry_phys{npdte->phys};
-            entry_phys <<= bsl::to_umax(HYPERVISOR_PAGE_SHIFT);
+            bsl::safe_umx entry_phys{npdte->phys};
+            entry_phys <<= bsl::to_umx(HYPERVISOR_PAGE_SHIFT);
 
             return m_page_pool->template phys_to_virt<npt_t const>(entry_phys);
         }
@@ -375,10 +375,10 @@ namespace example
         ///   @return the NPT offset from the guest physical address
         ///
         [[nodiscard]] static constexpr auto
-        npto(bsl::safe_uintmax const &gpa) noexcept -> bsl::safe_uintmax
+        npto(bsl::safe_umx const &gpa) noexcept -> bsl::safe_umx
         {
-            constexpr bsl::safe_uintmax mask{bsl::to_umax(0x1FF)};
-            constexpr bsl::safe_uintmax shift{bsl::to_umax(12)};
+            constexpr bsl::safe_umx mask{bsl::to_umx(0x1FF)};
+            constexpr bsl::safe_umx shift{bsl::to_umx(12)};
             return (gpa >> shift) & mask;
         }
 
@@ -390,9 +390,9 @@ namespace example
         ///   @return Returns true if the provided address is page aligned
         ///
         [[nodiscard]] static constexpr auto
-        is_page_aligned(bsl::safe_uintmax const &addr) noexcept -> bool
+        is_page_aligned(bsl::safe_umx const &addr) noexcept -> bool
         {
-            return (addr & (bsl::to_umax(HYPERVISOR_PAGE_SIZE) - bsl::ONE_UMAX)) == bsl::ZERO_UMAX;
+            return (addr & (bsl::to_umx(HYPERVISOR_PAGE_SIZE) - bsl::ONE_UMAX)) == bsl::ZERO_UMAX;
         }
 
         /// <!-- description -->
@@ -419,7 +419,7 @@ namespace example
 
             m_page_pool->deallocate(m_npml4t);
             m_npml4t = {};
-            m_npml4t_phys = bsl::safe_uintmax::failure();
+            m_npml4t_phys = bsl::safe_umx::failure();
         }
 
     public:
@@ -486,7 +486,7 @@ namespace example
         ///   @return Returns the physical address of the PML4
         ///
         [[nodiscard]] constexpr auto
-        phys() const noexcept -> bsl::safe_uintmax const &
+        phys() const noexcept -> bsl::safe_umx const &
         {
             return m_npml4t_phys;
         }
@@ -506,10 +506,10 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         map_4k_page(
-            bsl::safe_uintmax const &page_gpa,
-            bsl::safe_uintmax const &page_spa,
-            bsl::safe_uintmax const &page_flags,
-            bsl::safe_uintmax const &page_type) noexcept -> bsl::errc_type
+            bsl::safe_umx const &page_gpa,
+            bsl::safe_umx const &page_spa,
+            bsl::safe_umx const &page_flags,
+            bsl::safe_umx const &page_type) noexcept -> bsl::errc_type
         {
             lock_guard lock{m_npt_lock};
 
@@ -652,7 +652,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            npte->phys = (page_spa >> bsl::to_umax(HYPERVISOR_PAGE_SHIFT)).get();
+            npte->phys = (page_spa >> bsl::to_umx(HYPERVISOR_PAGE_SHIFT)).get();
             npte->p = bsl::ONE_UMAX.get();
             npte->us = bsl::ONE_UMAX.get();
 
@@ -696,10 +696,10 @@ namespace example
         ///
         [[nodiscard]] constexpr auto
         map_2m_page(
-            bsl::safe_uintmax const &page_gpa,
-            bsl::safe_uintmax const &page_spa,
-            bsl::safe_uintmax const &page_flags,
-            bsl::safe_uintmax const &page_type) noexcept -> bsl::errc_type
+            bsl::safe_umx const &page_gpa,
+            bsl::safe_umx const &page_spa,
+            bsl::safe_umx const &page_flags,
+            bsl::safe_umx const &page_type) noexcept -> bsl::errc_type
         {
             lock_guard lock{m_npt_lock};
 
@@ -828,7 +828,7 @@ namespace example
                 return bsl::errc_failure;
             }
 
-            npdte->phys = (page_spa >> bsl::to_umax(HYPERVISOR_PAGE_SHIFT)).get();
+            npdte->phys = (page_spa >> bsl::to_umx(HYPERVISOR_PAGE_SHIFT)).get();
             npdte->p = bsl::ONE_UMAX.get();
             npdte->us = bsl::ONE_UMAX.get();
             npdte->ps = bsl::ONE_UMAX.get();

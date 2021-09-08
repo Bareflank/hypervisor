@@ -20,7 +20,7 @@ If a syscall returns BF_STATUS_FAILURE_UNKNOWN, it should be assumed that either
 
 # 4.1 Resource Creation
 
-Any syscall that creates a resource like bf_vm_op_create_vm, bf_vm_op_create_vp and bf_vm_op_create_vps will leave the internal state of the microkernel the way it was prior to an error. This includes if a hardware exception occurs while attempting to execute the syscall (excluding exceptions like a Machine Check which are unrecoverable by design). It is up to the extension to determine how to proceed. For example, if the extension is implementing guest support and a creation fails for whatever reason, the extension may choose to stop everything, or it may choose to continue the execution of any existing virtual machines and simply fail to create a new one.
+Any syscall that creates a resource like bf_vm_op_create_vm, bf_vm_op_create_vp and bf_vm_op_create_vs will leave the internal state of the microkernel the way it was prior to an error. This includes if a hardware exception occurs while attempting to execute the syscall (excluding exceptions like a Machine Check which are unrecoverable by design). It is up to the extension to determine how to proceed. For example, if the extension is implementing guest support and a creation fails for whatever reason, the extension may choose to stop everything, or it may choose to continue the execution of any existing virtual machines and simply fail to create a new one.
 
 # 4.2 Resource Destruction
 

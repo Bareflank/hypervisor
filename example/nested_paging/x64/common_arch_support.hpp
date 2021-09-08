@@ -36,7 +36,7 @@
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/touch.hpp>
-#include <bsl/unlikely_assert.hpp>
+#include <bsl/unlikely.hpp>
 
 namespace example
 {
@@ -45,20 +45,20 @@ namespace example
     ///
     /// <!-- inputs/outputs -->
     ///   @param handle the handle to use
-    ///   @param vpsid the ID of the VPS that caused the VMExit
+    ///   @param vsid the ID of the VS that caused the VMExit
     ///   @return Returns bsl::errc_success on success and bsl::errc_failure
     ///     on failure.
     ///
     [[nodiscard]] inline auto
-    handle_vmexit_cpuid(syscall::bf_handle_t &handle, bsl::safe_uint16 const &vpsid) noexcept
+    handle_vmexit_cpuid(syscall::bf_handle_t &handle, bsl::safe_u16 const &vsid) noexcept
         -> bsl::errc_type
     {
         bsl::errc_type ret{};
 
-        bsl::safe_uintmax rax{syscall::bf_tls_rax(handle)};
-        bsl::safe_uintmax rbx{syscall::bf_tls_rbx(handle)};
-        bsl::safe_uintmax rcx{syscall::bf_tls_rcx(handle)};
-        bsl::safe_uintmax rdx{syscall::bf_tls_rdx(handle)};
+        bsl::safe_umx rax{syscall::bf_tls_rax(handle)};
+        bsl::safe_umx rbx{syscall::bf_tls_rbx(handle)};
+        bsl::safe_umx rcx{syscall::bf_tls_rcx(handle)};
+        bsl::safe_umx rdx{syscall::bf_tls_rdx(handle)};
 
         /// NOTE:
         /// - Before we execute CPUID, we need to check to see if we have
@@ -76,20 +76,20 @@ namespace example
                     ///   the IP (as CPUID should not be executed again).
                     /// - From there, we can run the promote API, which will
                     ///   take the current state associated with the provided
-                    ///   VPS and promote it, effectively stopping the
+                    ///   VS and promote it, effectively stopping the
                     ///   hypervisor.
                     ///
 
                     syscall::bf_tls_set_rax(handle, bsl::ZERO_UMAX);
 
-                    ret = syscall::bf_vps_op_advance_ip(handle, vpsid);
-                    if (bsl::unlikely_assert(!ret)) {
+                    ret = syscall::bf_vs_op_advance_ip(handle, vsid);
+                    if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return ret;
                     }
 
-                    ret = syscall::bf_vps_op_promote(handle, vpsid);
-                    if (bsl::unlikely_assert(!ret)) {
+                    ret = syscall::bf_vs_op_promote(handle, vsid);
+                    if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return ret;
                     }
@@ -103,7 +103,7 @@ namespace example
                                  << bsl::grn << " now "                                 // --
                                  << bsl::rst << "in a vm (nested_paging example)\n";    // --
 
-                    if (vpsid + bsl::ONE_U16 == syscall::bf_tls_online_pps(handle)) {
+                    if (vsid + bsl::ONE_U16 == syscall::bf_tls_online_pps(handle)) {
                         bsl::print() << bsl::endl;
                         syscall::bf_debug_op_dump_page_pool();
                         bsl::print() << bsl::endl;

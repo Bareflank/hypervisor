@@ -41,7 +41,7 @@ namespace mk
     /// <!-- inputs/outputs -->
     ///   @param tls the current TLS block
     ///   @param ext the extension that made the syscall
-    ///   @param intrinsic the intrinsics to use
+    ///   @param intrinsic the intrinsic_t to use
     ///   @return Returns syscall::BF_STATUS_SUCCESS on success or an error
     ///     code on failure.
     ///

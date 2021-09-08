@@ -40,14 +40,14 @@ namespace integration
     ///   @brief Implements the VMExit entry function.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpsid the ID of the VPS that generated the VMExit
+    ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     void
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    vmexit_entry(bsl::uint16 const vpsid, bsl::uint64 const exit_reason) noexcept
+    vmexit_entry(bsl::uint16 const vsid, bsl::uint64 const exit_reason) noexcept
     {
-        bsl::discard(vpsid);
+        bsl::discard(vsid);
         bsl::discard(exit_reason);
 
         syscall::bf_control_op_exit();
@@ -78,7 +78,7 @@ namespace integration
     bootstrap_entry(bsl::uint16 const ppid) noexcept
     {
         bsl::errc_type ret{};
-        bsl::safe_uint16 vpid{};
+        bsl::safe_u16 vpid{};
 
         // create with invalid handle
         ret = syscall::bf_vp_op_create_vp({}, syscall::BF_ROOT_VMID, ppid, vpid);
@@ -104,7 +104,7 @@ namespace integration
         integration::verify(bsl::errc_failure == ret);
 
         // create all and prove that creating one more will fail
-        for (bsl::safe_uintmax i{}; i < HYPERVISOR_MAX_VPS; ++i) {
+        for (bsl::safe_idx i{}; i < HYPERVISOR_MAX_VS; ++i) {
             ret = syscall::bf_vp_op_create_vp(g_handle, syscall::BF_ROOT_VMID, ppid, vpid);
             integration::verify(bsl::errc_success == ret);
         }

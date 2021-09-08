@@ -25,6 +25,8 @@
 #ifndef MOCKS_GS_T_HPP
 #define MOCKS_GS_T_HPP
 
+#include <bsl/errc_type.hpp>
+
 namespace example
 {
     /// @class example::gs_t
@@ -35,7 +37,10 @@ namespace example
     ///     that are common for all architectures.
     ///
     struct gs_t final
-    {};
+    {
+        /// @brief tells certain mocks when to fail
+        bsl::errc_type test_ret;
+    };
 }
 
 #endif

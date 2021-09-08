@@ -150,11 +150,11 @@ ifneq ($(KERNELRELEASE),)
 	EXTRA_CFLAGS += -I$(src)/include
 	EXTRA_CFLAGS += -I$(src)/include/x64
 	EXTRA_CFLAGS += -I$(src)/include/std
-	EXTRA_CFLAGS += -I$(src)/include/platform_interface/c
+	EXTRA_CFLAGS += -I$(src)/include/platform_interface
 	EXTRA_CFLAGS += -I$(src)/../include
 	EXTRA_CFLAGS += -I$(src)/../include/x64/
-	EXTRA_CFLAGS += -I$(src)/../include/interface/c
-	EXTRA_CFLAGS += -I$(src)/../include/interface/c/x64
+	EXTRA_CFLAGS += -I$(src)/../include/interface
+	EXTRA_CFLAGS += -I$(src)/../include/interface/x64
 	EXTRA_CFLAGS += -I$(CMAKE_BINARY_DIR)/include
 
     EXTRA_AFLAGS += -I$(CMAKE_BINARY_DIR)/include
@@ -168,7 +168,7 @@ ifneq ($(KERNELRELEASE),)
 
 		EXTRA_CFLAGS += -I$(src)/include/x64/amd
 		EXTRA_CFLAGS += -I$(src)/../include/x64/amd
-		EXTRA_CFLAGS += -I$(src)/../include/interface/c/x64/amd
+		EXTRA_CFLAGS += -I$(src)/../include/interface/x64/amd
 	endif
 
 	ifneq (,$(findstring GenuineIntel,$(VENDOR_ID)))
@@ -182,7 +182,7 @@ ifneq ($(KERNELRELEASE),)
 
 		EXTRA_CFLAGS += -I$(src)/include/x64/intel
 		EXTRA_CFLAGS += -I$(src)/../include/x64/intel
-		EXTRA_CFLAGS += -I$(src)/../include/interface/c/x64/intel
+		EXTRA_CFLAGS += -I$(src)/../include/interface/x64/intel
 	endif
 
 else

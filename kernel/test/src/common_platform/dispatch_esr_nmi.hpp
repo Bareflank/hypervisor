@@ -38,7 +38,7 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param tls the current TLS block
-    ///   @param intrinsic the intrinsics to use
+    ///   @param intrinsic the intrinsic_t to use
     ///   @return Returns bsl::exit_success if the exception was handled,
     ///     bsl::exit_failure otherwise
     ///

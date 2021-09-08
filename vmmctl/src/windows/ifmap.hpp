@@ -69,7 +69,7 @@ namespace vmmctl
         /// @brief stores a pointer to the file that was opened.
         void *m_data{};
         /// @brief stores the number of bytes for the open file
-        bsl::safe_uintmax m_size{};
+        bsl::safe_umx m_size{};
 
         /// <!-- description -->
         ///   @brief Swaps *this with other
@@ -90,10 +90,10 @@ namespace vmmctl
     public:
         /// @brief alias for: void
         using value_type = void;
-        /// @brief alias for: safe_uintmax
-        using size_type = bsl::safe_uintmax;
-        /// @brief alias for: safe_uintmax
-        using difference_type = bsl::safe_uintmax;
+        /// @brief alias for: safe_umx
+        using size_type = bsl::safe_umx;
+        /// @brief alias for: safe_umx
+        using difference_type = bsl::safe_umx;
         /// @brief alias for: void *
         using pointer_type = void *;
         /// @brief alias for: void const *
@@ -159,7 +159,7 @@ namespace vmmctl
                 return;
             }
 
-            m_size = bsl::to_umax(static_cast<bsl::uintmax>(size));
+            m_size = bsl::to_umx(static_cast<bsl::uintmx>(size));
             mut_release_on_error.ignore();
         }
 
@@ -310,7 +310,7 @@ namespace vmmctl
         ///     mapped.
         ///
         [[nodiscard]] constexpr auto
-        size() const noexcept -> bsl::safe_uintmax
+        size() const noexcept -> bsl::safe_umx
         {
             return m_size;
         }

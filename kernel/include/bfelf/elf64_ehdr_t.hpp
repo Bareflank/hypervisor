@@ -37,25 +37,25 @@
 namespace bfelf
 {
     /// @brief e_ident[EI_MAG0] contains 0x7FU for file identification
-    constexpr auto EI_MAG0{0_umax};
+    constexpr auto EI_MAG0{0_idx};
     /// @brief e_ident[EI_MAG1] contains 0x45U for file identification
-    constexpr auto EI_MAG1{1_umax};
+    constexpr auto EI_MAG1{1_idx};
     /// @brief e_ident[EI_MAG2] contains 0x4CU for file identification
-    constexpr auto EI_MAG2{2_umax};
+    constexpr auto EI_MAG2{2_idx};
     /// @brief e_ident[EI_MAG3] contains 0x46U for file identification
-    constexpr auto EI_MAG3{3_umax};
+    constexpr auto EI_MAG3{3_idx};
     /// @brief e_ident[EI_CLASS] identifies if the file is 32bit or 64 bit
-    constexpr auto EI_CLASS{4_umax};
+    constexpr auto EI_CLASS{4_idx};
     /// @brief e_ident[EI_DATA] specifies the data bit encoding of the file
-    constexpr auto EI_DATA{5_umax};
+    constexpr auto EI_DATA{5_idx};
     /// @brief e_ident[EI_VERSION] identifies the version of the file
-    constexpr auto EI_VERSION{6_umax};
+    constexpr auto EI_VERSION{6_idx};
     /// @brief e_ident[EI_OSABI] identifies file's ABI scheme
-    constexpr auto EI_OSABI{7_umax};
+    constexpr auto EI_OSABI{7_idx};
     /// @brief e_ident[EI_ABIVERSION] identifies file's ABI version
-    constexpr auto EI_ABIVERSION{8_umax};
+    constexpr auto EI_ABIVERSION{8_idx};
     /// @brief defines the size of e_ident
-    constexpr auto EI_NIDENT{16_umax};
+    constexpr auto EI_NIDENT{16_idx};
 
     /// @brief defines the expected e_ident[EI_MAG0] value
     constexpr auto ELFMAG0{0x7F_u8};

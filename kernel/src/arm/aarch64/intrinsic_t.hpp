@@ -52,7 +52,7 @@ namespace mk
         ///   @return Returns the value of tp (TLS pointer)
         ///
         [[nodiscard]] static constexpr auto
-        tp() noexcept -> bsl::safe_uint64
+        tp() noexcept -> bsl::safe_u64
         {
             if (bsl::is_constant_evaluated()) {
                 return {};
@@ -68,7 +68,7 @@ namespace mk
         ///   @param val the value to set tp (TLS pointer) to
         ///
         static constexpr void
-        set_tp(bsl::safe_uint64 const &val) noexcept
+        set_tp(bsl::safe_u64 const &val) noexcept
         {
             if (bsl::is_constant_evaluated()) {
                 return;
