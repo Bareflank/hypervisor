@@ -37,21 +37,9 @@ namespace mk
     extern "C"
     {
         /// @brief stores a pointer to the debug ring provided by the loader
-        // NOLINTNEXTLINE(bsl-var-braced-init)
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
         extern loader::debug_ring_t *g_pmut_mut_debug_ring;
     }
-
-    /// NOTE:
-    /// - There are a lot of Clang Tidy exceptions here. The rules that have
-    ///   exceptions are all self imposed to ensure that safe integrals are
-    ///   used wherever possible as the compiler will remove the overhead
-    ///   when it is not needed, so they are almost zero cost. In this case
-    ///   however, the debug ring implements the debugging logic that the
-    ///   safe integral relies on, which means that it cannot use safe
-    ///   integrals in it's implementation. This is, however, still compliant
-    ///   as fixed types are used and overflow has been checked and verified
-    ///   to never occur.
-    ///
 
     /// <!-- description -->
     ///   @brief Outputs a character to the serial port.
@@ -59,15 +47,12 @@ namespace mk
     /// <!-- inputs/outputs -->
     ///   @param c the character to output
     ///
-    constexpr void
+    extern "C" constexpr void
     debug_ring_write(bsl::char_type const c) noexcept
     {
-        // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
         bsl::uintmx mut_epos{g_pmut_mut_debug_ring->epos};
-        // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
         bsl::uintmx mut_spos{g_pmut_mut_debug_ring->spos};
 
-        // NOLINTNEXTLINE(bsl-types-fixed-width-ints-arithmetic-check)
         if (!(g_pmut_mut_debug_ring->buf.size() > mut_epos)) {
             mut_epos = {};
         }
@@ -78,7 +63,6 @@ namespace mk
         *g_pmut_mut_debug_ring->buf.at_if(mut_epos) = c;
         ++mut_epos;
 
-        // NOLINTNEXTLINE(bsl-types-fixed-width-ints-arithmetic-check)
         if (!(g_pmut_mut_debug_ring->buf.size() > mut_epos)) {
             mut_epos = {};
         }
@@ -89,7 +73,6 @@ namespace mk
         if (mut_epos == mut_spos) {
             ++mut_spos;
 
-            // NOLINTNEXTLINE(bsl-types-fixed-width-ints-arithmetic-check)
             if (!(g_pmut_mut_debug_ring->buf.size() > mut_spos)) {
                 mut_spos = {};
             }

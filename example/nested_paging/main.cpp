@@ -44,8 +44,7 @@ namespace example
     ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
-    void
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+    extern "C" void
     vmexit_entry(bsl::uint16 const vsid, bsl::uint64 const exit_reason) noexcept
     {
         vmexit(g_handle, vsid, exit_reason);
@@ -67,8 +66,7 @@ namespace example
     /// <!-- inputs/outputs -->
     ///   @param fail_reason the exit reason associated with the fail
     ///
-    void
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+    extern "C" void
     fail_entry(syscall::bf_status_t::value_type const fail_reason) noexcept
     {
         bsl::discard(fail_reason);
@@ -113,8 +111,7 @@ namespace example
     /// <!-- inputs/outputs -->
     ///   @param ppid the physical process to bootstrap
     ///
-    void
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+    extern "C" void
     bootstrap_entry(bsl::uint16 const ppid) noexcept
     {
         bsl::errc_type ret{};

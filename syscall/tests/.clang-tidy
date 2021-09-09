@@ -23,9 +23,6 @@ Checks:
   '
     -*,
     bsl-*,
-      -bsl-lambda-implicit-capture,
-      -bsl-literals-user-defined,
-      -bsl-template-generic-param,
     bugprone-*,
       -bugprone-branch-clone,
     cert-*,
@@ -37,12 +34,13 @@ Checks:
       -clang-analyzer-core.NonNullParamChecker,
       -clang-analyzer-cplusplus.NewDelete,
     cppcoreguidelines-*,
+      -cppcoreguidelines-avoid-magic-numbers,
+      -cppcoreguidelines-pro-type-union-access,
       -cppcoreguidelines-avoid-non-const-global-variables,
     hicpp-*,
       -hicpp-function-size,
     misc-*,
       -misc-misplaced-const,
-      -misc-non-private-member-variables-in-classes,
     modernize-*,
       -modernize-use-default-member-init,
     performance-*,
@@ -50,7 +48,8 @@ Checks:
       -readability-redundant-member-init,
       -readability-avoid-const-params-in-decls,
       -readability-static-accessed-through-instance,
-      -readability-function-size
+      -readability-function-size,
+      -readability-magic-numbers
   '
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'

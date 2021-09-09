@@ -42,7 +42,7 @@ namespace lib
         bsl::uint16 ppid;
         /// @brief stores a pointer to the active root page table
         void *active_rpt;
-        /// @brief tells certain MOCK when to fail
+        /// @brief tells certain mocks when to fail
         bsl::errc_type test_ret;
     };
 }

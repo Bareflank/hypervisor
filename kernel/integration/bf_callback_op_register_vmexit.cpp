@@ -43,8 +43,7 @@ namespace integration
     ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
-    void
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+    extern "C" void
     vmexit_entry(bsl::uint16 const vsid, bsl::uint64 const exit_reason) noexcept
     {
         bsl::discard(vsid);
