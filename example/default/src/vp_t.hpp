@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MOCKS_VP_T_HPP
-#define MOCKS_VP_T_HPP
+#ifndef VP_T_HPP
+#define VP_T_HPP
 
 #include <allocated_status_t.hpp>
 #include <bf_syscall_t.hpp>

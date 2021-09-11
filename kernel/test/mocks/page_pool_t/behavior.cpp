@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../MOCK/page_pool_t.hpp"
+#include "../../../mocks/page_pool_t.hpp"
 
 #include <ext_tcb_t.hpp>
 #include <page_t.hpp>

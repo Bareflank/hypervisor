@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../MOCK/huge_pool_t.hpp"
+#include "../../../mocks/huge_pool_t.hpp"
 
 #include <bsl/convert.hpp>
 #include <bsl/ut.hpp>

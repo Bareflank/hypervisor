@@ -42,8 +42,7 @@ namespace integration
     /// <!-- inputs/outputs -->
     ///   @param fail_reason the exit reason associated with the fail
     ///
-    void
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+    extern "C" void
     fail_entry(syscall::bf_status_t::value_type const fail_reason) noexcept
     {
         bsl::discard(fail_reason);

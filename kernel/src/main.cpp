@@ -46,39 +46,51 @@
 namespace mk
 {
     /// @brief stores the TLS blocks used by the microkernel.
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     extern "C" constinit bsl::array<tls_t, HYPERVISOR_MAX_PPS.get()> g_mut_tls_blocks{};
 
     /// @brief stores a pointer to the debug ring provided by the loader
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     extern "C" constinit loader::debug_ring_t *g_pmut_mut_debug_ring{};
 
     /// @brief stores the vmexit log used by the microkernel
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit inline vmexit_log_t g_mut_vmexit_log{};
 
     /// @brief stores the page_pool_t used by the microkernel
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit inline page_pool_t g_mut_page_pool{};
 
     /// @brief stores the huge pool used by the microkernel
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit inline huge_pool_t g_mut_huge_pool{};
 
     /// @brief stores the intrinsics used by the microkernel
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit inline intrinsic_t g_mut_intrinsic{};
 
     /// @brief stores the vm_pool_t used by the microkernel
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit inline vm_pool_t g_mut_vm_pool{};
 
     /// @brief stores the vp_pool_t used by the microkernel
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit inline vp_pool_t g_mut_vp_pool{};
 
     /// @brief stores the vs_pool_t used by the microkernel
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit inline vs_pool_t g_mut_vs_pool{};
 
     /// @brief stores the ext pool used by the microkernel
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit inline ext_pool_t g_mut_ext_pool{};
 
     /// @brief stores the system RPT provided by the loader
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit inline root_page_table_t g_mut_system_rpt{};
 
     /// @brief stores the microkernel's main class
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit inline mk_main_t g_mut_mk_main{};
 
     /// <!-- description -->

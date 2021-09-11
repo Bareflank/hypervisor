@@ -67,7 +67,7 @@ namespace syscall
     ///
 
     // -------------------------------------------------------------------------
-    // global variables used by the impl MOCK
+    // global variables used by the impl mocks
     // -------------------------------------------------------------------------
 
     /// @brief stores the data to return for an API

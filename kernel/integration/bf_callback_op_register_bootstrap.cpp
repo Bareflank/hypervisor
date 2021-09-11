@@ -42,8 +42,7 @@ namespace integration
     /// <!-- inputs/outputs -->
     ///   @param ppid the physical process to bootstrap
     ///
-    void
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+    extern "C" void
     bootstrap_entry(bsl::uint16 const ppid) noexcept
     {
         bsl::discard(ppid);

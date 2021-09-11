@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../MOCK/lock_guard_t.hpp"
+#include "../../../mocks/lock_guard_t.hpp"
 
 #include <spinlock_t.hpp>
 

@@ -99,11 +99,6 @@ namespace example
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic) noexcept
         {
-            /// NOTE:
-            /// - Initialize all of the vp_t's in the pool and give them
-            ///   each a unique ID.
-            ///
-
             for (bsl::safe_idx mut_i{}; mut_i < m_pool.size(); ++mut_i) {
                 m_pool.at_if(mut_i)->initialize(gs, tls, sys, intrinsic, bsl::to_u16(mut_i));
             }
@@ -125,10 +120,6 @@ namespace example
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic) noexcept
         {
-            /// NOTE:
-            /// - Release all of the vp_t's in the pool
-            ///
-
             for (auto &mut_vp : m_pool) {
                 mut_vp.release(gs, tls, sys, intrinsic);
             }

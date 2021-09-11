@@ -84,7 +84,7 @@ namespace example
         ///   plan to add guest support with your extensions.
         ///
 
-        auto const vmid{syscall::BF_ROOT_VMID};
+        constexpr auto vmid{syscall::BF_ROOT_VMID};
 
         /// NOTE:
         /// - The VP in this simple example does nothing, but we still need
