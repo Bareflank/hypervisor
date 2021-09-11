@@ -70,10 +70,12 @@ namespace mk
         constexpr void
         initialize(bsl::safe_u16 const &i) noexcept
         {
+            bsl::expects(this->id() == syscall::BF_INVALID_ID);
+
             bsl::expects(i.is_valid_and_checked());
             bsl::expects(i != syscall::BF_INVALID_ID);
 
-            m_id = i;
+            m_id = ~i;
         }
 
         /// <!-- description -->
@@ -93,11 +95,10 @@ namespace mk
         ///   @return Returns the ID of this vp_t
         ///
         [[nodiscard]] constexpr auto
-        id() const noexcept -> bsl::safe_u16 const &
+        id() const noexcept -> bsl::safe_u16
         {
             bsl::ensures(m_id.is_valid_and_checked());
-            bsl::ensures(m_id != syscall::BF_INVALID_ID);
-            return m_id;
+            return ~m_id;
         }
 
         /// <!-- description -->
@@ -111,7 +112,9 @@ namespace mk
         [[nodiscard]] constexpr auto
         allocate(bsl::safe_u16 const &vmid, bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
         {
-            bsl::expects(m_allocated != allocated_status_t::allocated);
+            bsl::expects(this->id() != syscall::BF_INVALID_ID);
+            bsl::expects(allocated_status_t::deallocated == m_allocated);
+
             bsl::expects(vmid.is_valid_and_checked());
             bsl::expects(vmid != syscall::BF_INVALID_ID);
             bsl::expects(ppid.is_valid_and_checked());
@@ -130,7 +133,6 @@ namespace mk
         constexpr void
         deallocate() noexcept
         {
-            bsl::expects(m_allocated != allocated_status_t::deallocated);
             bsl::expects(this->is_active().is_invalid());
 
             m_assigned_ppid = {};
@@ -175,7 +177,7 @@ namespace mk
             bsl::expects(syscall::BF_INVALID_ID == mut_tls.active_vpid);
 
             m_active_ppid = ~bsl::to_u16(mut_tls.ppid);
-            mut_tls.active_vpid = m_id.get();
+            mut_tls.active_vpid = this->id().get();
         }
 
         /// <!-- description -->
@@ -188,7 +190,7 @@ namespace mk
         set_inactive(tls_t &mut_tls) noexcept
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
-            bsl::expects(m_id == mut_tls.active_vpid);
+            bsl::expects(this->id() == mut_tls.active_vpid);
 
             m_active_ppid = {};
             mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
@@ -284,7 +286,7 @@ namespace mk
             }
 
             bsl::print() << bsl::mag << "vp [";
-            bsl::print() << bsl::rst << bsl::hex(m_id);
+            bsl::print() << bsl::rst << bsl::hex(this->id());
             bsl::print() << bsl::mag << "] dump: ";
             bsl::print() << bsl::rst << bsl::endl;
 

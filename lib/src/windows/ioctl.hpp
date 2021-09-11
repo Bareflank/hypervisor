@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef VMMCTL_IOCTL_WINDOWS_HPP
-#define VMMCTL_IOCTL_WINDOWS_HPP
+#ifndef LIB_IOCTL_HPP
+#define LIB_IOCTL_HPP
 
 // clang-format off
 
@@ -46,9 +46,9 @@
 #include <bsl/swap.hpp>
 #include <bsl/unlikely.hpp>
 
-namespace vmmctl
+namespace lib
 {
-    /// @class vmmctl::ioctl
+    /// @class lib::ioctl
     ///
     /// <!-- description -->
     ///   @brief Executes IOCTL commands to a driver.
@@ -60,7 +60,7 @@ namespace vmmctl
 
     public:
         /// <!-- description -->
-        ///   @brief Creates a vmmctl::ioctl that can be used to communicate
+        ///   @brief Creates a lib::ioctl that can be used to communicate
         ///     with a device driver through an IOCTL interface.
         ///
         /// <!-- inputs/outputs -->
@@ -148,16 +148,24 @@ namespace vmmctl
         }
 
         /// <!-- description -->
+        ///   @brief Creates a lib::ioctl that can be used to communicate
+        ///     with a device driver through an IOCTL interface.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param hndl the handle to an existing IOCTL to use.
+        ///
+        explicit constexpr ioctl(HANDLE const hndl) noexcept
+        {
+            bsl::expects(nullptr != hndl);
+            m_hndl = hndl;
+        }
+
+        /// <!-- description -->
         ///   @brief Destructor
         ///
         constexpr ~ioctl() noexcept
         {
-            if (bsl::unlikely(nullptr != m_hndl)) {
-                bsl::discard(CloseHandle(m_hndl));
-            }
-            else {
-                bsl::touch();
-            }
+            this->close();
         }
         /// <!-- description -->
         ///   @brief copy constructor
@@ -194,6 +202,22 @@ namespace vmmctl
         [[maybe_unused]] constexpr auto operator=(ioctl &&mut_o) &noexcept -> ioctl & = delete;
 
         /// <!-- description -->
+        ///   @brief Closes the IOCTL
+        ///
+        constexpr void
+        // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
+        close() noexcept
+        {
+            if (bsl::unlikely(nullptr != m_hndl)) {
+                bsl::discard(CloseHandle(m_hndl));
+                m_hndl = nullptr;
+            }
+            else {
+                bsl::touch();
+            }
+        }
+
+        /// <!-- description -->
         ///   @brief Returns true if the ioctl has been opened, false
         ///     otherwise.
         ///
@@ -208,191 +232,136 @@ namespace vmmctl
         }
 
         /// <!-- description -->
-        ///   @brief Returns is_open()
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return Returns is_open()
-        ///
-        [[nodiscard]] explicit constexpr operator bool() const noexcept
-        {
-            return this->is_open();
-        }
-
-        /// <!-- description -->
         ///   @brief Sends a request to the driver without read or writing
         ///     data.
         ///
         /// <!-- inputs/outputs -->
         ///   @param req the request
-        ///   @return Returns true if the IOCTL succeeded, false otherwise.
+        ///   @return Returns a negative error code on failure, or
+        ///     something 0 or positive on success.
         ///
         [[nodiscard]] constexpr auto
-        send(bsl::safe_umx const &req) const noexcept -> bool
+        // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
+        send(bsl::safe_umx const &req) const noexcept -> bsl::safe_i64
         {
-            if (bsl::unlikely(nullptr == m_hndl)) {
-                bsl::error() << "failed to send, ioctl not properly initialized\n";
-                return false;
-            }
-
-            auto const req32{bsl::to_u32(req)};
-            if (bsl::unlikely(req32.is_invalid())) {
-                bsl::error() << "invalid request: " << bsl::hex(req) << bsl::endl << bsl::here();
-                return false;
-            }
-
             DWORD bytes{};
+            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
+
             auto const ret{
                 DeviceIoControl(m_hndl, req32.get(), nullptr, 0, nullptr, 0, &bytes, nullptr)};
 
             if (bsl::unlikely(!ret)) {
                 bsl::error() << "DeviceIoControl failed\n";
-                return false;
+                return bsl::safe_i64::magic_neg_1();
             }
 
-            return true;
+            return bsl::safe_i64::magic_0();
         }
 
         /// <!-- description -->
         ///   @brief Reads data from the device driver
         ///
         /// <!-- inputs/outputs -->
+        ///   @tparam T the type of data to read
         ///   @param req the request
         ///   @param data a pointer to read data to
-        ///   @param size the size of the buffer being read to
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
+        template<typename T>
         [[nodiscard]] constexpr auto
-        read_data(bsl::safe_umx const &req, void *const data, bsl::safe_umx const &size)
-            const noexcept -> bool
+        // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
+        read(bsl::safe_umx const &req, T *const pmut_data) const noexcept -> bsl::safe_i64
         {
-            if (bsl::unlikely(nullptr == m_hndl)) {
-                bsl::error() << "failed to read, ioctl not properly initialized\n";
-                return false;
-            }
+            DWORD bytes{};
+            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
+            bsl::expects(nullptr != pmut_data);
 
             auto const req32{bsl::to_u32(req)};
-            if (bsl::unlikely(req32.is_invalid())) {
-                bsl::error() << "invalid request: " << bsl::hex(req) << bsl::endl << bsl::here();
-                return false;
-            }
+            bsl::expects(req32.is_invalid());
 
-            if (bsl::unlikely(nullptr == data)) {
-                bsl::error() << "invalid data: " << data << bsl::endl << bsl::here();
-                return false;
-            }
+            auto const size32{bsl::to_u32(sizeof(T))};
+            bsl::expects(size32.is_invalid());
 
-            auto const size32{bsl::to_u32(size)};
-            if (bsl::unlikely(size32.is_invalid())) {
-                bsl::error() << "invalid size: " << bsl::hex(size) << bsl::endl << bsl::here();
-                return false;
-            }
-
-            DWORD bytes{};
             auto const ret{DeviceIoControl(
-                m_hndl, req32.get(), nullptr, 0, data, size32.get(), &bytes, nullptr)};
+                m_hndl, req32.get(), nullptr, 0, pmut_data, size32.get(), &bytes, nullptr)};
 
             if (bsl::unlikely(!ret)) {
                 bsl::error() << "DeviceIoControl failed\n";
-                return false;
+                return bsl::safe_i64::magic_neg_1();
             }
 
-            return true;
+            return bsl::safe_i64::magic_0();
         }
 
         /// <!-- description -->
         ///   @brief Writes data to the device driver
         ///
         /// <!-- inputs/outputs -->
+        ///   @tparam T the type of data to write
         ///   @param req the request
         ///   @param data a pointer to write data from
-        ///   @param size the size of the buffer being written from
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
+        template<typename T>
         [[nodiscard]] constexpr auto
-        write_data(bsl::safe_umx const &req, void const *const data, bsl::safe_umx const &size)
-            const noexcept -> bool
+        // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
+        write(bsl::safe_umx const &req, T const *const data) const noexcept -> bsl::safe_i64
         {
-            void *const ptr{const_cast<void *>(data)};
-
-            if (bsl::unlikely(nullptr == m_hndl)) {
-                bsl::error() << "failed to write, ioctl not properly initialized\n";
-                return false;
-            }
-
-            auto const req32{bsl::to_u32(req)};
-            if (bsl::unlikely(req32.is_invalid())) {
-                bsl::error() << "invalid request: " << bsl::hex(req) << bsl::endl << bsl::here();
-                return false;
-            }
-
-            if (bsl::unlikely(nullptr == data)) {
-                bsl::error() << "invalid data: " << data << bsl::endl << bsl::here();
-                return false;
-            }
-
-            auto const size32{bsl::to_u32(size)};
-            if (bsl::unlikely(size32.is_invalid())) {
-                bsl::error() << "invalid size: " << bsl::hex(size) << bsl::endl << bsl::here();
-                return false;
-            }
+            void *const pmut_ptr{const_cast<void *>(data)};
 
             DWORD bytes{};
+            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
+            bsl::expects(nullptr != pmut_data);
+
+            auto const req32{bsl::to_u32(req)};
+            bsl::expects(req32.is_invalid());
+
+            auto const size32{bsl::to_u32(sizeof(T))};
+            bsl::expects(size32.is_invalid());
+
             auto const ret{DeviceIoControl(
-                m_hndl, req32.get(), ptr, size32.get(), nullptr, 0, &bytes, nullptr)};
+                m_hndl, req32.get(), pmut_ptr, size32.get(), nullptr, 0, &bytes, nullptr)};
 
             if (bsl::unlikely(!ret)) {
                 bsl::error() << "DeviceIoControl failed\n";
-                return false;
+                return bsl::safe_i64::magic_neg_1();
             }
 
-            return true;
+            return bsl::safe_i64::magic_0();
         }
 
         /// <!-- description -->
         ///   @brief Reads/writes data from/to the device driver
         ///
         /// <!-- inputs/outputs -->
+        ///   @tparam T the type of data to read/write
         ///   @param req the request
         ///   @param data a pointer to read/write data to/from
-        ///   @param size the size of the buffer being read/written to/from
         ///   @return Returns true if the IOCTL succeeded, false otherwise.
         ///
+        template<typename T>
         [[nodiscard]] constexpr auto
-        read_write_data(bsl::safe_umx const &req, void *const data, bsl::safe_umx const &size)
-            const noexcept -> bool
+        read_write(bsl::safe_umx const &req, T *const data) const noexcept -> bsl::safe_i64
         {
-            if (bsl::unlikely(nullptr == m_hndl)) {
-                bsl::error() << "failed to read/write, ioctl not properly initialized\n";
-                return false;
-            }
+            DWORD bytes{};
+            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
+            bsl::expects(nullptr != pmut_data);
 
             auto const req32{bsl::to_u32(req)};
-            if (bsl::unlikely(req32.is_invalid())) {
-                bsl::error() << "invalid request: " << bsl::hex(req) << bsl::endl << bsl::here();
-                return false;
-            }
+            bsl::expects(req32.is_invalid());
 
-            if (bsl::unlikely(nullptr == data)) {
-                bsl::error() << "invalid data: " << data << bsl::endl << bsl::here();
-                return false;
-            }
+            auto const size32{bsl::to_u32(sizeof(T))};
+            bsl::expects(size32.is_invalid());
 
-            auto const size32{bsl::to_u32(size)};
-            if (bsl::unlikely(size32.is_invalid())) {
-                bsl::error() << "invalid size: " << bsl::hex(size) << bsl::endl << bsl::here();
-                return false;
-            }
-
-            DWORD bytes{};
             auto const ret{DeviceIoControl(
                 m_hndl, req32.get(), data, size32.get(), data, size32.get(), &bytes, nullptr)};
 
             if (bsl::unlikely(!ret)) {
                 bsl::error() << "DeviceIoControl failed\n";
-                return false;
+                return bsl::safe_i64::magic_neg_1();
             }
 
-            return true;
+            return bsl::safe_i64::magic_0();
         }
     };
 }

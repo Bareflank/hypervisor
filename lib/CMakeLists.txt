@@ -30,4 +30,12 @@ add_library(lib INTERFACE)
 target_include_directories(lib INTERFACE
     include
     src
+    $<$<PLATFORM_ID:Linux>:${CMAKE_CURRENT_LIST_DIR}/src/linux>
+    $<$<PLATFORM_ID:Windows>:${CMAKE_CURRENT_LIST_DIR}/src/windows>
+)
+
+target_link_libraries(lib INTERFACE
+    bsl
+    $<$<PLATFORM_ID:Windows>:SetupAPI>
+    $<$<PLATFORM_ID:Windows>:libcmt.lib>
 )

@@ -120,7 +120,8 @@ namespace example
                 vs_t mut_vs{};
                 syscall::bf_syscall_t mut_sys{};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_sys.bf_tls_set_ppid(bsl::safe_u16::magic_1());
+                    mut_sys.bf_tls_set_online_pps(bsl::safe_u16::magic_1());
+                    mut_sys.bf_tls_set_ppid(bsl::safe_u16::magic_2());
                     mut_vs.initialize({}, {}, {}, {}, {});
                     mut_vs.allocate({}, {}, mut_sys, {}, {}, {});
                     bsl::ut_then{} = [&]() noexcept {

@@ -26,8 +26,8 @@
  * SOFTWARE.
  */
 
-#ifndef LOADER_PLATFORM_INTERFACE_H
-#define LOADER_PLATFORM_INTERFACE_H
+#ifndef LOADER_PLATFORM_INTERFACE_HPP
+#define LOADER_PLATFORM_INTERFACE_HPP
 
 #include <asm/ioctl.h>
 #include <dump_vmm_args_t.hpp>

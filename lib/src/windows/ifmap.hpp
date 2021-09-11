@@ -22,18 +22,27 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef VMMCTL_IFMAP_LINUX_HPP
-#define VMMCTL_IFMAP_LINUX_HPP
+#ifndef LIB_IFMAP_HPP
+#define LIB_IFMAP_HPP
 
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <unistd.h>
+// clang-format off
+
+/// NOTE:
+/// - The windows includes that we use here need to remain in this order.
+///   Otherwise the code will not compile. Also, when using CPP, we need
+///   to remove the max/min macros as they are used by the C++ standard.
+///
+
+#include <Windows.h>
+#undef max
+#undef min
+
+// clang-format on
 
 #include <bsl/convert.hpp>
+#include <bsl/cstdint.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
-#include <bsl/finally.hpp>
 #include <bsl/move.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/span.hpp>
@@ -41,17 +50,11 @@
 #include <bsl/swap.hpp>
 #include <bsl/touch.hpp>
 #include <bsl/unlikely.hpp>
+#include <bsl/finally.hpp>
 
-// IWYU pragma: no_include <bits/mman-map-flags-generic.h>
-
-namespace vmmctl
+namespace lib
 {
-    /// @brief defines what an error looks like from a POSIX call.
-    constexpr auto IFMAP_POSIX_ERROR{-1_i32};
-    /// @brief defines what an invalid file is.
-    constexpr auto IFMAP_INVALID_FILE{-1_i32};
-
-    /// @class bsl::ifmap
+    /// @class lib::ifmap
     ///
     /// <!-- description -->
     ///   @brief Maps a file as read-only, and returns a pointer to the file
@@ -59,8 +62,10 @@ namespace vmmctl
     ///
     class ifmap final
     {
+        /// @brief stores a handle to the file being mapped
+        HANDLE m_file{};
         /// @brief stores a handle to the mapped file.
-        bsl::safe_i32 m_file{IFMAP_INVALID_FILE};
+        HANDLE m_view{};
         /// @brief stores a pointer to the file that was opened.
         void *m_data{};
         /// @brief stores the number of bytes for the open file
@@ -73,22 +78,34 @@ namespace vmmctl
         ///   @param mut_lhs the left hand side of the exchange
         ///   @param mut_rhs the right hand side of the exchange
         ///
-        static constexpr auto
-        private_swap(ifmap &mut_lhs, ifmap &mut_rhs) noexcept -> void
+        static constexpr void
+        private_swap(ifmap &mut_lhs, ifmap &mut_rhs) noexcept
         {
             bsl::swap(mut_lhs.m_file, mut_rhs.m_file);
+            bsl::swap(mut_lhs.m_view, mut_rhs.m_view);
             bsl::swap(mut_lhs.m_data, mut_rhs.m_data);
             bsl::swap(mut_lhs.m_size, mut_rhs.m_size);
         }
 
     public:
+        /// @brief alias for: void
+        using value_type = void;
+        /// @brief alias for: safe_umx
+        using size_type = bsl::safe_umx;
+        /// @brief alias for: safe_umx
+        using difference_type = bsl::safe_umx;
+        /// @brief alias for: void *
+        using pointer_type = void *;
+        /// @brief alias for: void const *
+        using const_pointer_type = void const *;
+
         /// <!-- description -->
         ///   @brief Creates a default ifmap that has not yet been mapped.
         ///
         constexpr ifmap() noexcept = default;
 
         /// <!-- description -->
-        ///   @brief Creates a bsl::ifmap given a the filename and path of
+        ///   @brief Creates a lib::ifmap given a the filename and path of
         ///     the file to map as read-only.
         ///
         /// <!-- inputs/outputs -->
@@ -96,53 +113,53 @@ namespace vmmctl
         ///
         explicit constexpr ifmap(bsl::string_view const &filename) noexcept
         {
-            using stat_t = struct stat;
-            stat_t mut_s{};
-
-            // We don't have a choice here
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-            m_file = open(filename.data(), O_RDONLY);
-            if (bsl::unlikely(IFMAP_INVALID_FILE == m_file)) {
-                bsl::error() << "failed to open read-only file: "    // --
-                             << filename                             // --
-                             << bsl::endl;                           // --
-
-                return;
-            }
+            m_file = CreateFileA(
+                filename.data(),
+                GENERIC_READ,
+                0,
+                nullptr,
+                OPEN_EXISTING,
+                FILE_ATTRIBUTE_NORMAL,
+                nullptr);
 
             bsl::finally mut_release_on_error{[this]() noexcept -> void {
                 this->release();
             }};
 
-            if (bsl::unlikely(IFMAP_POSIX_ERROR == fstat(m_file.get(), &mut_s))) {
-                bsl::error() << "failed to get the size of the read-only file: "    // --
+            m_view = CreateFileMappingA(m_file, nullptr, PAGE_READONLY, 0, 0, nullptr);
+            if (bsl::unlikely(nullptr == m_view)) {
+                bsl::alert() << "failed to open read-only file: "    // --
+                             << filename                             // --
+                             << bsl::endl;
+                return;
+            }
+
+            DWORD high{};
+            DWORD size{GetFileSize(m_file, &high)};
+
+            if (bsl::unlikely(INVALID_FILE_SIZE == size)) {
+                bsl::alert() << "failed to get the size of the read-only file: "    // --
                              << filename                                            // --
                              << bsl::endl;
-
                 return;
             }
 
-            m_data = mmap(
-                nullptr,
-                static_cast<bsl::uintmx>(mut_s.st_size),
-                PROT_READ,
-                // We don't have a choice here
-                // NOLINTNEXTLINE(hicpp-signed-bitwise, bsl-types-fixed-width-ints-arithmetic-check)
-                MAP_SHARED | MAP_POPULATE,
-                m_file.get(),
-                static_cast<bsl::int64>(0));
+            if (bsl::unlikely(DWORD{} != high)) {
+                bsl::alert() << "file too big: "    // --
+                             << filename            // --
+                             << bsl::endl;
+                return;
+            }
 
-            // We don't have a choice here
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-            if (bsl::unlikely(MAP_FAILED == m_data)) {
-                bsl::error() << "failed to map read-only file: "    // --
+            m_data = MapViewOfFile(m_view, FILE_MAP_READ, 0, 0, 0);
+            if (bsl::unlikely(nullptr == m_data)) {
+                bsl::alert() << "failed to map read-only file: "    // --
                              << filename                            // --
                              << bsl::endl;
-
                 return;
             }
 
-            m_size = bsl::to_umx(mut_s.st_size);
+            m_size = bsl::to_umx(static_cast<bsl::uintmx>(size));
             mut_release_on_error.ignore();
         }
 
@@ -170,13 +187,16 @@ namespace vmmctl
         ///
         constexpr ifmap(ifmap &&mut_o) noexcept
             : m_file{bsl::move(mut_o.m_file)}
+            , m_view{bsl::move(mut_o.m_view)}
             , m_data{bsl::move(mut_o.m_data)}
             , m_size{bsl::move(mut_o.m_size)}
         {
-            mut_o.m_file = IFMAP_INVALID_FILE;
+            mut_o.m_file = {};
+            mut_o.m_view = {};
             mut_o.m_data = {};
             mut_o.m_size = {};
         }
+
         /// <!-- description -->
         ///   @brief copy assignment
         ///
@@ -209,14 +229,21 @@ namespace vmmctl
         release() noexcept
         {
             if (nullptr != m_data) {
-                bsl::discard(munmap(m_data, m_size.get()));
+                bsl::discard(UnmapViewOfFile(m_data));
             }
             else {
                 bsl::touch();
             }
 
-            if (IFMAP_INVALID_FILE != m_file) {
-                bsl::discard(close(m_file.get()));
+            if (nullptr != m_view) {
+                bsl::discard(CloseHandle(m_view));
+            }
+            else {
+                bsl::touch();
+            }
+
+            if (nullptr != m_file) {
+                bsl::discard(CloseHandle(m_file));
             }
             else {
                 bsl::touch();
@@ -224,9 +251,9 @@ namespace vmmctl
 
             m_size = {};
             m_data = {};
-            m_file = IFMAP_INVALID_FILE;
+            m_view = {};
+            m_file = {};
         }
-
         /// <!-- description -->
         ///   @brief Returns a pointer to the read-only mapped file.
         ///
