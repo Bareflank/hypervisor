@@ -1027,16 +1027,6 @@ namespace mk
             return bsl::safe_umx::failure();
         }
 
-        if (bsl::unlikely(virt <= min_addr)) {
-            bsl::error() << "the virtual address "                   // --
-                         << bsl::hex(virt)                           // --
-                         << " is out of range and cannot be used"    // --
-                         << bsl::endl                                // --
-                         << bsl::here();                             // --
-
-            return bsl::safe_umx::failure();
-        }
-
         if (bsl::unlikely(virt >= max_addr)) {
             bsl::error() << "the virtual address "                   // --
                          << bsl::hex(virt)                           // --

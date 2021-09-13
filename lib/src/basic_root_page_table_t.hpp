@@ -1002,12 +1002,12 @@ namespace lib
 
             if constexpr (bsl::is_same<E, L1E_TYPE>::value) {
                 bsl::expects(is_page_2m_aligned(page_virt));
-                bsl::expects(is_page_1g_aligned(page_phys));
+                bsl::expects(is_page_2m_aligned(page_phys));
             }
 
             if constexpr (bsl::is_same<E, L0E_TYPE>::value) {
                 bsl::expects(is_page_4k_aligned(page_virt));
-                bsl::expects(is_page_1g_aligned(page_phys));
+                bsl::expects(is_page_4k_aligned(page_phys));
             }
 
             basic_lock_guard_t mut_lock{mut_tls, m_lock};
@@ -1268,7 +1268,7 @@ namespace lib
             }
 
             if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
-                if (bsl::safe_u64::magic_0() == ents.l2e->points_to_block) {
+                if (bsl::safe_u64::magic_1() == ents.l2e->points_to_block) {
                     *ents.l2e = {};
                     release_entry(mut_tls, mut_page_pool, ents.l3e);
 
@@ -1296,7 +1296,7 @@ namespace lib
             }
 
             if constexpr (bsl::is_same<E, L1E_TYPE>::value) {
-                if (bsl::safe_u64::magic_0() == ents.l1e->points_to_block) {
+                if (bsl::safe_u64::magic_1() == ents.l1e->points_to_block) {
                     *ents.l1e = {};
                     release_entry(mut_tls, mut_page_pool, ents.l2e);
                     release_entry(mut_tls, mut_page_pool, ents.l3e);
@@ -1325,7 +1325,7 @@ namespace lib
             }
 
             if constexpr (bsl::is_same<E, L0E_TYPE>::value) {
-                if (bsl::safe_u64::magic_0() == ents.l0e->points_to_block) {
+                if (bsl::safe_u64::magic_1() == ents.l0e->points_to_block) {
                     *ents.l0e = {};
                     release_entry(mut_tls, mut_page_pool, ents.l1e);
                     release_entry(mut_tls, mut_page_pool, ents.l2e);

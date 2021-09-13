@@ -811,20 +811,20 @@ namespace syscall
         ///   @tparam T the type of pointer to return. Must be a POD type and
         ///     the size of a page.
         ///   @param vmid The VMID of the VM to unmap the virtual address from
-        ///   @param pmut_virt The virtual address to unmap
+        ///   @param pudm_virt The virtual address to unmap
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
         template<typename T>
         [[nodiscard]] constexpr auto
-        bf_vm_op_unmap_direct(bsl::safe_u16 const &vmid, T *const pmut_virt) noexcept
+        bf_vm_op_unmap_direct(bsl::safe_u16 const &vmid, T *const pudm_virt) noexcept
             -> bsl::errc_type
         {
             constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
             constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_DIRECT_MAP_SIZE).checked()};
 
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-            bsl::safe_u64 const virt{reinterpret_cast<bsl::uint64>(pmut_virt)};
+            bsl::safe_u64 const virt{reinterpret_cast<bsl::uint64>(pudm_virt)};
 
             bsl::expects(vmid.is_valid_and_checked());
             bsl::expects(vmid != BF_INVALID_ID);
