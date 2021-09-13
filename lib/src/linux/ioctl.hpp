@@ -22,8 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef VMMCTL_IOCTL_LINUX_HPP
-#define VMMCTL_IOCTL_LINUX_HPP
+#ifndef LIB_IOCTL_HPP
+#define LIB_IOCTL_HPP
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -32,22 +32,22 @@
 #include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
+#include <bsl/expects.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/string_view.hpp>
 #include <bsl/touch.hpp>
 #include <bsl/unlikely.hpp>
 
-namespace vmmctl
+namespace lib
 {
     /// @brief defines what an invalid handle is.
     constexpr auto IOCTL_INVALID_HNDL{-1_i32};
 
-    /// @class bsl::ioctl
+    /// @class lib::ioctl
     ///
     /// <!-- description -->
     ///   @brief Executes IOCTL commands to a driver.
     ///
-    // This is a name conflict with external code.
     // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
     class ioctl final
     {
@@ -56,7 +56,7 @@ namespace vmmctl
 
     public:
         /// <!-- description -->
-        ///   @brief Creates a bsl::ioctl that can be used to communicate
+        ///   @brief Creates a lib::ioctl that can be used to communicate
         ///     with a device driver through an IOCTL interface.
         ///
         /// <!-- inputs/outputs -->
@@ -64,7 +64,6 @@ namespace vmmctl
         ///
         explicit constexpr ioctl(bsl::string_view const &name) noexcept
         {
-            // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             m_hndl = bsl::to_i32(open(name.data(), O_RDWR));
             if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
@@ -76,16 +75,26 @@ namespace vmmctl
         }
 
         /// <!-- description -->
+        ///   @brief Creates a lib::ioctl that can be used to communicate
+        ///     with a device driver through an IOCTL interface.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param hndl the handle to an existing IOCTL to use.
+        ///
+        explicit constexpr ioctl(bsl::safe_i32 const hndl) noexcept
+        {
+            bsl::expects(IOCTL_INVALID_HNDL != hndl);
+            bsl::expects(hndl.is_pos());
+
+            m_hndl = hndl;
+        }
+
+        /// <!-- description -->
         ///   @brief Destructor
         ///
         constexpr ~ioctl() noexcept
         {
-            if (IOCTL_INVALID_HNDL != m_hndl) {
-                bsl::discard(close(m_hndl.get()));
-            }
-            else {
-                bsl::touch();
-            }
+            this->close();
         }
 
         /// <!-- description -->
@@ -123,6 +132,22 @@ namespace vmmctl
         [[maybe_unused]] constexpr auto operator=(ioctl &&mut_o) &noexcept -> ioctl & = delete;
 
         /// <!-- description -->
+        ///   @brief Closes the IOCTL
+        ///
+        constexpr void
+        // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
+        close() noexcept
+        {
+            if (IOCTL_INVALID_HNDL != m_hndl) {
+                bsl::discard(::close(m_hndl.get()));
+                m_hndl = IOCTL_INVALID_HNDL;
+            }
+            else {
+                bsl::touch();
+            }
+        }
+
+        /// <!-- description -->
         ///   @brief Returns true if the ioctl has been opened, false
         ///     otherwise.
         ///
@@ -137,197 +162,111 @@ namespace vmmctl
         }
 
         /// <!-- description -->
-        ///   @brief Returns is_open()
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return Returns is_open()
-        ///
-        [[nodiscard]] explicit constexpr operator bool() const noexcept
-        {
-            return this->is_open();
-        }
-
-        /// <!-- description -->
         ///   @brief Sends a request to the driver without read or writing
         ///     data.
         ///
         /// <!-- inputs/outputs -->
         ///   @param req the request
-        ///   @return Returns true if the IOCTL succeeded, false otherwise.
+        ///   @return Returns a negative error code on failure, or
+        ///     something 0 or positive on success.
         ///
         [[nodiscard]] constexpr auto
-        send(bsl::safe_umx const &req) const noexcept -> bool
+        // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
+        send(bsl::safe_umx const &req) const noexcept -> bsl::safe_i64
         {
-            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
-                bsl::error() << "failed to send, ioctl not properly initialized\n";
-                return false;
-            }
+            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
 
-            if (bsl::unlikely(req.is_invalid())) {
-                bsl::error() << "invalid request: "    // --
-                             << bsl::hex(req)          // --
-                             << bsl::endl              // --
-                             << bsl::here();           // --
-
-                return false;
-            }
-
-            // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get())};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "ioctl failed\n";
-                return false;
+                return bsl::to_i64(ret);
             }
 
-            return true;
+            return bsl::to_i64(ret);
         }
 
         /// <!-- description -->
         ///   @brief Reads data from the device driver
         ///
         /// <!-- inputs/outputs -->
+        ///   @tparam T the type of data to read
         ///   @param req the request
         ///   @param pmut_data a pointer to read data to
-        ///   @param size the size of the buffer being read to
-        ///   @return Returns true if the IOCTL succeeded, false otherwise.
+        ///   @return Returns a negative error code on failure, or
+        ///     something 0 or positive on success.
         ///
+        template<typename T>
         [[nodiscard]] constexpr auto
-        read_data(bsl::safe_umx const &req, void *const pmut_data, bsl::safe_umx const &size)
-            const noexcept -> bool
+        // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
+        read(bsl::safe_umx const &req, T *const pmut_data) const noexcept -> bsl::safe_i64
         {
-            bsl::discard(size);
+            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
+            bsl::expects(nullptr != pmut_data);
 
-            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl.get())) {
-                bsl::error() << "failed to read, ioctl not properly initialized\n";
-                return false;
-            }
-
-            if (bsl::unlikely(req.is_invalid())) {
-                bsl::error() << "invalid request: "    // --
-                             << bsl::hex(req)          // --
-                             << bsl::endl              // --
-                             << bsl::here();           // --
-
-                return false;
-            }
-
-            if (bsl::unlikely(nullptr == pmut_data)) {
-                bsl::error() << "invalid pmut_data: "    // --
-                             << pmut_data                // --
-                             << bsl::endl                // --
-                             << bsl::here();             // --
-
-                return false;
-            }
-
-            // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), pmut_data)};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "ioctl failed\n";
-                return false;
+                return bsl::to_i64(ret);
             }
 
-            return true;
+            return bsl::to_i64(ret);
         }
 
         /// <!-- description -->
         ///   @brief Writes data to the device driver
         ///
         /// <!-- inputs/outputs -->
+        ///   @tparam T the type of data to write
         ///   @param req the request
         ///   @param data a pointer to write data from
-        ///   @param size the size of the buffer being written from
-        ///   @return Returns true if the IOCTL succeeded, false otherwise.
+        ///   @return Returns a negative error code on failure, or
+        ///     something 0 or positive on success.
         ///
+        template<typename T>
         [[nodiscard]] constexpr auto
-        write_data(bsl::safe_umx const &req, void const *const data, bsl::safe_umx const &size)
-            const noexcept -> bool
+        // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
+        write(bsl::safe_umx const &req, T const *const data) const noexcept -> bsl::safe_i64
         {
-            bsl::discard(size);
+            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
+            bsl::expects(nullptr != data);
 
-            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
-                bsl::error() << "failed to write, ioctl not properly initialized\n";
-                return false;
-            }
-
-            if (bsl::unlikely(req.is_invalid())) {
-                bsl::error() << "invalid request: "    // --
-                             << bsl::hex(req)          // --
-                             << bsl::endl              // --
-                             << bsl::here();           // --
-
-                return false;
-            }
-
-            if (bsl::unlikely(nullptr == data)) {
-                bsl::error() << "invalid data: "    // --
-                             << data                // --
-                             << bsl::endl           // --
-                             << bsl::here();        // --
-
-                return false;
-            }
-
-            // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), data)};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "ioctl failed\n";
-                return false;
+                return bsl::to_i64(ret);
             }
 
-            return true;
+            return bsl::to_i64(ret);
         }
 
         /// <!-- description -->
         ///   @brief Reads/writes data from/to the device driver
         ///
         /// <!-- inputs/outputs -->
+        ///   @tparam T the type of data to read/write
         ///   @param req the request
         ///   @param pmut_data a pointer to read/write data to/from
-        ///   @param size the size of the buffer being read/written to/from
-        ///   @return Returns true if the IOCTL succeeded, false otherwise.
+        ///   @return Returns a negative error code on failure, or
+        ///     something 0 or positive on success.
         ///
+        template<typename T>
         [[nodiscard]] constexpr auto
-        read_write_data(bsl::safe_umx const &req, void *const pmut_data, bsl::safe_umx const &size)
-            const noexcept -> bool
+        read_write(bsl::safe_umx const &req, T *const pmut_data) const noexcept -> bsl::safe_i64
         {
-            bsl::discard(size);
+            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
+            bsl::expects(nullptr != pmut_data);
 
-            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
-                bsl::error() << "failed to read/write, ioctl not properly initialized\n";
-                return false;
-            }
-
-            if (bsl::unlikely(req.is_invalid())) {
-                bsl::error() << "invalid request: "    // --
-                             << bsl::hex(req)          // --
-                             << bsl::endl              // --
-                             << bsl::here();           // --
-
-                return false;
-            }
-
-            if (bsl::unlikely(nullptr == pmut_data)) {
-                bsl::error() << "invalid pmut_data: "    // --
-                             << pmut_data                // --
-                             << bsl::endl                // --
-                             << bsl::here();             // --
-
-                return false;
-            }
-
-            // We don't have a choice here
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), pmut_data)};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "ioctl failed\n";
-                return false;
+                return bsl::to_i64(ret);
             }
 
-            return true;
+            return bsl::to_i64(ret);
         }
     };
 }

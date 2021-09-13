@@ -30,6 +30,7 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL CODECOV)
     endif()
 
     if(HYPERVISOR_BUILD_VMMCTL)
+        add_subdirectory(lib)
         add_subdirectory(vmmctl)
     endif()
 

@@ -648,7 +648,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         is_vp_a_root_vp(bsl::safe_u16 const &vpid) noexcept -> bool
         {
-            return vpid == bf_tls_ppid();
+            return vpid < bf_tls_online_pps();
         }
 
         /// <!-- description -->
@@ -665,7 +665,7 @@ namespace syscall
         [[nodiscard]] static constexpr auto
         is_vs_a_root_vs(bsl::safe_u16 const &vsid) noexcept -> bool
         {
-            return vsid == bf_tls_ppid();
+            return vsid < bf_tls_online_pps();
         }
 
         // ---------------------------------------------------------------------

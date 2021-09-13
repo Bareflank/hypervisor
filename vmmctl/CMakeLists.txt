@@ -29,8 +29,6 @@ add_executable(vmmctl)
 
 target_include_directories(vmmctl PRIVATE
     src
-    $<$<PLATFORM_ID:Linux>:${CMAKE_CURRENT_LIST_DIR}/src/linux>
-    $<$<PLATFORM_ID:Windows>:${CMAKE_CURRENT_LIST_DIR}/src/windows>
 )
 
 target_include_directories(vmmctl SYSTEM PRIVATE
@@ -42,10 +40,6 @@ target_include_directories(vmmctl SYSTEM PRIVATE
 # ------------------------------------------------------------------------------
 
 list(APPEND HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/src/linux/ifmap.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/linux/ioctl.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/windows/ifmap.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/windows/ioctl.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vmmctl_main.hpp
 )
 
@@ -63,8 +57,7 @@ target_link_libraries(vmmctl PRIVATE
     bsl
     loader
     hypervisor
-    $<$<PLATFORM_ID:Windows>:SetupAPI>
-    $<$<PLATFORM_ID:Windows>:libcmt.lib>
+    lib
 )
 
 # ------------------------------------------------------------------------------

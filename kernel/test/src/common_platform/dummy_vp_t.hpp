@@ -111,7 +111,7 @@ namespace mk
         ///   @return Returns the ID of this vp_t
         ///
         [[nodiscard]] constexpr auto
-        id() const noexcept -> bsl::safe_u16 const &
+        id() const noexcept -> bsl::safe_u16
         {
             return m_id;
         }

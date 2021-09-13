@@ -63,9 +63,9 @@ namespace vmmctl
     class vmmctl_main final
     {
         /// @brief stores the mapped ELF file for the microkernel
-        ifmap m_mapped_mk_elf_file{};
+        lib::ifmap m_mapped_mk_elf_file{};
         /// @brief stores the mapped ELF files for each extension
-        bsl::array<ifmap, HYPERVISOR_MAX_EXTENSIONS.get()> m_mapped_ext_elf_files{};
+        bsl::array<lib::ifmap, HYPERVISOR_MAX_EXTENSIONS.get()> m_mapped_ext_elf_files{};
         /// @brief stores the arguments for starting the VMM.
         loader::start_vmm_args_t m_start_vmm_ctl_args{};
         /// @brief stores the arguments for stopping the VMM.
@@ -88,62 +88,7 @@ namespace vmmctl
         }
 
         /// <!-- description -->
-        ///   @brief Writes a provided request to the loader given an ioctl
-        ///     to the loader as well as the arguments to send to the loader.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam R the type that defines the request to give the loader
-        ///   @tparam A the type that defines the arguments to give the loader
-        ///   @param request the request to give the loader
-        ///   @param ctl the ioctl to the loader
-        ///   @param ctl_args the arguments to give the loader
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        template<typename R, typename A>
-        [[nodiscard]] constexpr auto
-        write_data(R const &request, ioctl const &ctl, A const *const ctl_args) const noexcept
-            -> bsl::errc_type
-        {
-            bool const ret{ctl.write_data(request, ctl_args, bsl::to_umx(sizeof(A)))};
-            if (bsl::unlikely(!ret)) {
-                bsl::error() << "vmmctl failed. check kernel logs details\n";
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Writes a provided request to the loader given an ioctl
-        ///     to the loader as well as the arguments to send to the loader.
-        ///     The results of the ioctl are returned in the provided args.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam R the type that defines the request to give the loader
-        ///   @tparam A the type that defines the arguments to give the loader
-        ///   @param request the request to give the loader
-        ///   @param ctl the ioctl to the loader
-        ///   @param pmut_ctl_args the arguments to give the loader
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        template<typename R, typename A>
-        [[nodiscard]] constexpr auto
-        read_write_data(R const &request, ioctl const &ctl, A *const pmut_ctl_args) const noexcept
-            -> bsl::errc_type
-        {
-            bool const ret{ctl.read_write_data(request, pmut_ctl_args, bsl::to_umx(sizeof(A)))};
-            if (bsl::unlikely(!ret)) {
-                bsl::error() << "vmmctl failed. check kernel logs details\n";
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Starts the VMM given a set of ioctl arguments to send
+        ///   @brief Starts the VMM given a set of lib::ioctl arguments to send
         ///     to the loader.
         ///
         /// <!-- inputs/outputs -->
@@ -151,19 +96,25 @@ namespace vmmctl
         ///   @return Returns bsl::errc_success if the VMM was successfully
         ///     started, otherwise returns bsl::errc_failure.
         ///
-        [[nodiscard]] constexpr auto
-        start_vmm(loader::start_vmm_args_t const *const ctl_args) const noexcept -> bsl::errc_type
+        [[nodiscard]] static constexpr auto
+        start_vmm(loader::start_vmm_args_t const *const ctl_args) noexcept -> bsl::errc_type
         {
-            ioctl const ctl{loader::DEVICE_NAME};
-            if (bsl::unlikely(!ctl)) {
+            lib::ioctl const ctl{loader::DEVICE_NAME};
+            if (bsl::unlikely(!ctl.is_open())) {
                 return bsl::errc_failure;
             }
 
-            return this->write_data(loader::START_VMM, ctl, ctl_args);
+            auto const ret{ctl.write(loader::START_VMM, ctl_args)};
+            if (bsl::unlikely(ret.is_neg())) {
+                bsl::error() << "vmmctl failed. check kernel logs details\n";
+                return bsl::errc_failure;
+            }
+
+            return bsl::errc_success;
         }
 
         /// <!-- description -->
-        ///   @brief Stops the VMM given a set of ioctl arguments to send
+        ///   @brief Stops the VMM given a set of lib::ioctl arguments to send
         ///     to the loader.
         ///
         /// <!-- inputs/outputs -->
@@ -171,19 +122,25 @@ namespace vmmctl
         ///   @return Returns bsl::errc_success if the VMM was successfully
         ///     stopped, otherwise returns bsl::errc_failure.
         ///
-        [[nodiscard]] constexpr auto
-        stop_vmm(loader::stop_vmm_args_t const *const ctl_args) const noexcept -> bsl::errc_type
+        [[nodiscard]] static constexpr auto
+        stop_vmm(loader::stop_vmm_args_t const *const ctl_args) noexcept -> bsl::errc_type
         {
-            ioctl const ctl{loader::DEVICE_NAME};
-            if (bsl::unlikely(!ctl)) {
+            lib::ioctl const ctl{loader::DEVICE_NAME};
+            if (bsl::unlikely(!ctl.is_open())) {
                 return bsl::errc_failure;
             }
 
-            return this->write_data(loader::STOP_VMM, ctl, ctl_args);
+            auto const ret{ctl.write(loader::STOP_VMM, ctl_args)};
+            if (bsl::unlikely(ret.is_neg())) {
+                bsl::error() << "vmmctl failed. check kernel logs details\n";
+                return bsl::errc_failure;
+            }
+
+            return bsl::errc_success;
         }
 
         /// <!-- description -->
-        ///   @brief Dumps the VMM given a set of ioctl arguments to send
+        ///   @brief Dumps the VMM given a set of lib::ioctl arguments to send
         ///     to the loader.
         ///
         /// <!-- inputs/outputs -->
@@ -191,17 +148,18 @@ namespace vmmctl
         ///   @return Returns bsl::errc_success if the VMM was successfully
         ///     dumped to the console, otherwise returns bsl::errc_failure.
         ///
-        [[nodiscard]] constexpr auto
-        dump_vmm(loader::dump_vmm_args_t *const pmut_ctl_args) const noexcept -> bsl::errc_type
+        [[nodiscard]] static constexpr auto
+        dump_vmm(loader::dump_vmm_args_t *const pmut_ctl_args) noexcept -> bsl::errc_type
         {
-            ioctl const ctl{loader::DEVICE_NAME};
-            if (bsl::unlikely(!ctl)) {
+            lib::ioctl const ctl{loader::DEVICE_NAME};
+            if (bsl::unlikely(!ctl.is_open())) {
                 return bsl::errc_failure;
             }
 
-            auto const ret{this->read_write_data(loader::DUMP_VMM, ctl, pmut_ctl_args)};
-            if (bsl::unlikely(bsl::errc_success != ret)) {
-                return ret;
+            auto const ret{ctl.read_write(loader::DUMP_VMM, pmut_ctl_args)};
+            if (bsl::unlikely(ret.is_neg())) {
+                bsl::error() << "vmmctl failed. check kernel logs details\n";
+                return bsl::errc_failure;
             }
 
             bsl::safe_idx mut_epos{pmut_ctl_args->debug_ring.epos};
@@ -253,9 +211,9 @@ namespace vmmctl
         ///     this function returns bsl::errc_failure.
         ///
         [[nodiscard]] static constexpr auto
-        map_elf_file(bsl::arguments &mut_args, ifmap &mut_map) noexcept -> bsl::errc_type
+        map_elf_file(bsl::arguments &mut_args, lib::ifmap &mut_map) noexcept -> bsl::errc_type
         {
-            mut_map = ifmap{mut_args.front<bsl::string_view>()};
+            mut_map = lib::ifmap{mut_args.front<bsl::string_view>()};
             if (bsl::unlikely(!mut_map)) {
                 return bsl::errc_failure;
             }
@@ -314,7 +272,7 @@ namespace vmmctl
         }
 
         /// <!-- description -->
-        ///   @brief Converts the extension ELF files from an array of ifmaps
+        ///   @brief Converts the extension ELF files from an array of lib::ifmaps
         ///     to an array of buffer_t structs so that the ELF files can be
         ///     passed to the loader.
         ///
@@ -339,13 +297,13 @@ namespace vmmctl
 
         /// <!-- description -->
         ///   @brief Given arguments from the user, this function creates the
-        ///     ioctl equivalent arguments that the loader expects for
+        ///     lib::ioctl equivalent arguments that the loader expects for
         ///     starting the VMM
         ///
         /// <!-- inputs/outputs -->
         ///   @param mut_args the user provided arguments
         ///   @param mut_start_args the resulting start_vmm_args_t
-        ///   @return The resulting ioctl arguments
+        ///   @return The resulting lib::ioctl arguments
         ///
         [[nodiscard]] constexpr auto
         make_start_vmm_args(

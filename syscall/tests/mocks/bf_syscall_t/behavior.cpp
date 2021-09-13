@@ -635,6 +635,7 @@ namespace syscall
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_data.clear();
 
+                    mut_sys.bf_tls_set_online_pps(1_u16);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.is_vp_a_root_vp({}));
                     };
@@ -652,6 +653,7 @@ namespace syscall
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_data.clear();
 
+                    mut_sys.bf_tls_set_online_pps(1_u16);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.is_vs_a_root_vs({}));
                     };
