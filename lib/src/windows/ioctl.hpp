@@ -40,6 +40,7 @@
 
 // clang-format on
 
+#include <bsl/exchange.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/move.hpp>
 #include <bsl/safe_integral.hpp>
@@ -59,6 +60,11 @@ namespace lib
         HANDLE m_hndl{};
 
     public:
+        /// <!-- description -->
+        ///   @brief Default constructor
+        ///
+        constexpr ioctl() noexcept = default;
+
         /// <!-- description -->
         ///   @brief Creates a lib::ioctl that can be used to communicate
         ///     with a device driver through an IOCTL interface.
@@ -156,7 +162,6 @@ namespace lib
         ///
         explicit constexpr ioctl(HANDLE const hndl) noexcept
         {
-            bsl::expects(nullptr != hndl);
             m_hndl = hndl;
         }
 
@@ -181,7 +186,8 @@ namespace lib
         /// <!-- inputs/outputs -->
         ///   @param mut_o the object being moved
         ///
-        constexpr ioctl(ioctl &&mut_o) noexcept = delete;
+        constexpr ioctl(ioctl &&mut_o) noexcept : m_hndl{bsl::exchange(mut_o.m_hndl, nullptr)}
+        {}
 
         /// <!-- description -->
         ///   @brief copy assignment
@@ -199,7 +205,22 @@ namespace lib
         ///   @param mut_o the object being moved
         ///   @return a reference to *this
         ///
-        [[maybe_unused]] constexpr auto operator=(ioctl &&mut_o) &noexcept -> ioctl & = delete;
+        [[maybe_unused]] constexpr auto
+        operator=(ioctl &&mut_o) &noexcept -> ioctl &
+        {
+            /// NOTE:
+            /// - For now we do not use the swap technique that AUTOSAR wants
+            ///   you to use because we actually need an exchange since we
+            ///   are implementing something closer to a unique_ptr.
+            ///
+
+            if (this == &mut_o) {
+                return *this;
+            }
+
+            m_hndl = bsl::exchange(mut_o.m_hndl, IOCTL_INVALID_HNDL);
+            return *this;
+        }
 
         /// <!-- description -->
         ///   @brief Closes the IOCTL

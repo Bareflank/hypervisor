@@ -52,6 +52,8 @@ macro(hypervisor_add_integration NAME HEADERS)
         ${NAME}.cpp
     )
 
+    target_compile_options(integration_${NAME} PRIVATE -Wframe-larger-than=4294967295)
+
     set_property(SOURCE ${NAME} APPEND PROPERTY OBJECT_DEPENDS ${${HEADERS}})
 
     target_link_libraries(integration_${NAME} PRIVATE
