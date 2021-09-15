@@ -455,3 +455,5 @@ bf_add_config(
     DESCRIPTION "Defines an extension's default heap pool max size"
     OPTIONS ${HYPERVISOR_MK_PAGE_POOL_SIZE}
 )
+
+bf_find_program(HYPERVISOR_VERIFY_LLD "${HYPERVISOR_CXX_LINKER}" "https://github.com/Bareflank/hypervisor#build-requirements")
