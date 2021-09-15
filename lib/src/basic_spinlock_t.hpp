@@ -27,7 +27,9 @@
 
 #if __has_include("spinlock_helpers.hpp")
 #include "spinlock_helpers.hpp"    // IWYU pragma: export
-#else
+#endif
+
+#if __has_include("basic_spinlock_helpers.hpp")
 #include "basic_spinlock_helpers.hpp"    // IWYU pragma: export
 #endif
 

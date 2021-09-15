@@ -27,7 +27,9 @@
 
 #if __has_include("page_pool_helpers.hpp")
 #include "page_pool_helpers.hpp"    // IWYU pragma: export
-#else
+#endif
+
+#if __has_include("basic_page_pool_helpers.hpp")
 #include "basic_page_pool_helpers.hpp"    // IWYU pragma: export
 #endif
 

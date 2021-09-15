@@ -1208,31 +1208,31 @@ namespace mk
                     return bsl::to_u64(m_gprs.r15);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cr2: {
+                case syscall::bf_reg_t::bf_reg_t_cr2: {
                     return bsl::to_u64(m_vmcs_missing_registers.guest_cr2);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_dr6: {
+                case syscall::bf_reg_t::bf_reg_t_dr6: {
                     return bsl::to_u64(m_vmcs_missing_registers.guest_dr6);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_star: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_star: {
                     return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_star);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_lstar: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_lstar: {
                     return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_lstar);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_cstar: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_cstar: {
                     return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_cstar);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_fmask: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_fmask: {
                     return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_fmask);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_kernel_gs_base: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_kernel_gs_base: {
                     return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_kernel_gs_base);
                 }
 
@@ -1252,47 +1252,47 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_es_selector: {
+                case syscall::bf_reg_t::bf_reg_t_es_selector: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_ES_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cs_selector: {
+                case syscall::bf_reg_t::bf_reg_t_cs_selector: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_CS_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ss_selector: {
+                case syscall::bf_reg_t::bf_reg_t_ss_selector: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_SS_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ds_selector: {
+                case syscall::bf_reg_t::bf_reg_t_ds_selector: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_DS_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_fs_selector: {
+                case syscall::bf_reg_t::bf_reg_t_fs_selector: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_FS_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_gs_selector: {
+                case syscall::bf_reg_t::bf_reg_t_gs_selector: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_GS_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_selector: {
+                case syscall::bf_reg_t::bf_reg_t_ldtr_selector: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_LDTR_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_tr_selector: {
+                case syscall::bf_reg_t::bf_reg_t_tr_selector: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_TR_SELECTOR, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_interrupt_status: {
+                case syscall::bf_reg_t::bf_reg_t_interrupt_status: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_INTERRUPT_STATUS, mut_val.data());
                     break;
                 }
@@ -1435,7 +1435,7 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_physical_address: {
+                case syscall::bf_reg_t::bf_reg_t_physical_address: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_PHYSICAL_ADDRESS, mut_val.data());
                     break;
                 }
@@ -1445,52 +1445,52 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_debugctl: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_debugctl: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_DEBUGCTL, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_pat: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_pat: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_PAT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_efer: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_efer: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_EFER, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_perf_global_ctrl: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_perf_global_ctrl: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_pdpte0: {
+                case syscall::bf_reg_t::bf_reg_t_pdpte0: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_PDPTE0, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_pdpte1: {
+                case syscall::bf_reg_t::bf_reg_t_pdpte1: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_PDPTE1, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_pdpte2: {
+                case syscall::bf_reg_t::bf_reg_t_pdpte2: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_PDPTE2, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_pdpte3: {
+                case syscall::bf_reg_t::bf_reg_t_pdpte3: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_PDPTE3, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_bndcfgs: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_bndcfgs: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_BNDCFGS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_rtit_ctl: {
+                case syscall::bf_reg_t::bf_reg_t_rtit_ctl: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_RTIT_CTL, mut_val.data());
                     break;
                 }
@@ -1630,112 +1630,112 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_es_limit: {
+                case syscall::bf_reg_t::bf_reg_t_es_limit: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_ES_LIMIT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cs_limit: {
+                case syscall::bf_reg_t::bf_reg_t_cs_limit: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_CS_LIMIT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ss_limit: {
+                case syscall::bf_reg_t::bf_reg_t_ss_limit: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_SS_LIMIT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ds_limit: {
+                case syscall::bf_reg_t::bf_reg_t_ds_limit: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_DS_LIMIT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_fs_limit: {
+                case syscall::bf_reg_t::bf_reg_t_fs_limit: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_FS_LIMIT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_gs_limit: {
+                case syscall::bf_reg_t::bf_reg_t_gs_limit: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_GS_LIMIT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_limit: {
+                case syscall::bf_reg_t::bf_reg_t_ldtr_limit: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_LDTR_LIMIT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_tr_limit: {
+                case syscall::bf_reg_t::bf_reg_t_tr_limit: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_TR_LIMIT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_gdtr_limit: {
+                case syscall::bf_reg_t::bf_reg_t_gdtr_limit: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_GDTR_LIMIT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_idtr_limit: {
+                case syscall::bf_reg_t::bf_reg_t_idtr_limit: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_IDTR_LIMIT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_es_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_es_attrib: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_ES_ACCESS_RIGHTS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cs_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_cs_attrib: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_CS_ACCESS_RIGHTS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ss_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_ss_attrib: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_SS_ACCESS_RIGHTS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ds_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_ds_attrib: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_DS_ACCESS_RIGHTS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_fs_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_fs_attrib: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_FS_ACCESS_RIGHTS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_gs_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_gs_attrib: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_GS_ACCESS_RIGHTS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_ldtr_attrib: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_LDTR_ACCESS_RIGHTS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_tr_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_tr_attrib: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_TR_ACCESS_RIGHTS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_interruptibility_state: {
+                case syscall::bf_reg_t::bf_reg_t_interruptibility_state: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_INTERRUPTIBILITY_STATE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_activity_state: {
+                case syscall::bf_reg_t::bf_reg_t_activity_state: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_ACTIVITY_STATE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_smbase: {
+                case syscall::bf_reg_t::bf_reg_t_smbase: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_SMBASE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_sysenter_cs: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_cs: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_SYSENTER_CS, mut_val.data());
                     break;
                 }
@@ -1810,107 +1810,107 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_linear_address: {
+                case syscall::bf_reg_t::bf_reg_t_linear_address: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_LINEAR_ADDRESS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cr0: {
+                case syscall::bf_reg_t::bf_reg_t_cr0: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_CR0, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cr3: {
+                case syscall::bf_reg_t::bf_reg_t_cr3: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_CR3, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cr4: {
+                case syscall::bf_reg_t::bf_reg_t_cr4: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_CR4, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_es_base: {
+                case syscall::bf_reg_t::bf_reg_t_es_base: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_ES_BASE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cs_base: {
+                case syscall::bf_reg_t::bf_reg_t_cs_base: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_CS_BASE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ss_base: {
+                case syscall::bf_reg_t::bf_reg_t_ss_base: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_SS_BASE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ds_base: {
+                case syscall::bf_reg_t::bf_reg_t_ds_base: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_DS_BASE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_fs_base: {
+                case syscall::bf_reg_t::bf_reg_t_fs_base: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_FS_BASE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_gs_base: {
+                case syscall::bf_reg_t::bf_reg_t_gs_base: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_GS_BASE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_base: {
+                case syscall::bf_reg_t::bf_reg_t_ldtr_base: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_LDTR_BASE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_tr_base: {
+                case syscall::bf_reg_t::bf_reg_t_tr_base: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_TR_BASE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_gdtr_base: {
+                case syscall::bf_reg_t::bf_reg_t_gdtr_base: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_GDTR_BASE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_idtr_base: {
+                case syscall::bf_reg_t::bf_reg_t_idtr_base: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_IDTR_BASE, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_dr7: {
+                case syscall::bf_reg_t::bf_reg_t_dr7: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_DR7, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_rsp: {
+                case syscall::bf_reg_t::bf_reg_t_rsp: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_RSP, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_rip: {
+                case syscall::bf_reg_t::bf_reg_t_rip: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_RIP, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_rflags: {
+                case syscall::bf_reg_t::bf_reg_t_rflags: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_RFLAGS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_pending_debug_exceptions: {
+                case syscall::bf_reg_t::bf_reg_t_pending_debug_exceptions: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_sysenter_esp: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_esp: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_SYSENTER_ESP, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_sysenter_eip: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_eip: {
                     mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_SYSENTER_EIP, mut_val.data());
                     break;
                 }
@@ -2104,37 +2104,37 @@ namespace mk
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cr2: {
+                case syscall::bf_reg_t::bf_reg_t_cr2: {
                     m_vmcs_missing_registers.guest_cr2 = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_dr6: {
+                case syscall::bf_reg_t::bf_reg_t_dr6: {
                     m_vmcs_missing_registers.guest_dr6 = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_star: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_star: {
                     m_vmcs_missing_registers.guest_ia32_star = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_lstar: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_lstar: {
                     m_vmcs_missing_registers.guest_ia32_lstar = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_cstar: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_cstar: {
                     m_vmcs_missing_registers.guest_ia32_cstar = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_fmask: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_fmask: {
                     m_vmcs_missing_registers.guest_ia32_fmask = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_kernel_gs_base: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_kernel_gs_base: {
                     m_vmcs_missing_registers.guest_ia32_kernel_gs_base = val.get();
                     return bsl::errc_success;
                 }
@@ -2156,47 +2156,47 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_es_selector: {
+                case syscall::bf_reg_t::bf_reg_t_es_selector: {
                     mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_ES_SELECTOR, bsl::to_u16(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cs_selector: {
+                case syscall::bf_reg_t::bf_reg_t_cs_selector: {
                     mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_CS_SELECTOR, bsl::to_u16(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ss_selector: {
+                case syscall::bf_reg_t::bf_reg_t_ss_selector: {
                     mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_SS_SELECTOR, bsl::to_u16(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ds_selector: {
+                case syscall::bf_reg_t::bf_reg_t_ds_selector: {
                     mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_DS_SELECTOR, bsl::to_u16(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_fs_selector: {
+                case syscall::bf_reg_t::bf_reg_t_fs_selector: {
                     mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_FS_SELECTOR, bsl::to_u16(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_gs_selector: {
+                case syscall::bf_reg_t::bf_reg_t_gs_selector: {
                     mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_GS_SELECTOR, bsl::to_u16(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_selector: {
+                case syscall::bf_reg_t::bf_reg_t_ldtr_selector: {
                     mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_LDTR_SELECTOR, bsl::to_u16(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_tr_selector: {
+                case syscall::bf_reg_t::bf_reg_t_tr_selector: {
                     mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_TR_SELECTOR, bsl::to_u16(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_interrupt_status: {
+                case syscall::bf_reg_t::bf_reg_t_interrupt_status: {
                     mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_INTERRUPT_STATUS, bsl::to_u16(val));
                     break;
                 }
@@ -2339,7 +2339,7 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_physical_address: {
+                case syscall::bf_reg_t::bf_reg_t_physical_address: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PHYSICAL_ADDRESS, bsl::to_u64(val));
                     break;
                 }
@@ -2349,53 +2349,53 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_debugctl: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_debugctl: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IA32_DEBUGCTL, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_pat: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_pat: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IA32_PAT, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_efer: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_efer: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IA32_EFER, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_perf_global_ctrl: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_perf_global_ctrl: {
                     mut_ret =
                         mut_intrinsic.vmwr64(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_pdpte0: {
+                case syscall::bf_reg_t::bf_reg_t_pdpte0: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PDPTE0, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_pdpte1: {
+                case syscall::bf_reg_t::bf_reg_t_pdpte1: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PDPTE1, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_pdpte2: {
+                case syscall::bf_reg_t::bf_reg_t_pdpte2: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PDPTE2, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_pdpte3: {
+                case syscall::bf_reg_t::bf_reg_t_pdpte3: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PDPTE3, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_bndcfgs: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_bndcfgs: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IA32_BNDCFGS, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_rtit_ctl: {
+                case syscall::bf_reg_t::bf_reg_t_rtit_ctl: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_RTIT_CTL, bsl::to_u64(val));
                     break;
                 }
@@ -2543,113 +2543,113 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_es_limit: {
+                case syscall::bf_reg_t::bf_reg_t_es_limit: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_ES_LIMIT, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cs_limit: {
+                case syscall::bf_reg_t::bf_reg_t_cs_limit: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_CS_LIMIT, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ss_limit: {
+                case syscall::bf_reg_t::bf_reg_t_ss_limit: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_SS_LIMIT, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ds_limit: {
+                case syscall::bf_reg_t::bf_reg_t_ds_limit: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_DS_LIMIT, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_fs_limit: {
+                case syscall::bf_reg_t::bf_reg_t_fs_limit: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_FS_LIMIT, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_gs_limit: {
+                case syscall::bf_reg_t::bf_reg_t_gs_limit: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_GS_LIMIT, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_limit: {
+                case syscall::bf_reg_t::bf_reg_t_ldtr_limit: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_LDTR_LIMIT, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_tr_limit: {
+                case syscall::bf_reg_t::bf_reg_t_tr_limit: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_TR_LIMIT, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_gdtr_limit: {
+                case syscall::bf_reg_t::bf_reg_t_gdtr_limit: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_GDTR_LIMIT, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_idtr_limit: {
+                case syscall::bf_reg_t::bf_reg_t_idtr_limit: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_IDTR_LIMIT, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_es_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_es_attrib: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_ES_ACCESS_RIGHTS, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cs_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_cs_attrib: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_CS_ACCESS_RIGHTS, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ss_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_ss_attrib: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_SS_ACCESS_RIGHTS, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ds_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_ds_attrib: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_DS_ACCESS_RIGHTS, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_fs_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_fs_attrib: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_FS_ACCESS_RIGHTS, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_gs_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_gs_attrib: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_GS_ACCESS_RIGHTS, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_ldtr_attrib: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_LDTR_ACCESS_RIGHTS, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_tr_access_rights: {
+                case syscall::bf_reg_t::bf_reg_t_tr_attrib: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_TR_ACCESS_RIGHTS, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_interruptibility_state: {
+                case syscall::bf_reg_t::bf_reg_t_interruptibility_state: {
                     mut_ret =
                         mut_intrinsic.vmwr32(VMCS_GUEST_INTERRUPTIBILITY_STATE, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_activity_state: {
+                case syscall::bf_reg_t::bf_reg_t_activity_state: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_ACTIVITY_STATE, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_smbase: {
+                case syscall::bf_reg_t::bf_reg_t_smbase: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_SMBASE, bsl::to_u32(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_sysenter_cs: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_cs: {
                     mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_IA32_SYSENTER_CS, bsl::to_u32(val));
                     break;
                 }
@@ -2725,108 +2725,108 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_linear_address: {
+                case syscall::bf_reg_t::bf_reg_t_linear_address: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_LINEAR_ADDRESS, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cr0: {
+                case syscall::bf_reg_t::bf_reg_t_cr0: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CR0, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cr3: {
+                case syscall::bf_reg_t::bf_reg_t_cr3: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CR3, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cr4: {
+                case syscall::bf_reg_t::bf_reg_t_cr4: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CR4, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_es_base: {
+                case syscall::bf_reg_t::bf_reg_t_es_base: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_ES_BASE, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_cs_base: {
+                case syscall::bf_reg_t::bf_reg_t_cs_base: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CS_BASE, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ss_base: {
+                case syscall::bf_reg_t::bf_reg_t_ss_base: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_SS_BASE, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ds_base: {
+                case syscall::bf_reg_t::bf_reg_t_ds_base: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_DS_BASE, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_fs_base: {
+                case syscall::bf_reg_t::bf_reg_t_fs_base: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_FS_BASE, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_gs_base: {
+                case syscall::bf_reg_t::bf_reg_t_gs_base: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_GS_BASE, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ldtr_base: {
+                case syscall::bf_reg_t::bf_reg_t_ldtr_base: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_LDTR_BASE, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_tr_base: {
+                case syscall::bf_reg_t::bf_reg_t_tr_base: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_TR_BASE, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_gdtr_base: {
+                case syscall::bf_reg_t::bf_reg_t_gdtr_base: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_GDTR_BASE, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_idtr_base: {
+                case syscall::bf_reg_t::bf_reg_t_idtr_base: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IDTR_BASE, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_dr7: {
+                case syscall::bf_reg_t::bf_reg_t_dr7: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_DR7, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_rsp: {
+                case syscall::bf_reg_t::bf_reg_t_rsp: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_RSP, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_rip: {
+                case syscall::bf_reg_t::bf_reg_t_rip: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_RIP, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_rflags: {
+                case syscall::bf_reg_t::bf_reg_t_rflags: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_RFLAGS, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_pending_debug_exceptions: {
+                case syscall::bf_reg_t::bf_reg_t_pending_debug_exceptions: {
                     mut_ret =
                         mut_intrinsic.vmwr64(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_sysenter_esp: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_esp: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IA32_SYSENTER_ESP, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_guest_ia32_sysenter_eip: {
+                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_eip: {
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IA32_SYSENTER_EIP, bsl::to_u64(val));
                     break;
                 }
@@ -3223,14 +3223,14 @@ namespace mk
             this->dump_field("tr_limit ", intrinsic.vmrd32(VMCS_GUEST_TR_LIMIT));
             this->dump_field("gdtr_limit ", intrinsic.vmrd32(VMCS_GUEST_GDTR_LIMIT));
             this->dump_field("idtr_limit ", intrinsic.vmrd32(VMCS_GUEST_IDTR_LIMIT));
-            this->dump_field("es_access_rights ", intrinsic.vmrd32(VMCS_GUEST_ES_ACCESS_RIGHTS));
-            this->dump_field("cs_access_rights ", intrinsic.vmrd32(VMCS_GUEST_CS_ACCESS_RIGHTS));
-            this->dump_field("ss_access_rights ", intrinsic.vmrd32(VMCS_GUEST_SS_ACCESS_RIGHTS));
-            this->dump_field("ds_access_rights ", intrinsic.vmrd32(VMCS_GUEST_DS_ACCESS_RIGHTS));
-            this->dump_field("fs_access_rights ", intrinsic.vmrd32(VMCS_GUEST_FS_ACCESS_RIGHTS));
-            this->dump_field("gs_access_rights ", intrinsic.vmrd32(VMCS_GUEST_GS_ACCESS_RIGHTS));
-            this->dump_field("ldtr_access_rights ", intrinsic.vmrd32(VMCS_GUEST_LDTR_ACCESS_RIGHTS));
-            this->dump_field("tr_access_rights ", intrinsic.vmrd32(VMCS_GUEST_TR_ACCESS_RIGHTS));
+            this->dump_field("es_attrib ", intrinsic.vmrd32(VMCS_GUEST_ES_ACCESS_RIGHTS));
+            this->dump_field("cs_attrib ", intrinsic.vmrd32(VMCS_GUEST_CS_ACCESS_RIGHTS));
+            this->dump_field("ss_attrib ", intrinsic.vmrd32(VMCS_GUEST_SS_ACCESS_RIGHTS));
+            this->dump_field("ds_attrib ", intrinsic.vmrd32(VMCS_GUEST_DS_ACCESS_RIGHTS));
+            this->dump_field("fs_attrib ", intrinsic.vmrd32(VMCS_GUEST_FS_ACCESS_RIGHTS));
+            this->dump_field("gs_attrib ", intrinsic.vmrd32(VMCS_GUEST_GS_ACCESS_RIGHTS));
+            this->dump_field("ldtr_attrib ", intrinsic.vmrd32(VMCS_GUEST_LDTR_ACCESS_RIGHTS));
+            this->dump_field("tr_attrib ", intrinsic.vmrd32(VMCS_GUEST_TR_ACCESS_RIGHTS));
             this->dump_field("guest_interruptibility_state ", intrinsic.vmrd32(VMCS_GUEST_INTERRUPTIBILITY_STATE));
             this->dump_field("guest_activity_state ", intrinsic.vmrd32(VMCS_GUEST_ACTIVITY_STATE));
             this->dump_field("guest_smbase ", intrinsic.vmrd32(VMCS_GUEST_SMBASE));

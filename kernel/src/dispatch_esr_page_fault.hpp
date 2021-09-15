@@ -51,6 +51,9 @@ namespace mk
         tls_t &mut_tls, page_pool_t &mut_page_pool, ext_t *const pmut_ext) noexcept
         -> bsl::errc_type
     {
+        constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
+        constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_DIRECT_MAP_SIZE).checked()};
+
         /// NOTE:
         /// - When the microkernel is still bootstrapping, the pmut_ext field in
         ///   the TLS has not yet been set, so pmut_ext could actually be a
@@ -61,7 +64,16 @@ namespace mk
             return bsl::errc_failure;
         }
 
-        return pmut_ext->map_page_direct(mut_tls, mut_page_pool, bsl::to_umx(mut_tls.esr_pf_addr));
+        auto const virt{bsl::to_umx(mut_tls.esr_pf_addr)};
+        if (bsl::unlikely(virt <= min_addr)) {
+            return bsl::errc_failure;
+        }
+
+        if (bsl::unlikely(virt >= max_addr)) {
+            return bsl::errc_failure;
+        }
+
+        return pmut_ext->map_page_direct(mut_tls, mut_page_pool, virt);
     }
 }
 
