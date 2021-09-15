@@ -70,20 +70,20 @@ namespace syscall
         bf_reg_t_r14 = static_cast<bsl::uint64>(14),
         /// @brief defines the r15 register
         bf_reg_t_r15 = static_cast<bsl::uint64>(15),
-        /// @brief defines the bf_reg_t_guest_cr2 register
-        bf_reg_t_guest_cr2 = static_cast<bsl::uint64>(16),
-        /// @brief defines the bf_reg_t_guest_dr6 register
-        bf_reg_t_guest_dr6 = static_cast<bsl::uint64>(17),
-        /// @brief defines the bf_reg_t_guest_ia32_star register
-        bf_reg_t_guest_ia32_star = static_cast<bsl::uint64>(18),
-        /// @brief defines the bf_reg_t_guest_ia32_lstar register
-        bf_reg_t_guest_ia32_lstar = static_cast<bsl::uint64>(19),
-        /// @brief defines the bf_reg_t_guest_ia32_cstar register
-        bf_reg_t_guest_ia32_cstar = static_cast<bsl::uint64>(20),
-        /// @brief defines the bf_reg_t_guest_ia32_fmask register
-        bf_reg_t_guest_ia32_fmask = static_cast<bsl::uint64>(21),
-        /// @brief defines the bf_reg_t_guest_ia32_kernel_gs_base register
-        bf_reg_t_guest_ia32_kernel_gs_base = static_cast<bsl::uint64>(22),
+        /// @brief defines the bf_reg_t_cr2 register
+        bf_reg_t_cr2 = static_cast<bsl::uint64>(16),
+        /// @brief defines the bf_reg_t_dr6 register
+        bf_reg_t_dr6 = static_cast<bsl::uint64>(17),
+        /// @brief defines the bf_reg_t_ia32_star register
+        bf_reg_t_ia32_star = static_cast<bsl::uint64>(18),
+        /// @brief defines the bf_reg_t_ia32_lstar register
+        bf_reg_t_ia32_lstar = static_cast<bsl::uint64>(19),
+        /// @brief defines the bf_reg_t_ia32_cstar register
+        bf_reg_t_ia32_cstar = static_cast<bsl::uint64>(20),
+        /// @brief defines the bf_reg_t_ia32_fmask register
+        bf_reg_t_ia32_fmask = static_cast<bsl::uint64>(21),
+        /// @brief defines the bf_reg_t_ia32_kernel_gs_base register
+        bf_reg_t_ia32_kernel_gs_base = static_cast<bsl::uint64>(22),
         /// @brief defines the virtual_processor_identifier register
         bf_reg_t_virtual_processor_identifier = static_cast<bsl::uint64>(23),
         /// @brief defines the posted_interrupt_notification_vector register
@@ -91,23 +91,23 @@ namespace syscall
         /// @brief defines the eptp_index register
         bf_reg_t_eptp_index = static_cast<bsl::uint64>(25),
         /// @brief defines the guest_es_selector register
-        bf_reg_t_guest_es_selector = static_cast<bsl::uint64>(26),
+        bf_reg_t_es_selector = static_cast<bsl::uint64>(26),
         /// @brief defines the guest_cs_selector register
-        bf_reg_t_guest_cs_selector = static_cast<bsl::uint64>(27),
+        bf_reg_t_cs_selector = static_cast<bsl::uint64>(27),
         /// @brief defines the guest_ss_selector register
-        bf_reg_t_guest_ss_selector = static_cast<bsl::uint64>(28),
+        bf_reg_t_ss_selector = static_cast<bsl::uint64>(28),
         /// @brief defines the guest_ds_selector register
-        bf_reg_t_guest_ds_selector = static_cast<bsl::uint64>(29),
+        bf_reg_t_ds_selector = static_cast<bsl::uint64>(29),
         /// @brief defines the guest_fs_selector register
-        bf_reg_t_guest_fs_selector = static_cast<bsl::uint64>(30),
+        bf_reg_t_fs_selector = static_cast<bsl::uint64>(30),
         /// @brief defines the guest_gs_selector register
-        bf_reg_t_guest_gs_selector = static_cast<bsl::uint64>(31),
+        bf_reg_t_gs_selector = static_cast<bsl::uint64>(31),
         /// @brief defines the guest_ldtr_selector register
-        bf_reg_t_guest_ldtr_selector = static_cast<bsl::uint64>(32),
+        bf_reg_t_ldtr_selector = static_cast<bsl::uint64>(32),
         /// @brief defines the guest_tr_selector register
-        bf_reg_t_guest_tr_selector = static_cast<bsl::uint64>(33),
+        bf_reg_t_tr_selector = static_cast<bsl::uint64>(33),
         /// @brief defines the guest_interrupt_status register
-        bf_reg_t_guest_interrupt_status = static_cast<bsl::uint64>(34),
+        bf_reg_t_interrupt_status = static_cast<bsl::uint64>(34),
         /// @brief defines the pml_index register
         bf_reg_t_pml_index = static_cast<bsl::uint64>(35),
         /// @brief defines the address_of_io_bitmap_a register
@@ -163,29 +163,29 @@ namespace syscall
         /// @brief defines the tls_multiplier register
         bf_reg_t_tls_multiplier = static_cast<bsl::uint64>(61),
         /// @brief defines the guest_physical_address register
-        bf_reg_t_guest_physical_address = static_cast<bsl::uint64>(62),
+        bf_reg_t_physical_address = static_cast<bsl::uint64>(62),
         /// @brief defines the vmcs_link_pointer register
         bf_reg_t_vmcs_link_pointer = static_cast<bsl::uint64>(63),
         /// @brief defines the guest_ia32_debugctl register
-        bf_reg_t_guest_ia32_debugctl = static_cast<bsl::uint64>(64),
+        bf_reg_t_ia32_debugctl = static_cast<bsl::uint64>(64),
         /// @brief defines the guest_ia32_pat register
-        bf_reg_t_guest_ia32_pat = static_cast<bsl::uint64>(65),
+        bf_reg_t_ia32_pat = static_cast<bsl::uint64>(65),
         /// @brief defines the guest_ia32_efer register
-        bf_reg_t_guest_ia32_efer = static_cast<bsl::uint64>(66),
+        bf_reg_t_ia32_efer = static_cast<bsl::uint64>(66),
         /// @brief defines the guest_ia32_perf_global_ctrl register
-        bf_reg_t_guest_ia32_perf_global_ctrl = static_cast<bsl::uint64>(67),
+        bf_reg_t_ia32_perf_global_ctrl = static_cast<bsl::uint64>(67),
         /// @brief defines the guest_pdpte0 register
-        bf_reg_t_guest_pdpte0 = static_cast<bsl::uint64>(68),
+        bf_reg_t_pdpte0 = static_cast<bsl::uint64>(68),
         /// @brief defines the guest_pdpte1 register
-        bf_reg_t_guest_pdpte1 = static_cast<bsl::uint64>(69),
+        bf_reg_t_pdpte1 = static_cast<bsl::uint64>(69),
         /// @brief defines the guest_pdpte2 register
-        bf_reg_t_guest_pdpte2 = static_cast<bsl::uint64>(70),
+        bf_reg_t_pdpte2 = static_cast<bsl::uint64>(70),
         /// @brief defines the guest_pdpte3 register
-        bf_reg_t_guest_pdpte3 = static_cast<bsl::uint64>(71),
+        bf_reg_t_pdpte3 = static_cast<bsl::uint64>(71),
         /// @brief defines the guest_ia32_bndcfgs register
-        bf_reg_t_guest_ia32_bndcfgs = static_cast<bsl::uint64>(72),
+        bf_reg_t_ia32_bndcfgs = static_cast<bsl::uint64>(72),
         /// @brief defines the guest_rtit_ctl register
-        bf_reg_t_guest_rtit_ctl = static_cast<bsl::uint64>(73),
+        bf_reg_t_rtit_ctl = static_cast<bsl::uint64>(73),
         /// @brief defines the pin_based_vm_execution_ctls register
         bf_reg_t_pin_based_vm_execution_ctls = static_cast<bsl::uint64>(74),
         /// @brief defines the primary_proc_based_vm_execution_ctls register
@@ -239,50 +239,50 @@ namespace syscall
         /// @brief defines the vmexit_instruction_information register
         bf_reg_t_vmexit_instruction_information = static_cast<bsl::uint64>(99),
         /// @brief defines the guest_es_limit register
-        bf_reg_t_guest_es_limit = static_cast<bsl::uint64>(100),
+        bf_reg_t_es_limit = static_cast<bsl::uint64>(100),
         /// @brief defines the guest_cs_limit register
-        bf_reg_t_guest_cs_limit = static_cast<bsl::uint64>(101),
+        bf_reg_t_cs_limit = static_cast<bsl::uint64>(101),
         /// @brief defines the guest_ss_limit register
-        bf_reg_t_guest_ss_limit = static_cast<bsl::uint64>(102),
+        bf_reg_t_ss_limit = static_cast<bsl::uint64>(102),
         /// @brief defines the guest_ds_limit register
-        bf_reg_t_guest_ds_limit = static_cast<bsl::uint64>(103),
+        bf_reg_t_ds_limit = static_cast<bsl::uint64>(103),
         /// @brief defines the guest_fs_limit register
-        bf_reg_t_guest_fs_limit = static_cast<bsl::uint64>(104),
+        bf_reg_t_fs_limit = static_cast<bsl::uint64>(104),
         /// @brief defines the guest_gs_limit register
-        bf_reg_t_guest_gs_limit = static_cast<bsl::uint64>(105),
+        bf_reg_t_gs_limit = static_cast<bsl::uint64>(105),
         /// @brief defines the guest_ldtr_limit register
-        bf_reg_t_guest_ldtr_limit = static_cast<bsl::uint64>(106),
+        bf_reg_t_ldtr_limit = static_cast<bsl::uint64>(106),
         /// @brief defines the guest_tr_limit register
-        bf_reg_t_guest_tr_limit = static_cast<bsl::uint64>(107),
+        bf_reg_t_tr_limit = static_cast<bsl::uint64>(107),
         /// @brief defines the guest_gdtr_limit register
-        bf_reg_t_guest_gdtr_limit = static_cast<bsl::uint64>(108),
+        bf_reg_t_gdtr_limit = static_cast<bsl::uint64>(108),
         /// @brief defines the guest_idtr_limit register
         // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
-        bf_reg_t_guest_idtr_limit = static_cast<bsl::uint64>(109),
-        /// @brief defines the guest_es_access_rights register
-        bf_reg_t_guest_es_access_rights = static_cast<bsl::uint64>(110),
-        /// @brief defines the guest_cs_access_rights register
-        bf_reg_t_guest_cs_access_rights = static_cast<bsl::uint64>(111),
-        /// @brief defines the guest_ss_access_rights register
-        bf_reg_t_guest_ss_access_rights = static_cast<bsl::uint64>(112),
-        /// @brief defines the guest_ds_access_rights register
-        bf_reg_t_guest_ds_access_rights = static_cast<bsl::uint64>(113),
-        /// @brief defines the guest_fs_access_rights register
-        bf_reg_t_guest_fs_access_rights = static_cast<bsl::uint64>(114),
-        /// @brief defines the guest_gs_access_rights register
-        bf_reg_t_guest_gs_access_rights = static_cast<bsl::uint64>(115),
-        /// @brief defines the guest_ldtr_access_rights register
-        bf_reg_t_guest_ldtr_access_rights = static_cast<bsl::uint64>(116),
-        /// @brief defines the guest_tr_access_rights register
-        bf_reg_t_guest_tr_access_rights = static_cast<bsl::uint64>(117),
+        bf_reg_t_idtr_limit = static_cast<bsl::uint64>(109),
+        /// @brief defines the guest_es_attrib register
+        bf_reg_t_es_attrib = static_cast<bsl::uint64>(110),
+        /// @brief defines the guest_cs_attrib register
+        bf_reg_t_cs_attrib = static_cast<bsl::uint64>(111),
+        /// @brief defines the guest_ss_attrib register
+        bf_reg_t_ss_attrib = static_cast<bsl::uint64>(112),
+        /// @brief defines the guest_ds_attrib register
+        bf_reg_t_ds_attrib = static_cast<bsl::uint64>(113),
+        /// @brief defines the guest_fs_attrib register
+        bf_reg_t_fs_attrib = static_cast<bsl::uint64>(114),
+        /// @brief defines the guest_gs_attrib register
+        bf_reg_t_gs_attrib = static_cast<bsl::uint64>(115),
+        /// @brief defines the guest_ldtr_attrib register
+        bf_reg_t_ldtr_attrib = static_cast<bsl::uint64>(116),
+        /// @brief defines the guest_tr_attrib register
+        bf_reg_t_tr_attrib = static_cast<bsl::uint64>(117),
         /// @brief defines the guest_interruptibility_state register
-        bf_reg_t_guest_interruptibility_state = static_cast<bsl::uint64>(118),
+        bf_reg_t_interruptibility_state = static_cast<bsl::uint64>(118),
         /// @brief defines the guest_activity_state register
-        bf_reg_t_guest_activity_state = static_cast<bsl::uint64>(119),
+        bf_reg_t_activity_state = static_cast<bsl::uint64>(119),
         /// @brief defines the guest_smbase register
-        bf_reg_t_guest_smbase = static_cast<bsl::uint64>(120),
+        bf_reg_t_smbase = static_cast<bsl::uint64>(120),
         /// @brief defines the guest_ia32_sysenter_cs register
-        bf_reg_t_guest_ia32_sysenter_cs = static_cast<bsl::uint64>(121),
+        bf_reg_t_ia32_sysenter_cs = static_cast<bsl::uint64>(121),
         /// @brief defines the vmx_preemption_timer_value register
         bf_reg_t_vmx_preemption_timer_value = static_cast<bsl::uint64>(122),
         /// @brief defines the cr0_guest_host_mask register
@@ -312,48 +312,48 @@ namespace syscall
         /// @brief defines the io_rip register
         bf_reg_t_io_rip = static_cast<bsl::uint64>(135),
         /// @brief defines the guest_linear_address register
-        bf_reg_t_guest_linear_address = static_cast<bsl::uint64>(136),
+        bf_reg_t_linear_address = static_cast<bsl::uint64>(136),
         /// @brief defines the guest_cr0 register
-        bf_reg_t_guest_cr0 = static_cast<bsl::uint64>(137),
+        bf_reg_t_cr0 = static_cast<bsl::uint64>(137),
         /// @brief defines the guest_cr3 register
-        bf_reg_t_guest_cr3 = static_cast<bsl::uint64>(138),
+        bf_reg_t_cr3 = static_cast<bsl::uint64>(138),
         /// @brief defines the guest_cr4 register
-        bf_reg_t_guest_cr4 = static_cast<bsl::uint64>(139),
+        bf_reg_t_cr4 = static_cast<bsl::uint64>(139),
         /// @brief defines the guest_es_base register
-        bf_reg_t_guest_es_base = static_cast<bsl::uint64>(140),
+        bf_reg_t_es_base = static_cast<bsl::uint64>(140),
         /// @brief defines the guest_cs_base register
-        bf_reg_t_guest_cs_base = static_cast<bsl::uint64>(141),
+        bf_reg_t_cs_base = static_cast<bsl::uint64>(141),
         /// @brief defines the guest_ss_base register
-        bf_reg_t_guest_ss_base = static_cast<bsl::uint64>(142),
+        bf_reg_t_ss_base = static_cast<bsl::uint64>(142),
         /// @brief defines the guest_ds_base register
-        bf_reg_t_guest_ds_base = static_cast<bsl::uint64>(143),
+        bf_reg_t_ds_base = static_cast<bsl::uint64>(143),
         /// @brief defines the guest_fs_base register
-        bf_reg_t_guest_fs_base = static_cast<bsl::uint64>(144),
+        bf_reg_t_fs_base = static_cast<bsl::uint64>(144),
         /// @brief defines the guest_gs_base register
-        bf_reg_t_guest_gs_base = static_cast<bsl::uint64>(145),
+        bf_reg_t_gs_base = static_cast<bsl::uint64>(145),
         /// @brief defines the guest_ldtr_base register
-        bf_reg_t_guest_ldtr_base = static_cast<bsl::uint64>(146),
+        bf_reg_t_ldtr_base = static_cast<bsl::uint64>(146),
         /// @brief defines the guest_tr_base register
-        bf_reg_t_guest_tr_base = static_cast<bsl::uint64>(147),
+        bf_reg_t_tr_base = static_cast<bsl::uint64>(147),
         /// @brief defines the guest_gdtr_base register
-        bf_reg_t_guest_gdtr_base = static_cast<bsl::uint64>(148),
+        bf_reg_t_gdtr_base = static_cast<bsl::uint64>(148),
         /// @brief defines the guest_idtr_base register
         // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
-        bf_reg_t_guest_idtr_base = static_cast<bsl::uint64>(149),
+        bf_reg_t_idtr_base = static_cast<bsl::uint64>(149),
         /// @brief defines the guest_dr7 register
-        bf_reg_t_guest_dr7 = static_cast<bsl::uint64>(150),
+        bf_reg_t_dr7 = static_cast<bsl::uint64>(150),
         /// @brief defines the guest_rsp register
-        bf_reg_t_guest_rsp = static_cast<bsl::uint64>(151),
+        bf_reg_t_rsp = static_cast<bsl::uint64>(151),
         /// @brief defines the guest_rip register
-        bf_reg_t_guest_rip = static_cast<bsl::uint64>(152),
+        bf_reg_t_rip = static_cast<bsl::uint64>(152),
         /// @brief defines the guest_rflags register
-        bf_reg_t_guest_rflags = static_cast<bsl::uint64>(153),
+        bf_reg_t_rflags = static_cast<bsl::uint64>(153),
         /// @brief defines the guest_pending_debug_exceptions register
-        bf_reg_t_guest_pending_debug_exceptions = static_cast<bsl::uint64>(154),
+        bf_reg_t_pending_debug_exceptions = static_cast<bsl::uint64>(154),
         /// @brief defines the guest_ia32_sysenter_esp register
-        bf_reg_t_guest_ia32_sysenter_esp = static_cast<bsl::uint64>(155),
+        bf_reg_t_ia32_sysenter_esp = static_cast<bsl::uint64>(155),
         /// @brief defines the guest_ia32_sysenter_eip register
-        bf_reg_t_guest_ia32_sysenter_eip = static_cast<bsl::uint64>(156),
+        bf_reg_t_ia32_sysenter_eip = static_cast<bsl::uint64>(156),
         /// @brief defines an invalid bf_reg_t
         bf_reg_t_invalid = static_cast<bsl::uint64>(BF_MAX_REG_T)
     };

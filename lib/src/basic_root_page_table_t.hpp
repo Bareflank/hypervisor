@@ -27,7 +27,13 @@
 
 #if __has_include("root_page_table_helpers.hpp")
 #include "root_page_table_helpers.hpp"    // IWYU pragma: export
-#else
+#endif
+
+#if __has_include("second_level_page_table_helpers.hpp")
+#include "second_level_page_table_helpers.hpp"    // IWYU pragma: export
+#endif
+
+#if __has_include("basic_root_page_table_helpers.hpp")
 #include "basic_root_page_table_helpers.hpp"    // IWYU pragma: export
 #endif
 

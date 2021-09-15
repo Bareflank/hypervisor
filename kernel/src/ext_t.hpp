@@ -1444,21 +1444,15 @@ namespace mk
             tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_umx const &page_virt) noexcept
             -> bsl::errc_type
         {
-            constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
-            constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_DIRECT_MAP_SIZE).checked()};
-
             bsl::expects(bsl::to_umx(mut_tls.active_vmid) < m_direct_map_rpts.size());
             bsl::expects(page_virt.is_valid_and_checked());
-            bsl::expects(page_virt.is_pos());
-            bsl::expects(page_virt >= min_addr);
-            bsl::expects(page_virt <= max_addr);
 
             auto *const pmut_direct_map_rpt{
                 m_direct_map_rpts.at_if(bsl::to_idx(mut_tls.active_vmid))};
             bsl::expects(nullptr != pmut_direct_map_rpt);
 
             auto const aligned_virt{syscall::bf_page_aligned(page_virt)};
-            auto const aligned_phys{(page_virt - min_addr).checked()};
+            auto const aligned_phys{(page_virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR).checked()};
 
             /// NOTE:
             /// - The validity of page_virt is performed above which is why

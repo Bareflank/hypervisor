@@ -76,7 +76,7 @@ jobs:
     - name: Setup
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang cmake ninja-build
+        sudo apt-get install -y clang lld cmake ninja-build
       shell: bash
     - name: Validate Compliance
       run: |
@@ -173,7 +173,7 @@ jobs:
     - name: Setup
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang cmake ninja-build llvm
+        sudo apt-get install -y clang lld cmake ninja-build llvm
         wget https://github.com/mozilla/grcov/releases/download/v0.8.0/grcov-linux-x86_64.tar.bz2
         tar xvf grcov-linux-x86_64.tar.bz2
         sudo mv grcov /usr/bin/
