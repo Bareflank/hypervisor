@@ -66,8 +66,10 @@ namespace lib
     /// <!-- template parameters -->
     ///   @tparam TLS_TYPE the type of TLS block to use
     ///   @tparam SYS_TYPE the type of bf_syscall_t to use
+    ///   @tparam MAP_ADDR the starting address of the address space
+    ///   @tparam MAP_SIZE the max size of the address space
     ///
-    template<typename TLS_TYPE, typename SYS_TYPE = bsl::dontcare_t>
+    template<typename TLS_TYPE, typename SYS_TYPE, bsl::uintmx MAP_ADDR, bsl::uintmx MAP_SIZE>
     class basic_page_pool_t final
     {
         /// @brief stores the head of the basic_page_pool_t.
@@ -89,8 +91,8 @@ namespace lib
         [[nodiscard]] constexpr auto
         virt_to_phys(bsl::safe_umx const &virt) const noexcept -> bsl::safe_umx
         {
-            constexpr auto min_addr{HYPERVISOR_MK_DIRECT_MAP_ADDR};
-            constexpr auto max_addr{(min_addr + HYPERVISOR_MK_DIRECT_MAP_SIZE).checked()};
+            constexpr bsl::safe_umx min_addr{MAP_ADDR};
+            constexpr bsl::safe_umx max_addr{(min_addr + MAP_SIZE).checked()};
 
             bsl::expects(virt.is_valid_and_checked());
             bsl::expects(virt.is_pos());
@@ -112,9 +114,9 @@ namespace lib
         {
             bsl::expects(phys.is_valid_and_checked());
             bsl::expects(phys.is_pos());
-            bsl::expects(phys < HYPERVISOR_MK_DIRECT_MAP_SIZE);
+            bsl::expects(phys < MAP_SIZE);
 
-            return (phys + HYPERVISOR_MK_DIRECT_MAP_ADDR).checked();
+            return (phys + MAP_ADDR).checked();
         }
 
         /// <!-- description -->
@@ -173,18 +175,18 @@ namespace lib
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of pointer to allocate
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param mut_sys the bf_syscall_t to use
         ///   @return Returns a pointer to the newly allocated page
         ///
         template<typename T>
         [[nodiscard]] constexpr auto
-        allocate(TLS_TYPE &mut_tls, SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> T *
+        allocate(TLS_TYPE const &tls, SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> T *
         {
             static_assert(bsl::is_pod<T>::value);
             static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);
 
-            basic_lock_guard_t mut_lock{mut_tls, m_lock};
+            basic_lock_guard_t mut_lock{tls, m_lock};
 
             if (bsl::unlikely(nullptr == m_head)) {
                 m_head = helpers::add_to_page_pool(mut_sys);
@@ -229,18 +231,18 @@ namespace lib
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of pointer to deallocate
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param pmut_virt the pointer to the page to deallocate
         ///
         template<typename T>
         constexpr void
-        deallocate(TLS_TYPE &mut_tls, T *const pmut_virt) noexcept
+        deallocate(TLS_TYPE const &tls, T *const pmut_virt) noexcept
         {
             static_assert(bsl::is_pod<T>::value);
             static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);
 
             bsl::expects(nullptr != pmut_virt);
-            basic_lock_guard_t mut_lock{mut_tls, m_lock};
+            basic_lock_guard_t mut_lock{tls, m_lock};
 
             /// NOTE:
             /// - To deallocate, we simply do the reverse, again treating
@@ -273,13 +275,13 @@ namespace lib
         ///   @brief Returns the number of bytes allocated.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @return Returns the number of bytes allocated.
         ///
         [[nodiscard]] constexpr auto
-        allocated(TLS_TYPE &mut_tls) const noexcept -> bsl::safe_umx
+        allocated(TLS_TYPE const &tls) const noexcept -> bsl::safe_umx
         {
-            basic_lock_guard_t mut_lock{mut_tls, m_lock};
+            basic_lock_guard_t mut_lock{tls, m_lock};
             return this->allocated();
         }
 
@@ -287,13 +289,13 @@ namespace lib
         ///   @brief Returns this->size() - this->allocated().
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @return Returns this->size() - this->allocated().
         ///
         [[nodiscard]] constexpr auto
-        remaining(TLS_TYPE &mut_tls) const noexcept -> bsl::safe_umx
+        remaining(TLS_TYPE const &tls) const noexcept -> bsl::safe_umx
         {
-            basic_lock_guard_t mut_lock{mut_tls, m_lock};
+            basic_lock_guard_t mut_lock{tls, m_lock};
             return this->remaining();
         }
 
@@ -339,12 +341,12 @@ namespace lib
         ///   @brief Dumps the basic_page_pool_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///
         constexpr void
-        dump(TLS_TYPE &mut_tls) const noexcept
+        dump(TLS_TYPE const &tls) const noexcept
         {
-            basic_lock_guard_t mut_lock{mut_tls, m_lock};
+            basic_lock_guard_t mut_lock{tls, m_lock};
 
             constexpr auto kb{1024_umx};
             constexpr auto mb{kb * kb};

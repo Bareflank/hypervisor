@@ -30,10 +30,16 @@
 #include <basic_page_pool_t.hpp>
 #include <tls_t.hpp>
 
+#include <bsl/dontcare_t.hpp>
+
 namespace mk
 {
     /// @brief defines the page_pool_t used by the microkernel
-    using page_pool_t = lib::basic_page_pool_t<tls_t>;
+    using page_pool_t = lib::basic_page_pool_t<
+        tls_t,
+        bsl::dontcare_t,
+        HYPERVISOR_MK_DIRECT_MAP_ADDR.get(),
+        HYPERVISOR_MK_DIRECT_MAP_SIZE.get()>;
 }
 
 #endif
