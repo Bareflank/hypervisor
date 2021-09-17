@@ -29,8 +29,10 @@ hypervisor_silence(CMAKE_CXX_COMPILER)
 hypervisor_silence(CMAKE_INSTALL_MESSAGE)
 
 hypervisor_silence(bsl_SOURCE_DIR)
+hypervisor_silence(hypervisor_SOURCE_DIR)
 hypervisor_silence(FETCHCONTENT_UPDATES_DISCONNECTED)
 hypervisor_silence(FETCHCONTENT_SOURCE_DIR_BSL)
+hypervisor_silence(FETCHCONTENT_SOURCE_DIR_HYPERVISOR)
 
 hypervisor_silence(BUILD_EXAMPLES)
 hypervisor_silence(BUILD_TESTS)

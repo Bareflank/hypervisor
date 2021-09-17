@@ -28,13 +28,21 @@
 #include <tls_t.hpp>
 
 #include <bsl/discard.hpp>
+#include <bsl/dontcare_t.hpp>
+#include <bsl/safe_integral.hpp>
 #include <bsl/span.hpp>
 #include <bsl/ut.hpp>
 
 namespace
 {
+    using pool_t = lib::basic_page_pool_t<
+        lib::tls_t,
+        bsl::dontcare_t,
+        HYPERVISOR_MK_DIRECT_MAP_ADDR.get(),
+        HYPERVISOR_MK_DIRECT_MAP_SIZE.get()>;
+
     /// @brief verify constinit it supported
-    constinit lib::basic_page_pool_t<lib::tls_t> const g_verify_constinit{};
+    constinit pool_t const g_verify_constinit{};
 }
 
 /// <!-- description -->
@@ -54,13 +62,13 @@ main() noexcept -> bsl::exit_code
 
     bsl::ut_scenario{"verify noexcept"} = []() noexcept {
         bsl::ut_given{} = []() noexcept {
-            lib::basic_page_pool_t<lib::tls_t> mut_pool{};
-            lib::basic_page_pool_t<lib::tls_t> const pool{};
+            pool_t mut_pool{};
+            pool_t const pool{};
             bsl::span<lib::basic_page_pool_node_t> mut_view{};
             lib::tls_t mut_tls{};
             lib::basic_page_4k_t mut_page{};
             bsl::ut_then{} = []() noexcept {
-                static_assert(noexcept(lib::basic_page_pool_t<lib::tls_t>{}));
+                static_assert(noexcept(pool_t{}));
 
                 static_assert(noexcept(mut_pool.initialize(mut_view)));
                 static_assert(noexcept(mut_pool.allocate<lib::basic_page_4k_t>(mut_tls)));

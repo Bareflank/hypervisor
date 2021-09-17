@@ -53,7 +53,7 @@ namespace lib
     ///     be spare in their layout the virtual addresses of each page are
     ///     based on their physical address as they are in the direct map.
     ///     This spare nature of the pages is not a requirement of the page
-    ///     mut_pool. All the basic_page_pool_t<tls_t, bool> cares about is that it is given a linked
+    ///     mut_pool. All the pool_t cares about is that it is given a linked
     ///     list of pages. How those pages are layed out in memory does not
     ///     matter, so in the case of the unit test, we use a simple array.
     ///
@@ -83,9 +83,15 @@ namespace lib
     [[nodiscard]] constexpr auto
     tests() noexcept -> bsl::exit_code
     {
+        using pool_t = basic_page_pool_t<
+            tls_t,
+            bool,
+            HYPERVISOR_MK_DIRECT_MAP_ADDR.get(),
+            HYPERVISOR_MK_DIRECT_MAP_SIZE.get()>;
+
         bsl::ut_scenario{"allocate empty"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                basic_page_pool_t<tls_t, bool> mut_page_pool{};
+                pool_t mut_page_pool{};
                 bsl::span<basic_page_pool_node_t> mut_view{};
                 tls_t mut_tls{};
                 bool mut_return_nullptr{true};
@@ -102,7 +108,7 @@ namespace lib
 
         bsl::ut_scenario{"allocate until empty"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                basic_page_pool_t<tls_t, bool> mut_page_pool{};
+                pool_t mut_page_pool{};
                 bsl::array<basic_page_pool_node_t, POOL_SIZE.get()> mut_pool{};
                 bsl::span mut_view{mut_pool};
                 tls_t mut_tls{};
@@ -127,7 +133,7 @@ namespace lib
 
         bsl::ut_scenario{"allocate until empty, then alloc more"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                basic_page_pool_t<tls_t, bool> mut_page_pool{};
+                pool_t mut_page_pool{};
                 bsl::array<basic_page_pool_node_t, POOL_SIZE.get()> mut_pool{};
                 bsl::span mut_view{mut_pool};
                 tls_t mut_tls{};
@@ -155,7 +161,7 @@ namespace lib
 
         bsl::ut_scenario{"deallocate"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                basic_page_pool_t<tls_t, bool> mut_page_pool{};
+                pool_t mut_page_pool{};
                 bsl::array<basic_page_pool_node_t, POOL_SIZE.get()> mut_pool{};
                 bsl::span mut_view{mut_pool};
                 tls_t mut_tls{};
@@ -180,7 +186,7 @@ namespace lib
 
         bsl::ut_scenario{"size"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                basic_page_pool_t<tls_t, bool> mut_page_pool{};
+                pool_t mut_page_pool{};
                 bsl::array<basic_page_pool_node_t, POOL_SIZE.get()> mut_pool{};
                 bsl::span mut_view{mut_pool};
                 auto const expected_size{(mut_pool.size() * HYPERVISOR_PAGE_SIZE).checked()};
@@ -200,7 +206,7 @@ namespace lib
 
         bsl::ut_scenario{"allocated"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                basic_page_pool_t<tls_t, bool> mut_page_pool{};
+                pool_t mut_page_pool{};
                 bsl::array<basic_page_pool_node_t, POOL_SIZE.get()> mut_pool{};
                 bsl::span mut_view{mut_pool};
                 tls_t mut_tls{};
@@ -236,7 +242,7 @@ namespace lib
 
         bsl::ut_scenario{"remaining"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                basic_page_pool_t<tls_t, bool> mut_page_pool{};
+                pool_t mut_page_pool{};
                 bsl::array<basic_page_pool_node_t, POOL_SIZE.get()> mut_pool{};
                 bsl::span mut_view{mut_pool};
                 tls_t mut_tls{};
@@ -272,7 +278,7 @@ namespace lib
 
         bsl::ut_scenario{"virt_to_phys"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                basic_page_pool_t<tls_t, bool> const page_pool{};
+                pool_t const page_pool{};
                 constexpr auto min_addr{HYPERVISOR_MK_DIRECT_MAP_ADDR};
                 bsl::safe_umx const virt{(min_addr + HYPERVISOR_PAGE_SIZE).checked()};
                 bsl::safe_umx const phys{(virt - min_addr).checked()};
@@ -286,7 +292,7 @@ namespace lib
 
         bsl::ut_scenario{"phys_to_virt"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                basic_page_pool_t<tls_t, bool> const page_pool{};
+                pool_t const page_pool{};
                 constexpr auto min_addr{HYPERVISOR_MK_DIRECT_MAP_ADDR};
                 bsl::safe_umx const virt{(min_addr + HYPERVISOR_PAGE_SIZE).checked()};
                 bsl::safe_umx const phys{(virt - min_addr).checked()};
@@ -300,7 +306,7 @@ namespace lib
 
         bsl::ut_scenario{"dump"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                basic_page_pool_t<tls_t, bool> mut_page_pool{};
+                pool_t mut_page_pool{};
                 bsl::array<basic_page_pool_node_t, POOL_SIZE.get()> mut_pool{};
                 bsl::span mut_view{mut_pool};
                 tls_t mut_tls{};
@@ -318,7 +324,7 @@ namespace lib
             };
 
             bsl::ut_given_at_runtime{} = []() noexcept {
-                basic_page_pool_t<tls_t, bool> mut_page_pool{};
+                pool_t mut_page_pool{};
                 bsl::span mut_view{g_mut_pool};
                 tls_t mut_tls{};
                 bool mut_return_nullptr{true};

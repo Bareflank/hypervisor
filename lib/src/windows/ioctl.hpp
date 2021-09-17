@@ -266,7 +266,11 @@ namespace lib
         send(bsl::safe_umx const &req) const noexcept -> bsl::safe_i64
         {
             DWORD bytes{};
-            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
+
+            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
+                return bsl::safe_i64::magic_neg_1();
+            }
 
             auto const ret{
                 DeviceIoControl(m_hndl, req32.get(), nullptr, 0, nullptr, 0, &bytes, nullptr)};
@@ -294,8 +298,12 @@ namespace lib
         read(bsl::safe_umx const &req, T *const pmut_data) const noexcept -> bsl::safe_i64
         {
             DWORD bytes{};
-            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
             bsl::expects(nullptr != pmut_data);
+
+            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
+                return bsl::safe_i64::magic_neg_1();
+            }
 
             auto const req32{bsl::to_u32(req)};
             bsl::expects(req32.is_invalid());
@@ -331,8 +339,12 @@ namespace lib
             void *const pmut_ptr{const_cast<void *>(data)};
 
             DWORD bytes{};
-            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
             bsl::expects(nullptr != pmut_data);
+
+            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
+                return bsl::safe_i64::magic_neg_1();
+            }
 
             auto const req32{bsl::to_u32(req)};
             bsl::expects(req32.is_invalid());
@@ -365,8 +377,12 @@ namespace lib
         read_write(bsl::safe_umx const &req, T *const data) const noexcept -> bsl::safe_i64
         {
             DWORD bytes{};
-            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
             bsl::expects(nullptr != pmut_data);
+
+            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
+                return bsl::safe_i64::magic_neg_1();
+            }
 
             auto const req32{bsl::to_u32(req)};
             bsl::expects(req32.is_invalid());

@@ -199,7 +199,10 @@ namespace lib
         // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
         send(bsl::safe_umx const &req) const noexcept -> bsl::safe_i64
         {
-            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
+            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
+                return bsl::safe_i64::magic_neg_1();
+            }
 
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get())};
@@ -226,8 +229,12 @@ namespace lib
         // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
         read(bsl::safe_umx const &req, T *const pmut_data) const noexcept -> bsl::safe_i64
         {
-            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
             bsl::expects(nullptr != pmut_data);
+
+            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
+                return bsl::safe_i64::magic_neg_1();
+            }
 
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), pmut_data)};
@@ -254,8 +261,12 @@ namespace lib
         // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
         write(bsl::safe_umx const &req, T const *const data) const noexcept -> bsl::safe_i64
         {
-            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
             bsl::expects(nullptr != data);
+
+            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
+                return bsl::safe_i64::magic_neg_1();
+            }
 
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), data)};
@@ -281,8 +292,12 @@ namespace lib
         [[nodiscard]] constexpr auto
         read_write(bsl::safe_umx const &req, T *const pmut_data) const noexcept -> bsl::safe_i64
         {
-            bsl::expects(IOCTL_INVALID_HNDL != m_hndl);
             bsl::expects(nullptr != pmut_data);
+
+            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
+                return bsl::safe_i64::magic_neg_1();
+            }
 
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), pmut_data)};

@@ -54,6 +54,7 @@
 #include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
+#include <bsl/dontcare_t.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/expects.hpp>
 #include <bsl/finally.hpp>
@@ -180,6 +181,7 @@ namespace lib
     ///
     /// <!-- template parameters -->
     ///   @tparam TLS_TYPE the type of TLS block to use
+    ///   @tparam SYS_TYPE the type of bf_syscall_t to use (optional)
     ///   @tparam PAGE_POOL_TYPE the type page_pool_t to use
     ///   @tparam INTRINSIC_TYPE the type intrinsic_t to use
     ///   @tparam L3E_TYPE the level-3 page table entry to use
@@ -189,6 +191,7 @@ namespace lib
     ///
     template<
         typename TLS_TYPE,
+        typename SYS_TYPE,
         typename PAGE_POOL_TYPE,
         typename INTRINSIC_TYPE,
         typename L3E_TYPE,
@@ -428,28 +431,32 @@ namespace lib
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam E the type of entry to allocate a table for
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @return Returns a pointer to a newly allocated table. On failure
         ///     returns a nullptr.
         ///
         template<typename E>
         [[nodiscard]] static constexpr auto
         // NOLINTNEXTLINE(bsl-auto-type-usage)
-        allocate_table(TLS_TYPE &mut_tls, PAGE_POOL_TYPE &mut_page_pool) noexcept -> auto
+        allocate_table(
+            TLS_TYPE const &tls,
+            PAGE_POOL_TYPE &mut_page_pool,
+            SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> auto
         {
             static_assert(bsl::is_one_of<E, L3E_TYPE, L2E_TYPE, L1E_TYPE>::value);
 
             if constexpr (bsl::is_same<bsl::remove_const_t<E>, L3E_TYPE>::value) {
-                return mut_page_pool.template allocate<l2t_t>(mut_tls);
+                return mut_page_pool.template allocate<l2t_t>(tls, mut_sys);
             }
 
             if constexpr (bsl::is_same<bsl::remove_const_t<E>, L2E_TYPE>::value) {
-                return mut_page_pool.template allocate<l1t_t>(mut_tls);
+                return mut_page_pool.template allocate<l1t_t>(tls, mut_sys);
             }
 
             if constexpr (bsl::is_same<bsl::remove_const_t<E>, L1E_TYPE>::value) {
-                return mut_page_pool.template allocate<l0t_t>(mut_tls);
+                return mut_page_pool.template allocate<l0t_t>(tls, mut_sys);
             }
         }
 
@@ -459,8 +466,9 @@ namespace lib
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam E the type of entry to add the table to
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @param pmut_entry the entry to configure to point to the newly
         ///     created table
         ///   @return Returns a pointer to the newly created table on success.
@@ -468,10 +476,14 @@ namespace lib
         ///
         template<typename E>
         [[nodiscard]] static constexpr auto
-        add_table(TLS_TYPE &mut_tls, PAGE_POOL_TYPE &mut_page_pool, E *const pmut_entry) noexcept
-            -> decltype(allocate_table<E>(mut_tls, mut_page_pool))
+        add_table(
+            TLS_TYPE const &tls,
+            PAGE_POOL_TYPE &mut_page_pool,
+            E *const pmut_entry,
+            SYS_TYPE &mut_sys = bsl::dontcare) noexcept
+            -> decltype(allocate_table<E>(tls, mut_page_pool, mut_sys))
         {
-            auto *const pmut_table{allocate_table<E>(mut_tls, mut_page_pool)};
+            auto *const pmut_table{allocate_table<E>(tls, mut_page_pool, mut_sys)};
             if (bsl::unlikely(nullptr == pmut_table)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return nullptr;
@@ -496,34 +508,39 @@ namespace lib
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of table to release
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param pmut_table the table to release
+        ///   @param cleanup allow an entry to be released automatically
+        ///     if it is not marked as require_explicit_unmap
         ///   @return Returns true if the table is empty. Returns
         ///     false otherwise.
         ///
         template<typename T>
         [[maybe_unused]] static constexpr auto
         release_table(
-            TLS_TYPE &mut_tls, PAGE_POOL_TYPE &mut_page_pool, T *const pmut_table) noexcept -> bool
+            TLS_TYPE const &tls,
+            PAGE_POOL_TYPE &mut_page_pool,
+            T *const pmut_table,
+            bool const cleanup) noexcept -> bool
         {
             bool mut_empty{true};
 
             for (bsl::safe_idx mut_i{}; mut_i < pmut_table->entries.size(); ++mut_i) {
                 auto *const pmut_entry{pmut_table->entries.at_if(mut_i)};
-                if (!release_entry(mut_tls, mut_page_pool, pmut_entry)) {
+                if (!release_entry(tls, mut_page_pool, pmut_entry, cleanup)) {
                     mut_empty = false;
+                    break;
                 }
-                else {
-                    bsl::touch();
-                }
+
+                bsl::touch();
             }
 
             if (!mut_empty) {
                 return false;
             }
 
-            mut_page_pool.deallocate(mut_tls, pmut_table);
+            mut_page_pool.deallocate(tls, pmut_table);
             return true;
         }
 
@@ -534,19 +551,187 @@ namespace lib
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam E the type of entry to release the table from
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param pmut_entry the entry that points to the table to release
+        ///   @param cleanup allow an entry to be released automatically
+        ///     if it is not marked as require_explicit_unmap
+        ///   @return Returns true if the entry points to an empty block
+        ///     or table. Returns false otherwise.
+        ///
+        template<typename E>
+        [[maybe_unused]] static constexpr auto
+        release_entry_to_block(
+            TLS_TYPE const &tls,
+            PAGE_POOL_TYPE &mut_page_pool,
+            E *const pmut_entry,
+            bool const cleanup) noexcept -> bool
+        {
+            /// NOTE:
+            /// - There are three ways that memory could be released:
+            ///   * unmap()
+            ///   * release()
+            ///   * map() during an error
+            ///
+            /// - If unmap() is called, the leaf entry that is being unmapped
+            ///   has require_explicit_unmap set to 0, meaning it has been
+            ///   explicitly unmapped using the unmap() function and can
+            ///   now be released. This function starts by unmapping the leaf
+            ///   entry with cleanup set to true, and then releases the entry
+            ///   for each table in reverse order with cleanup set to false.
+            ///   If a table still has an entry that is present, it will not
+            ///   attempt to release and return. This allows unmap to cleanup
+            ///   unused tables without removing anything that is still in
+            ///   use, and it is also efficient.
+            ///
+            /// - If release() is called, it is time to cleanup all of the
+            ///   page tables as nothing is in use. If require_explicit_unmap
+            ///   is still marked as present, it means that an unmap() was
+            ///   never called, and that means we cannot actually release
+            ///   all of memory, and the tables are left in place. Typically,
+            ///   huge pages are the only that should be marked this way.
+            ///   This is because the huge pages need to be released back to
+            ///   the huge pool before the page table can release everything.
+            ///   Otherwise, information about the huge allocation is lost
+            ///   and cannot be freed at all. It also indicates an issue with
+            ///   the code that needs to be fixed. For second level paging,
+            ///   this should never be an issue as require_explicit_unmap will
+            ///   never be used.
+            ///
+            /// - If the map() function encounters an error, it has to clean
+            ///   up just like the unmap() function as it might have allocated
+            ///   tables that are empty and will need to undo them. In this
+            ///   case, cleanup is false, as everything should be empty so
+            ///   there are no entries to cleanup. We just need to delete
+            ///   empty tables.
+            ///
+            /// - So, the TL;DR is, if we get here, the entry must be marked
+            ///   as present. If cleanup is true, it means that we are allowed
+            ///   to release the entry so long as require_explicit_unmap is
+            ///   not set. If cleanup is false, there is nothing to do here.
+            ///
+
+            if (!cleanup) {
+                return false;
+            }
+
+            if (bsl::unlikely(bsl::safe_u64::magic_1() == pmut_entry->require_explicit_unmap)) {
+                bsl::alert() << "release_entry_to_block failed due to "
+                             << "require_explicit_unmap being set on the entry. "
+                             << "memory was likely leaked as a result" << bsl::endl
+                             << bsl::here();
+
+                return false;
+            }
+
+            if constexpr (bsl::is_same<E, L0E_TYPE>::value) {
+                if (bsl::safe_u64::magic_1() == pmut_entry->auto_release) {
+                    mut_page_pool.deallocate(tls, entry_to_block(mut_page_pool, pmut_entry));
+                }
+                else {
+                    bsl::touch();
+                }
+            }
+
+            *pmut_entry = {};
+            return true;
+        }
+
+        /// <!-- description -->
+        ///   @brief Given an entry, calls release_block if the entry points
+        ///     to a block and calls release_table if the entry points to a
+        ///     table.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @tparam E the type of entry to release the table from
+        ///   @param tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param pmut_entry the entry that points to the table to release
+        ///   @param cleanup allow an entry to be released automatically
+        ///     if it is not marked as require_explicit_unmap
+        ///   @return Returns true if the entry points to an empty block
+        ///     or table. Returns false otherwise.
+        ///
+        template<typename E>
+        [[maybe_unused]] static constexpr auto
+        release_entry_to_table(
+            TLS_TYPE const &tls,
+            PAGE_POOL_TYPE &mut_page_pool,
+            E *const pmut_entry,
+            bool const cleanup) noexcept -> bool
+        {
+            bool mut_empty{};
+
+            /// NOTE:
+            /// - There are two different ways that this function could be
+            ///   called, cleanup is true or false.
+            ///
+            /// - If cleanup is true, it means that release() was called. It
+            ///   is the only function that will ever do this because if
+            ///   cleanup is true when releasing a table, it will pass this
+            ///   to each entry that it attempts to release, and that entry
+            ///   will be released. Both unmap() and map() will not do this
+            ///   because they are only interested in cleaning up empty tables,
+            ///   meaning if the table still has an entry in it, the table
+            ///   should be kept alive.
+            ///
+            /// - If cleanup is false, it means that we are only meant to
+            ///   cleanup empty tables. This will be the case for when the
+            ///   unmap() and map() functions are called (with map only
+            ///   calling this function on error). If the table is empty, it
+            ///   will tell us, in which case we are free to deallocate the
+            ///   table and mark the entry as 0. This will allow the parent
+            ///   table to cleanup itself if it is also empty now that it's
+            ///   child has be released. If any entry is still marked present
+            ///   no cleanup will occur.
+            ///
+
+            if constexpr (bsl::is_same<E, L3E_TYPE>::value) {
+                mut_empty = release_table(
+                    tls, mut_page_pool, entry_to_table(mut_page_pool, pmut_entry), cleanup);
+            }
+
+            if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
+                mut_empty = release_table(
+                    tls, mut_page_pool, entry_to_table(mut_page_pool, pmut_entry), cleanup);
+            }
+
+            if constexpr (bsl::is_same<E, L1E_TYPE>::value) {
+                mut_empty = release_table(
+                    tls, mut_page_pool, entry_to_table(mut_page_pool, pmut_entry), cleanup);
+            }
+
+            if (!mut_empty) {
+                return false;
+            }
+
+            *pmut_entry = {};
+            return true;
+        }
+
+        /// <!-- description -->
+        ///   @brief Given an entry, calls release_block if the entry points
+        ///     to a block and calls release_table if the entry points to a
+        ///     table.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @tparam E the type of entry to release the table from
+        ///   @param tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param pmut_entry the entry that points to the table to release
+        ///   @param cleanup allow an entry to be released automatically
+        ///     if it is not marked as require_explicit_unmap
         ///   @return Returns true if the entry points to an empty block
         ///     or table. Returns false otherwise.
         ///
         template<typename E>
         [[maybe_unused]] static constexpr auto
         release_entry(
-            TLS_TYPE &mut_tls, PAGE_POOL_TYPE &mut_page_pool, E *const pmut_entry) noexcept -> bool
+            TLS_TYPE const &tls,
+            PAGE_POOL_TYPE &mut_page_pool,
+            E *const pmut_entry,
+            bool const cleanup) noexcept -> bool
         {
-            bool mut_empty{};
-
             if (helpers::entry_status(pmut_entry) != basic_entry_status_t::present) {
                 return true;
             }
@@ -556,41 +741,10 @@ namespace lib
             }
 
             if (bsl::safe_u64::magic_1() == pmut_entry->points_to_block) {
-                if constexpr (bsl::is_same<E, L0E_TYPE>::value) {
-                    if (bsl::safe_u64::magic_1() == pmut_entry->auto_release) {
-                        mut_page_pool.deallocate(
-                            mut_tls, entry_to_block(mut_page_pool, pmut_entry));
-                    }
-                    else {
-                        bsl::touch();
-                    }
-                }
-
-                mut_empty = (bsl::safe_u64::magic_1() != pmut_entry->require_explicit_unmap);
-            }
-            else {
-                if constexpr (bsl::is_same<E, L3E_TYPE>::value) {
-                    mut_empty = release_table(
-                        mut_tls, mut_page_pool, entry_to_table(mut_page_pool, pmut_entry));
-                }
-
-                if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
-                    mut_empty = release_table(
-                        mut_tls, mut_page_pool, entry_to_table(mut_page_pool, pmut_entry));
-                }
-
-                if constexpr (bsl::is_same<E, L1E_TYPE>::value) {
-                    mut_empty = release_table(
-                        mut_tls, mut_page_pool, entry_to_table(mut_page_pool, pmut_entry));
-                }
+                return release_entry_to_block(tls, mut_page_pool, pmut_entry, cleanup);
             }
 
-            if (!mut_empty) {
-                return false;
-            }
-
-            *pmut_entry = {};
-            return true;
+            return release_entry_to_table(tls, mut_page_pool, pmut_entry, cleanup);
         }
 
         /// <!-- description -->
@@ -606,8 +760,9 @@ namespace lib
         ///     should be set to true for all map style functions, while
         ///     MAP_OP should be set to false when modifying an existing
         ///     map, or unmapping a previously mapped virtual address.
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @param page_virt the virtual address to decode
         ///   @return Returns all of the entries that are identified during the
         ///     translation of the provided virtual address.
@@ -615,9 +770,10 @@ namespace lib
         template<typename E, bool MAP_OP = true>
         [[nodiscard]] constexpr auto
         get_entries(
-            TLS_TYPE &mut_tls,
+            TLS_TYPE const &tls,
             PAGE_POOL_TYPE &mut_page_pool,
-            bsl::safe_u64 const &page_virt) noexcept -> entries_t
+            bsl::safe_u64 const &page_virt,
+            SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> entries_t
         {
             entries_t mut_ret{};
             l2t_t *pmut_mut_l2t{};
@@ -625,36 +781,36 @@ namespace lib
             l0t_t *pmut_mut_l0t{};
 
             bsl::finally mut_release_l2t_on_error{
-                bsl::dormant, [&mut_tls, &mut_page_pool, &mut_ret]() noexcept -> void {
+                bsl::dormant, [&tls, &mut_page_pool, &mut_ret]() noexcept -> void {
                     if constexpr (MAP_OP) {
-                        release_entry(mut_tls, mut_page_pool, mut_ret.l3e);
+                        release_entry(tls, mut_page_pool, mut_ret.l3e, false);
                     }
                     else {
-                        bsl::discard(mut_tls);
+                        bsl::discard(tls);
                         bsl::discard(mut_page_pool);
                         bsl::discard(mut_ret);
                     }
                 }};
 
             bsl::finally mut_release_l1t_on_error{
-                bsl::dormant, [&mut_tls, &mut_page_pool, &mut_ret]() noexcept -> void {
+                bsl::dormant, [&tls, &mut_page_pool, &mut_ret]() noexcept -> void {
                     if constexpr (MAP_OP) {
-                        release_entry(mut_tls, mut_page_pool, mut_ret.l2e);
+                        release_entry(tls, mut_page_pool, mut_ret.l2e, false);
                     }
                     else {
-                        bsl::discard(mut_tls);
+                        bsl::discard(tls);
                         bsl::discard(mut_page_pool);
                         bsl::discard(mut_ret);
                     }
                 }};
 
             bsl::finally mut_release_l0t_on_error{
-                bsl::dormant, [&mut_tls, &mut_page_pool, &mut_ret]() noexcept -> void {
+                bsl::dormant, [&tls, &mut_page_pool, &mut_ret]() noexcept -> void {
                     if constexpr (MAP_OP) {
-                        release_entry(mut_tls, mut_page_pool, mut_ret.l1e);
+                        release_entry(tls, mut_page_pool, mut_ret.l1e, false);
                     }
                     else {
-                        bsl::discard(mut_tls);
+                        bsl::discard(tls);
                         bsl::discard(mut_page_pool);
                         bsl::discard(mut_ret);
                     }
@@ -668,7 +824,7 @@ namespace lib
                             return mut_ret;
                         }
 
-                        pmut_mut_l2t = add_table(mut_tls, mut_page_pool, mut_ret.l3e);
+                        pmut_mut_l2t = add_table(tls, mut_page_pool, mut_ret.l3e, mut_sys);
                         if (bsl::unlikely(nullptr == pmut_mut_l2t)) {
                             bsl::print<bsl::V>() << bsl::here();
                             return {};
@@ -718,7 +874,7 @@ namespace lib
                             return mut_ret;
                         }
 
-                        pmut_mut_l1t = add_table(mut_tls, mut_page_pool, mut_ret.l2e);
+                        pmut_mut_l1t = add_table(tls, mut_page_pool, mut_ret.l2e, mut_sys);
                         if (bsl::unlikely(nullptr == pmut_mut_l1t)) {
                             bsl::print<bsl::V>() << bsl::here();
                             return {};
@@ -773,7 +929,7 @@ namespace lib
                             return mut_ret;
                         }
 
-                        pmut_mut_l0t = add_table(mut_tls, mut_page_pool, mut_ret.l1e);
+                        pmut_mut_l0t = add_table(tls, mut_page_pool, mut_ret.l1e, mut_sys);
                         if (bsl::unlikely(nullptr == pmut_mut_l0t)) {
                             bsl::print<bsl::V>() << bsl::here();
                             return {};
@@ -880,17 +1036,21 @@ namespace lib
         ///   @brief Initializes this basic_root_page_table_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        initialize(TLS_TYPE &mut_tls, PAGE_POOL_TYPE &mut_page_pool) noexcept -> bsl::errc_type
+        initialize(
+            TLS_TYPE const &tls,
+            PAGE_POOL_TYPE &mut_page_pool,
+            SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> bsl::errc_type
         {
             bsl::expects(nullptr == m_l3t);
 
-            m_l3t = mut_page_pool.template allocate<l3t_t>(mut_tls);
+            m_l3t = mut_page_pool.template allocate<l3t_t>(tls, mut_sys);
             if (bsl::unlikely(nullptr == m_l3t)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -904,17 +1064,17 @@ namespace lib
         ///   @brief Releases all of the resources used by the RPT.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///
         constexpr void
-        release(TLS_TYPE &mut_tls, PAGE_POOL_TYPE &mut_page_pool) noexcept
+        release(TLS_TYPE const &tls, PAGE_POOL_TYPE &mut_page_pool) noexcept
         {
             if (bsl::unlikely(nullptr == m_l3t)) {
                 return;
             }
 
-            this->release_table(mut_tls, mut_page_pool, m_l3t);
+            this->release_table(tls, mut_page_pool, m_l3t, true);
 
             m_l3t_phys = {};
             m_l3t = {};
@@ -962,6 +1122,21 @@ namespace lib
         }
 
         /// <!-- description -->
+        ///   @brief Returns the physical address of the RPT.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the physical address of the RPT.
+        ///
+        [[nodiscard]] constexpr auto
+        phys() const noexcept -> bsl::safe_umx
+        {
+            bsl::expects(nullptr != m_l3t);
+            bsl::ensures(m_l3t_phys.is_valid_and_checked());
+
+            return m_l3t_phys;
+        }
+
+        /// <!-- description -->
         ///   @brief Maps a 1g page into the root page table
         ///
         /// <!-- inputs/outputs -->
@@ -969,13 +1144,14 @@ namespace lib
         ///     and L0E_TYPE. If L2E_TYPE is provided, a 1G map is requested. If
         ///     L1E_TYPE is provided, a 2M map is requested. If L0E_TYPE is provided,
         ///     a 4K map is requested. Defaults to L0E_TYPE (i.e. 4k).
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param page_virt the virtual address to map the physical
         ///     address to
         ///   @param page_phys the physical address to map
         ///   @param page_flgs defines how memory should be mapped
         ///   @param require_explicit_unmap tells the RPT that the virtual
+        ///   @param mut_sys the bf_syscall_t to use
         ///     address must be explicitly unmapped before the RPT can be
         ///     released. Otherwise the release will fail.
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
@@ -984,22 +1160,20 @@ namespace lib
         template<typename E = L0E_TYPE>
         [[nodiscard]] constexpr auto
         map_page(
-            TLS_TYPE &mut_tls,
+            TLS_TYPE const &tls,
             PAGE_POOL_TYPE &mut_page_pool,
             bsl::safe_u64 const &page_virt,
             bsl::safe_u64 const &page_phys,
             bsl::safe_u64 const &page_flgs,
-            bool const require_explicit_unmap = false) noexcept -> bsl::errc_type
+            bool const require_explicit_unmap = false,
+            SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> bsl::errc_type
         {
             static_assert(bsl::is_one_of<E, L2E_TYPE, L1E_TYPE, L0E_TYPE>::value);
 
             bsl::expects(nullptr != m_l3t);
             bsl::expects(page_virt.is_valid_and_checked());
-            bsl::expects(page_virt.is_pos());
             bsl::expects(page_phys.is_valid_and_checked());
-            bsl::expects(page_phys.is_pos());
             bsl::expects(page_flgs.is_valid_and_checked());
-            bsl::expects(page_flgs.is_pos());
 
             if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
                 bsl::expects(is_page_1g_aligned(page_virt));
@@ -1016,10 +1190,10 @@ namespace lib
                 bsl::expects(is_page_4k_aligned(page_phys));
             }
 
-            basic_lock_guard_t mut_lock{mut_tls, m_lock};
+            basic_lock_guard_t mut_lock{tls, m_lock};
 
-            auto *const pmut_entry{
-                get_entry_from_entries<E>(this->get_entries<E>(mut_tls, mut_page_pool, page_virt))};
+            auto *const pmut_entry{get_entry_from_entries<E>(
+                this->get_entries<E>(tls, mut_page_pool, page_virt, mut_sys))};
 
             if (bsl::unlikely(nullptr == pmut_entry)) {
                 bsl::print<bsl::V>() << bsl::here();
@@ -1065,21 +1239,23 @@ namespace lib
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of virtual address to return
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param page_virt the virtual address to map the allocated
         ///     basic_page_4k_t to
         ///   @param page_flgs defines how memory should be mapped
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @return Returns a pointer to the newly allocated basic_page_4k_t as
         ///     a type T *, or a nullptr on failure.
         ///
         template<typename T>
         [[nodiscard]] constexpr auto
         allocate_page(
-            TLS_TYPE &mut_tls,
+            TLS_TYPE const &tls,
             PAGE_POOL_TYPE &mut_page_pool,
             bsl::safe_u64 const &page_virt,
-            bsl::safe_u64 const &page_flgs) noexcept -> T *
+            bsl::safe_u64 const &page_flgs,
+            SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> T *
         {
             static_assert(bsl::is_pod<T>::value);
             static_assert(sizeof(T) == sizeof(basic_page_4k_t));
@@ -1091,21 +1267,21 @@ namespace lib
             bsl::expects(page_flgs.is_valid_and_checked());
             bsl::expects(page_flgs.is_pos());
 
-            basic_lock_guard_t mut_lock{mut_tls, m_lock};
+            basic_lock_guard_t mut_lock{tls, m_lock};
 
-            auto *const pmut_ptr{mut_page_pool.template allocate<basic_page_4k_t>(mut_tls)};
+            auto *const pmut_ptr{mut_page_pool.template allocate<basic_page_4k_t>(tls, mut_sys)};
             if (bsl::unlikely(nullptr == pmut_ptr)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return nullptr;
             }
 
             bsl::finally mut_deallocate_on_error{
-                [&mut_tls, &mut_page_pool, &pmut_ptr]() noexcept -> void {
-                    mut_page_pool.deallocate(mut_tls, pmut_ptr);
+                [&tls, &mut_page_pool, &pmut_ptr]() noexcept -> void {
+                    mut_page_pool.deallocate(tls, pmut_ptr);
                 }};
 
             auto *const pmut_entry{get_entry_from_entries<L0E_TYPE>(
-                this->get_entries<L0E_TYPE>(mut_tls, mut_page_pool, page_virt))};
+                this->get_entries<L0E_TYPE>(tls, mut_page_pool, page_virt))};
 
             if (bsl::unlikely(nullptr == pmut_entry)) {
                 bsl::print<bsl::V>() << bsl::here();
@@ -1143,21 +1319,24 @@ namespace lib
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam OFFSET the offset to map the allocate page to
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @return Returns a basic_alloc_page_t containing the virtual address
         ///     and physical address that was allocated and mapped using
         ///     OFFSET.
         ///
         template<bsl::uintmx OFFSET>
         [[nodiscard]] constexpr auto
-        allocate_page(TLS_TYPE &mut_tls, PAGE_POOL_TYPE &mut_page_pool) noexcept
-            -> basic_alloc_page_t
+        allocate_page(
+            TLS_TYPE const &tls,
+            PAGE_POOL_TYPE &mut_page_pool,
+            SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> basic_alloc_page_t
         {
             bsl::expects(nullptr != m_l3t);
-            basic_lock_guard_t mut_lock{mut_tls, m_lock};
+            basic_lock_guard_t mut_lock{tls, m_lock};
 
-            auto *const pmut_ptr{mut_page_pool.template allocate<basic_page_4k_t>(mut_tls)};
+            auto *const pmut_ptr{mut_page_pool.template allocate<basic_page_4k_t>(tls, mut_sys)};
             if (bsl::unlikely(nullptr == pmut_ptr)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
@@ -1172,12 +1351,12 @@ namespace lib
             bsl::expects(page_virt.is_pos());
 
             bsl::finally mut_deallocate_on_error{
-                [&mut_tls, &mut_page_pool, &pmut_ptr]() noexcept -> void {
-                    mut_page_pool.deallocate(mut_tls, pmut_ptr);
+                [&tls, &mut_page_pool, &pmut_ptr]() noexcept -> void {
+                    mut_page_pool.deallocate(tls, pmut_ptr);
                 }};
 
             auto *const pmut_entry{get_entry_from_entries<L0E_TYPE>(
-                this->get_entries<L0E_TYPE>(mut_tls, mut_page_pool, page_virt))};
+                this->get_entries<L0E_TYPE>(tls, mut_page_pool, page_virt))};
 
             if (bsl::unlikely(nullptr == pmut_entry)) {
                 bsl::print<bsl::V>() << bsl::here();
@@ -1220,7 +1399,7 @@ namespace lib
         ///     and L0E_TYPE. If L2E_TYPE is provided, a 1G map is requested. If
         ///     L1E_TYPE is provided, a 2M map is requested. If L0E_TYPE is provided,
         ///     a 4K map is requested. Defaults to L0E_TYPE (i.e. 4k).
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param page_virt the virtual address to unmap
@@ -1231,7 +1410,7 @@ namespace lib
         template<typename E = L0E_TYPE>
         [[nodiscard]] constexpr auto
         unmap_page(
-            TLS_TYPE &mut_tls,
+            TLS_TYPE const &tls,
             PAGE_POOL_TYPE &mut_page_pool,
             INTRINSIC_TYPE const &intrinsic,
             bsl::safe_u64 const &page_virt,
@@ -1255,28 +1434,19 @@ namespace lib
                 bsl::expects(is_page_4k_aligned(page_virt));
             }
 
-            basic_lock_guard_t mut_lock{mut_tls, m_lock};
+            basic_lock_guard_t mut_lock{tls, m_lock};
 
-            auto const ents{this->get_entries<E, false>(mut_tls, mut_page_pool, page_virt)};
+            auto const ents{this->get_entries<E, false>(tls, mut_page_pool, page_virt)};
             if (bsl::unlikely(nullptr == ents.l2e)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            if (bsl::unlikely(helpers::entry_status(ents.l2e) != basic_entry_status_t::present)) {
-                bsl::error() << "the virtual address "    // --
-                             << bsl::hex(page_virt)       // --
-                             << " was never mapped"       // --
-                             << bsl::endl                 // --
-                             << bsl::here();              // --
-
-                return bsl::errc_failure;
-            }
-
             if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
                 if (bsl::safe_u64::magic_1() == ents.l2e->points_to_block) {
-                    *ents.l2e = {};
-                    release_entry(mut_tls, mut_page_pool, ents.l3e);
+                    ents.l2e->require_explicit_unmap = bsl::safe_u64::magic_0().get();
+                    release_entry(tls, mut_page_pool, ents.l2e, true);
+                    release_entry(tls, mut_page_pool, ents.l3e, false);
 
                     intrinsic.tlb_flush(type, page_virt);
                     return bsl::errc_success;
@@ -1287,25 +1457,16 @@ namespace lib
                              << " was not mapped at this granularity"    // --
                              << bsl::endl                                // --
                              << bsl::here();                             // --
-
-                return bsl::errc_failure;
-            }
-
-            if (bsl::unlikely(helpers::entry_status(ents.l1e) != basic_entry_status_t::present)) {
-                bsl::error() << "the virtual address "    // --
-                             << bsl::hex(page_virt)       // --
-                             << " was never mapped"       // --
-                             << bsl::endl                 // --
-                             << bsl::here();              // --
 
                 return bsl::errc_failure;
             }
 
             if constexpr (bsl::is_same<E, L1E_TYPE>::value) {
                 if (bsl::safe_u64::magic_1() == ents.l1e->points_to_block) {
-                    *ents.l1e = {};
-                    release_entry(mut_tls, mut_page_pool, ents.l2e);
-                    release_entry(mut_tls, mut_page_pool, ents.l3e);
+                    ents.l1e->require_explicit_unmap = bsl::safe_u64::magic_0().get();
+                    release_entry(tls, mut_page_pool, ents.l1e, true);
+                    release_entry(tls, mut_page_pool, ents.l2e, false);
+                    release_entry(tls, mut_page_pool, ents.l3e, false);
 
                     intrinsic.tlb_flush(type, page_virt);
                     return bsl::errc_success;
@@ -1320,22 +1481,13 @@ namespace lib
                 return bsl::errc_failure;
             }
 
-            if (bsl::unlikely(helpers::entry_status(ents.l0e) != basic_entry_status_t::present)) {
-                bsl::error() << "the virtual address "    // --
-                             << bsl::hex(page_virt)       // --
-                             << " was never mapped"       // --
-                             << bsl::endl                 // --
-                             << bsl::here();              // --
-
-                return bsl::errc_failure;
-            }
-
             if constexpr (bsl::is_same<E, L0E_TYPE>::value) {
                 if (bsl::safe_u64::magic_1() == ents.l0e->points_to_block) {
-                    *ents.l0e = {};
-                    release_entry(mut_tls, mut_page_pool, ents.l1e);
-                    release_entry(mut_tls, mut_page_pool, ents.l2e);
-                    release_entry(mut_tls, mut_page_pool, ents.l3e);
+                    ents.l0e->require_explicit_unmap = bsl::safe_u64::magic_0().get();
+                    release_entry(tls, mut_page_pool, ents.l0e, true);
+                    release_entry(tls, mut_page_pool, ents.l1e, false);
+                    release_entry(tls, mut_page_pool, ents.l2e, false);
+                    release_entry(tls, mut_page_pool, ents.l3e, false);
 
                     intrinsic.tlb_flush(type, page_virt);
                     return bsl::errc_success;
@@ -1360,7 +1512,7 @@ namespace lib
         /// <!-- inputs/outputs -->
         ///   @tparam E the entry type requested. L2E_TYPE for a 1G request,
         ///     L1E_TYPE for a 2M and L2E_TYPE for a 4K.
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param page_pool the page_pool_t to use
         ///   @param page_virt the virtual address to decode
         ///   @return Returns all of the entries that are identified during the
@@ -1369,7 +1521,7 @@ namespace lib
         template<typename E = L0E_TYPE>
         [[nodiscard]] constexpr auto
         entries(
-            TLS_TYPE &mut_tls,
+            TLS_TYPE const &tls,
             PAGE_POOL_TYPE const &page_pool,
             bsl::safe_u64 const &page_virt) noexcept -> entries_t
         {
@@ -1391,8 +1543,8 @@ namespace lib
                 bsl::expects(is_page_4k_aligned(page_virt));
             }
 
-            basic_lock_guard_t mut_lock{mut_tls, m_lock};
-            return this->get_entries<E, false>(mut_tls, page_pool, page_virt);
+            basic_lock_guard_t mut_lock{tls, m_lock};
+            return this->get_entries<E, false>(tls, page_pool, page_virt);
         }
 
         /// <!-- description -->
@@ -1404,16 +1556,16 @@ namespace lib
         ///     are not returned back to the page_pool_t.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param l3t the l3t_t of the root page table to add aliases to
         ///
         constexpr void
-        add_tables(TLS_TYPE &mut_tls, basic_page_table_t<L3E_TYPE> const *const l3t) noexcept
+        add_tables(TLS_TYPE const &tls, basic_page_table_t<L3E_TYPE> const *const l3t) noexcept
         {
             bsl::expects(nullptr != m_l3t);
             bsl::expects(nullptr != l3t);
 
-            basic_lock_guard_t mut_lock{mut_tls, m_lock};
+            basic_lock_guard_t mut_lock{tls, m_lock};
 
             for (bsl::safe_idx mut_i{}; mut_i < l3t->entries.size(); ++mut_i) {
                 auto const *const src_l3e{l3t->entries.at_if(mut_i)};
@@ -1437,13 +1589,13 @@ namespace lib
         ///     are not returned back to the page_pool_t.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param rpt the root page table to add aliases to
         ///
         constexpr void
-        add_tables(TLS_TYPE &mut_tls, basic_root_page_table_t const &rpt) noexcept
+        add_tables(TLS_TYPE const &tls, basic_root_page_table_t const &rpt) noexcept
         {
-            this->add_tables(mut_tls, rpt.m_l3t);
+            this->add_tables(tls, rpt.m_l3t);
         }
 
         // template<typename E>

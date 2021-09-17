@@ -39,8 +39,15 @@
 namespace mk
 {
     /// @brief defines the root_page_table_t used by the microkernel
-    using root_page_table_t =
-        lib::basic_root_page_table_t<tls_t, page_pool_t, intrinsic_t, l3e_t, l2e_t, l1e_t, l0e_t>;
+    using root_page_table_t = lib::basic_root_page_table_t<
+        tls_t,
+        bsl::dontcare_t,
+        page_pool_t,
+        intrinsic_t,
+        l3e_t,
+        l2e_t,
+        l1e_t,
+        l0e_t>;
 }
 
 #endif

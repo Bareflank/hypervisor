@@ -40,6 +40,9 @@ namespace lib
     constexpr auto BASIC_MAP_PAGE_RW{BASIC_MAP_PAGE_READ | BASIC_MAP_PAGE_WRITE};
     /// @brief map a page with read/execute permmissions
     constexpr auto BASIC_MAP_PAGE_RE{BASIC_MAP_PAGE_READ | BASIC_MAP_PAGE_EXECUTE};
+    /// @brief map a page with read/write/execute permmissions
+    constexpr auto BASIC_MAP_PAGE_RWE{
+        BASIC_MAP_PAGE_READ | BASIC_MAP_PAGE_WRITE | BASIC_MAP_PAGE_EXECUTE};
 }
 
 #endif
