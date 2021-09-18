@@ -56,16 +56,16 @@ const BF_REG_T_R15:u64 = 15;
 const BF_REG_T_GUEST_CR2:u64 = 16;
 /// @brief defines the bf_reg_t_guest_dr6 register
 const BF_REG_T_GUEST_DR6:u64 = 17;
-/// @brief defines the bf_reg_t_guest_ia32_star register
-const BF_REG_T_GUEST_IA32_STAR:u64 = 18;
-/// @brief defines the bf_reg_t_guest_ia32_lstar register
-const BF_REG_T_GUEST_IA32_LSTAR:u64 = 19;
-/// @brief defines the bf_reg_t_guest_ia32_cstar register
-const BF_REG_T_GUEST_IA32_CSTAR:u64 = 20;
-/// @brief defines the bf_reg_t_guest_ia32_fmask register
-const BF_REG_T_GUEST_IA32_FMASK:u64 = 21;
-/// @brief defines the bf_reg_t_guest_ia32_kernel_gs_base register
-const BF_REG_T_GUEST_IA32_KERNEL_GS_BASE:u64 = 22;
+/// @brief defines the bf_reg_t_guest_star register
+const BF_REG_T_GUEST_STAR:u64 = 18;
+/// @brief defines the bf_reg_t_guest_lstar register
+const BF_REG_T_GUEST_LSTAR:u64 = 19;
+/// @brief defines the bf_reg_t_guest_cstar register
+const BF_REG_T_GUEST_CSTAR:u64 = 20;
+/// @brief defines the bf_reg_t_guest_fmask register
+const BF_REG_T_GUEST_FMASK:u64 = 21;
+/// @brief defines the bf_reg_t_guest_kernel_gs_base register
+const BF_REG_T_GUEST_KERNEL_GS_BASE:u64 = 22;
 /// @brief defines the virtual_processor_identifier register
 const BF_REG_T_VIRTUAL_PROCESSOR_IDENTIFIER:u64 = 23;
 /// @brief defines the posted_interrupt_notification_vector register
@@ -148,14 +148,14 @@ const BF_REG_T_TLS_MULTIPLIER:u64 = 61;
 const BF_REG_T_GUEST_PHYSICAL_ADDRESS:u64 = 62;
 /// @brief defines the vmcs_link_pointer register
 const BF_REG_T_VMCS_LINK_POINTER:u64 = 63;
-/// @brief defines the guest_ia32_debugctl register
-const BF_REG_T_GUEST_IA32_DEBUGCTL:u64 = 64;
-/// @brief defines the guest_ia32_pat register
-const BF_REG_T_GUEST_IA32_PAT:u64 = 65;
-/// @brief defines the guest_ia32_efer register
-const BF_REG_T_GUEST_IA32_EFER:u64 = 66;
-/// @brief defines the guest_ia32_perf_global_ctrl register
-const BF_REG_T_GUEST_IA32_PERF_GLOBAL_CTRL:u64 = 67;
+/// @brief defines the guest_debugctl register
+const BF_REG_T_GUEST_DEBUGCTL:u64 = 64;
+/// @brief defines the guest_pat register
+const BF_REG_T_GUEST_PAT:u64 = 65;
+/// @brief defines the guest_efer register
+const BF_REG_T_GUEST_EFER:u64 = 66;
+/// @brief defines the guest_perf_global_ctrl register
+const BF_REG_T_GUEST_PERF_GLOBAL_CTRL:u64 = 67;
 /// @brief defines the guest_pdpte0 register
 const BF_REG_T_GUEST_PDPTE0:u64 = 68;
 /// @brief defines the guest_pdpte1 register
@@ -164,8 +164,8 @@ const BF_REG_T_GUEST_PDPTE1:u64 = 69;
 const BF_REG_T_GUEST_PDPTE2:u64 = 70;
 /// @brief defines the guest_pdpte3 register
 const BF_REG_T_GUEST_PDPTE3:u64 = 71;
-/// @brief defines the guest_ia32_bndcfgs register
-const BF_REG_T_GUEST_IA32_BNDCFGS:u64 = 72;
+/// @brief defines the guest_bndcfgs register
+const BF_REG_T_GUEST_BNDCFGS:u64 = 72;
 /// @brief defines the guest_rtit_ctl register
 const BF_REG_T_GUEST_RTIT_CTL:u64 = 73;
 /// @brief defines the pin_based_vm_execution_ctls register
@@ -262,8 +262,8 @@ const BF_REG_T_GUEST_INTERRUPTIBILITY_STATE:u64 = 118;
 const BF_REG_T_GUEST_ACTIVITY_STATE:u64 = 119;
 /// @brief defines the guest_smbase register
 const BF_REG_T_GUEST_SMBASE:u64 = 120;
-/// @brief defines the guest_ia32_sysenter_cs register
-const BF_REG_T_GUEST_IA32_SYSENTER_CS:u64 = 121;
+/// @brief defines the guest_sysenter_cs register
+const BF_REG_T_GUEST_SYSENTER_CS:u64 = 121;
 /// @brief defines the vmx_preemption_timer_value register
 const BF_REG_T_VMX_PREEMPTION_TIMER_VALUE:u64 = 122;
 /// @brief defines the cr0_guest_host_mask register
@@ -330,7 +330,7 @@ const BF_REG_T_GUEST_RIP:u64 = 152;
 const BF_REG_T_GUEST_RFLAGS:u64 = 153;
 /// @brief defines the guest_pending_debug_exceptions register
 const BF_REG_T_GUEST_PENDING_DEBUG_EXCEPTIONS:u64 = 154;
-/// @brief defines the guest_ia32_sysenter_esp register
-const BF_REG_T_GUEST_IA32_SYSENTER_ESP:u64 = 155;
-/// @brief defines the guest_ia32_sysenter_eip register
-const BF_REG_T_GUEST_IA32_SYSENTER_EIP:u64 = 156;
+/// @brief defines the guest_sysenter_esp register
+const BF_REG_T_GUEST_SYSENTER_ESP:u64 = 155;
+/// @brief defines the guest_sysenter_eip register
+const BF_REG_T_GUEST_SYSENTER_EIP:u64 = 156;

@@ -1262,10 +1262,8 @@ namespace lib
 
             bsl::expects(nullptr != m_l3t);
             bsl::expects(page_virt.is_valid_and_checked());
-            bsl::expects(page_virt.is_pos());
             bsl::expects(is_page_4k_aligned(page_virt));
             bsl::expects(page_flgs.is_valid_and_checked());
-            bsl::expects(page_flgs.is_pos());
 
             basic_lock_guard_t mut_lock{tls, m_lock};
 
@@ -1401,9 +1399,8 @@ namespace lib
         ///     a 4K map is requested. Defaults to L0E_TYPE (i.e. 4k).
         ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
-        ///   @param intrinsic the intrinsic_t to use
         ///   @param page_virt the virtual address to unmap
-        ///   @param type the type of TLB flush to perform
+        ///   @param mut_sys the bf_syscall_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -1412,15 +1409,13 @@ namespace lib
         unmap_page(
             TLS_TYPE const &tls,
             PAGE_POOL_TYPE &mut_page_pool,
-            INTRINSIC_TYPE const &intrinsic,
             bsl::safe_u64 const &page_virt,
-            basic_tlb_flush_type_t const type) noexcept -> bsl::errc_type
+            SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> bsl::errc_type
         {
             static_assert(bsl::is_one_of<E, L2E_TYPE, L1E_TYPE, L0E_TYPE>::value);
 
             bsl::expects(nullptr != m_l3t);
             bsl::expects(page_virt.is_valid_and_checked());
-            bsl::expects(page_virt.is_pos());
 
             if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
                 bsl::expects(is_page_1g_aligned(page_virt));
@@ -1436,7 +1431,7 @@ namespace lib
 
             basic_lock_guard_t mut_lock{tls, m_lock};
 
-            auto const ents{this->get_entries<E, false>(tls, mut_page_pool, page_virt)};
+            auto const ents{this->get_entries<E, false>(tls, mut_page_pool, page_virt, mut_sys)};
             if (bsl::unlikely(nullptr == ents.l2e)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -1448,15 +1443,14 @@ namespace lib
                     release_entry(tls, mut_page_pool, ents.l2e, true);
                     release_entry(tls, mut_page_pool, ents.l3e, false);
 
-                    intrinsic.tlb_flush(type, page_virt);
                     return bsl::errc_success;
                 }
 
-                bsl::error() << "the virtual address "                   // --
-                             << bsl::hex(page_virt)                      // --
-                             << " was not mapped at this granularity"    // --
-                             << bsl::endl                                // --
-                             << bsl::here();                             // --
+                bsl::error() << "the virtual address "                // --
+                             << bsl::hex(page_virt)                   // --
+                             << " was not mapped a 1g granularity"    // --
+                             << bsl::endl                             // --
+                             << bsl::here();                          // --
 
                 return bsl::errc_failure;
             }
@@ -1468,15 +1462,14 @@ namespace lib
                     release_entry(tls, mut_page_pool, ents.l2e, false);
                     release_entry(tls, mut_page_pool, ents.l3e, false);
 
-                    intrinsic.tlb_flush(type, page_virt);
                     return bsl::errc_success;
                 }
 
-                bsl::error() << "the virtual address "                   // --
-                             << bsl::hex(page_virt)                      // --
-                             << " was not mapped at this granularity"    // --
-                             << bsl::endl                                // --
-                             << bsl::here();                             // --
+                bsl::error() << "the virtual address "                // --
+                             << bsl::hex(page_virt)                   // --
+                             << " was not mapped a 2m granularity"    // --
+                             << bsl::endl                             // --
+                             << bsl::here();                          // --
 
                 return bsl::errc_failure;
             }
@@ -1489,13 +1482,12 @@ namespace lib
                     release_entry(tls, mut_page_pool, ents.l2e, false);
                     release_entry(tls, mut_page_pool, ents.l3e, false);
 
-                    intrinsic.tlb_flush(type, page_virt);
                     return bsl::errc_success;
                 }
 
                 bsl::error() << "the virtual address "                   // --
                              << bsl::hex(page_virt)                      // --
-                             << " was not mapped at this granularity"    // --
+                             << " was not mapped at a 4k granularity"    // --
                              << bsl::endl                                // --
                              << bsl::here();                             // --
 
@@ -1529,7 +1521,6 @@ namespace lib
 
             bsl::expects(nullptr != m_l3t);
             bsl::expects(page_virt.is_valid_and_checked());
-            bsl::expects(page_virt.is_pos());
 
             if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
                 bsl::expects(is_page_1g_aligned(page_virt));

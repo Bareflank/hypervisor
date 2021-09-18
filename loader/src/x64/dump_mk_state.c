@@ -132,19 +132,19 @@ dump_mk_state(struct state_save_t *const state, uint32_t const cpu)
     bfdebug_x64(" - dr6", state->dr6);
     bfdebug_x64(" - dr7", state->dr7);
 
-    bfdebug_x64(" - efer", state->ia32_efer);
-    bfdebug_x64(" - star", state->ia32_star);
-    bfdebug_x64(" - lstar", state->ia32_lstar);
-    bfdebug_x64(" - cstar", state->ia32_cstar);
-    bfdebug_x64(" - fmask", state->ia32_fmask);
-    bfdebug_x64(" - fs_base", state->ia32_fs_base);
-    bfdebug_x64(" - gs_base", state->ia32_gs_base);
-    bfdebug_x64(" - kernel_gs_base", state->ia32_kernel_gs_base);
-    bfdebug_x64(" - sysenter_cs", state->ia32_sysenter_cs);
-    bfdebug_x64(" - sysenter_esp", state->ia32_sysenter_esp);
-    bfdebug_x64(" - sysenter_eip", state->ia32_sysenter_eip);
-    bfdebug_x64(" - pat", state->ia32_pat);
-    bfdebug_x64(" - debugctl", state->ia32_debugctl);
+    bfdebug_x64(" - efer", state->msr_efer);
+    bfdebug_x64(" - star", state->msr_star);
+    bfdebug_x64(" - lstar", state->msr_lstar);
+    bfdebug_x64(" - cstar", state->msr_cstar);
+    bfdebug_x64(" - fmask", state->msr_fmask);
+    bfdebug_x64(" - fs_base", state->msr_fs_base);
+    bfdebug_x64(" - gs_base", state->msr_gs_base);
+    bfdebug_x64(" - kernel_gs_base", state->msr_kernel_gs_base);
+    bfdebug_x64(" - sysenter_cs", state->msr_sysenter_cs);
+    bfdebug_x64(" - sysenter_esp", state->msr_sysenter_esp);
+    bfdebug_x64(" - sysenter_eip", state->msr_sysenter_eip);
+    bfdebug_x64(" - pat", state->msr_pat);
+    bfdebug_x64(" - debugctl", state->msr_debugctl);
 
     bfdebug_ptr(" - hve_page", state->hve_page);
 

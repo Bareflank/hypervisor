@@ -55,43 +55,43 @@ namespace example
     constexpr bsl::safe_umx CPUID_LP_ADDRESS_SIZE_PHYS_ADDR_BITS{bsl::to_umx(0x000000FFU)};
 
     /// @brief defines the MTRRcap MSR
-    constexpr bsl::safe_u32 IA32_MTRRCAP{bsl::to_u32(0x000000FEU)};
+    constexpr bsl::safe_u32 MTRRCAP{bsl::to_u32(0x000000FEU)};
     /// @brief defines the MTRRcap MSR VCNT field
-    constexpr bsl::safe_umx IA32_MTRRCAP_VCNT{bsl::to_umx(0x00000000000000FFU)};
+    constexpr bsl::safe_umx MTRRCAP_VCNT{bsl::to_umx(0x00000000000000FFU)};
     /// @brief defines the MTRRcap MSR FIX field
-    constexpr bsl::safe_umx IA32_MTRRCAP_FIX{bsl::to_umx(0x0000000000000100U)};
+    constexpr bsl::safe_umx MTRRCAP_FIX{bsl::to_umx(0x0000000000000100U)};
 
     /// @brief defines the MTRRdefType MSR
-    constexpr bsl::safe_u32 IA32_MTRRDEFTYPE{bsl::to_u32(0x000002FFU)};
+    constexpr bsl::safe_u32 MTRRDEFTYPE{bsl::to_u32(0x000002FFU)};
     /// @brief defines the MTRRdefType MSR type field
-    constexpr bsl::safe_umx IA32_MTRRDEFTYPE_TYPE{bsl::to_umx(0x00000000000000FFU)};
+    constexpr bsl::safe_umx MTRRDEFTYPE_TYPE{bsl::to_umx(0x00000000000000FFU)};
     /// @brief defines the MTRRdefType MSR fixed range enable field
-    constexpr bsl::safe_umx IA32_MTRRDEFTYPE_FE{bsl::to_umx(0x0000000000000400U)};
+    constexpr bsl::safe_umx MTRRDEFTYPE_FE{bsl::to_umx(0x0000000000000400U)};
     /// @brief defines the MTRRdefType MSR enable field
-    constexpr bsl::safe_umx IA32_MTRRDEFTYPE_E{bsl::to_umx(0x0000000000000800U)};
+    constexpr bsl::safe_umx MTRRDEFTYPE_E{bsl::to_umx(0x0000000000000800U)};
 
     /// @brief defines the MTRRfix64K_00000 MSR
-    constexpr bsl::safe_u32 IA32_MTRRFIX64K_00000{bsl::to_u32(0x000000250U)};
+    constexpr bsl::safe_u32 MTRRFIX64K_00000{bsl::to_u32(0x000000250U)};
     /// @brief defines the MTRRfix16K_80000 MSR
-    constexpr bsl::safe_u32 IA32_MTRRFIX16K_80000{bsl::to_u32(0x000000258U)};
+    constexpr bsl::safe_u32 MTRRFIX16K_80000{bsl::to_u32(0x000000258U)};
     /// @brief defines the MTRRfix16K_A0000 MSR
-    constexpr bsl::safe_u32 IA32_MTRRFIX16K_A0000{bsl::to_u32(0x000000259U)};
+    constexpr bsl::safe_u32 MTRRFIX16K_A0000{bsl::to_u32(0x000000259U)};
     /// @brief defines the MTRRfix4K_C0000 MSR
-    constexpr bsl::safe_u32 IA32_MTRRFIX4K_C0000{bsl::to_u32(0x000000268U)};
+    constexpr bsl::safe_u32 MTRRFIX4K_C0000{bsl::to_u32(0x000000268U)};
     /// @brief defines the MTRRfix4K_C8000 MSR
-    constexpr bsl::safe_u32 IA32_MTRRFIX4K_C8000{bsl::to_u32(0x000000269U)};
+    constexpr bsl::safe_u32 MTRRFIX4K_C8000{bsl::to_u32(0x000000269U)};
     /// @brief defines the MTRRfix4K_D0000 MSR
-    constexpr bsl::safe_u32 IA32_MTRRFIX4K_D0000{bsl::to_u32(0x00000026AU)};
+    constexpr bsl::safe_u32 MTRRFIX4K_D0000{bsl::to_u32(0x00000026AU)};
     /// @brief defines the MTRRfix4K_D8000 MSR
-    constexpr bsl::safe_u32 IA32_MTRRFIX4K_D8000{bsl::to_u32(0x00000026BU)};
+    constexpr bsl::safe_u32 MTRRFIX4K_D8000{bsl::to_u32(0x00000026BU)};
     /// @brief defines the MTRRfix4K_E0000 MSR
-    constexpr bsl::safe_u32 IA32_MTRRFIX4K_E0000{bsl::to_u32(0x00000026CU)};
+    constexpr bsl::safe_u32 MTRRFIX4K_E0000{bsl::to_u32(0x00000026CU)};
     /// @brief defines the MTRRfix4K_E8000 MSR
-    constexpr bsl::safe_u32 IA32_MTRRFIX4K_E8000{bsl::to_u32(0x00000026DU)};
+    constexpr bsl::safe_u32 MTRRFIX4K_E8000{bsl::to_u32(0x00000026DU)};
     /// @brief defines the MTRRfix4K_F0000 MSR
-    constexpr bsl::safe_u32 IA32_MTRRFIX4K_F0000{bsl::to_u32(0x00000026EU)};
+    constexpr bsl::safe_u32 MTRRFIX4K_F0000{bsl::to_u32(0x00000026EU)};
     /// @brief defines the MTRRfix4K_F8000 MSR
-    constexpr bsl::safe_u32 IA32_MTRRFIX4K_F8000{bsl::to_u32(0x00000026FU)};
+    constexpr bsl::safe_u32 MTRRFIX4K_F8000{bsl::to_u32(0x00000026FU)};
 
     /// @brief defines the memory type mask for fixed ranges
     constexpr bsl::safe_umx MTRR_FIX_MASK{bsl::to_umx(0x00000000000000FFU)};
@@ -146,9 +146,9 @@ namespace example
     constexpr bsl::safe_umx MTRRFIX4K_F8000_SIZE{bsl::to_umx(0x1000U)};
 
     /// @brief defines the MTRRphysBase MSR
-    constexpr bsl::safe_u32 IA32_MTRRPHYSBASE{bsl::to_u32(0x000000200U)};
+    constexpr bsl::safe_u32 MTRRPHYSBASE{bsl::to_u32(0x000000200U)};
     /// @brief defines the MTRRphysMask MSR
-    constexpr bsl::safe_u32 IA32_MTRRPHYSMASK{bsl::to_u32(0x000000201U)};
+    constexpr bsl::safe_u32 MTRRPHYSMASK{bsl::to_u32(0x000000201U)};
 
     /// <!-- description -->
     ///   @brief Implements the sort function that we use for a range_t
@@ -650,13 +650,13 @@ namespace example
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        add_ia32_mtrr_fix64k_00000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
+        add_mtrr_fix64k_00000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
             bsl::safe_umx mtrr{};
             bsl::safe_umx shft{};
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX64K_00000, mtrr);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRFIX64K_00000, mtrr);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -689,13 +689,13 @@ namespace example
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        add_ia32_mtrr_fix16k_80000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
+        add_mtrr_fix16k_80000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
             bsl::safe_umx mtrr{};
             bsl::safe_umx shft{};
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX16K_80000, mtrr);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRFIX16K_80000, mtrr);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -728,13 +728,13 @@ namespace example
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        add_ia32_mtrr_fix16k_a0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
+        add_mtrr_fix16k_a0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
             bsl::safe_umx mtrr{};
             bsl::safe_umx shft{};
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX16K_A0000, mtrr);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRFIX16K_A0000, mtrr);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -767,13 +767,13 @@ namespace example
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        add_ia32_mtrr_fix4k_c0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
+        add_mtrr_fix4k_c0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
             bsl::safe_umx mtrr{};
             bsl::safe_umx shft{};
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_C0000, mtrr);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRFIX4K_C0000, mtrr);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -806,13 +806,13 @@ namespace example
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        add_ia32_mtrr_fix4k_c8000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
+        add_mtrr_fix4k_c8000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
             bsl::safe_umx mtrr{};
             bsl::safe_umx shft{};
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_C8000, mtrr);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRFIX4K_C8000, mtrr);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -845,13 +845,13 @@ namespace example
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        add_ia32_mtrr_fix4k_d0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
+        add_mtrr_fix4k_d0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
             bsl::safe_umx mtrr{};
             bsl::safe_umx shft{};
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_D0000, mtrr);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRFIX4K_D0000, mtrr);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -884,13 +884,13 @@ namespace example
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        add_ia32_mtrr_fix4k_d8000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
+        add_mtrr_fix4k_d8000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
             bsl::safe_umx mtrr{};
             bsl::safe_umx shft{};
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_D8000, mtrr);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRFIX4K_D8000, mtrr);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -923,13 +923,13 @@ namespace example
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        add_ia32_mtrr_fix4k_e0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
+        add_mtrr_fix4k_e0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
             bsl::safe_umx mtrr{};
             bsl::safe_umx shft{};
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_E0000, mtrr);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRFIX4K_E0000, mtrr);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -962,13 +962,13 @@ namespace example
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        add_ia32_mtrr_fix4k_e8000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
+        add_mtrr_fix4k_e8000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
             bsl::safe_umx mtrr{};
             bsl::safe_umx shft{};
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_E8000, mtrr);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRFIX4K_E8000, mtrr);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -1001,13 +1001,13 @@ namespace example
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        add_ia32_mtrr_fix4k_f0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
+        add_mtrr_fix4k_f0000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
             bsl::safe_umx mtrr{};
             bsl::safe_umx shft{};
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_F0000, mtrr);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRFIX4K_F0000, mtrr);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -1040,13 +1040,13 @@ namespace example
         ///     on failure.
         ///
         [[nodiscard]] constexpr auto
-        add_ia32_mtrr_fix4k_f8000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
+        add_mtrr_fix4k_f8000(syscall::bf_handle_t &handle) noexcept -> bsl::errc_type
         {
             bsl::errc_type ret{};
             bsl::safe_umx mtrr{};
             bsl::safe_umx shft{};
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRFIX4K_F8000, mtrr);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRFIX4K_F8000, mtrr);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -1156,10 +1156,10 @@ namespace example
 
             constexpr auto msrs_per_iteration{bsl::to_u32(2)};
             for (bsl::safe_idx i{}; i < (vcnt * msrs_per_iteration); i += msrs_per_iteration) {
-                auto ia32_mtrrphysbasen{IA32_MTRRPHYSBASE + i};
-                auto ia32_mtrrphysmaskn{IA32_MTRRPHYSMASK + i};
+                auto mtrrphysbasen{MTRRPHYSBASE + i};
+                auto mtrrphysmaskn{MTRRPHYSMASK + i};
 
-                ret = syscall::bf_intrinsic_op_rdmsr(handle, ia32_mtrrphysmaskn, physmask);
+                ret = syscall::bf_intrinsic_op_rdmsr(handle, mtrrphysmaskn, physmask);
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return bsl::errc_failure;
@@ -1169,7 +1169,7 @@ namespace example
                     continue;
                 }
 
-                ret = syscall::bf_intrinsic_op_rdmsr(handle, ia32_mtrrphysbasen, physbase);
+                ret = syscall::bf_intrinsic_op_rdmsr(handle, mtrrphysbasen, physbase);
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return bsl::errc_failure;
@@ -1272,24 +1272,24 @@ namespace example
             bsl::safe_umx cap{};
             bsl::safe_umx deftype{};
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRCAP, cap);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRCAP, cap);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            ret = syscall::bf_intrinsic_op_rdmsr(handle, IA32_MTRRDEFTYPE, deftype);
+            ret = syscall::bf_intrinsic_op_rdmsr(handle, MTRRDEFTYPE, deftype);
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            auto const cap_vcnt{bsl::to_u32(cap & IA32_MTRRCAP_VCNT)};
-            auto const cap_fix{bsl::to_u32(cap & IA32_MTRRCAP_FIX)};
+            auto const cap_vcnt{bsl::to_u32(cap & MTRRCAP_VCNT)};
+            auto const cap_fix{bsl::to_u32(cap & MTRRCAP_FIX)};
 
-            auto const deftype_type{deftype & IA32_MTRRDEFTYPE_TYPE};
-            auto const deftype_fe{deftype & IA32_MTRRDEFTYPE_FE};
-            auto const deftype_e{deftype & IA32_MTRRDEFTYPE_E};
+            auto const deftype_type{deftype & MTRRDEFTYPE_TYPE};
+            auto const deftype_fe{deftype & MTRRDEFTYPE_FE};
+            auto const deftype_e{deftype & MTRRDEFTYPE_E};
 
             /// NOTE:
             /// - If the MTRRs are disabled, the default memory type is
@@ -1328,67 +1328,67 @@ namespace example
 
             if (cap_fix.is_pos()) {
                 if (deftype_fe.is_pos()) {
-                    ret = this->add_ia32_mtrr_fix64k_00000(handle);
+                    ret = this->add_mtrr_fix64k_00000(handle);
                     if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return bsl::errc_failure;
                     }
 
-                    ret = this->add_ia32_mtrr_fix16k_80000(handle);
+                    ret = this->add_mtrr_fix16k_80000(handle);
                     if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return bsl::errc_failure;
                     }
 
-                    ret = this->add_ia32_mtrr_fix16k_a0000(handle);
+                    ret = this->add_mtrr_fix16k_a0000(handle);
                     if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return bsl::errc_failure;
                     }
 
-                    ret = this->add_ia32_mtrr_fix4k_c0000(handle);
+                    ret = this->add_mtrr_fix4k_c0000(handle);
                     if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return bsl::errc_failure;
                     }
 
-                    ret = this->add_ia32_mtrr_fix4k_c8000(handle);
+                    ret = this->add_mtrr_fix4k_c8000(handle);
                     if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return bsl::errc_failure;
                     }
 
-                    ret = this->add_ia32_mtrr_fix4k_d0000(handle);
+                    ret = this->add_mtrr_fix4k_d0000(handle);
                     if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return bsl::errc_failure;
                     }
 
-                    ret = this->add_ia32_mtrr_fix4k_d8000(handle);
+                    ret = this->add_mtrr_fix4k_d8000(handle);
                     if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return bsl::errc_failure;
                     }
 
-                    ret = this->add_ia32_mtrr_fix4k_e0000(handle);
+                    ret = this->add_mtrr_fix4k_e0000(handle);
                     if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return bsl::errc_failure;
                     }
 
-                    ret = this->add_ia32_mtrr_fix4k_e8000(handle);
+                    ret = this->add_mtrr_fix4k_e8000(handle);
                     if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return bsl::errc_failure;
                     }
 
-                    ret = this->add_ia32_mtrr_fix4k_f0000(handle);
+                    ret = this->add_mtrr_fix4k_f0000(handle);
                     if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return bsl::errc_failure;
                     }
 
-                    ret = this->add_ia32_mtrr_fix4k_f8000(handle);
+                    ret = this->add_mtrr_fix4k_f8000(handle);
                     if (bsl::unlikely(!ret)) {
                         bsl::print<bsl::V>() << bsl::here();
                         return bsl::errc_failure;

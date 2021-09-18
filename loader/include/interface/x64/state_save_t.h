@@ -225,32 +225,32 @@ struct state_save_t
     /* MSRs                                                                   */
     /**************************************************************************/
 
-    /** @brief stores the value of the IA32_EFER MSR (0x240) */
-    uint64_t ia32_efer;
-    /** @brief stores the value of the IA32_STAR MSR (0x248) */
-    uint64_t ia32_star;
-    /** @brief stores the value of the IA32_LSTAR MSR (0x250) */
-    uint64_t ia32_lstar;
-    /** @brief stores the value of the IA32_CSTAR MSR (0x258) */
-    uint64_t ia32_cstar;
-    /** @brief stores the value of the IA32_FMASK MSR (0x260) */
-    uint64_t ia32_fmask;
-    /** @brief stores the value of the IA32_FS_BASE MSR (0x268) */
-    uint64_t ia32_fs_base;
-    /** @brief stores the value of the IA32_GS_BASE MSR (0x270) */
-    uint64_t ia32_gs_base;
-    /** @brief stores the value of the IA32_KERNEL_GS_BASE MSR (0x278) */
-    uint64_t ia32_kernel_gs_base;
-    /** @brief stores the value of the IA32_SYSENTER_CS MSR (0x280) */
-    uint64_t ia32_sysenter_cs;
-    /** @brief stores the value of the IA32_SYSENTER_ESP MSR (0x288) */
-    uint64_t ia32_sysenter_esp;
-    /** @brief stores the value of the IA32_SYSENTER_EIP MSR (0x290) */
-    uint64_t ia32_sysenter_eip;
-    /** @brief stores the value of the IA32_PAT MSR (0x298) */
-    uint64_t ia32_pat;
-    /** @brief stores the value of the IA32_DEBUGCTL MSR (0x2A0) */
-    uint64_t ia32_debugctl;
+    /** @brief stores the value of the EFER MSR (0x240) */
+    uint64_t msr_efer;
+    /** @brief stores the value of the STAR MSR (0x248) */
+    uint64_t msr_star;
+    /** @brief stores the value of the LSTAR MSR (0x250) */
+    uint64_t msr_lstar;
+    /** @brief stores the value of the CSTAR MSR (0x258) */
+    uint64_t msr_cstar;
+    /** @brief stores the value of the FMASK MSR (0x260) */
+    uint64_t msr_fmask;
+    /** @brief stores the value of the FS_BASE MSR (0x268) */
+    uint64_t msr_fs_base;
+    /** @brief stores the value of the GS_BASE MSR (0x270) */
+    uint64_t msr_gs_base;
+    /** @brief stores the value of the KERNEL_GS_BASE MSR (0x278) */
+    uint64_t msr_kernel_gs_base;
+    /** @brief stores the value of the SYSENTER_CS MSR (0x280) */
+    uint64_t msr_sysenter_cs;
+    /** @brief stores the value of the SYSENTER_ESP MSR (0x288) */
+    uint64_t msr_sysenter_esp;
+    /** @brief stores the value of the SYSENTER_EIP MSR (0x290) */
+    uint64_t msr_sysenter_eip;
+    /** @brief stores the value of the PAT MSR (0x298) */
+    uint64_t msr_pat;
+    /** @brief stores the value of the DEBUGCTL MSR (0x2A0) */
+    uint64_t msr_debugctl;
 
     /** @brief reserved for future use (0x2A8) */
     uint64_t reserved3[0x7];

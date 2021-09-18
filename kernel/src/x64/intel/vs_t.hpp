@@ -50,32 +50,32 @@ namespace mk
     /// @brief entry point prototype
     extern "C" void intrinsic_vmexit(void) noexcept;
 
-    /// @brief defines the IA32_VMX_BASIC MSR
-    constexpr auto IA32_VMX_BASIC{0x480_u32};
-    /// @brief defines the IA32_PAT MSR
-    constexpr auto IA32_PAT{0x277_u32};
-    /// @brief defines the IA32_SYSENTER_CS MSR
-    constexpr auto IA32_SYSENTER_CS{0x174_u32};
-    /// @brief defines the IA32_SYSENTER_ESP MSR
-    constexpr auto IA32_SYSENTER_ESP{0x175_u32};
-    /// @brief defines the IA32_SYSENTER_EIP MSR
-    constexpr auto IA32_SYSENTER_EIP{0x176_u32};
-    /// @brief defines the IA32_EFER MSR
-    constexpr auto IA32_EFER{0xC0000080_u32};
-    /// @brief defines the IA32_STAR MSR
-    constexpr auto IA32_STAR{0xC0000081_u32};
-    /// @brief defines the IA32_LSTAR MSR
-    constexpr auto IA32_LSTAR{0xC0000082_u32};
-    /// @brief defines the IA32_CSTAR MSR
-    constexpr auto IA32_CSTAR{0xC0000083_u32};
-    /// @brief defines the IA32_FMASK MSR
-    constexpr auto IA32_FMASK{0xC0000084_u32};
-    /// @brief defines the IA32_FS_BASE MSR
-    constexpr auto IA32_FS_BASE{0xC0000100_u32};
-    /// @brief defines the IA32_GS_BASE MSR
-    constexpr auto IA32_GS_BASE{0xC0000101_u32};
-    /// @brief defines the IA32_KERNEL_GS_BASE MSR
-    constexpr auto IA32_KERNEL_GS_BASE{0xC0000102_u32};
+    /// @brief defines the VMX_BASIC MSR
+    constexpr auto MSR_VMX_BASIC{0x480_u32};
+    /// @brief defines the PAT MSR
+    constexpr auto MSR_PAT{0x277_u32};
+    /// @brief defines the SYSENTER_CS MSR
+    constexpr auto MSR_SYSENTER_CS{0x174_u32};
+    /// @brief defines the SYSENTER_ESP MSR
+    constexpr auto MSR_SYSENTER_ESP{0x175_u32};
+    /// @brief defines the SYSENTER_EIP MSR
+    constexpr auto MSR_SYSENTER_EIP{0x176_u32};
+    /// @brief defines the EFER MSR
+    constexpr auto MSR_EFER{0xC0000080_u32};
+    /// @brief defines the STAR MSR
+    constexpr auto MSR_STAR{0xC0000081_u32};
+    /// @brief defines the LSTAR MSR
+    constexpr auto MSR_LSTAR{0xC0000082_u32};
+    /// @brief defines the CSTAR MSR
+    constexpr auto MSR_CSTAR{0xC0000083_u32};
+    /// @brief defines the FMASK MSR
+    constexpr auto MSR_FMASK{0xC0000084_u32};
+    /// @brief defines the FS_BASE MSR
+    constexpr auto MSR_FS_BASE{0xC0000100_u32};
+    /// @brief defines the GS_BASE MSR
+    constexpr auto MSR_GS_BASE{0xC0000101_u32};
+    /// @brief defines the KERNEL_GS_BASE MSR
+    constexpr auto MSR_KERNEL_GS_BASE{0xC0000102_u32};
 
     /// @class mk::vs_t
     ///
@@ -289,7 +289,7 @@ namespace mk
         [[nodiscard]] static constexpr auto
         sanitize_entry_ctls(bsl::safe_u64 const &val) noexcept -> bsl::safe_u32
         {
-            constexpr auto vmcs_entry_ctls_mask{0xC204_u64};
+            constexpr auto vmcs_entry_ctls_mask{0xC004_u64};
             return bsl::to_u32(val | vmcs_entry_ctls_mask);
         }
 
@@ -328,7 +328,7 @@ namespace mk
         constexpr void
         init_vmcs(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept
         {
-            auto const revision_id{mut_intrinsic.rdmsr(IA32_VMX_BASIC)};
+            auto const revision_id{mut_intrinsic.rdmsr(MSR_VMX_BASIC)};
             bsl::expects(revision_id.is_valid_and_checked());
 
             m_vmcs->revision_id = bsl::to_u32_unsafe(revision_id).get();
@@ -349,12 +349,12 @@ namespace mk
             auto const tr{mut_intrinsic.tr_selector()};
             bsl::expects(mut_intrinsic.vmwr16(VMCS_HOST_TR_SELECTOR, tr));
 
-            auto const pat{mut_intrinsic.rdmsr(IA32_PAT)};
-            bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_IA32_PAT, pat));
-            auto const efer{mut_intrinsic.rdmsr(IA32_EFER)};
-            bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_IA32_EFER, efer));
-            auto const sysenter_cs{mut_intrinsic.rdmsr(IA32_SYSENTER_CS)};
-            bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_IA32_SYSENTER_CS, sysenter_cs));
+            auto const pat{mut_intrinsic.rdmsr(MSR_PAT)};
+            bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_PAT, pat));
+            auto const efer{mut_intrinsic.rdmsr(MSR_EFER)};
+            bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_EFER, efer));
+            auto const sysenter_cs{mut_intrinsic.rdmsr(MSR_SYSENTER_CS)};
+            bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_SYSENTER_CS, sysenter_cs));
 
             auto const cr0{mut_intrinsic.cr0()};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_CR0, cr0));
@@ -363,9 +363,9 @@ namespace mk
             auto const cr4{mut_intrinsic.cr4()};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_CR4, cr4));
 
-            auto const fs_base{mut_intrinsic.rdmsr(IA32_FS_BASE)};
+            auto const fs_base{mut_intrinsic.rdmsr(MSR_FS_BASE)};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_FS_BASE, fs_base));
-            auto const gs_base{mut_intrinsic.rdmsr(IA32_GS_BASE)};
+            auto const gs_base{mut_intrinsic.rdmsr(MSR_GS_BASE)};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_GS_BASE, gs_base));
             auto const tr_base{bsl::to_u64(mut_tls.mk_state->tr_base)};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_TR_BASE, tr_base));
@@ -375,23 +375,23 @@ namespace mk
             auto const idtr_base{bsl::to_u64(mut_tls.mk_state->idtr.base)};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_IDTR_BASE, idtr_base));
 
-            auto const sysenter_esp{mut_intrinsic.rdmsr(IA32_SYSENTER_ESP)};
-            bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_IA32_SYSENTER_ESP, sysenter_esp));
-            auto const sysenter_eip{mut_intrinsic.rdmsr(IA32_SYSENTER_EIP)};
-            bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_IA32_SYSENTER_EIP, sysenter_eip));
+            auto const sysenter_esp{mut_intrinsic.rdmsr(MSR_SYSENTER_ESP)};
+            bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_SYSENTER_ESP, sysenter_esp));
+            auto const sysenter_eip{mut_intrinsic.rdmsr(MSR_SYSENTER_EIP)};
+            bsl::expects(mut_intrinsic.vmwr64(VMCS_HOST_SYSENTER_EIP, sysenter_eip));
 
             bsl::expects(mut_intrinsic.vmwrfunc(VMCS_HOST_RIP, &intrinsic_vmexit));
 
-            m_vmcs_missing_registers.host_ia32_star =              // --
-                mut_intrinsic.rdmsr(IA32_STAR).get();              // --
-            m_vmcs_missing_registers.host_ia32_lstar =             // --
-                mut_intrinsic.rdmsr(IA32_LSTAR).get();             // --
-            m_vmcs_missing_registers.host_ia32_cstar =             // --
-                mut_intrinsic.rdmsr(IA32_CSTAR).get();             // --
-            m_vmcs_missing_registers.host_ia32_fmask =             // --
-                mut_intrinsic.rdmsr(IA32_FMASK).get();             // --
-            m_vmcs_missing_registers.host_ia32_kernel_gs_base =    // --
-                mut_intrinsic.rdmsr(IA32_KERNEL_GS_BASE).get();    // --
+            m_vmcs_missing_registers.host_star =                  // --
+                mut_intrinsic.rdmsr(MSR_STAR).get();              // --
+            m_vmcs_missing_registers.host_lstar =                 // --
+                mut_intrinsic.rdmsr(MSR_LSTAR).get();             // --
+            m_vmcs_missing_registers.host_cstar =                 // --
+                mut_intrinsic.rdmsr(MSR_CSTAR).get();             // --
+            m_vmcs_missing_registers.host_fmask =                 // --
+                mut_intrinsic.rdmsr(MSR_FMASK).get();             // --
+            m_vmcs_missing_registers.host_kernel_gs_base =        // --
+                mut_intrinsic.rdmsr(MSR_KERNEL_GS_BASE).get();    // --
         }
 
     public:
@@ -845,30 +845,31 @@ namespace mk
             auto const dr7{bsl::to_u64(state->dr7)};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_DR7, dr7));
 
-            auto const pat{bsl::to_u64(state->ia32_pat)};
-            bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_IA32_PAT, pat));
-            auto const efer{bsl::to_u64(state->ia32_efer)};
-            bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_IA32_EFER, efer));
-            auto const sysenter_cs{bsl::to_u64(state->ia32_sysenter_cs)};
-            bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_IA32_SYSENTER_CS, sysenter_cs));
-            auto const fs_base{bsl::to_u64(state->ia32_fs_base)};
+            auto const pat{bsl::to_u64(state->msr_pat)};
+            bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_PAT, pat));
+            auto const efer{bsl::to_u64(state->msr_efer)};
+            bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_EFER, efer));
+            auto const sysenter_cs{bsl::to_u64(state->msr_sysenter_cs)};
+            bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_SYSENTER_CS, sysenter_cs));
+            auto const fs_base{bsl::to_u64(state->msr_fs_base)};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_FS_BASE, fs_base));
-            auto const gs_base{bsl::to_u64(state->ia32_gs_base)};
+            auto const gs_base{bsl::to_u64(state->msr_gs_base)};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_GS_BASE, gs_base));
-            auto const sysenter_esp{bsl::to_u64(state->ia32_sysenter_esp)};
-            bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_IA32_SYSENTER_ESP, sysenter_esp));
-            auto const sysenter_eip{bsl::to_u64(state->ia32_sysenter_eip)};
-            bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_IA32_SYSENTER_EIP, sysenter_eip));
-            auto const debugctl{bsl::to_u64(state->ia32_debugctl)};
-            bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_IA32_DEBUGCTL, debugctl));
+            auto const sysenter_esp{bsl::to_u64(state->msr_sysenter_esp)};
+            bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_SYSENTER_ESP, sysenter_esp));
+            auto const sysenter_eip{bsl::to_u64(state->msr_sysenter_eip)};
+            bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_SYSENTER_EIP, sysenter_eip));
+            auto const debugctl{bsl::to_u64(state->msr_debugctl)};
+            bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_DEBUGCTL, debugctl));
 
             m_vmcs_missing_registers.guest_cr2 = state->cr2;
             m_vmcs_missing_registers.guest_dr6 = state->dr6;
-            m_vmcs_missing_registers.guest_ia32_star = state->ia32_star;
-            m_vmcs_missing_registers.guest_ia32_lstar = state->ia32_lstar;
-            m_vmcs_missing_registers.guest_ia32_cstar = state->ia32_cstar;
-            m_vmcs_missing_registers.guest_ia32_fmask = state->ia32_fmask;
-            m_vmcs_missing_registers.guest_ia32_kernel_gs_base = state->ia32_kernel_gs_base;
+
+            m_vmcs_missing_registers.guest_star = state->msr_star;
+            m_vmcs_missing_registers.guest_lstar = state->msr_lstar;
+            m_vmcs_missing_registers.guest_cstar = state->msr_cstar;
+            m_vmcs_missing_registers.guest_fmask = state->msr_fmask;
+            m_vmcs_missing_registers.guest_kernel_gs_base = state->msr_kernel_gs_base;
         }
 
         /// <!-- description -->
@@ -1036,30 +1037,31 @@ namespace mk
             auto *const pmut_dr7{&pmut_state->dr7};
             bsl::expects(intrinsic.vmrd64(VMCS_GUEST_DR7, pmut_dr7));
 
-            auto *const pmut_pat{&pmut_state->ia32_pat};
-            bsl::expects(intrinsic.vmrd64(VMCS_GUEST_IA32_PAT, pmut_pat));
-            auto *const pmut_efer{&pmut_state->ia32_efer};
-            bsl::expects(intrinsic.vmrd64(VMCS_GUEST_IA32_EFER, pmut_efer));
-            auto *const pmut_sysenter_cs{&pmut_state->ia32_sysenter_cs};
-            bsl::expects(intrinsic.vmrd64(VMCS_GUEST_IA32_SYSENTER_CS, pmut_sysenter_cs));
-            auto *const pmut_fs_base{&pmut_state->ia32_fs_base};
+            auto *const pmut_pat{&pmut_state->msr_pat};
+            bsl::expects(intrinsic.vmrd64(VMCS_GUEST_PAT, pmut_pat));
+            auto *const pmut_efer{&pmut_state->msr_efer};
+            bsl::expects(intrinsic.vmrd64(VMCS_GUEST_EFER, pmut_efer));
+            auto *const pmut_sysenter_cs{&pmut_state->msr_sysenter_cs};
+            bsl::expects(intrinsic.vmrd64(VMCS_GUEST_SYSENTER_CS, pmut_sysenter_cs));
+            auto *const pmut_fs_base{&pmut_state->msr_fs_base};
             bsl::expects(intrinsic.vmrd64(VMCS_GUEST_FS_BASE, pmut_fs_base));
-            auto *const pmut_gs_base{&pmut_state->ia32_gs_base};
+            auto *const pmut_gs_base{&pmut_state->msr_gs_base};
             bsl::expects(intrinsic.vmrd64(VMCS_GUEST_GS_BASE, pmut_gs_base));
-            auto *const pmut_sysenter_esp{&pmut_state->ia32_sysenter_esp};
-            bsl::expects(intrinsic.vmrd64(VMCS_GUEST_IA32_SYSENTER_ESP, pmut_sysenter_esp));
-            auto *const pmut_sysenter_eip{&pmut_state->ia32_sysenter_eip};
-            bsl::expects(intrinsic.vmrd64(VMCS_GUEST_IA32_SYSENTER_EIP, pmut_sysenter_eip));
-            auto *const pmut_debugctl{&pmut_state->ia32_debugctl};
-            bsl::expects(intrinsic.vmrd64(VMCS_GUEST_IA32_DEBUGCTL, pmut_debugctl));
+            auto *const pmut_sysenter_esp{&pmut_state->msr_sysenter_esp};
+            bsl::expects(intrinsic.vmrd64(VMCS_GUEST_SYSENTER_ESP, pmut_sysenter_esp));
+            auto *const pmut_sysenter_eip{&pmut_state->msr_sysenter_eip};
+            bsl::expects(intrinsic.vmrd64(VMCS_GUEST_SYSENTER_EIP, pmut_sysenter_eip));
+            auto *const pmut_debugctl{&pmut_state->msr_debugctl};
+            bsl::expects(intrinsic.vmrd64(VMCS_GUEST_DEBUGCTL, pmut_debugctl));
 
             pmut_state->cr2 = m_vmcs_missing_registers.guest_cr2;
             pmut_state->dr6 = m_vmcs_missing_registers.guest_dr6;
-            pmut_state->ia32_star = m_vmcs_missing_registers.guest_ia32_star;
-            pmut_state->ia32_lstar = m_vmcs_missing_registers.guest_ia32_lstar;
-            pmut_state->ia32_cstar = m_vmcs_missing_registers.guest_ia32_cstar;
-            pmut_state->ia32_fmask = m_vmcs_missing_registers.guest_ia32_fmask;
-            pmut_state->ia32_kernel_gs_base = m_vmcs_missing_registers.guest_ia32_kernel_gs_base;
+
+            pmut_state->msr_star = m_vmcs_missing_registers.guest_star;
+            pmut_state->msr_lstar = m_vmcs_missing_registers.guest_lstar;
+            pmut_state->msr_cstar = m_vmcs_missing_registers.guest_cstar;
+            pmut_state->msr_fmask = m_vmcs_missing_registers.guest_fmask;
+            pmut_state->msr_kernel_gs_base = m_vmcs_missing_registers.guest_kernel_gs_base;
         }
 
         /// <!-- description -->
@@ -1216,24 +1218,24 @@ namespace mk
                     return bsl::to_u64(m_vmcs_missing_registers.guest_dr6);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_star: {
-                    return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_star);
+                case syscall::bf_reg_t::bf_reg_t_star: {
+                    return bsl::to_u64(m_vmcs_missing_registers.guest_star);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_lstar: {
-                    return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_lstar);
+                case syscall::bf_reg_t::bf_reg_t_lstar: {
+                    return bsl::to_u64(m_vmcs_missing_registers.guest_lstar);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_cstar: {
-                    return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_cstar);
+                case syscall::bf_reg_t::bf_reg_t_cstar: {
+                    return bsl::to_u64(m_vmcs_missing_registers.guest_cstar);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_fmask: {
-                    return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_fmask);
+                case syscall::bf_reg_t::bf_reg_t_fmask: {
+                    return bsl::to_u64(m_vmcs_missing_registers.guest_fmask);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_kernel_gs_base: {
-                    return bsl::to_u64(m_vmcs_missing_registers.guest_ia32_kernel_gs_base);
+                case syscall::bf_reg_t::bf_reg_t_kernel_gs_base: {
+                    return bsl::to_u64(m_vmcs_missing_registers.guest_kernel_gs_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_virtual_processor_identifier: {
@@ -1445,23 +1447,23 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_debugctl: {
-                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_DEBUGCTL, mut_val.data());
+                case syscall::bf_reg_t::bf_reg_t_debugctl: {
+                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_DEBUGCTL, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_pat: {
-                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_PAT, mut_val.data());
+                case syscall::bf_reg_t::bf_reg_t_pat: {
+                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_PAT, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_efer: {
-                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_EFER, mut_val.data());
+                case syscall::bf_reg_t::bf_reg_t_efer: {
+                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_EFER, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_perf_global_ctrl: {
-                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, mut_val.data());
+                case syscall::bf_reg_t::bf_reg_t_perf_global_ctrl: {
+                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_PERF_GLOBAL_CTRL, mut_val.data());
                     break;
                 }
 
@@ -1485,8 +1487,8 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_bndcfgs: {
-                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_BNDCFGS, mut_val.data());
+                case syscall::bf_reg_t::bf_reg_t_bndcfgs: {
+                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_BNDCFGS, mut_val.data());
                     break;
                 }
 
@@ -1735,8 +1737,8 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_cs: {
-                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_SYSENTER_CS, mut_val.data());
+                case syscall::bf_reg_t::bf_reg_t_sysenter_cs: {
+                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_SYSENTER_CS, mut_val.data());
                     break;
                 }
 
@@ -1905,13 +1907,13 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_esp: {
-                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_SYSENTER_ESP, mut_val.data());
+                case syscall::bf_reg_t::bf_reg_t_sysenter_esp: {
+                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_SYSENTER_ESP, mut_val.data());
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_eip: {
-                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_IA32_SYSENTER_EIP, mut_val.data());
+                case syscall::bf_reg_t::bf_reg_t_sysenter_eip: {
+                    mut_ret = intrinsic.vmrd64(VMCS_GUEST_SYSENTER_EIP, mut_val.data());
                     break;
                 }
 
@@ -2114,28 +2116,28 @@ namespace mk
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_star: {
-                    m_vmcs_missing_registers.guest_ia32_star = val.get();
+                case syscall::bf_reg_t::bf_reg_t_star: {
+                    m_vmcs_missing_registers.guest_star = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_lstar: {
-                    m_vmcs_missing_registers.guest_ia32_lstar = val.get();
+                case syscall::bf_reg_t::bf_reg_t_lstar: {
+                    m_vmcs_missing_registers.guest_lstar = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_cstar: {
-                    m_vmcs_missing_registers.guest_ia32_cstar = val.get();
+                case syscall::bf_reg_t::bf_reg_t_cstar: {
+                    m_vmcs_missing_registers.guest_cstar = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_fmask: {
-                    m_vmcs_missing_registers.guest_ia32_fmask = val.get();
+                case syscall::bf_reg_t::bf_reg_t_fmask: {
+                    m_vmcs_missing_registers.guest_fmask = val.get();
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_kernel_gs_base: {
-                    m_vmcs_missing_registers.guest_ia32_kernel_gs_base = val.get();
+                case syscall::bf_reg_t::bf_reg_t_kernel_gs_base: {
+                    m_vmcs_missing_registers.guest_kernel_gs_base = val.get();
                     return bsl::errc_success;
                 }
 
@@ -2349,24 +2351,23 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_debugctl: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IA32_DEBUGCTL, bsl::to_u64(val));
+                case syscall::bf_reg_t::bf_reg_t_debugctl: {
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_DEBUGCTL, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_pat: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IA32_PAT, bsl::to_u64(val));
+                case syscall::bf_reg_t::bf_reg_t_pat: {
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PAT, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_efer: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IA32_EFER, bsl::to_u64(val));
+                case syscall::bf_reg_t::bf_reg_t_efer: {
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_EFER, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_perf_global_ctrl: {
-                    mut_ret =
-                        mut_intrinsic.vmwr64(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL, bsl::to_u64(val));
+                case syscall::bf_reg_t::bf_reg_t_perf_global_ctrl: {
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PERF_GLOBAL_CTRL, bsl::to_u64(val));
                     break;
                 }
 
@@ -2390,8 +2391,8 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_bndcfgs: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IA32_BNDCFGS, bsl::to_u64(val));
+                case syscall::bf_reg_t::bf_reg_t_bndcfgs: {
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_BNDCFGS, bsl::to_u64(val));
                     break;
                 }
 
@@ -2649,8 +2650,8 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_cs: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_IA32_SYSENTER_CS, bsl::to_u32(val));
+                case syscall::bf_reg_t::bf_reg_t_sysenter_cs: {
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_SYSENTER_CS, bsl::to_u32(val));
                     break;
                 }
 
@@ -2821,13 +2822,13 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_esp: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IA32_SYSENTER_ESP, bsl::to_u64(val));
+                case syscall::bf_reg_t::bf_reg_t_sysenter_esp: {
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_SYSENTER_ESP, bsl::to_u64(val));
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_ia32_sysenter_eip: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IA32_SYSENTER_EIP, bsl::to_u64(val));
+                case syscall::bf_reg_t::bf_reg_t_sysenter_eip: {
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_SYSENTER_EIP, bsl::to_u64(val));
                     break;
                 }
 
@@ -3152,21 +3153,21 @@ namespace mk
             bsl::print() << bsl::rst << bsl::endl;
 
             this->dump_field("vmcs_link_pointer ", intrinsic.vmrd64(VMCS_VMCS_LINK_POINTER));
-            this->dump_field("ia32_debugctl ", intrinsic.vmrd64(VMCS_GUEST_IA32_DEBUGCTL));
-            this->dump_field("ia32_pat ", intrinsic.vmrd64(VMCS_GUEST_IA32_PAT));
-            this->dump_field("ia32_efer ", intrinsic.vmrd64(VMCS_GUEST_IA32_EFER));
-            this->dump_field("ia32_perf_global_ctrl ", intrinsic.vmrd64(VMCS_GUEST_IA32_PERF_GLOBAL_CTRL));
+            this->dump_field("debugctl ", intrinsic.vmrd64(VMCS_GUEST_DEBUGCTL));
+            this->dump_field("pat ", intrinsic.vmrd64(VMCS_GUEST_PAT));
+            this->dump_field("efer ", intrinsic.vmrd64(VMCS_GUEST_EFER));
+            this->dump_field("perf_global_ctrl ", intrinsic.vmrd64(VMCS_GUEST_PERF_GLOBAL_CTRL));
             this->dump_field("guest_pdpte0 ", intrinsic.vmrd64(VMCS_GUEST_PDPTE0));
             this->dump_field("guest_pdpte1 ", intrinsic.vmrd64(VMCS_GUEST_PDPTE1));
             this->dump_field("guest_pdpte2 ", intrinsic.vmrd64(VMCS_GUEST_PDPTE2));
             this->dump_field("guest_pdpte3 ", intrinsic.vmrd64(VMCS_GUEST_PDPTE3));
-            this->dump_field("ia32_bndcfgs ", intrinsic.vmrd64(VMCS_GUEST_IA32_BNDCFGS));
+            this->dump_field("bndcfgs ", intrinsic.vmrd64(VMCS_GUEST_BNDCFGS));
             this->dump_field("guest_rtit_ctl ", intrinsic.vmrd64(VMCS_GUEST_RTIT_CTL));
-            this->dump_field("ia32_star ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_star));
-            this->dump_field("ia32_lstar ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_lstar));
-            this->dump_field("ia32_cstar ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_cstar));
-            this->dump_field("ia32_fmask ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_fmask));
-            this->dump_field("ia32_kernel_gs_base ", bsl::make_safe(m_vmcs_missing_registers.guest_ia32_kernel_gs_base));
+            this->dump_field("star ", bsl::make_safe(m_vmcs_missing_registers.guest_star));
+            this->dump_field("lstar ", bsl::make_safe(m_vmcs_missing_registers.guest_lstar));
+            this->dump_field("cstar ", bsl::make_safe(m_vmcs_missing_registers.guest_cstar));
+            this->dump_field("fmask ", bsl::make_safe(m_vmcs_missing_registers.guest_fmask));
+            this->dump_field("kernel_gs_base ", bsl::make_safe(m_vmcs_missing_registers.guest_kernel_gs_base));
 
             /// 32 Bit Control Fields
             ///
@@ -3234,7 +3235,7 @@ namespace mk
             this->dump_field("guest_interruptibility_state ", intrinsic.vmrd32(VMCS_GUEST_INTERRUPTIBILITY_STATE));
             this->dump_field("guest_activity_state ", intrinsic.vmrd32(VMCS_GUEST_ACTIVITY_STATE));
             this->dump_field("guest_smbase ", intrinsic.vmrd32(VMCS_GUEST_SMBASE));
-            this->dump_field("ia32_sysenter_cs ", intrinsic.vmrd32(VMCS_GUEST_IA32_SYSENTER_CS));
+            this->dump_field("sysenter_cs ", intrinsic.vmrd32(VMCS_GUEST_SYSENTER_CS));
             this->dump_field("vmx_preemption_timer_value ", intrinsic.vmrd32(VMCS_VMX_PREEMPTION_TIMER_VALUE));
 
             /// Natural-Width Control Fields
@@ -3291,8 +3292,8 @@ namespace mk
             this->dump_field("rip ", intrinsic.vmrd64(VMCS_GUEST_RIP));
             this->dump_field("rflags ", intrinsic.vmrd64(VMCS_GUEST_RFLAGS));
             this->dump_field("guest_pending_debug_exceptions ", intrinsic.vmrd64(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS));
-            this->dump_field("ia32_sysenter_esp ", intrinsic.vmrd64(VMCS_GUEST_IA32_SYSENTER_ESP));
-            this->dump_field("ia32_sysenter_eip ", intrinsic.vmrd64(VMCS_GUEST_IA32_SYSENTER_EIP));
+            this->dump_field("sysenter_esp ", intrinsic.vmrd64(VMCS_GUEST_SYSENTER_ESP));
+            this->dump_field("sysenter_eip ", intrinsic.vmrd64(VMCS_GUEST_SYSENTER_EIP));
 
             /// Footer
             ///

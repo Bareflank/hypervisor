@@ -71,10 +71,10 @@
     /** @brief defines the offset of state_save_t.nmi */
     #define SS_OFFSET_NMI 0x318
 
-    /** @brief defines MSR_IA32_LSTAR */
-    #define MSR_IA32_LSTAR 0xC0000082
-    /** @brief defines MSR_IA32_GS_BASE */
-    #define MSR_IA32_GS_BASE 0xC0000101
+    /** @brief defines MSR_LSTAR */
+    #define MSR_LSTAR 0xC0000082
+    /** @brief defines MSR_GS_BASE */
+    #define MSR_GS_BASE 0xC0000101
 
     /** @brief defines invalid ids for all of the active ids */
     #define INVALID_IDS 0xFFFFFFFFFFFFFFFF
@@ -126,7 +126,7 @@ mk_main_entry:
      *   can index into the TLS block using GS.
      */
 
-    mov ecx, MSR_IA32_GS_BASE
+    mov ecx, MSR_GS_BASE
     mov rax, rsi
     mov rdx, rsi
     shr rdx, 32
@@ -313,7 +313,7 @@ mk_main_entry:
      *   used by extensions to make syscalls.
      */
 
-    mov ecx, MSR_IA32_LSTAR
+    mov ecx, MSR_LSTAR
     lea rax, [rip + dispatch_syscall_entry]
     mov rdx, rax
     shr rdx, 32

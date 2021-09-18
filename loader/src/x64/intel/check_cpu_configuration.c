@@ -47,12 +47,12 @@
 #define CPUID_FEATURE_ECX_VMX (((uint32_t)1) << ((uint32_t)5))
 
 /** @brief defines the MSR address for feature information */
-#define MSR_IA32_FEATURE_CTRL ((uint32_t)0x3A)
+#define MSR_FEATURE_CTRL ((uint32_t)0x3A)
 /** @brief defines the MSR feature VMX enabled bit */
 #define FEATURE_CTRL_VMX_ENABLED_OUTSIDE_SMX (((uint64_t)1) << ((uint64_t)2))
 
 /** @brief defines the MSR address for VMX information */
-#define MSR_IA32_VMX_BASIC ((uint32_t)0x480)
+#define MSR_VMX_BASIC ((uint32_t)0x480)
 /** @brief defines the supported physical address size */
 #define VMX_BASIC_PHYS_ADDR_SIZE (((uint64_t)1) << ((uint64_t)48))
 /** @brief defines the VMX memory type */
@@ -62,8 +62,8 @@
 /** @brief defines the MSR VMX true controls enabled bit */
 #define VMX_BASIC_TRUE_CTRLS (((uint64_t)1) << ((uint64_t)55))
 
-/** @brief defines the MSR_IA32_EFER MSR  */
-#define MSR_IA32_EFER ((uint32_t)0xC0000080)
+/** @brief defines the MSR_EFER MSR  */
+#define MSR_EFER ((uint32_t)0xC0000080)
 /** @brief defines the EFER_LMA MSR field */
 #define EFER_LMA (((uint64_t)1) << ((uint64_t)10))
 /** @brief defines the EFER_LME MSR field */
@@ -156,7 +156,7 @@ check_for_vmx(void)
 static inline int64_t
 check_for_vmx_disabled(void)
 {
-    uint64_t msr = intrinsic_rdmsr(MSR_IA32_FEATURE_CTRL);
+    uint64_t msr = intrinsic_rdmsr(MSR_FEATURE_CTRL);
 
     if ((msr & FEATURE_CTRL_VMX_ENABLED_OUTSIDE_SMX) == ((uint64_t)0)) {
         bferror_x64("VT-x has been disabled in BIOS", msr);
@@ -176,7 +176,7 @@ check_for_vmx_disabled(void)
 static inline int64_t
 check_vmx_capabilities(void)
 {
-    uint64_t msr = intrinsic_rdmsr(MSR_IA32_VMX_BASIC);
+    uint64_t msr = intrinsic_rdmsr(MSR_VMX_BASIC);
 
     if ((msr & VMX_BASIC_PHYS_ADDR_SIZE) != ((uint64_t)0)) {
         bferror_x64("VT-x address size not supported", msr);
@@ -206,7 +206,7 @@ check_vmx_capabilities(void)
 static inline int64_t
 check_the_configuration_of_efer(void)
 {
-    uint64_t msr = intrinsic_rdmsr(MSR_IA32_EFER);
+    uint64_t msr = intrinsic_rdmsr(MSR_EFER);
 
     if ((msr & EFER_LMA) == ((uint64_t)0)) {
         bferror_x64("The OS is not in long mode", msr);
@@ -232,14 +232,14 @@ static inline int64_t
 check_cr0(void)
 {
     uint64_t cr0 = intrinsic_scr0();
-    uint64_t ia32_vmx_cr0_fixed0 = intrinsic_rdmsr(MSR_VMX_CR0_FIXED0);
-    uint64_t ia32_vmx_cr0_fixed1 = intrinsic_rdmsr(MSR_VMX_CR0_FIXED1);
+    uint64_t vmx_cr0_fixed0 = intrinsic_rdmsr(MSR_VMX_CR0_FIXED0);
+    uint64_t vmx_cr0_fixed1 = intrinsic_rdmsr(MSR_VMX_CR0_FIXED1);
 
-    if (0 != ((~cr0 & ia32_vmx_cr0_fixed0) | (cr0 & ~ia32_vmx_cr0_fixed1))) {
+    if (0 != ((~cr0 & vmx_cr0_fixed0) | (cr0 & ~vmx_cr0_fixed1))) {
         bferror("cr0 is not properly configured");
         bferror_x64(" - cr0", cr0);
-        bferror_x64(" - ia32_vmx_cr0_fixed0", ia32_vmx_cr0_fixed0);
-        bferror_x64(" - ia32_vmx_cr0_fixed1", ia32_vmx_cr0_fixed1);
+        bferror_x64(" - vmx_cr0_fixed0", vmx_cr0_fixed0);
+        bferror_x64(" - vmx_cr0_fixed1", vmx_cr0_fixed1);
 
         return LOADER_FAILURE;
     }
@@ -258,14 +258,14 @@ static inline int64_t
 check_cr4(void)
 {
     uint64_t cr4 = intrinsic_scr4() | CR4_VMXE;
-    uint64_t ia32_vmx_cr4_fixed0 = intrinsic_rdmsr(MSR_VMX_CR4_FIXED0);
-    uint64_t ia32_vmx_cr4_fixed1 = intrinsic_rdmsr(MSR_VMX_CR4_FIXED1);
+    uint64_t vmx_cr4_fixed0 = intrinsic_rdmsr(MSR_VMX_CR4_FIXED0);
+    uint64_t vmx_cr4_fixed1 = intrinsic_rdmsr(MSR_VMX_CR4_FIXED1);
 
-    if (0 != ((~cr4 & ia32_vmx_cr4_fixed0) | (cr4 & ~ia32_vmx_cr4_fixed1))) {
+    if (0 != ((~cr4 & vmx_cr4_fixed0) | (cr4 & ~vmx_cr4_fixed1))) {
         bferror("cr4 is not properly configured");
         bferror_x64(" - cr4", cr4);
-        bferror_x64(" - ia32_vmx_cr4_fixed0", ia32_vmx_cr4_fixed0);
-        bferror_x64(" - ia32_vmx_cr4_fixed1", ia32_vmx_cr4_fixed1);
+        bferror_x64(" - vmx_cr4_fixed0", vmx_cr4_fixed0);
+        bferror_x64(" - vmx_cr4_fixed1", vmx_cr4_fixed1);
 
         return LOADER_FAILURE;
     }

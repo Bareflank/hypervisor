@@ -22,7 +22,7 @@
 ; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ; SOFTWARE.
 
-    ; @brief defines the offset of state_save_t.ia32_debugctl
+    ; @brief defines the offset of state_save_t.debugctl
     SS_OFFSET_NMI EQU 318h
 
     esr_nmi_text SEGMENT ALIGN(1000h) 'CODE'

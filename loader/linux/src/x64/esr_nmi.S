@@ -26,7 +26,7 @@
  * SOFTWARE.
  */
 
-    /** @brief defines the offset of state_save_t.ia32_debugctl */
+    /** @brief defines the offset of state_save_t.debugctl */
     #define SS_OFFSET_NMI 0x318
 
 #include <asm/unwind_hints.h>

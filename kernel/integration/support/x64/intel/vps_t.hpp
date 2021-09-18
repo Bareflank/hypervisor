@@ -167,15 +167,15 @@ namespace integration
                 return ret;
             }
 
-            constexpr auto ia32_vmx_true_pinbased_ctls{0x48D_u32};
-            constexpr auto ia32_vmx_true_procbased_ctls{0x48E_u32};
-            constexpr auto ia32_vmx_true_exit_ctls{0x48F_u32};
-            constexpr auto ia32_vmx_true_entry_ctls{0x490_u32};
-            constexpr auto ia32_vmx_true_procbased_ctls2{0x48B_u32};
+            constexpr auto vmx_true_pinbased_ctls{0x48D_u32};
+            constexpr auto vmx_true_procbased_ctls{0x48E_u32};
+            constexpr auto vmx_true_exit_ctls{0x48F_u32};
+            constexpr auto vmx_true_entry_ctls{0x490_u32};
+            constexpr auto vmx_true_procbased_ctls2{0x48B_u32};
 
             bsl::safe_umx mut_ctls{};
 
-            mut_ctls = sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_pinbased_ctls);
+            mut_ctls = sys.bf_intrinsic_op_rdmsr(vmx_true_pinbased_ctls);
             if (bsl::unlikely(!mut_ctls)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -191,7 +191,7 @@ namespace integration
             constexpr auto enable_msr_bitmaps{0x10000000_u64};
             constexpr auto enable_procbased_ctls2{0x80000000_u64};
 
-            mut_ctls = sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_procbased_ctls);
+            mut_ctls = sys.bf_intrinsic_op_rdmsr(vmx_true_procbased_ctls);
             if (bsl::unlikely(!mut_ctls)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -209,7 +209,7 @@ namespace integration
                 return ret;
             }
 
-            mut_ctls = sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_exit_ctls);
+            mut_ctls = sys.bf_intrinsic_op_rdmsr(vmx_true_exit_ctls);
             if (bsl::unlikely(!mut_ctls)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -222,7 +222,7 @@ namespace integration
                 return ret;
             }
 
-            mut_ctls = sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_entry_ctls);
+            mut_ctls = sys.bf_intrinsic_op_rdmsr(vmx_true_entry_ctls);
             if (bsl::unlikely(!mut_ctls)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -241,7 +241,7 @@ namespace integration
             constexpr auto enable_xsave{0x00100000_u64};
             constexpr auto enable_uwait{0x04000000_u64};
 
-            mut_ctls = sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_procbased_ctls2);
+            mut_ctls = sys.bf_intrinsic_op_rdmsr(vmx_true_procbased_ctls2);
             if (bsl::unlikely(!ctls)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;

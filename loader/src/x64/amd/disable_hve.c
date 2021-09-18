@@ -29,13 +29,13 @@
 #include <intrinsic_wrmsr.h>
 #include <types.h>
 
-/** @brief defines the MSR_IA32_EFER MSR  */
-#define MSR_IA32_EFER ((uint32_t)0xC0000080)
+/** @brief defines the MSR_EFER MSR  */
+#define MSR_EFER ((uint32_t)0xC0000080)
 /** @brief defines the EFER_SVME MSR field */
 #define EFER_SVME (((uint64_t)1) << ((uint64_t)12))
 
 /** @brief defines the MSR_VM_HSAVE_PA MSR  */
-#define MSR_IA32_VM_HSAVE_PA ((uint32_t)0xC0010117)
+#define MSR_VM_HSAVE_PA ((uint32_t)0xC0010117)
 
 /**
  * <!-- description -->
@@ -44,6 +44,6 @@
 void
 disable_hve(void)
 {
-    intrinsic_wrmsr(MSR_IA32_VM_HSAVE_PA, ((uint64_t)0));
-    intrinsic_wrmsr(MSR_IA32_EFER, intrinsic_rdmsr(MSR_IA32_EFER) & ~EFER_SVME);
+    intrinsic_wrmsr(MSR_VM_HSAVE_PA, ((uint64_t)0));
+    intrinsic_wrmsr(MSR_EFER, intrinsic_rdmsr(MSR_EFER) & ~EFER_SVME);
 }
