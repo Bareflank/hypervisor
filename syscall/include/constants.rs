@@ -474,8 +474,6 @@ pub const BF_VM_OP_UNMAP_DIRECT_BROADCAST_IDX_VAL: u64 = 0x0000000000000004;
 pub const BF_VP_OP_CREATE_VP_IDX_VAL: u64 = 0x0000000000000000;
 /// @brief Defines the index for bf_vp_op_destroy_vp
 pub const BF_VP_OP_DESTROY_VP_IDX_VAL: u64 = 0x0000000000000001;
-/// @brief Defines the index for bf_vp_op_migrate
-pub const BF_VP_OP_MIGRATE_IDX_VAL: u64 = 0x0000000000000002;
 
 /// @brief Defines the index for bf_vs_op_create_vs
 pub const BF_VS_OP_CREATE_VS_IDX_VAL: u64 = 0x0000000000000000;
@@ -491,14 +489,20 @@ pub const BF_VS_OP_WRITE_IDX_VAL: u64 = 0x0000000000000004;
 pub const BF_VS_OP_RUN_IDX_VAL: u64 = 0x0000000000000005;
 /// @brief Defines the index for bf_vs_op_run_current
 pub const BF_VS_OP_RUN_CURRENT_IDX_VAL: u64 = 0x0000000000000006;
-/// @brief Defines the index for bf_vs_op_advance_ip
-pub const BF_VS_OP_ADVANCE_IP_IDX_VAL: u64 = 0x0000000000000007;
+/// @brief Defines the index for bf_vs_op_advance_ip_and_run
+pub const BF_VS_OP_ADVANCE_IP_AND_RUN_IDX_VAL: u64 = 0x0000000000000007;
 /// @brief Defines the index for bf_vs_op_advance_ip_and_run_current
 pub const BF_VS_OP_ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL: u64 = 0x0000000000000008;
 /// @brief Defines the index for bf_vs_op_promote
 pub const BF_VS_OP_PROMOTE_IDX_VAL: u64 = 0x0000000000000009;
-/// @brief Defines the index for bf_vs_op_clear_vs
-pub const BF_VS_OP_CLEAR_VS_IDX_VAL: u64 = 0x000000000000000A;
+/// @brief Defines the index for bf_vs_op_clear
+pub const BF_VS_OP_CLEAR_IDX_VAL: u64 = 0x000000000000000A;
+/// @brief Defines the index for bf_vs_op_migrate
+pub const BF_VS_OP_MIGRATE_IDX_VAL: u64 = 0x000000000000000B;
+/// @brief Defines the index for bf_vs_op_set_active
+pub const BF_VS_OP_SET_ACTIVE_IDX_VAL: u64 = 0x000000000000000C;
+/// @brief Defines the index for bf_vs_op_advance_ip_and_set_active
+pub const BF_VS_OP_ADVANCE_IP_AND_SET_ACTIVE_IDX_VAL: u64 = 0x000000000000000D;
 
 /// @brief Defines the index for bf_intrinsic_op_rdmsr
 pub const BF_INTRINSIC_OP_RDMSR_IDX_VAL: u64 = 0x0000000000000000;

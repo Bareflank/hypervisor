@@ -39,7 +39,6 @@
 #include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
-#include <bsl/move.hpp>
 #include <bsl/safe_idx.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/span.hpp>
@@ -374,7 +373,7 @@ namespace vmmctl
         ///     will return bsl::errc_failure.
         ///
         [[nodiscard]] constexpr auto
-        process_cmd(bsl::arguments &&mut_args) noexcept -> bsl::errc_type
+        process_cmd(bsl::arguments &mut_args) noexcept -> bsl::errc_type
         {
             auto const cmd{mut_args.front<bsl::string_view>()};
             ++mut_args;
@@ -414,7 +413,7 @@ namespace vmmctl
         ///     will return bsl::errc_failure.
         ///
         [[nodiscard]] constexpr auto
-        process(bsl::arguments &&mut_args) noexcept -> bsl::errc_type
+        process(bsl::arguments &mut_args) noexcept -> bsl::errc_type
         {
             if (mut_args.get<bool>("-h")) {
                 this->help();
@@ -426,7 +425,7 @@ namespace vmmctl
                 return bsl::errc_success;
             }
 
-            return this->process_cmd(bsl::move(mut_args));
+            return this->process_cmd(mut_args);
         }
     };
 }

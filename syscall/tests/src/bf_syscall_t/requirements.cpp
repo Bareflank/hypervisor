@@ -101,9 +101,8 @@ main() noexcept -> bsl::exit_code
                 static_assert(noexcept(mut_sys.bf_tls_online_pps()));
                 static_assert(noexcept(mut_sys.bf_vm_op_create_vm()));
                 static_assert(noexcept(mut_sys.bf_vm_op_destroy_vm({})));
-                static_assert(noexcept(mut_sys.bf_vp_op_create_vp({}, {})));
+                static_assert(noexcept(mut_sys.bf_vp_op_create_vp({})));
                 static_assert(noexcept(mut_sys.bf_vp_op_destroy_vp({})));
-                static_assert(noexcept(mut_sys.bf_vp_op_migrate({}, {})));
                 static_assert(noexcept(mut_sys.bf_vs_op_create_vs({}, {})));
                 static_assert(noexcept(mut_sys.bf_vs_op_destroy_vs({})));
                 static_assert(noexcept(mut_sys.bf_vs_op_init_as_root({})));
@@ -111,10 +110,13 @@ main() noexcept -> bsl::exit_code
                 static_assert(noexcept(mut_sys.bf_vs_op_write({}, {}, {})));
                 static_assert(noexcept(mut_sys.bf_vs_op_run({}, {}, {})));
                 static_assert(noexcept(mut_sys.bf_vs_op_run_current()));
-                static_assert(noexcept(mut_sys.bf_vs_op_advance_ip({})));
+                static_assert(noexcept(mut_sys.bf_vs_op_advance_ip_and_run({}, {}, {})));
                 static_assert(noexcept(mut_sys.bf_vs_op_advance_ip_and_run_current()));
                 static_assert(noexcept(mut_sys.bf_vs_op_promote({})));
-                static_assert(noexcept(mut_sys.bf_vs_op_clear_vs({})));
+                static_assert(noexcept(mut_sys.bf_vs_op_clear({})));
+                static_assert(noexcept(mut_sys.bf_vs_op_migrate({}, {})));
+                static_assert(noexcept(mut_sys.bf_vs_op_set_active({}, {}, {})));
+                static_assert(noexcept(mut_sys.bf_vs_op_advance_ip_and_set_active({}, {}, {})));
                 static_assert(noexcept(mut_sys.bf_intrinsic_op_rdmsr({})));
                 static_assert(noexcept(mut_sys.bf_intrinsic_op_wrmsr({}, {})));
                 static_assert(noexcept(mut_sys.bf_mem_op_alloc_page<page_t>(mut_phys)));

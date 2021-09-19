@@ -45,6 +45,7 @@ option(HYPERVISOR_BUILD_LOADER "Turns on/off building the loader" ON)
 option(HYPERVISOR_BUILD_VMMCTL "Turns on/off building the vmmctl" ${HYPERVISOR_DEFAULT_BUILD_VMMCTL})
 option(HYPERVISOR_BUILD_MICROKERNEL "Turns on/off building the microkernel" ON)
 option(HYPERVISOR_BUILD_EFI "Turns on/off building the EFI loader" ${HYPERVISOR_DEFAULT_BUILD_EFI})
+option(HYPERVISOR_IWYU "Turns on/off support for IWYU" OFF)
 
 if(NOT DEFINED HYPERVISOR_TARGET_ARCH)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -339,7 +340,7 @@ bf_add_config(
 bf_add_config(
     CONFIG_NAME HYPERVISOR_MK_HUGE_POOL_SIZE
     CONFIG_TYPE STRING
-    DEFAULT_VAL "0x10000"
+    DEFAULT_VAL "0x20000"
     DESCRIPTION "Defines the microkernel's default huge pool size in bytes"
     SKIP_VALIDATION
 )

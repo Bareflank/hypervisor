@@ -97,7 +97,7 @@ namespace example
         ///   the VMCS/VMCB and other CPU register state that is needed.
         ///
 
-        auto const vpid{mut_vp_pool.allocate(gs, mut_tls, mut_sys, intrinsic, vmid, ppid)};
+        auto const vpid{mut_vp_pool.allocate(gs, mut_tls, mut_sys, intrinsic, vmid)};
         if (bsl::unlikely(vpid.is_invalid())) {
             bsl::print<bsl::V>() << bsl::here();
             return bsl::errc_failure;

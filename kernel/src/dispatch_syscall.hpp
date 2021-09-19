@@ -157,7 +157,13 @@ namespace mk
 
             case syscall::BF_VS_OP_VAL.get(): {
                 auto const ret{dispatch_syscall_vs_op(
-                    mut_tls, mut_page_pool, mut_intrinsic, mut_vm_pool, mut_vp_pool, mut_vs_pool)};
+                    mut_tls,
+                    mut_page_pool,
+                    mut_intrinsic,
+                    mut_vm_pool,
+                    mut_vp_pool,
+                    mut_vs_pool,
+                    mut_ext_pool)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;

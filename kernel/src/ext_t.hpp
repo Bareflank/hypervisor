@@ -1268,7 +1268,7 @@ namespace mk
                 return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
             }
 
-            auto mut_huge{mut_huge_pool.allocate(mut_tls, mut_bytes)};
+            auto mut_huge{mut_huge_pool.allocate(mut_tls, mut_pages)};
             if (bsl::unlikely(mut_huge.is_invalid())) {
                 bsl::print<bsl::V>() << bsl::here();
                 return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
@@ -1310,7 +1310,8 @@ namespace mk
             ///   now because we cannot free to the huge pool anyway.
             ///
 
-            for (bsl::safe_idx mut_i{}; mut_i < mut_pages; ++mut_i) {
+            constexpr auto inc{bsl::to_idx(HYPERVISOR_PAGE_SIZE)};
+            for (bsl::safe_idx mut_i{}; mut_i < mut_bytes; mut_i += inc) {
                 auto const page_virt{(huge_virt + bsl::to_umx(mut_i)).checked()};
                 auto const page_phys{(huge_phys + bsl::to_umx(mut_i)).checked()};
 
@@ -1444,6 +1445,8 @@ namespace mk
             tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_umx const &page_virt) noexcept
             -> bsl::errc_type
         {
+            bsl::expects(false);    // REMOVE ME, use config option for this
+
             bsl::expects(bsl::to_umx(mut_tls.active_vmid) < m_direct_map_rpts.size());
             bsl::expects(page_virt.is_valid_and_checked());
 
@@ -1528,7 +1531,7 @@ namespace mk
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
-        ///   @param vmid the VMID of the VM that was created.
+        ///   @param vmid the ID of the VM that was created.
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -1558,7 +1561,7 @@ namespace mk
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
-        ///   @param vmid the VMID of the VM that was destroyed.
+        ///   @param vmid the ID of the VM that was destroyed.
         ///
         constexpr void
         signal_vm_destroyed(
@@ -1568,6 +1571,28 @@ namespace mk
             bsl::expects(bsl::to_umx(vmid) < m_direct_map_rpts.size());
 
             m_direct_map_rpts.at_if(bsl::to_idx(vmid))->release(mut_tls, mut_page_pool);
+        }
+
+        /// <!-- description -->
+        ///   @brief Tells the extension that the requested VM was set to
+        ///     active and therefore it's memory map should change on this PP.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsic_t to use
+        ///   @param vmid the ID of the VM that was created.
+        ///
+        constexpr void
+        signal_vm_active(
+            tls_t &mut_tls, intrinsic_t &mut_intrinsic, bsl::safe_u16 const &vmid) noexcept
+        {
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(bsl::to_umx(mut_tls.active_vmid) < m_direct_map_rpts.size());
+
+            auto *const pmut_rpt{m_direct_map_rpts.at_if(bsl::to_idx(mut_tls.active_vmid))};
+            bsl::expects(nullptr != pmut_rpt);
+
+            pmut_rpt->activate(mut_tls, mut_intrinsic);
         }
 
         /// <!-- description -->

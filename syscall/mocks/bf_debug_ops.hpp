@@ -60,7 +60,7 @@ namespace syscall
     ///     debugging.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vmid The VMID of the VM whose state is to be outputted
+    ///   @param vmid The ID of the VM whose state is to be outputted
     ///
     constexpr void
     bf_debug_op_dump_vm(bsl::safe_u16 const &vmid) noexcept
@@ -78,7 +78,7 @@ namespace syscall
     ///     debugging.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vpid The VPID of the VP whose state is to be outputted
+    ///   @param vpid The ID of the VP whose state is to be outputted
     ///
     constexpr void
     bf_debug_op_dump_vp(bsl::safe_u16 const &vpid) noexcept
@@ -96,7 +96,7 @@ namespace syscall
     ///     debugging.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vsid The VSID of the VS whose state is to be outputted
+    ///   @param vsid The ID of the VS whose state is to be outputted
     ///
     constexpr void
     bf_debug_op_dump_vs(bsl::safe_u16 const &vsid) noexcept

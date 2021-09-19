@@ -22,7 +22,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "vmmctl_main.hpp"
+#include <vmmctl_main.hpp>
 
 #include <bsl/arguments.hpp>
 #include <bsl/basic_errc_type.hpp>
@@ -31,7 +31,6 @@
 #include <bsl/cstr_type.hpp>
 #include <bsl/enable_color.hpp>
 #include <bsl/exit_code.hpp>
-#include <bsl/move.hpp>
 #include <bsl/unlikely.hpp>
 
 /// <!-- description -->
@@ -43,7 +42,8 @@
 ///   @return bsl::exit_success on success, bsl::exit_failure otherwise.
 ///
 [[nodiscard]] auto
-main(bsl::int32 const argc, bsl::cstr_type const *const argv) noexcept -> bsl::exit_code
+VMMCTL_MAIN(bsl::int32 const argc, bsl::cstr_type const *const argv) noexcept    // NOLINT
+    -> bsl::exit_code
 {
     bsl::enable_color();
 
@@ -51,7 +51,7 @@ main(bsl::int32 const argc, bsl::cstr_type const *const argv) noexcept -> bsl::e
     ++mut_args;
 
     vmmctl::vmmctl_main mut_app{};
-    auto const ret{mut_app.process(bsl::move(mut_args))};
+    auto const ret{mut_app.process(mut_args)};
     if (bsl::unlikely(!ret)) {
         return bsl::exit_failure;
     }

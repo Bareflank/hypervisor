@@ -165,7 +165,6 @@ namespace mk
 
             bsl::expects(pages.is_valid_and_checked());
             bsl::expects(pages.is_pos());
-            bsl::expects(syscall::bf_is_page_aligned(pages));
 
             auto mut_buf{m_pool.subspan(bsl::to_idx(m_crsr), pages)};
             if (bsl::unlikely(mut_buf.size() != pages)) {

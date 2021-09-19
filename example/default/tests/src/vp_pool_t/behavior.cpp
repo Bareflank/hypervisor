@@ -80,7 +80,7 @@ namespace example
                 bsl::ut_when{} = [&]() noexcept {
                     mut_vp_pool.initialize({}, {}, {}, {});
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}, {}));
+                        bsl::ut_check(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}));
                         bsl::ut_check(mut_sys.bf_vp_op_create_vp_count().is_pos());
                     };
                 };
@@ -93,9 +93,9 @@ namespace example
                 syscall::bf_syscall_t mut_sys{};
                 bsl::ut_when{} = [&]() noexcept {
                     mut_vp_pool.initialize({}, {}, {}, {});
-                    mut_sys.set_bf_vp_op_create_vp({}, {}, bsl::safe_u16::failure());
+                    mut_sys.set_bf_vp_op_create_vp({}, bsl::safe_u16::failure());
                     bsl::ut_then{} = [&]() noexcept {
-                        auto const vpid{mut_vp_pool.allocate({}, {}, mut_sys, {}, {}, {})};
+                        auto const vpid{mut_vp_pool.allocate({}, {}, mut_sys, {}, {})};
                         bsl::ut_check(vpid.is_invalid());
                     };
                 };
@@ -108,7 +108,7 @@ namespace example
                 syscall::bf_syscall_t mut_sys{};
                 bsl::ut_when{} = [&]() noexcept {
                     mut_vp_pool.initialize({}, {}, {}, {});
-                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}, {}));
+                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         mut_vp_pool.deallocate({}, {}, mut_sys, {}, {});
                         bsl::ut_check(mut_vp_pool.is_deallocated({}));
@@ -163,7 +163,7 @@ namespace example
                         bsl::ut_check(mut_vp_pool.is_deallocated({}));
                     };
 
-                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}, {}));
+                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_vp_pool.is_allocated({}));
                         bsl::ut_check(!mut_vp_pool.is_deallocated({}));
@@ -175,7 +175,7 @@ namespace example
                         bsl::ut_check(mut_vp_pool.is_deallocated({}));
                     };
 
-                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}, {}));
+                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_vp_pool.is_allocated({}));
                         bsl::ut_check(!mut_vp_pool.is_deallocated({}));
@@ -197,37 +197,31 @@ namespace example
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_vp_pool.assigned_vm({}) == syscall::BF_INVALID_ID);
-                        bsl::ut_check(mut_vp_pool.assigned_pp({}) == syscall::BF_INVALID_ID);
                     };
 
                     mut_vp_pool.initialize({}, {}, {}, {});
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_vp_pool.assigned_vm({}) == syscall::BF_INVALID_ID);
-                        bsl::ut_check(mut_vp_pool.assigned_pp({}) == syscall::BF_INVALID_ID);
                     };
 
-                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}, {}));
+                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_vp_pool.assigned_vm({}) != syscall::BF_INVALID_ID);
-                        bsl::ut_check(mut_vp_pool.assigned_pp({}) != syscall::BF_INVALID_ID);
                     };
 
                     mut_vp_pool.deallocate({}, {}, mut_sys, {}, {});
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_vp_pool.assigned_vm({}) == syscall::BF_INVALID_ID);
-                        bsl::ut_check(mut_vp_pool.assigned_pp({}) == syscall::BF_INVALID_ID);
                     };
 
-                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}, {}));
+                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_vp_pool.assigned_vm({}) != syscall::BF_INVALID_ID);
-                        bsl::ut_check(mut_vp_pool.assigned_pp({}) != syscall::BF_INVALID_ID);
                     };
 
                     mut_vp_pool.release({}, {}, {}, {});
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_vp_pool.assigned_vm({}) == syscall::BF_INVALID_ID);
-                        bsl::ut_check(mut_vp_pool.assigned_pp({}) == syscall::BF_INVALID_ID);
                     };
                 };
             };

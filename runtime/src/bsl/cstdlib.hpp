@@ -25,10 +25,31 @@
 #ifndef BSL_CSTDLIB_HPP
 #define BSL_CSTDLIB_HPP
 
-#include <bf_syscall_impl.hpp>
+#include <bsl/is_constant_evaluated.hpp>
+#include <bsl/touch.hpp>
 
-#include <bsl/cstdint.hpp>
-#include <bsl/discard.hpp>
+namespace syscall
+{
+    /// NOTE:
+    /// - We provide these prototypes ourselves instead of including
+    ///   the header files because the debugging portion of the runtime
+    ///   for both the microkernel, and for extensions provides the
+    ///   foundation for everything, including asserts. These are needed
+    ///   to implement even the basics for safe integrals, so you end up
+    ///   with circular dependencies.
+    ///
+    /// - The impl prototypes also do not bring these headers in, but the
+    ///   mocks do, because they really need to provide the mocked version
+    ///   of this code, and having access to more of the BSL helps with
+    ///   that, so providing the prototypes here ensures that there are
+    ///   no issues no matter what happens.
+    ///
+
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_control_op_exit.
+    ///
+    extern "C" void bf_control_op_exit_impl() noexcept;    // NOLINT
+}
 
 namespace bsl
 {
@@ -36,13 +57,18 @@ namespace bsl
     ///   @brief Immediately the application with a failure
     ///
     [[noreturn]] constexpr void
-    stdlib_fast_fail() noexcept
+    stdlib_fast_fail() noexcept    // GRCOV_EXCLUDE
     {
-        syscall::bf_control_op_exit_impl();
+        if (bsl::is_constant_evaluated()) {        // GRCOV_EXCLUDE
+            bsl::touch();                          // GRCOV_EXCLUDE
+        }                                          // GRCOV_EXCLUDE
+        else {                                     // GRCOV_EXCLUDE
+            syscall::bf_control_op_exit_impl();    // GRCOV_EXCLUDE
+        }                                          // GRCOV_EXCLUDE
 
         // Unreachable
-        while (true) {
-        }
+        while (true) {    // GRCOV_EXCLUDE
+        }                 // GRCOV_EXCLUDE
     }
 }
 

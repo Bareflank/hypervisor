@@ -857,14 +857,13 @@ namespace syscall
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
-                bsl::safe_u16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
                     g_mut_errc.at("bf_vp_op_create_vp_impl") = BF_STATUS_FAILURE_UNKNOWN;
                     g_mut_data.at("bf_vp_op_create_vp_impl_reg0_out") = bsl::to_u64(ANSWER16);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_vp_op_create_vp(arg0, arg1).is_invalid());
+                        bsl::ut_check(mut_sys.bf_vp_op_create_vp(arg0).is_invalid());
                     };
                 };
             };
@@ -874,13 +873,12 @@ namespace syscall
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
-                bsl::safe_u16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
                     g_mut_data.at("bf_vp_op_create_vp_impl_reg0_out") = bsl::to_u64(BF_INVALID_ID);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_vp_op_create_vp(arg0, arg1).is_invalid());
+                        bsl::ut_check(mut_sys.bf_vp_op_create_vp(arg0).is_invalid());
                     };
                 };
             };
@@ -890,13 +888,12 @@ namespace syscall
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
-                bsl::safe_u16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
                     g_mut_data.at("bf_vp_op_create_vp_impl_reg0_out") = OOR_ID;
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_vp_op_create_vp(arg0, arg1).is_invalid());
+                        bsl::ut_check(mut_sys.bf_vp_op_create_vp(arg0).is_invalid());
                     };
                 };
             };
@@ -906,13 +903,12 @@ namespace syscall
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
-                bsl::safe_u16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     g_mut_data.clear();
                     g_mut_data.at("bf_vp_op_create_vp_impl_reg0_out") = bsl::to_u64(ANSWER16);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_vp_op_create_vp(arg0, arg1) == ANSWER16);
+                        bsl::ut_check(mut_sys.bf_vp_op_create_vp(arg0) == ANSWER16);
                     };
                 };
             };
@@ -940,35 +936,6 @@ namespace syscall
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_vp_op_destroy_vp(arg0));
-                    };
-                };
-            };
-        };
-
-        bsl::ut_scenario{"bf_vp_op_migrate bf_vp_op_migrate_impl fails"} = []() noexcept {
-            bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_syscall_t mut_sys{};
-                bsl::safe_u16 const arg0{};
-                bsl::safe_u16 const arg1{};
-                bsl::ut_when{} = [&]() noexcept {
-                    g_mut_errc.clear();
-                    g_mut_errc.at("bf_vp_op_migrate_impl") = BF_STATUS_FAILURE_UNKNOWN;
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_sys.bf_vp_op_migrate(arg0, arg1));
-                    };
-                };
-            };
-        };
-
-        bsl::ut_scenario{"bf_vp_op_migrate success"} = []() noexcept {
-            bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_syscall_t mut_sys{};
-                bsl::safe_u16 const arg0{};
-                bsl::safe_u16 const arg1{};
-                bsl::ut_when{} = [&]() noexcept {
-                    g_mut_errc.clear();
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_vp_op_migrate(arg0, arg1));
                     };
                 };
             };
@@ -1220,28 +1187,33 @@ namespace syscall
             };
         };
 
-        bsl::ut_scenario{"bf_vs_op_advance_ip bf_vs_op_advance_ip_impl fails"} = []() noexcept {
+        bsl::ut_scenario{
+            "bf_vs_op_advance_ip_and_run bf_vs_op_advance_ip_and_run_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::safe_u16 const arg2{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
-                    g_mut_errc.at("bf_vs_op_advance_ip_impl") = BF_STATUS_FAILURE_UNKNOWN;
+                    g_mut_errc.at("bf_vs_op_advance_ip_and_run_impl") = BF_STATUS_FAILURE_UNKNOWN;
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_sys.bf_vs_op_advance_ip(arg0));
+                        bsl::ut_check(!mut_sys.bf_vs_op_advance_ip_and_run(arg0, arg1, arg2));
                     };
                 };
             };
         };
 
-        bsl::ut_scenario{"bf_vs_op_advance_ip success"} = []() noexcept {
+        bsl::ut_scenario{"bf_vs_op_advance_ip_and_run success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::safe_u16 const arg2{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_vs_op_advance_ip(arg0));
+                        bsl::ut_check(mut_sys.bf_vs_op_advance_ip_and_run(arg0, arg1, arg2));
                     };
                 };
             };
@@ -1302,28 +1274,123 @@ namespace syscall
             };
         };
 
-        bsl::ut_scenario{"bf_vs_op_clear_vs bf_vs_op_clear_vs_impl fails"} = []() noexcept {
+        bsl::ut_scenario{"bf_vs_op_clear bf_vs_op_clear_impl fails"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
-                    g_mut_errc.at("bf_vs_op_clear_vs_impl") = BF_STATUS_FAILURE_UNKNOWN;
+                    g_mut_errc.at("bf_vs_op_clear_impl") = BF_STATUS_FAILURE_UNKNOWN;
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_sys.bf_vs_op_clear_vs(arg0));
+                        bsl::ut_check(!mut_sys.bf_vs_op_clear(arg0));
                     };
                 };
             };
         };
 
-        bsl::ut_scenario{"bf_vs_op_clear_vs success"} = []() noexcept {
+        bsl::ut_scenario{"bf_vs_op_clear success"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_vs_op_clear_vs(arg0));
+                        bsl::ut_check(mut_sys.bf_vs_op_clear(arg0));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vs_op_migrate bf_vs_op_migrate_impl fails"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::ut_when{} = [&]() noexcept {
+                    g_mut_errc.clear();
+                    g_mut_errc.at("bf_vs_op_migrate_impl") = BF_STATUS_FAILURE_UNKNOWN;
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_sys.bf_vs_op_migrate(arg0, arg1));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vs_op_migrate success"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::ut_when{} = [&]() noexcept {
+                    g_mut_errc.clear();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_sys.bf_vs_op_migrate(arg0, arg1));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vs_op_set_active bf_vs_op_set_active_impl fails"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::safe_u16 const arg2{};
+                bsl::ut_when{} = [&]() noexcept {
+                    g_mut_errc.clear();
+                    g_mut_errc.at("bf_vs_op_set_active_impl") = BF_STATUS_FAILURE_UNKNOWN;
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_sys.bf_vs_op_set_active(arg0, arg1, arg2));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vs_op_set_active success"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::safe_u16 const arg2{};
+                bsl::ut_when{} = [&]() noexcept {
+                    g_mut_errc.clear();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_sys.bf_vs_op_set_active(arg0, arg1, arg2));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{
+            "bf_vs_op_advance_ip_and_set_active bf_vs_op_advance_ip_and_set_active_impl fails"} =
+            []() noexcept {
+                bsl::ut_given_at_runtime{} = []() noexcept {
+                    bf_syscall_t mut_sys{};
+                    bsl::safe_u16 const arg0{};
+                    bsl::safe_u16 const arg1{};
+                    bsl::safe_u16 const arg2{};
+                    bsl::ut_when{} = [&]() noexcept {
+                        g_mut_errc.clear();
+                        g_mut_errc.at("bf_vs_op_advance_ip_and_set_active_impl") =
+                            BF_STATUS_FAILURE_UNKNOWN;
+                        bsl::ut_then{} = [&]() noexcept {
+                            bsl::ut_check(
+                                !mut_sys.bf_vs_op_advance_ip_and_set_active(arg0, arg1, arg2));
+                        };
+                    };
+                };
+            };
+
+        bsl::ut_scenario{"bf_vs_op_advance_ip_and_set_active success"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::safe_u16 const arg2{};
+                bsl::ut_when{} = [&]() noexcept {
+                    g_mut_errc.clear();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_sys.bf_vs_op_advance_ip_and_set_active(arg0, arg1, arg2));
                     };
                 };
             };

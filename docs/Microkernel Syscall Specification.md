@@ -67,7 +67,6 @@
   - [2.14. Virtual Processor Syscalls](#214-virtual-processor-syscalls)
     - [2.14.2. bf_vp_op_create_vp, OP=0x5, IDX=0x0](#2142-bf_vp_op_create_vp-op0x5-idx0x0)
     - [2.14.3. bf_vp_op_destroy_vp, OP=0x5, IDX=0x1](#2143-bf_vp_op_destroy_vp-op0x5-idx0x1)
-    - [2.14.4. bf_vp_op_migrate, OP=0x5, IDX=0x2](#2144-bf_vp_op_migrate-op0x5-idx0x2)
   - [2.14.5. Virtual Processor State Syscalls](#2145-virtual-processor-state-syscalls)
     - [2.14.7. bf_vs_op_create_vs, OP=0x6, IDX=0x0](#2147-bf_vs_op_create_vs-op0x6-idx0x0)
     - [2.14.8. bf_vs_op_destroy_vs, OP=0x6, IDX=0x1](#2148-bf_vs_op_destroy_vs-op0x6-idx0x1)
@@ -76,10 +75,13 @@
     - [2.14.11. bf_vs_op_write, OP=0x6, IDX=0x4](#21411-bf_vs_op_write-op0x6-idx0x4)
     - [2.14.12. bf_vs_op_run, OP=0x5, IDX=0x5](#21412-bf_vs_op_run-op0x5-idx0x5)
     - [2.14.13. bf_vs_op_run_current, OP=0x5, IDX=0x6](#21413-bf_vs_op_run_current-op0x5-idx0x6)
-    - [2.14.14. bf_vs_op_advance_ip, OP=0x5, IDX=0x7](#21414-bf_vs_op_advance_ip-op0x5-idx0x7)
+    - [2.14.14. bf_vs_op_advance_ip_and_run_impl, OP=0x5, IDX=0x7](#21414-bf_vs_op_advance_ip_and_run_impl-op0x5-idx0x7)
     - [2.14.15. bf_vs_op_advance_ip_and_run_current, OP=0x5, IDX=0x8](#21415-bf_vs_op_advance_ip_and_run_current-op0x5-idx0x8)
     - [2.14.16. bf_vs_op_promote, OP=0x5, IDX=0x9](#21416-bf_vs_op_promote-op0x5-idx0x9)
-    - [2.14.17. bf_vs_op_clear_vs, OP=0x5, IDX=0xA](#21417-bf_vs_op_clear_vs-op0x5-idx0xa)
+    - [2.14.17. bf_vs_op_clear, OP=0x5, IDX=0xA](#21417-bf_vs_op_clear-op0x5-idx0xa)
+    - [2.14.17. bf_vs_op_migrate, OP=0x5, IDX=0xB](#21417-bf_vs_op_migrate-op0x5-idx0xb)
+    - [2.14.17. bf_vs_op_set_active, OP=0x5, IDX=0xC](#21417-bf_vs_op_set_active-op0x5-idx0xc)
+    - [2.14.17. bf_vs_op_advance_ip_and_set_active, OP=0x5, IDX=0xD](#21417-bf_vs_op_advance_ip_and_set_active-op0x5-idx0xd)
   - [2.15. Intrinsic Syscalls](#215-intrinsic-syscalls)
     - [2.15.1. bf_intrinsic_op_rdmsr, OP=0x7, IDX=0x0](#2151-bf_intrinsic_op_rdmsr-op0x7-idx0x0)
     - [2.15.2. bf_intrinsic_op_wrmsr, OP=0x7, IDX=0x1](#2152-bf_intrinsic_op_wrmsr-op0x7-idx0x1)
@@ -678,7 +680,7 @@ This syscall tells the microkernel to output a VM's state to the console device 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
-| REG0 | 63:0 | The VMID of the VM's state to output |
+| REG0 | 63:0 | The ID of the VM's state to output |
 
 **const, uint64_t: BF_DEBUG_OP_DUMP_VM_IDX_VAL**
 | Value | Description |
@@ -692,7 +694,7 @@ This syscall tells the microkernel to output a VP's state to the console device 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
-| REG0 | 63:0 | The VPID of the VP's state to output |
+| REG0 | 63:0 | The ID of the VP's state to output |
 
 **const, uint64_t: BF_DEBUG_OP_DUMP_VP_IDX_VAL**
 | Value | Description |
@@ -706,7 +708,7 @@ This syscall tells the microkernel to output a VS's state to the console device 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
-| REG0 | 63:0 | The VSID of the VS's state to output |
+| REG0 | 63:0 | The ID of the VS's state to output |
 
 **const, uint64_t: BF_DEBUG_OP_DUMP_VS_IDX_VAL**
 | Value | Description |
@@ -869,7 +871,7 @@ This syscall tells the microkernel to destroy a VM given an ID.
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VMID of the VM to destroy |
+| REG1 | 15:0 | The ID of the VM to destroy |
 | REG1 | 63:16 | REVI |
 
 **const, uint64_t: BF_VM_OP_DESTROY_VM_IDX_VAL**
@@ -885,7 +887,7 @@ This syscall tells the microkernel to map a physical address into the VM's direc
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VMID of the VM to map the physical address to |
+| REG1 | 15:0 | The ID of the VM to map the physical address to |
 | REG1 | 63:16 | REVI |
 | REG2 | 12:0 | REV0 |
 | REG2 | 63:12 | The physical address to map |
@@ -909,7 +911,7 @@ This syscall tells the microkernel to unmap a previously mapped virtual address 
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VMID of the VM to unmap the virtual address from |
+| REG1 | 15:0 | The ID of the VM to unmap the virtual address from |
 | REG1 | 63:16 | REVI |
 | REG2 | 12:0 | REV0 |
 | REG2 | 63:12 | The virtual address to unmap |
@@ -927,7 +929,7 @@ This syscall tells the microkernel to unmap a previously mapped virtual address 
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VMID of the VM to unmap the virtual address from |
+| REG1 | 15:0 | The ID of the VM to unmap the virtual address from |
 | REG1 | 63:16 | REVI |
 | REG2 | 12:0 | REV0 |
 | REG2 | 63:12 | The virtual address to unmap |
@@ -945,7 +947,7 @@ Once a VP is run, it is assigned to the VM it was run on, and cannot be run on a
 
 ### 2.14.2. bf_vp_op_create_vp, OP=0x5, IDX=0x0
 
-This syscall tells the microkernel to create a VP given the IDs of the VM and PP the VP will be assigned to. Upon success, this syscall returns the ID of the newly created VP.
+This syscall tells the microkernel to create a VP given the ID of the VM the VP will be assigned to. Upon success, this syscall returns the ID of the newly created VP.
 
 **Input:**
 | Register Name | Bits | Description |
@@ -953,8 +955,6 @@ This syscall tells the microkernel to create a VP given the IDs of the VM and PP
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
 | REG1 | 15:0 | The ID of the VM to assign the newly created VP to |
 | REG1 | 63:16 | REVI |
-| REG2 | 15:0 | The ID of the PP to assign the newly created VP to |
-| REG2 | 63:16 | REVI |
 
 **Output:**
 | Register Name | Bits | Description |
@@ -975,7 +975,7 @@ This syscall tells the microkernel to destroy a VP given an ID.
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPID of the VP to destroy |
+| REG1 | 15:0 | The ID of the VP to destroy |
 | REG1 | 63:16 | REVI |
 
 **const, uint64_t: BF_VP_OP_DESTROY_VP_IDX_VAL**
@@ -983,35 +983,9 @@ This syscall tells the microkernel to destroy a VP given an ID.
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the index for bf_vp_op_destroy_vp |
 
-### 2.14.4. bf_vp_op_migrate, OP=0x5, IDX=0x2
-
-This syscall tells the microkernel to migrate a VP from one PP to another PP. This function does not execute the VP (use bf_vs_op_run for that), but instead allows bf_vs_op_run to execute a VP on a PP that it was not originally assigned to.
-
-When a VP is migrated, all of the VSs that are assigned to the requested VP are also migrated to this new PP as well. From an AMD/Intel point of view, this clears the VMCS/VMCB for each VS assigned to the VP. On Intel, it also loads the newly cleared VS and sets the launched state to false, ensuring the next bf_vs_op_run will use VMLaunch instead of VMResume.
-
-It should be noted that the migration of a VS from one PP to another does not happen during the execution of this ABI. This ABI simply tells the microkernel that the requested VP may now execute on the requested PP. This will cause a mismatch between the assigned PP for a VP and the assigned PP for a VS. The microkernel will detect this mismatch when an extension attempts to execute bf_vs_op_run. When this occurs, the microkernel will ensure the VP is being run on the PP it was assigned to during migration, and then it will check to see if the PP of the VS matches. If it doesn't, it will then perform a migration of that VS at that time. This ensures that the microkernel is only migrations VSs when it needs to, and it ensures the VS is cleared an loaded (in the case of Intel) on the PP it will be executed on, which is a requirement for VMCS migration. An extension can determine which VSs have been migrated by looking at the assigned PP of a VS. If it doesn't match the VP it was assigned to, it has not been migrated. Finally, an extension is free to read/write to the VSs state, even if it has not been migrated. The only requirement for migration is execution (meaning VMRun/VMLaunch/VMResume).
-
-Any additional migration responsibilities, like TSC synchronization, must be performed by the extension.
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VPID of the VP to migrate |
-| REG1 | 63:16 | REVI |
-| REG2 | 15:0 | The ID of the PP to assign the provided VP to |
-| REG2 | 63:16 | REVI |
-
-**const, uint64_t: BF_VP_OP_MIGRATE_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x0000000000000002 | Defines the index for bf_vp_op_migrate |
-
 ## 2.14.5. Virtual Processor State Syscalls
 
-A Virtual Processor State or VS encapsulates the state associated with a virtual process. For example, on Intel this would be the VMCS, the registers that must be saved that the VMCS does not manage, and the general purpose registers.
-
-Once a VS is run, it is assigned to the VP it was run on, and cannot be run on any other VP for the remainder of it's lifetime. Since a VP is also assigned to a specific PP (physical processor), so is the VS. When a VP is migrated, all VSs assigned to that VP are also migrated.
+TODO
 
 ### 2.14.7. bf_vs_op_create_vs, OP=0x6, IDX=0x0
 
@@ -1045,7 +1019,7 @@ This syscall tells the microkernel to destroy a VS given an ID.
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VSID of the VS to destroy |
+| REG1 | 15:0 | The ID of the VS to destroy |
 | REG1 | 63:16 | REVI |
 
 **const, uint64_t: BF_VS_OP_DESTROY_VS_IDX_VAL**
@@ -1061,7 +1035,7 @@ This syscall tells the microkernel to initialize a VS using the root VP state pr
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VSID of the VS to initialize |
+| REG1 | 15:0 | The ID of the VS to initialize |
 | REG1 | 63:16 | REVI |
 
 **const, uint64_t: BF_VS_OP_INIT_AS_ROOT_IDX_VAL**
@@ -1077,7 +1051,7 @@ Reads a CPU register from the VS given a bf_reg_t. Note that the bf_reg_t is arc
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VSID of the VS to read from |
+| REG1 | 15:0 | The ID of the VS to read from |
 | REG1 | 63:16 | REVI |
 | REG2 | 63:0 | A bf_reg_t defining which register to read |
 
@@ -1099,7 +1073,7 @@ Writes to a CPU register in the VS given a bf_reg_t and the value to write. Note
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VSID of the VS to write to |
+| REG1 | 15:0 | The ID of the VS to write to |
 | REG1 | 63:16 | REVI |
 | REG2 | 63:0 | A bf_reg_t defining which register to write to |
 | REG3 | 63:0 | The value to write to the requested register |
@@ -1111,25 +1085,17 @@ Writes to a CPU register in the VS given a bf_reg_t and the value to write. Note
 
 ### 2.14.12. bf_vs_op_run, OP=0x5, IDX=0x5
 
-bf_vs_op_run tells the microkernel to execute a given VS on behalf of a given VP and VM. This system call only returns if an error occurs. On success, this system call will physically execute the requested VM and VP using the requested VS, and the extension will only execute again on the next VMExit.
-
-Unless an extension needs to change the active VM, VP or VS, the extension should use bf_vs_op_run_current instead of bf_vs_op_run. bf_vs_op_run is slow as it must perform a series of checks to determine if it has any work to perform before execution of a VM can occur.
-
-Unlike bf_vs_op_run_current which is really just a return to microkernel execution, bf_vs_op_run must perform the following operations:
-- It first verifies that the provided VM, VP and VS are all created. Meaning, and extension must first use the create ABI to properly create a VM, VP and VS before it may be used.
-- Next, it must ensure VM, VP and VS assignment is correct. A newly created VP and VS are unassigned. Once bf_vs_op_run is executed, the VP is assigned to the provided VM and the VS is assigned to the provided VP. The VP and VS are also both assigned to the PP bf_vs_op_run is executed on. Once these assignments take place, an extension cannot change them, and any attempt to run a VP or VS on a VM, VP or PP they are not assigned to will fail. It is impossible to change the assigned of a VM or VP, but an extension can change the assignment of a VP and VSs PP by using the bf_vp_op_migrate function.
-- Next, bf_vs_op_run must determine if it needs to migrate a VS to the PP the VS is being executed on by bf_vs_op_run. For more information about how this works, please see bf_vp_op_migrate.
-- Finally, bf_vs_op_run must ensure the active VM, VP and VS are set to the VM, VP and VS provided to this ABI. Any changes in the active state could cause additional operations to take place. For example, the VS must transfer the TLS state of the general purpose registers to its internal cache so that the VS that is about to become active can use the TLS block instead.
+TODO
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VMID of the VM to run |
+| REG1 | 15:0 | The ID of the VM to run |
 | REG1 | 63:16 | REVI |
-| REG2 | 15:0 | The VPID of the VP to run |
+| REG2 | 15:0 | The ID of the VP to run |
 | REG2 | 63:16 | REVI |
-| REG3 | 15:0 | The VSID of the VS to run |
+| REG3 | 15:0 | The ID of the VS to run |
 | REG3 | 63:16 | REVI |
 
 **const, uint64_t: BF_VS_OP_RUN_IDX_VAL**
@@ -1151,32 +1117,32 @@ bf_vs_op_run_current tells the microkernel to execute the currently active VS, V
 | :---- | :---------- |
 | 0x0000000000000006 | Defines the index for bf_vs_op_run_current |
 
-### 2.14.14. bf_vs_op_advance_ip, OP=0x5, IDX=0x7
+### 2.14.14. bf_vs_op_advance_ip_and_run_impl, OP=0x5, IDX=0x7
 
-This syscall tells the microkernel to advance the instruction pointer in the requested VS.
+TODO
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VSID of the VS advance the IP in |
+| REG1 | 15:0 | The ID of the VS advance the IP in |
 | REG1 | 63:16 | REVI |
 
-**const, uint64_t: BF_VS_OP_ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL**
+**const, uint64_t: BF_VS_OP_ADVANCE_IP_AND_RUN_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x0000000000000007 | Defines the index for bf_vs_op_advance_ip |
+| 0x0000000000000007 | Defines the index for bf_vs_op_advance_ip_and_run_impl |
 
 ### 2.14.15. bf_vs_op_advance_ip_and_run_current, OP=0x5, IDX=0x8
 
-This syscall tells the microkernel to advance the instruction pointer in the currently active VS and run the currently active VS, VP and VM (i.e., this combines bf_vs_op_advance_ip and bf_vs_op_advance_ip).
+TODO
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
 
-**const, uint64_t: BF_VS_OP_ADVANCE_IP_IDX_VAL**
+**const, uint64_t: BF_VS_OP_ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000008 | Defines the index for bf_vs_op_advance_ip_and_run_current |
@@ -1189,7 +1155,7 @@ bf_vs_op_promote tells the microkernel to promote the requested VS. bf_vs_op_pro
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VSID of the VS to promote |
+| REG1 | 15:0 | The ID of the VS to promote |
 | REG1 | 63:16 | REVI |
 
 **const, uint64_t: BF_VS_OP_PROMOTE_IDX_VAL**
@@ -1197,21 +1163,79 @@ bf_vs_op_promote tells the microkernel to promote the requested VS. bf_vs_op_pro
 | :---- | :---------- |
 | 0x0000000000000009 | Defines the index for bf_vs_op_promote |
 
-### 2.14.17. bf_vs_op_clear_vs, OP=0x5, IDX=0xA
+### 2.14.17. bf_vs_op_clear, OP=0x5, IDX=0xA
 
-bf_vs_op_clear_vs tells the microkernel to clear the VS's hardware cache, if one exists. How this is used depends entirely on the hardware and is associated with AMD's VMCB Clean Bits, and Intel's VMClear instruction. See the associated documentation for more details. On AMD, this ABI clears the entire VMCB. For more fine grained control, use the write ABIs to manually modify the VMCB.
+bf_vs_op_clear tells the microkernel to clear the VS's hardware cache, if one exists. How this is used depends entirely on the hardware and is associated with AMD's VMCB Clean Bits, and Intel's VMClear instruction. See the associated documentation for more details. On AMD, this ABI clears the entire VMCB. For more fine grained control, use the write ABIs to manually modify the VMCB.
 
 **Input:**
 | Register Name | Bits | Description |
 | :------------ | :--- | :---------- |
 | REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 15:0 | The VSID of the VS to clear |
+| REG1 | 15:0 | The ID of the VS to clear |
 | REG1 | 63:16 | REVI |
 
 **const, uint64_t: BF_VS_OP_CLEAR_IDX_VAL**
 | Value | Description |
 | :---- | :---------- |
-| 0x000000000000000A | Defines the index for bf_vs_op_clear_vs |
+| 0x000000000000000A | Defines the index for bf_vs_op_clear |
+
+### 2.14.17. bf_vs_op_migrate, OP=0x5, IDX=0xB
+
+TODO
+
+**Input:**
+| Register Name | Bits | Description |
+| :------------ | :--- | :---------- |
+| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
+| REG1 | 15:0 | The ID of the VS to migrate |
+| REG1 | 63:16 | REVI |
+| REG1 | 15:0 | The ID of the PP to migrate the VS to |
+| REG1 | 63:16 | REVI |
+
+**const, uint64_t: BF_VS_OP_MIGRATE_IDX_VAL**
+| Value | Description |
+| :---- | :---------- |
+| 0x000000000000000B | Defines the index for bf_vs_op_migrate |
+
+### 2.14.17. bf_vs_op_set_active, OP=0x5, IDX=0xC
+
+Sets the active VM, VP and VS to the provided VM, VP and VS.
+
+**Input:**
+| Register Name | Bits | Description |
+| :------------ | :--- | :---------- |
+| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
+| REG1 | 15:0 | The ID of the VM to set active |
+| REG1 | 63:16 | REVI |
+| REG2 | 15:0 | The ID of the VP to set active |
+| REG2 | 63:16 | REVI |
+| REG3 | 15:0 | The ID of the VS to set active |
+| REG3 | 63:16 | REVI |
+
+**const, uint64_t: BF_VS_OP_SET_ACTIVE_IDX_VAL**
+| Value | Description |
+| :---- | :---------- |
+| 0x000000000000000C | Defines the index for bf_vs_op_set_active |
+
+### 2.14.17. bf_vs_op_advance_ip_and_set_active, OP=0x5, IDX=0xD
+
+Advances the IP of the current VS and then sets the active VM, VP and VS to the provided VM, VP and VS.
+
+**Input:**
+| Register Name | Bits | Description |
+| :------------ | :--- | :---------- |
+| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
+| REG1 | 15:0 | The ID of the VM to set active |
+| REG1 | 63:16 | REVI |
+| REG2 | 15:0 | The ID of the VP to set active |
+| REG2 | 63:16 | REVI |
+| REG3 | 15:0 | The ID of the VS to set active |
+| REG3 | 63:16 | REVI |
+
+**const, uint64_t: BF_VS_OP_ADVANCE_IP_AND_SET_ACTIVE_IDX_VAL**
+| Value | Description |
+| :---- | :---------- |
+| 0x000000000000000D | Defines the index for bf_vs_op_advance_ip_and_set_active |
 
 ## 2.15. Intrinsic Syscalls
 

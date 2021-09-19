@@ -73,6 +73,11 @@ dispatch_syscall_entry:
     mov rdx, gs:[0x1A8]
     mov gs:[0x188], rdx
 
+    mov rdx, gs:[0x238]
+    mov fs:[0xFF0], rdx
+    mov rdx, gs:[0x208]
+    mov fs:[0xFF8], edx
+
     mov rsp, gs:[0x0A8]
 
     mov r9,  gs:[0x070]

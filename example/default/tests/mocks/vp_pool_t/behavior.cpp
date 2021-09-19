@@ -47,7 +47,7 @@ namespace example
             bsl::ut_given{} = []() noexcept {
                 vp_pool_t mut_vp_pool{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(mut_vp_pool.allocate({}, {}, {}, {}, {}, {}));
+                    bsl::ut_check(mut_vp_pool.allocate({}, {}, {}, {}, {}));
                 };
             };
         };
@@ -56,9 +56,9 @@ namespace example
             bsl::ut_given{} = []() noexcept {
                 vp_pool_t mut_vp_pool{};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_vp_pool.set_allocate_fails({}, {});
+                    mut_vp_pool.set_allocate_fails({});
                     bsl::ut_then{} = [&]() noexcept {
-                        auto const vpid{mut_vp_pool.allocate({}, {}, {}, {}, {}, {})};
+                        auto const vpid{mut_vp_pool.allocate({}, {}, {}, {}, {})};
                         bsl::ut_check(vpid.is_invalid());
                     };
                 };
@@ -69,7 +69,7 @@ namespace example
             bsl::ut_given{} = []() noexcept {
                 vp_pool_t mut_vp_pool{};
                 bsl::ut_when{} = [&]() noexcept {
-                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, {}, {}, {}, {}));
+                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         mut_vp_pool.deallocate({}, {}, {}, {}, {});
                         bsl::ut_check(mut_vp_pool.is_deallocated({}));
@@ -97,7 +97,7 @@ namespace example
                         bsl::ut_check(mut_vp_pool.is_deallocated({}));
                     };
 
-                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, {}, {}, {}, {}));
+                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_vp_pool.is_allocated({}));
                         bsl::ut_check(!mut_vp_pool.is_deallocated({}));
@@ -118,19 +118,16 @@ namespace example
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_vp_pool.assigned_vm({}) == syscall::BF_INVALID_ID);
-                        bsl::ut_check(mut_vp_pool.assigned_pp({}) == syscall::BF_INVALID_ID);
                     };
 
-                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, {}, {}, {}, {}));
+                    bsl::ut_required_step(mut_vp_pool.allocate({}, {}, {}, {}, {}));
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_vp_pool.assigned_vm({}) != syscall::BF_INVALID_ID);
-                        bsl::ut_check(mut_vp_pool.assigned_pp({}) != syscall::BF_INVALID_ID);
                     };
 
                     mut_vp_pool.deallocate({}, {}, {}, {}, {});
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_vp_pool.assigned_vm({}) == syscall::BF_INVALID_ID);
-                        bsl::ut_check(mut_vp_pool.assigned_pp({}) == syscall::BF_INVALID_ID);
                     };
                 };
             };

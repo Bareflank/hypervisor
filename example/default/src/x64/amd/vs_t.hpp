@@ -143,7 +143,9 @@ namespace example
             bsl::safe_u16 const &vpid,
             bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
         {
-            bsl::expects(this->id() != syscall::BF_INVALID_ID);
+            auto const vsid{this->id()};
+
+            bsl::expects(vsid != syscall::BF_INVALID_ID);
             bsl::expects(allocated_status_t::deallocated == m_allocated);
 
             bsl::expects(vpid.is_valid_and_checked());
@@ -155,25 +157,24 @@ namespace example
             bsl::discard(tls);
             bsl::discard(intrinsic);
 
-            auto const vsid{this->id()};
-            if (mut_sys.is_vs_a_root_vs(vsid)) {
-                bsl::expects(mut_sys.bf_vs_op_init_as_root(vsid));
+            constexpr auto guest_asid_val{0x1_u64};
+            constexpr auto guest_asid_idx{syscall::bf_reg_t::bf_reg_t_guest_asid};
+            bsl::expects(mut_sys.bf_vs_op_write(this->id(), guest_asid_idx, guest_asid_val));
+
+            constexpr auto intercept1_val{0x00040000_u64};
+            constexpr auto intercept1_idx{syscall::bf_reg_t::bf_reg_t_intercept_instruction1};
+            bsl::expects(mut_sys.bf_vs_op_write(this->id(), intercept1_idx, intercept1_val));
+
+            constexpr auto intercept2_val{0x00000001_u64};
+            constexpr auto intercept2_idx{syscall::bf_reg_t::bf_reg_t_intercept_instruction2};
+            bsl::expects(mut_sys.bf_vs_op_write(this->id(), intercept2_idx, intercept2_val));
+
+            if (mut_sys.is_vs_a_root_vs(this->id())) {
+                bsl::expects(mut_sys.bf_vs_op_init_as_root(this->id()));
             }
             else {
                 bsl::touch();
             }
-
-            constexpr auto guest_asid_val{0x1_u64};
-            constexpr auto guest_asid_idx{syscall::bf_reg_t::bf_reg_t_guest_asid};
-            bsl::expects(mut_sys.bf_vs_op_write(vsid, guest_asid_idx, guest_asid_val));
-
-            constexpr auto intercept1_val{0x00040000_u64};
-            constexpr auto intercept1_idx{syscall::bf_reg_t::bf_reg_t_intercept_instruction1};
-            bsl::expects(mut_sys.bf_vs_op_write(vsid, intercept1_idx, intercept1_val));
-
-            constexpr auto intercept2_val{0x00000001_u64};
-            constexpr auto intercept2_idx{syscall::bf_reg_t::bf_reg_t_intercept_instruction2};
-            bsl::expects(mut_sys.bf_vs_op_write(vsid, intercept2_idx, intercept2_val));
 
             m_assigned_vpid = ~vpid;
             m_assigned_ppid = ~ppid;

@@ -31,6 +31,7 @@
 #include <general_purpose_regs_t.hpp>
 #include <intrinsic_t.hpp>
 #include <page_pool_t.hpp>
+#include <running_status_t.hpp>
 #include <tls_t.hpp>
 #include <vmcb_t.hpp>
 #include <vmexit_log_t.hpp>
@@ -46,42 +47,6 @@
 
 namespace mk
 {
-    /// <!-- description -->
-    ///   @brief Converts attributes in the form 0xF0FF to the form
-    ///     0x0FFF.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param attrib the attrib to compress
-    ///   @return Returns the compressed version of attrib
-    ///
-    [[nodiscard]] constexpr auto
-    compress_attrib(bsl::safe_u16 const &attrib) noexcept -> bsl::safe_u16
-    {
-        constexpr auto mask1{0x00FF_u16};
-        constexpr auto mask2{0xF000_u16};
-        constexpr auto shift{4_u16};
-
-        return (attrib & mask1) | ((attrib & mask2) >> shift);
-    }
-
-    /// <!-- description -->
-    ///   @brief Converts attributes in the form 0x0FFF to the form
-    ///     0xF0FF.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param attrib the attrib to decompress
-    ///   @return Returns the decompressed version of attrib
-    ///
-    [[nodiscard]] constexpr auto
-    decompress_attrib(bsl::safe_u16 const &attrib) noexcept -> bsl::safe_u16
-    {
-        constexpr auto mask1{0x00FF_u16};
-        constexpr auto mask2{0x0F00_u16};
-        constexpr auto shift{4_u16};
-
-        return (attrib & mask1) | ((attrib & mask2) << shift);
-    }
-
     /// @class mk::vs_t
     ///
     /// <!-- description -->
@@ -93,6 +58,8 @@ namespace mk
         bsl::safe_u16 m_id{};
         /// @brief stores whether or not this vs_t is allocated.
         allocated_status_t m_allocated{};
+        /// @brief stores the status of the vs_t
+        running_status_t m_status{};
         /// @brief stores the ID of the VP this vs_t is assigned to
         bsl::safe_u16 m_assigned_vpid{};
         /// @brief stores the ID of the PP this vs_t is assigned to
@@ -172,6 +139,56 @@ namespace mk
             bsl::print() << bsl::rst << bsl::endl;
         }
 
+        /// <!-- description -->
+        ///   @brief Converts attributes in the form 0xF0FF to the form
+        ///     0x0FFF.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param attrib the attrib to compress
+        ///   @return Returns the compressed version of attrib
+        ///
+        [[nodiscard]] static constexpr auto
+        compress_attrib(bsl::safe_u16 const &attrib) noexcept -> bsl::safe_u16
+        {
+            constexpr auto mask1{0x00FF_u16};
+            constexpr auto mask2{0xF000_u16};
+            constexpr auto shift{4_u16};
+
+            return (attrib & mask1) | ((attrib & mask2) >> shift);
+        }
+
+        /// <!-- description -->
+        ///   @brief Converts attributes in the form 0x0FFF to the form
+        ///     0xF0FF.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param attrib the attrib to decompress
+        ///   @return Returns the decompressed version of attrib
+        ///
+        [[nodiscard]] static constexpr auto
+        decompress_attrib(bsl::safe_u16 const &attrib) noexcept -> bsl::safe_u16
+        {
+            constexpr auto mask1{0x00FF_u16};
+            constexpr auto mask2{0x0F00_u16};
+            constexpr auto shift{4_u16};
+
+            return (attrib & mask1) | ((attrib & mask2) << shift);
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns a sanitized version of EFER
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param val the value to sanitize
+        ///   @return Returns a sanitized version of EFER
+        ///
+        [[nodiscard]] static constexpr auto
+        sanitize_efer(bsl::safe_u64 const &val) noexcept -> bsl::safe_u64
+        {
+            constexpr auto efer_mask{0x0000000000001000_u64};
+            return val | efer_mask;
+        }
+
     public:
         /// <!-- description -->
         ///   @brief Initializes this vs_t
@@ -240,6 +257,7 @@ namespace mk
 
             bsl::expects(this->id() != syscall::BF_INVALID_ID);
             bsl::expects(allocated_status_t::deallocated == m_allocated);
+            bsl::expects(running_status_t::initial == m_status);
 
             bsl::expects(vpid.is_valid_and_checked());
             bsl::expects(vpid != syscall::BF_INVALID_ID);
@@ -286,6 +304,7 @@ namespace mk
         constexpr void
         deallocate(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept
         {
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(this->is_active().is_invalid());
 
             m_gprs = {};
@@ -300,6 +319,7 @@ namespace mk
 
             m_assigned_ppid = {};
             m_assigned_vpid = {};
+            m_status = running_status_t::initial;
             m_allocated = allocated_status_t::deallocated;
         }
 
@@ -338,6 +358,7 @@ namespace mk
         set_active(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(syscall::BF_INVALID_ID == mut_tls.active_vsid);
 
             mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RAX, bsl::to_u64(m_gprs.rax));
@@ -371,6 +392,7 @@ namespace mk
         set_inactive(tls_t &mut_tls, intrinsic_t const &intrinsic) noexcept
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(this->id() == mut_tls.active_vsid);
 
             m_gprs.rax = intrinsic.tls_reg(syscall::TLS_OFFSET_RAX).get();
@@ -430,19 +452,26 @@ namespace mk
         ///   @brief Migrates this vs_t from one PP to another
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
         ///   @param intrinsic the intrinsic_t to use
         ///   @param ppid the ID of the PP to migrate to
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
         ///
-        constexpr void
-        migrate(tls_t const &tls, intrinsic_t const &intrinsic, bsl::safe_u16 const &ppid) noexcept
+        [[nodiscard]] constexpr auto
+        migrate(intrinsic_t const &intrinsic, bsl::safe_u16 const &ppid) noexcept -> bsl::errc_type
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
             bsl::expects(ppid.is_valid_and_checked());
             bsl::expects(ppid != syscall::BF_INVALID_ID);
 
-            this->clear(tls, intrinsic);
+            auto const ret{this->clear(intrinsic)};
+            if (bsl::unlikely(!ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return ret;
+            }
+
             m_assigned_ppid = ~ppid;
+            return ret;
         }
 
         /// <!-- description -->
@@ -490,6 +519,7 @@ namespace mk
             loader::state_save_t const *const state) noexcept
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(tls.ppid == this->assigned_pp());
             bsl::expects(nullptr != state);
 
@@ -586,7 +616,7 @@ namespace mk
             m_guest_vmcb->dr6 = state->dr6;
             m_guest_vmcb->dr7 = state->dr7;
 
-            m_guest_vmcb->efer = state->msr_efer;
+            m_guest_vmcb->efer = sanitize_efer(bsl::to_u64(state->msr_efer)).get();
             m_guest_vmcb->star = state->msr_star;
             m_guest_vmcb->lstar = state->msr_lstar;
             m_guest_vmcb->cstar = state->msr_cstar;
@@ -596,7 +626,7 @@ namespace mk
             m_guest_vmcb->sysenter_cs = state->msr_sysenter_cs;
             m_guest_vmcb->sysenter_esp = state->msr_sysenter_esp;
             m_guest_vmcb->sysenter_eip = state->msr_sysenter_eip;
-            m_guest_vmcb->g_pat = state->msr_pat;
+            m_guest_vmcb->pat = state->msr_pat;
             m_guest_vmcb->dbgctl = state->msr_debugctl;
         }
 
@@ -615,6 +645,7 @@ namespace mk
             loader::state_save_t *const pmut_state) const noexcept
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(tls.ppid == this->assigned_pp());
             bsl::expects(nullptr != pmut_state);
 
@@ -723,7 +754,7 @@ namespace mk
             pmut_state->msr_sysenter_cs = m_guest_vmcb->sysenter_cs;
             pmut_state->msr_sysenter_esp = m_guest_vmcb->sysenter_esp;
             pmut_state->msr_sysenter_eip = m_guest_vmcb->sysenter_eip;
-            pmut_state->msr_pat = m_guest_vmcb->g_pat;
+            pmut_state->msr_pat = m_guest_vmcb->pat;
             pmut_state->msr_debugctl = m_guest_vmcb->dbgctl;
         }
 
@@ -743,6 +774,7 @@ namespace mk
             const noexcept -> bsl::safe_umx
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(tls.ppid == this->assigned_pp());
 
             switch (reg) {
@@ -1012,7 +1044,7 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_attrib: {
-                    return bsl::to_umx(m_guest_vmcb->es_attrib);
+                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->es_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_limit: {
@@ -1028,7 +1060,7 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_attrib: {
-                    return bsl::to_umx(m_guest_vmcb->cs_attrib);
+                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->cs_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_limit: {
@@ -1044,7 +1076,7 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_attrib: {
-                    return bsl::to_umx(m_guest_vmcb->ss_attrib);
+                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->ss_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_limit: {
@@ -1060,7 +1092,7 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_attrib: {
-                    return bsl::to_umx(m_guest_vmcb->ds_attrib);
+                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->ds_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_limit: {
@@ -1076,7 +1108,7 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_attrib: {
-                    return bsl::to_umx(m_guest_vmcb->fs_attrib);
+                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->fs_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_limit: {
@@ -1092,7 +1124,7 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_attrib: {
-                    return bsl::to_umx(m_guest_vmcb->gs_attrib);
+                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->gs_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_limit: {
@@ -1108,7 +1140,7 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gdtr_attrib: {
-                    return bsl::to_umx(m_guest_vmcb->gdtr_attrib);
+                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->gdtr_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gdtr_limit: {
@@ -1124,7 +1156,7 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_attrib: {
-                    return bsl::to_umx(m_guest_vmcb->ldtr_attrib);
+                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->ldtr_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_limit: {
@@ -1140,7 +1172,7 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idtr_attrib: {
-                    return bsl::to_umx(m_guest_vmcb->idtr_attrib);
+                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->idtr_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idtr_limit: {
@@ -1156,7 +1188,7 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_attrib: {
-                    return bsl::to_umx(m_guest_vmcb->tr_attrib);
+                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->tr_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_limit: {
@@ -1243,8 +1275,8 @@ namespace mk
                     return bsl::to_umx(m_guest_vmcb->cr2);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_g_pat: {
-                    return bsl::to_umx(m_guest_vmcb->g_pat);
+                case syscall::bf_reg_t::bf_reg_t_pat: {
+                    return bsl::to_umx(m_guest_vmcb->pat);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_dbgctl: {
@@ -1295,13 +1327,16 @@ namespace mk
             syscall::bf_reg_t const reg,
             bsl::safe_umx const &val) noexcept -> bsl::errc_type
         {
+            bsl::errc_type ret{};
+
             bsl::expects(allocated_status_t::allocated == m_allocated);
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(tls.ppid == this->assigned_pp());
             bsl::expects(val.is_valid_and_checked());
 
             switch (reg) {
                 case syscall::bf_reg_t::bf_reg_t_unsupported: {
-                    bsl::error() << "unsupported bf_reg_t\n" << bsl::here();
+                    ret = bsl::errc_unsupported;
                     break;
                 }
 
@@ -1456,52 +1491,112 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_cr_read: {
-                    m_guest_vmcb->intercept_cr_read = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->intercept_cr_read = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_cr_write: {
-                    m_guest_vmcb->intercept_cr_write = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->intercept_cr_write = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_dr_read: {
-                    m_guest_vmcb->intercept_dr_read = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->intercept_dr_read = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_dr_write: {
-                    m_guest_vmcb->intercept_dr_write = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->intercept_dr_write = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_exception: {
-                    m_guest_vmcb->intercept_exception = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->intercept_exception = val32.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_instruction1: {
-                    m_guest_vmcb->intercept_instruction1 = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->intercept_instruction1 = val32.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_instruction2: {
-                    m_guest_vmcb->intercept_instruction2 = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->intercept_instruction2 = val32.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_instruction3: {
-                    m_guest_vmcb->intercept_instruction3 = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->intercept_instruction3 = val32.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pause_filter_threshold: {
-                    m_guest_vmcb->pause_filter_threshold = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->pause_filter_threshold = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pause_filter_count: {
-                    m_guest_vmcb->pause_filter_count = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->pause_filter_count = val16.get();
                     return bsl::errc_success;
                 }
 
@@ -1521,12 +1616,24 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_guest_asid: {
-                    m_guest_vmcb->guest_asid = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->guest_asid = val32.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tlb_control: {
-                    m_guest_vmcb->tlb_control = bsl::to_u8(val).get();
+                    auto const val8{bsl::to_u8(val)};
+                    if (bsl::unlikely(val8.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->tlb_control = val8.get();
                     return bsl::errc_success;
                 }
 
@@ -1591,7 +1698,13 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmcb_clean_bits: {
-                    m_guest_vmcb->vmcb_clean_bits = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->vmcb_clean_bits = val32.get();
                     return bsl::errc_success;
                 }
 
@@ -1601,7 +1714,13 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_number_of_bytes_fetched: {
-                    m_guest_vmcb->number_of_bytes_fetched = bsl::to_u8(val).get();
+                    auto const val8{bsl::to_u8(val)};
+                    if (bsl::unlikely(val8.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->number_of_bytes_fetched = val8.get();
                     return bsl::errc_success;
                 }
 
@@ -1626,17 +1745,35 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_selector: {
-                    m_guest_vmcb->es_selector = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->es_selector = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_attrib: {
-                    m_guest_vmcb->es_attrib = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->es_attrib = compress_attrib(val16).get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_limit: {
-                    m_guest_vmcb->es_limit = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->es_limit = val32.get();
                     return bsl::errc_success;
                 }
 
@@ -1646,17 +1783,35 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_selector: {
-                    m_guest_vmcb->cs_selector = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->cs_selector = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_attrib: {
-                    m_guest_vmcb->cs_attrib = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->cs_attrib = compress_attrib(val16).get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_limit: {
-                    m_guest_vmcb->cs_limit = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->cs_limit = val32.get();
                     return bsl::errc_success;
                 }
 
@@ -1666,17 +1821,35 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_selector: {
-                    m_guest_vmcb->ss_selector = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->ss_selector = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_attrib: {
-                    m_guest_vmcb->ss_attrib = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->ss_attrib = compress_attrib(val16).get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_limit: {
-                    m_guest_vmcb->ss_limit = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->ss_limit = val32.get();
                     return bsl::errc_success;
                 }
 
@@ -1686,17 +1859,35 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_selector: {
-                    m_guest_vmcb->ds_selector = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->ds_selector = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_attrib: {
-                    m_guest_vmcb->ds_attrib = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->ds_attrib = compress_attrib(val16).get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_limit: {
-                    m_guest_vmcb->ds_limit = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->ds_limit = val32.get();
                     return bsl::errc_success;
                 }
 
@@ -1706,17 +1897,35 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_selector: {
-                    m_guest_vmcb->fs_selector = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->fs_selector = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_attrib: {
-                    m_guest_vmcb->fs_attrib = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->fs_attrib = compress_attrib(val16).get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_limit: {
-                    m_guest_vmcb->fs_limit = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->fs_limit = val32.get();
                     return bsl::errc_success;
                 }
 
@@ -1726,17 +1935,35 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_selector: {
-                    m_guest_vmcb->gs_selector = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->gs_selector = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_attrib: {
-                    m_guest_vmcb->gs_attrib = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->gs_attrib = compress_attrib(val16).get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_limit: {
-                    m_guest_vmcb->gs_limit = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->gs_limit = val32.get();
                     return bsl::errc_success;
                 }
 
@@ -1746,17 +1973,35 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gdtr_selector: {
-                    m_guest_vmcb->gdtr_selector = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->gdtr_selector = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gdtr_attrib: {
-                    m_guest_vmcb->gdtr_attrib = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->gdtr_attrib = compress_attrib(val16).get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gdtr_limit: {
-                    m_guest_vmcb->gdtr_limit = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->gdtr_limit = val32.get();
                     return bsl::errc_success;
                 }
 
@@ -1766,17 +2011,35 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_selector: {
-                    m_guest_vmcb->ldtr_selector = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->ldtr_selector = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_attrib: {
-                    m_guest_vmcb->ldtr_attrib = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->ldtr_attrib = compress_attrib(val16).get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_limit: {
-                    m_guest_vmcb->ldtr_limit = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->ldtr_limit = val32.get();
                     return bsl::errc_success;
                 }
 
@@ -1786,17 +2049,35 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idtr_selector: {
-                    m_guest_vmcb->idtr_selector = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->idtr_selector = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idtr_attrib: {
-                    m_guest_vmcb->idtr_attrib = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->idtr_attrib = compress_attrib(val16).get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idtr_limit: {
-                    m_guest_vmcb->idtr_limit = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->idtr_limit = val32.get();
                     return bsl::errc_success;
                 }
 
@@ -1806,17 +2087,35 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_selector: {
-                    m_guest_vmcb->tr_selector = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->tr_selector = val16.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_attrib: {
-                    m_guest_vmcb->tr_attrib = bsl::to_u16(val).get();
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->tr_attrib = compress_attrib(val16).get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_limit: {
-                    m_guest_vmcb->tr_limit = bsl::to_u32(val).get();
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    m_guest_vmcb->tr_limit = val32.get();
                     return bsl::errc_success;
                 }
 
@@ -1826,12 +2125,18 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cpl: {
+                    auto const val8{bsl::to_u8(val)};
+                    if (bsl::unlikely(val8.is_invalid())) {
+                        ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
                     m_guest_vmcb->cpl = bsl::to_u8(val).get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_efer: {
-                    m_guest_vmcb->efer = val.get();
+                    m_guest_vmcb->efer = sanitize_efer(val).get();
                     return bsl::errc_success;
                 }
 
@@ -1920,8 +2225,8 @@ namespace mk
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_g_pat: {
-                    m_guest_vmcb->g_pat = val.get();
+                case syscall::bf_reg_t::bf_reg_t_pat: {
+                    m_guest_vmcb->pat = val.get();
                     return bsl::errc_success;
                 }
 
@@ -1951,12 +2256,33 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_invalid: {
-                    bsl::error() << "invalid bf_reg_t\n" << bsl::here();
+                    ret = bsl::errc_unsupported;
                     break;
                 }
             }
 
-            return bsl::errc_failure;
+            if (bsl::errc_narrow_overflow == ret) {
+                bsl::error() << "vs "                                // --
+                             << bsl::hex(this->id())                 // --
+                             << " attempted to write to regiter "    // --
+                             << static_cast<bsl::uint64>(reg)        // --
+                             << " with val "                         // --
+                             << bsl::hex(val)                        // --
+                             << "which resulted in data loss"        // --
+                             << bsl::endl                            // --
+                             << bsl::here();                         // --
+
+                return ret;
+            }
+
+            bsl::error() << "vs "                                        // --
+                         << bsl::hex(this->id())                         // --
+                         << " attempted to write to unknown regiter "    // --
+                         << static_cast<bsl::uint64>(reg)                // --
+                         << bsl::endl                                    // --
+                         << bsl::here();                                 // --
+
+            return ret;
         }
 
         /// <!-- description -->
@@ -1977,10 +2303,13 @@ namespace mk
         {
             bsl::discard(mut_intrinsic);
             bsl::expects(allocated_status_t::allocated == m_allocated);
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(tls.ppid == this->assigned_pp());
 
+            m_status = running_status_t::running;
             bsl::safe_umx const exit_reason{intrinsic_vmrun(
                 m_guest_vmcb, m_guest_vmcb_phys.get(), m_host_vmcb, m_host_vmcb_phys.get())};
+            m_status = running_status_t::handling_vmexit;
 
             if constexpr (BSL_DEBUG_LEVEL >= bsl::VV) {
                 mut_log.add(
@@ -2011,11 +2340,6 @@ namespace mk
                      bsl::to_umx(m_guest_vmcb->rip)});
             }
 
-            /// TODO:
-            /// - Add check logic to if an entry failure occurs and output
-            ///   what the error was and why.
-            ///
-
             return exit_reason;
         }
 
@@ -2031,6 +2355,7 @@ namespace mk
         {
             bsl::discard(intrinsic);
             bsl::expects(allocated_status_t::allocated == m_allocated);
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(tls.ppid == this->assigned_pp());
 
             m_guest_vmcb->rip = m_guest_vmcb->nrip;
@@ -2042,17 +2367,28 @@ namespace mk
         ///     values stored in the vs_t.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param tls the current TLS block
         ///   @param intrinsic the intrinsic_t to use
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
         ///
-        constexpr void
-        clear(tls_t const &tls, intrinsic_t const &intrinsic) noexcept
+        [[nodiscard]] constexpr auto
+        clear(intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
         {
             bsl::discard(intrinsic);
             bsl::expects(allocated_status_t::allocated == m_allocated);
-            bsl::expects(tls.ppid == this->assigned_pp());
+
+            if (bsl::unlikely(running_status_t::running == m_status)) {
+                bsl::error() << "vs "                                                 // --
+                             << bsl::hex(this->id())                                  // --
+                             << " is still running and cannot be cleared/migrated"    // --
+                             << bsl::endl                                             // --
+                             << bsl::here();                                          // --
+
+                return bsl::errc_failure;
+            }
 
             m_guest_vmcb->vmcb_clean_bits = {};
+            return bsl::errc_success;
         }
 
         /// <!-- description -->
@@ -2128,13 +2464,13 @@ namespace mk
             ///
 
             bsl::print() << bsl::ylw << "| ";
-            bsl::print() << bsl::rst << bsl::fmt{"<30s", "assigned vs "};
+            bsl::print() << bsl::rst << bsl::fmt{"<30s", "assigned vp "};
             bsl::print() << bsl::ylw << "| ";
-            if (m_assigned_vpid != syscall::BF_INVALID_ID) {
-                bsl::print() << bsl::grn << "      " << bsl::hex(m_assigned_vpid) << "       ";
+            if (this->assigned_vp() != syscall::BF_INVALID_ID) {
+                bsl::print() << bsl::grn << "      " << bsl::hex(this->assigned_vp()) << "       ";
             }
             else {
-                bsl::print() << bsl::red << "      " << bsl::hex(m_assigned_vpid) << "       ";
+                bsl::print() << bsl::red << "      " << bsl::hex(this->assigned_vp()) << "       ";
             }
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;
@@ -2145,11 +2481,11 @@ namespace mk
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<30s", "assigned pp "};
             bsl::print() << bsl::ylw << "| ";
-            if (m_assigned_ppid != syscall::BF_INVALID_ID) {
-                bsl::print() << bsl::grn << "      " << bsl::hex(m_assigned_ppid) << "       ";
+            if (this->assigned_pp() != syscall::BF_INVALID_ID) {
+                bsl::print() << bsl::grn << "      " << bsl::hex(this->assigned_pp()) << "       ";
             }
             else {
-                bsl::print() << bsl::red << "      " << bsl::hex(m_assigned_ppid) << "       ";
+                bsl::print() << bsl::red << "      " << bsl::hex(this->assigned_pp()) << "       ";
             }
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;
@@ -2324,7 +2660,7 @@ namespace mk
             this->dump_field("sysenter_esp ", bsl::make_safe(m_guest_vmcb->sysenter_esp));
             this->dump_field("sysenter_eip ", bsl::make_safe(m_guest_vmcb->sysenter_eip));
             this->dump_field("cr2 ", bsl::make_safe(m_guest_vmcb->cr2));
-            this->dump_field("g_pat ", bsl::make_safe(m_guest_vmcb->g_pat));
+            this->dump_field("pat ", bsl::make_safe(m_guest_vmcb->pat));
             this->dump_field("dbgctl ", bsl::make_safe(m_guest_vmcb->dbgctl));
             this->dump_field("br_from ", bsl::make_safe(m_guest_vmcb->br_from));
             this->dump_field("br_to ", bsl::make_safe(m_guest_vmcb->br_to));

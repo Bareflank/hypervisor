@@ -30,7 +30,6 @@
 #include <gs_t.hpp>
 #include <intrinsic_t.hpp>
 #include <tls_t.hpp>
-#include <tuple>
 
 #include <bsl/discard.hpp>
 #include <bsl/safe_integral.hpp>
@@ -48,13 +47,11 @@ namespace example
         /// @brief stores the id that will be returned on allocate
         bsl::safe_u16 m_id{};
         /// @brief stores the return value of allocate()
-        bsl::unordered_map<std::tuple<bsl::safe_u16, bsl::safe_u16>, bool> m_allocate_fails{};
+        bsl::unordered_map<bsl::safe_u16, bool> m_allocate_fails{};
         /// @brief stores the return value of is_allocated()
         bsl::unordered_map<bsl::safe_u16, allocated_status_t> m_allocated{};
         /// @brief stores the return value of assigned_vm()
         bsl::unordered_map<bsl::safe_u16, bsl::safe_u16> m_assigned_vmid{};
-        /// @brief stores the return value of assigned_pp()
-        bsl::unordered_map<bsl::safe_u16, bsl::safe_u16> m_assigned_ppid{};
 
     public:
         /// <!-- description -->
@@ -88,7 +85,6 @@ namespace example
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vmid the ID of the VM to assign the newly created VP to
-        ///   @param ppid the ID of the PP to assign the newly created VP to
         ///   @return Returns ID of the newly allocated vp_t. Returns
         ///     bsl::safe_u16::failure() on failure.
         ///
@@ -98,15 +94,14 @@ namespace example
             tls_t const &tls,
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
-            bsl::safe_u16 const &vmid,
-            bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
+            bsl::safe_u16 const &vmid) noexcept -> bsl::safe_u16
         {
             bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(sys);
             bsl::discard(intrinsic);
 
-            if (m_allocate_fails.at({vmid, ppid})) {
+            if (m_allocate_fails.at(vmid)) {
                 return bsl::safe_u16::failure();
             }
 
@@ -114,7 +109,6 @@ namespace example
             m_id = (m_id + bsl::safe_u16::magic_1()).checked();
 
             m_assigned_vmid.at(id) = vmid;
-            m_assigned_ppid.at(id) = ppid;
             m_allocated.at(id) = allocated_status_t::allocated;
 
             return id;
@@ -122,16 +116,15 @@ namespace example
 
         /// <!-- description -->
         ///   @brief Tells the allocate() function to return a failure
-        ///     for the provided vmid/ppid combo.
+        ///     for the provided vmid.
         ///
         /// <!-- inputs/outputs -->
         ///   @param vmid the ID of the VM to assign the newly created VP to
-        ///   @param ppid the ID of the PP to assign the newly created VP to
         ///
         constexpr void
-        set_allocate_fails(bsl::safe_u16 const &vmid, bsl::safe_u16 const &ppid) noexcept
+        set_allocate_fails(bsl::safe_u16 const &vmid) noexcept
         {
-            m_allocate_fails.at({vmid, ppid}) = true;
+            m_allocate_fails.at(vmid) = true;
         }
 
         /// <!-- description -->
@@ -158,7 +151,6 @@ namespace example
             bsl::discard(intrinsic);
 
             bsl::discard(m_assigned_vmid.erase(vpid));
-            bsl::discard(m_assigned_ppid.erase(vpid));
             bsl::discard(m_allocated.erase(vpid));
         }
 
@@ -211,27 +203,6 @@ namespace example
             }
 
             return m_assigned_vmid.at(vpid);
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the ID of the PP the requested vp_t is assigned
-        ///     to. If the vp_t is not assigned, syscall::BF_INVALID_ID is
-        ///     returned.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpid the ID of the vp_t to query
-        ///   @return Returns the ID of the PP the requested vp_t is assigned
-        ///     to. If the vp_t is not assigned, syscall::BF_INVALID_ID is
-        ///     returned.
-        ///
-        [[nodiscard]] constexpr auto
-        assigned_pp(bsl::safe_u16 const &vpid) const noexcept -> bsl::safe_u16
-        {
-            if (!m_assigned_ppid.contains(vpid)) {
-                return syscall::BF_INVALID_ID;
-            }
-
-            return m_assigned_ppid.at(vpid);
         }
     };
 }

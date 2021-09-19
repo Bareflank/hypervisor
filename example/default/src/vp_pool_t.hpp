@@ -134,7 +134,6 @@ namespace example
         ///   @param mut_sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vmid the ID of the VM to assign the newly created VP to
-        ///   @param ppid the ID of the PP to assign the newly created VP to
         ///   @return Returns ID of the newly allocated vp_t. Returns
         ///     bsl::safe_u16::failure() on failure.
         ///
@@ -144,15 +143,14 @@ namespace example
             tls_t const &tls,
             syscall::bf_syscall_t &mut_sys,
             intrinsic_t const &intrinsic,
-            bsl::safe_u16 const &vmid,
-            bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
+            bsl::safe_u16 const &vmid) noexcept -> bsl::safe_u16
         {
             /// NOTE:
             /// - Ask the microkernel to create a VP and return the ID of the
             ///   newly created VP.
             ///
 
-            auto const vpid{mut_sys.bf_vp_op_create_vp(vmid, ppid)};
+            auto const vpid{mut_sys.bf_vp_op_create_vp(vmid)};
             if (bsl::unlikely(vpid.is_invalid())) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::safe_u16::failure();
@@ -164,7 +162,7 @@ namespace example
             ///   which vp_t to allocate.
             ///
 
-            return this->get_vp(vpid)->allocate(gs, tls, mut_sys, intrinsic, vmid, ppid);
+            return this->get_vp(vpid)->allocate(gs, tls, mut_sys, intrinsic, vmid);
         }
 
         /// <!-- description -->
@@ -248,23 +246,6 @@ namespace example
         assigned_vm(bsl::safe_u16 const &vpid) const noexcept -> bsl::safe_u16
         {
             return this->get_vp(vpid)->assigned_vm();
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the ID of the PP the requested vp_t is assigned
-        ///     to. If the vp_t is not assigned, syscall::BF_INVALID_ID is
-        ///     returned.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpid the ID of the vp_t to query
-        ///   @return Returns the ID of the PP the requested vp_t is assigned
-        ///     to. If the vp_t is not assigned, syscall::BF_INVALID_ID is
-        ///     returned.
-        ///
-        [[nodiscard]] constexpr auto
-        assigned_pp(bsl::safe_u16 const &vpid) const noexcept -> bsl::safe_u16
-        {
-            return this->get_vp(vpid)->assigned_pp();
         }
     };
 }

@@ -60,17 +60,15 @@ main() noexcept -> bsl::exit_code
 
                 static_assert(noexcept(mut_vp_pool.initialize({}, {}, {}, {})));
                 static_assert(noexcept(mut_vp_pool.release({}, {}, {}, {})));
-                static_assert(noexcept(mut_vp_pool.allocate({}, {}, mut_sys, {}, {}, {})));
+                static_assert(noexcept(mut_vp_pool.allocate({}, {}, mut_sys, {}, {})));
                 static_assert(noexcept(mut_vp_pool.deallocate({}, {}, mut_sys, {}, {})));
                 static_assert(noexcept(mut_vp_pool.is_allocated({})));
                 static_assert(noexcept(mut_vp_pool.is_deallocated({})));
                 static_assert(noexcept(mut_vp_pool.assigned_vm({})));
-                static_assert(noexcept(mut_vp_pool.assigned_pp({})));
 
                 static_assert(noexcept(vp_pool.is_allocated({})));
                 static_assert(noexcept(vp_pool.is_deallocated({})));
                 static_assert(noexcept(vp_pool.assigned_vm({})));
-                static_assert(noexcept(vp_pool.assigned_pp({})));
             };
         };
     };

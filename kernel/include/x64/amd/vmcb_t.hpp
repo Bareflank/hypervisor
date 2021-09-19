@@ -285,7 +285,7 @@ namespace mk
         /// @brief stores the VMCB field at offset (0x0610)
         bsl::uint64 cstar;
         /// @brief stores the VMCB field at offset (0x0618)
-        bsl::uint64 sfmask;
+        bsl::uint64 fmask;
         /// @brief stores the VMCB field at offset (0x0620)
         bsl::uint64 kernel_gs_base;
         /// @brief stores the VMCB field at offset (0x0628)
@@ -299,7 +299,7 @@ namespace mk
         /// @brief stores the VMCB field at offset (0x0648)
         bsl::array<bsl::uint8, VMCB_RESERVED12_SIZE.get()> reserved12;
         /// @brief stores the VMCB field at offset (0x0668)
-        bsl::uint64 g_pat;
+        bsl::uint64 pat;
         /// @brief stores the VMCB field at offset (0x0670)
         bsl::uint64 dbgctl;
         /// @brief stores the VMCB field at offset (0x0678)

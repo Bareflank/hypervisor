@@ -82,7 +82,7 @@ namespace example
                 vp_pool_t mut_vp_pool{};
                 vs_pool_t mut_vs_pool{};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_vp_pool.set_allocate_fails({}, {});
+                    mut_vp_pool.set_allocate_fails({});
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(!dispatch_bootstrap(
                             {}, mut_tls, mut_sys, {}, mut_vp_pool, mut_vs_pool, {}));

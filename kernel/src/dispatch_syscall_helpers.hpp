@@ -305,47 +305,29 @@ namespace mk
     }
 
     /// <!-- description -->
-    ///   @brief Returns true if the vp_t associated with the
-    ///     provided vpid is migratable to the PP associated with the
+    ///   @brief Returns true if the vs_t associated with the
+    ///     provided vsid is migratable to the PP associated with the
     ///     provided ppid. Returns false otherwise.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vp_pool the vp_pool_t to use
-    ///   @param ppid the ID of the PP to migrate the vp_t to
-    ///   @param vpid the ID of the VP to query
-    ///   @return Returns true if the vp_t associated with the
-    ///     provided vpid is migratable to the PP associated with the
+    ///   @param vs_pool the vs_pool_t to use
+    ///   @param vsid the ID of the VP to query
+    ///   @return Returns true if the vs_t associated with the
+    ///     provided vsid is migratable to the PP associated with the
     ///     provided ppid. Returns false otherwise.
     ///
     [[nodiscard]] constexpr auto
-    is_vp_migratable(
-        vp_pool_t const &vp_pool, bsl::safe_u16 const &ppid, bsl::safe_u16 const &vpid) noexcept
-        -> bool
+    is_vs_migratable(vs_pool_t const &vs_pool, bsl::safe_u16 const &vsid) noexcept -> bool
     {
-        auto const active{vp_pool.is_active(vpid)};
+        auto const active{vs_pool.is_active(vsid)};
         if (bsl::unlikely(active.is_valid())) {
-            bsl::error() << "vp "                        // --
-                         << bsl::hex(vpid)               // --
+            bsl::error() << "vs "                        // --
+                         << bsl::hex(vsid)               // --
                          << " is active on pp "          // --
                          << bsl::hex(active)             // --
                          << " and cannot be migrated"    // --
                          << bsl::endl                    // --
                          << bsl::here();                 // --
-
-            return false;
-        }
-
-        auto const assigned_ppid{vp_pool.assigned_pp(vpid)};
-        if (bsl::unlikely(ppid == assigned_ppid)) {
-            bsl::error() << "vp "                               // --
-                         << bsl::hex(vpid)                      // --
-                         << " is already assigned to pp "       // --
-                         << bsl::hex(ppid)                      // --
-                         << " and cannot be migrated to pp "    // --
-                         << bsl::hex(ppid)                      // --
-                         << " again"                            // --
-                         << bsl::endl                           // --
-                         << bsl::here();                        // --
 
             return false;
         }
@@ -379,41 +361,6 @@ namespace mk
                          << bsl::hex(assigned_vmid)            // --
                          << " which is not the current vm "    // --
                          << bsl::hex(vmid)                     // --
-                         << " and therefore cannot be used"    // --
-                         << bsl::endl                          // --
-                         << bsl::here();                       // --
-
-            return false;
-        }
-
-        return true;
-    }
-
-    /// <!-- description -->
-    ///   @brief Returns true if the vp_t associated with the
-    ///     provided vpid is assigned to the provided PP. Returns false
-    ///     otherwise.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param vp_pool the vp_pool_t to use
-    ///   @param vpid the ID of the VP to query
-    ///   @return Returns true if the vp_t associated with the
-    ///     provided vpid is assigned to the provided PP. Returns false
-    ///     otherwise.
-    ///
-    [[nodiscard]] constexpr auto
-    is_vp_assigned_to_current_pp(
-        tls_t const &tls, vp_pool_t const &vp_pool, bsl::safe_u16 const &vpid) noexcept -> bool
-    {
-        auto const assigned_ppid{vp_pool.assigned_pp(vpid)};
-        if (bsl::unlikely(assigned_ppid != tls.ppid)) {
-            bsl::error() << "vp "                              // --
-                         << bsl::hex(vpid)                     // --
-                         << " is assigned to pp "              // --
-                         << bsl::hex(assigned_ppid)            // --
-                         << " which is not the current pp "    // --
-                         << bsl::hex(tls.ppid)                 // --
                          << " and therefore cannot be used"    // --
                          << bsl::endl                          // --
                          << bsl::here();                       // --

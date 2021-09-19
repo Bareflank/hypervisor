@@ -31,6 +31,7 @@
 #include <general_purpose_regs_t.hpp>
 #include <intrinsic_t.hpp>
 #include <page_pool_t.hpp>
+#include <running_status_t.hpp>
 #include <tls_t.hpp>
 #include <vmcs_missing_registers_t.hpp>
 #include <vmcs_t.hpp>
@@ -76,6 +77,24 @@ namespace mk
     constexpr auto MSR_GS_BASE{0xC0000101_u32};
     /// @brief defines the KERNEL_GS_BASE MSR
     constexpr auto MSR_KERNEL_GS_BASE{0xC0000102_u32};
+    /// @brief defines the MSR_VMX_CR0_FIXED0 MSR
+    constexpr auto MSR_VMX_CR0_FIXED0{0x00000486_u32};
+    /// @brief defines the MSR_VMX_CR0_FIXED1 MSR
+    constexpr auto MSR_VMX_CR0_FIXED1{0x00000487_u32};
+    /// @brief defines the MSR_VMX_CR4_FIXED0 MSR
+    constexpr auto MSR_VMX_CR4_FIXED0{0x00000488_u32};
+    /// @brief defines the MSR_VMX_CR4_FIXED1 MSR
+    constexpr auto MSR_VMX_CR4_FIXED1{0x00000489_u32};
+    /// @brief defines the MSR_VMX_TRUE_PIN_CTLS MSR
+    constexpr auto MSR_VMX_TRUE_PIN_CTLS{0x0000048D_u32};
+    /// @brief defines the MSR_VMX_TRUE_PROC_CTLS MSR
+    constexpr auto MSR_VMX_TRUE_PROC_CTLS{0x0000048E_u32};
+    /// @brief defines the MSR_VMX_TRUE_EXIT_CTLS MSR
+    constexpr auto MSR_VMX_TRUE_EXIT_CTLS{0x0000048F_u32};
+    /// @brief defines the MSR_VMX_TRUE_ENTRY_CTLS MSR
+    constexpr auto MSR_VMX_TRUE_ENTRY_CTLS{0x00000490_u32};
+    /// @brief defines the MSR_VMX_TRUE_PROC2_CTLS MSR
+    constexpr auto MSR_VMX_TRUE_PROC2_CTLS{0x0000048B_u32};
 
     /// @class mk::vs_t
     ///
@@ -88,6 +107,8 @@ namespace mk
         bsl::safe_u16 m_id{};
         /// @brief stores whether or not this vp_t is allocated.
         allocated_status_t m_allocated{};
+        /// @brief stores the status of the vs_t
+        running_status_t m_status{};
         /// @brief stores the ID of the VP this vs_t is assigned to
         bsl::safe_u16 m_assigned_vpid{};
         /// @brief stores the ID of the PP this vp_t is assigned to
@@ -103,6 +124,36 @@ namespace mk
         vmcs_missing_registers_t m_vmcs_missing_registers{};
         /// @brief stores the general purpose registers
         general_purpose_regs_t m_gprs{};
+
+        /// @brief stores the CR0 fixed0 values for sanitization
+        bsl::safe_u64 m_vmx_cr0_fixed0{};
+        /// @brief stores the CR0 fixed1 values for sanitization
+        bsl::safe_u64 m_vmx_cr0_fixed1{};
+        /// @brief stores the CR4 fixed0 values for sanitization
+        bsl::safe_u64 m_vmx_cr4_fixed0{};
+        /// @brief stores the CR4 fixed1 values for sanitization
+        bsl::safe_u64 m_vmx_cr4_fixed1{};
+
+        /// @brief stores the pin ctls fixed0 values for sanitization
+        bsl::safe_u64 m_vmx_pin_fixed0{};
+        /// @brief stores the pin ctls fixed1 values for sanitization
+        bsl::safe_u64 m_vmx_pin_fixed1{};
+        /// @brief stores the proc ctls fixed0 values for sanitization
+        bsl::safe_u64 m_vmx_proc_fixed0{};
+        /// @brief stores the proc ctls fixed1 values for sanitization
+        bsl::safe_u64 m_vmx_proc_fixed1{};
+        /// @brief stores the exit ctls fixed0 values for sanitization
+        bsl::safe_u64 m_vmx_exit_fixed0{};
+        /// @brief stores the exit ctls fixed1 values for sanitization
+        bsl::safe_u64 m_vmx_exit_fixed1{};
+        /// @brief stores the entry ctls fixed0 values for sanitization
+        bsl::safe_u64 m_vmx_entry_fixed0{};
+        /// @brief stores the entry ctls fixed1 values for sanitization
+        bsl::safe_u64 m_vmx_entry_fixed1{};
+        /// @brief stores the proc2 ctls fixed0 values for sanitization
+        bsl::safe_u64 m_vmx_proc2_fixed0{};
+        /// @brief stores the proc2 ctls fixed1 values for sanitization
+        bsl::safe_u64 m_vmx_proc2_fixed1{};
 
         /// <!-- description -->
         ///   @brief Returns the row color based on the value of "val"
@@ -252,45 +303,138 @@ namespace mk
         }
 
         /// <!-- description -->
-        ///   @brief Returns a sanitized version of the provided pinbased_ctls
+        ///   @brief Returns a sanitized version of the pin_ctls
         ///
         /// <!-- inputs/outputs -->
         ///   @param val the value to sanitize
-        ///   @return Returns a sanitized version of the provided pinbased_ctls
+        ///   @return Returns a sanitized version of the pin_ctls
         ///
-        [[nodiscard]] static constexpr auto
-        sanitize_pinbased_ctls(bsl::safe_u64 const &val) noexcept -> bsl::safe_u32
+        [[nodiscard]] constexpr auto
+        sanitize_pin_ctls(bsl::safe_u64 const &val) noexcept -> bsl::safe_u32
         {
-            constexpr auto vmcs_pinbased_ctls_mask{0x28_u64};
-            return bsl::to_u32(val | vmcs_pinbased_ctls_mask);
+            constexpr auto vmcs_pin_ctls_mask{0x28_u64};
+            auto mut_val{val | vmcs_pin_ctls_mask};
+
+            mut_val |= m_vmx_pin_fixed0;
+            mut_val &= m_vmx_pin_fixed1;
+            return bsl::to_u32(mut_val);
         }
 
         /// <!-- description -->
-        ///   @brief Returns a sanitized version of the provided exit_ctls
+        ///   @brief Returns a sanitized version of the proc_ctls
         ///
         /// <!-- inputs/outputs -->
         ///   @param val the value to sanitize
-        ///   @return Returns a sanitized version of the provided exit_ctls
+        ///   @return Returns a sanitized version of the proc_ctls
         ///
-        [[nodiscard]] static constexpr auto
+        [[nodiscard]] constexpr auto
+        sanitize_proc_ctls(bsl::safe_u64 const &val) noexcept -> bsl::safe_u32
+        {
+            constexpr auto vmcs_proc_ctls_mask{0x80000000_u64};
+            auto mut_val{val | vmcs_proc_ctls_mask};
+
+            mut_val |= m_vmx_proc_fixed0;
+            mut_val &= m_vmx_proc_fixed1;
+            return bsl::to_u32(mut_val);
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns a sanitized version of the exit_ctls
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param val the value to sanitize
+        ///   @return Returns a sanitized version of the exit_ctls
+        ///
+        [[nodiscard]] constexpr auto
         sanitize_exit_ctls(bsl::safe_u64 const &val) noexcept -> bsl::safe_u32
         {
             constexpr auto vmcs_exit_ctls_mask{0x3C0204_u64};
-            return bsl::to_u32(val | vmcs_exit_ctls_mask);
+            auto mut_val{val | vmcs_exit_ctls_mask};
+
+            mut_val |= m_vmx_exit_fixed0;
+            mut_val &= m_vmx_exit_fixed1;
+            return bsl::to_u32(mut_val);
         }
 
         /// <!-- description -->
-        ///   @brief Returns a sanitized version of the provided entry_ctls
+        ///   @brief Returns a sanitized version of the entry_ctls
         ///
         /// <!-- inputs/outputs -->
         ///   @param val the value to sanitize
-        ///   @return Returns a sanitized version of the provided entry_ctls
+        ///   @return Returns a sanitized version of the entry_ctls
         ///
-        [[nodiscard]] static constexpr auto
+        [[nodiscard]] constexpr auto
         sanitize_entry_ctls(bsl::safe_u64 const &val) noexcept -> bsl::safe_u32
         {
             constexpr auto vmcs_entry_ctls_mask{0xC004_u64};
-            return bsl::to_u32(val | vmcs_entry_ctls_mask);
+            auto mut_val{val | vmcs_entry_ctls_mask};
+
+            mut_val |= m_vmx_entry_fixed0;
+            mut_val &= m_vmx_entry_fixed1;
+            return bsl::to_u32(mut_val);
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns a sanitized version of the proc2_ctls
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param val the value to sanitize
+        ///   @return Returns a sanitized version of the proc2_ctls
+        ///
+        [[nodiscard]] constexpr auto
+        sanitize_proc2_ctls(bsl::safe_u64 const &val) noexcept -> bsl::safe_u32
+        {
+            constexpr auto vmcs_proc2_ctls_mask{0x0_u64};
+            auto mut_val{val | vmcs_proc2_ctls_mask};
+
+            mut_val |= m_vmx_proc2_fixed0;
+            mut_val &= m_vmx_proc2_fixed1;
+
+            constexpr auto pg_pe{0x80000001_u64};
+            constexpr auto unrestricted_guest_mode{0x00000080_u64};
+            if ((mut_val & unrestricted_guest_mode).is_pos()) {
+                m_vmx_cr0_fixed0 &= ~pg_pe;
+            }
+            else {
+                m_vmx_cr0_fixed0 |= pg_pe;
+            }
+
+            return bsl::to_u32(mut_val);
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns a sanitized version of CR4
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param val the value to sanitize
+        ///   @return Returns a sanitized version of CR4
+        ///
+        [[nodiscard]] constexpr auto
+        sanitize_cr0(bsl::safe_u64 const &val) noexcept -> bsl::safe_u64
+        {
+            auto mut_val{val};
+            mut_val |= m_vmx_cr0_fixed0;
+            mut_val &= m_vmx_cr0_fixed1;
+
+            return mut_val;
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns a sanitized version of CR4
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param val the value to sanitize
+        ///   @return Returns a sanitized version of CR4
+        ///
+        [[nodiscard]] constexpr auto
+        sanitize_cr4(bsl::safe_u64 const &val) noexcept -> bsl::safe_u64
+        {
+            auto mut_val{val};
+            mut_val |= m_vmx_cr4_fixed0;
+            mut_val &= m_vmx_cr4_fixed1;
+
+            constexpr auto vmxe_mask{0x2000_u64};
+            return mut_val | vmxe_mask;
         }
 
         /// <!-- description -->
@@ -304,6 +448,7 @@ namespace mk
         ensure_this_vs_is_loaded(tls_t &mut_tls, intrinsic_t const &intrinsic) const noexcept
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(mut_tls.ppid == this->assigned_pp());
 
             if (this->id() == mut_tls.loaded_vsid) {
@@ -328,6 +473,8 @@ namespace mk
         constexpr void
         init_vmcs(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept
         {
+            bsl::safe_u64 mut_ctls{};
+
             auto const revision_id{mut_intrinsic.rdmsr(MSR_VMX_BASIC)};
             bsl::expects(revision_id.is_valid_and_checked());
 
@@ -392,6 +539,51 @@ namespace mk
                 mut_intrinsic.rdmsr(MSR_FMASK).get();             // --
             m_vmcs_missing_registers.host_kernel_gs_base =        // --
                 mut_intrinsic.rdmsr(MSR_KERNEL_GS_BASE).get();    // --
+
+            m_vmx_cr0_fixed0 = mut_intrinsic.rdmsr(MSR_VMX_CR0_FIXED0);
+            m_vmx_cr0_fixed1 = mut_intrinsic.rdmsr(MSR_VMX_CR0_FIXED1);
+            m_vmx_cr4_fixed0 = mut_intrinsic.rdmsr(MSR_VMX_CR4_FIXED0);
+            m_vmx_cr4_fixed1 = mut_intrinsic.rdmsr(MSR_VMX_CR4_FIXED1);
+
+            bsl::expects(m_vmx_cr0_fixed0.is_valid_and_checked());
+            bsl::expects(m_vmx_cr0_fixed1.is_valid_and_checked());
+            bsl::expects(m_vmx_cr4_fixed0.is_valid_and_checked());
+            bsl::expects(m_vmx_cr4_fixed1.is_valid_and_checked());
+
+            constexpr auto fixed0_mask{0x00000000FFFFFFFF_u64};
+            constexpr auto fixed0_shft{0_u64};
+            constexpr auto fixed1_mask{0xFFFFFFFF00000000_u64};
+            constexpr auto fixed1_shft{32_u64};
+
+            mut_ctls = mut_intrinsic.rdmsr(MSR_VMX_TRUE_PIN_CTLS);
+            m_vmx_pin_fixed0 = (mut_ctls & fixed0_mask) >> fixed0_shft;
+            m_vmx_pin_fixed1 = (mut_ctls & fixed1_mask) >> fixed1_shft;
+            bsl::expects(m_vmx_pin_fixed0.is_valid_and_checked());
+            bsl::expects(m_vmx_pin_fixed1.is_valid_and_checked());
+
+            mut_ctls = mut_intrinsic.rdmsr(MSR_VMX_TRUE_PROC_CTLS);
+            m_vmx_proc_fixed0 = (mut_ctls & fixed0_mask) >> fixed0_shft;
+            m_vmx_proc_fixed1 = (mut_ctls & fixed1_mask) >> fixed1_shft;
+            bsl::expects(m_vmx_proc_fixed0.is_valid_and_checked());
+            bsl::expects(m_vmx_proc_fixed1.is_valid_and_checked());
+
+            mut_ctls = mut_intrinsic.rdmsr(MSR_VMX_TRUE_EXIT_CTLS);
+            m_vmx_exit_fixed0 = (mut_ctls & fixed0_mask) >> fixed0_shft;
+            m_vmx_exit_fixed1 = (mut_ctls & fixed1_mask) >> fixed1_shft;
+            bsl::expects(m_vmx_exit_fixed0.is_valid_and_checked());
+            bsl::expects(m_vmx_exit_fixed1.is_valid_and_checked());
+
+            mut_ctls = mut_intrinsic.rdmsr(MSR_VMX_TRUE_ENTRY_CTLS);
+            m_vmx_entry_fixed0 = (mut_ctls & fixed0_mask) >> fixed0_shft;
+            m_vmx_entry_fixed1 = (mut_ctls & fixed1_mask) >> fixed1_shft;
+            bsl::expects(m_vmx_entry_fixed0.is_valid_and_checked());
+            bsl::expects(m_vmx_entry_fixed1.is_valid_and_checked());
+
+            mut_ctls = mut_intrinsic.rdmsr(MSR_VMX_TRUE_PROC2_CTLS);
+            m_vmx_proc2_fixed0 = (mut_ctls & fixed0_mask) >> fixed0_shft;
+            m_vmx_proc2_fixed1 = (mut_ctls & fixed1_mask) >> fixed1_shft;
+            bsl::expects(m_vmx_proc2_fixed0.is_valid_and_checked());
+            bsl::expects(m_vmx_proc2_fixed1.is_valid_and_checked());
         }
 
     public:
@@ -460,6 +652,7 @@ namespace mk
         {
             bsl::expects(this->id() != syscall::BF_INVALID_ID);
             bsl::expects(allocated_status_t::deallocated == m_allocated);
+            bsl::expects(running_status_t::initial == m_status);
 
             bsl::expects(vpid.is_valid_and_checked());
             bsl::expects(vpid != syscall::BF_INVALID_ID);
@@ -493,6 +686,7 @@ namespace mk
         constexpr void
         deallocate(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept
         {
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(this->is_active().is_invalid());
 
             m_gprs = {};
@@ -502,8 +696,9 @@ namespace mk
             m_vmcs = {};
             m_vmcs_phys = {};
 
-            m_assigned_ppid = syscall::BF_INVALID_ID;
-            m_assigned_vpid = syscall::BF_INVALID_ID;
+            m_assigned_ppid = {};
+            m_assigned_vpid = {};
+            m_status = running_status_t::initial;
             m_allocated = allocated_status_t::deallocated;
         }
 
@@ -542,6 +737,7 @@ namespace mk
         set_active(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(syscall::BF_INVALID_ID == mut_tls.active_vsid);
 
             mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RAX, bsl::to_u64(m_gprs.rax));
@@ -575,6 +771,7 @@ namespace mk
         set_inactive(tls_t &mut_tls, intrinsic_t const &intrinsic) noexcept
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
+            bsl::expects(running_status_t::running != m_status);
             bsl::expects(this->id() == mut_tls.active_vsid);
 
             m_gprs.rax = intrinsic.tls_reg(syscall::TLS_OFFSET_RAX).get();
@@ -634,19 +831,26 @@ namespace mk
         ///   @brief Migrates this vs_t from one PP to another
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsic_t to use
         ///   @param ppid the ID of the PP to migrate to
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
         ///
-        constexpr void
-        migrate(tls_t &mut_tls, intrinsic_t const &intrinsic, bsl::safe_u16 const &ppid) noexcept
+        [[nodiscard]] constexpr auto
+        migrate(intrinsic_t const &intrinsic, bsl::safe_u16 const &ppid) noexcept -> bsl::errc_type
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
             bsl::expects(ppid.is_valid_and_checked());
             bsl::expects(ppid != syscall::BF_INVALID_ID);
 
-            this->clear(mut_tls, intrinsic);
+            auto const ret{this->clear(intrinsic)};
+            if (bsl::unlikely(!ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return ret;
+            }
+
             m_assigned_ppid = ~ppid;
+            return ret;
         }
 
         /// <!-- description -->
@@ -836,11 +1040,11 @@ namespace mk
                 VMCS_GUEST_TR_BASE,
                 bsl::to_u64(state->tr_base));
 
-            auto const cr0{bsl::to_u64(state->cr0)};
+            auto const cr0{bsl::to_u64(this->sanitize_cr0(bsl::to_u64(state->cr0)))};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_CR0, cr0));
             auto const cr3{bsl::to_u64(state->cr3)};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_CR3, cr3));
-            auto const cr4{bsl::to_u64(state->cr4)};
+            auto const cr4{bsl::to_u64(this->sanitize_cr4(bsl::to_u64(state->cr4)))};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_CR4, cr4));
             auto const dr7{bsl::to_u64(state->dr7)};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_DR7, dr7));
@@ -2403,13 +2607,13 @@ namespace mk
 
                 case syscall::bf_reg_t::bf_reg_t_pin_based_vm_execution_ctls: {
                     mut_ret = mut_intrinsic.vmwr32(
-                        VMCS_PIN_BASED_VM_EXECUTION_CTLS, sanitize_pinbased_ctls(val));
+                        VMCS_PIN_BASED_VM_EXECUTION_CTLS, sanitize_pin_ctls(val));
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls: {
                     mut_ret = mut_intrinsic.vmwr32(
-                        VMCS_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS, bsl::to_u32(val));
+                        VMCS_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS, sanitize_proc_ctls(val));
                     break;
                 }
 
@@ -2485,7 +2689,7 @@ namespace mk
 
                 case syscall::bf_reg_t::bf_reg_t_secondary_proc_based_vm_execution_ctls: {
                     mut_ret = mut_intrinsic.vmwr32(
-                        VMCS_SECONDARY_PROC_BASED_VM_EXECUTION_CTLS, bsl::to_u32(val));
+                        VMCS_SECONDARY_PROC_BASED_VM_EXECUTION_CTLS, sanitize_proc2_ctls(val));
                     break;
                 }
 
@@ -2732,7 +2936,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr0: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CR0, bsl::to_u64(val));
+                    auto const sanitized{this->sanitize_cr0(bsl::to_u64(val))};
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CR0, sanitized);
                     break;
                 }
 
@@ -2742,7 +2947,8 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr4: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CR4, bsl::to_u64(val));
+                    auto const sanitized{this->sanitize_cr4(bsl::to_u64(val))};
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CR4, sanitized);
                     break;
                 }
 
@@ -2860,15 +3066,9 @@ namespace mk
             constexpr auto invalid_exit_reason{0xFFFFFFFF00000000_umx};
             this->ensure_this_vs_is_loaded(mut_tls, mut_intrinsic);
 
-            bsl::safe_umx const exit_reason{intrinsic_vmrun(&m_vmcs_missing_registers)};
-            if (bsl::unlikely(exit_reason > invalid_exit_reason)) {
-                bsl::error() << "vmlaunch/vmresume failed with error code "    // --
-                             << (exit_reason & (~invalid_exit_reason))         // --
-                             << bsl::endl                                      // --
-                             << bsl::here();                                   // --
-
-                return bsl::safe_umx::failure();
-            }
+            m_status = running_status_t::running;
+            bsl::safe_umx mut_exit_reason{intrinsic_vmrun(&m_vmcs_missing_registers)};
+            m_status = running_status_t::handling_vmexit;
 
             if constexpr (BSL_DEBUG_LEVEL >= bsl::VV) {
                 mut_log.add(
@@ -2876,7 +3076,7 @@ namespace mk
                     {bsl::to_u16(mut_tls.active_vmid),
                      bsl::to_u16(mut_tls.active_vpid),
                      bsl::to_u16(mut_tls.active_vsid),
-                     exit_reason,
+                     mut_exit_reason,
                      mut_intrinsic.vmrd64(VMCS_EXIT_QUALIFICATION),
                      mut_intrinsic.vmrd64(VMCS_VMEXIT_INSTRUCTION_INFORMATION),
                      {},
@@ -2899,12 +3099,14 @@ namespace mk
                      mut_intrinsic.vmrd64(VMCS_GUEST_RIP)});
             }
 
-            /// TODO:
-            /// - Add check logic to if an entry failure occurs and output
-            ///   what the error was and why.
-            ///
+            if (bsl::unlikely(mut_exit_reason > invalid_exit_reason)) {
+                mut_exit_reason &= (~invalid_exit_reason);
+            }
+            else {
+                bsl::touch();
+            }
 
-            return exit_reason;
+            return mut_exit_reason;
         }
 
         /// <!-- description -->
@@ -2935,18 +3137,30 @@ namespace mk
         ///     values stored in the vs_t.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsic_t to use
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
         ///
-        constexpr void
-        clear(tls_t &mut_tls, intrinsic_t const &intrinsic) noexcept
+        [[nodiscard]] constexpr auto
+        clear(intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
         {
-            this->ensure_this_vs_is_loaded(mut_tls, intrinsic);
+            bsl::discard(intrinsic);
+            bsl::expects(allocated_status_t::allocated == m_allocated);
+
+            if (bsl::unlikely(running_status_t::running == m_status)) {
+                bsl::error() << "vs "                                                 // --
+                             << bsl::hex(this->id())                                  // --
+                             << " is still running and cannot be cleared/migrated"    // --
+                             << bsl::endl                                             // --
+                             << bsl::here();                                          // --
+
+                return bsl::errc_failure;
+            }
 
             bsl::expects(intrinsic.vmcl(&m_vmcs_phys));
-            bsl::expects(intrinsic.vmld(&m_vmcs_phys));
-
             m_vmcs_missing_registers.launched = {};
+
+            return bsl::errc_success;
         }
 
         /// <!-- description -->
@@ -3007,13 +3221,13 @@ namespace mk
             ///
 
             bsl::print() << bsl::ylw << "| ";
-            bsl::print() << bsl::rst << bsl::fmt{"<40s", "assigned vs "};
+            bsl::print() << bsl::rst << bsl::fmt{"<40s", "assigned vp "};
             bsl::print() << bsl::ylw << "| ";
-            if (m_assigned_vpid != syscall::BF_INVALID_ID) {
-                bsl::print() << bsl::grn << "      " << bsl::hex(m_assigned_vpid) << "       ";
+            if (this->assigned_vp() != syscall::BF_INVALID_ID) {
+                bsl::print() << bsl::grn << "      " << bsl::hex(this->assigned_vp()) << "       ";
             }
             else {
-                bsl::print() << bsl::red << "      " << bsl::hex(m_assigned_vpid) << "       ";
+                bsl::print() << bsl::red << "      " << bsl::hex(this->assigned_vp()) << "       ";
             }
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;
@@ -3024,11 +3238,11 @@ namespace mk
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<40s", "assigned pp "};
             bsl::print() << bsl::ylw << "| ";
-            if (m_assigned_ppid != syscall::BF_INVALID_ID) {
-                bsl::print() << bsl::grn << "      " << bsl::hex(m_assigned_ppid) << "       ";
+            if (this->assigned_pp() != syscall::BF_INVALID_ID) {
+                bsl::print() << bsl::grn << "      " << bsl::hex(this->assigned_pp()) << "       ";
             }
             else {
-                bsl::print() << bsl::red << "      " << bsl::hex(m_assigned_ppid) << "       ";
+                bsl::print() << bsl::red << "      " << bsl::hex(this->assigned_pp()) << "       ";
             }
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;

@@ -722,7 +722,7 @@ namespace syscall
         ///     given an ID.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param vmid The VMID of the VM to destroy
+        ///   @param vmid The ID of the VM to destroy
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
@@ -756,7 +756,7 @@ namespace syscall
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of pointer to return. Must be a POD type and
         ///     the size of a page.
-        ///   @param vmid The VMID of the VM to map the physical address to
+        ///   @param vmid The ID of the VM to map the physical address to
         ///   @param phys The physical address to map
         ///   @return Returns a pointer to the map on success, returns a
         ///     nullptr on failure.
@@ -810,7 +810,7 @@ namespace syscall
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of pointer to return. Must be a POD type and
         ///     the size of a page.
-        ///   @param vmid The VMID of the VM to unmap the virtual address from
+        ///   @param vmid The ID of the VM to unmap the virtual address from
         ///   @param pudm_virt The virtual address to unmap
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
@@ -863,7 +863,7 @@ namespace syscall
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of pointer to return. Must be a POD type and
         ///     the size of a page.
-        ///   @param vmid The VMID of the VM to unmap the virtual address from
+        ///   @param vmid The ID of the VM to unmap the virtual address from
         ///   @param pmut_virt The virtual address to unmap
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
@@ -916,26 +916,21 @@ namespace syscall
         ///
         /// <!-- inputs/outputs -->
         ///   @param vmid The ID of the VM to assign the newly created VP to
-        ///   @param ppid The ID of the PP to assign the newly created VP to
         ///   @return Returns the resulting ID, or bsl::safe_u16::failure()
         ///     on failure.
         ///
         ///
         [[nodiscard]] constexpr auto
-        bf_vp_op_create_vp(bsl::safe_u16 const &vmid, bsl::safe_u16 const &ppid) noexcept
-            -> bsl::safe_u16
+        bf_vp_op_create_vp(bsl::safe_u16 const &vmid) noexcept -> bsl::safe_u16
         {
             bsl::expects(vmid.is_valid_and_checked());
             bsl::expects(vmid != BF_INVALID_ID);
             bsl::expects(bsl::to_umx(vmid) < HYPERVISOR_MAX_VMS);
-            bsl::expects(ppid.is_valid_and_checked());
-            bsl::expects(ppid != BF_INVALID_ID);
-            bsl::expects(bsl::to_umx(ppid) < HYPERVISOR_MAX_PPS);
 
             bsl::safe_u16 mut_vpid{};
 
             bf_status_t const ret{
-                bf_vp_op_create_vp_impl(m_hndl.get(), vmid.get(), ppid.get(), mut_vpid.data())};
+                bf_vp_op_create_vp_impl(m_hndl.get(), vmid.get(), mut_vpid.data())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_vp_op_create_vp failed with status "    // --
                              << bsl::hex(ret)                               // --
@@ -972,7 +967,7 @@ namespace syscall
         ///     given an ID.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param vpid The VPID of the VP to destroy
+        ///   @param vpid The ID of the VP to destroy
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
@@ -988,73 +983,6 @@ namespace syscall
                 bsl::error() << "bf_vp_op_destroy_vp failed with status "    // --
                              << bsl::hex(ret)                                // --
                              << bsl::endl                                    // --
-                             << bsl::here();
-
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief This syscall tells the microkernel to migrate a VP from one PP
-        ///     to another PP. This function does not execute the VP (use
-        ///     bf_vs_op_run for that), but instead allows bf_vs_op_run to
-        ///     execute a VP on a PP that it was not originally assigned to.
-        ///
-        ///     When a VP is migrated, all of the VSs that are assigned to the
-        ///     requested VP are also migrated to this new PP as well. From an
-        ///     AMD/Intel point of view, this clears the VMCS/VMCB for each VS
-        ///     assigned to the VP. On Intel, it also loads the newly cleared VS
-        ///     and sets the launched state to false, ensuring the next
-        ///     bf_vs_op_run will use VMLaunch instead of VMResume.
-        ///
-        ///     It should be noted that the migration of a VS from one PP to
-        ///     another does not happen during the execution of this ABI. This
-        ///     ABI simply tells the microkernel that the requested VP may now
-        ///     execute on the requested PP. This will cause a mismatch between
-        ///     the assigned PP for a VP and the assigned PP for a VS. The
-        ///     microkernel will detect this mismatch when an extension attempts
-        ///     to execute bf_vs_op_run. When this occurs, the microkernel will
-        ///     ensure the VP is being run on the PP it was assigned to during
-        ///     migration, and then it will check to see if the PP of the VS
-        ///     matches. If it doesn't, it will then perform a migration of that
-        ///     VS at that time. This ensures that the microkernel is only
-        ///     migrations VSs when it needs to, and it ensures the VS is
-        ///     cleared an loaded (in the case of Intel) on the PP it will be
-        ///     executed on, which is a requirement for VMCS migration. An
-        ///     extension can determine which VSs have been migrated by looking
-        ///     at the assigned PP of a VS. If it doesn't match the VP it was
-        ///     assigned to, it has not been migrated. Finally, an extension is
-        ///     free to read/write to the VSs state, even if it has not been
-        ///     migrated. The only requirement for migration is execution (meaning
-        ///     VMRun/VMLaunch/VMResume).
-        ///
-        ///     Any additional migration responsibilities, like TSC
-        ///     synchronization, must be performed by the extension.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpid The VPID of the VP to migrate
-        ///   @param ppid The ID of the PP to assign the provided VP to
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        bf_vp_op_migrate(bsl::safe_u16 const &vpid, bsl::safe_u16 const &ppid) noexcept
-            -> bsl::errc_type
-        {
-            bsl::expects(vpid.is_valid_and_checked());
-            bsl::expects(vpid != BF_INVALID_ID);
-            bsl::expects(bsl::to_umx(vpid) < HYPERVISOR_MAX_VPS);
-            bsl::expects(ppid.is_valid_and_checked());
-            bsl::expects(ppid != BF_INVALID_ID);
-            bsl::expects(bsl::to_umx(ppid) < HYPERVISOR_MAX_PPS);
-
-            bf_status_t const ret{bf_vp_op_migrate_impl(m_hndl.get(), vpid.get(), ppid.get())};
-            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vp_op_migrate failed with status "    // --
-                             << bsl::hex(ret)                             // --
-                             << bsl::endl                                 // --
                              << bsl::here();
 
                 return bsl::errc_failure;
@@ -1129,7 +1057,7 @@ namespace syscall
         ///     given an ID.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param vsid The VSID of the VS to destroy
+        ///   @param vsid The ID of the VS to destroy
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
@@ -1158,7 +1086,7 @@ namespace syscall
         ///     the root VP state provided by the loader using the current PPID.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param vsid The VSID of the VS to initialize
+        ///   @param vsid The ID of the VS to initialize
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
@@ -1187,7 +1115,7 @@ namespace syscall
         ///     that the bf_reg_t is architecture specific.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param vsid The VSID of the VS to read from
+        ///   @param vsid The ID of the VS to read from
         ///   @param reg A bf_reg_t defining which register to read
         ///   @return Returns the value read, or bsl::safe_u64::failure()
         ///     on failure.
@@ -1222,7 +1150,7 @@ namespace syscall
         ///     value to write. Note that the bf_reg_t is architecture specific.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param vsid The VSID of the VS to write to
+        ///   @param vsid The ID of the VS to write to
         ///   @param reg A bf_reg_t defining which register to write to
         ///   @param value The value to write to the requested register
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
@@ -1254,48 +1182,12 @@ namespace syscall
         }
 
         /// <!-- description -->
-        ///   @brief bf_vs_op_run tells the microkernel to execute a given VS on
-        ///     behalf of a given VP and VM. This system call only returns if an
-        ///     error occurs. On success, this system call will physically execute
-        ///     the requested VM and VP using the requested VS, and the extension
-        ///     will only execute again on the next VMExit.
-        ///
-        ///     Unless an extension needs to change the active VM, VP or VS, the
-        ///     extension should use bf_vs_op_run_current instead of
-        ///     bf_vs_op_run. bf_vs_op_run is slow as it must perform a series of
-        ///     checks to determine if it has any work to perform before execution
-        ///     of a VM can occur.
-        ///
-        ///     Unlike bf_vs_op_run_current which is really just a return to
-        ///     microkernel execution, bf_vs_op_run must perform the following
-        ///     operations:
-        ///     - It first verifies that the provided VM, VP and VS are all
-        ///       created. Meaning, and extension must first use the create ABI
-        ///       to properly create a VM, VP and VS before it may be used.
-        ///     - Next, it must ensure VM, VP and VS assignment is correct. A
-        ///       newly created VP and VS are unassigned. Once bf_vs_op_run is
-        ///       executed, the VP is assigned to the provided VM and the VS is
-        ///       assigned to the provided VP. The VP and VS are also both
-        ///       assigned to the PP bf_vs_op_run is executed on. Once these
-        ///       assignments take place, an extension cannot change them, and any
-        ///       attempt to run a VP or VS on a VM, VP or PP they are not
-        ///       assigned to will fail. It is impossible to change the assigned of
-        ///       a VM or VP, but an extension can change the assignment of a VP
-        ///       and VSs PP by using the bf_vp_op_migrate function.
-        ///     - Next, bf_vs_op_run must determine if it needs to migrate a VS
-        ///       to the PP the VS is being executed on by bf_vs_op_run. For more
-        ///       information about how this works, please see bf_vp_op_migrate.
-        ///     - Finally, bf_vs_op_run must ensure the active VM, VP and VS are
-        ///       set to the VM, VP and VS provided to this ABI. Any changes in
-        ///       the active state could cause additional operations to take place.
-        ///       For example, the VS must transfer the TLS state of the general
-        ///       purpose registers to its internal cache so that the VS that is
-        ///       about to become active can use the TLS block instead.
+        ///   @brief TODO
         ///
         /// <!-- inputs/outputs -->
-        ///   @param vmid The VMID of the VM to run
-        ///   @param vpid The VPID of the VP to run
-        ///   @param vsid The VSID of the VS to run
+        ///   @param vmid The ID of the VM to run
+        ///   @param vpid The ID of the VP to run
+        ///   @param vsid The ID of the VS to run
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
@@ -1354,26 +1246,37 @@ namespace syscall
         }
 
         /// <!-- description -->
-        ///   @brief This syscall tells the microkernel to advance the instruction
-        ///     pointer in the requested VS.
+        ///   @brief TODO
         ///
         /// <!-- inputs/outputs -->
-        ///   @param vsid The VSID of the VS advance the IP in
+        ///   @param vmid The ID of the VM to advance the IP for
+        ///   @param vpid The ID of the VP to advance the IP for
+        ///   @param vsid The ID of the VS to advance the IP for
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_vs_op_advance_ip(bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
+        bf_vs_op_advance_ip_and_run(
+            bsl::safe_u16 const &vmid,
+            bsl::safe_u16 const &vpid,
+            bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
         {
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(vmid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vmid) < HYPERVISOR_MAX_VMS);
+            bsl::expects(vpid.is_valid_and_checked());
+            bsl::expects(vpid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vpid) < HYPERVISOR_MAX_VPS);
             bsl::expects(vsid.is_valid_and_checked());
             bsl::expects(vsid != BF_INVALID_ID);
             bsl::expects(bsl::to_umx(vsid) < HYPERVISOR_MAX_VSS);
 
-            bf_status_t const ret{bf_vs_op_advance_ip_impl(m_hndl.get(), vsid.get())};
+            bf_status_t const ret{
+                bf_vs_op_advance_ip_and_run_impl(m_hndl.get(), vmid.get(), vpid.get(), vsid.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vs_op_advance_ip failed with status "    // --
-                             << bsl::hex(ret)                                // --
-                             << bsl::endl                                    // --
+                bsl::error() << "bf_vs_op_advance_ip_and_run failed with status "    // --
+                             << bsl::hex(ret)                                        // --
+                             << bsl::endl                                            // --
                              << bsl::here();
 
                 return bsl::errc_failure;
@@ -1383,10 +1286,7 @@ namespace syscall
         }
 
         /// <!-- description -->
-        ///   @brief This syscall tells the microkernel to advance the instruction
-        ///     pointer in the currently active VS and run the currently active
-        ///     VS, VP and VM (i.e., this combines bf_vs_op_advance_ip and
-        ///     bf_vs_op_advance_ip).
+        ///   @brief TODO
         ///
         /// <!-- inputs/outputs -->
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
@@ -1416,7 +1316,7 @@ namespace syscall
         ///     on error.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param vsid The VSID of the VS to promote
+        ///   @param vsid The ID of the VS to promote
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
@@ -1441,7 +1341,7 @@ namespace syscall
         }
 
         /// <!-- description -->
-        ///   @brief bf_vs_op_clear_vs tells the microkernel to clear the VS's
+        ///   @brief bf_vs_op_clear tells the microkernel to clear the VS's
         ///     hardware cache, if one exists. How this is used depends entirely
         ///     on the hardware and is associated with AMD's VMCB Clean Bits,
         ///     and Intel's VMClear instruction. See the associated documentation
@@ -1450,22 +1350,135 @@ namespace syscall
         ///     VMCB.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param vsid The VSID of the VS to clear
+        ///   @param vsid The ID of the VS to clear
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
         [[nodiscard]] constexpr auto
-        bf_vs_op_clear_vs(bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
+        bf_vs_op_clear(bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
         {
             bsl::expects(vsid.is_valid_and_checked());
             bsl::expects(vsid != BF_INVALID_ID);
             bsl::expects(bsl::to_umx(vsid) < HYPERVISOR_MAX_VSS);
 
-            bf_status_t const ret{bf_vs_op_clear_vs_impl(m_hndl.get(), vsid.get())};
+            bf_status_t const ret{bf_vs_op_clear_impl(m_hndl.get(), vsid.get())};
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_vs_op_clear_vs failed with status "    // --
-                             << bsl::hex(ret)                              // --
-                             << bsl::endl                                  // --
+                bsl::error() << "bf_vs_op_clear failed with status "    // --
+                             << bsl::hex(ret)                           // --
+                             << bsl::endl                               // --
+                             << bsl::here();
+
+                return bsl::errc_failure;
+            }
+
+            return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief TODO
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vsid The ID of the VS to migrate
+        ///   @param ppid The ID of the PP to migrate the VS to
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        bf_vs_op_migrate(bsl::safe_u16 const &vsid, bsl::safe_u16 const &ppid) noexcept
+            -> bsl::errc_type
+        {
+            bsl::expects(vsid.is_valid_and_checked());
+            bsl::expects(vsid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vsid) < HYPERVISOR_MAX_VSS);
+            bsl::expects(ppid.is_valid_and_checked());
+            bsl::expects(ppid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(ppid) < HYPERVISOR_MAX_PPS);
+
+            bf_status_t const ret{bf_vs_op_migrate_impl(m_hndl.get(), vsid.get(), ppid.get())};
+            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
+                bsl::error() << "bf_vs_op_migrate failed with status "    // --
+                             << bsl::hex(ret)                             // --
+                             << bsl::endl                                 // --
+                             << bsl::here();
+
+                return bsl::errc_failure;
+            }
+
+            return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief TODO
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vmid The ID of the VM to run
+        ///   @param vpid The ID of the VP to run
+        ///   @param vsid The ID of the VS to run
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        bf_vs_op_set_active(
+            bsl::safe_u16 const &vmid,
+            bsl::safe_u16 const &vpid,
+            bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
+        {
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(vmid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vmid) < HYPERVISOR_MAX_VMS);
+            bsl::expects(vpid.is_valid_and_checked());
+            bsl::expects(vpid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vpid) < HYPERVISOR_MAX_VPS);
+            bsl::expects(vsid.is_valid_and_checked());
+            bsl::expects(vsid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vsid) < HYPERVISOR_MAX_VSS);
+
+            bf_status_t const ret{
+                bf_vs_op_set_active_impl(m_hndl.get(), vmid.get(), vpid.get(), vsid.get())};
+            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
+                bsl::error() << "bf_vs_op_set_active failed with status "    // --
+                             << bsl::hex(ret)                                // --
+                             << bsl::endl                                    // --
+                             << bsl::here();
+
+                return bsl::errc_failure;
+            }
+
+            return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief TODO
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vmid The ID of the VM to run
+        ///   @param vpid The ID of the VP to run
+        ///   @param vsid The ID of the VS to run
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        bf_vs_op_advance_ip_and_set_active(
+            bsl::safe_u16 const &vmid,
+            bsl::safe_u16 const &vpid,
+            bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
+        {
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(vmid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vmid) < HYPERVISOR_MAX_VMS);
+            bsl::expects(vpid.is_valid_and_checked());
+            bsl::expects(vpid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vpid) < HYPERVISOR_MAX_VPS);
+            bsl::expects(vsid.is_valid_and_checked());
+            bsl::expects(vsid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vsid) < HYPERVISOR_MAX_VSS);
+
+            bf_status_t const ret{bf_vs_op_advance_ip_and_set_active_impl(
+                m_hndl.get(), vmid.get(), vpid.get(), vsid.get())};
+            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
+                bsl::error() << "bf_vs_op_advance_ip_and_set_active failed with status "    // --
+                             << bsl::hex(ret)                                               // --
+                             << bsl::endl                                                   // --
                              << bsl::here();
 
                 return bsl::errc_failure;
@@ -1677,6 +1690,7 @@ namespace syscall
 
             bf_status_t const ret{bf_mem_op_alloc_huge_impl(
                 m_hndl.get(), size.get(), &pmut_mut_ptr, mut_phys.data())};
+
             if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
                 bsl::error() << "bf_mem_op_alloc_huge failed with status "    // --
                              << bsl::hex(ret)                                 // --

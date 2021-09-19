@@ -57,14 +57,10 @@ namespace mk
         ext_t &mut_ext,
         vmexit_log_t &mut_log) noexcept -> bsl::errc_type
     {
-        auto mut_exit_reason{
+        auto const exit_reason{
             mut_vs_pool.run(mut_tls, mut_intrinsic, mut_log, bsl::to_u16(mut_tls.active_vsid))};
-        if (bsl::unlikely(mut_exit_reason.is_invalid())) {
-            bsl::print<bsl::V>() << bsl::here();
-            return bsl::errc_failure;
-        }
 
-        auto const ret{mut_ext.vmexit(mut_tls, mut_intrinsic, mut_exit_reason)};
+        auto const ret{mut_ext.vmexit(mut_tls, mut_intrinsic, exit_reason)};
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;

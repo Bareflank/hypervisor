@@ -25,6 +25,7 @@
 #ifndef DISPATCH_VMEXIT_HPP
 #define DISPATCH_VMEXIT_HPP
 
+#include <bf_debug_ops.hpp>
 #include <bf_syscall_t.hpp>
 #include <dispatch_vmexit_cpuid.hpp>
 #include <dispatch_vmexit_nmi.hpp>
@@ -94,10 +95,9 @@ namespace example
             }
         }
 
-        bsl::error() << "unsupported vmexit "    // --
-                     << bsl::hex(exit_reason)    // --
-                     << bsl::endl                // --
-                     << bsl::here();             // --
+        bsl::error() << "unsupported vmexit: " << bsl::hex(exit_reason) << bsl::endl;
+        syscall::bf_debug_op_dump_vs(vsid);
+        bsl::print() << bsl::here();
 
         return bsl::errc_failure;
     }

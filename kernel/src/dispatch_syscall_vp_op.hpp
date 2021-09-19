@@ -58,13 +58,7 @@ namespace mk
             return syscall::BF_STATUS_INVALID_INPUT_REG1;
         }
 
-        auto const ppid{get_ppid(mut_tls, mut_tls.ext_reg2)};
-        if (bsl::unlikely(ppid.is_invalid())) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::BF_STATUS_INVALID_INPUT_REG2;
-        }
-
-        auto const vpid{mut_vp_pool.allocate(mut_tls, vmid, ppid)};
+        auto const vpid{mut_vp_pool.allocate(mut_tls, vmid)};
         if (bsl::unlikely(vpid.is_invalid())) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::BF_STATUS_FAILURE_UNKNOWN;
@@ -101,39 +95,6 @@ namespace mk
         }
 
         mut_vp_pool.deallocate(mut_tls, vpid);
-        return syscall::BF_STATUS_SUCCESS;
-    }
-
-    /// <!-- description -->
-    ///   @brief Implements the bf_vp_op_migrate syscall
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param tls the current TLS block
-    ///   @param mut_vp_pool the vp_pool_t to use
-    ///   @return Returns a bf_status_t containing success or failure
-    ///
-    [[nodiscard]] constexpr auto
-    syscall_vp_op_migrate(tls_t const &tls, vp_pool_t &mut_vp_pool) noexcept -> syscall::bf_status_t
-    {
-        auto const vpid{get_allocated_vpid(tls.ext_reg1, mut_vp_pool)};
-        if (bsl::unlikely(vpid.is_invalid())) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::BF_STATUS_INVALID_INPUT_REG1;
-        }
-
-        auto const ppid{get_ppid(tls, tls.ext_reg2)};
-        if (bsl::unlikely(ppid.is_invalid())) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::BF_STATUS_INVALID_INPUT_REG2;
-        }
-
-        bool const vp_migratable{is_vp_migratable(mut_vp_pool, ppid, vpid)};
-        if (bsl::unlikely(!vp_migratable)) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::BF_STATUS_FAILURE_UNKNOWN;
-        }
-
-        mut_vp_pool.migrate(ppid, vpid);
         return syscall::BF_STATUS_SUCCESS;
     }
 
@@ -177,16 +138,6 @@ namespace mk
 
             case syscall::BF_VP_OP_DESTROY_VP_IDX_VAL.get(): {
                 auto const ret{syscall_vp_op_destroy_vp(mut_tls, mut_vp_pool, vs_pool)};
-                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                return ret;
-            }
-
-            case syscall::BF_VP_OP_MIGRATE_IDX_VAL.get(): {
-                auto const ret{syscall_vp_op_migrate(mut_tls, mut_vp_pool)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
