@@ -37,12 +37,12 @@
 #define CR4_VMXE (((uint64_t)1) << ((uint64_t)13))
 
 /** @brief defines the MSR address for VMX information */
-#define MSR_IA32_VMX_BASIC ((uint32_t)0x480)
+#define MSR_VMX_BASIC ((uint32_t)0x480)
 /** @brief defines the VMX revision ID */
 #define VMX_BASIC_REVISION_ID ((uint64_t)0x000000007FFFFFFF)
 
 /** @brief defines the MSR address for VMX information */
-#define MSR_IA32_FEATURE_CONTROL ((uint32_t)0x3A)
+#define MSR_FEATURE_CONTROL ((uint32_t)0x3A)
 
 /**
  * <!-- description -->
@@ -71,7 +71,7 @@ enable_hve(struct state_save_t *const state)
         return LOADER_FAILURE;
     }
 
-    revision_id = intrinsic_rdmsr(MSR_IA32_VMX_BASIC) & VMX_BASIC_REVISION_ID;
+    revision_id = intrinsic_rdmsr(MSR_VMX_BASIC) & VMX_BASIC_REVISION_ID;
     ((uint32_t *)state->hve_page)[0] = ((uint32_t)revision_id);
 
     intrinsic_lcr4(cr4 | CR4_VMXE);

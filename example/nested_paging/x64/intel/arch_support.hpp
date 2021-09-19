@@ -327,11 +327,11 @@ namespace example
         constexpr bsl::safe_umx vmcs_entry_ctls_idx{bsl::to_umx(0x4012U)};
         constexpr bsl::safe_umx vmcs_procbased_ctls2_idx{bsl::to_umx(0x401EU)};
 
-        constexpr bsl::safe_u32 ia32_vmx_true_pinbased_ctls{bsl::to_u32(0x48DU)};
-        constexpr bsl::safe_u32 ia32_vmx_true_procbased_ctls{bsl::to_u32(0x48EU)};
-        constexpr bsl::safe_u32 ia32_vmx_true_exit_ctls{bsl::to_u32(0x48FU)};
-        constexpr bsl::safe_u32 ia32_vmx_true_entry_ctls{bsl::to_u32(0x490U)};
-        constexpr bsl::safe_u32 ia32_vmx_true_procbased_ctls2{bsl::to_u32(0x48BU)};
+        constexpr bsl::safe_u32 vmx_true_pinbased_ctls{bsl::to_u32(0x48DU)};
+        constexpr bsl::safe_u32 vmx_true_procbased_ctls{bsl::to_u32(0x48EU)};
+        constexpr bsl::safe_u32 vmx_true_exit_ctls{bsl::to_u32(0x48FU)};
+        constexpr bsl::safe_u32 vmx_true_entry_ctls{bsl::to_u32(0x490U)};
+        constexpr bsl::safe_u32 vmx_true_procbased_ctls2{bsl::to_u32(0x48BU)};
 
         bsl::safe_umx ctls{};
 
@@ -339,7 +339,7 @@ namespace example
         /// - Configure the pin based controls
         ///
 
-        ret = syscall::bf_intrinsic_op_rdmsr(handle, ia32_vmx_true_pinbased_ctls, ctls);
+        ret = syscall::bf_intrinsic_op_rdmsr(handle, vmx_true_pinbased_ctls, ctls);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -359,7 +359,7 @@ namespace example
         constexpr bsl::safe_umx enable_msr_bitmaps{bsl::to_umx(0x10000000U)};
         constexpr bsl::safe_umx enable_procbased_ctls2{bsl::to_umx(0x80000000U)};
 
-        ret = syscall::bf_intrinsic_op_rdmsr(handle, ia32_vmx_true_procbased_ctls, ctls);
+        ret = syscall::bf_intrinsic_op_rdmsr(handle, vmx_true_procbased_ctls, ctls);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -379,7 +379,7 @@ namespace example
         /// - Configure the exit controls
         ///
 
-        ret = syscall::bf_intrinsic_op_rdmsr(handle, ia32_vmx_true_exit_ctls, ctls);
+        ret = syscall::bf_intrinsic_op_rdmsr(handle, vmx_true_exit_ctls, ctls);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -396,7 +396,7 @@ namespace example
         /// - Configure the entry controls
         ///
 
-        ret = syscall::bf_intrinsic_op_rdmsr(handle, ia32_vmx_true_entry_ctls, ctls);
+        ret = syscall::bf_intrinsic_op_rdmsr(handle, vmx_true_entry_ctls, ctls);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;
@@ -420,7 +420,7 @@ namespace example
         constexpr bsl::safe_umx enable_uwait{bsl::to_umx(0x04000000U)};
         constexpr bsl::safe_umx enable_ept{bsl::to_umx(0x00000002U)};
 
-        ret = syscall::bf_intrinsic_op_rdmsr(handle, ia32_vmx_true_procbased_ctls2, ctls);
+        ret = syscall::bf_intrinsic_op_rdmsr(handle, vmx_true_procbased_ctls2, ctls);
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return ret;

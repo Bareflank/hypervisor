@@ -561,10 +561,12 @@ namespace mk
             m_guest_vmcb->fs_selector = state->fs_selector;
             m_guest_vmcb->fs_attrib = compress_attrib(bsl::to_u16(state->fs_attrib)).get();
             m_guest_vmcb->fs_limit = state->fs_limit;
+            m_guest_vmcb->fs_base = state->fs_base;
 
             m_guest_vmcb->gs_selector = state->gs_selector;
             m_guest_vmcb->gs_attrib = compress_attrib(bsl::to_u16(state->gs_attrib)).get();
             m_guest_vmcb->gs_limit = state->gs_limit;
+            m_guest_vmcb->gs_base = state->gs_base;
 
             m_guest_vmcb->ldtr_selector = state->ldtr_selector;
             m_guest_vmcb->ldtr_attrib = compress_attrib(bsl::to_u16(state->ldtr_attrib)).get();
@@ -584,19 +586,18 @@ namespace mk
             m_guest_vmcb->dr6 = state->dr6;
             m_guest_vmcb->dr7 = state->dr7;
 
-            m_guest_vmcb->efer = state->ia32_efer;
-            m_guest_vmcb->star = state->ia32_star;
-            m_guest_vmcb->lstar = state->ia32_lstar;
-            m_guest_vmcb->cstar = state->ia32_cstar;
-            m_guest_vmcb->sfmask = state->ia32_fmask;
-            m_guest_vmcb->fs_base = state->ia32_fs_base;
-            m_guest_vmcb->gs_base = state->ia32_gs_base;
-            m_guest_vmcb->kernel_gs_base = state->ia32_kernel_gs_base;
-            m_guest_vmcb->sysenter_cs = state->ia32_sysenter_cs;
-            m_guest_vmcb->sysenter_esp = state->ia32_sysenter_esp;
-            m_guest_vmcb->sysenter_eip = state->ia32_sysenter_eip;
-            m_guest_vmcb->g_pat = state->ia32_pat;
-            m_guest_vmcb->dbgctl = state->ia32_debugctl;
+            m_guest_vmcb->efer = state->msr_efer;
+            m_guest_vmcb->star = state->msr_star;
+            m_guest_vmcb->lstar = state->msr_lstar;
+            m_guest_vmcb->cstar = state->msr_cstar;
+            m_guest_vmcb->fmask = state->msr_fmask;
+            m_guest_vmcb->fs_base = state->msr_fs_base;
+            m_guest_vmcb->gs_base = state->msr_gs_base;
+            m_guest_vmcb->sysenter_cs = state->msr_sysenter_cs;
+            m_guest_vmcb->sysenter_esp = state->msr_sysenter_esp;
+            m_guest_vmcb->sysenter_eip = state->msr_sysenter_eip;
+            m_guest_vmcb->g_pat = state->msr_pat;
+            m_guest_vmcb->dbgctl = state->msr_debugctl;
         }
 
         /// <!-- description -->
@@ -685,10 +686,12 @@ namespace mk
             pmut_state->fs_selector = m_guest_vmcb->fs_selector;
             pmut_state->fs_attrib = decompress_attrib(bsl::to_u16(m_guest_vmcb->fs_attrib)).get();
             pmut_state->fs_limit = m_guest_vmcb->fs_limit;
+            pmut_state->fs_base = m_guest_vmcb->fs_base;
 
             pmut_state->gs_selector = m_guest_vmcb->gs_selector;
             pmut_state->gs_attrib = decompress_attrib(bsl::to_u16(m_guest_vmcb->gs_attrib)).get();
             pmut_state->gs_limit = m_guest_vmcb->gs_limit;
+            pmut_state->gs_base = m_guest_vmcb->gs_base;
 
             pmut_state->ldtr_selector = m_guest_vmcb->ldtr_selector;
             pmut_state->ldtr_attrib =
@@ -709,19 +712,19 @@ namespace mk
             pmut_state->dr6 = m_guest_vmcb->dr6;
             pmut_state->dr7 = m_guest_vmcb->dr7;
 
-            pmut_state->ia32_efer = m_guest_vmcb->efer;
-            pmut_state->ia32_star = m_guest_vmcb->star;
-            pmut_state->ia32_lstar = m_guest_vmcb->lstar;
-            pmut_state->ia32_cstar = m_guest_vmcb->cstar;
-            pmut_state->ia32_fmask = m_guest_vmcb->sfmask;
-            pmut_state->ia32_fs_base = m_guest_vmcb->fs_base;
-            pmut_state->ia32_gs_base = m_guest_vmcb->gs_base;
-            pmut_state->ia32_kernel_gs_base = m_guest_vmcb->kernel_gs_base;
-            pmut_state->ia32_sysenter_cs = m_guest_vmcb->sysenter_cs;
-            pmut_state->ia32_sysenter_esp = m_guest_vmcb->sysenter_esp;
-            pmut_state->ia32_sysenter_eip = m_guest_vmcb->sysenter_eip;
-            pmut_state->ia32_pat = m_guest_vmcb->g_pat;
-            pmut_state->ia32_debugctl = m_guest_vmcb->dbgctl;
+            pmut_state->msr_efer = m_guest_vmcb->efer;
+            pmut_state->msr_star = m_guest_vmcb->star;
+            pmut_state->msr_lstar = m_guest_vmcb->lstar;
+            pmut_state->msr_cstar = m_guest_vmcb->cstar;
+            pmut_state->msr_fmask = m_guest_vmcb->fmask;
+            pmut_state->msr_fs_base = m_guest_vmcb->fs_base;
+            pmut_state->msr_gs_base = m_guest_vmcb->gs_base;
+            pmut_state->msr_kernel_gs_base = m_guest_vmcb->kernel_gs_base;
+            pmut_state->msr_sysenter_cs = m_guest_vmcb->sysenter_cs;
+            pmut_state->msr_sysenter_esp = m_guest_vmcb->sysenter_esp;
+            pmut_state->msr_sysenter_eip = m_guest_vmcb->sysenter_eip;
+            pmut_state->msr_pat = m_guest_vmcb->g_pat;
+            pmut_state->msr_debugctl = m_guest_vmcb->dbgctl;
         }
 
         /// <!-- description -->
@@ -1216,8 +1219,8 @@ namespace mk
                     return bsl::to_umx(m_guest_vmcb->cstar);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_sfmask: {
-                    return bsl::to_umx(m_guest_vmcb->sfmask);
+                case syscall::bf_reg_t::bf_reg_t_fmask: {
+                    return bsl::to_umx(m_guest_vmcb->fmask);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_kernel_gs_base: {
@@ -1887,8 +1890,8 @@ namespace mk
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_sfmask: {
-                    m_guest_vmcb->sfmask = val.get();
+                case syscall::bf_reg_t::bf_reg_t_fmask: {
+                    m_guest_vmcb->fmask = val.get();
                     return bsl::errc_success;
                 }
 
@@ -2315,7 +2318,7 @@ namespace mk
             this->dump_field("star ", bsl::make_safe(m_guest_vmcb->star));
             this->dump_field("lstar ", bsl::make_safe(m_guest_vmcb->lstar));
             this->dump_field("cstar ", bsl::make_safe(m_guest_vmcb->cstar));
-            this->dump_field("sfmask ", bsl::make_safe(m_guest_vmcb->sfmask));
+            this->dump_field("fmask ", bsl::make_safe(m_guest_vmcb->fmask));
             this->dump_field("kernel_gs_base ", bsl::make_safe(m_guest_vmcb->kernel_gs_base));
             this->dump_field("sysenter_cs ", bsl::make_safe(m_guest_vmcb->sysenter_cs));
             this->dump_field("sysenter_esp ", bsl::make_safe(m_guest_vmcb->sysenter_esp));

@@ -1510,14 +1510,14 @@ namespace mk
             auto *const pmut_direct_map_rpt{m_direct_map_rpts.at_if(bsl::to_idx(vmid))};
             bsl::expects(nullptr != pmut_direct_map_rpt);
 
-            auto const ret{pmut_direct_map_rpt->unmap_page(
-                mut_tls, mut_page_pool, intrinsic, page_virt, type)};
+            auto const ret{pmut_direct_map_rpt->unmap_page(mut_tls, mut_page_pool, page_virt)};
 
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
 
+            intrinsic.tlb_flush(type, page_virt);
             return ret;
         }
 

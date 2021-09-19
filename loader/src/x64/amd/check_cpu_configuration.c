@@ -47,13 +47,13 @@
 /** @brief define the CPUID feature bit for VMX */
 #define CPUID_EXT_FEATURE_ECX_SVM (((uint32_t)1) << ((uint32_t)2))
 
-/** @brief defines the MSR_IA32_VM_CR MSR  */
-#define MSR_IA32_VM_CR ((uint32_t)0xC0010114)
+/** @brief defines the MSR_VM_CR MSR  */
+#define MSR_VM_CR ((uint32_t)0xC0010114)
 /** @brief defines the VM_CR_SVMDIS MSR field */
 #define VM_CR_SVMDIS (((uint64_t)1) << ((uint64_t)4))
 
-/** @brief defines the MSR_IA32_EFER MSR  */
-#define MSR_IA32_EFER ((uint32_t)0xC0000080)
+/** @brief defines the MSR_EFER MSR  */
+#define MSR_EFER ((uint32_t)0xC0000080)
 /** @brief defines the EFER_LMA MSR field */
 #define EFER_LMA (((uint64_t)1) << ((uint64_t)10))
 /** @brief defines the EFER_LME MSR field */
@@ -134,7 +134,7 @@ check_for_svm(void)
 static inline int64_t
 check_for_svm_disabled(void)
 {
-    uint64_t msr = intrinsic_rdmsr(MSR_IA32_VM_CR);
+    uint64_t msr = intrinsic_rdmsr(MSR_VM_CR);
 
     if ((msr & VM_CR_SVMDIS) != ((uint64_t)0)) {
         bferror_x64("SVM has been disabled in BIOS", msr);
@@ -154,7 +154,7 @@ check_for_svm_disabled(void)
 static inline int64_t
 check_the_configuration_of_efer(void)
 {
-    uint64_t msr = intrinsic_rdmsr(MSR_IA32_EFER);
+    uint64_t msr = intrinsic_rdmsr(MSR_EFER);
 
     if ((msr & EFER_LMA) == ((uint64_t)0)) {
         bferror_x64("The OS is not in long mode", msr);

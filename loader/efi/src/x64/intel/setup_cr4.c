@@ -46,11 +46,11 @@ void
 setup_cr4(void)
 {
     uint64_t cr4 = intrinsic_scr4();
-    uint64_t ia32_vmx_cr4_fixed0 = intrinsic_rdmsr(MSR_VMX_CR4_FIXED0);
-    uint64_t ia32_vmx_cr4_fixed1 = intrinsic_rdmsr(MSR_VMX_CR4_FIXED1);
+    uint64_t vmx_cr4_fixed0 = intrinsic_rdmsr(MSR_VMX_CR4_FIXED0);
+    uint64_t vmx_cr4_fixed1 = intrinsic_rdmsr(MSR_VMX_CR4_FIXED1);
 
-    cr4 |= ia32_vmx_cr4_fixed0;
-    cr4 &= ia32_vmx_cr4_fixed1;
+    cr4 |= vmx_cr4_fixed0;
+    cr4 &= vmx_cr4_fixed1;
 
     intrinsic_lcr4(cr4 & (~CR4_VMXE));
 }

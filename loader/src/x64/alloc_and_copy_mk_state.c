@@ -62,8 +62,8 @@
 // #define DEFAULT_CR4_OFF ((uint64_t)0xFFFFFFFFFF9FFFFF)
 #define DEFAULT_CR4_OFF ((uint64_t)0xFFFFFFFFFFFFFFFF)
 
-/** @brief defines the MSR_IA32_EFER MSR */
-#define MSR_IA32_EFER ((uint32_t)0xC0000080)
+/** @brief defines the MSR_EFER MSR */
+#define MSR_EFER ((uint32_t)0xC0000080)
 /** @brief defines the default value of EFER */
 #define DEFAULT_EFER ((uint64_t)0x00000D01)
 
@@ -159,13 +159,13 @@
 #define ESR_ATTRIB ((uint16_t)0x8E01)
 
 /** @brief defines the PAT MSR used by the microkernel */
-#define MK_MSR_IA32_PAT ((uint64_t)0x0000000600000006)
+#define MK_MSR_PAT ((uint64_t)0x0000000600000006)
 
 /** @brief defines the STAR MSR used by the microkernel */
-#define MK_MSR_IA32_STAR ((uint64_t)0x001B001000000000)
+#define MK_MSR_STAR ((uint64_t)0x001B001000000000)
 
 /** @brief defines the FMASK MSR used by the microkernel */
-#define MK_MSR_IA32_FMASK ((uint64_t)0xFFFFFFFFFFFBFFFD)
+#define MK_MSR_FMASK ((uint64_t)0xFFFFFFFFFFFBFFFD)
 
 /**
  * <!-- description -->
@@ -655,10 +655,10 @@ alloc_and_copy_mk_state(
     /* MSRs                                                                   */
     /**************************************************************************/
 
-    (*state)->ia32_efer = intrinsic_rdmsr(MSR_IA32_EFER) | DEFAULT_EFER;
-    (*state)->ia32_star = MK_MSR_IA32_STAR;
-    (*state)->ia32_fmask = MK_MSR_IA32_FMASK;
-    (*state)->ia32_pat = MK_MSR_IA32_PAT;
+    (*state)->msr_efer = intrinsic_rdmsr(MSR_EFER) | DEFAULT_EFER;
+    (*state)->msr_star = MK_MSR_STAR;
+    (*state)->msr_fmask = MK_MSR_FMASK;
+    (*state)->msr_pat = MK_MSR_PAT;
 
     return LOADER_SUCCESS;
 

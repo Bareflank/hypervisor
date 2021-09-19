@@ -45,27 +45,27 @@ namespace mk
         /// @brief stores the value of dr6 (0x008)
         bsl::uintmx guest_dr6;
 
-        /// @brief stores the guest value of ia32_star (0x010)
-        bsl::uintmx guest_ia32_star;
-        /// @brief stores the guest value of ia32_lstar (0x018)
-        bsl::uintmx guest_ia32_lstar;
-        /// @brief stores the guest value of ia32_cstar (0x020)
-        bsl::uintmx guest_ia32_cstar;
-        /// @brief stores the guest value of ia32_fmask (0x028)
-        bsl::uintmx guest_ia32_fmask;
-        /// @brief stores the guest value of ia32_kernel_gs_base (0x030)
-        bsl::uintmx guest_ia32_kernel_gs_base;
+        /// @brief stores the guest value of star (0x010)
+        bsl::uintmx guest_star;
+        /// @brief stores the guest value of lstar (0x018)
+        bsl::uintmx guest_lstar;
+        /// @brief stores the guest value of cstar (0x020)
+        bsl::uintmx guest_cstar;
+        /// @brief stores the guest value of fmask (0x028)
+        bsl::uintmx guest_fmask;
+        /// @brief stores the guest value of kernel_gs_base (0x030)
+        bsl::uintmx guest_kernel_gs_base;
 
-        /// @brief stores the host value of ia32_star (0x038)
-        bsl::uintmx host_ia32_star;
-        /// @brief stores the host value of ia32_lstar (0x040)
-        bsl::uintmx host_ia32_lstar;
-        /// @brief stores the host value of ia32_cstar (0x048)
-        bsl::uintmx host_ia32_cstar;
-        /// @brief stores the host value of ia32_fmask (0x050)
-        bsl::uintmx host_ia32_fmask;
-        /// @brief stores the host value of ia32_kernel_gs_base (0x058)
-        bsl::uintmx host_ia32_kernel_gs_base;
+        /// @brief stores the host value of star (0x038)
+        bsl::uintmx host_star;
+        /// @brief stores the host value of lstar (0x040)
+        bsl::uintmx host_lstar;
+        /// @brief stores the host value of cstar (0x048)
+        bsl::uintmx host_cstar;
+        /// @brief stores the host value of fmask (0x050)
+        bsl::uintmx host_fmask;
+        /// @brief stores the host value of kernel_gs_base (0x058)
+        bsl::uintmx host_kernel_gs_base;
 
         /// @brief stores the launch status of the hypervisor (0x060)
         bsl::uintmx launched;

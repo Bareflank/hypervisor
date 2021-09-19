@@ -141,14 +141,14 @@ namespace mk
 
     /// @brief encoding for: vmcs_link_pointer
     constexpr auto VMCS_VMCS_LINK_POINTER{0x2800_umx};
-    /// @brief encoding for: guest_ia32_debugctl
-    constexpr auto VMCS_GUEST_IA32_DEBUGCTL{0x2802_umx};
-    /// @brief encoding for: guest_ia32_pat
-    constexpr auto VMCS_GUEST_IA32_PAT{0x2804_umx};
-    /// @brief encoding for: guest_ia32_efer
-    constexpr auto VMCS_GUEST_IA32_EFER{0x2806_umx};
-    /// @brief encoding for: guest_ia32_perf_global_ctrl
-    constexpr auto VMCS_GUEST_IA32_PERF_GLOBAL_CTRL{0x2808_umx};
+    /// @brief encoding for: guest_debugctl
+    constexpr auto VMCS_GUEST_DEBUGCTL{0x2802_umx};
+    /// @brief encoding for: guest_pat
+    constexpr auto VMCS_GUEST_PAT{0x2804_umx};
+    /// @brief encoding for: guest_efer
+    constexpr auto VMCS_GUEST_EFER{0x2806_umx};
+    /// @brief encoding for: guest_perf_global_ctrl
+    constexpr auto VMCS_GUEST_PERF_GLOBAL_CTRL{0x2808_umx};
     /// @brief encoding for: guest_pdpte0
     constexpr auto VMCS_GUEST_PDPTE0{0x280A_umx};
     /// @brief encoding for: guest_pdpte1
@@ -157,17 +157,17 @@ namespace mk
     constexpr auto VMCS_GUEST_PDPTE2{0x280E_umx};
     /// @brief encoding for: guest_pdpte3
     constexpr auto VMCS_GUEST_PDPTE3{0x2810_umx};
-    /// @brief encoding for: guest_ia32_bndcfgs
-    constexpr auto VMCS_GUEST_IA32_BNDCFGS{0x2812_umx};
+    /// @brief encoding for: guest_bndcfgs
+    constexpr auto VMCS_GUEST_BNDCFGS{0x2812_umx};
     /// @brief encoding for: guest_rtit_ctl
     constexpr auto VMCS_GUEST_RTIT_CTL{0x2814_umx};
 
-    /// @brief encoding for: host_ia32_pat
-    constexpr auto VMCS_HOST_IA32_PAT{0x2C00_umx};
-    /// @brief encoding for: host_ia32_efer
-    constexpr auto VMCS_HOST_IA32_EFER{0x2C02_umx};
-    /// @brief encoding for: host_ia32_perf_global_ctrl
-    constexpr auto VMCS_HOST_IA32_PERF_GLOBAL_CTRL{0x2C04_umx};
+    /// @brief encoding for: host_pat
+    constexpr auto VMCS_HOST_PAT{0x2C00_umx};
+    /// @brief encoding for: host_efer
+    constexpr auto VMCS_HOST_EFER{0x2C02_umx};
+    /// @brief encoding for: host_perf_global_ctrl
+    constexpr auto VMCS_HOST_PERF_GLOBAL_CTRL{0x2C04_umx};
 
     /// @brief encoding for: pin_based_vm_execution_ctls
     constexpr auto VMCS_PIN_BASED_VM_EXECUTION_CTLS{0x4000_umx};
@@ -266,13 +266,13 @@ namespace mk
     constexpr auto VMCS_GUEST_ACTIVITY_STATE{0x4826_umx};
     /// @brief encoding for: guest_smbase
     constexpr auto VMCS_GUEST_SMBASE{0x4828_umx};
-    /// @brief encoding for: guest_ia32_sysenter_cs
-    constexpr auto VMCS_GUEST_IA32_SYSENTER_CS{0x482A_umx};
+    /// @brief encoding for: guest_sysenter_cs
+    constexpr auto VMCS_GUEST_SYSENTER_CS{0x482A_umx};
     /// @brief encoding for: vmx_preemption_timer_value
     constexpr auto VMCS_VMX_PREEMPTION_TIMER_VALUE{0x482E_umx};
 
-    /// @brief encoding for: host_ia32_sysenter_cs
-    constexpr auto VMCS_HOST_IA32_SYSENTER_CS{0x4C00_umx};
+    /// @brief encoding for: host_sysenter_cs
+    constexpr auto VMCS_HOST_SYSENTER_CS{0x4C00_umx};
 
     /// @brief encoding for: cr0_guest_host_mask
     constexpr auto VMCS_CR0_GUEST_HOST_MASK{0x6000_umx};
@@ -341,10 +341,10 @@ namespace mk
     constexpr auto VMCS_GUEST_RFLAGS{0x6820_umx};
     /// @brief encoding for: guest_pending_debug_exceptions
     constexpr auto VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS{0x6822_umx};
-    /// @brief encoding for: guest_ia32_sysenter_esp
-    constexpr auto VMCS_GUEST_IA32_SYSENTER_ESP{0x6824_umx};
-    /// @brief encoding for: guest_ia32_sysenter_eip
-    constexpr auto VMCS_GUEST_IA32_SYSENTER_EIP{0x6826_umx};
+    /// @brief encoding for: guest_sysenter_esp
+    constexpr auto VMCS_GUEST_SYSENTER_ESP{0x6824_umx};
+    /// @brief encoding for: guest_sysenter_eip
+    constexpr auto VMCS_GUEST_SYSENTER_EIP{0x6826_umx};
 
     /// @brief encoding for: host_cr0
     constexpr auto VMCS_HOST_CR0{0x6C00_umx};
@@ -362,10 +362,10 @@ namespace mk
     constexpr auto VMCS_HOST_GDTR_BASE{0x6C0C_umx};
     /// @brief encoding for: host_idtr_base
     constexpr auto VMCS_HOST_IDTR_BASE{0x6C0E_umx};
-    /// @brief encoding for: host_ia32_sysenter_esp
-    constexpr auto VMCS_HOST_IA32_SYSENTER_ESP{0x6C10_umx};
-    /// @brief encoding for: host_ia32_sysenter_eip
-    constexpr auto VMCS_HOST_IA32_SYSENTER_EIP{0x6C12_umx};
+    /// @brief encoding for: host_sysenter_esp
+    constexpr auto VMCS_HOST_SYSENTER_ESP{0x6C10_umx};
+    /// @brief encoding for: host_sysenter_eip
+    constexpr auto VMCS_HOST_SYSENTER_EIP{0x6C12_umx};
     /// @brief encoding for: host_rsp
     constexpr auto VMCS_HOST_RSP{0x6C14_umx};
     /// @brief encoding for: host_rip

@@ -31,6 +31,7 @@
 #include <g_mk_debug_ring.h>
 #include <g_vmm_status.h>
 #include <platform.h>
+#include <stop_and_free_the_vmm.h>
 #include <types.h>
 
 /**
@@ -50,6 +51,8 @@ loader_fini(void)
         bferror("Unable to fini, a VMM failed to properly stop");
         return LOADER_FAILURE;
     }
+
+    stop_and_free_the_vmm();
 
     free_mk_code_aliases(&g_mk_code_aliases);
     free_mk_debug_ring(&g_mk_debug_ring);

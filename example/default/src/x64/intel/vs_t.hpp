@@ -186,16 +186,16 @@ namespace example
             constexpr auto vmcs_link_ptr_idx{syscall::bf_reg_t::bf_reg_t_vmcs_link_pointer};
             bsl::expects(mut_sys.bf_vs_op_write(this->id(), vmcs_link_ptr_idx, vmcs_link_ptr_val));
 
-            constexpr auto ia32_vmx_true_pinbased_ctls{0x48D_u32};
-            constexpr auto ia32_vmx_true_procbased_ctls{0x48E_u32};
-            constexpr auto ia32_vmx_true_exit_ctls{0x48F_u32};
-            constexpr auto ia32_vmx_true_entry_ctls{0x490_u32};
-            constexpr auto ia32_vmx_true_procbased_ctls2{0x48B_u32};
+            constexpr auto vmx_true_pinbased_ctls{0x48D_u32};
+            constexpr auto vmx_true_procbased_ctls{0x48E_u32};
+            constexpr auto vmx_true_exit_ctls{0x48F_u32};
+            constexpr auto vmx_true_entry_ctls{0x490_u32};
+            constexpr auto vmx_true_procbased_ctls2{0x48B_u32};
 
             bsl::safe_umx mut_ctls{};
             syscall::bf_reg_t mut_idx{};
 
-            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_pinbased_ctls);
+            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(vmx_true_pinbased_ctls);
             bsl::expects(mut_ctls.is_valid_and_checked());
 
             mut_idx = syscall::bf_reg_t::bf_reg_t_pin_based_vm_execution_ctls;
@@ -204,7 +204,7 @@ namespace example
             constexpr auto enable_msr_bitmaps{0x10000000_u64};
             constexpr auto enable_procbased_ctls2{0x80000000_u64};
 
-            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_procbased_ctls);
+            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(vmx_true_procbased_ctls);
             bsl::expects(mut_ctls.is_valid_and_checked());
 
             mut_ctls |= enable_msr_bitmaps;
@@ -213,14 +213,18 @@ namespace example
             mut_idx = syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls;
             bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, ctls_mask(mut_ctls)));
 
-            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_exit_ctls);
+            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(vmx_true_exit_ctls);
             bsl::expects(mut_ctls.is_valid_and_checked());
 
             mut_idx = syscall::bf_reg_t::bf_reg_t_vmexit_ctls;
             bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, ctls_mask(mut_ctls)));
 
-            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_entry_ctls);
+            constexpr auto enable_ia32e_mode{0x00000200_u64};
+
+            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(vmx_true_entry_ctls);
             bsl::expects(mut_ctls.is_valid_and_checked());
+
+            mut_ctls |= enable_ia32e_mode;
 
             mut_idx = syscall::bf_reg_t::bf_reg_t_vmentry_ctls;
             bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, ctls_mask(mut_ctls)));
@@ -231,7 +235,7 @@ namespace example
             constexpr auto enable_xsave{0x00100000_u64};
             constexpr auto enable_uwait{0x04000000_u64};
 
-            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(ia32_vmx_true_procbased_ctls2);
+            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(vmx_true_procbased_ctls2);
             bsl::expects(mut_ctls.is_valid_and_checked());
 
             mut_ctls |= enable_vpid;

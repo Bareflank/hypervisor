@@ -248,8 +248,8 @@ namespace syscall
         bf_reg_t_lstar = static_cast<bsl::uint64>(101),
         /// @brief defines the cstar register in the VMCB
         bf_reg_t_cstar = static_cast<bsl::uint64>(102),
-        /// @brief defines the sfmask register in the VMCB
-        bf_reg_t_sfmask = static_cast<bsl::uint64>(103),
+        /// @brief defines the fmask register in the VMCB
+        bf_reg_t_fmask = static_cast<bsl::uint64>(103),
         /// @brief defines the kernel_gs_base register in the VMCB
         bf_reg_t_kernel_gs_base = static_cast<bsl::uint64>(104),
         /// @brief defines the sysenter_cs register in the VMCB
@@ -260,8 +260,8 @@ namespace syscall
         bf_reg_t_sysenter_eip = static_cast<bsl::uint64>(107),
         /// @brief defines the cr2 register in the VMCB
         bf_reg_t_cr2 = static_cast<bsl::uint64>(108),
-        /// @brief defines the g_pat register in the VMCB
-        bf_reg_t_g_pat = static_cast<bsl::uint64>(109),
+        /// @brief defines the pat register in the VMCB
+        bf_reg_t_pat = static_cast<bsl::uint64>(109),
         /// @brief defines the dbgctl register in the VMCB
         bf_reg_t_dbgctl = static_cast<bsl::uint64>(110),
         /// @brief defines the br_from register in the VMCB

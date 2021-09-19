@@ -31,13 +31,13 @@
 #include <state_save_t.h>
 #include <types.h>
 
-/** @brief defines the MSR_IA32_EFER MSR  */
-#define MSR_IA32_EFER ((uint32_t)0xC0000080)
+/** @brief defines the MSR_EFER MSR  */
+#define MSR_EFER ((uint32_t)0xC0000080)
 /** @brief defines the EFER_SVME MSR field */
 #define EFER_SVME (((uint64_t)1) << ((uint64_t)12))
 
 /** @brief defines the MSR_VM_HSAVE_PA MSR  */
-#define MSR_IA32_VM_HSAVE_PA ((uint32_t)0xC0010117)
+#define MSR_VM_HSAVE_PA ((uint32_t)0xC0010117)
 
 /**
  * <!-- description -->
@@ -59,14 +59,14 @@ enable_hve(struct state_save_t *const state)
         return LOADER_FAILURE;
     }
 
-    efer = intrinsic_rdmsr(MSR_IA32_EFER);
+    efer = intrinsic_rdmsr(MSR_EFER);
     if ((efer & EFER_SVME) != 0) {
         bferror("SVM is already running. Is another hypervisor running?");
         return LOADER_FAILURE;
     }
 
-    intrinsic_wrmsr(MSR_IA32_EFER, efer | EFER_SVME);
-    intrinsic_wrmsr(MSR_IA32_VM_HSAVE_PA, phys);
+    intrinsic_wrmsr(MSR_EFER, efer | EFER_SVME);
+    intrinsic_wrmsr(MSR_VM_HSAVE_PA, phys);
 
     return LOADER_SUCCESS;
 }

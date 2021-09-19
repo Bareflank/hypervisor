@@ -92,59 +92,59 @@
     #define SS_OFFSET_DR6 0x1F0
     /** @brief defines the offset of state_save_t.dr7 */
     #define SS_OFFSET_DR7 0x1F8
-    /** @brief defines the offset of state_save_t.ia32_efer */
-    #define SS_OFFSET_IA32_EFER 0x240
-    /** @brief defines the offset of state_save_t.ia32_star */
-    #define SS_OFFSET_IA32_STAR 0x248
-    /** @brief defines the offset of state_save_t.ia32_lstar */
-    #define SS_OFFSET_IA32_LSTAR 0x250
-    /** @brief defines the offset of state_save_t.ia32_cstar */
-    #define SS_OFFSET_IA32_CSTAR 0x258
-    /** @brief defines the offset of state_save_t.ia32_fmask */
-    #define SS_OFFSET_IA32_FMASK 0x260
-    /** @brief defines the offset of state_save_t.ia32_fs_base */
-    #define SS_OFFSET_IA32_FS_BASE 0x268
-    /** @brief defines the offset of state_save_t.ia32_gs_base */
-    #define SS_OFFSET_IA32_GS_BASE 0x270
-    /** @brief defines the offset of state_save_t.ia32_kernel_gs_base */
-    #define SS_OFFSET_IA32_KERNEL_GS_BASE 0x278
-    /** @brief defines the offset of state_save_t.ia32_sysenter_cs */
-    #define SS_OFFSET_IA32_SYSENTER_CS 0x280
-    /** @brief defines the offset of state_save_t.ia32_sysenter_esp */
-    #define SS_OFFSET_IA32_SYSENTER_ESP 0x288
-    /** @brief defines the offset of state_save_t.ia32_sysenter_eip */
-    #define SS_OFFSET_IA32_SYSENTER_EIP 0x290
-    /** @brief defines the offset of state_save_t.ia32_pat */
-    #define SS_OFFSET_IA32_PAT 0x298
-    /** @brief defines the offset of state_save_t.ia32_debugctl */
-    #define SS_OFFSET_IA32_DEBUGCTL 0x2A0
+    /** @brief defines the offset of state_save_t.efer */
+    #define SS_OFFSET_EFER 0x240
+    /** @brief defines the offset of state_save_t.star */
+    #define SS_OFFSET_STAR 0x248
+    /** @brief defines the offset of state_save_t.lstar */
+    #define SS_OFFSET_LSTAR 0x250
+    /** @brief defines the offset of state_save_t.cstar */
+    #define SS_OFFSET_CSTAR 0x258
+    /** @brief defines the offset of state_save_t.fmask */
+    #define SS_OFFSET_FMASK 0x260
+    /** @brief defines the offset of state_save_t.fs_base */
+    #define SS_OFFSET_FS_BASE 0x268
+    /** @brief defines the offset of state_save_t.gs_base */
+    #define SS_OFFSET_GS_BASE 0x270
+    /** @brief defines the offset of state_save_t.kernel_gs_base */
+    #define SS_OFFSET_KERNEL_GS_BASE 0x278
+    /** @brief defines the offset of state_save_t.sysenter_cs */
+    #define SS_OFFSET_SYSENTER_CS 0x280
+    /** @brief defines the offset of state_save_t.sysenter_esp */
+    #define SS_OFFSET_SYSENTER_ESP 0x288
+    /** @brief defines the offset of state_save_t.sysenter_eip */
+    #define SS_OFFSET_SYSENTER_EIP 0x290
+    /** @brief defines the offset of state_save_t.pat */
+    #define SS_OFFSET_PAT 0x298
+    /** @brief defines the offset of state_save_t.debugctl */
+    #define SS_OFFSET_DEBUGCTL 0x2A0
 
-    /** @brief defines MSR_IA32_SYSENTER_CS */
-    #define MSR_IA32_SYSENTER_CS 0x00000174
-    /** @brief defines MSR_IA32_SYSENTER_ESP */
-    #define MSR_IA32_SYSENTER_ESP 0x00000175
-    /** @brief defines MSR_IA32_SYSENTER_EIP */
-    #define MSR_IA32_SYSENTER_EIP 0x00000176
-    /** @brief defines MSR_IA32_DEBUGCTL */
-    #define MSR_IA32_DEBUGCTL 0x000001D9
-    /** @brief defines MSR_IA32_PAT */
-    #define MSR_IA32_PAT 0x00000277
-    /** @brief defines MSR_IA32_EFER */
-    #define MSR_IA32_EFER 0xC0000080
-    /** @brief defines MSR_IA32_STAR */
-    #define MSR_IA32_STAR 0xC0000081
-    /** @brief defines MSR_IA32_LSTAR */
-    #define MSR_IA32_LSTAR 0xC0000082
-    /** @brief defines MSR_IA32_CSTAR */
-    #define MSR_IA32_CSTAR 0xC0000083
-    /** @brief defines MSR_IA32_FMASK */
-    #define MSR_IA32_FMASK 0xC0000084
-    /** @brief defines MSR_IA32_FS_BASE */
-    #define MSR_IA32_FS_BASE 0xC0000100
-    /** @brief defines MSR_IA32_GS_BASE */
-    #define MSR_IA32_GS_BASE 0xC0000101
-    /** @brief defines MSR_IA32_KERNEL_GS_BASE */
-    #define MSR_IA32_KERNEL_GS_BASE 0xC0000102
+    /** @brief defines MSR_SYSENTER_CS */
+    #define MSR_SYSENTER_CS 0x00000174
+    /** @brief defines MSR_SYSENTER_ESP */
+    #define MSR_SYSENTER_ESP 0x00000175
+    /** @brief defines MSR_SYSENTER_EIP */
+    #define MSR_SYSENTER_EIP 0x00000176
+    /** @brief defines MSR_DEBUGCTL */
+    #define MSR_DEBUGCTL 0x000001D9
+    /** @brief defines MSR_PAT */
+    #define MSR_PAT 0x00000277
+    /** @brief defines MSR_EFER */
+    #define MSR_EFER 0xC0000080
+    /** @brief defines MSR_STAR */
+    #define MSR_STAR 0xC0000081
+    /** @brief defines MSR_LSTAR */
+    #define MSR_LSTAR 0xC0000082
+    /** @brief defines MSR_CSTAR */
+    #define MSR_CSTAR 0xC0000083
+    /** @brief defines MSR_FMASK */
+    #define MSR_FMASK 0xC0000084
+    /** @brief defines MSR_FS_BASE */
+    #define MSR_FS_BASE 0xC0000100
+    /** @brief defines MSR_GS_BASE */
+    #define MSR_GS_BASE 0xC0000101
+    /** @brief defines MSR_KERNEL_GS_BASE */
+    #define MSR_KERNEL_GS_BASE 0xC0000102
 
     .code64
     .intel_syntax noprefix
@@ -214,108 +214,108 @@ demote:
     /* MSRs                                                                   */
     /**************************************************************************/
 
-    mov ecx, MSR_IA32_EFER
+    mov ecx, MSR_EFER
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_EFER + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_EFER + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_EFER + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_EFER + 0x4]
+    mov [r15 + SS_OFFSET_EFER + 0x0], eax
+    mov [r15 + SS_OFFSET_EFER + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_EFER + 0x0]
+    mov edx, [r14 + SS_OFFSET_EFER + 0x4]
     wrmsr
 
-    mov ecx, MSR_IA32_STAR
+    mov ecx, MSR_STAR
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_STAR + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_STAR + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_STAR + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_STAR + 0x4]
+    mov [r15 + SS_OFFSET_STAR + 0x0], eax
+    mov [r15 + SS_OFFSET_STAR + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_STAR + 0x0]
+    mov edx, [r14 + SS_OFFSET_STAR + 0x4]
     wrmsr
 
-    mov ecx, MSR_IA32_LSTAR
+    mov ecx, MSR_LSTAR
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_LSTAR + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_LSTAR + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_LSTAR + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_LSTAR + 0x4]
+    mov [r15 + SS_OFFSET_LSTAR + 0x0], eax
+    mov [r15 + SS_OFFSET_LSTAR + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_LSTAR + 0x0]
+    mov edx, [r14 + SS_OFFSET_LSTAR + 0x4]
     wrmsr
 
-    mov ecx, MSR_IA32_CSTAR
+    mov ecx, MSR_CSTAR
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_CSTAR + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_CSTAR + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_CSTAR + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_CSTAR + 0x4]
+    mov [r15 + SS_OFFSET_CSTAR + 0x0], eax
+    mov [r15 + SS_OFFSET_CSTAR + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_CSTAR + 0x0]
+    mov edx, [r14 + SS_OFFSET_CSTAR + 0x4]
     wrmsr
 
-    mov ecx, MSR_IA32_FMASK
+    mov ecx, MSR_FMASK
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_FMASK + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_FMASK + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_FMASK + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_FMASK + 0x4]
+    mov [r15 + SS_OFFSET_FMASK + 0x0], eax
+    mov [r15 + SS_OFFSET_FMASK + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_FMASK + 0x0]
+    mov edx, [r14 + SS_OFFSET_FMASK + 0x4]
     wrmsr
 
-    mov ecx, MSR_IA32_FS_BASE
+    mov ecx, MSR_FS_BASE
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_FS_BASE + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_FS_BASE + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_FS_BASE + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_FS_BASE + 0x4]
+    mov [r15 + SS_OFFSET_FS_BASE + 0x0], eax
+    mov [r15 + SS_OFFSET_FS_BASE + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_FS_BASE + 0x0]
+    mov edx, [r14 + SS_OFFSET_FS_BASE + 0x4]
     wrmsr
 
-    mov ecx, MSR_IA32_GS_BASE
+    mov ecx, MSR_GS_BASE
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_GS_BASE + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_GS_BASE + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_GS_BASE + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_GS_BASE + 0x4]
+    mov [r15 + SS_OFFSET_GS_BASE + 0x0], eax
+    mov [r15 + SS_OFFSET_GS_BASE + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_GS_BASE + 0x0]
+    mov edx, [r14 + SS_OFFSET_GS_BASE + 0x4]
     wrmsr
 
-    mov ecx, MSR_IA32_KERNEL_GS_BASE
+    mov ecx, MSR_KERNEL_GS_BASE
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_KERNEL_GS_BASE + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_KERNEL_GS_BASE + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_KERNEL_GS_BASE + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_KERNEL_GS_BASE + 0x4]
+    mov [r15 + SS_OFFSET_KERNEL_GS_BASE + 0x0], eax
+    mov [r15 + SS_OFFSET_KERNEL_GS_BASE + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_KERNEL_GS_BASE + 0x0]
+    mov edx, [r14 + SS_OFFSET_KERNEL_GS_BASE + 0x4]
     wrmsr
 
-    mov ecx, MSR_IA32_SYSENTER_CS
+    mov ecx, MSR_SYSENTER_CS
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_SYSENTER_CS + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_SYSENTER_CS + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_SYSENTER_CS + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_SYSENTER_CS + 0x4]
+    mov [r15 + SS_OFFSET_SYSENTER_CS + 0x0], eax
+    mov [r15 + SS_OFFSET_SYSENTER_CS + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_SYSENTER_CS + 0x0]
+    mov edx, [r14 + SS_OFFSET_SYSENTER_CS + 0x4]
     wrmsr
 
-    mov ecx, MSR_IA32_SYSENTER_ESP
+    mov ecx, MSR_SYSENTER_ESP
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_SYSENTER_ESP + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_SYSENTER_ESP + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_SYSENTER_ESP + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_SYSENTER_ESP + 0x4]
+    mov [r15 + SS_OFFSET_SYSENTER_ESP + 0x0], eax
+    mov [r15 + SS_OFFSET_SYSENTER_ESP + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_SYSENTER_ESP + 0x0]
+    mov edx, [r14 + SS_OFFSET_SYSENTER_ESP + 0x4]
     wrmsr
 
-    mov ecx, MSR_IA32_SYSENTER_EIP
+    mov ecx, MSR_SYSENTER_EIP
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_SYSENTER_EIP + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_SYSENTER_EIP + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_SYSENTER_EIP + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_SYSENTER_EIP + 0x4]
+    mov [r15 + SS_OFFSET_SYSENTER_EIP + 0x0], eax
+    mov [r15 + SS_OFFSET_SYSENTER_EIP + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_SYSENTER_EIP + 0x0]
+    mov edx, [r14 + SS_OFFSET_SYSENTER_EIP + 0x4]
     wrmsr
 
-    mov ecx, MSR_IA32_PAT
+    mov ecx, MSR_PAT
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_PAT + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_PAT + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_PAT + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_PAT + 0x4]
+    mov [r15 + SS_OFFSET_PAT + 0x0], eax
+    mov [r15 + SS_OFFSET_PAT + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_PAT + 0x0]
+    mov edx, [r14 + SS_OFFSET_PAT + 0x4]
     wrmsr
 
-    mov ecx, MSR_IA32_DEBUGCTL
+    mov ecx, MSR_DEBUGCTL
     rdmsr
-    mov [r15 + SS_OFFSET_IA32_DEBUGCTL + 0x0], eax
-    mov [r15 + SS_OFFSET_IA32_DEBUGCTL + 0x4], edx
-    mov eax, [r14 + SS_OFFSET_IA32_DEBUGCTL + 0x0]
-    mov edx, [r14 + SS_OFFSET_IA32_DEBUGCTL + 0x4]
+    mov [r15 + SS_OFFSET_DEBUGCTL + 0x0], eax
+    mov [r15 + SS_OFFSET_DEBUGCTL + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_DEBUGCTL + 0x0]
+    mov edx, [r14 + SS_OFFSET_DEBUGCTL + 0x4]
     wrmsr
 
     /**************************************************************************/

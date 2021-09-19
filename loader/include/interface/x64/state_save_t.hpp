@@ -239,32 +239,32 @@ namespace loader
         /// MSRs
         /// --------------------------------------------------------------------
 
-        /// @brief stores the value of the IA32_EFER MSR (0x240)
-        bsl::uint64 ia32_efer;
-        /// @brief stores the value of the IA32_STAR MSR (0x248)
-        bsl::uint64 ia32_star;
-        /// @brief stores the value of the IA32_LSTAR MSR (0x250)
-        bsl::uint64 ia32_lstar;
-        /// @brief stores the value of the IA32_CSTAR MSR (0x258)
-        bsl::uint64 ia32_cstar;
-        /// @brief stores the value of the IA32_FMASK MSR (0x260)
-        bsl::uint64 ia32_fmask;
-        /// @brief stores the value of the IA32_FS_BASE MSR (0x268)
-        bsl::uint64 ia32_fs_base;
-        /// @brief stores the value of the IA32_GS_BASE MSR (0x270)
-        bsl::uint64 ia32_gs_base;
-        /// @brief stores the value of the IA32_KERNEL_GS_BASE MSR (0x278)
-        bsl::uint64 ia32_kernel_gs_base;
-        /// @brief stores the value of the IA32_SYSENTER_CS MSR (0x280)
-        bsl::uint64 ia32_sysenter_cs;
-        /// @brief stores the value of the IA32_SYSENTER_ESP MSR (0x288)
-        bsl::uint64 ia32_sysenter_esp;
-        /// @brief stores the value of the IA32_SYSENTER_EIP MSR (0x290)
-        bsl::uint64 ia32_sysenter_eip;
-        /// @brief stores the value of the IA32_PAT MSR (0x298)
-        bsl::uint64 ia32_pat;
-        /// @brief stores the value of the IA32_DEBUGCTL MSR (0x2A0)
-        bsl::uint64 ia32_debugctl;
+        /// @brief stores the value of the EFER MSR (0x240)
+        bsl::uint64 msr_efer;
+        /// @brief stores the value of the STAR MSR (0x248)
+        bsl::uint64 msr_star;
+        /// @brief stores the value of the LSTAR MSR (0x250)
+        bsl::uint64 msr_lstar;
+        /// @brief stores the value of the CSTAR MSR (0x258)
+        bsl::uint64 msr_cstar;
+        /// @brief stores the value of the FMASK MSR (0x260)
+        bsl::uint64 msr_fmask;
+        /// @brief stores the value of the FS_BASE MSR (0x268)
+        bsl::uint64 msr_fs_base;
+        /// @brief stores the value of the GS_BASE MSR (0x270)
+        bsl::uint64 msr_gs_base;
+        /// @brief stores the value of the KERNEL_GS_BASE MSR (0x278)
+        bsl::uint64 msr_kernel_gs_base;
+        /// @brief stores the value of the SYSENTER_CS MSR (0x280)
+        bsl::uint64 msr_sysenter_cs;
+        /// @brief stores the value of the SYSENTER_ESP MSR (0x288)
+        bsl::uint64 msr_sysenter_esp;
+        /// @brief stores the value of the SYSENTER_EIP MSR (0x290)
+        bsl::uint64 msr_sysenter_eip;
+        /// @brief stores the value of the PAT MSR (0x298)
+        bsl::uint64 msr_pat;
+        /// @brief stores the value of the DEBUGCTL MSR (0x2A0)
+        bsl::uint64 msr_debugctl;
 
         /// @brief reserved for future use (0x2A8)
         bsl::array<bsl::uint64, SS_RESERVED3_SIZE.get()> reserved3;
