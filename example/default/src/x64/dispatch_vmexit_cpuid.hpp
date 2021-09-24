@@ -35,7 +35,6 @@
 #include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
-#include <bsl/expects.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/touch.hpp>
 
@@ -119,16 +118,6 @@ namespace example
                                  << bsl::rst << "root OS on pp "                   // --
                                  << bsl::cyn << bsl::hex(mut_sys.bf_tls_ppid())    // --
                                  << bsl::rst << bsl::endl;                         // --
-
-                    /// NOTE:
-                    /// - Before we can stop, we need to advance RIP.
-                    ///   Normally, all of the other commands will advance
-                    ///   and return to the VM at the end of this switch
-                    ///   statement, but in this case, promote will not
-                    ///   exit before then so we need to advance now.
-                    ///
-
-                    bsl::expects(mut_sys.bf_vs_op_advance_ip(vsid));
 
                     /// NOTE:
                     /// - The promote ABI will load the microkernel by

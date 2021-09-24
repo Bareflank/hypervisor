@@ -430,8 +430,6 @@ namespace syscall
     constexpr auto BF_VP_OP_CREATE_VP_IDX_VAL{0x0000000000000000_u64};
     /// @brief Defines the index for bf_vp_op_destroy_vp
     constexpr auto BF_VP_OP_DESTROY_VP_IDX_VAL{0x0000000000000001_u64};
-    /// @brief Defines the index for bf_vp_op_migrate
-    constexpr auto BF_VP_OP_MIGRATE_IDX_VAL{0x0000000000000002_u64};
 
     /// @brief Defines the index for bf_vs_op_create_vs
     constexpr auto BF_VS_OP_CREATE_VS_IDX_VAL{0x0000000000000000_u64};
@@ -447,14 +445,20 @@ namespace syscall
     constexpr auto BF_VS_OP_RUN_IDX_VAL{0x0000000000000005_u64};
     /// @brief Defines the index for bf_vs_op_run_current
     constexpr auto BF_VS_OP_RUN_CURRENT_IDX_VAL{0x0000000000000006_u64};
-    /// @brief Defines the index for bf_vs_op_advance_ip
-    constexpr auto BF_VS_OP_ADVANCE_IP_IDX_VAL{0x0000000000000007_u64};
+    /// @brief Defines the index for bf_vs_op_advance_ip_and_run
+    constexpr auto BF_VS_OP_ADVANCE_IP_AND_RUN_IDX_VAL{0x0000000000000007_u64};
     /// @brief Defines the index for bf_vs_op_advance_ip_and_run_current
     constexpr auto BF_VS_OP_ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL{0x0000000000000008_u64};
     /// @brief Defines the index for bf_vs_op_promote
     constexpr auto BF_VS_OP_PROMOTE_IDX_VAL{0x0000000000000009_u64};
-    /// @brief Defines the index for bf_vs_op_clear_vs
-    constexpr auto BF_VS_OP_CLEAR_VS_IDX_VAL{0x000000000000000A_u64};
+    /// @brief Defines the index for bf_vs_op_clear
+    constexpr auto BF_VS_OP_CLEAR_IDX_VAL{0x000000000000000A_u64};
+    /// @brief Defines the index for bf_vs_op_migrate
+    constexpr auto BF_VS_OP_MIGRATE_IDX_VAL{0x000000000000000B_u64};
+    /// @brief Defines the index for bf_vs_op_set_active
+    constexpr auto BF_VS_OP_SET_ACTIVE_IDX_VAL{0x000000000000000C_u64};
+    /// @brief Defines the index for bf_vs_op_advance_ip_and_set_active
+    constexpr auto BF_VS_OP_ADVANCE_IP_AND_SET_ACTIVE_IDX_VAL{0x000000000000000D_u64};
 
     /// @brief Defines the index for bf_intrinsic_op_rdmsr
     constexpr auto BF_INTRINSIC_OP_RDMSR_IDX_VAL{0x0000000000000000_u64};

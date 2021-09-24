@@ -616,7 +616,7 @@ impl BfSyscallT {
     // ///     given an ID.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vmid The VMID of the VM to destroy
+    // ///   @param vmid The ID of the VM to destroy
     // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     // ///     otherwise
     // ///
@@ -648,7 +648,7 @@ impl BfSyscallT {
     // ///     precalculated virtual address.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vmid The VMID of the VM to map the physical address to
+    // ///   @param vmid The ID of the VM to map the physical address to
     // ///   @param phys The physical address to map
     // ///   @return Returns a pointer to the map on success, returns a
     // ///     nullptr on failure.
@@ -700,7 +700,7 @@ impl BfSyscallT {
     // ///     otherwise UB will occur.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vmid The VMID of the VM to unmap the virtual address from
+    // ///   @param vmid The ID of the VM to unmap the virtual address from
     // ///   @param virt The virtual address to unmap
     // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     // ///     otherwise
@@ -750,7 +750,7 @@ impl BfSyscallT {
     // ///     systems with a lot of cores.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vmid The VMID of the VM to unmap the virtual address from
+    // ///   @param vmid The ID of the VM to unmap the virtual address from
     // ///   @param virt The virtual address to unmap
     // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     // ///     otherwise
@@ -839,7 +839,7 @@ impl BfSyscallT {
     // ///     given an ID.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vpid The VPID of the VP to destroy
+    // ///   @param vpid The ID of the VP to destroy
     // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     // ///     otherwise
     // ///
@@ -901,7 +901,7 @@ impl BfSyscallT {
     // ///     synchronization, must be performed by the extension.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vpid The VPID of the VP to migrate
+    // ///   @param vpid The ID of the VP to migrate
     // ///   @param ppid The ID of the PP to assign the provided VP to
     // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     // ///     otherwise
@@ -977,7 +977,7 @@ impl BfSyscallT {
     // ///     given an ID.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vsid The VSID of the VS to destroy
+    // ///   @param vsid The ID of the VS to destroy
     // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     // ///     otherwise
     // ///
@@ -1006,7 +1006,7 @@ impl BfSyscallT {
     // ///     the root VP state provided by the loader using the current PPID.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vsid The VSID of the VS to initialize
+    // ///   @param vsid The ID of the VS to initialize
     // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     // ///     otherwise
     // ///
@@ -1035,7 +1035,7 @@ impl BfSyscallT {
     // ///     that the bf_reg_t is architecture specific.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vsid The VSID of the VS to read from
+    // ///   @param vsid The ID of the VS to read from
     // ///   @param reg A bf_reg_t defining which register to read
     // ///   @return Returns the value read, or bsl::safe_u64::failure()
     // ///     on failure.
@@ -1070,7 +1070,7 @@ impl BfSyscallT {
     // ///     value to write. Note that the bf_reg_t is architecture specific.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vsid The VSID of the VS to write to
+    // ///   @param vsid The ID of the VS to write to
     // ///   @param reg A bf_reg_t defining which register to write to
     // ///   @param value The value to write to the requested register
     // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
@@ -1141,9 +1141,9 @@ impl BfSyscallT {
     // ///       about to become active can use the TLS block instead.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vmid The VMID of the VM to run
-    // ///   @param vpid The VPID of the VP to run
-    // ///   @param vsid The VSID of the VS to run
+    // ///   @param vmid The ID of the VM to run
+    // ///   @param vpid The ID of the VP to run
+    // ///   @param vsid The ID of the VS to run
     // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     // ///     otherwise
     // ///
@@ -1206,7 +1206,7 @@ impl BfSyscallT {
     // ///     pointer in the requested VS.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vsid The VSID of the VS advance the IP in
+    // ///   @param vsid The ID of the VS advance the IP in
     // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     // ///     otherwise
     // ///
@@ -1264,7 +1264,7 @@ impl BfSyscallT {
     // ///     on error.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vsid The VSID of the VS to promote
+    // ///   @param vsid The ID of the VS to promote
     // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     // ///     otherwise
     // ///
@@ -1289,7 +1289,7 @@ impl BfSyscallT {
     // }
 
     // /// <!-- description -->
-    // ///   @brief bf_vs_op_clear_vs tells the microkernel to clear the VS's
+    // ///   @brief bf_vs_op_clear tells the microkernel to clear the VS's
     // ///     hardware cache, if one exists. How this is used depends entirely
     // ///     on the hardware and is associated with AMD's VMCB Clean Bits,
     // ///     and Intel's VMClear instruction. See the associated documentation
@@ -1298,20 +1298,20 @@ impl BfSyscallT {
     // ///     VMCB.
     // ///
     // /// <!-- inputs/outputs -->
-    // ///   @param vsid The VSID of the VS to clear
+    // ///   @param vsid The ID of the VS to clear
     // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     // ///     otherwise
     // ///
     //
-    // bf_vs_op_clear_vs(bsl::safe_u16 const &vsid) -> bsl::errc_type
+    // bf_vs_op_clear(bsl::safe_u16 const &vsid) -> bsl::errc_type
     // {
     //     bsl::expects(vsid.is_valid_and_checked());
     //     bsl::expects(vsid != BF_INVALID_ID);
     //     bsl::expects(bsl::to_umx(vsid) < HYPERVISOR_MAX_VSS);
 
-    //     bf_status_t const ret{bf_vs_op_clear_vs_impl(m_hndl.get(), vsid.get())};
+    //     bf_status_t const ret{bf_vs_op_clear_impl(m_hndl.get(), vsid.get())};
     //     if (ret != BF_STATUS_SUCCESS)) {
-    //         bsl::error() << "bf_vs_op_clear_vs failed with status "    // --
+    //         bsl::error() << "bf_vs_op_clear failed with status "    // --
     //                         << bsl::hex(ret)                              // --
     //                         << bsl::endl                                  // --
     //                         << bsl::here();

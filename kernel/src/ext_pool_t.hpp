@@ -140,7 +140,7 @@ namespace mk
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
-        ///   @param vmid the VMID of the VM that was created.
+        ///   @param vmid the ID of the VM that was created.
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -169,7 +169,7 @@ namespace mk
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
-        ///   @param vmid the VMID of the VM that was destroyed.
+        ///   @param vmid the ID of the VM that was destroyed.
         ///
         constexpr void
         signal_vm_destroyed(
@@ -177,6 +177,24 @@ namespace mk
         {
             for (auto &mut_ext : m_pool) {
                 mut_ext.signal_vm_destroyed(mut_tls, mut_page_pool, vmid);
+            }
+        }
+
+        /// <!-- description -->
+        ///   @brief Tells the extensions that the requested VM was set to
+        ///     active and therefore it's memory map should change on this PP.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_intrinsic the intrinsic_t to use
+        ///   @param vmid the ID of the VM that was created.
+        ///
+        constexpr void
+        signal_vm_active(
+            tls_t &mut_tls, intrinsic_t &mut_intrinsic, bsl::safe_u16 const &vmid) noexcept
+        {
+            for (auto &mut_ext : m_pool) {
+                mut_ext.signal_vm_active(mut_tls, mut_intrinsic, vmid);
             }
         }
 

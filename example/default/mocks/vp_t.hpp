@@ -51,8 +51,6 @@ namespace example
         allocated_status_t m_allocated{};
         /// @brief stores the ID of the VM this vp_t is assigned to
         bsl::safe_u16 m_assigned_vmid{};
-        /// @brief stores the ID of the PP this vp_t is assigned to
-        bsl::safe_u16 m_assigned_ppid{};
 
     public:
         /// <!-- description -->
@@ -129,7 +127,6 @@ namespace example
         ///   @param sys the bf_syscall_t to use
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vmid the ID of the VM to assign the vp_t to
-        ///   @param ppid the ID of the PP to assign the vp_t to
         ///   @return Returns ID of this vp_t
         ///
         [[maybe_unused]] constexpr auto
@@ -138,16 +135,13 @@ namespace example
             tls_t const &tls,
             syscall::bf_syscall_t const &sys,
             intrinsic_t const &intrinsic,
-            bsl::safe_u16 const &vmid,
-            bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
+            bsl::safe_u16 const &vmid) noexcept -> bsl::safe_u16
         {
             bsl::expects(this->id() != syscall::BF_INVALID_ID);
             bsl::expects(allocated_status_t::deallocated == m_allocated);
 
             bsl::expects(vmid.is_valid_and_checked());
             bsl::expects(vmid != syscall::BF_INVALID_ID);
-            bsl::expects(ppid.is_valid_and_checked());
-            bsl::expects(ppid != syscall::BF_INVALID_ID);
 
             bsl::discard(gs);
             bsl::discard(tls);
@@ -155,7 +149,6 @@ namespace example
             bsl::discard(intrinsic);
 
             m_assigned_vmid = ~vmid;
-            m_assigned_ppid = ~ppid;
             m_allocated = allocated_status_t::allocated;
 
             return this->id();
@@ -182,7 +175,6 @@ namespace example
             bsl::discard(sys);
             bsl::discard(intrinsic);
 
-            m_assigned_ppid = {};
             m_assigned_vmid = {};
             m_allocated = allocated_status_t::deallocated;
         }
@@ -224,21 +216,6 @@ namespace example
         {
             bsl::ensures(m_assigned_vmid.is_valid_and_checked());
             return ~m_assigned_vmid;
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the ID of the PP this vp_t is assigned to. If
-        ///     this vp_t is not assigned, syscall::BF_INVALID_ID is returned.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return Returns the ID of the PP this vp_t is assigned to. If
-        ///     this vp_t is not assigned, syscall::BF_INVALID_ID is returned.
-        ///
-        [[nodiscard]] constexpr auto
-        assigned_pp() const noexcept -> bsl::safe_u16
-        {
-            bsl::ensures(m_assigned_ppid.is_valid_and_checked());
-            return ~m_assigned_ppid;
         }
     };
 }

@@ -828,11 +828,10 @@ namespace syscall
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
-                bsl::safe_u16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_sys.set_bf_vp_op_create_vp(arg0, arg1, bsl::safe_u16::failure());
+                    mut_sys.set_bf_vp_op_create_vp(arg0, bsl::safe_u16::failure());
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_vp_op_create_vp(arg0, arg1).is_invalid());
+                        bsl::ut_check(mut_sys.bf_vp_op_create_vp(arg0).is_invalid());
                     };
                 };
             };
@@ -842,11 +841,10 @@ namespace syscall
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
-                bsl::safe_u16 const arg1{};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_sys.set_bf_vp_op_create_vp(arg0, arg1, ANSWER16);
+                    mut_sys.set_bf_vp_op_create_vp(arg0, ANSWER16);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_vp_op_create_vp(arg0, arg1) == ANSWER16);
+                        bsl::ut_check(mut_sys.bf_vp_op_create_vp(arg0) == ANSWER16);
                         bsl::ut_check(mut_sys.bf_vp_op_create_vp_count().is_pos());
                     };
                 };
@@ -873,32 +871,6 @@ namespace syscall
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(mut_sys.bf_vp_op_destroy_vp(arg0));
                     bsl::ut_check(mut_sys.bf_vp_op_destroy_vp_count().is_pos());
-                };
-            };
-        };
-
-        bsl::ut_scenario{"bf_vp_op_migrate bf_vp_op_migrate_impl fails"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
-                bf_syscall_t mut_sys{};
-                bsl::safe_u16 const arg0{};
-                bsl::safe_u16 const arg1{};
-                bsl::ut_when{} = [&]() noexcept {
-                    mut_sys.set_bf_vp_op_migrate(arg0, arg1, bsl::errc_failure);
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_sys.bf_vp_op_migrate(arg0, arg1));
-                    };
-                };
-            };
-        };
-
-        bsl::ut_scenario{"bf_vp_op_migrate success"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
-                bf_syscall_t mut_sys{};
-                bsl::safe_u16 const arg0{};
-                bsl::safe_u16 const arg1{};
-                bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(mut_sys.bf_vp_op_migrate(arg0, arg1));
-                    bsl::ut_check(mut_sys.bf_vp_op_migrate_count().is_pos());
                 };
             };
         };
@@ -1091,26 +1063,31 @@ namespace syscall
             };
         };
 
-        bsl::ut_scenario{"bf_vs_op_advance_ip bf_vs_op_advance_ip_impl fails"} = []() noexcept {
+        bsl::ut_scenario{
+            "bf_vs_op_advance_ip_and_run bf_vs_op_advance_ip_and_run_impl fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::safe_u16 const arg2{};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_sys.set_bf_vs_op_advance_ip(arg0, bsl::errc_failure);
+                    mut_sys.set_bf_vs_op_advance_ip_and_run(arg0, arg1, arg2, bsl::errc_failure);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_sys.bf_vs_op_advance_ip(arg0));
+                        bsl::ut_check(!mut_sys.bf_vs_op_advance_ip_and_run(arg0, arg1, arg2));
                     };
                 };
             };
         };
 
-        bsl::ut_scenario{"bf_vs_op_advance_ip success"} = []() noexcept {
+        bsl::ut_scenario{"bf_vs_op_advance_ip_and_run success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::safe_u16 const arg2{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(mut_sys.bf_vs_op_advance_ip(arg0));
-                    bsl::ut_check(mut_sys.bf_vs_op_advance_ip_count().is_pos());
+                    bsl::ut_check(mut_sys.bf_vs_op_advance_ip_and_run(arg0, arg1, arg2));
+                    bsl::ut_check(mut_sys.bf_vs_op_advance_ip_and_run_count().is_pos());
                 };
             };
         };
@@ -1163,26 +1140,112 @@ namespace syscall
             };
         };
 
-        bsl::ut_scenario{"bf_vs_op_clear_vs bf_vs_op_clear_vs_impl fails"} = []() noexcept {
+        bsl::ut_scenario{"bf_vs_op_clear bf_vs_op_clear_impl fails"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_sys.set_bf_vs_op_clear_vs(arg0, bsl::errc_failure);
+                    mut_sys.set_bf_vs_op_clear(arg0, bsl::errc_failure);
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_sys.bf_vs_op_clear_vs(arg0));
+                        bsl::ut_check(!mut_sys.bf_vs_op_clear(arg0));
                     };
                 };
             };
         };
 
-        bsl::ut_scenario{"bf_vs_op_clear_vs success"} = []() noexcept {
+        bsl::ut_scenario{"bf_vs_op_clear success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bf_syscall_t mut_sys{};
                 bsl::safe_u16 const arg0{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(mut_sys.bf_vs_op_clear_vs(arg0));
-                    bsl::ut_check(mut_sys.bf_vs_op_clear_vs_count().is_pos());
+                    bsl::ut_check(mut_sys.bf_vs_op_clear(arg0));
+                    bsl::ut_check(mut_sys.bf_vs_op_clear_count().is_pos());
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vs_op_migrate bf_vs_op_migrate_impl fails"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_sys.set_bf_vs_op_migrate(arg0, arg1, bsl::errc_failure);
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_sys.bf_vs_op_migrate(arg0, arg1));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vs_op_migrate success"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(mut_sys.bf_vs_op_migrate(arg0, arg1));
+                    bsl::ut_check(mut_sys.bf_vs_op_migrate_count().is_pos());
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vs_op_set_active bf_vs_op_set_active_impl fails"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::safe_u16 const arg2{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_sys.set_bf_vs_op_set_active(arg0, arg1, arg2, bsl::errc_failure);
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_sys.bf_vs_op_set_active(arg0, arg1, arg2));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vs_op_set_active success"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::safe_u16 const arg2{};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(mut_sys.bf_vs_op_set_active(arg0, arg1, arg2));
+                    bsl::ut_check(mut_sys.bf_vs_op_set_active_count().is_pos());
+                };
+            };
+        };
+
+        bsl::ut_scenario{
+            "bf_vs_op_advance_ip_and_set_active bf_vs_op_advance_ip_and_set_active_impl fails"} =
+            []() noexcept {
+                bsl::ut_given{} = []() noexcept {
+                    bf_syscall_t mut_sys{};
+                    bsl::safe_u16 const arg0{};
+                    bsl::safe_u16 const arg1{};
+                    bsl::safe_u16 const arg2{};
+                    bsl::ut_when{} = [&]() noexcept {
+                        mut_sys.set_bf_vs_op_advance_ip_and_set_active(
+                            arg0, arg1, arg2, bsl::errc_failure);
+                        bsl::ut_then{} = [&]() noexcept {
+                            bsl::ut_check(
+                                !mut_sys.bf_vs_op_advance_ip_and_set_active(arg0, arg1, arg2));
+                        };
+                    };
+                };
+            };
+
+        bsl::ut_scenario{"bf_vs_op_advance_ip_and_set_active success"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::safe_u16 const arg1{};
+                bsl::safe_u16 const arg2{};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(mut_sys.bf_vs_op_advance_ip_and_set_active(arg0, arg1, arg2));
+                    bsl::ut_check(mut_sys.bf_vs_op_advance_ip_and_set_active_count().is_pos());
                 };
             };
         };

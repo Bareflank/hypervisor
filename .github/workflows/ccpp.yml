@@ -85,7 +85,7 @@ jobs:
         sudo cp hypervisor/utils/linux/include-what-you-use /usr/lib/llvm-bareflank/bin/
         export PATH="/usr/lib/llvm-bareflank/bin:$PATH"
         mkdir build && cd build
-        cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DBSL_DEBUG_LEVEL=bsl::VVV ../hypervisor
+        cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DBSL_DEBUG_LEVEL=bsl::VVV -DHYPERVISOR_IWYU=ON ../hypervisor
         ninja iwyu
       shell: bash
 

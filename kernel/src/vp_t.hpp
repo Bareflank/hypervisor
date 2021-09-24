@@ -55,8 +55,6 @@ namespace mk
         allocated_status_t m_allocated{};
         /// @brief stores the ID of the VM this vp_t is assigned to
         bsl::safe_u16 m_assigned_vmid{};
-        /// @brief stores the ID of the PP this vp_t is assigned to
-        bsl::safe_u16 m_assigned_ppid{};
         /// @brief stores the ID of the PP this vp_t is active on
         bsl::safe_u16 m_active_ppid{};
 
@@ -106,22 +104,18 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param vmid The ID of the VM to assign the newly allocated vp_t to
-        ///   @param ppid The ID of the PP to assign the newly allocated vp_t to
         ///   @return Returns ID of the newly allocated vp_t
         ///
         [[nodiscard]] constexpr auto
-        allocate(bsl::safe_u16 const &vmid, bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
+        allocate(bsl::safe_u16 const &vmid) noexcept -> bsl::safe_u16
         {
             bsl::expects(this->id() != syscall::BF_INVALID_ID);
             bsl::expects(allocated_status_t::deallocated == m_allocated);
 
             bsl::expects(vmid.is_valid_and_checked());
             bsl::expects(vmid != syscall::BF_INVALID_ID);
-            bsl::expects(ppid.is_valid_and_checked());
-            bsl::expects(ppid != syscall::BF_INVALID_ID);
 
             m_assigned_vmid = ~vmid;
-            m_assigned_ppid = ~ppid;
             m_allocated = allocated_status_t::allocated;
 
             return this->id();
@@ -135,7 +129,6 @@ namespace mk
         {
             bsl::expects(this->is_active().is_invalid());
 
-            m_assigned_ppid = {};
             m_assigned_vmid = {};
             m_allocated = allocated_status_t::deallocated;
         }
@@ -230,22 +223,6 @@ namespace mk
         }
 
         /// <!-- description -->
-        ///   @brief Migrates this vp_t from one PP to another
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param ppid the ID of the PP to migrate to
-        ///
-        constexpr void
-        migrate(bsl::safe_u16 const &ppid) noexcept
-        {
-            bsl::expects(allocated_status_t::allocated == m_allocated);
-            bsl::expects(ppid.is_valid_and_checked());
-            bsl::expects(ppid != syscall::BF_INVALID_ID);
-
-            m_assigned_ppid = ~ppid;
-        }
-
-        /// <!-- description -->
         ///   @brief Returns the ID of the VM this vp_t is assigned to. If
         ///     vp_t is not assigned, syscall::BF_INVALID_ID is returned.
         ///
@@ -258,21 +235,6 @@ namespace mk
         {
             bsl::ensures(m_assigned_vmid.is_valid_and_checked());
             return ~m_assigned_vmid;
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the ID of the PP this vp_t is assigned to If
-        ///     vp_t is not assigned, syscall::BF_INVALID_ID is returned.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return Returns the ID of the PP this vp_t is assigned to If
-        ///     vp_t is not assigned, syscall::BF_INVALID_ID is returned.
-        ///
-        [[nodiscard]] constexpr auto
-        assigned_pp() const noexcept -> bsl::safe_u16
-        {
-            bsl::ensures(m_assigned_ppid.is_valid_and_checked());
-            return ~m_assigned_ppid;
         }
 
         /// <!-- description -->
@@ -342,26 +304,11 @@ namespace mk
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<12s", "assigned vm "};
             bsl::print() << bsl::ylw << "| ";
-            if (syscall::BF_INVALID_ID != m_assigned_vmid) {
-                bsl::print() << bsl::grn << "  " << bsl::hex(m_assigned_vmid) << "   ";
+            if (syscall::BF_INVALID_ID != this->assigned_vm()) {
+                bsl::print() << bsl::grn << "  " << bsl::hex(this->assigned_vm()) << "   ";
             }
             else {
-                bsl::print() << bsl::red << "  " << bsl::hex(m_assigned_vmid) << "   ";
-            }
-            bsl::print() << bsl::ylw << "| ";
-            bsl::print() << bsl::rst << bsl::endl;
-
-            /// Assigned PP
-            ///
-
-            bsl::print() << bsl::ylw << "| ";
-            bsl::print() << bsl::rst << bsl::fmt{"<12s", "assigned pp "};
-            bsl::print() << bsl::ylw << "| ";
-            if (syscall::BF_INVALID_ID != m_assigned_ppid) {
-                bsl::print() << bsl::grn << "  " << bsl::hex(m_assigned_ppid) << "   ";
-            }
-            else {
-                bsl::print() << bsl::red << "  " << bsl::hex(m_assigned_ppid) << "   ";
+                bsl::print() << bsl::red << "  " << bsl::hex(this->assigned_vm()) << "   ";
             }
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;

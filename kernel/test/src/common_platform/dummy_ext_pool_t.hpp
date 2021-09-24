@@ -48,7 +48,7 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
-        ///   @param vmid the VMID of the VM that was created.
+        ///   @param vmid the ID of the VM that was created.
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -70,7 +70,7 @@ namespace mk
         ///
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
-        ///   @param vmid the VMID of the VM that was destroyed.
+        ///   @param vmid the ID of the VM that was destroyed.
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///

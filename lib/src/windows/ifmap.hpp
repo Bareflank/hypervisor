@@ -70,6 +70,8 @@ namespace lib
         void *m_data{};
         /// @brief stores the number of bytes for the open file
         bsl::safe_umx m_size{};
+        /// @brief stores the GPA associated with the file
+        bsl::safe_u64 m_gpa{};
 
         /// <!-- description -->
         ///   @brief Swaps *this with other
@@ -313,6 +315,30 @@ namespace lib
         size() const noexcept -> bsl::safe_umx
         {
             return m_size;
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the GPA associated with the file
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the GPA associated with the file
+        ///
+        [[nodiscard]] constexpr auto
+        gpa() const noexcept -> bsl::safe_u64
+        {
+            return m_gpa;
+        }
+
+        /// <!-- description -->
+        ///   @brief Sets the GPA associated with the file
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param gpa the GPA to associate with this file
+        ///
+        constexpr void
+        set_gpa(bsl::safe_u64 const &gpa) noexcept
+        {
+            m_gpa = gpa;
         }
     };
 }

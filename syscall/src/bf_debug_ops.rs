@@ -68,7 +68,7 @@ mod test_bf_debug_op_out {
 ///     debugging.
 ///
 /// <!-- inputs/outputs -->
-///   @param vmid The VMID of the VM whose state is to be outputted
+///   @param vmid The ID of the VM whose state is to be outputted
 ///
 pub fn bf_debug_op_dump_vm(vmid: u16) {
     unsafe {
@@ -102,7 +102,7 @@ mod test_bf_debug_op_dump_vm {
 ///     debugging.
 ///
 /// <!-- inputs/outputs -->
-///   @param vpid The VPID of the VP whose state is to be outputted
+///   @param vpid The ID of the VP whose state is to be outputted
 ///
 pub fn bf_debug_op_dump_vp(vpid: u16) {
     unsafe {
@@ -136,7 +136,7 @@ mod test_bf_debug_op_dump_vp {
 ///     debugging.
 ///
 /// <!-- inputs/outputs -->
-///   @param vsid The VSID of the VS whose state is to be outputted
+///   @param vsid The ID of the VS whose state is to be outputted
 ///
 pub fn bf_debug_op_dump_vs(vsid: u16) {
     unsafe {

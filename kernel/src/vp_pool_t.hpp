@@ -116,19 +116,17 @@ namespace mk
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param vmid The ID of the VM to assign the newly allocated vp_t to
-        ///   @param ppid The ID of the PP to assign the newly allocated vp_t to
         ///   @return Returns ID of the newly allocated vp_t. Returns
         ///     bsl::safe_u16::failure() on failure.
         ///
         [[nodiscard]] constexpr auto
-        allocate(tls_t &mut_tls, bsl::safe_u16 const &vmid, bsl::safe_u16 const &ppid) noexcept
-            -> bsl::safe_u16
+        allocate(tls_t &mut_tls, bsl::safe_u16 const &vmid) noexcept -> bsl::safe_u16
         {
             lock_guard_t mut_lock{mut_tls, m_lock};
 
             for (auto &mut_vp : m_pool) {
                 if (mut_vp.is_deallocated()) {
-                    return mut_vp.allocate(vmid, ppid);
+                    return mut_vp.allocate(vmid);
                 }
 
                 bsl::touch();
@@ -244,19 +242,6 @@ namespace mk
         }
 
         /// <!-- description -->
-        ///   @brief Migrates the requested vp_t from one PP to another
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param ppid the ID of the PP to migrate to
-        ///   @param vpid the ID of the vp_t to migrate
-        ///
-        constexpr void
-        migrate(bsl::safe_u16 const &ppid, bsl::safe_u16 const &vpid) noexcept
-        {
-            this->get_vp(vpid)->migrate(ppid);
-        }
-
-        /// <!-- description -->
         ///   @brief Returns the ID of the VM the requested vp_t is assigned to
         ///
         /// <!-- inputs/outputs -->
@@ -267,19 +252,6 @@ namespace mk
         assigned_vm(bsl::safe_u16 const &vpid) const noexcept -> bsl::safe_u16
         {
             return this->get_vp(vpid)->assigned_vm();
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the ID of the PP the requested vp_t is assigned to
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param vpid the ID of the vp_t to query
-        ///   @return Returns the ID of the PP the requested vp_t is assigned to
-        ///
-        [[nodiscard]] constexpr auto
-        assigned_pp(bsl::safe_u16 const &vpid) const noexcept -> bsl::safe_u16
-        {
-            return this->get_vp(vpid)->assigned_pp();
         }
 
         /// <!-- description -->

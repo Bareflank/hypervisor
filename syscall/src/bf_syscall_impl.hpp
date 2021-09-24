@@ -587,14 +587,12 @@ namespace syscall
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
     ///   @param pmut_reg0_out n/a
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto bf_vp_op_create_vp_impl(
         bsl::uint64 const reg0_in,
         bsl::uint16 const reg1_in,
-        bsl::uint16 const reg2_in,
         bsl::uint16 *const pmut_reg0_out) noexcept -> bsl::uint64;
 
     /// <!-- description -->
@@ -607,19 +605,6 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] auto
     bf_vp_op_destroy_vp_impl(bsl::uint64 const reg0_in, bsl::uint16 const reg1_in) noexcept
-        -> bsl::uint64;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vp_op_migrate.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto bf_vp_op_migrate_impl(
-        bsl::uint64 const reg0_in, bsl::uint16 const reg1_in, bsl::uint16 const reg2_in) noexcept
         -> bsl::uint64;
 
     // -------------------------------------------------------------------------
@@ -725,16 +710,20 @@ namespace syscall
         -> bsl::uint64;
 
     /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vs_op_advance_ip.
+    ///   @brief Implements the ABI for bf_vs_op_advance_ip_and_run.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
+    ///   @param reg2_in n/a
+    ///   @param reg3_in n/a
     ///   @return n/a
     ///
-    extern "C" [[nodiscard]] auto
-    bf_vs_op_advance_ip_impl(bsl::uint64 const reg0_in, bsl::uint16 const reg1_in) noexcept
-        -> bsl::uint64;
+    extern "C" [[nodiscard]] auto bf_vs_op_advance_ip_and_run_impl(
+        bsl::uint64 const reg0_in,
+        bsl::uint16 const reg1_in,
+        bsl::uint16 const reg2_in,
+        bsl::uint16 const reg3_in) noexcept -> bsl::uint64;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_vs_op_advance_ip_and_run_current.
@@ -759,7 +748,7 @@ namespace syscall
         -> bsl::uint64;
 
     /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vs_op_clear_vs.
+    ///   @brief Implements the ABI for bf_vs_op_clear.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
@@ -767,8 +756,53 @@ namespace syscall
     ///   @return n/a
     ///
     extern "C" [[nodiscard]] auto
-    bf_vs_op_clear_vs_impl(bsl::uint64 const reg0_in, bsl::uint16 const reg1_in) noexcept
+    bf_vs_op_clear_impl(bsl::uint64 const reg0_in, bsl::uint16 const reg1_in) noexcept
         -> bsl::uint64;
+
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_vs_op_migrate.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
+    ///   @param reg2_in n/a
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] auto bf_vs_op_migrate_impl(
+        bsl::uint64 const reg0_in, bsl::uint16 const reg1_in, bsl::uint16 const reg2_in) noexcept
+        -> bsl::uint64;
+
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_vs_op_set_active.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
+    ///   @param reg2_in n/a
+    ///   @param reg3_in n/a
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] auto bf_vs_op_set_active_impl(
+        bsl::uint64 const reg0_in,
+        bsl::uint16 const reg1_in,
+        bsl::uint16 const reg2_in,
+        bsl::uint16 const reg3_in) noexcept -> bsl::uint64;
+
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_vs_op_advance_ip_and_set_active.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
+    ///   @param reg2_in n/a
+    ///   @param reg3_in n/a
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] auto bf_vs_op_advance_ip_and_set_active_impl(
+        bsl::uint64 const reg0_in,
+        bsl::uint16 const reg1_in,
+        bsl::uint16 const reg2_in,
+        bsl::uint16 const reg3_in) noexcept -> bsl::uint64;
 
     // -------------------------------------------------------------------------
     // bf_intrinsic_ops

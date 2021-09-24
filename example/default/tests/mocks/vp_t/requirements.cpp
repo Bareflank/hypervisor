@@ -58,18 +58,16 @@ main() noexcept -> bsl::exit_code
                 static_assert(noexcept(mut_vp.initialize({}, {}, {}, {}, {})));
                 static_assert(noexcept(mut_vp.release({}, {}, {}, {})));
                 static_assert(noexcept(mut_vp.id()));
-                static_assert(noexcept(mut_vp.allocate({}, {}, {}, {}, {}, {})));
+                static_assert(noexcept(mut_vp.allocate({}, {}, {}, {}, {})));
                 static_assert(noexcept(mut_vp.deallocate({}, {}, {}, {})));
                 static_assert(noexcept(mut_vp.is_allocated()));
                 static_assert(noexcept(mut_vp.is_deallocated()));
                 static_assert(noexcept(mut_vp.assigned_vm()));
-                static_assert(noexcept(mut_vp.assigned_pp()));
 
                 static_assert(noexcept(vp.id()));
                 static_assert(noexcept(vp.is_allocated()));
                 static_assert(noexcept(vp.is_deallocated()));
                 static_assert(noexcept(vp.assigned_vm()));
-                static_assert(noexcept(vp.assigned_pp()));
             };
         };
     };

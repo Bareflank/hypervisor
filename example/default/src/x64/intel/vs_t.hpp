@@ -158,7 +158,10 @@ namespace example
             bsl::safe_u16 const &vpid,
             bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
         {
-            bsl::expects(this->id() != syscall::BF_INVALID_ID);
+            syscall::bf_reg_t mut_idx{};
+            auto const vsid{this->id()};
+
+            bsl::expects(vsid != syscall::BF_INVALID_ID);
             bsl::expects(allocated_status_t::deallocated == m_allocated);
 
             bsl::expects(vpid.is_valid_and_checked());
@@ -170,64 +173,29 @@ namespace example
             bsl::discard(tls);
             bsl::discard(intrinsic);
 
-            auto const vsid{this->id()};
-            if (mut_sys.is_vs_a_root_vs(vsid)) {
-                bsl::expects(mut_sys.bf_vs_op_init_as_root(vsid));
-            }
-            else {
-                bsl::touch();
-            }
-
-            constexpr auto vmcs_vpid_val{0x1_u64};
+            auto const vmcs_vpid_val{bsl::safe_u64::magic_1()};
             constexpr auto vmcs_vpid_idx{syscall::bf_reg_t::bf_reg_t_virtual_processor_identifier};
-            bsl::expects(mut_sys.bf_vs_op_write(this->id(), vmcs_vpid_idx, vmcs_vpid_val));
+            bsl::expects(mut_sys.bf_vs_op_write(vsid, vmcs_vpid_idx, vmcs_vpid_val));
 
             constexpr auto vmcs_link_ptr_val{0xFFFFFFFFFFFFFFFF_u64};
             constexpr auto vmcs_link_ptr_idx{syscall::bf_reg_t::bf_reg_t_vmcs_link_pointer};
-            bsl::expects(mut_sys.bf_vs_op_write(this->id(), vmcs_link_ptr_idx, vmcs_link_ptr_val));
+            bsl::expects(mut_sys.bf_vs_op_write(vsid, vmcs_link_ptr_idx, vmcs_link_ptr_val));
 
-            constexpr auto vmx_true_pinbased_ctls{0x48D_u32};
-            constexpr auto vmx_true_procbased_ctls{0x48E_u32};
-            constexpr auto vmx_true_exit_ctls{0x48F_u32};
-            constexpr auto vmx_true_entry_ctls{0x490_u32};
-            constexpr auto vmx_true_procbased_ctls2{0x48B_u32};
-
-            bsl::safe_umx mut_ctls{};
-            syscall::bf_reg_t mut_idx{};
-
-            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(vmx_true_pinbased_ctls);
-            bsl::expects(mut_ctls.is_valid_and_checked());
-
-            mut_idx = syscall::bf_reg_t::bf_reg_t_pin_based_vm_execution_ctls;
-            bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, ctls_mask(mut_ctls)));
+            bsl::safe_u64 mut_pin_ctls{};
+            bsl::safe_u64 mut_proc_ctls{};
+            bsl::safe_u64 mut_exit_ctls{};
+            bsl::safe_u64 mut_entry_ctls{};
+            bsl::safe_u64 mut_proc2_ctls{};
 
             constexpr auto enable_msr_bitmaps{0x10000000_u64};
-            constexpr auto enable_procbased_ctls2{0x80000000_u64};
+            constexpr auto enable_proc2_ctls{0x80000000_u64};
 
-            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(vmx_true_procbased_ctls);
-            bsl::expects(mut_ctls.is_valid_and_checked());
-
-            mut_ctls |= enable_msr_bitmaps;
-            mut_ctls |= enable_procbased_ctls2;
-
-            mut_idx = syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls;
-            bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, ctls_mask(mut_ctls)));
-
-            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(vmx_true_exit_ctls);
-            bsl::expects(mut_ctls.is_valid_and_checked());
-
-            mut_idx = syscall::bf_reg_t::bf_reg_t_vmexit_ctls;
-            bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, ctls_mask(mut_ctls)));
+            mut_proc_ctls |= enable_msr_bitmaps;
+            mut_proc_ctls |= enable_proc2_ctls;
 
             constexpr auto enable_ia32e_mode{0x00000200_u64};
 
-            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(vmx_true_entry_ctls);
-            bsl::expects(mut_ctls.is_valid_and_checked());
-
-            mut_ctls |= enable_ia32e_mode;
-
-            mut_idx = syscall::bf_reg_t::bf_reg_t_vmentry_ctls;
-            bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, ctls_mask(mut_ctls)));
+            mut_entry_ctls |= enable_ia32e_mode;
 
             constexpr auto enable_vpid{0x00000020_u64};
             constexpr auto enable_rdtscp{0x00000008_u64};
@@ -235,20 +203,33 @@ namespace example
             constexpr auto enable_xsave{0x00100000_u64};
             constexpr auto enable_uwait{0x04000000_u64};
 
-            mut_ctls = mut_sys.bf_intrinsic_op_rdmsr(vmx_true_procbased_ctls2);
-            bsl::expects(mut_ctls.is_valid_and_checked());
+            mut_proc2_ctls |= enable_vpid;
+            mut_proc2_ctls |= enable_rdtscp;
+            mut_proc2_ctls |= enable_invpcid;
+            mut_proc2_ctls |= enable_xsave;
+            mut_proc2_ctls |= enable_uwait;
 
-            mut_ctls |= enable_vpid;
-            mut_ctls |= enable_rdtscp;
-            mut_ctls |= enable_invpcid;
-            mut_ctls |= enable_xsave;
-            mut_ctls |= enable_uwait;
+            mut_idx = syscall::bf_reg_t::bf_reg_t_pin_based_vm_execution_ctls;
+            bsl::expects(mut_sys.bf_vs_op_write(vsid, mut_idx, mut_pin_ctls));
+
+            mut_idx = syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls;
+            bsl::expects(mut_sys.bf_vs_op_write(vsid, mut_idx, mut_proc_ctls));
+
+            mut_idx = syscall::bf_reg_t::bf_reg_t_vmexit_ctls;
+            bsl::expects(mut_sys.bf_vs_op_write(vsid, mut_idx, mut_exit_ctls));
+
+            mut_idx = syscall::bf_reg_t::bf_reg_t_vmentry_ctls;
+            bsl::expects(mut_sys.bf_vs_op_write(vsid, mut_idx, mut_entry_ctls));
 
             mut_idx = syscall::bf_reg_t::bf_reg_t_secondary_proc_based_vm_execution_ctls;
-            bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, ctls_mask(mut_ctls)));
+            bsl::expects(mut_sys.bf_vs_op_write(vsid, mut_idx, mut_proc2_ctls));
 
-            constexpr auto msr_bitmaps_idx{syscall::bf_reg_t::bf_reg_t_address_of_msr_bitmaps};
-            bsl::expects(mut_sys.bf_vs_op_write(this->id(), msr_bitmaps_idx, gs.msr_bitmap_phys));
+            if (mut_sys.is_vs_a_root_vs(vsid)) {
+                bsl::expects(mut_sys.bf_vs_op_init_as_root(vsid));
+            }
+            else {
+                bsl::touch();
+            }
 
             m_assigned_vpid = ~vpid;
             m_assigned_ppid = ~ppid;

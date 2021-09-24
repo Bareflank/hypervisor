@@ -180,7 +180,7 @@ namespace mk
             auto const ppid{bsl::to_idx(mut_tls.ppid)};
 
             bsl::expects(allocated_status_t::allocated == m_allocated);
-            bsl::expects(syscall::BF_INVALID_ID == mut_tls.active_vpid);
+            bsl::expects(syscall::BF_INVALID_ID == mut_tls.active_vmid);
             bsl::expects(ppid < m_active.size());
 
             *m_active.at_if(ppid) = true;
@@ -199,7 +199,7 @@ namespace mk
             auto const ppid{bsl::to_idx(mut_tls.ppid)};
 
             bsl::expects(allocated_status_t::allocated == m_allocated);
-            bsl::expects(this->id() == mut_tls.active_vpid);
+            bsl::expects(this->id() == mut_tls.active_vmid);
             bsl::expects(ppid < m_active.size());
 
             *m_active.at_if(ppid) = false;

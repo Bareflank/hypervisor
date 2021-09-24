@@ -563,17 +563,6 @@ extern "C" {
     ///
     pub fn bf_vp_op_destroy_vp_impl(reg0_in: u64, reg1_in: u16) -> u64;
 
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vp_op_migrate.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @return n/a
-    ///
-    pub fn bf_vp_op_migrate_impl(reg0_in: u64, reg1_in: u16, reg2_in: u16) -> u64;
-
     // -------------------------------------------------------------------------
     // bf_vs_ops
     // -------------------------------------------------------------------------
@@ -695,14 +684,25 @@ extern "C" {
     pub fn bf_vs_op_promote_impl(reg0_in: u64, reg1_in: u16) -> u64;
 
     /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vs_op_clear_vs.
+    ///   @brief Implements the ABI for bf_vs_op_clear.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
     ///   @return n/a
     ///
-    pub fn bf_vs_op_clear_vs_impl(reg0_in: u64, reg1_in: u16) -> u64;
+    pub fn bf_vs_op_clear_impl(reg0_in: u64, reg1_in: u16) -> u64;
+
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_vs_op_migrate.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
+    ///   @param reg2_in n/a
+    ///   @return n/a
+    ///
+    pub fn bf_vs_op_migrate_impl(reg0_in: u64, reg1_in: u16, reg2_in: u16) -> u64;
 
     // -------------------------------------------------------------------------
     // bf_intrinsic_ops
