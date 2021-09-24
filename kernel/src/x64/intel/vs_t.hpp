@@ -481,6 +481,9 @@ namespace mk
             m_vmcs->revision_id = bsl::to_u32_unsafe(revision_id).get();
             this->ensure_this_vs_is_loaded(mut_tls, mut_intrinsic);
 
+            bsl::expects(mut_intrinsic.vmcl(&m_vmcs_phys));
+            bsl::expects(mut_intrinsic.vmld(&m_vmcs_phys));
+
             auto const es{mut_intrinsic.es_selector()};
             bsl::expects(mut_intrinsic.vmwr16(VMCS_HOST_ES_SELECTOR, es));
             auto const cs{mut_intrinsic.cs_selector()};
@@ -831,19 +834,21 @@ namespace mk
         ///   @brief Migrates this vs_t from one PP to another
         ///
         /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsic_t to use
         ///   @param ppid the ID of the PP to migrate to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        migrate(intrinsic_t const &intrinsic, bsl::safe_u16 const &ppid) noexcept -> bsl::errc_type
+        migrate(tls_t &mut_tls, intrinsic_t const &intrinsic, bsl::safe_u16 const &ppid) noexcept
+            -> bsl::errc_type
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
             bsl::expects(ppid.is_valid_and_checked());
             bsl::expects(ppid != syscall::BF_INVALID_ID);
 
-            auto const ret{this->clear(intrinsic)};
+            auto const ret{this->clear(mut_tls, intrinsic)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
@@ -3137,12 +3142,13 @@ namespace mk
         ///     values stored in the vs_t.
         ///
         /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsic_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        clear(intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
+        clear(tls_t &mut_tls, intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
         {
             bsl::discard(intrinsic);
             bsl::expects(allocated_status_t::allocated == m_allocated);
@@ -3159,6 +3165,10 @@ namespace mk
 
             bsl::expects(intrinsic.vmcl(&m_vmcs_phys));
             m_vmcs_missing_registers.launched = {};
+
+            if (this->id() == mut_tls.loaded_vsid) {
+                mut_tls.loaded_vsid = syscall::BF_INVALID_ID.get();
+            }
 
             return bsl::errc_success;
         }

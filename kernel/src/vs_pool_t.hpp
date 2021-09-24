@@ -263,6 +263,7 @@ namespace mk
         ///   @brief Migrates the requested vs_t from one PP to another
         ///
         /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
         ///   @param mut_intrinsic the intrinsic_t to use
         ///   @param ppid the ID of the PP to migrate to
         ///   @param vsid the ID of the vs_t to migrate
@@ -271,11 +272,12 @@ namespace mk
         ///
         [[nodiscard]] constexpr auto
         migrate(
+            tls_t &mut_tls,
             intrinsic_t &mut_intrinsic,
             bsl::safe_u16 const &ppid,
             bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
         {
-            return this->get_vs(vsid)->migrate(mut_intrinsic, ppid);
+            return this->get_vs(vsid)->migrate(mut_tls, mut_intrinsic, ppid);
         }
 
         /// <!-- description -->
@@ -458,15 +460,17 @@ namespace mk
         ///     values stored in the vs_t.
         ///
         /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vsid the ID of the vs_t to clear
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        clear(intrinsic_t const &intrinsic, bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
+        clear(tls_t &mut_tls, intrinsic_t const &intrinsic, bsl::safe_u16 const &vsid) noexcept
+            -> bsl::errc_type
         {
-            return this->get_vs(vsid)->clear(intrinsic);
+            return this->get_vs(vsid)->clear(mut_tls, intrinsic);
         }
 
         /// <!-- description -->

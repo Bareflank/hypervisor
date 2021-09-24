@@ -452,19 +452,21 @@ namespace mk
         ///   @brief Migrates this vs_t from one PP to another
         ///
         /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
         ///   @param intrinsic the intrinsic_t to use
         ///   @param ppid the ID of the PP to migrate to
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        migrate(intrinsic_t const &intrinsic, bsl::safe_u16 const &ppid) noexcept -> bsl::errc_type
+        migrate(tls_t const &tls, intrinsic_t const &intrinsic, bsl::safe_u16 const &ppid) noexcept
+            -> bsl::errc_type
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
             bsl::expects(ppid.is_valid_and_checked());
             bsl::expects(ppid != syscall::BF_INVALID_ID);
 
-            auto const ret{this->clear(intrinsic)};
+            auto const ret{this->clear(tls, intrinsic)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
@@ -2367,13 +2369,15 @@ namespace mk
         ///     values stored in the vs_t.
         ///
         /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
         ///   @param intrinsic the intrinsic_t to use
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        clear(intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
+        clear(tls_t const &tls, intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
         {
+            bsl::discard(tls);
             bsl::discard(intrinsic);
             bsl::expects(allocated_status_t::allocated == m_allocated);
 

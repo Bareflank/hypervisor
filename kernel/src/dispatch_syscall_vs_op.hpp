@@ -384,7 +384,7 @@ namespace mk
             return syscall::BF_STATUS_INVALID_INPUT_REG1;
         }
 
-        auto const ret{mut_vs_pool.clear(intrinsic, vsid)};
+        auto const ret{mut_vs_pool.clear(mut_tls, intrinsic, vsid)};
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::BF_STATUS_FAILURE_UNKNOWN;
@@ -430,7 +430,7 @@ namespace mk
             return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
-        auto const ret{mut_vs_pool.migrate(mut_intrinsic, ppid, vsid)};
+        auto const ret{mut_vs_pool.migrate(mut_tls, mut_intrinsic, ppid, vsid)};
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::BF_STATUS_FAILURE_UNKNOWN;
