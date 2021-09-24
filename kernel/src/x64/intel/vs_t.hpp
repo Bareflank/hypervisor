@@ -3169,6 +3169,9 @@ namespace mk
             if (this->id() == mut_tls.loaded_vsid) {
                 mut_tls.loaded_vsid = syscall::BF_INVALID_ID.get();
             }
+            else {
+                bsl::touch();
+            }
 
             return bsl::errc_success;
         }
