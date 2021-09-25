@@ -477,6 +477,76 @@ namespace mk
         return true;
     }
 
+    /// <!-- description -->
+    ///   @brief Returns true if the requested vp_t is active on another PP.
+    ///     Returns false otherwise.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param tls the current TLS block
+    ///   @param vp_pool the vp_pool_t to use
+    ///   @param vpid the ID of the VP to query
+    ///   @return Returns true if the requested vp_t is active on another PP.
+    ///     Returns false otherwise.
+    ///
+    [[nodiscard]] constexpr auto
+    is_vp_active_on_another_pp(
+        tls_t const &tls, vp_pool_t const &vp_pool, bsl::safe_u16 const &vpid) noexcept -> bool
+    {
+        if (vp_pool.is_active_on_this_pp(tls, vpid)) {
+            return false;
+        }
+
+        auto const vp_active{vp_pool.is_active(vpid)};
+        if (bsl::unlikely(!vp_active.is_invalid())) {
+            bsl::error() << "vp "                              // --
+                         << bsl::hex(vpid)                     // --
+                         << " is already active on PP "        // --
+                         << bsl::hex(vp_active)                // --
+                         << " and therefore cannot be used"    // --
+                         << bsl::endl                          // --
+                         << bsl::here();                       // --
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <!-- description -->
+    ///   @brief Returns true if the requested vs_t is active on another PP.
+    ///     Returns false otherwise.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param tls the current TLS block
+    ///   @param vs_pool the vs_pool_t to use
+    ///   @param vsid the ID of the VS to query
+    ///   @return Returns true if the requested vs_t is active on another PP.
+    ///     Returns false otherwise.
+    ///
+    [[nodiscard]] constexpr auto
+    is_vs_active_on_another_pp(
+        tls_t const &tls, vs_pool_t const &vs_pool, bsl::safe_u16 const &vsid) noexcept -> bool
+    {
+        if (vs_pool.is_active_on_this_pp(tls, vsid)) {
+            return false;
+        }
+
+        auto const vs_active{vs_pool.is_active(vsid)};
+        if (bsl::unlikely(!vs_active.is_invalid())) {
+            bsl::error() << "vs "                              // --
+                         << bsl::hex(vsid)                     // --
+                         << " is already active on PP "        // --
+                         << bsl::hex(vs_active)                // --
+                         << " and therefore cannot be used"    // --
+                         << bsl::endl                          // --
+                         << bsl::here();                       // --
+
+            return true;
+        }
+
+        return false;
+    }
+
     /// ------------------------------------------------------------------------
     /// Get Functions
     /// ------------------------------------------------------------------------

@@ -1324,7 +1324,7 @@ namespace lib
         ///     and physical address that was allocated and mapped using
         ///     OFFSET.
         ///
-        template<bsl::uintmx OFFSET>
+        template<bsl::uintmx OFFSET = HYPERVISOR_EXT_PAGE_POOL_ADDR.get()>
         [[nodiscard]] constexpr auto
         allocate_page(
             TLS_TYPE const &tls,

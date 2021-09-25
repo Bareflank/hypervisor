@@ -251,6 +251,34 @@ intrinsic_vmrun:
     mov r12, rsi    /* guest VMCB phys */
     mov r13, rdx    /* host VMCB */
     mov r14, rcx    /* host VMCB phys */
+    mov r15, r8     /* missing registers */
+
+    /**************************************************************************/
+    /* Missing Registgers                                                     */
+    /**************************************************************************/
+
+    mov rax, [r15 + 0x010]
+    mov cr8, rax
+
+    mov rax, [r15 + 0x018]
+    mov dr0, rax
+
+    mov rax, [r15 + 0x020]
+    mov dr1, rax
+
+    mov rax, [r15 + 0x028]
+    mov dr2, rax
+
+    mov rax, [r15 + 0x030]
+    mov dr3, rax
+
+    xor ecx, ecx
+    xgetbv
+    mov [r15 + 0x0D8], eax
+    mov [r15 + 0x0DC], edx
+    mov eax, [r15 + 0x088]
+    mov edx, [r15 + 0x08C]
+    xsetbv
 
     /**************************************************************************/
     /* PAT                                                                    */
@@ -275,6 +303,7 @@ skip_load_pat:
     mov rax, fs:[0x800]
     mov [r11 + 0x05F8], rax
 
+    push r15
     push r11
     push r12
     push r13
@@ -336,6 +365,7 @@ skip_load_pat:
     pop r13
     pop r12
     pop r11
+    pop r15
 
     mov rax, [r11 + 0x05F8]
     mov fs:[0x800], rax
@@ -355,6 +385,42 @@ skip_load_pat:
     call intrinsic_wrmsr_unsafe
 
 skip_save_pat:
+
+    /**************************************************************************/
+    /* Missing Registers                                                      */
+    /**************************************************************************/
+
+    xor ecx, ecx
+    xgetbv
+    mov [r15 + 0x088], eax
+    mov [r15 + 0x08C], edx
+    mov eax, [r15 + 0x0D8]
+    mov edx, [r15 + 0x0DC]
+    xsetbv
+
+    xor rcx, rcx
+
+    mov rax, dr3
+    mov [r15 + 0x030], rax
+    mov dr3, rcx
+
+    mov rax, dr2
+    mov [r15 + 0x028], rax
+    mov dr2, rcx
+
+    mov rax, dr1
+    mov [r15 + 0x020], rax
+    mov dr1, rcx
+
+    mov rax, dr0
+    mov [r15 + 0x018], rax
+    mov dr0, rcx
+
+    mov rax, cr8
+    mov [r15 + 0x010], rax
+    mov cr8, rcx
+
+    mov cr2, rcx
 
     /**************************************************************************/
     /* Done                                                                   */

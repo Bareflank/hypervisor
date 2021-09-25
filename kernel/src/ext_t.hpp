@@ -1203,21 +1203,19 @@ namespace mk
         [[nodiscard]] constexpr auto
         alloc_page(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept -> alloc_page_t
         {
-            /// NOTE:
-            /// - See update_direct_map_rpts for more details on how this
-            ///   works, but the TL;DR is, we map the page into VM 0's direct
-            ///   map. VM 0 cannot be destroyed, so auto_release works as
-            ///   expected here as destroying any other VM will not attempt
-            ///   to free the page we are mapping here. The extension can
-            ///   access this memory from any VM as this is direct map memory
-            ///   so any attempt to access this memory when a VM is active
-            ///   that is not #0 will result in a page fault, and the page
-            ///   handler will direct map the address into that VM as it
-            ///   would any other physical address.
-            ///
+            auto const page{m_main_rpt.allocate_page<>(mut_tls, mut_page_pool)};
+            if (bsl::unlikely(page.virt.is_invalid())) {
+                bsl::print<bsl::V>() << bsl::here();
+                return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
+            }
 
-            constexpr auto min_addr{HYPERVISOR_EXT_PAGE_POOL_ADDR};
-            return m_direct_map_rpts.front().allocate_page<min_addr.get()>(mut_tls, mut_page_pool);
+            auto const ret{this->update_direct_map_rpts(mut_tls)};
+            if (bsl::unlikely(!ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
+            }
+
+            return page;
         }
 
         /// <!-- description -->
@@ -1283,19 +1281,6 @@ namespace mk
             bsl::expects(huge_virt.is_pos());
 
             /// NOTE:
-            /// - See update_direct_map_rpts for more details on how this
-            ///   works, but the TL;DR is, we map the page into VM 0's direct
-            ///   map. VM 0 cannot be destroyed, so auto_release works as
-            ///   expected here as destroying any other VM will not attempt
-            ///   to free the page we are mapping here. The extension can
-            ///   access this memory from any VM as this is direct map memory
-            ///   so any attempt to access this memory when a VM is active
-            ///   that is not #0 will result in a page fault, and the page
-            ///   handler will direct map the address into that VM as it
-            ///   would any other physical address.
-            ///
-
-            /// NOTE:
             /// - Huge allocations come from the kernel's direct map, which
             ///   is the same size as the extension's direct map, something
             ///   that is validated by CMake. As a result, the virtual and
@@ -1315,7 +1300,7 @@ namespace mk
                 auto const page_virt{(huge_virt + bsl::to_umx(mut_i)).checked()};
                 auto const page_phys{(huge_phys + bsl::to_umx(mut_i)).checked()};
 
-                auto const ret{m_direct_map_rpts.front().map_page(
+                auto const ret{m_main_rpt.map_page(
                     mut_tls, mut_page_pool, page_virt, page_phys, MAP_PAGE_RW, true)};
 
                 if (bsl::unlikely(!ret)) {
@@ -1324,6 +1309,12 @@ namespace mk
                 }
 
                 bsl::touch();
+            }
+
+            auto const ret{this->update_direct_map_rpts(mut_tls)};
+            if (bsl::unlikely(!ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
             }
 
             return {huge_virt, huge_phys};
@@ -1445,7 +1436,18 @@ namespace mk
             tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_umx const &page_virt) noexcept
             -> bsl::errc_type
         {
-            bsl::expects(false);    // REMOVE ME, use config option for this
+            /// TODO:
+            /// - This should be a config option that is on by default.
+            ///
+
+            bsl::error() << "attempt to map virtual address: "           // --
+                         << bsl::hex(page_virt)                          // --
+                         << " without using bf_vm_op_map_direct"         // --
+                         << " is not supported by this configuration"    // --
+                         << bsl::endl                                    // --
+                         << bsl::here();                                 // --
+
+            return bsl::errc_failure;
 
             bsl::expects(bsl::to_umx(mut_tls.active_vmid) < m_direct_map_rpts.size());
             bsl::expects(page_virt.is_valid_and_checked());
@@ -1696,8 +1698,10 @@ namespace mk
         [[nodiscard]] constexpr auto
         fail(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept -> bsl::errc_type
         {
-            auto const arg{syscall::BF_STATUS_FAILURE_UNKNOWN};
-            auto const ret{this->execute(mut_tls, mut_intrinsic, m_fail_ip, arg)};
+            auto const arg0{bsl::to_umx(mut_tls.active_vsid)};
+            auto const arg1{syscall::BF_STATUS_FAILURE_UNKNOWN};
+
+            auto const ret{this->execute(mut_tls, mut_intrinsic, m_fail_ip, arg0, arg1)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;

@@ -86,6 +86,18 @@
     SS_OFFSET_CR3 EQU 158h
     ; @brief defines the offset of state_save_t.cr4
     SS_OFFSET_CR4 EQU 160h
+    ; @brief defines the offset of state_save_t.cr8
+    SS_OFFSET_CR8 EQU 168h
+    ; @brief defines the offset of state_save_t.xcr0
+    SS_OFFSET_XCR0 EQU 170h
+    ; @brief defines the offset of state_save_t.dr0
+    SS_OFFSET_DR0 EQU 1C0h
+    ; @brief defines the offset of state_save_t.dr1
+    SS_OFFSET_DR1 EQU 1C8h
+    ; @brief defines the offset of state_save_t.dr2
+    SS_OFFSET_DR2 EQU 1D0h
+    ; @brief defines the offset of state_save_t.dr3
+    SS_OFFSET_DR3 EQU 1D8h
     ; @brief defines the offset of state_save_t.dr6
     SS_OFFSET_DR6 EQU 1F0h
     ; @brief defines the offset of state_save_t.dr7
@@ -162,9 +174,29 @@
     mov rax, [r15 + SS_OFFSET_DR6]
     mov dr6, rax
 
+    mov rax, [r15 + SS_OFFSET_DR3]
+    mov dr3, rax
+
+    mov rax, [r15 + SS_OFFSET_DR2]
+    mov dr2, rax
+
+    mov rax, [r15 + SS_OFFSET_DR1]
+    mov dr1, rax
+
+    mov rax, [r15 + SS_OFFSET_DR0]
+    mov dr0, rax
+
     ; **************************************************************************
     ; Control Registers
     ; **************************************************************************
+
+    xor ecx, ecx
+    mov eax, [r15 + SS_OFFSET_XCR0 + 0h]
+    mov edx, [r15 + SS_OFFSET_XCR0 + 4h]
+    xsetbv
+
+    mov rax, [r15 + SS_OFFSET_CR8]
+    mov cr8, rax
 
     ; Notes:
     ; - When we promote the OS, we need to handle PCID properly. This is

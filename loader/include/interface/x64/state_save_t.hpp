@@ -41,9 +41,9 @@ namespace loader
     /// @brief the size of reserved #0 in the state_save_t
     constexpr auto SS_PAD_SIZE{0x6_umx};
     /// @brief the size of reserved #0 in the state_save_t
-    constexpr auto SS_RESERVED0_SIZE{0xB_umx};
+    constexpr auto SS_RESERVED0_SIZE{0x9_umx};
     /// @brief the size of reserved #1 in the state_save_t
-    constexpr auto SS_RESERVED1_SIZE{0x6_umx};
+    constexpr auto SS_RESERVED1_SIZE{0x2_umx};
     /// @brief the size of reserved #2 in the state_save_t
     constexpr auto SS_RESERVED2_SIZE{0x8_umx};
     /// @brief the size of reserved #3 in the state_save_t
@@ -216,15 +216,29 @@ namespace loader
         bsl::uint64 cr3;
         /// @brief stores the value of the CR4 control register (0x160)
         bsl::uint64 cr4;
+        /// @brief stores the value of the CR8 control register (0x168)
+        bsl::uint64 cr8;
 
-        /// @brief reserved for future use (0x168)
+        /// @brief stores the value of the XCR0 control register (0x170)
+        bsl::uint64 xcr0;
+
+        /// @brief reserved for future use (0x178)
         bsl::array<bsl::uint64, SS_RESERVED0_SIZE.get()> reserved0;
 
         /// --------------------------------------------------------------------
         /// Debug Registers
         /// --------------------------------------------------------------------
 
-        /// @brief reserved for future use (0x1C0)
+        /// @brief stores the value of DR0 debug register (0x1C0)
+        bsl::uint64 dr0;
+        /// @brief stores the value of DR1 debug register (0x1C8)
+        bsl::uint64 dr1;
+        /// @brief stores the value of DR2 debug register (0x1D0)
+        bsl::uint64 dr2;
+        /// @brief stores the value of DR3 debug register (0x1D8)
+        bsl::uint64 dr3;
+
+        /// @brief reserved for future use (0x1E0)
         bsl::array<bsl::uint64, SS_RESERVED1_SIZE.get()> reserved1;
 
         /// @brief stores the value of DR6 debug register (0x1F0)

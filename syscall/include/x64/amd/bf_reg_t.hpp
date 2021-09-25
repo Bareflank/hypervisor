@@ -31,7 +31,7 @@ namespace syscall
 {
     /// @brief stores the max value for a bf_reg_t
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    constexpr bsl::uint64 BF_MAX_REG_T{static_cast<bsl::uint64>(116)};
+    constexpr bsl::uint64 BF_MAX_REG_T{static_cast<bsl::uint64>(122)};
 
     /// <!-- description -->
     ///   @brief Defines which register to use for read/write
@@ -68,210 +68,222 @@ namespace syscall
         bf_reg_t_r14 = static_cast<bsl::uint64>(13),
         /// @brief defines the r15 register
         bf_reg_t_r15 = static_cast<bsl::uint64>(14),
-        /// @brief defines the intercept_cr_read register in the VMCB
+        /// @brief defines the intercept_cr_read register
         bf_reg_t_intercept_cr_read = static_cast<bsl::uint64>(15),
-        /// @brief defines the intercept_cr_write register in the VMCB
+        /// @brief defines the intercept_cr_write register
         bf_reg_t_intercept_cr_write = static_cast<bsl::uint64>(16),
-        /// @brief defines the intercept_dr_read register in the VMCB
+        /// @brief defines the intercept_dr_read register
         bf_reg_t_intercept_dr_read = static_cast<bsl::uint64>(17),
-        /// @brief defines the intercept_dr_write register in the VMCB
+        /// @brief defines the intercept_dr_write register
         bf_reg_t_intercept_dr_write = static_cast<bsl::uint64>(18),
-        /// @brief defines the intercept_exception register in the VMCB
+        /// @brief defines the intercept_exception register
         bf_reg_t_intercept_exception = static_cast<bsl::uint64>(19),
-        /// @brief defines the intercept_instruction1 register in the VMCB
+        /// @brief defines the intercept_instruction1 register
         bf_reg_t_intercept_instruction1 = static_cast<bsl::uint64>(20),
-        /// @brief defines the intercept_instruction2 register in the VMCB
+        /// @brief defines the intercept_instruction2 register
         bf_reg_t_intercept_instruction2 = static_cast<bsl::uint64>(21),
-        /// @brief defines the intercept_instruction3 register in the VMCB
+        /// @brief defines the intercept_instruction3 register
         bf_reg_t_intercept_instruction3 = static_cast<bsl::uint64>(22),
-        /// @brief defines the pause_filter_threshold register in the VMCB
+        /// @brief defines the pause_filter_threshold register
         bf_reg_t_pause_filter_threshold = static_cast<bsl::uint64>(23),
-        /// @brief defines the pause_filter_count register in the VMCB
+        /// @brief defines the pause_filter_count register
         bf_reg_t_pause_filter_count = static_cast<bsl::uint64>(24),
-        /// @brief defines the iopm_base_pa register in the VMCB
+        /// @brief defines the iopm_base_pa register
         bf_reg_t_iopm_base_pa = static_cast<bsl::uint64>(25),
-        /// @brief defines the msrpm_base_pa register in the VMCB
+        /// @brief defines the msrpm_base_pa register
         bf_reg_t_msrpm_base_pa = static_cast<bsl::uint64>(26),
-        /// @brief defines the tsc_offset register in the VMCB
+        /// @brief defines the tsc_offset register
         bf_reg_t_tsc_offset = static_cast<bsl::uint64>(27),
-        /// @brief defines the guest_asid register in the VMCB
+        /// @brief defines the guest_asid register
         bf_reg_t_guest_asid = static_cast<bsl::uint64>(28),
-        /// @brief defines the tlb_control register in the VMCB
+        /// @brief defines the tlb_control register
         bf_reg_t_tlb_control = static_cast<bsl::uint64>(29),
-        /// @brief defines the virtual_interrupt_a register in the VMCB
+        /// @brief defines the virtual_interrupt_a register
         bf_reg_t_virtual_interrupt_a = static_cast<bsl::uint64>(30),
-        /// @brief defines the virtual_interrupt_b register in the VMCB
+        /// @brief defines the virtual_interrupt_b register
         bf_reg_t_virtual_interrupt_b = static_cast<bsl::uint64>(31),
-        /// @brief defines the exitcode register in the VMCB
+        /// @brief defines the exitcode register
         bf_reg_t_exitcode = static_cast<bsl::uint64>(32),
-        /// @brief defines the exitinfo1 register in the VMCB
+        /// @brief defines the exitinfo1 register
         bf_reg_t_exitinfo1 = static_cast<bsl::uint64>(33),
-        /// @brief defines the exitinfo2 register in the VMCB
+        /// @brief defines the exitinfo2 register
         bf_reg_t_exitinfo2 = static_cast<bsl::uint64>(34),
-        /// @brief defines the exitininfo register in the VMCB
+        /// @brief defines the exitininfo register
         bf_reg_t_exitininfo = static_cast<bsl::uint64>(35),
-        /// @brief defines the ctls1 register in the VMCB
+        /// @brief defines the ctls1 register
         bf_reg_t_ctls1 = static_cast<bsl::uint64>(36),
-        /// @brief defines the avic_apic_bar register in the VMCB
+        /// @brief defines the avic_apic_bar register
         bf_reg_t_avic_apic_bar = static_cast<bsl::uint64>(37),
-        /// @brief defines the guest_pa_of_ghcb register in the VMCB
+        /// @brief defines the guest_pa_of_ghcb register
         bf_reg_t_guest_pa_of_ghcb = static_cast<bsl::uint64>(38),
-        /// @brief defines the eventinj register in the VMCB
+        /// @brief defines the eventinj register
         bf_reg_t_eventinj = static_cast<bsl::uint64>(39),
-        /// @brief defines the n_cr3 register in the VMCB
+        /// @brief defines the n_cr3 register
         bf_reg_t_n_cr3 = static_cast<bsl::uint64>(40),
-        /// @brief defines the ctls2 register in the VMCB
+        /// @brief defines the ctls2 register
         bf_reg_t_ctls2 = static_cast<bsl::uint64>(41),
-        /// @brief defines the vmcb_clean_bits register in the VMCB
+        /// @brief defines the vmcb_clean_bits register
         bf_reg_t_vmcb_clean_bits = static_cast<bsl::uint64>(42),
-        /// @brief defines the nrip register in the VMCB
+        /// @brief defines the nrip register
         bf_reg_t_nrip = static_cast<bsl::uint64>(43),
-        /// @brief defines the number_of_bytes_fetched register in the VMCB
+        /// @brief defines the number_of_bytes_fetched register
         bf_reg_t_number_of_bytes_fetched = static_cast<bsl::uint64>(44),
-        /// @brief defines the avic_apic_backing_page_ptr register in the VMCB
+        /// @brief defines the avic_apic_backing_page_ptr register
         bf_reg_t_avic_apic_backing_page_ptr = static_cast<bsl::uint64>(45),
-        /// @brief defines the avic_logical_table_ptr register in the VMCB
+        /// @brief defines the avic_logical_table_ptr register
         bf_reg_t_avic_logical_table_ptr = static_cast<bsl::uint64>(46),
-        /// @brief defines the avic_physical_table_ptr register in the VMCB
+        /// @brief defines the avic_physical_table_ptr register
         bf_reg_t_avic_physical_table_ptr = static_cast<bsl::uint64>(47),
-        /// @brief defines the vmsa_ptr register in the VMCB
+        /// @brief defines the vmsa_ptr register
         bf_reg_t_vmsa_ptr = static_cast<bsl::uint64>(48),
-        /// @brief defines the es_selector register in the VMCB
+        /// @brief defines the es_selector register
         bf_reg_t_es_selector = static_cast<bsl::uint64>(49),
-        /// @brief defines the es_attrib register in the VMCB
+        /// @brief defines the es_attrib register
         bf_reg_t_es_attrib = static_cast<bsl::uint64>(50),
-        /// @brief defines the es_limit register in the VMCB
+        /// @brief defines the es_limit register
         bf_reg_t_es_limit = static_cast<bsl::uint64>(51),
-        /// @brief defines the es_base register in the VMCB
+        /// @brief defines the es_base register
         bf_reg_t_es_base = static_cast<bsl::uint64>(52),
-        /// @brief defines the cs_selector register in the VMCB
+        /// @brief defines the cs_selector register
         bf_reg_t_cs_selector = static_cast<bsl::uint64>(53),
-        /// @brief defines the cs_attrib register in the VMCB
+        /// @brief defines the cs_attrib register
         bf_reg_t_cs_attrib = static_cast<bsl::uint64>(54),
-        /// @brief defines the cs_limit register in the VMCB
+        /// @brief defines the cs_limit register
         bf_reg_t_cs_limit = static_cast<bsl::uint64>(55),
-        /// @brief defines the cs_base register in the VMCB
+        /// @brief defines the cs_base register
         bf_reg_t_cs_base = static_cast<bsl::uint64>(56),
-        /// @brief defines the ss_selector register in the VMCB
+        /// @brief defines the ss_selector register
         bf_reg_t_ss_selector = static_cast<bsl::uint64>(57),
-        /// @brief defines the ss_attrib register in the VMCB
+        /// @brief defines the ss_attrib register
         bf_reg_t_ss_attrib = static_cast<bsl::uint64>(58),
-        /// @brief defines the ss_limit register in the VMCB
+        /// @brief defines the ss_limit register
         bf_reg_t_ss_limit = static_cast<bsl::uint64>(59),
-        /// @brief defines the ss_base register in the VMCB
+        /// @brief defines the ss_base register
         bf_reg_t_ss_base = static_cast<bsl::uint64>(60),
-        /// @brief defines the ds_selector register in the VMCB
+        /// @brief defines the ds_selector register
         bf_reg_t_ds_selector = static_cast<bsl::uint64>(61),
-        /// @brief defines the ds_attrib register in the VMCB
+        /// @brief defines the ds_attrib register
         bf_reg_t_ds_attrib = static_cast<bsl::uint64>(62),
-        /// @brief defines the ds_limit register in the VMCB
+        /// @brief defines the ds_limit register
         bf_reg_t_ds_limit = static_cast<bsl::uint64>(63),
-        /// @brief defines the ds_base register in the VMCB
+        /// @brief defines the ds_base register
         bf_reg_t_ds_base = static_cast<bsl::uint64>(64),
-        /// @brief defines the fs_selector register in the VMCB
+        /// @brief defines the fs_selector register
         bf_reg_t_fs_selector = static_cast<bsl::uint64>(65),
-        /// @brief defines the fs_attrib register in the VMCB
+        /// @brief defines the fs_attrib register
         bf_reg_t_fs_attrib = static_cast<bsl::uint64>(66),
-        /// @brief defines the fs_limit register in the VMCB
+        /// @brief defines the fs_limit register
         bf_reg_t_fs_limit = static_cast<bsl::uint64>(67),
-        /// @brief defines the fs_base register in the VMCB
+        /// @brief defines the fs_base register
         bf_reg_t_fs_base = static_cast<bsl::uint64>(68),
-        /// @brief defines the gs_selector register in the VMCB
+        /// @brief defines the gs_selector register
         bf_reg_t_gs_selector = static_cast<bsl::uint64>(69),
-        /// @brief defines the gs_attrib register in the VMCB
+        /// @brief defines the gs_attrib register
         bf_reg_t_gs_attrib = static_cast<bsl::uint64>(70),
-        /// @brief defines the gs_limit register in the VMCB
+        /// @brief defines the gs_limit register
         bf_reg_t_gs_limit = static_cast<bsl::uint64>(71),
-        /// @brief defines the gs_base register in the VMCB
+        /// @brief defines the gs_base register
         bf_reg_t_gs_base = static_cast<bsl::uint64>(72),
-        /// @brief defines the gdtr_selector register in the VMCB
+        /// @brief defines the gdtr_selector register
         bf_reg_t_gdtr_selector = static_cast<bsl::uint64>(73),
-        /// @brief defines the gdtr_attrib register in the VMCB
+        /// @brief defines the gdtr_attrib register
         bf_reg_t_gdtr_attrib = static_cast<bsl::uint64>(74),
-        /// @brief defines the gdtr_limit register in the VMCB
+        /// @brief defines the gdtr_limit register
         bf_reg_t_gdtr_limit = static_cast<bsl::uint64>(75),
-        /// @brief defines the gdtr_base register in the VMCB
+        /// @brief defines the gdtr_base register
         bf_reg_t_gdtr_base = static_cast<bsl::uint64>(76),
-        /// @brief defines the ldtr_selector register in the VMCB
+        /// @brief defines the ldtr_selector register
         bf_reg_t_ldtr_selector = static_cast<bsl::uint64>(77),
-        /// @brief defines the ldtr_attrib register in the VMCB
+        /// @brief defines the ldtr_attrib register
         bf_reg_t_ldtr_attrib = static_cast<bsl::uint64>(78),
-        /// @brief defines the ldtr_limit register in the VMCB
+        /// @brief defines the ldtr_limit register
         bf_reg_t_ldtr_limit = static_cast<bsl::uint64>(79),
-        /// @brief defines the ldtr_base register in the VMCB
+        /// @brief defines the ldtr_base register
         bf_reg_t_ldtr_base = static_cast<bsl::uint64>(80),
-        /// @brief defines the idtr_selector register in the VMCB
+        /// @brief defines the idtr_selector register
         // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
         bf_reg_t_idtr_selector = static_cast<bsl::uint64>(81),
-        /// @brief defines the idtr_attrib register in the VMCB
+        /// @brief defines the idtr_attrib register
         // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
         bf_reg_t_idtr_attrib = static_cast<bsl::uint64>(82),
-        /// @brief defines the idtr_limit register in the VMCB
+        /// @brief defines the idtr_limit register
         // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
         bf_reg_t_idtr_limit = static_cast<bsl::uint64>(83),
-        /// @brief defines the idtr_base register in the VMCB
+        /// @brief defines the idtr_base register
         // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
         bf_reg_t_idtr_base = static_cast<bsl::uint64>(84),
-        /// @brief defines the tr_selector register in the VMCB
+        /// @brief defines the tr_selector register
         bf_reg_t_tr_selector = static_cast<bsl::uint64>(85),
-        /// @brief defines the tr_attrib register in the VMCB
+        /// @brief defines the tr_attrib register
         bf_reg_t_tr_attrib = static_cast<bsl::uint64>(86),
-        /// @brief defines the tr_limit register in the VMCB
+        /// @brief defines the tr_limit register
         bf_reg_t_tr_limit = static_cast<bsl::uint64>(87),
-        /// @brief defines the tr_base register in the VMCB
+        /// @brief defines the tr_base register
         bf_reg_t_tr_base = static_cast<bsl::uint64>(88),
-        /// @brief defines the cpl register in the VMCB
+        /// @brief defines the cpl register
         bf_reg_t_cpl = static_cast<bsl::uint64>(89),
-        /// @brief defines the efer register in the VMCB
+        /// @brief defines the efer register
         bf_reg_t_efer = static_cast<bsl::uint64>(90),
-        /// @brief defines the cr4 register in the VMCB
+        /// @brief defines the cr4 register
         bf_reg_t_cr4 = static_cast<bsl::uint64>(91),
-        /// @brief defines the cr3 register in the VMCB
+        /// @brief defines the cr3 register
         bf_reg_t_cr3 = static_cast<bsl::uint64>(92),
-        /// @brief defines the cr0 register in the VMCB
+        /// @brief defines the cr0 register
         bf_reg_t_cr0 = static_cast<bsl::uint64>(93),
-        /// @brief defines the dr7 register in the VMCB
+        /// @brief defines the dr7 register
         bf_reg_t_dr7 = static_cast<bsl::uint64>(94),
-        /// @brief defines the dr6 register in the VMCB
+        /// @brief defines the dr6 register
         bf_reg_t_dr6 = static_cast<bsl::uint64>(95),
-        /// @brief defines the rflags register in the VMCB
+        /// @brief defines the rflags register
         bf_reg_t_rflags = static_cast<bsl::uint64>(96),
-        /// @brief defines the rip register in the VMCB
+        /// @brief defines the rip register
         bf_reg_t_rip = static_cast<bsl::uint64>(97),
-        /// @brief defines the rsp register in the VMCB
+        /// @brief defines the rsp register
         bf_reg_t_rsp = static_cast<bsl::uint64>(98),
-        /// @brief defines the rax register in the VMCB
+        /// @brief defines the rax register
         bf_reg_t_rax = static_cast<bsl::uint64>(99),
-        /// @brief defines the star register in the VMCB
+        /// @brief defines the star register
         bf_reg_t_star = static_cast<bsl::uint64>(100),
-        /// @brief defines the lstar register in the VMCB
+        /// @brief defines the lstar register
         bf_reg_t_lstar = static_cast<bsl::uint64>(101),
-        /// @brief defines the cstar register in the VMCB
+        /// @brief defines the cstar register
         bf_reg_t_cstar = static_cast<bsl::uint64>(102),
-        /// @brief defines the fmask register in the VMCB
+        /// @brief defines the fmask register
         bf_reg_t_fmask = static_cast<bsl::uint64>(103),
-        /// @brief defines the kernel_gs_base register in the VMCB
+        /// @brief defines the kernel_gs_base register
         bf_reg_t_kernel_gs_base = static_cast<bsl::uint64>(104),
-        /// @brief defines the sysenter_cs register in the VMCB
+        /// @brief defines the sysenter_cs register
         bf_reg_t_sysenter_cs = static_cast<bsl::uint64>(105),
-        /// @brief defines the sysenter_esp register in the VMCB
+        /// @brief defines the sysenter_esp register
         bf_reg_t_sysenter_esp = static_cast<bsl::uint64>(106),
-        /// @brief defines the sysenter_eip register in the VMCB
+        /// @brief defines the sysenter_eip register
         bf_reg_t_sysenter_eip = static_cast<bsl::uint64>(107),
-        /// @brief defines the cr2 register in the VMCB
+        /// @brief defines the cr2 register
         bf_reg_t_cr2 = static_cast<bsl::uint64>(108),
-        /// @brief defines the pat register in the VMCB
+        /// @brief defines the pat register
         bf_reg_t_pat = static_cast<bsl::uint64>(109),
-        /// @brief defines the dbgctl register in the VMCB
+        /// @brief defines the dbgctl register
         bf_reg_t_dbgctl = static_cast<bsl::uint64>(110),
-        /// @brief defines the br_from register in the VMCB
+        /// @brief defines the br_from register
         bf_reg_t_br_from = static_cast<bsl::uint64>(112),
-        /// @brief defines the br_to register in the VMCB
+        /// @brief defines the br_to register
         bf_reg_t_br_to = static_cast<bsl::uint64>(113),
-        /// @brief defines the lastexcpfrom register in the VMCB
+        /// @brief defines the lastexcpfrom register
         bf_reg_t_lastexcpfrom = static_cast<bsl::uint64>(114),
-        /// @brief defines the lastexcpto register in the VMCB
+        /// @brief defines the lastexcpto register
         bf_reg_t_lastexcpto = static_cast<bsl::uint64>(115),
+        /// @brief defines the cr8 register
+        bf_reg_t_cr8 = static_cast<bsl::uint64>(116),
+        /// @brief defines the dr0 register
+        bf_reg_t_dr0 = static_cast<bsl::uint64>(117),
+        /// @brief defines the dr1 register
+        bf_reg_t_dr1 = static_cast<bsl::uint64>(118),
+        /// @brief defines the dr2 register
+        bf_reg_t_dr2 = static_cast<bsl::uint64>(119),
+        /// @brief defines the dr3 register
+        bf_reg_t_dr3 = static_cast<bsl::uint64>(120),
+        /// @brief defines the xcr0 register
+        bf_reg_t_xcr0 = static_cast<bsl::uint64>(121),
         /// @brief defines an invalid bf_reg_t
         bf_reg_t_invalid = static_cast<bsl::uint64>(BF_MAX_REG_T)
     };

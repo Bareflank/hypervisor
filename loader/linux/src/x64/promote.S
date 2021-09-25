@@ -94,6 +94,18 @@
     #define SS_OFFSET_CR3 0x158
     /** @brief defines the offset of state_save_t.cr4 */
     #define SS_OFFSET_CR4 0x160
+    /** @brief defines the offset of state_save_t.cr8 */
+    #define SS_OFFSET_CR8 0x168
+    /** @brief defines the offset of state_save_t.xcr0 */
+    #define SS_OFFSET_XCR0 0x170
+    /** @brief defines the offset of state_save_t.dr0 */
+    #define SS_OFFSET_DR0 0x1C0
+    /** @brief defines the offset of state_save_t.dr1 */
+    #define SS_OFFSET_DR1 0x1C8
+    /** @brief defines the offset of state_save_t.dr2 */
+    #define SS_OFFSET_DR2 0x1D0
+    /** @brief defines the offset of state_save_t.dr3 */
+    #define SS_OFFSET_DR3 0x1D8
     /** @brief defines the offset of state_save_t.dr6 */
     #define SS_OFFSET_DR6 0x1F0
     /** @brief defines the offset of state_save_t.dr7 */
@@ -172,9 +184,29 @@ promote:
     mov rax, [r15 + SS_OFFSET_DR6]
     mov dr6, rax
 
+    mov rax, [r15 + SS_OFFSET_DR3]
+    mov dr3, rax
+
+    mov rax, [r15 + SS_OFFSET_DR2]
+    mov dr2, rax
+
+    mov rax, [r15 + SS_OFFSET_DR1]
+    mov dr1, rax
+
+    mov rax, [r15 + SS_OFFSET_DR0]
+    mov dr0, rax
+
     /**************************************************************************/
     /* Control Registers                                                      */
     /**************************************************************************/
+
+    xor ecx, ecx
+    mov eax, [r15 + SS_OFFSET_XCR0 + 0x0]
+    mov edx, [r15 + SS_OFFSET_XCR0 + 0x4]
+    xsetbv
+
+    mov rax, [r15 + SS_OFFSET_CR8]
+    mov cr8, rax
 
     /**
      * Notes:

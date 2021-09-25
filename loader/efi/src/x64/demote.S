@@ -88,6 +88,18 @@
     #define SS_OFFSET_CR3 0x158
     /** @brief defines the offset of state_save_t.cr4 */
     #define SS_OFFSET_CR4 0x160
+    /** @brief defines the offset of state_save_t.cr8 */
+    #define SS_OFFSET_CR8 0x168
+    /** @brief defines the offset of state_save_t.xcr0 */
+    #define SS_OFFSET_XCR0 0x170
+    /** @brief defines the offset of state_save_t.dr0 */
+    #define SS_OFFSET_DR0 0x1C0
+    /** @brief defines the offset of state_save_t.dr1 */
+    #define SS_OFFSET_DR1 0x1C8
+    /** @brief defines the offset of state_save_t.dr2 */
+    #define SS_OFFSET_DR2 0x1D0
+    /** @brief defines the offset of state_save_t.dr3 */
+    #define SS_OFFSET_DR3 0x1D8
     /** @brief defines the offset of state_save_t.dr6 */
     #define SS_OFFSET_DR6 0x1F0
     /** @brief defines the offset of state_save_t.dr7 */
@@ -396,6 +408,19 @@ gdt_and_cs_loaded:
     mov rax, [r14 + SS_OFFSET_CR3]
     mov cr3, rax
 
+    mov rax, cr8
+    mov [r15 + SS_OFFSET_CR8], rax
+    mov rax, [r14 + SS_OFFSET_CR8]
+    mov cr8, rax
+
+    xor ecx, ecx
+    xgetbv
+    mov [r15 + SS_OFFSET_XCR0 + 0x0], eax
+    mov [r15 + SS_OFFSET_XCR0 + 0x4], edx
+    mov eax, [r14 + SS_OFFSET_XCR0 + 0x0]
+    mov edx, [r14 + SS_OFFSET_XCR0 + 0x4]
+    xsetbv
+
     /**************************************************************************/
     /* Stack                                                                  */
     /**************************************************************************/
@@ -405,6 +430,26 @@ gdt_and_cs_loaded:
     /**************************************************************************/
     /* Debug Registers                                                        */
     /**************************************************************************/
+
+    mov rax, dr0
+    mov [r15 + SS_OFFSET_DR0], rax
+    mov rax, [r14 + SS_OFFSET_DR0]
+    mov dr0, rax
+
+    mov rax, dr1
+    mov [r15 + SS_OFFSET_DR1], rax
+    mov rax, [r14 + SS_OFFSET_DR1]
+    mov dr1, rax
+
+    mov rax, dr2
+    mov [r15 + SS_OFFSET_DR2], rax
+    mov rax, [r14 + SS_OFFSET_DR2]
+    mov dr2, rax
+
+    mov rax, dr3
+    mov [r15 + SS_OFFSET_DR3], rax
+    mov rax, [r14 + SS_OFFSET_DR3]
+    mov dr3, rax
 
     mov rax, dr6
     mov [r15 + SS_OFFSET_DR6], rax

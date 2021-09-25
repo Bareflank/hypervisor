@@ -128,7 +128,6 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
         list(APPEND HEADERS
             ${CMAKE_CURRENT_LIST_DIR}/include/x64/intel/invept_descriptor_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/include/x64/intel/invvpid_descriptor_t.hpp
-            ${CMAKE_CURRENT_LIST_DIR}/include/x64/intel/vmcs_missing_registers_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/include/x64/intel/vmcs_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/dispatch_esr_nmi.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/intrinsic_t.hpp

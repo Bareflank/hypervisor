@@ -45,6 +45,10 @@
 #define CPUID_LEAF_FEATURE ((uint32_t)0x1)
 /** @brief define the CPUID feature bit for VMX */
 #define CPUID_FEATURE_ECX_VMX (((uint32_t)1) << ((uint32_t)5))
+/** @brief define the CPUID feature bit for XSAVE */
+#define CPUID_FEATURE_ECX_XSAVE (((uint32_t)1) << ((uint32_t)26))
+/** @brief define the CPUID feature bit for OSXSAVE */
+#define CPUID_FEATURE_ECX_OSXSAVE (((uint32_t)1) << ((uint32_t)27))
 
 /** @brief defines the MSR address for feature information */
 #define MSR_FEATURE_CTRL ((uint32_t)0x3A)
@@ -275,6 +279,38 @@ check_cr4(void)
 
 /**
  * <!-- description -->
+ *   @brief Check if the cpu supports XSAVE.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success, LOADER_FAILURE otherwise.
+ */
+static inline int64_t
+check_for_xsave(void)
+{
+    uint32_t eax;
+    uint32_t ebx;
+    uint32_t ecx;
+    uint32_t edx;
+
+    eax = CPUID_LEAF_FEATURE;
+    ecx = 0U;
+    intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
+
+    if ((ecx & CPUID_FEATURE_ECX_XSAVE) == 0U) {
+        bferror_x32("cpu does not support XSAVE", ecx);
+        return LOADER_FAILURE;
+    }
+
+    if ((ecx & CPUID_FEATURE_ECX_OSXSAVE) == 0U) {
+        bferror_x32("cpu does not support CR4.OSXSAVE", ecx);
+        return LOADER_FAILURE;
+    }
+
+    return LOADER_SUCCESS;
+}
+
+/**
+ * <!-- description -->
  *   @brief This function checks to see if the CPU is supported as well as
  *     it's system configuration.
  *
@@ -316,6 +352,11 @@ check_cpu_configuration(void)
 
     if (check_cr4()) {
         bferror("check_cr4 failed");
+        return LOADER_FAILURE;
+    }
+
+    if (check_for_xsave()) {
+        bferror("check_for_xsave failed");
         return LOADER_FAILURE;
     }
 

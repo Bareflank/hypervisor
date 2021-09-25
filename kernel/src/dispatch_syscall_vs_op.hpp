@@ -501,6 +501,22 @@ namespace mk
         }
 
         // ---------------------------------------------------------------------
+        // Active Status
+        // ---------------------------------------------------------------------
+
+        bool const vp_active_on_another_pp{is_vp_active_on_another_pp(mut_tls, mut_vp_pool, vpid)};
+        if (bsl::unlikely(vp_active_on_another_pp)) {
+            bsl::print<bsl::V>() << bsl::here();
+            return syscall::BF_STATUS_INVALID_INPUT_REG2;
+        }
+
+        bool const vs_active_on_another_pp{is_vs_active_on_another_pp(mut_tls, mut_vs_pool, vsid)};
+        if (bsl::unlikely(vs_active_on_another_pp)) {
+            bsl::print<bsl::V>() << bsl::here();
+            return syscall::BF_STATUS_INVALID_INPUT_REG3;
+        }
+
+        // ---------------------------------------------------------------------
         // IP Advancement
         // ---------------------------------------------------------------------
 

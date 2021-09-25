@@ -30,6 +30,7 @@
 #include <bf_reg_t.hpp>
 #include <general_purpose_regs_t.hpp>
 #include <intrinsic_t.hpp>
+#include <missing_registers_t.hpp>
 #include <page_pool_t.hpp>
 #include <running_status_t.hpp>
 #include <tls_t.hpp>
@@ -77,6 +78,8 @@ namespace mk
         bsl::safe_umx m_host_vmcb_phys{};
         /// @brief stores the general purpose registers
         general_purpose_regs_t m_gprs{};
+        /// @brief stores the VMCB missing registers
+        missing_registers_t m_missing_registers{};
 
         /// <!-- description -->
         ///   @brief Returns the row color based on the value of "val"
@@ -186,6 +189,20 @@ namespace mk
         sanitize_efer(bsl::safe_u64 const &val) noexcept -> bsl::safe_u64
         {
             constexpr auto efer_mask{0x0000000000001000_u64};
+            return val | efer_mask;
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns a sanitized version of XCR0
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param val the value to sanitize
+        ///   @return Returns a sanitized version of XCR0
+        ///
+        [[nodiscard]] static constexpr auto
+        sanitize_xcr0(bsl::safe_u64 const &val) noexcept -> bsl::safe_u64
+        {
+            constexpr auto efer_mask{0x0000000000000001_u64};
             return val | efer_mask;
         }
 
@@ -307,6 +324,7 @@ namespace mk
             bsl::expects(running_status_t::running != m_status);
             bsl::expects(this->is_active().is_invalid());
 
+            m_missing_registers = {};
             m_gprs = {};
 
             mut_page_pool.deallocate(mut_tls, m_host_vmcb);
@@ -614,7 +632,13 @@ namespace mk
             m_guest_vmcb->cr2 = state->cr2;
             m_guest_vmcb->cr3 = state->cr3;
             m_guest_vmcb->cr4 = state->cr4;
+            m_missing_registers.guest_cr8 = state->cr8;
+            m_missing_registers.guest_xcr0 = sanitize_xcr0(bsl::to_u64(state->xcr0)).get();
 
+            m_missing_registers.guest_dr0 = state->dr0;
+            m_missing_registers.guest_dr1 = state->dr1;
+            m_missing_registers.guest_dr2 = state->dr2;
+            m_missing_registers.guest_dr3 = state->dr3;
             m_guest_vmcb->dr6 = state->dr6;
             m_guest_vmcb->dr7 = state->dr7;
 
@@ -741,7 +765,13 @@ namespace mk
             pmut_state->cr2 = m_guest_vmcb->cr2;
             pmut_state->cr3 = m_guest_vmcb->cr3;
             pmut_state->cr4 = m_guest_vmcb->cr4;
+            pmut_state->cr8 = m_missing_registers.guest_cr8;
+            pmut_state->xcr0 = m_missing_registers.guest_xcr0;
 
+            pmut_state->dr0 = m_missing_registers.guest_dr0;
+            pmut_state->dr1 = m_missing_registers.guest_dr1;
+            pmut_state->dr2 = m_missing_registers.guest_dr2;
+            pmut_state->dr3 = m_missing_registers.guest_dr3;
             pmut_state->dr6 = m_guest_vmcb->dr6;
             pmut_state->dr7 = m_guest_vmcb->dr7;
 
@@ -790,7 +820,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RAX);
                     }
 
-                    return bsl::to_umx(m_gprs.rax);
+                    return bsl::to_u64(m_gprs.rax);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rbx: {
@@ -798,7 +828,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RBX);
                     }
 
-                    return bsl::to_umx(m_gprs.rbx);
+                    return bsl::to_u64(m_gprs.rbx);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rcx: {
@@ -806,7 +836,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RCX);
                     }
 
-                    return bsl::to_umx(m_gprs.rcx);
+                    return bsl::to_u64(m_gprs.rcx);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rdx: {
@@ -814,7 +844,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RDX);
                     }
 
-                    return bsl::to_umx(m_gprs.rdx);
+                    return bsl::to_u64(m_gprs.rdx);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rbp: {
@@ -822,7 +852,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RBP);
                     }
 
-                    return bsl::to_umx(m_gprs.rbp);
+                    return bsl::to_u64(m_gprs.rbp);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rsi: {
@@ -830,7 +860,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RSI);
                     }
 
-                    return bsl::to_umx(m_gprs.rsi);
+                    return bsl::to_u64(m_gprs.rsi);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rdi: {
@@ -838,7 +868,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_RDI);
                     }
 
-                    return bsl::to_umx(m_gprs.rdi);
+                    return bsl::to_u64(m_gprs.rdi);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r8: {
@@ -846,7 +876,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R8);
                     }
 
-                    return bsl::to_umx(m_gprs.r8);
+                    return bsl::to_u64(m_gprs.r8);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r9: {
@@ -854,7 +884,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R9);
                     }
 
-                    return bsl::to_umx(m_gprs.r9);
+                    return bsl::to_u64(m_gprs.r9);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r10: {
@@ -862,7 +892,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R10);
                     }
 
-                    return bsl::to_umx(m_gprs.r10);
+                    return bsl::to_u64(m_gprs.r10);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r11: {
@@ -870,7 +900,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R11);
                     }
 
-                    return bsl::to_umx(m_gprs.r11);
+                    return bsl::to_u64(m_gprs.r11);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r12: {
@@ -878,7 +908,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R12);
                     }
 
-                    return bsl::to_umx(m_gprs.r12);
+                    return bsl::to_u64(m_gprs.r12);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r13: {
@@ -886,7 +916,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R13);
                     }
 
-                    return bsl::to_umx(m_gprs.r13);
+                    return bsl::to_u64(m_gprs.r13);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r14: {
@@ -894,7 +924,7 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R14);
                     }
 
-                    return bsl::to_umx(m_gprs.r14);
+                    return bsl::to_u64(m_gprs.r14);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_r15: {
@@ -902,403 +932,427 @@ namespace mk
                         return intrinsic.tls_reg(syscall::TLS_OFFSET_R15);
                     }
 
-                    return bsl::to_umx(m_gprs.r15);
+                    return bsl::to_u64(m_gprs.r15);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_cr_read: {
-                    return bsl::to_umx(m_guest_vmcb->intercept_cr_read);
+                    return bsl::to_u64(m_guest_vmcb->intercept_cr_read);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_cr_write: {
-                    return bsl::to_umx(m_guest_vmcb->intercept_cr_write);
+                    return bsl::to_u64(m_guest_vmcb->intercept_cr_write);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_dr_read: {
-                    return bsl::to_umx(m_guest_vmcb->intercept_dr_read);
+                    return bsl::to_u64(m_guest_vmcb->intercept_dr_read);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_dr_write: {
-                    return bsl::to_umx(m_guest_vmcb->intercept_dr_write);
+                    return bsl::to_u64(m_guest_vmcb->intercept_dr_write);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_exception: {
-                    return bsl::to_umx(m_guest_vmcb->intercept_exception);
+                    return bsl::to_u64(m_guest_vmcb->intercept_exception);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_instruction1: {
-                    return bsl::to_umx(m_guest_vmcb->intercept_instruction1);
+                    return bsl::to_u64(m_guest_vmcb->intercept_instruction1);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_instruction2: {
-                    return bsl::to_umx(m_guest_vmcb->intercept_instruction2);
+                    return bsl::to_u64(m_guest_vmcb->intercept_instruction2);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_intercept_instruction3: {
-                    return bsl::to_umx(m_guest_vmcb->intercept_instruction3);
+                    return bsl::to_u64(m_guest_vmcb->intercept_instruction3);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pause_filter_threshold: {
-                    return bsl::to_umx(m_guest_vmcb->pause_filter_threshold);
+                    return bsl::to_u64(m_guest_vmcb->pause_filter_threshold);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pause_filter_count: {
-                    return bsl::to_umx(m_guest_vmcb->pause_filter_count);
+                    return bsl::to_u64(m_guest_vmcb->pause_filter_count);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_iopm_base_pa: {
-                    return bsl::to_umx(m_guest_vmcb->iopm_base_pa);
+                    return bsl::to_u64(m_guest_vmcb->iopm_base_pa);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_msrpm_base_pa: {
-                    return bsl::to_umx(m_guest_vmcb->msrpm_base_pa);
+                    return bsl::to_u64(m_guest_vmcb->msrpm_base_pa);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tsc_offset: {
-                    return bsl::to_umx(m_guest_vmcb->tsc_offset);
+                    return bsl::to_u64(m_guest_vmcb->tsc_offset);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_guest_asid: {
-                    return bsl::to_umx(m_guest_vmcb->guest_asid);
+                    return bsl::to_u64(m_guest_vmcb->guest_asid);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tlb_control: {
-                    return bsl::to_umx(m_guest_vmcb->tlb_control);
+                    return bsl::to_u64(m_guest_vmcb->tlb_control);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_virtual_interrupt_a: {
-                    return bsl::to_umx(m_guest_vmcb->virtual_interrupt_a);
+                    return bsl::to_u64(m_guest_vmcb->virtual_interrupt_a);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_virtual_interrupt_b: {
-                    return bsl::to_umx(m_guest_vmcb->virtual_interrupt_b);
+                    return bsl::to_u64(m_guest_vmcb->virtual_interrupt_b);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_exitcode: {
-                    return bsl::to_umx(m_guest_vmcb->exitcode);
+                    return bsl::to_u64(m_guest_vmcb->exitcode);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_exitinfo1: {
-                    return bsl::to_umx(m_guest_vmcb->exitinfo1);
+                    return bsl::to_u64(m_guest_vmcb->exitinfo1);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_exitinfo2: {
-                    return bsl::to_umx(m_guest_vmcb->exitinfo2);
+                    return bsl::to_u64(m_guest_vmcb->exitinfo2);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_exitininfo: {
-                    return bsl::to_umx(m_guest_vmcb->exitininfo);
+                    return bsl::to_u64(m_guest_vmcb->exitininfo);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ctls1: {
-                    return bsl::to_umx(m_guest_vmcb->ctls1);
+                    return bsl::to_u64(m_guest_vmcb->ctls1);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_avic_apic_bar: {
-                    return bsl::to_umx(m_guest_vmcb->avic_apic_bar);
+                    return bsl::to_u64(m_guest_vmcb->avic_apic_bar);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_guest_pa_of_ghcb: {
-                    return bsl::to_umx(m_guest_vmcb->guest_pa_of_ghcb);
+                    return bsl::to_u64(m_guest_vmcb->guest_pa_of_ghcb);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_eventinj: {
-                    return bsl::to_umx(m_guest_vmcb->eventinj);
+                    return bsl::to_u64(m_guest_vmcb->eventinj);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_n_cr3: {
-                    return bsl::to_umx(m_guest_vmcb->n_cr3);
+                    return bsl::to_u64(m_guest_vmcb->n_cr3);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ctls2: {
-                    return bsl::to_umx(m_guest_vmcb->ctls2);
+                    return bsl::to_u64(m_guest_vmcb->ctls2);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmcb_clean_bits: {
-                    return bsl::to_umx(m_guest_vmcb->vmcb_clean_bits);
+                    return bsl::to_u64(m_guest_vmcb->vmcb_clean_bits);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_nrip: {
-                    return bsl::to_umx(m_guest_vmcb->nrip);
+                    return bsl::to_u64(m_guest_vmcb->nrip);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_number_of_bytes_fetched: {
-                    return bsl::to_umx(m_guest_vmcb->number_of_bytes_fetched);
+                    return bsl::to_u64(m_guest_vmcb->number_of_bytes_fetched);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_avic_apic_backing_page_ptr: {
-                    return bsl::to_umx(m_guest_vmcb->avic_apic_backing_page_ptr);
+                    return bsl::to_u64(m_guest_vmcb->avic_apic_backing_page_ptr);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_avic_logical_table_ptr: {
-                    return bsl::to_umx(m_guest_vmcb->avic_logical_table_ptr);
+                    return bsl::to_u64(m_guest_vmcb->avic_logical_table_ptr);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_avic_physical_table_ptr: {
-                    return bsl::to_umx(m_guest_vmcb->avic_physical_table_ptr);
+                    return bsl::to_u64(m_guest_vmcb->avic_physical_table_ptr);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmsa_ptr: {
-                    return bsl::to_umx(m_guest_vmcb->vmsa_ptr);
+                    return bsl::to_u64(m_guest_vmcb->vmsa_ptr);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_selector: {
-                    return bsl::to_umx(m_guest_vmcb->es_selector);
+                    return bsl::to_u64(m_guest_vmcb->es_selector);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_attrib: {
-                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->es_attrib)));
+                    return bsl::to_u64(decompress_attrib(bsl::to_u16(m_guest_vmcb->es_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_limit: {
-                    return bsl::to_umx(m_guest_vmcb->es_limit);
+                    return bsl::to_u64(m_guest_vmcb->es_limit);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_base: {
-                    return bsl::to_umx(m_guest_vmcb->es_base);
+                    return bsl::to_u64(m_guest_vmcb->es_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_selector: {
-                    return bsl::to_umx(m_guest_vmcb->cs_selector);
+                    return bsl::to_u64(m_guest_vmcb->cs_selector);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_attrib: {
-                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->cs_attrib)));
+                    return bsl::to_u64(decompress_attrib(bsl::to_u16(m_guest_vmcb->cs_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_limit: {
-                    return bsl::to_umx(m_guest_vmcb->cs_limit);
+                    return bsl::to_u64(m_guest_vmcb->cs_limit);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_base: {
-                    return bsl::to_umx(m_guest_vmcb->cs_base);
+                    return bsl::to_u64(m_guest_vmcb->cs_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_selector: {
-                    return bsl::to_umx(m_guest_vmcb->ss_selector);
+                    return bsl::to_u64(m_guest_vmcb->ss_selector);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_attrib: {
-                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->ss_attrib)));
+                    return bsl::to_u64(decompress_attrib(bsl::to_u16(m_guest_vmcb->ss_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_limit: {
-                    return bsl::to_umx(m_guest_vmcb->ss_limit);
+                    return bsl::to_u64(m_guest_vmcb->ss_limit);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_base: {
-                    return bsl::to_umx(m_guest_vmcb->ss_base);
+                    return bsl::to_u64(m_guest_vmcb->ss_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_selector: {
-                    return bsl::to_umx(m_guest_vmcb->ds_selector);
+                    return bsl::to_u64(m_guest_vmcb->ds_selector);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_attrib: {
-                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->ds_attrib)));
+                    return bsl::to_u64(decompress_attrib(bsl::to_u16(m_guest_vmcb->ds_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_limit: {
-                    return bsl::to_umx(m_guest_vmcb->ds_limit);
+                    return bsl::to_u64(m_guest_vmcb->ds_limit);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_base: {
-                    return bsl::to_umx(m_guest_vmcb->ds_base);
+                    return bsl::to_u64(m_guest_vmcb->ds_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_selector: {
-                    return bsl::to_umx(m_guest_vmcb->fs_selector);
+                    return bsl::to_u64(m_guest_vmcb->fs_selector);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_attrib: {
-                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->fs_attrib)));
+                    return bsl::to_u64(decompress_attrib(bsl::to_u16(m_guest_vmcb->fs_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_limit: {
-                    return bsl::to_umx(m_guest_vmcb->fs_limit);
+                    return bsl::to_u64(m_guest_vmcb->fs_limit);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_base: {
-                    return bsl::to_umx(m_guest_vmcb->fs_base);
+                    return bsl::to_u64(m_guest_vmcb->fs_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_selector: {
-                    return bsl::to_umx(m_guest_vmcb->gs_selector);
+                    return bsl::to_u64(m_guest_vmcb->gs_selector);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_attrib: {
-                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->gs_attrib)));
+                    return bsl::to_u64(decompress_attrib(bsl::to_u16(m_guest_vmcb->gs_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_limit: {
-                    return bsl::to_umx(m_guest_vmcb->gs_limit);
+                    return bsl::to_u64(m_guest_vmcb->gs_limit);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_base: {
-                    return bsl::to_umx(m_guest_vmcb->gs_base);
+                    return bsl::to_u64(m_guest_vmcb->gs_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gdtr_selector: {
-                    return bsl::to_umx(m_guest_vmcb->gdtr_selector);
+                    return bsl::to_u64(m_guest_vmcb->gdtr_selector);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gdtr_attrib: {
-                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->gdtr_attrib)));
+                    return bsl::to_u64(decompress_attrib(bsl::to_u16(m_guest_vmcb->gdtr_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gdtr_limit: {
-                    return bsl::to_umx(m_guest_vmcb->gdtr_limit);
+                    return bsl::to_u64(m_guest_vmcb->gdtr_limit);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gdtr_base: {
-                    return bsl::to_umx(m_guest_vmcb->gdtr_base);
+                    return bsl::to_u64(m_guest_vmcb->gdtr_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_selector: {
-                    return bsl::to_umx(m_guest_vmcb->ldtr_selector);
+                    return bsl::to_u64(m_guest_vmcb->ldtr_selector);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_attrib: {
-                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->ldtr_attrib)));
+                    return bsl::to_u64(decompress_attrib(bsl::to_u16(m_guest_vmcb->ldtr_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_limit: {
-                    return bsl::to_umx(m_guest_vmcb->ldtr_limit);
+                    return bsl::to_u64(m_guest_vmcb->ldtr_limit);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_base: {
-                    return bsl::to_umx(m_guest_vmcb->ldtr_base);
+                    return bsl::to_u64(m_guest_vmcb->ldtr_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idtr_selector: {
-                    return bsl::to_umx(m_guest_vmcb->idtr_selector);
+                    return bsl::to_u64(m_guest_vmcb->idtr_selector);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idtr_attrib: {
-                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->idtr_attrib)));
+                    return bsl::to_u64(decompress_attrib(bsl::to_u16(m_guest_vmcb->idtr_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idtr_limit: {
-                    return bsl::to_umx(m_guest_vmcb->idtr_limit);
+                    return bsl::to_u64(m_guest_vmcb->idtr_limit);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idtr_base: {
-                    return bsl::to_umx(m_guest_vmcb->idtr_base);
+                    return bsl::to_u64(m_guest_vmcb->idtr_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_selector: {
-                    return bsl::to_umx(m_guest_vmcb->tr_selector);
+                    return bsl::to_u64(m_guest_vmcb->tr_selector);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_attrib: {
-                    return bsl::to_umx(decompress_attrib(bsl::to_u16(m_guest_vmcb->tr_attrib)));
+                    return bsl::to_u64(decompress_attrib(bsl::to_u16(m_guest_vmcb->tr_attrib)));
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_limit: {
-                    return bsl::to_umx(m_guest_vmcb->tr_limit);
+                    return bsl::to_u64(m_guest_vmcb->tr_limit);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_base: {
-                    return bsl::to_umx(m_guest_vmcb->tr_base);
+                    return bsl::to_u64(m_guest_vmcb->tr_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cpl: {
-                    return bsl::to_umx(m_guest_vmcb->cpl);
+                    return bsl::to_u64(m_guest_vmcb->cpl);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_efer: {
-                    return bsl::to_umx(m_guest_vmcb->efer);
+                    return bsl::to_u64(m_guest_vmcb->efer);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr4: {
-                    return bsl::to_umx(m_guest_vmcb->cr4);
+                    return bsl::to_u64(m_guest_vmcb->cr4);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr3: {
-                    return bsl::to_umx(m_guest_vmcb->cr3);
+                    return bsl::to_u64(m_guest_vmcb->cr3);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr0: {
-                    return bsl::to_umx(m_guest_vmcb->cr0);
+                    return bsl::to_u64(m_guest_vmcb->cr0);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_dr7: {
-                    return bsl::to_umx(m_guest_vmcb->dr7);
+                    return bsl::to_u64(m_guest_vmcb->dr7);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_dr6: {
-                    return bsl::to_umx(m_guest_vmcb->dr6);
+                    return bsl::to_u64(m_guest_vmcb->dr6);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rflags: {
-                    return bsl::to_umx(m_guest_vmcb->rflags);
+                    return bsl::to_u64(m_guest_vmcb->rflags);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rip: {
-                    return bsl::to_umx(m_guest_vmcb->rip);
+                    return bsl::to_u64(m_guest_vmcb->rip);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rsp: {
-                    return bsl::to_umx(m_guest_vmcb->rsp);
+                    return bsl::to_u64(m_guest_vmcb->rsp);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_star: {
-                    return bsl::to_umx(m_guest_vmcb->star);
+                    return bsl::to_u64(m_guest_vmcb->star);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_lstar: {
-                    return bsl::to_umx(m_guest_vmcb->lstar);
+                    return bsl::to_u64(m_guest_vmcb->lstar);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cstar: {
-                    return bsl::to_umx(m_guest_vmcb->cstar);
+                    return bsl::to_u64(m_guest_vmcb->cstar);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fmask: {
-                    return bsl::to_umx(m_guest_vmcb->fmask);
+                    return bsl::to_u64(m_guest_vmcb->fmask);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_kernel_gs_base: {
-                    return bsl::to_umx(m_guest_vmcb->kernel_gs_base);
+                    return bsl::to_u64(m_guest_vmcb->kernel_gs_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_sysenter_cs: {
-                    return bsl::to_umx(m_guest_vmcb->sysenter_cs);
+                    return bsl::to_u64(m_guest_vmcb->sysenter_cs);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_sysenter_esp: {
-                    return bsl::to_umx(m_guest_vmcb->sysenter_esp);
+                    return bsl::to_u64(m_guest_vmcb->sysenter_esp);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_sysenter_eip: {
-                    return bsl::to_umx(m_guest_vmcb->sysenter_eip);
+                    return bsl::to_u64(m_guest_vmcb->sysenter_eip);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr2: {
-                    return bsl::to_umx(m_guest_vmcb->cr2);
+                    return bsl::to_u64(m_guest_vmcb->cr2);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pat: {
-                    return bsl::to_umx(m_guest_vmcb->pat);
+                    return bsl::to_u64(m_guest_vmcb->pat);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_dbgctl: {
-                    return bsl::to_umx(m_guest_vmcb->dbgctl);
+                    return bsl::to_u64(m_guest_vmcb->dbgctl);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_br_from: {
-                    return bsl::to_umx(m_guest_vmcb->br_from);
+                    return bsl::to_u64(m_guest_vmcb->br_from);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_br_to: {
-                    return bsl::to_umx(m_guest_vmcb->br_to);
+                    return bsl::to_u64(m_guest_vmcb->br_to);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_lastexcpfrom: {
-                    return bsl::to_umx(m_guest_vmcb->lastexcpfrom);
+                    return bsl::to_u64(m_guest_vmcb->lastexcpfrom);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_lastexcpto: {
-                    return bsl::to_umx(m_guest_vmcb->lastexcpto);
+                    return bsl::to_u64(m_guest_vmcb->lastexcpto);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_cr8: {
+                    return bsl::to_u64(m_missing_registers.guest_cr8);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr0: {
+                    return bsl::to_u64(m_missing_registers.guest_dr0);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr1: {
+                    return bsl::to_u64(m_missing_registers.guest_dr1);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr2: {
+                    return bsl::to_u64(m_missing_registers.guest_dr2);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr3: {
+                    return bsl::to_u64(m_missing_registers.guest_dr3);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_xcr0: {
+                    return bsl::to_u64(m_missing_registers.guest_xcr0);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_invalid: {
@@ -2257,6 +2311,36 @@ namespace mk
                     return bsl::errc_success;
                 }
 
+                case syscall::bf_reg_t::bf_reg_t_cr8: {
+                    m_missing_registers.guest_cr8 = val.get();
+                    return bsl::errc_success;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr0: {
+                    m_missing_registers.guest_dr0 = val.get();
+                    return bsl::errc_success;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr1: {
+                    m_missing_registers.guest_dr1 = val.get();
+                    return bsl::errc_success;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr2: {
+                    m_missing_registers.guest_dr2 = val.get();
+                    return bsl::errc_success;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr3: {
+                    m_missing_registers.guest_dr3 = val.get();
+                    return bsl::errc_success;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_xcr0: {
+                    m_missing_registers.guest_xcr0 = sanitize_xcr0(val).get();
+                    return bsl::errc_success;
+                }
+
                 case syscall::bf_reg_t::bf_reg_t_invalid: {
                     ret = bsl::errc_unsupported;
                     break;
@@ -2309,8 +2393,12 @@ namespace mk
             bsl::expects(tls.ppid == this->assigned_pp());
 
             m_status = running_status_t::running;
-            bsl::safe_umx const exit_reason{intrinsic_vmrun(
-                m_guest_vmcb, m_guest_vmcb_phys.get(), m_host_vmcb, m_host_vmcb_phys.get())};
+            auto const exit_reason{mut_intrinsic.vmrun(
+                m_guest_vmcb,
+                m_guest_vmcb_phys,
+                m_host_vmcb,
+                m_host_vmcb_phys,
+                &m_missing_registers)};
             m_status = running_status_t::handling_vmexit;
 
             if constexpr (BSL_DEBUG_LEVEL >= bsl::VV) {
@@ -2670,6 +2758,12 @@ namespace mk
             this->dump_field("br_to ", bsl::make_safe(m_guest_vmcb->br_to));
             this->dump_field("lastexcpfrom ", bsl::make_safe(m_guest_vmcb->lastexcpfrom));
             this->dump_field("lastexcpto ", bsl::make_safe(m_guest_vmcb->lastexcpto));
+            this->dump_field("cr8 ", bsl::make_safe(m_missing_registers.guest_cr8));
+            this->dump_field("dr0 ", bsl::make_safe(m_missing_registers.guest_dr0));
+            this->dump_field("dr1 ", bsl::make_safe(m_missing_registers.guest_dr1));
+            this->dump_field("dr2 ", bsl::make_safe(m_missing_registers.guest_dr2));
+            this->dump_field("dr3 ", bsl::make_safe(m_missing_registers.guest_dr3));
+            this->dump_field("xcr0 ", bsl::make_safe(m_missing_registers.guest_xcr0));
 
             /// Footer
             ///
