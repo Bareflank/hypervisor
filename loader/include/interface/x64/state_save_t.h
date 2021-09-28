@@ -202,16 +202,30 @@ struct state_save_t
     uint64_t cr3;
     /** @brief stores the value of the CR4 control register (0x160) */
     uint64_t cr4;
+    /** @brief stores the value of the CR8 control register (0x168) */
+    uint64_t cr8;
 
-    /** @brief reserved for future use (0x168) */
-    uint64_t reserved0[0xB];
+    /** @brief stores the value of the XCR0 control register (0x170) */
+    uint64_t xcr0;
+
+    /** @brief reserved for future use (0x178) */
+    uint64_t reserved0[0x9];
 
     /**************************************************************************/
     /* Debug Registers                                                        */
     /**************************************************************************/
 
-    /** @brief reserved for future use (0x1C0) */
-    uint64_t reserved1[0x6];
+    /** @brief stores the value of DR0 debug register (0x1C0) */
+    uint64_t dr0;
+    /** @brief stores the value of DR1 debug register (0x1C8) */
+    uint64_t dr1;
+    /** @brief stores the value of DR2 debug register (0x1D0) */
+    uint64_t dr2;
+    /** @brief stores the value of DR3 debug register (0x1D8) */
+    uint64_t dr3;
+
+    /** @brief reserved for future use (0x1E0) */
+    uint64_t reserved1[0x2];
 
     /** @brief stores the value of DR6 debug register (0x1F0) */
     uint64_t dr6;

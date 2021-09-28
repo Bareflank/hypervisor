@@ -114,17 +114,19 @@ namespace mk
     ///     a "VMExit" has occurred and must be handled.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param pmut_guest_vmcb a pointer to the guest VMCB to use
-    ///   @param guest_vmcb_phys the physical address of the guest VMCB to use
-    ///   @param pmut_host_vmcb a pointer to the host VMCB to use
-    ///   @param host_vmcb_phys the physical address of the host VMCB to use
+    ///   @param pmut_guest_vmcb a pointer to the guest VMCB
+    ///   @param guest_vmcb_phys the physical address of the guest VMCB
+    ///   @param pmut_host_vmcb a pointer to the host VMCB
+    ///   @param host_vmcb_phys the physical address of the host VMCB
+    ///   @param pmut_missing_registers a pointer to the missing registers
     ///   @return Returns the exit reason associated with the VMExit
     ///
     extern "C" [[nodiscard]] auto intrinsic_vmrun(
         void *const pmut_guest_vmcb,
         bsl::uintmx const guest_vmcb_phys,
         void *const pmut_host_vmcb,
-        bsl::uintmx const host_vmcb_phys) noexcept -> bsl::uintmx;
+        bsl::uintmx const host_vmcb_phys,
+        void *const pmut_missing_registers) noexcept -> bsl::uintmx;
 
     /// @class mk::intrinsic_t
     ///
@@ -280,6 +282,36 @@ namespace mk
             }
 
             return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief Executes the VMRun instruction. When this function returns
+        ///     a "VMExit" has occurred and must be handled.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param pmut_guest_vmcb a pointer to the guest VMCB
+        ///   @param guest_vmcb_phys the physical address of the guest VMCB
+        ///   @param pmut_host_vmcb a pointer to the host VMCB
+        ///   @param host_vmcb_phys the physical address of the host VMCB
+        ///   @param pmut_missing_registers a pointer to the missing registers
+        ///   @return Returns the exit reason associated with the VMExit
+        ///
+        [[nodiscard]] static constexpr auto
+        vmrun(
+            void *const pmut_guest_vmcb,
+            bsl::safe_umx const &guest_vmcb_phys,
+            void *const pmut_host_vmcb,
+            bsl::safe_umx const &host_vmcb_phys,
+            void *const pmut_missing_registers) noexcept -> bsl::safe_umx
+        {
+            bsl::uintmx const exit_reason{intrinsic_vmrun(
+                pmut_guest_vmcb,
+                guest_vmcb_phys.get(),
+                pmut_host_vmcb,
+                host_vmcb_phys.get(),
+                pmut_missing_registers)};
+
+            return bsl::safe_umx{exit_reason};
         }
     };
 }

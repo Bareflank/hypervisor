@@ -34,6 +34,7 @@
 #include <esr_gpf.h>
 #include <esr_nmi.h>
 #include <esr_pf.h>
+#include <intrinsic_cpuid.h>
 #include <intrinsic_rdmsr.h>
 #include <intrinsic_scr0.h>
 #include <intrinsic_scr4.h>
@@ -54,12 +55,11 @@
 /** @brief defines the default value of CR0 */
 #define DEFAULT_CR0 ((uint64_t)0x80050033)
 /** @brief defines the default value of CR4 */
-#define DEFAULT_CR4 ((uint64_t)0x003000E0)
+#define DEFAULT_CR4 ((uint64_t)0x003400E0)
 
 /** @brief defines the default value of CR0 bits that must be off */
 #define DEFAULT_CR0_OFF ((uint64_t)0xFFFFFFFFFFFFFFFF)
 /** @brief defines the default value of CR4 bits that must be off */
-// #define DEFAULT_CR4_OFF ((uint64_t)0xFFFFFFFFFF9FFFFF)
 #define DEFAULT_CR4_OFF ((uint64_t)0xFFFFFFFFFFFFFFFF)
 
 /** @brief defines the MSR_EFER MSR */
@@ -167,6 +167,9 @@
 /** @brief defines the FMASK MSR used by the microkernel */
 #define MK_MSR_FMASK ((uint64_t)0xFFFFFFFFFFFBFFFD)
 
+/** @brief defines the CPUID leaf for extended state enumeration */
+#define CPUID_EXTENDED_STATE ((uint32_t)0xD)
+
 /**
  * <!-- description -->
  *   @brief The function's main purpose is to set up the state for the
@@ -191,6 +194,11 @@ alloc_and_copy_mk_state(
     int64_t ret;
     uint16_t ext_cs_selector;
     uint16_t ext_ss_selector;
+
+    uint32_t eax;
+    uint32_t ebx;
+    uint32_t ecx;
+    uint32_t edx;
 
     /**************************************************************************/
     /* Allocate the resulting state                                           */
@@ -646,8 +654,19 @@ alloc_and_copy_mk_state(
     (*state)->cr3 = platform_virt_to_phys(rpt);
     (*state)->cr4 = (intrinsic_scr4() | DEFAULT_CR4) & DEFAULT_CR4_OFF;
 
+    eax = CPUID_EXTENDED_STATE;
+    ecx = 0U;
+    intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
+
+    (*state)->xcr0 = (((uint64_t)edx) << ((uint64_t)32)) | ((uint64_t)eax);
+
     if (((uint64_t)0) == (*state)->cr3) {
         bferror("platform_virt_to_phys failed");
+        goto platform_virt_to_phys_cr3_failed;
+    }
+
+    if (((uint64_t)0) == (*state)->xcr0) {
+        bferror("intrinsic_cpuid failed");
         goto platform_virt_to_phys_cr3_failed;
     }
 

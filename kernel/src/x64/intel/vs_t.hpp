@@ -30,10 +30,10 @@
 #include <bf_reg_t.hpp>
 #include <general_purpose_regs_t.hpp>
 #include <intrinsic_t.hpp>
+#include <missing_registers_t.hpp>
 #include <page_pool_t.hpp>
 #include <running_status_t.hpp>
 #include <tls_t.hpp>
-#include <vmcs_missing_registers_t.hpp>
 #include <vmcs_t.hpp>
 #include <vmexit_log_t.hpp>
 
@@ -120,10 +120,10 @@ namespace mk
         vmcs_t *m_vmcs{};
         /// @brief stores the physical address of the guest vmcs
         bsl::safe_umx m_vmcs_phys{};
-        /// @brief stores the rest of the state the vmcs doesn't
-        vmcs_missing_registers_t m_vmcs_missing_registers{};
         /// @brief stores the general purpose registers
         general_purpose_regs_t m_gprs{};
+        /// @brief stores the rest of the state the vmcs doesn't
+        missing_registers_t m_missing_registers{};
 
         /// @brief stores the CR0 fixed0 values for sanitization
         bsl::safe_u64 m_vmx_cr0_fixed0{};
@@ -438,6 +438,20 @@ namespace mk
         }
 
         /// <!-- description -->
+        ///   @brief Returns a sanitized version of XCR0
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param val the value to sanitize
+        ///   @return Returns a sanitized version of XCR0
+        ///
+        [[nodiscard]] static constexpr auto
+        sanitize_xcr0(bsl::safe_u64 const &val) noexcept -> bsl::safe_u64
+        {
+            constexpr auto efer_mask{0x0000000000000001_u64};
+            return val | efer_mask;
+        }
+
+        /// <!-- description -->
         ///   @brief Ensures that this VS is loaded
         ///
         /// <!-- inputs/outputs -->
@@ -532,15 +546,15 @@ namespace mk
 
             bsl::expects(mut_intrinsic.vmwrfunc(VMCS_HOST_RIP, &intrinsic_vmexit));
 
-            m_vmcs_missing_registers.host_star =                  // --
+            m_missing_registers.host_star =                       // --
                 mut_intrinsic.rdmsr(MSR_STAR).get();              // --
-            m_vmcs_missing_registers.host_lstar =                 // --
+            m_missing_registers.host_lstar =                      // --
                 mut_intrinsic.rdmsr(MSR_LSTAR).get();             // --
-            m_vmcs_missing_registers.host_cstar =                 // --
+            m_missing_registers.host_cstar =                      // --
                 mut_intrinsic.rdmsr(MSR_CSTAR).get();             // --
-            m_vmcs_missing_registers.host_fmask =                 // --
+            m_missing_registers.host_fmask =                      // --
                 mut_intrinsic.rdmsr(MSR_FMASK).get();             // --
-            m_vmcs_missing_registers.host_kernel_gs_base =        // --
+            m_missing_registers.host_kernel_gs_base =             // --
                 mut_intrinsic.rdmsr(MSR_KERNEL_GS_BASE).get();    // --
 
             m_vmx_cr0_fixed0 = mut_intrinsic.rdmsr(MSR_VMX_CR0_FIXED0);
@@ -692,8 +706,8 @@ namespace mk
             bsl::expects(running_status_t::running != m_status);
             bsl::expects(this->is_active().is_invalid());
 
+            m_missing_registers = {};
             m_gprs = {};
-            m_vmcs_missing_registers = {};
 
             mut_page_pool.deallocate(mut_tls, m_vmcs);
             m_vmcs = {};
@@ -1047,10 +1061,23 @@ namespace mk
 
             auto const cr0{bsl::to_u64(this->sanitize_cr0(bsl::to_u64(state->cr0)))};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_CR0, cr0));
+
+            m_missing_registers.guest_cr2 = state->cr2;
+
             auto const cr3{bsl::to_u64(state->cr3)};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_CR3, cr3));
             auto const cr4{bsl::to_u64(this->sanitize_cr4(bsl::to_u64(state->cr4)))};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_CR4, cr4));
+
+            m_missing_registers.guest_cr8 = state->cr8;
+            m_missing_registers.guest_xcr0 = sanitize_xcr0(bsl::to_u64(state->xcr0)).get();
+
+            m_missing_registers.guest_dr0 = state->dr0;
+            m_missing_registers.guest_dr1 = state->dr1;
+            m_missing_registers.guest_dr2 = state->dr2;
+            m_missing_registers.guest_dr3 = state->dr3;
+            m_missing_registers.guest_dr6 = state->dr6;
+
             auto const dr7{bsl::to_u64(state->dr7)};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_DR7, dr7));
 
@@ -1071,14 +1098,11 @@ namespace mk
             auto const debugctl{bsl::to_u64(state->msr_debugctl)};
             bsl::expects(mut_intrinsic.vmwr64(VMCS_GUEST_DEBUGCTL, debugctl));
 
-            m_vmcs_missing_registers.guest_cr2 = state->cr2;
-            m_vmcs_missing_registers.guest_dr6 = state->dr6;
-
-            m_vmcs_missing_registers.guest_star = state->msr_star;
-            m_vmcs_missing_registers.guest_lstar = state->msr_lstar;
-            m_vmcs_missing_registers.guest_cstar = state->msr_cstar;
-            m_vmcs_missing_registers.guest_fmask = state->msr_fmask;
-            m_vmcs_missing_registers.guest_kernel_gs_base = state->msr_kernel_gs_base;
+            m_missing_registers.guest_star = state->msr_star;
+            m_missing_registers.guest_lstar = state->msr_lstar;
+            m_missing_registers.guest_cstar = state->msr_cstar;
+            m_missing_registers.guest_fmask = state->msr_fmask;
+            m_missing_registers.guest_kernel_gs_base = state->msr_kernel_gs_base;
         }
 
         /// <!-- description -->
@@ -1239,10 +1263,23 @@ namespace mk
 
             auto *const pmut_cr0{&pmut_state->cr0};
             bsl::expects(intrinsic.vmrd64(VMCS_GUEST_CR0, pmut_cr0));
+
+            pmut_state->cr2 = m_missing_registers.guest_cr2;
+
             auto *const pmut_cr3{&pmut_state->cr3};
             bsl::expects(intrinsic.vmrd64(VMCS_GUEST_CR3, pmut_cr3));
             auto *const pmut_cr4{&pmut_state->cr4};
             bsl::expects(intrinsic.vmrd64(VMCS_GUEST_CR4, pmut_cr4));
+
+            pmut_state->cr8 = m_missing_registers.guest_cr8;
+            pmut_state->xcr0 = m_missing_registers.guest_xcr0;
+
+            pmut_state->dr0 = m_missing_registers.guest_dr0;
+            pmut_state->dr1 = m_missing_registers.guest_dr1;
+            pmut_state->dr2 = m_missing_registers.guest_dr2;
+            pmut_state->dr3 = m_missing_registers.guest_dr3;
+            pmut_state->dr6 = m_missing_registers.guest_dr6;
+
             auto *const pmut_dr7{&pmut_state->dr7};
             bsl::expects(intrinsic.vmrd64(VMCS_GUEST_DR7, pmut_dr7));
 
@@ -1263,14 +1300,11 @@ namespace mk
             auto *const pmut_debugctl{&pmut_state->msr_debugctl};
             bsl::expects(intrinsic.vmrd64(VMCS_GUEST_DEBUGCTL, pmut_debugctl));
 
-            pmut_state->cr2 = m_vmcs_missing_registers.guest_cr2;
-            pmut_state->dr6 = m_vmcs_missing_registers.guest_dr6;
-
-            pmut_state->msr_star = m_vmcs_missing_registers.guest_star;
-            pmut_state->msr_lstar = m_vmcs_missing_registers.guest_lstar;
-            pmut_state->msr_cstar = m_vmcs_missing_registers.guest_cstar;
-            pmut_state->msr_fmask = m_vmcs_missing_registers.guest_fmask;
-            pmut_state->msr_kernel_gs_base = m_vmcs_missing_registers.guest_kernel_gs_base;
+            pmut_state->msr_star = m_missing_registers.guest_star;
+            pmut_state->msr_lstar = m_missing_registers.guest_lstar;
+            pmut_state->msr_cstar = m_missing_registers.guest_cstar;
+            pmut_state->msr_fmask = m_missing_registers.guest_fmask;
+            pmut_state->msr_kernel_gs_base = m_missing_registers.guest_kernel_gs_base;
         }
 
         /// <!-- description -->
@@ -1420,31 +1454,31 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr2: {
-                    return bsl::to_u64(m_vmcs_missing_registers.guest_cr2);
+                    return bsl::to_u64(m_missing_registers.guest_cr2);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_dr6: {
-                    return bsl::to_u64(m_vmcs_missing_registers.guest_dr6);
+                    return bsl::to_u64(m_missing_registers.guest_dr6);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_star: {
-                    return bsl::to_u64(m_vmcs_missing_registers.guest_star);
+                    return bsl::to_u64(m_missing_registers.guest_star);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_lstar: {
-                    return bsl::to_u64(m_vmcs_missing_registers.guest_lstar);
+                    return bsl::to_u64(m_missing_registers.guest_lstar);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cstar: {
-                    return bsl::to_u64(m_vmcs_missing_registers.guest_cstar);
+                    return bsl::to_u64(m_missing_registers.guest_cstar);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fmask: {
-                    return bsl::to_u64(m_vmcs_missing_registers.guest_fmask);
+                    return bsl::to_u64(m_missing_registers.guest_fmask);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_kernel_gs_base: {
-                    return bsl::to_u64(m_vmcs_missing_registers.guest_kernel_gs_base);
+                    return bsl::to_u64(m_missing_registers.guest_kernel_gs_base);
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_virtual_processor_identifier: {
@@ -2126,6 +2160,30 @@ namespace mk
                     break;
                 }
 
+                case syscall::bf_reg_t::bf_reg_t_cr8: {
+                    return bsl::to_u64(m_missing_registers.guest_cr8);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr0: {
+                    return bsl::to_u64(m_missing_registers.guest_dr0);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr1: {
+                    return bsl::to_u64(m_missing_registers.guest_dr1);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr2: {
+                    return bsl::to_u64(m_missing_registers.guest_dr2);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr3: {
+                    return bsl::to_u64(m_missing_registers.guest_dr3);
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_xcr0: {
+                    return bsl::to_u64(m_missing_registers.guest_xcr0);
+                }
+
                 case syscall::bf_reg_t::bf_reg_t_invalid: {
                     bsl::error() << "invalid bf_reg_t\n" << bsl::here();
                     break;
@@ -2316,37 +2374,37 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr2: {
-                    m_vmcs_missing_registers.guest_cr2 = val.get();
+                    m_missing_registers.guest_cr2 = val.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_dr6: {
-                    m_vmcs_missing_registers.guest_dr6 = val.get();
+                    m_missing_registers.guest_dr6 = val.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_star: {
-                    m_vmcs_missing_registers.guest_star = val.get();
+                    m_missing_registers.guest_star = val.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_lstar: {
-                    m_vmcs_missing_registers.guest_lstar = val.get();
+                    m_missing_registers.guest_lstar = val.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cstar: {
-                    m_vmcs_missing_registers.guest_cstar = val.get();
+                    m_missing_registers.guest_cstar = val.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fmask: {
-                    m_vmcs_missing_registers.guest_fmask = val.get();
+                    m_missing_registers.guest_fmask = val.get();
                     return bsl::errc_success;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_kernel_gs_base: {
-                    m_vmcs_missing_registers.guest_kernel_gs_base = val.get();
+                    m_missing_registers.guest_kernel_gs_base = val.get();
                     return bsl::errc_success;
                 }
 
@@ -3043,6 +3101,36 @@ namespace mk
                     break;
                 }
 
+                case syscall::bf_reg_t::bf_reg_t_cr8: {
+                    m_missing_registers.guest_cr8 = val.get();
+                    return bsl::errc_success;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr0: {
+                    m_missing_registers.guest_dr0 = val.get();
+                    return bsl::errc_success;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr1: {
+                    m_missing_registers.guest_dr1 = val.get();
+                    return bsl::errc_success;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr2: {
+                    m_missing_registers.guest_dr2 = val.get();
+                    return bsl::errc_success;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_dr3: {
+                    m_missing_registers.guest_dr3 = val.get();
+                    return bsl::errc_success;
+                }
+
+                case syscall::bf_reg_t::bf_reg_t_xcr0: {
+                    m_missing_registers.guest_xcr0 = sanitize_xcr0(val).get();
+                    return bsl::errc_success;
+                }
+
                 case syscall::bf_reg_t::bf_reg_t_invalid: {
                     bsl::error() << "invalid bf_reg_t\n" << bsl::here();
                     break;
@@ -3068,11 +3156,10 @@ namespace mk
         run(tls_t &mut_tls, intrinsic_t &mut_intrinsic, vmexit_log_t &mut_log) noexcept
             -> bsl::safe_umx
         {
-            constexpr auto invalid_exit_reason{0xFFFFFFFF00000000_umx};
             this->ensure_this_vs_is_loaded(mut_tls, mut_intrinsic);
 
             m_status = running_status_t::running;
-            bsl::safe_umx mut_exit_reason{intrinsic_vmrun(&m_vmcs_missing_registers)};
+            auto const exit_reason{mut_intrinsic.vmrun(&m_missing_registers)};
             m_status = running_status_t::handling_vmexit;
 
             if constexpr (BSL_DEBUG_LEVEL >= bsl::VV) {
@@ -3081,7 +3168,7 @@ namespace mk
                     {bsl::to_u16(mut_tls.active_vmid),
                      bsl::to_u16(mut_tls.active_vpid),
                      bsl::to_u16(mut_tls.active_vsid),
-                     mut_exit_reason,
+                     exit_reason,
                      mut_intrinsic.vmrd64(VMCS_EXIT_QUALIFICATION),
                      mut_intrinsic.vmrd64(VMCS_VMEXIT_INSTRUCTION_INFORMATION),
                      {},
@@ -3104,14 +3191,7 @@ namespace mk
                      mut_intrinsic.vmrd64(VMCS_GUEST_RIP)});
             }
 
-            if (bsl::unlikely(mut_exit_reason > invalid_exit_reason)) {
-                mut_exit_reason &= (~invalid_exit_reason);
-            }
-            else {
-                bsl::touch();
-            }
-
-            return mut_exit_reason;
+            return exit_reason;
         }
 
         /// <!-- description -->
@@ -3164,7 +3244,7 @@ namespace mk
             }
 
             bsl::expects(intrinsic.vmcl(&m_vmcs_phys));
-            m_vmcs_missing_registers.launched = {};
+            m_missing_registers.launched = {};
 
             if (this->id() == mut_tls.loaded_vsid) {
                 mut_tls.loaded_vsid = syscall::BF_INVALID_ID.get();
@@ -3390,11 +3470,11 @@ namespace mk
             this->dump_field("guest_pdpte3 ", intrinsic.vmrd64(VMCS_GUEST_PDPTE3));
             this->dump_field("bndcfgs ", intrinsic.vmrd64(VMCS_GUEST_BNDCFGS));
             this->dump_field("guest_rtit_ctl ", intrinsic.vmrd64(VMCS_GUEST_RTIT_CTL));
-            this->dump_field("star ", bsl::make_safe(m_vmcs_missing_registers.guest_star));
-            this->dump_field("lstar ", bsl::make_safe(m_vmcs_missing_registers.guest_lstar));
-            this->dump_field("cstar ", bsl::make_safe(m_vmcs_missing_registers.guest_cstar));
-            this->dump_field("fmask ", bsl::make_safe(m_vmcs_missing_registers.guest_fmask));
-            this->dump_field("kernel_gs_base ", bsl::make_safe(m_vmcs_missing_registers.guest_kernel_gs_base));
+            this->dump_field("star ", bsl::make_safe(m_missing_registers.guest_star));
+            this->dump_field("lstar ", bsl::make_safe(m_missing_registers.guest_lstar));
+            this->dump_field("cstar ", bsl::make_safe(m_missing_registers.guest_cstar));
+            this->dump_field("fmask ", bsl::make_safe(m_missing_registers.guest_fmask));
+            this->dump_field("kernel_gs_base ", bsl::make_safe(m_missing_registers.guest_kernel_gs_base));
 
             /// 32 Bit Control Fields
             ///
@@ -3500,9 +3580,11 @@ namespace mk
             bsl::print() << bsl::rst << bsl::endl;
 
             this->dump_field("cr0 ", intrinsic.vmrd64(VMCS_GUEST_CR0));
-            this->dump_field("cr2 ", bsl::make_safe(m_vmcs_missing_registers.guest_cr2));
+            this->dump_field("cr2 ", bsl::make_safe(m_missing_registers.guest_cr2));
             this->dump_field("cr3 ", intrinsic.vmrd64(VMCS_GUEST_CR3));
             this->dump_field("cr4 ", intrinsic.vmrd64(VMCS_GUEST_CR4));
+            this->dump_field("cr8 ", bsl::make_safe(m_missing_registers.guest_cr8));
+            this->dump_field("xcr0 ", bsl::make_safe(m_missing_registers.guest_xcr0));
             this->dump_field("es_base ", intrinsic.vmrd64(VMCS_GUEST_ES_BASE));
             this->dump_field("cs_base ", intrinsic.vmrd64(VMCS_GUEST_CS_BASE));
             this->dump_field("ss_base ", intrinsic.vmrd64(VMCS_GUEST_SS_BASE));
@@ -3513,7 +3595,11 @@ namespace mk
             this->dump_field("tr_base ", intrinsic.vmrd64(VMCS_GUEST_TR_BASE));
             this->dump_field("gdtr_base ", intrinsic.vmrd64(VMCS_GUEST_GDTR_BASE));
             this->dump_field("idtr_base ", intrinsic.vmrd64(VMCS_GUEST_IDTR_BASE));
-            this->dump_field("dr6 ", bsl::make_safe(m_vmcs_missing_registers.guest_dr6));
+            this->dump_field("dr0 ", bsl::make_safe(m_missing_registers.guest_dr0));
+            this->dump_field("dr1 ", bsl::make_safe(m_missing_registers.guest_dr1));
+            this->dump_field("dr2 ", bsl::make_safe(m_missing_registers.guest_dr2));
+            this->dump_field("dr3 ", bsl::make_safe(m_missing_registers.guest_dr3));
+            this->dump_field("dr6 ", bsl::make_safe(m_missing_registers.guest_dr6));
             this->dump_field("dr7 ", intrinsic.vmrd64(VMCS_GUEST_DR7));
             this->dump_field("rsp ", intrinsic.vmrd64(VMCS_GUEST_RSP));
             this->dump_field("rip ", intrinsic.vmrd64(VMCS_GUEST_RIP));

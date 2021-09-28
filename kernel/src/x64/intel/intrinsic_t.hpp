@@ -304,11 +304,10 @@ namespace mk
     ///     function returns, a "VMExit" has occurred and must be handled.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param pmut_vmcs_missing_registers a pointer to struct for where to
-    ///     store the registers not saved in the VMCS
+    ///   @param pmut_missing_registers a pointer to the missing registers
     ///   @return Returns the exit reason associated with the VMExit
     ///
-    extern "C" [[nodiscard]] auto intrinsic_vmrun(void *const pmut_vmcs_missing_registers) noexcept
+    extern "C" [[nodiscard]] auto intrinsic_vmrun(void *const pmut_missing_registers) noexcept
         -> bsl::uintmx;
 
     /// @class mk::intrinsic_t
@@ -980,6 +979,21 @@ namespace mk
             }
 
             return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief Executes the VMLaunch/VMResume instructions. When this
+        ///     function returns, a "VMExit" has occurred and must be handled.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param pmut_missing_registers a pointer to the missing registers
+        ///   @return Returns the exit reason associated with the VMExit
+        ///
+        [[nodiscard]] static constexpr auto
+        vmrun(void *const pmut_missing_registers) noexcept -> bsl::safe_umx
+        {
+            bsl::uintmx const exit_reason{intrinsic_vmrun(pmut_missing_registers)};
+            return bsl::safe_umx{exit_reason};
         }
     };
 }

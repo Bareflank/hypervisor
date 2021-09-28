@@ -108,7 +108,13 @@ dump_root_vp_state(struct state_save_t *const state, uint32_t const cpu)
     bfdebug_x64(" - cr2", state->cr2);
     bfdebug_x64(" - cr3", state->cr3);
     bfdebug_x64(" - cr4", state->cr4);
+    bfdebug_x64(" - cr8", state->cr8);
+    bfdebug_x64(" - xcr0", state->xcr0);
 
+    bfdebug_x64(" - dr0", state->dr0);
+    bfdebug_x64(" - dr1", state->dr1);
+    bfdebug_x64(" - dr2", state->dr2);
+    bfdebug_x64(" - dr3", state->dr3);
     bfdebug_x64(" - dr6", state->dr6);
     bfdebug_x64(" - dr7", state->dr7);
 

@@ -86,6 +86,18 @@
     SS_OFFSET_CR3 EQU 158h
     ; @brief defines the offset of state_save_t.cr4
     SS_OFFSET_CR4 EQU 160h
+    ; @brief defines the offset of state_save_t.cr8
+    SS_OFFSET_CR8 EQU 168h
+    ; @brief defines the offset of state_save_t.xcr0
+    SS_OFFSET_XCR0 EQU 170h
+    ; @brief defines the offset of state_save_t.dr0
+    SS_OFFSET_DR0 EQU 1C0h
+    ; @brief defines the offset of state_save_t.dr1
+    SS_OFFSET_DR1 EQU 1C8h
+    ; @brief defines the offset of state_save_t.dr2
+    SS_OFFSET_DR2 EQU 1D0h
+    ; @brief defines the offset of state_save_t.dr3
+    SS_OFFSET_DR3 EQU 1D8h
     ; @brief defines the offset of state_save_t.dr6
     SS_OFFSET_DR6 EQU 1F0h
     ; @brief defines the offset of state_save_t.dr7
@@ -392,6 +404,19 @@ gdt_and_cs_loaded:
     mov rax, [r14 + SS_OFFSET_CR3]
     mov cr3, rax
 
+    mov rax, cr8
+    mov [r15 + SS_OFFSET_CR8], rax
+    mov rax, [r14 + SS_OFFSET_CR8]
+    mov cr8, rax
+
+    xor ecx, ecx
+    xgetbv
+    mov [r15 + SS_OFFSET_XCR0 + 0h], eax
+    mov [r15 + SS_OFFSET_XCR0 + 4h], edx
+    mov eax, [r14 + SS_OFFSET_XCR0 + 0h]
+    mov edx, [r14 + SS_OFFSET_XCR0 + 4h]
+    xsetbv
+
     ; **************************************************************************
     ; Stack
     ; **************************************************************************
@@ -401,6 +426,26 @@ gdt_and_cs_loaded:
     ; **************************************************************************
     ; Debug Registers
     ; **************************************************************************
+
+    mov rax, dr0
+    mov [r15 + SS_OFFSET_DR0], rax
+    mov rax, [r14 + SS_OFFSET_DR0]
+    mov dr0, rax
+
+    mov rax, dr1
+    mov [r15 + SS_OFFSET_DR1], rax
+    mov rax, [r14 + SS_OFFSET_DR1]
+    mov dr1, rax
+
+    mov rax, dr2
+    mov [r15 + SS_OFFSET_DR2], rax
+    mov rax, [r14 + SS_OFFSET_DR2]
+    mov dr2, rax
+
+    mov rax, dr3
+    mov [r15 + SS_OFFSET_DR3], rax
+    mov rax, [r14 + SS_OFFSET_DR3]
+    mov dr3, rax
 
     mov rax, dr6
     mov [r15 + SS_OFFSET_DR6], rax
