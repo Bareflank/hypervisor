@@ -253,6 +253,18 @@ namespace lib
         }
 
         /// <!-- description -->
+        ///   @brief Returns the handle associated with this IOCTL
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the handle associated with this IOCTL
+        ///
+        [[nodiscard]] constexpr auto
+        handle() const noexcept -> HANDLE
+        {
+            return m_hndl;
+        }
+
+        /// <!-- description -->
         ///   @brief Sends a request to the driver without read or writing
         ///     data.
         ///

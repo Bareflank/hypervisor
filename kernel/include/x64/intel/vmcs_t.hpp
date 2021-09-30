@@ -356,7 +356,7 @@ namespace mk
     constexpr auto VMCS_HOST_FS_BASE{0x6C06_umx};
     /// @brief encoding for: host_gs_base
     constexpr auto VMCS_HOST_GS_BASE{0x6C08_umx};
-    /// @brief encoding for: host_tr_baseD
+    /// @brief encoding for: host_tr_base
     constexpr auto VMCS_HOST_TR_BASE{0x6C0A_umx};
     /// @brief encoding for: host_gdtr_base
     constexpr auto VMCS_HOST_GDTR_BASE{0x6C0C_umx};

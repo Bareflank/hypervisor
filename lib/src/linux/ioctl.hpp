@@ -187,6 +187,18 @@ namespace lib
         }
 
         /// <!-- description -->
+        ///   @brief Returns the handle associated with this IOCTL
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the handle associated with this IOCTL
+        ///
+        [[nodiscard]] constexpr auto
+        handle() const noexcept -> bsl::safe_i32
+        {
+            return m_hndl;
+        }
+
+        /// <!-- description -->
         ///   @brief Sends a request to the driver without read or writing
         ///     data.
         ///
@@ -205,7 +217,7 @@ namespace lib
             }
 
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-            bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get())};
+            bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), nullptr)};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "ioctl failed\n";
                 return bsl::to_i64(ret);
@@ -270,6 +282,36 @@ namespace lib
 
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), data)};
+            if (bsl::unlikely(ret.is_neg())) {
+                bsl::error() << "ioctl failed\n";
+                return bsl::to_i64(ret);
+            }
+
+            return bsl::to_i64(ret);
+        }
+
+        /// <!-- description -->
+        ///   @brief Writes data to the device driver
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param req the request
+        ///   @param data an integral to write to the IOCTL
+        ///   @return Returns a negative error code on failure, or
+        ///     something 0 or positive on success.
+        ///
+        [[nodiscard]] constexpr auto
+        // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
+        write(bsl::safe_umx const &req, bsl::safe_i64 const &data) const noexcept -> bsl::safe_i64
+        {
+            bsl::expects(data.is_valid_and_checked());
+
+            if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
+                return bsl::safe_i64::magic_neg_1();
+            }
+
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
+            bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), data.get())};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "ioctl failed\n";
                 return bsl::to_i64(ret);

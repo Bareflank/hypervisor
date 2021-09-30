@@ -51,9 +51,6 @@ namespace mk
     fast_fail(tls_t &mut_tls, intrinsic_t &mut_intrinsic, ext_t *const pmut_ext) noexcept
         -> bsl::errc_type
     {
-        bsl::print() << bsl::red << "\nfast failing:";
-        bsl::print() << bsl::rst << bsl::endl;
-
         if (nullptr != pmut_ext) {
             auto const ret{pmut_ext->fail(mut_tls, mut_intrinsic)};
             if (bsl::unlikely(!ret)) {
