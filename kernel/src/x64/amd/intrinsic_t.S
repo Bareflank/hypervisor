@@ -334,7 +334,9 @@ skip_load_pat:
     mov rax, [rsp + 0x010]
     vmload rax
 
+    sti
     vmrun rax
+    cli
 
     mov rax, [rsp + 0x010]
     vmsave rax

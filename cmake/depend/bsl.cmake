@@ -22,7 +22,7 @@
 FetchContent_Declare(
     bsl
     GIT_REPOSITORY  https://github.com/bareflank/bsl.git
-    GIT_TAG         1874ee51007ecf49537215899bce7afb5a3d7227
+    GIT_TAG         2c5f979d3f2f6718a55f474f957e7eadc25f3dbc
 )
 
 FetchContent_GetProperties(bsl)
