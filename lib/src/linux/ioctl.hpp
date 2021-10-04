@@ -232,16 +232,16 @@ namespace lib
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of data to read
         ///   @param req the request
-        ///   @param pmut_data a pointer to read data to
+        ///   @param pudm_data a pointer to read data to
         ///   @return Returns a negative error code on failure, or
         ///     something 0 or positive on success.
         ///
         template<typename T>
         [[nodiscard]] constexpr auto
         // NOLINTNEXTLINE(bsl-using-ident-unique-namespace)
-        read(bsl::safe_umx const &req, T *const pmut_data) const noexcept -> bsl::safe_i64
+        read(bsl::safe_umx const &req, T *const pudm_data) const noexcept -> bsl::safe_i64
         {
-            bsl::expects(nullptr != pmut_data);
+            bsl::expects(nullptr != pudm_data);
 
             if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
                 bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
@@ -249,7 +249,7 @@ namespace lib
             }
 
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
-            bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), pmut_data)};
+            bsl::safe_i32 const ret{::ioctl(m_hndl.get(), req.get(), pudm_data)};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "ioctl failed\n";
                 return bsl::to_i64(ret);
