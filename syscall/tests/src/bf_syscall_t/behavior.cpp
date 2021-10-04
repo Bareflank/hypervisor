@@ -849,6 +849,33 @@ namespace syscall
             };
         };
 
+        bsl::ut_scenario{"bf_vm_op_tlb_flush bf_vm_op_tlb_flush_impl fails"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::ut_when{} = [&]() noexcept {
+                    g_mut_errc.clear();
+                    g_mut_errc.at("bf_vm_op_tlb_flush_impl") = BF_STATUS_FAILURE_UNKNOWN;
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_sys.bf_vm_op_tlb_flush(arg0));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vm_op_tlb_flush success"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::ut_when{} = [&]() noexcept {
+                    g_mut_errc.clear();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_sys.bf_vm_op_tlb_flush(arg0));
+                    };
+                };
+            };
+        };
+
         // ---------------------------------------------------------------------
         // bf_vp_ops
         // ---------------------------------------------------------------------
@@ -1391,6 +1418,35 @@ namespace syscall
                     g_mut_errc.clear();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_sys.bf_vs_op_advance_ip_and_set_active(arg0, arg1, arg2));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vs_op_tlb_flush bf_vs_op_tlb_flush_impl fails"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::safe_u64 const arg1{HYPERVISOR_PAGE_SIZE};
+                bsl::ut_when{} = [&]() noexcept {
+                    g_mut_errc.clear();
+                    g_mut_errc.at("bf_vs_op_tlb_flush_impl") = BF_STATUS_FAILURE_UNKNOWN;
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_sys.bf_vs_op_tlb_flush(arg0, arg1));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vs_op_tlb_flush success"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bf_syscall_t mut_sys{};
+                bsl::safe_u16 const arg0{};
+                bsl::safe_u64 const arg1{HYPERVISOR_PAGE_SIZE};
+                bsl::ut_when{} = [&]() noexcept {
+                    g_mut_errc.clear();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_sys.bf_vs_op_tlb_flush(arg0, arg1));
                     };
                 };
             };

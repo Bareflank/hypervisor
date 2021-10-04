@@ -32,6 +32,7 @@
 #include <vp_pool_t.hpp>
 #include <vs_pool_t.hpp>
 
+#include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/expects.hpp>
@@ -50,8 +51,13 @@ namespace example
     ///   @param intrinsic the intrinsic_t to use
     ///   @param vp_pool the vp_pool_t to use
     ///   @param vs_pool the vs_pool_t to use
-    ///   @param vsid the ID of the VS that generated the fail
-    ///   @param fail_reason the exit reason associated with the fail
+    ///   @param errc the reason for the failure, which is CPU
+    ///     specific. On x86, this is a combination of the exception
+    ///     vector and error code.
+    ///   @param addr contains a faulting address if the fail reason
+    ///     is associated with an error that involves a faulting address (
+    ///     for example like a page fault). Otherwise, the value of this
+    ///     input is undefined.
     ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     ///     and friends otherwise
     ///
@@ -63,11 +69,11 @@ namespace example
         intrinsic_t const &intrinsic,
         vp_pool_t const &vp_pool,
         vs_pool_t const &vs_pool,
-        bsl::safe_u16 const &vsid,
-        bsl::safe_u64 const &fail_reason) noexcept -> bsl::errc_type
+        bsl::safe_u64 const &errc,
+        bsl::safe_u64 const &addr) noexcept -> bsl::errc_type
     {
-        bsl::expects(vsid.is_valid_and_checked());
-        bsl::expects(fail_reason.is_valid_and_checked());
+        bsl::expects(errc.is_valid_and_checked());
+        bsl::expects(addr.is_valid_and_checked());
 
         bsl::discard(gs);
         bsl::discard(tls);
@@ -91,6 +97,7 @@ namespace example
         ///   fault system works properly during testing.
         ///
 
+        bsl::alert() << "this extension does not support handling fast fail events\n";
         return bsl::errc_failure;
     }
 }

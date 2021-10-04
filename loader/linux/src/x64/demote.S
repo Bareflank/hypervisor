@@ -486,6 +486,10 @@ demotion_return:
      *   generates a failure, it needs to return to loader. The state in
      *   the root VP, which is what it will use to return is still the same
      *   at this point, so a return is safe.
+     *
+     * - The second CPUID is for integration testing. It costs nothing to do,
+     *   but allows us to pretend that we are passed to recovery window that
+     *   the first cpuid provides.
      */
 
     push rax

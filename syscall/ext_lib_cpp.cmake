@@ -64,15 +64,6 @@ target_include_directories(syscall PUBLIC
 # Headers
 # ------------------------------------------------------------------------------
 
-list(APPEND HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/include/bf_constants.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/bf_types.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bf_control_ops.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bf_debug_ops.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bf_syscall_impl.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/bf_syscall_t.hpp
-)
-
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
     if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
         list(APPEND HEADERS
@@ -93,6 +84,15 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     )
 endif()
 
+list(APPEND HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/include/bf_constants.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/bf_types.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bf_control_ops.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bf_debug_ops.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bf_syscall_impl.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/bf_syscall_t.hpp
+)
+
 # ------------------------------------------------------------------------------
 # Sources
 # ------------------------------------------------------------------------------
@@ -103,6 +103,7 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
     hypervisor_target_source(syscall src/x64/bf_callback_op_register_vmexit_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_control_op_exit_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_control_op_wait_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_control_op_again_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_debug_op_dump_ext_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_debug_op_dump_huge_pool_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_debug_op_dump_page_pool_impl.S ${HEADERS})
@@ -163,6 +164,7 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
     hypervisor_target_source(syscall src/x64/bf_vm_op_map_direct_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vm_op_unmap_direct_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vm_op_unmap_direct_broadcast_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vm_op_tlb_flush_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vp_op_create_vp_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vp_op_destroy_vp_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vs_op_advance_ip_and_run_current_impl.S ${HEADERS})
@@ -178,6 +180,7 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
     hypervisor_target_source(syscall src/x64/bf_vs_op_run_current_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vs_op_run_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vs_op_set_active_impl.S ${HEADERS})
+    hypervisor_target_source(syscall src/x64/bf_vs_op_tlb_flush_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_vs_op_write_impl.S ${HEADERS})
 endif()
 

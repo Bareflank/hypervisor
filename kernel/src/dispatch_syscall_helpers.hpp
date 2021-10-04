@@ -142,7 +142,7 @@ namespace mk
     [[nodiscard]] constexpr auto
     verify_handle_for_current_ext(tls_t const &tls) noexcept -> bool
     {
-        bool const valid{tls.ext->is_handle_valid(bsl::to_umx(tls.ext_reg0))};
+        bool const valid{tls.ext->is_handle_valid(bsl::to_u16_unsafe(tls.ext_reg0))};
         if (bsl::unlikely(!valid)) {
             bsl::error() << "invalid handle "         // --
                          << bsl::hex(tls.ext_reg0)    // --
@@ -917,6 +917,45 @@ namespace mk
     }
 
     /// <!-- description -->
+    ///   @brief Given an input register, returns a extid if the provided
+    ///     register contains a valid extid. Otherwise, this function returns
+    ///     bsl::safe_u16::failure().
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg the register to get the extid from.
+    ///   @return Given an input register, returns a extid if the provided
+    ///     register contains a valid extid. Otherwise, this function returns
+    ///     bsl::safe_u16::failure().
+    ///
+    [[nodiscard]] constexpr auto
+    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+    get_extid(bsl::uint64 const reg) noexcept -> bsl::safe_u16
+    {
+        auto const extid{bsl::to_u16_unsafe(reg)};
+        if (bsl::unlikely(syscall::BF_INVALID_ID == extid)) {
+            bsl::error() << "the provided extid "                     // --
+                         << bsl::hex(extid)                           // --
+                         << " is BF_INVALID_ID and cannot be used"    // --
+                         << bsl::endl                                 // --
+                         << bsl::here();                              // --
+
+            return bsl::safe_u16::failure();
+        }
+
+        if (bsl::unlikely(bsl::to_umx(extid) >= bsl::safe_umx::magic_1())) {
+            bsl::error() << "the provided extid "                     // --
+                         << bsl::hex(extid)                           // --
+                         << " is out of bounds and cannot be used"    // --
+                         << bsl::endl                                 // --
+                         << bsl::here();                              // --
+
+            return bsl::safe_u16::failure();
+        }
+
+        return extid;
+    }
+
+    /// <!-- description -->
     ///   @brief Given an input register, returns a bf_reg_t if the provided
     ///     register contains a valid bf_reg_t. Otherwise, this function
     ///     returns syscall::bf_reg_t::bf_reg_t_invalid.
@@ -1018,7 +1057,7 @@ namespace mk
     ///
     [[nodiscard]] constexpr auto
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    get_virt(bsl::uint64 const reg) noexcept -> bsl::safe_umx
+    get_direct_map_virt(bsl::uint64 const reg) noexcept -> bsl::safe_umx
     {
         constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
         constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_DIRECT_MAP_SIZE).checked()};
@@ -1066,6 +1105,172 @@ namespace mk
         }
 
         return virt;
+    }
+
+    /// <!-- description -->
+    ///   @brief Given an input register, returns a virtual address if the
+    ///     provided register contains a valid virtual address. Otherwise,
+    ///     this function returns bsl::safe_umx::failure().
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg the register to get the virtual address from.
+    ///   @return Given an input register, returns a virtual address if the
+    ///     provided register contains a valid virtual address. Otherwise,
+    ///     this function returns bsl::safe_umx::failure().
+    ///
+    [[nodiscard]] constexpr auto
+    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+    get_page_pool_virt(bsl::uint64 const reg) noexcept -> bsl::safe_umx
+    {
+        constexpr auto min_addr{HYPERVISOR_EXT_PAGE_POOL_ADDR};
+        constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_PAGE_POOL_SIZE).checked()};
+
+        auto const virt{bsl::to_umx(reg)};
+        if (bsl::unlikely(virt.is_zero())) {
+            bsl::error() << "the virtual address "                     // --
+                         << bsl::hex(virt)                             // --
+                         << " is a NULL address and cannot be used"    // --
+                         << bsl::endl                                  // --
+                         << bsl::here();                               // --
+
+            return bsl::safe_umx::failure();
+        }
+
+        if (bsl::unlikely(virt <= min_addr)) {
+            bsl::error() << "the virtual address "                   // --
+                         << bsl::hex(virt)                           // --
+                         << " is out of range and cannot be used"    // --
+                         << bsl::endl                                // --
+                         << bsl::here();                             // --
+
+            return bsl::safe_umx::failure();
+        }
+
+        if (bsl::unlikely(virt >= max_addr)) {
+            bsl::error() << "the virtual address "                   // --
+                         << bsl::hex(virt)                           // --
+                         << " is out of range and cannot be used"    // --
+                         << bsl::endl                                // --
+                         << bsl::here();                             // --
+
+            return bsl::safe_umx::failure();
+        }
+
+        bool const aligned{syscall::bf_is_page_aligned(virt)};
+        if (bsl::unlikely(!aligned)) {
+            bsl::error() << "the virtual address "                       // --
+                         << bsl::hex(virt)                               // --
+                         << " is not page aligned and cannot be used"    // --
+                         << bsl::endl                                    // --
+                         << bsl::here();                                 // --
+
+            return bsl::safe_umx::failure();
+        }
+
+        return virt;
+    }
+
+    /// <!-- description -->
+    ///   @brief Given an input register, returns a virtual address if the
+    ///     provided register contains a valid virtual address. Otherwise,
+    ///     this function returns bsl::safe_umx::failure().
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg the register to get the virtual address from.
+    ///   @return Given an input register, returns a virtual address if the
+    ///     provided register contains a valid virtual address. Otherwise,
+    ///     this function returns bsl::safe_umx::failure().
+    ///
+    [[nodiscard]] constexpr auto
+    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+    get_huge_pool_virt(bsl::uint64 const reg) noexcept -> bsl::safe_umx
+    {
+        constexpr auto min_addr{HYPERVISOR_EXT_HUGE_POOL_ADDR};
+        constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_HUGE_POOL_SIZE).checked()};
+
+        auto const virt{bsl::to_umx(reg)};
+        if (bsl::unlikely(virt.is_zero())) {
+            bsl::error() << "the virtual address "                     // --
+                         << bsl::hex(virt)                             // --
+                         << " is a NULL address and cannot be used"    // --
+                         << bsl::endl                                  // --
+                         << bsl::here();                               // --
+
+            return bsl::safe_umx::failure();
+        }
+
+        if (bsl::unlikely(virt <= min_addr)) {
+            bsl::error() << "the virtual address "                   // --
+                         << bsl::hex(virt)                           // --
+                         << " is out of range and cannot be used"    // --
+                         << bsl::endl                                // --
+                         << bsl::here();                             // --
+
+            return bsl::safe_umx::failure();
+        }
+
+        if (bsl::unlikely(virt >= max_addr)) {
+            bsl::error() << "the virtual address "                   // --
+                         << bsl::hex(virt)                           // --
+                         << " is out of range and cannot be used"    // --
+                         << bsl::endl                                // --
+                         << bsl::here();                             // --
+
+            return bsl::safe_umx::failure();
+        }
+
+        bool const aligned{syscall::bf_is_page_aligned(virt)};
+        if (bsl::unlikely(!aligned)) {
+            bsl::error() << "the virtual address "                       // --
+                         << bsl::hex(virt)                               // --
+                         << " is not page aligned and cannot be used"    // --
+                         << bsl::endl                                    // --
+                         << bsl::here();                                 // --
+
+            return bsl::safe_umx::failure();
+        }
+
+        return virt;
+    }
+
+    /// <!-- description -->
+    ///   @brief Given an input register, returns a guest linear address if the
+    ///     provided register contains a valid guest linear address. Otherwise,
+    ///     this function returns bsl::safe_umx::failure().
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg the register to get the guest linear address from.
+    ///   @return Given an input register, returns a guest linear address if the
+    ///     provided register contains a valid guest linear address. Otherwise,
+    ///     this function returns bsl::safe_umx::failure().
+    ///
+    [[nodiscard]] constexpr auto
+    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+    get_gla(bsl::uint64 const reg) noexcept -> bsl::safe_umx
+    {
+        auto const gla{bsl::to_umx(reg)};
+        if (bsl::unlikely(gla.is_zero())) {
+            bsl::error() << "the guest linear address "                // --
+                         << bsl::hex(gla)                              // --
+                         << " is a NULL address and cannot be used"    // --
+                         << bsl::endl                                  // --
+                         << bsl::here();                               // --
+
+            return bsl::safe_umx::failure();
+        }
+
+        bool const aligned{syscall::bf_is_page_aligned(gla)};
+        if (bsl::unlikely(!aligned)) {
+            bsl::error() << "the guest linear address "                  // --
+                         << bsl::hex(gla)                                // --
+                         << " is not page aligned and cannot be used"    // --
+                         << bsl::endl                                    // --
+                         << bsl::here();                                 // --
+
+            return bsl::safe_umx::failure();
+        }
+
+        return gla;
     }
 
     /// <!-- description -->

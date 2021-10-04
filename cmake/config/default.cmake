@@ -378,6 +378,22 @@ bf_add_config(
 )
 
 bf_add_config(
+    CONFIG_NAME HYPERVISOR_EXT_FAIL_STACK_ADDR
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "0x0000318000000000"
+    DESCRIPTION "Defines an extension's fail stack address"
+    OPTIONS 0x0000318000000000
+)
+
+bf_add_config(
+    CONFIG_NAME HYPERVISOR_EXT_FAIL_STACK_SIZE
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "0x8000"
+    DESCRIPTION "Defines an extension's stack size in bytes"
+    SKIP_VALIDATION
+)
+
+bf_add_config(
     CONFIG_NAME HYPERVISOR_EXT_CODE_ADDR
     CONFIG_TYPE STRING
     DEFAULT_VAL "0x0000328000000000"
@@ -412,9 +428,9 @@ bf_add_config(
 bf_add_config(
     CONFIG_NAME HYPERVISOR_EXT_PAGE_POOL_ADDR
     CONFIG_TYPE STRING
-    DEFAULT_VAL ${HYPERVISOR_EXT_DIRECT_MAP_ADDR}
+    DEFAULT_VAL "0x0000200000000000"
     DESCRIPTION "Defines an extension's default page pool address"
-    OPTIONS ${HYPERVISOR_EXT_DIRECT_MAP_ADDR}
+    OPTIONS 0x0000200000000000
 )
 
 bf_add_config(
@@ -428,9 +444,9 @@ bf_add_config(
 bf_add_config(
     CONFIG_NAME HYPERVISOR_EXT_HUGE_POOL_ADDR
     CONFIG_TYPE STRING
-    DEFAULT_VAL ${HYPERVISOR_EXT_DIRECT_MAP_ADDR}
+    DEFAULT_VAL ${HYPERVISOR_EXT_PAGE_POOL_ADDR}
     DESCRIPTION "Defines an extension's default huge pool address"
-    OPTIONS ${HYPERVISOR_EXT_DIRECT_MAP_ADDR}
+    OPTIONS ${HYPERVISOR_EXT_PAGE_POOL_ADDR}
 )
 
 bf_add_config(
@@ -439,22 +455,6 @@ bf_add_config(
     DEFAULT_VAL ${HYPERVISOR_MK_HUGE_POOL_SIZE}
     DESCRIPTION "Defines an extension's default huge pool max size in bytes"
     OPTIONS ${HYPERVISOR_MK_HUGE_POOL_SIZE}
-)
-
-bf_add_config(
-    CONFIG_NAME HYPERVISOR_EXT_HEAP_POOL_ADDR
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "0x0000348000000000"
-    DESCRIPTION "Defines an extension's default heap pool address in bytes"
-    OPTIONS 0x0000348000000000
-)
-
-bf_add_config(
-    CONFIG_NAME HYPERVISOR_EXT_HEAP_POOL_SIZE
-    CONFIG_TYPE STRING
-    DEFAULT_VAL ${HYPERVISOR_MK_PAGE_POOL_SIZE}
-    DESCRIPTION "Defines an extension's default heap pool max size"
-    OPTIONS ${HYPERVISOR_MK_PAGE_POOL_SIZE}
 )
 
 bf_find_program(HYPERVISOR_VERIFY_LLD "${HYPERVISOR_CXX_LINKER}" "https://github.com/Bareflank/hypervisor#build-requirements")

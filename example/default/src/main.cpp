@@ -142,12 +142,16 @@ namespace example
     ///     by the main function to execute whenever a fast fail occurs.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vsid the ID of the VS that generated the fail
-    ///   @param fail_reason the exit reason associated with the fail
+    ///   @param errc the reason for the failure, which is CPU
+    ///     specific. On x86, this is a combination of the exception
+    ///     vector and error code.
+    ///   @param addr contains a faulting address if the fail reason
+    ///     is associated with an error that involves a faulting address (
+    ///     for example like a page fault). Otherwise, the value of this
+    ///     input is undefined.
     ///
     extern "C" void
-    fail_entry(
-        bsl::safe_u16::value_type const vsid, bsl::safe_u64::value_type const fail_reason) noexcept
+    fail_entry(bsl::safe_u64::value_type const errc, bsl::safe_u64::value_type const addr) noexcept
     {
         /// NOTE:
         /// - Call into the fast fail handler. This entry point serves as a
@@ -163,8 +167,8 @@ namespace example
             g_mut_intrinsic,             // --
             g_mut_vp_pool,               // --
             g_mut_vs_pool,               // --
-            bsl::to_u16(vsid),           // --
-            bsl::to_u64(fail_reason))};
+            bsl::to_u64(errc),           // --
+            bsl::to_u64(addr))};
 
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();

@@ -31,14 +31,38 @@
     .type   set_esr, @function
 set_esr:
 
+    /**
+     * NOTE:
+     * - The descriptors in the IDT are actually set up by the loader,
+     *   and the only thing we need to actually do here is update the
+     *   descriptors to use our handlers instead of the temporary
+     *   handlers that the loader uses. So, step 1 is is to load the
+     *   IDTR onto the stack so that we can fetch the descriptor that
+     *   we plan to change.
+     */
+
     push rax
     push ax
     sidt [rsp]
     pop ax
     pop rax
 
+    /**
+     * NOTE:
+     * - Load RDI with the memory location of the descriptor that we
+     *   want to change.
+     */
+
     shl rdi, 4
     add rdi, rax
+
+    /**
+     * NOTE:
+     * - Update Offset bits 0-15 in the descriptor with the new location
+     *   of our ESR handler. If this doesn't make sense, please take a
+     *   look at a Call-Gate Descriptor in Long Mode from the AMD manual
+     *   as all of the information that is needed can be seen there.
+     */
 
     mov rcx, [rdi]
     mov rax, 0xFFFFFFFFFFFF0000
@@ -50,6 +74,14 @@ set_esr:
     or rcx, rdx
     mov [rdi], rcx
 
+    /**
+     * NOTE:
+     * - Update Offset bits 31-16 in the descriptor with the new location
+     *   of our ESR handler. If this doesn't make sense, please take a
+     *   look at a Call-Gate Descriptor in Long Mode from the AMD manual
+     *   as all of the information that is needed can be seen there.
+     */
+
     mov rcx, [rdi]
     mov rax, 0x0000FFFFFFFFFFFF
     and rcx, rax
@@ -59,6 +91,14 @@ set_esr:
     and rdx, rax
     or rcx, rdx
     mov [rdi], rcx
+
+    /**
+     * NOTE:
+     * - Update Offset bits 63-32 in the descriptor with the new location
+     *   of our ESR handler. If this doesn't make sense, please take a
+     *   look at a Call-Gate Descriptor in Long Mode from the AMD manual
+     *   as all of the information that is needed can be seen there.
+     */
 
     mov rcx, [rdi + 8]
     mov rax, 0xFFFFFFFF00000000

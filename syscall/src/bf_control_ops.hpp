@@ -61,6 +61,22 @@ namespace syscall
 
         bf_control_op_wait_impl();
     }
+
+    /// <!-- description -->
+    ///   @brief This syscall tells the microkernel that the extension would
+    ///     like to try again from a fast fail callback. This syscall is a
+    ///     blocking syscall that never returns and should be used to return
+    ///     from the fail_entry function.
+    ///
+    constexpr void
+    bf_control_op_again() noexcept
+    {
+        if (bsl::is_constant_evaluated()) {
+            return;
+        }
+
+        bf_control_op_again_impl();
+    }
 }
 
 #endif

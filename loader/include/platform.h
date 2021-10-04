@@ -215,4 +215,15 @@ void platform_dump_vmm(void);
  */
 int64_t platform_arch_init(void);
 
+/**
+ * <!-- description -->
+ *   @brief Marks the current GDT as read/write
+ */
+void platform_mark_gdt_writable(void);
+/**
+ * <!-- description -->
+ *   @brief Marks the current GDT as read-only
+ */
+void platform_mark_gdt_readonly(void);
+
 #endif

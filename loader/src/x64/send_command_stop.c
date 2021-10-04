@@ -27,6 +27,7 @@
 #include <cpuid_commands.h>
 #include <debug.h>
 #include <intrinsic_cpuid.h>
+#include <platform.h>
 #include <types.h>
 
 /**
@@ -46,7 +47,9 @@ send_command_stop(void)
 
     eax = CPUID_COMMAND_EAX;
     ecx = CPUID_COMMAND_ECX_STOP;
+    platform_mark_gdt_writable();
     intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
+    platform_mark_gdt_readonly();
 
     if (((uint32_t)0) != eax) {
         bferror("stop cpuid command failed");

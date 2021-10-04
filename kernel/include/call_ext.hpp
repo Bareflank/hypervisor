@@ -41,7 +41,7 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param ip the instruction pointer to call into
-    ///   @param sp the stack pointer to use when calling the ext
+    ///   @param sp the stack pointer to use
     ///   @param arg0 the first argument to pass the extension
     ///   @param arg1 the second argument to pass the extension
     ///   @return returns the exit status from the extension

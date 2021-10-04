@@ -70,144 +70,144 @@ namespace mk
         /// --------------------------------------------------------------------
 
         /// @brief stores the value of rbx for the microkernel (0x000)
-        bsl::uintmx mk_rbx;
+        bsl::uint64 mk_rbx;
         /// @brief stores the value of rbp for the microkernel (0x008)
-        bsl::uintmx mk_rbp;
+        bsl::uint64 mk_rbp;
         /// @brief stores the value of r12 for the microkernel (0x010)
-        bsl::uintmx mk_r12;
+        bsl::uint64 mk_r12;
         /// @brief stores the value of r13 for the microkernel (0x018)
-        bsl::uintmx mk_r13;
+        bsl::uint64 mk_r13;
         /// @brief stores the value of r14 for the microkernel (0x020)
-        bsl::uintmx mk_r14;
+        bsl::uint64 mk_r14;
         /// @brief stores the value of r15 for the microkernel (0x028)
-        bsl::uintmx mk_r15;
+        bsl::uint64 mk_r15;
 
         /// --------------------------------------------------------------------
         /// Extension State
         /// --------------------------------------------------------------------
 
         /// @brief RAX, stores the extension's syscall (0x030)
-        bsl::uintmx ext_syscall;
+        bsl::uint64 ext_syscall;
         /// @brief RBX, reserved (0x038)
-        bsl::uintmx reserved_reg1;
+        bsl::uint64 reserved_rbx;
         /// @brief RCX, reserved (0x040)
-        bsl::uintmx reserved_reg2;
+        bsl::uint64 reserved_rcx;
         /// @brief RDX, stores the value of REG2 for the extension (0x048)
-        bsl::uintmx ext_reg2;
+        bsl::uint64 ext_reg2;
         /// @brief RBP, reserved (0x050)
-        bsl::uintmx reserved_reg3;
+        bsl::uint64 reserved_rbp;
         /// @brief RSI, stores the value of REG1 for the extension (0x058)
-        bsl::uintmx ext_reg1;
+        bsl::uint64 ext_reg1;
         /// @brief RDI, stores the value of REG0 for the extension (0x060)
-        bsl::uintmx ext_reg0;
+        bsl::uint64 ext_reg0;
         /// @brief R8, stores the value of REG4 for the extension (0x068)
-        bsl::uintmx ext_reg4;
+        bsl::uint64 ext_reg4;
         /// @brief R9, stores the value of REG5 for the extension (0x070)
-        bsl::uintmx ext_reg5;
+        bsl::uint64 ext_reg5;
         /// @brief R10, stores the value of REG3 for the extension (0x078)
-        bsl::uintmx ext_reg3;
+        bsl::uint64 ext_reg3;
         /// @brief R11, reserved (0x080)
-        bsl::uintmx reserved_reg4;
+        bsl::uint64 reserved_r11;
         /// @brief R12, reserved (0x088)
-        bsl::uintmx reserved_reg5;
+        bsl::uint64 reserved_r12;
         /// @brief R13, reserved (0x090)
-        bsl::uintmx reserved_reg6;
+        bsl::uint64 reserved_r13;
         /// @brief R14, reserved (0x098)
-        bsl::uintmx reserved_reg7;
+        bsl::uint64 reserved_r14;
         /// @brief R15, reserved (0x0A0)
-        bsl::uintmx reserved_reg8;
+        bsl::uint64 reserved_r15;
         /// @brief RSP, reserved (0x0A8)
-        bsl::uintmx reserved_reg9;
+        bsl::uint64 ext_sp;
 
         /// --------------------------------------------------------------------
         /// ESR State
         /// --------------------------------------------------------------------
 
         /// @brief stores the value of rax for the ESR (0x0B0)
-        bsl::uintmx esr_rax;
+        bsl::uint64 esr_rax;
         /// @brief stores the value of rbx for the ESR (0x0B8)
-        bsl::uintmx esr_rbx;
+        bsl::uint64 esr_rbx;
         /// @brief stores the value of rcx for the ESR (0x0C0)
-        bsl::uintmx esr_rcx;
+        bsl::uint64 esr_rcx;
         /// @brief stores the value of rdx for the ESR (0x0C8)
-        bsl::uintmx esr_rdx;
+        bsl::uint64 esr_rdx;
         /// @brief stores the value of rbp for the ESR (0x0D0)
-        bsl::uintmx esr_rbp;
+        bsl::uint64 esr_rbp;
         /// @brief stores the value of rsi for the ESR (0x0D8)
-        bsl::uintmx esr_rsi;
+        bsl::uint64 esr_rsi;
         /// @brief stores the value of rdi for the ESR (0x0E0)
-        bsl::uintmx esr_rdi;
+        bsl::uint64 esr_rdi;
         /// @brief stores the value of r8 for the ESR (0x0E8)
-        bsl::uintmx esr_r8;
+        bsl::uint64 esr_r8;
         /// @brief stores the value of r9 for the ESR (0x0F0)
-        bsl::uintmx esr_r9;
+        bsl::uint64 esr_r9;
         /// @brief stores the value of r10 for the ESR (0x0F8)
-        bsl::uintmx esr_r10;
+        bsl::uint64 esr_r10;
         /// @brief stores the value of r11 for the ESR (0x100)
-        bsl::uintmx esr_r11;
+        bsl::uint64 esr_r11;
         /// @brief stores the value of r12 for the ESR (0x108)
-        bsl::uintmx esr_r12;
+        bsl::uint64 esr_r12;
         /// @brief stores the value of r13 for the ESR (0x110)
-        bsl::uintmx esr_r13;
+        bsl::uint64 esr_r13;
         /// @brief stores the value of r14 for the ESR (0x118)
-        bsl::uintmx esr_r14;
+        bsl::uint64 esr_r14;
         /// @brief stores the value of r15 for the ESR (0x120)
-        bsl::uintmx esr_r15;
+        bsl::uint64 esr_r15;
         /// @brief stores the value of rip for the ESR (0x128)
-        bsl::uintmx esr_ip;
+        bsl::uint64 esr_ip;
         /// @brief stores the value of rsp for the ESR (0x130)
-        bsl::uintmx esr_sp;
+        bsl::uint64 esr_sp;
 
         /// @brief stores the value of the ESR vector (0x138)
-        bsl::uintmx esr_vector;
+        bsl::uint64 esr_vector;
         /// @brief stores the value of the ESR error code (0x140)
-        bsl::uintmx esr_error_code;
+        bsl::uint64 esr_error_code;
 
         /// @brief stores the value of cr0 for the ESR (0x148)
-        bsl::uintmx esr_cr0;
+        bsl::uint64 esr_cr0;
         /// @brief stores the value of cr2 for the ESR (0x150)
-        bsl::uintmx esr_pf_addr;
+        bsl::uint64 esr_pf_addr;
         /// @brief stores the value of cr3 for the ESR (0x158)
-        bsl::uintmx esr_cr3;
+        bsl::uint64 esr_cr3;
         /// @brief stores the value of cr4 for the ESR (0x160)
-        bsl::uintmx esr_cr4;
+        bsl::uint64 esr_cr4;
 
         /// @brief stores the value of cs for the ESR (0x168)
-        bsl::uintmx esr_cs;
+        bsl::uint64 esr_cs;
         /// @brief stores the value of ss for the ESR (0x170)
-        bsl::uintmx esr_ss;
+        bsl::uint64 esr_ss;
 
         /// @brief stores the value of ss for the ESR (0x178)
-        bsl::uintmx esr_rflags;
+        bsl::uint64 esr_rflags;
 
         /// --------------------------------------------------------------------
-        /// Fast Fail Information
+        /// Fail Handler States
         /// --------------------------------------------------------------------
 
-        /// @brief stores the current fast fail address (0x180)
-        bsl::uintmx current_fast_fail_ip;
-        /// @brief stores the current fast fail stack (0x188)
-        bsl::uintmx current_fast_fail_sp;
+        /// @brief stores the value of rsp for the MK (0x180)
+        bsl::uint64 mk_sp;
+        /// @brief stores the value of rsp for the MK when calling fail (0x188)
+        bsl::uint64 mk_handling_esr;
 
-        /// @brief stores the mk_main fast fail address (0x190)
-        bsl::uintmx mk_main_fast_fail_ip;
-        /// @brief stores the mk_main fast fail stack (0x198)
-        bsl::uintmx mk_main_fast_fail_sp;
+        /// @brief stores the value of rsp for the MK when failing (0x190)
+        bsl::uint64 mk_fail_sp;
+        /// @brief stores the fail sp used by extensions for callbacks (0x198)
+        bsl::uint64 ext_fail_sp;
 
-        /// @brief stores the call_ext fast fail address (0x1A0)
-        bsl::uintmx call_ext_fast_fail_ip;
-        /// @brief stores the call_ext fast fail stack (0x1A8)
-        bsl::uintmx call_ext_fast_fail_sp;
+        /// @brief reserved (0x1A0)
+        bsl::uint64 reserved_tmp4;
+        /// @brief reserved (0x1A8)
+        bsl::uint64 reserved_tmp5;
 
-        /// @brief stores the dispatch_syscall fast fail address (0x1B0)
-        bsl::uintmx dispatch_syscall_fast_fail_ip;
-        /// @brief stores the dispatch_syscall fast fail stack (0x1B8)
-        bsl::uintmx dispatch_syscall_fast_fail_sp;
+        /// @brief reserved (0x1B0)
+        bsl::uint64 reserved_tmp6;
+        /// @brief reserved (0x1B8)
+        bsl::uint64 reserved_tmp7;
 
-        /// @brief stores the vmexit loop address (0x1C0)
-        bsl::uintmx vmexit_loop_ip;
-        /// @brief stores the vmexit loop stack (0x1C8)
-        bsl::uintmx vmexit_loop_sp;
+        /// @brief reserved (0x1C0)
+        bsl::uint64 reserved_tmp8;
+        /// @brief reserved (0x1C8)
+        bsl::uint64 reserved_tmp9;
 
         /// @brief reserve the rest of the TLS block for later use.
         bsl::array<bsl::uint8, TLS_T_RESERVED1_SIZE.get()> reserved1;
@@ -250,20 +250,20 @@ namespace mk
         bsl::uint16 active_vsid;
 
         /// @brief stores the sp used by extensions for callbacks (0x240)
-        bsl::uintmx sp;
+        bsl::uint64 sp;
         /// @brief stores the tps used by extensions for callbacks (0x248)
-        bsl::uintmx tp;
+        bsl::uint64 tp;
 
         /// @brief used to store a return address for unsafe ops (0x250)
-        bsl::uintmx unsafe_rip;
+        bsl::uint64 unsafe_rip;
 
         /// @brief used to signal NMIs are not safe (0x258)
-        bsl::uintmx nmi_lock;
+        bsl::uint64 nmi_lock;
         /// @brief used to singal an NMI has fired (0x260)
-        bsl::uintmx nmi_pending;
+        bsl::uint64 nmi_pending;
 
         /// @brief stores whether or not the first launch succeeded (0x268)
-        bsl::uintmx first_launch_succeeded;
+        bsl::uint64 first_launch_succeeded;
 
         /// @brief stores the currently active root page table (0x270)
         void *active_rpt;

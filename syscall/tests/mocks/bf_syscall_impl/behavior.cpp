@@ -81,7 +81,7 @@ namespace syscall
 
         bsl::ut_scenario{"quiet dummy_fail_entry"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
-                bsl::safe_u16 const arg0{};
+                bsl::safe_u64 const arg0{};
                 bsl::safe_u64 const arg1{};
                 bsl::ut_then{} = [&]() noexcept {
                     dummy_fail_entry(arg0.get(), arg1.get());
@@ -360,6 +360,18 @@ namespace syscall
                     bf_control_op_wait_impl();
                     bsl::ut_then{} = []() noexcept {
                         bsl::ut_check(g_mut_bf_control_op_wait_impl_executed);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_control_op_again_impl"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bsl::ut_when{} = []() noexcept {
+                    g_mut_bf_control_op_again_impl_executed = {};
+                    bf_control_op_again_impl();
+                    bsl::ut_then{} = []() noexcept {
+                        bsl::ut_check(g_mut_bf_control_op_again_impl_executed);
                     };
                 };
             };
@@ -820,6 +832,33 @@ namespace syscall
                     g_mut_data.clear();
                     bsl::ut_then{} = []() noexcept {
                         bf_status_t const ret{bf_vm_op_unmap_direct_broadcast_impl({}, {}, {})};
+                        bsl::ut_check(BF_STATUS_SUCCESS == ret);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vm_op_tlb_flush_impl failure"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bsl::ut_when{} = []() noexcept {
+                    g_mut_errc.clear();
+                    g_mut_data.clear();
+                    g_mut_errc.at("bf_vm_op_tlb_flush_impl") = BF_STATUS_FAILURE_UNKNOWN;
+                    bsl::ut_then{} = []() noexcept {
+                        bf_status_t const ret{bf_vm_op_tlb_flush_impl({}, {})};
+                        bsl::ut_check(BF_STATUS_FAILURE_UNKNOWN == ret);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vm_op_tlb_flush_impl success"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bsl::ut_when{} = []() noexcept {
+                    g_mut_errc.clear();
+                    g_mut_data.clear();
+                    bsl::ut_then{} = []() noexcept {
+                        bf_status_t const ret{bf_vm_op_tlb_flush_impl({}, {})};
                         bsl::ut_check(BF_STATUS_SUCCESS == ret);
                     };
                 };
@@ -1317,6 +1356,33 @@ namespace syscall
                     bsl::ut_then{} = []() noexcept {
                         bf_status_t const ret{
                             bf_vs_op_advance_ip_and_set_active_impl({}, {}, {}, {})};
+                        bsl::ut_check(BF_STATUS_SUCCESS == ret);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vs_op_tlb_flush_impl failure"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bsl::ut_when{} = []() noexcept {
+                    g_mut_errc.clear();
+                    g_mut_data.clear();
+                    g_mut_errc.at("bf_vs_op_tlb_flush_impl") = BF_STATUS_FAILURE_UNKNOWN;
+                    bsl::ut_then{} = []() noexcept {
+                        bf_status_t const ret{bf_vs_op_tlb_flush_impl({}, {}, {})};
+                        bsl::ut_check(BF_STATUS_FAILURE_UNKNOWN == ret);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"bf_vs_op_tlb_flush_impl success"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                bsl::ut_when{} = []() noexcept {
+                    g_mut_errc.clear();
+                    g_mut_data.clear();
+                    bsl::ut_then{} = []() noexcept {
+                        bf_status_t const ret{bf_vs_op_tlb_flush_impl({}, {}, {})};
                         bsl::ut_check(BF_STATUS_SUCCESS == ret);
                     };
                 };

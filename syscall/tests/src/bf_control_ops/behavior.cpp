@@ -64,6 +64,18 @@ namespace syscall
             };
         };
 
+        bsl::ut_scenario{"bf_control_op_again"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                g_mut_bf_control_op_again_impl_executed = {};
+                bsl::ut_when{} = []() noexcept {
+                    bf_control_op_again();
+                    bsl::ut_then{} = []() noexcept {
+                        bsl::ut_check(g_mut_bf_control_op_again_impl_executed);
+                    };
+                };
+            };
+        };
+
         return bsl::ut_success();
     }
 }

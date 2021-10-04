@@ -811,20 +811,20 @@ namespace syscall
         ///   @tparam T the type of pointer to return. Must be a POD type and
         ///     the size of a page.
         ///   @param vmid The ID of the VM to unmap the virtual address from
-        ///   @param pudm_virt The virtual address to unmap
+        ///   @param ptr The virtual address to unmap
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
         template<typename T>
         [[nodiscard]] constexpr auto
-        bf_vm_op_unmap_direct(bsl::safe_u16 const &vmid, T *const pudm_virt) noexcept
+        bf_vm_op_unmap_direct(bsl::safe_u16 const &vmid, T const *const ptr) noexcept
             -> bsl::errc_type
         {
             constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
             constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_DIRECT_MAP_SIZE).checked()};
 
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-            bsl::safe_u64 const virt{reinterpret_cast<bsl::uint64>(pudm_virt)};
+            bsl::safe_u64 const virt{reinterpret_cast<bsl::uint64>(ptr)};
 
             bsl::expects(vmid.is_valid_and_checked());
             bsl::expects(vmid != BF_INVALID_ID);
@@ -858,26 +858,26 @@ namespace syscall
         ///     which means it can be safely used on all direct mapped
         ///     addresses. The downside of using this function is that it can
         ///     be a lot slower than bf_vm_op_unmap_direct, especially on
-        ///     systems with a lot of cores.
+        ///     systems with a lot of PPs.
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of pointer to return. Must be a POD type and
         ///     the size of a page.
         ///   @param vmid The ID of the VM to unmap the virtual address from
-        ///   @param pmut_virt The virtual address to unmap
+        ///   @param ptr The virtual address to unmap
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     otherwise
         ///
         template<typename T>
         [[nodiscard]] constexpr auto
-        bf_vm_op_unmap_direct_broadcast(bsl::safe_u16 const &vmid, T *const pmut_virt) noexcept
+        bf_vm_op_unmap_direct_broadcast(bsl::safe_u16 const &vmid, T const *const ptr) noexcept
             -> bsl::errc_type
         {
             constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
             constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_DIRECT_MAP_SIZE).checked()};
 
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-            bsl::safe_u64 const virt{reinterpret_cast<bsl::uint64>(pmut_virt)};
+            bsl::safe_u64 const virt{reinterpret_cast<bsl::uint64>(ptr)};
 
             bsl::expects(vmid.is_valid_and_checked());
             bsl::expects(vmid != BF_INVALID_ID);
@@ -897,6 +897,35 @@ namespace syscall
                 bsl::error() << "bf_vm_op_unmap_direct_broadcast_impl failed with status "    // --
                              << bsl::hex(ret)                                                 // --
                              << bsl::endl                                                     // --
+                             << bsl::here();
+
+                return bsl::errc_failure;
+            }
+
+            return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief Given the ID of a VM, invalidates a TLB entry for a given
+        ///     GLA on the PP that this is executed on.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vmid The ID of the VM to invalidate
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        bf_vm_op_tlb_flush(bsl::safe_u16 const &vmid) noexcept -> bsl::errc_type
+        {
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(vmid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vmid) < HYPERVISOR_MAX_VMS);
+
+            bf_status_t const ret{bf_vm_op_tlb_flush_impl(m_hndl.get(), vmid.get())};
+            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
+                bsl::error() << "bf_vm_op_tlb_flush failed with status "    // --
+                             << bsl::hex(ret)                               // --
+                             << bsl::endl                                   // --
                              << bsl::here();
 
                 return bsl::errc_failure;
@@ -1479,6 +1508,40 @@ namespace syscall
                 bsl::error() << "bf_vs_op_advance_ip_and_set_active failed with status "    // --
                              << bsl::hex(ret)                                               // --
                              << bsl::endl                                                   // --
+                             << bsl::here();
+
+                return bsl::errc_failure;
+            }
+
+            return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief Given the ID of a VS, invalidates a TLB entry for a given
+        ///     GLA on the PP that this is executed on.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vsid The ID of the VS to invalidate
+        ///   @param gla The GLA to invalidate
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        bf_vs_op_tlb_flush(bsl::safe_u16 const &vsid, bsl::safe_u64 const &gla) noexcept
+            -> bsl::errc_type
+        {
+            bsl::expects(vsid.is_valid_and_checked());
+            bsl::expects(vsid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vsid) < HYPERVISOR_MAX_VSS);
+            bsl::expects(gla.is_valid_and_checked());
+            bsl::expects(gla.is_pos());
+            bsl::expects(bf_is_page_aligned(gla));
+
+            bf_status_t const ret{bf_vs_op_tlb_flush_impl(m_hndl.get(), vsid.get(), gla.get())};
+            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
+                bsl::error() << "bf_vs_op_tlb_flush failed with status "    // --
+                             << bsl::hex(ret)                               // --
+                             << bsl::endl                                   // --
                              << bsl::here();
 
                 return bsl::errc_failure;

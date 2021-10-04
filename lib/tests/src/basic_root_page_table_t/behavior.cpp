@@ -1565,7 +1565,6 @@ namespace lib
         //         constexpr auto flgs6{MAP_PAGE_READ | MAP_PAGE_EXECUTE};
         //         constexpr auto atrl0{MAP_PAGE_NO_AUTO_RELEASE};
         //         constexpr auto atrl1{MAP_PAGE_AUTO_RELEASE_ALLOC_PAGE};
-        //         constexpr auto atrl2{MAP_PAGE_AUTO_RELEASE_ALLOC_HEAP};
         //         constexpr auto atrl3{MAP_PAGE_AUTO_RELEASE_STACK};
         //         constexpr auto atrl4{MAP_PAGE_AUTO_RELEASE_TLS};
         //         constexpr auto atrl5{MAP_PAGE_AUTO_RELEASE_TCB};
@@ -1580,8 +1579,6 @@ namespace lib
         //             pmut_mut_page1 =
         //                 mut_page_pool.allocate<page_t>(mut_tls, ALLOCATE_TAG_BF_MEM_OP_ALLOC_PAGE);
         //             pmut_mut_page2 =
-        //                 mut_page_pool.allocate<page_t>(mut_tls, ALLOCATE_TAG_BF_MEM_OP_ALLOC_HEAP);
-        //             pmut_mut_page3 =
         //                 mut_page_pool.allocate<page_t>(mut_tls, ALLOCATE_TAG_EXT_STACK);
         //             pmut_mut_page4 = mut_page_pool.allocate<page_t>(mut_tls, ALLOCATE_TAG_EXT_TLS);
         //             pmut_mut_page5 =

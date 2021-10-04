@@ -381,6 +381,8 @@ namespace syscall
     constexpr auto BF_CONTROL_OP_EXIT_IDX_VAL{0x0000000000000000_u64};
     /// @brief Defines the index for bf_control_op_wait
     constexpr auto BF_CONTROL_OP_WAIT_IDX_VAL{0x0000000000000001_u64};
+    /// @brief Defines the index for bf_control_op_again
+    constexpr auto BF_CONTROL_OP_AGAIN_IDX_VAL{0x0000000000000002_u64};
 
     /// @brief Defines the index for bf_handle_op_open_handle
     constexpr auto BF_HANDLE_OP_OPEN_HANDLE_IDX_VAL{0x0000000000000000_u64};
@@ -425,6 +427,8 @@ namespace syscall
     constexpr auto BF_VM_OP_UNMAP_DIRECT_IDX_VAL{0x0000000000000003_u64};
     /// @brief Defines the index for bf_vm_op_unmap_direct_broadcast
     constexpr auto BF_VM_OP_UNMAP_DIRECT_BROADCAST_IDX_VAL{0x0000000000000004_u64};
+    /// @brief Defines the index for bf_vm_op_tlb_flush
+    constexpr auto BF_VM_OP_TLB_FLUSH_IDX_VAL{0x0000000000000005_u64};
 
     /// @brief Defines the index for bf_vp_op_create_vp
     constexpr auto BF_VP_OP_CREATE_VP_IDX_VAL{0x0000000000000000_u64};
@@ -459,6 +463,8 @@ namespace syscall
     constexpr auto BF_VS_OP_SET_ACTIVE_IDX_VAL{0x000000000000000C_u64};
     /// @brief Defines the index for bf_vs_op_advance_ip_and_set_active
     constexpr auto BF_VS_OP_ADVANCE_IP_AND_SET_ACTIVE_IDX_VAL{0x000000000000000D_u64};
+    /// @brief Defines the index for bf_vs_op_tlb_flush
+    constexpr auto BF_VS_OP_TLB_FLUSH_IDX_VAL{0x000000000000000E_u64};
 
     /// @brief Defines the index for bf_intrinsic_op_rdmsr
     constexpr auto BF_INTRINSIC_OP_RDMSR_IDX_VAL{0x0000000000000000_u64};

@@ -83,6 +83,8 @@ namespace syscall
     constinit inline bool g_mut_bf_control_op_exit_impl_executed{};
     /// @brief stores whether or not bf_control_op_wait_impl was executed
     constinit inline bool g_mut_bf_control_op_wait_impl_executed{};
+    /// @brief stores whether or not bf_control_op_again_impl was executed
+    constinit inline bool g_mut_bf_control_op_again_impl_executed{};
 
     /// @brief stores whether or not bf_debug_op_out_impl was executed
     constinit inline bool g_mut_bf_debug_op_out_impl_executed{};
@@ -127,7 +129,7 @@ namespace syscall
 
     /// @brief Defines the signature of the fast fail callback handler
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    using bf_callback_handler_fail_t = void (*)(bsl::uint16, bsl::uint64);
+    using bf_callback_handler_fail_t = void (*)(bsl::uint64, bsl::uint64);
 
     // -------------------------------------------------------------------------
     // dummy callbacks
@@ -163,14 +165,19 @@ namespace syscall
     ///   @brief Implements a dummy fast fail entry function.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vsid the ID of the VS that generated the fail
-    ///   @param fail_reason the exit reason associated with the fail
+    ///   @param errc the reason for the failure, which is CPU
+    ///     specific. On x86, this is a combination of the exception
+    ///     vector and error code.
+    ///   @param addr contains a faulting address if the fail reason
+    ///     is associated with an error that involves a faulting address (
+    ///     for example like a page fault). Otherwise, the value of this
+    ///     input is undefined.
     ///
     extern "C" inline void
-    dummy_fail_entry(bsl::uint16 const vsid, bsl::uint64 const fail_reason) noexcept
+    dummy_fail_entry(bsl::uint64 const errc, bsl::uint64 const addr) noexcept
     {
-        bsl::discard(vsid);
-        bsl::discard(fail_reason);
+        bsl::discard(errc);
+        bsl::discard(addr);
     }
 
     // -------------------------------------------------------------------------
@@ -631,6 +638,15 @@ namespace syscall
         g_mut_bf_control_op_wait_impl_executed = true;
     }
 
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_control_op_again.
+    ///
+    extern "C" inline void
+    bf_control_op_again_impl() noexcept
+    {
+        g_mut_bf_control_op_again_impl_executed = true;
+    }
+
     // -------------------------------------------------------------------------
     // bf_handle_ops
     // -------------------------------------------------------------------------
@@ -999,6 +1015,24 @@ namespace syscall
         bsl::discard(reg2_in);
 
         return g_mut_errc.at("bf_vm_op_unmap_direct_broadcast_impl").get();
+    }
+
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_vm_op_tlb_flush.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] inline auto
+    bf_vm_op_tlb_flush_impl(bsl::uint64 const reg0_in, bsl::uint16 const reg1_in) noexcept
+        -> bsl::uint64
+    {
+        bsl::discard(reg0_in);
+        bsl::discard(reg1_in);
+
+        return g_mut_errc.at("bf_vm_op_tlb_flush_impl").get();
     }
 
     // -------------------------------------------------------------------------
@@ -1379,6 +1413,27 @@ namespace syscall
         bsl::discard(reg3_in);
 
         return g_mut_errc.at("bf_vs_op_advance_ip_and_set_active_impl").get();
+    }
+
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_vs_op_tlb_flush.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
+    ///   @param reg2_in n/a
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] inline auto
+    bf_vs_op_tlb_flush_impl(
+        bsl::uint64 const reg0_in, bsl::uint16 const reg1_in, bsl::uint64 const reg2_in) noexcept
+        -> bsl::uint64
+    {
+        bsl::discard(reg0_in);
+        bsl::discard(reg1_in);
+        bsl::discard(reg2_in);
+
+        return g_mut_errc.at("bf_vs_op_tlb_flush_impl").get();
     }
 
     // -------------------------------------------------------------------------

@@ -44,6 +44,8 @@
 int64_t
 map_mk_state(struct state_save_t const *const state, root_page_table_t *const rpt)
 {
+    uint64_t off;
+
     if (map_4k_page_rw(state, ((uint64_t)0), rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
@@ -54,9 +56,11 @@ map_mk_state(struct state_save_t const *const state, root_page_table_t *const rp
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rw(state->ist, ((uint64_t)0), rpt)) {
-        bferror("map_4k_page_rw failed");
-        return LOADER_FAILURE;
+    for (off = ((uint64_t)0); off < HYPERVISOR_MK_STACK_SIZE; off += HYPERVISOR_PAGE_SIZE) {
+        if (map_4k_page_rw(state->ist + off, ((uint64_t)0), rpt)) {
+            bferror("map_4k_page_rw failed");
+            return LOADER_FAILURE;
+        }
     }
 
     if (map_4k_page_rw(state->gdtr.base, ((uint64_t)0), rpt)) {

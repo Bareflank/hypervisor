@@ -27,24 +27,24 @@ macro(hypervisor_add_integration_target NAME)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_custom_target(integration_${NAME}
             COMMAND sync
-            COMMAND sudo vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/mk_cross_compile/bin/kernel ${CMAKE_BINARY_DIR}/ext_cross_compile/bin/integration_${NAME} | true
+            COMMAND sudo vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/kernel ${CMAKE_BINARY_DIR}/ext_cross_compile/build/integration/integration_${NAME} | true
             COMMAND sudo vmmctl/vmmctl dump
             VERBATIM
         )
         add_custom_target(${NAME}
             COMMAND sync
-            COMMAND sudo vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/mk_cross_compile/bin/kernel ${CMAKE_BINARY_DIR}/ext_cross_compile/bin/integration_${NAME} | true
+            COMMAND sudo vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/kernel ${CMAKE_BINARY_DIR}/ext_cross_compile/build/integration/integration_${NAME} | true
             COMMAND sudo vmmctl/vmmctl dump
             VERBATIM
         )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         add_custom_target(integration_${NAME}
-            COMMAND vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/mk_cross_compile/bin/kernel ${CMAKE_BINARY_DIR}/ext_cross_compile/bin/integration_${NAME} | true
+            COMMAND vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/kernel ${CMAKE_BINARY_DIR}/ext_cross_compile/build/integration/integration_${NAME} | true
             COMMAND vmmctl/vmmctl dump
             VERBATIM
         )
         add_custom_target(${NAME}
-            COMMAND vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/mk_cross_compile/bin/kernel ${CMAKE_BINARY_DIR}/ext_cross_compile/bin/integration_${NAME} | true
+            COMMAND vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/kernel ${CMAKE_BINARY_DIR}/ext_cross_compile/build/integration/integration_${NAME} | true
             COMMAND vmmctl/vmmctl dump
             VERBATIM
         )

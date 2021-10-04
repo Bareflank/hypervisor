@@ -26,25 +26,33 @@ macro(hypervisor_add_integration NAME HEADERS)
 
     target_include_directories(integration_${NAME} PRIVATE
         support
+        support/include
+        support/src
     )
 
     if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
         target_include_directories(integration_${NAME} PRIVATE
-            support/x64
-            support/x64/amd
+            support/include/x64
+            support/include/x64/amd
+            support/src/x64
+            support/src/x64/amd
+        )
+
+        target_sources(integration_${NAME} PRIVATE
+            support/src/x64/intrinsic_cpuid_impl.S
         )
     endif()
 
     if(HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
         target_include_directories(integration_${NAME} PRIVATE
-            support/x64
-            support/x64/intel
+            support/include/x64
+            support/include/x64/intel
+            support/src/x64
+            support/src/x64/intel
         )
-    endif()
 
-    if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
-        target_include_directories(integration_${NAME} PRIVATE
-            support/arm/aarch64
+        target_sources(integration_${NAME} PRIVATE
+            support/src/x64/intrinsic_cpuid_impl.S
         )
     endif()
 
@@ -61,11 +69,10 @@ macro(hypervisor_add_integration NAME HEADERS)
         bsl
         loader
         syscall
+        lib
     )
 
     if(CMAKE_BUILD_TYPE STREQUAL RELEASE OR CMAKE_BUILD_TYPE STREQUAL MINSIZEREL)
         add_custom_command(TARGET integration_${NAME} POST_BUILD COMMAND ${CMAKE_STRIP} integration_${NAME})
     endif()
-
-    install(TARGETS integration_${NAME} DESTINATION bin)
 endmacro(hypervisor_add_integration)

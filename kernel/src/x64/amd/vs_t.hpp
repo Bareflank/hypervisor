@@ -61,6 +61,8 @@ namespace mk
         allocated_status_t m_allocated{};
         /// @brief stores the status of the vs_t
         running_status_t m_status{};
+        /// @brief stores the ID of the VM this vs_t is assigned to
+        bsl::safe_u16 m_assigned_vmid{};
         /// @brief stores the ID of the VP this vs_t is assigned to
         bsl::safe_u16 m_assigned_vpid{};
         /// @brief stores the ID of the PP this vs_t is assigned to
@@ -258,6 +260,7 @@ namespace mk
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param intrinsic the intrinsic_t to use
+        ///   @param vmid The ID of the VM to assign the newly allocated vs_t to
         ///   @param vpid The ID of the VP to assign the newly allocated vs_t to
         ///   @param ppid The ID of the PP to assign the newly allocated vs_t to
         ///   @return Returns ID of the newly allocated vs_t
@@ -267,6 +270,7 @@ namespace mk
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             intrinsic_t const &intrinsic,
+            bsl::safe_u16 const &vmid,
             bsl::safe_u16 const &vpid,
             bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
         {
@@ -276,6 +280,8 @@ namespace mk
             bsl::expects(allocated_status_t::deallocated == m_allocated);
             bsl::expects(running_status_t::initial == m_status);
 
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(vmid != syscall::BF_INVALID_ID);
             bsl::expects(vpid.is_valid_and_checked());
             bsl::expects(vpid != syscall::BF_INVALID_ID);
             bsl::expects(ppid.is_valid_and_checked());
@@ -303,6 +309,7 @@ namespace mk
             m_host_vmcb_phys = mut_page_pool.virt_to_phys(m_host_vmcb);
             bsl::expects(m_host_vmcb_phys.is_valid_and_checked());
 
+            m_assigned_vmid = ~vmid;
             m_assigned_vpid = ~vpid;
             m_assigned_ppid = ~ppid;
             m_allocated = allocated_status_t::allocated;
@@ -337,6 +344,7 @@ namespace mk
 
             m_assigned_ppid = {};
             m_assigned_vpid = {};
+            m_assigned_vmid = {};
             m_status = running_status_t::initial;
             m_allocated = allocated_status_t::deallocated;
         }
@@ -492,6 +500,21 @@ namespace mk
 
             m_assigned_ppid = ~ppid;
             return ret;
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the ID of the VM this vs_t is assigned to. If
+        ///     vs_t is not assigned, syscall::BF_INVALID_ID is returned.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the ID of the VM this vs_t is assigned to If
+        ///     vs_t is not assigned, syscall::BF_INVALID_ID is returned.
+        ///
+        [[nodiscard]] constexpr auto
+        assigned_vm() const noexcept -> bsl::safe_u16
+        {
+            bsl::ensures(m_assigned_vmid.is_valid_and_checked());
+            return ~m_assigned_vmid;
         }
 
         /// <!-- description -->
@@ -1672,13 +1695,18 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_guest_asid: {
-                    auto const val32{bsl::to_u32(val)};
-                    if (bsl::unlikely(val32.is_invalid())) {
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
                         ret = bsl::errc_narrow_overflow;
                         break;
                     }
 
-                    m_guest_vmcb->guest_asid = val32.get();
+                    /// NOTE:
+                    /// - To match Intel, and our use of 16bit IDs, the
+                    ///   ASID must be 16bits instead of 32bits.
+                    ///
+
+                    m_guest_vmcb->guest_asid = bsl::to_u32(val16).get();
                     return bsl::errc_success;
                 }
 
@@ -2430,6 +2458,7 @@ namespace mk
                      bsl::to_umx(m_guest_vmcb->rip)});
             }
 
+            m_guest_vmcb->tlb_control = {};
             return exit_reason;
         }
 
@@ -2481,6 +2510,40 @@ namespace mk
 
             m_guest_vmcb->vmcb_clean_bits = {};
             return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief Flushes any TLB entries associated with this VS on
+        ///     the current PP.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsic_t to use
+        ///
+        constexpr void
+        tlb_flush(tls_t const &tls, intrinsic_t const &intrinsic) noexcept
+        {
+            bsl::discard(tls);
+            bsl::discard(intrinsic);
+
+            constexpr auto type{3_u8};
+            m_guest_vmcb->tlb_control = type.get();
+        }
+
+        /// <!-- description -->
+        ///   @brief Given a GLA, invalidates any TLB entries on this PP
+        ///     associated with this VS for the provided GLA.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param intrinsic the intrinsic_t to use
+        ///   @param gla the guest linear address to invalidate
+        ///
+        constexpr void
+        tlb_flush(tls_t const &tls, intrinsic_t const &intrinsic, bsl::safe_u64 const &gla) noexcept
+        {
+            bsl::discard(tls);
+            return intrinsic.tlb_flush(gla, bsl::to_u16(m_guest_vmcb->guest_asid));
         }
 
         /// <!-- description -->

@@ -157,6 +157,8 @@
 
 /** @brief defines the ESR attributes used by the microkernel */
 #define ESR_ATTRIB ((uint16_t)0x8E01)
+/** @brief defines the ESR attributes used by the microkernel */
+#define ESR_EXT_ATTRIB ((uint16_t)0xEE01)
 
 /** @brief defines the PAT MSR used by the microkernel */
 #define MK_MSR_PAT ((uint64_t)0x0000000600000006)
@@ -252,13 +254,13 @@ alloc_and_copy_mk_state(
         goto platform_alloc_tss_failed;
     }
 
-    (*state)->ist = platform_alloc(HYPERVISOR_PAGE_SIZE);
+    (*state)->ist = platform_alloc(HYPERVISOR_MK_STACK_SIZE);
     if (((void *)0) == (*state)->ist) {
         bferror("platform_alloc failed");
         goto platform_alloc_ist_failed;
     }
 
-    (*state)->tss->ist1 = ((uint64_t)(*state)->ist) + HYPERVISOR_PAGE_SIZE;
+    (*state)->tss->ist1 = ((uint64_t)(*state)->ist) + HYPERVISOR_MK_STACK_SIZE;
     (*state)->tss->iomap = ((uint16_t)sizeof(struct tss_t));
 
     /**************************************************************************/
@@ -435,7 +437,7 @@ alloc_and_copy_mk_state(
         ESR_BREAKPOINT_VECTOR,
         (uint64_t)esr_default,
         (*state)->cs_selector,
-        ESR_ATTRIB);
+        ESR_EXT_ATTRIB);
 
     if (ret) {
         bferror("set_idt_descriptor failed");

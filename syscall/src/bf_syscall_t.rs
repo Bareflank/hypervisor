@@ -747,7 +747,7 @@ impl BfSyscallT {
     // ///     which means it can be safely used on all direct mapped
     // ///     addresses. The downside of using this function is that it can
     // ///     be a lot slower than bf_vm_op_unmap_direct, especially on
-    // ///     systems with a lot of cores.
+    // ///     systems with a lot of PPs.
     // ///
     // /// <!-- inputs/outputs -->
     // ///   @param vmid The ID of the VM to unmap the virtual address from

@@ -123,6 +123,7 @@ namespace mk
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param mut_intrinsic the intrinsic_t to use
+        ///   @param vmid The ID of the VM to assign the newly allocated vs_t to
         ///   @param vpid The ID of the VP to assign the newly allocated vs_t to
         ///   @param ppid The ID of the PP to assign the newly allocated vs_t to
         ///   @return Returns ID of the newly allocated vs_t
@@ -132,6 +133,7 @@ namespace mk
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             intrinsic_t &mut_intrinsic,
+            bsl::safe_u16 const &vmid,
             bsl::safe_u16 const &vpid,
             bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
         {
@@ -139,7 +141,7 @@ namespace mk
 
             for (auto &mut_vs : m_pool) {
                 if (mut_vs.is_deallocated()) {
-                    return mut_vs.allocate(mut_tls, mut_page_pool, mut_intrinsic, vpid, ppid);
+                    return mut_vs.allocate(mut_tls, mut_page_pool, mut_intrinsic, vmid, vpid, ppid);
                 }
 
                 bsl::touch();
@@ -278,6 +280,19 @@ namespace mk
             bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
         {
             return this->get_vs(vsid)->migrate(mut_tls, mut_intrinsic, ppid);
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the ID of the VM the requested vs_t is assigned to
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vsid the ID of the vs_t to query
+        ///   @return Returns the ID of the VM the requested vs_t is assigned to
+        ///
+        [[nodiscard]] constexpr auto
+        assigned_vm(bsl::safe_u16 const &vsid) const noexcept -> bsl::safe_u16
+        {
+            return this->get_vs(vsid)->assigned_vm();
         }
 
         /// <!-- description -->
@@ -427,16 +442,14 @@ namespace mk
         ///   @param mut_tls the current TLS block
         ///   @param mut_intrinsic the intrinsic_t to use
         ///   @param mut_log the VMExit log to use
-        ///   @param vsid the ID of the vs_t to run
         ///   @return Returns the VMExit reason on success, or
         ///     bsl::safe_umx::failure() on failure.
         ///
         [[nodiscard]] constexpr auto
-        run(tls_t &mut_tls,
-            intrinsic_t &mut_intrinsic,
-            vmexit_log_t &mut_log,
-            bsl::safe_u16 const &vsid) noexcept -> bsl::safe_umx
+        run(tls_t &mut_tls, intrinsic_t &mut_intrinsic, vmexit_log_t &mut_log) noexcept
+            -> bsl::safe_umx
         {
+            auto const vsid{bsl::to_u16(mut_tls.active_vsid)};
             return this->get_vs(vsid)->run(mut_tls, mut_intrinsic, mut_log);
         }
 
@@ -471,6 +484,55 @@ namespace mk
             -> bsl::errc_type
         {
             return this->get_vs(vsid)->clear(mut_tls, intrinsic);
+        }
+
+        /// <!-- description -->
+        ///   @brief Loops through every VS, and flushes any TLB entries
+        ///     associated with a VS that is assigned to the provided VM
+        ///     and the current PP.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///   @param intrinsic the intrinsic_t to use
+        ///   @param vmid the ID of the vs_t to flush
+        ///
+        constexpr void
+        tlb_flush(tls_t &mut_tls, intrinsic_t const &intrinsic, bsl::safe_u16 const &vmid) noexcept
+        {
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(vmid != syscall::BF_INVALID_ID);
+
+            for (auto &mut_vs : m_pool) {
+                if (vmid != mut_vs.assigned_vm()) {
+                    continue;
+                }
+
+                if (mut_tls.ppid != mut_vs.assigned_pp()) {
+                    continue;
+                }
+
+                mut_vs.tlb_flush(mut_tls, intrinsic);
+            }
+        }
+
+        /// <!-- description -->
+        ///   @brief Given a GLA, invalidates any TLB entries on this PP
+        ///     associated with this VS for the provided GLA.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///   @param intrinsic the intrinsic_t to use
+        ///   @param gla the guest linear address to invalidate
+        ///   @param vsid the ID of the vs_t to flush
+        ///
+        constexpr void
+        tlb_flush(
+            tls_t &mut_tls,
+            intrinsic_t const &intrinsic,
+            bsl::safe_u64 const &gla,
+            bsl::safe_u16 const &vsid) noexcept
+        {
+            this->get_vs(vsid)->tlb_flush(mut_tls, intrinsic, gla);
         }
 
         /// <!-- description -->

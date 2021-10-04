@@ -24,6 +24,33 @@
  * SOFTWARE.
  */
 
+    /** @brief defines the offset of tls_t.mk_rbx */
+    #define TLS_OFFSET_MK_RBX 0x000
+    /** @brief defines the offset of tls_t.mk_rbp */
+    #define TLS_OFFSET_MK_RBP 0x008
+    /** @brief defines the offset of tls_t.mk_r12 */
+    #define TLS_OFFSET_MK_R12 0x010
+    /** @brief defines the offset of tls_t.mk_r13 */
+    #define TLS_OFFSET_MK_R13 0x018
+    /** @brief defines the offset of tls_t.mk_r14 */
+    #define TLS_OFFSET_MK_R14 0x020
+    /** @brief defines the offset of tls_t.mk_r15 */
+    #define TLS_OFFSET_MK_R15 0x028
+    /** @brief defines the offset of tls_t.mk_sp */
+    #define TLS_OFFSET_MK_SP 0x180
+    /** @brief defines the offset of tls_t.pp<> */
+    #define TLS_OFFSET_PP_INFO 0x208
+    /** @brief defines the offset of tls_t.active_<>id */
+    #define TLS_OFFSET_ACTIVE_IDS 0x238
+
+    /** @brief defines the rflags the extension will start with */
+    #define EXT_RFLAGS 0x3002
+
+    /** @brief defines the offset of the active ids in the ABI's TLS */
+    #define ABI_TLS_ACTIVE_IDS 0xFF0
+    /** @brief defines the offset of the PP info in the ABI's TLS */
+    #define ABI_TLS_PP_INFO 0xFF8
+
     .code64
     .intel_syntax noprefix
 
@@ -33,27 +60,52 @@ call_ext:
 
     mov r10, rcx
 
-    mov gs:[0x000], rbx
-    mov gs:[0x008], rbp
-    mov gs:[0x010], r12
-    mov gs:[0x018], r13
-    mov gs:[0x020], r14
-    mov gs:[0x028], r15
+    /**
+     * NOTE:
+     * - Save off the current MK state. Note that we do not need to worry
+     *   about the volatile registers
+     */
 
-    mov rax, gs:[0x238]
-    mov fs:[0xFF0], rax
-    mov rax, gs:[0x208]
-    mov fs:[0xFF8], eax
+    mov gs:[TLS_OFFSET_MK_RBX], rbx
+    mov gs:[TLS_OFFSET_MK_RBP], rbp
+    mov gs:[TLS_OFFSET_MK_R12], r12
+    mov gs:[TLS_OFFSET_MK_R13], r13
+    mov gs:[TLS_OFFSET_MK_R14], r14
+    mov gs:[TLS_OFFSET_MK_R15], r15
 
-    mov gs:[0x1A8], rsp
-    mov rax, gs:[0x1A0]
-    mov gs:[0x180], rax
-    mov rax, gs:[0x1A8]
-    mov gs:[0x188], rax
+    /**
+     * NOTE:
+     * - Update the TLS ID information. This makes sure that each time the
+     *   extension is called, it knows what the active resources are.
+     *
+     * TODO:
+     * - This does not need to be done on every call. It should be moved
+     *   to the set_active/set_inactive functions.
+     */
+
+    mov rax, gs:[TLS_OFFSET_ACTIVE_IDS]
+    mov fs:[ABI_TLS_ACTIVE_IDS], rax
+    mov rax, gs:[TLS_OFFSET_PP_INFO]
+    mov fs:[ABI_TLS_PP_INFO], eax
+
+    /**
+     * NOTE:
+     * - Update the stack to point to the stack that we have been told to
+     *   use. Before we do this, we will save off the current SP of the
+     *   MK so that when it is time to return from the extension, we have
+     *   a proper SP.
+     */
+
+    mov gs:[TLS_OFFSET_MK_SP], rsp
+    mov rsp, rsi
+
+    /**
+     * NOTE:
+     * - Call the microkernel.
+     */
 
     mov rcx, rdi
-    mov rsp, rsi
-    mov r11, 0x2
+    mov r11, EXT_RFLAGS
 
     mov rdi, rdx
     mov rsi, r10
@@ -74,29 +126,3 @@ call_ext:
     int 3
 
     .size call_ext, .-call_ext
-
-    /**************************************************************************/
-    /* Fast Fail Routine                                                      */
-    /**************************************************************************/
-
-    .globl  call_ext_fast_fail_entry
-    .type   call_ext_fast_fail_entry, @function
-call_ext_fast_fail_entry:
-
-    mov rax, gs:[0x190]
-    mov gs:[0x180], rax
-    mov rax, gs:[0x198]
-    mov gs:[0x188], rax
-
-    mov r15, gs:[0x028]
-    mov r14, gs:[0x020]
-    mov r13, gs:[0x018]
-    mov r12, gs:[0x010]
-    mov rbp, gs:[0x008]
-    mov rbx, gs:[0x000]
-
-    mov rax, 0xFFFFFFFFFFFFFFFF
-    ret
-    int 3
-
-    .size call_ext_fast_fail_entry, .-call_ext_fast_fail_entry

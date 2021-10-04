@@ -43,6 +43,7 @@ main() noexcept -> bsl::exit_code
         bsl::ut_then{} = []() noexcept {
             static_assert(noexcept(syscall::bf_control_op_exit()));
             static_assert(noexcept(syscall::bf_control_op_wait()));
+            static_assert(noexcept(syscall::bf_control_op_again()));
         };
     };
 

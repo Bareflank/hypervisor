@@ -44,7 +44,6 @@ namespace mk
     ///   @param mut_tls the current TLS block
     ///   @param mut_intrinsic the intrinsic_t to use
     ///   @param mut_vs_pool the VPS pool to use
-    ///   @param mut_ext the ext_t to handle the VMExit
     ///   @param mut_log the VMExit log to use
     ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     ///     otherwise
@@ -54,19 +53,23 @@ namespace mk
         tls_t &mut_tls,
         intrinsic_t &mut_intrinsic,
         vs_pool_t &mut_vs_pool,
-        ext_t &mut_ext,
         vmexit_log_t &mut_log) noexcept -> bsl::errc_type
     {
-        auto const exit_reason{
-            mut_vs_pool.run(mut_tls, mut_intrinsic, mut_log, bsl::to_u16(mut_tls.active_vsid))};
+        while (true) {
+            auto const exit_reason{mut_vs_pool.run(mut_tls, mut_intrinsic, mut_log)};
+            if (bsl::unlikely(exit_reason.is_invalid())) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::errc_failure;
+            }
 
-        auto const ret{mut_ext.vmexit(mut_tls, mut_intrinsic, exit_reason)};
-        if (bsl::unlikely(!ret)) {
-            bsl::print<bsl::V>() << bsl::here();
-            return ret;
+            auto const ret{mut_tls.ext_vmexit->vmexit(mut_tls, mut_intrinsic, exit_reason)};
+            if (bsl::unlikely(!ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::errc_failure;
+            }
+
+            mut_tls.first_launch_succeeded = bsl::safe_u64::magic_1().get();
         }
-
-        return ret;
     }
 }
 
