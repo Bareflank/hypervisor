@@ -32,6 +32,6 @@
 __stack_chk_fail:
 
     call msg_stack_chk_fail
-    jmp return_to_current_fast_fail
+    int 3
 
     .size __stack_chk_fail, .-__stack_chk_fail

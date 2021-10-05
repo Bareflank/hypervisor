@@ -24,6 +24,21 @@
  * SOFTWARE.
  */
 
+    /** @brief defines the offset of tls_t.mk_rbx */
+    #define TLS_OFFSET_MK_RBX 0x000
+    /** @brief defines the offset of tls_t.mk_rbp */
+    #define TLS_OFFSET_MK_RBP 0x008
+    /** @brief defines the offset of tls_t.mk_r12 */
+    #define TLS_OFFSET_MK_R12 0x010
+    /** @brief defines the offset of tls_t.mk_r13 */
+    #define TLS_OFFSET_MK_R13 0x018
+    /** @brief defines the offset of tls_t.mk_r14 */
+    #define TLS_OFFSET_MK_R14 0x020
+    /** @brief defines the offset of tls_t.mk_r15 */
+    #define TLS_OFFSET_MK_R15 0x028
+    /** @brief defines the offset of tls_t.mk_sp */
+    #define TLS_OFFSET_MK_SP 0x180
+
     .code64
     .intel_syntax noprefix
 
@@ -31,19 +46,24 @@
     .type   return_to_mk, @function
 return_to_mk:
 
-    mov rsp, gs:[0x1A8]
+    /**
+     * NOTE:
+     * - Restore the MK's SP
+     */
 
-    mov rax, gs:[0x190]
-    mov gs:[0x180], rax
-    mov rax, gs:[0x198]
-    mov gs:[0x188], rax
+    mov rsp, gs:[TLS_OFFSET_MK_SP]
 
-    mov r15, gs:[0x028]
-    mov r14, gs:[0x020]
-    mov r13, gs:[0x018]
-    mov r12, gs:[0x010]
-    mov rbp, gs:[0x008]
-    mov rbx, gs:[0x000]
+    /**
+     * NOTE:
+     * - Restore the MK's state
+     */
+
+    mov r15, gs:[TLS_OFFSET_MK_R15]
+    mov r14, gs:[TLS_OFFSET_MK_R14]
+    mov r13, gs:[TLS_OFFSET_MK_R13]
+    mov r12, gs:[TLS_OFFSET_MK_R12]
+    mov rbp, gs:[TLS_OFFSET_MK_RBP]
+    mov rbx, gs:[TLS_OFFSET_MK_RBX]
 
     mov rax, rdi
     ret

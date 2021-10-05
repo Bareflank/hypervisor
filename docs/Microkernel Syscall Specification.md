@@ -40,6 +40,7 @@
   - [2.9. Control Syscalls](#29-control-syscalls)
     - [2.9.1. bf_control_op_exit, OP=0x0, IDX=0x0](#291-bf_control_op_exit-op0x0-idx0x0)
     - [2.9.2. bf_control_op_wait, OP=0x0, IDX=0x1](#292-bf_control_op_wait-op0x0-idx0x1)
+    - [2.9.2. bf_control_op_again, OP=0x0, IDX=0x2](#292-bf_control_op_again-op0x0-idx0x2)
   - [2.10. Handle Syscalls](#210-handle-syscalls)
     - [2.10.1. bf_handle_op_open_handle, OP=0x1, IDX=0x0](#2101-bf_handle_op_open_handle-op0x1-idx0x0)
     - [2.10.2. bf_handle_op_close_handle, OP=0x1, IDX=0x1](#2102-bf_handle_op_close_handle-op0x1-idx0x1)
@@ -64,6 +65,7 @@
     - [2.13.3. bf_vm_op_map_direct, OP=0x4, IDX=0x2](#2133-bf_vm_op_map_direct-op0x4-idx0x2)
     - [2.13.3. bf_vm_op_unmap_direct, OP=0x4, IDX=0x3](#2133-bf_vm_op_unmap_direct-op0x4-idx0x3)
     - [2.13.3. bf_vm_op_unmap_direct_broadcast, OP=0x4, IDX=0x4](#2133-bf_vm_op_unmap_direct_broadcast-op0x4-idx0x4)
+    - [2.15.3. bf_vm_op_tlb_flush, OP=0x4, IDX=0x5](#2153-bf_vm_op_tlb_flush-op0x4-idx0x5)
   - [2.14. Virtual Processor Syscalls](#214-virtual-processor-syscalls)
     - [2.14.2. bf_vp_op_create_vp, OP=0x5, IDX=0x0](#2142-bf_vp_op_create_vp-op0x5-idx0x0)
     - [2.14.3. bf_vp_op_destroy_vp, OP=0x5, IDX=0x1](#2143-bf_vp_op_destroy_vp-op0x5-idx0x1)
@@ -73,27 +75,24 @@
     - [2.14.9. bf_vs_op_init_as_root, OP=0x6, IDX=0x2](#2149-bf_vs_op_init_as_root-op0x6-idx0x2)
     - [2.14.10. bf_vs_op_read, OP=0x6, IDX=0x3](#21410-bf_vs_op_read-op0x6-idx0x3)
     - [2.14.11. bf_vs_op_write, OP=0x6, IDX=0x4](#21411-bf_vs_op_write-op0x6-idx0x4)
-    - [2.14.12. bf_vs_op_run, OP=0x5, IDX=0x5](#21412-bf_vs_op_run-op0x5-idx0x5)
-    - [2.14.13. bf_vs_op_run_current, OP=0x5, IDX=0x6](#21413-bf_vs_op_run_current-op0x5-idx0x6)
-    - [2.14.14. bf_vs_op_advance_ip_and_run_impl, OP=0x5, IDX=0x7](#21414-bf_vs_op_advance_ip_and_run_impl-op0x5-idx0x7)
-    - [2.14.15. bf_vs_op_advance_ip_and_run_current, OP=0x5, IDX=0x8](#21415-bf_vs_op_advance_ip_and_run_current-op0x5-idx0x8)
-    - [2.14.16. bf_vs_op_promote, OP=0x5, IDX=0x9](#21416-bf_vs_op_promote-op0x5-idx0x9)
-    - [2.14.17. bf_vs_op_clear, OP=0x5, IDX=0xA](#21417-bf_vs_op_clear-op0x5-idx0xa)
-    - [2.14.17. bf_vs_op_migrate, OP=0x5, IDX=0xB](#21417-bf_vs_op_migrate-op0x5-idx0xb)
-    - [2.14.17. bf_vs_op_set_active, OP=0x5, IDX=0xC](#21417-bf_vs_op_set_active-op0x5-idx0xc)
-    - [2.14.17. bf_vs_op_advance_ip_and_set_active, OP=0x5, IDX=0xD](#21417-bf_vs_op_advance_ip_and_set_active-op0x5-idx0xd)
+    - [2.14.12. bf_vs_op_run, OP=0x6, IDX=0x5](#21412-bf_vs_op_run-op0x6-idx0x5)
+    - [2.14.13. bf_vs_op_run_current, OP=0x6, IDX=0x6](#21413-bf_vs_op_run_current-op0x6-idx0x6)
+    - [2.14.14. bf_vs_op_advance_ip_and_run_impl, OP=0x6, IDX=0x7](#21414-bf_vs_op_advance_ip_and_run_impl-op0x6-idx0x7)
+    - [2.14.15. bf_vs_op_advance_ip_and_run_current, OP=0x6, IDX=0x8](#21415-bf_vs_op_advance_ip_and_run_current-op0x6-idx0x8)
+    - [2.14.16. bf_vs_op_promote, OP=0x6, IDX=0x9](#21416-bf_vs_op_promote-op0x6-idx0x9)
+    - [2.14.17. bf_vs_op_clear, OP=0x6, IDX=0xA](#21417-bf_vs_op_clear-op0x6-idx0xa)
+    - [2.14.17. bf_vs_op_migrate, OP=0x6, IDX=0xB](#21417-bf_vs_op_migrate-op0x6-idx0xb)
+    - [2.14.17. bf_vs_op_set_active, OP=0x6, IDX=0xC](#21417-bf_vs_op_set_active-op0x6-idx0xc)
+    - [2.14.17. bf_vs_op_advance_ip_and_set_active, OP=0x6, IDX=0xD](#21417-bf_vs_op_advance_ip_and_set_active-op0x6-idx0xd)
+    - [2.15.3. bf_vs_op_tlb_flush, OP=0x6, IDX=0xE](#2153-bf_vs_op_tlb_flush-op0x6-idx0xe)
   - [2.15. Intrinsic Syscalls](#215-intrinsic-syscalls)
     - [2.15.1. bf_intrinsic_op_rdmsr, OP=0x7, IDX=0x0](#2151-bf_intrinsic_op_rdmsr-op0x7-idx0x0)
     - [2.15.2. bf_intrinsic_op_wrmsr, OP=0x7, IDX=0x1](#2152-bf_intrinsic_op_wrmsr-op0x7-idx0x1)
-    - [2.15.3. bf_intrinsic_op_invlpga, OP=0x7, IDX=0x2](#2153-bf_intrinsic_op_invlpga-op0x7-idx0x2)
-    - [2.15.4. bf_intrinsic_op_invept, OP=0x7, IDX=0x3](#2154-bf_intrinsic_op_invept-op0x7-idx0x3)
-    - [2.15.5. bf_intrinsic_op_invvpid, OP=0x7, IDX=0x4](#2155-bf_intrinsic_op_invvpid-op0x7-idx0x4)
   - [2.16. Mem Syscalls](#216-mem-syscalls)
-    - [2.16.1. bf_mem_op_alloc_page, OP=0x7, IDX=0x0](#2161-bf_mem_op_alloc_page-op0x7-idx0x0)
-    - [2.16.2. bf_mem_op_free_page, OP=0x7, IDX=0x1](#2162-bf_mem_op_free_page-op0x7-idx0x1)
-    - [2.16.3. bf_mem_op_alloc_huge, OP=0x7, IDX=0x2](#2163-bf_mem_op_alloc_huge-op0x7-idx0x2)
-    - [2.16.4. bf_mem_op_free_huge, OP=0x7, IDX=0x3](#2164-bf_mem_op_free_huge-op0x7-idx0x3)
-    - [2.16.5. bf_mem_op_alloc_heap, OP=0x7, IDX=0x4](#2165-bf_mem_op_alloc_heap-op0x7-idx0x4)
+    - [2.16.1. bf_mem_op_alloc_page, OP=0x8, IDX=0x0](#2161-bf_mem_op_alloc_page-op0x8-idx0x0)
+    - [2.16.2. bf_mem_op_free_page, OP=0x8, IDX=0x1](#2162-bf_mem_op_free_page-op0x8-idx0x1)
+    - [2.16.3. bf_mem_op_alloc_huge, OP=0x8, IDX=0x2](#2163-bf_mem_op_alloc_huge-op0x8-idx0x2)
+    - [2.16.4. bf_mem_op_free_huge, OP=0x8, IDX=0x3](#2164-bf_mem_op_free_huge-op0x8-idx0x3)
 
 # 1. Introduction
 
@@ -182,7 +181,7 @@ Defines the signature of the VM exit callback handler
 
 Defines the signature of the fast fail callback handler
 
-**typedef, void(*bf_callback_handler_fail_t)(bf_status_t)**
+**typedef, void(*bf_callback_handler_fail_t)(uint64_t, uint64_t)**
 
 ## 1.5. ID Constants
 
@@ -615,6 +614,15 @@ This syscall tells the microkernel that the extension would like to wait for a c
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the index for bf_control_op_wait |
 
+### 2.9.2. bf_control_op_again, OP=0x0, IDX=0x2
+
+This syscall tells the microkernel that the extension would like to try again from a fast fail callback. This syscall is a blocking syscall that never returns and should be used to return from the fail_entry function.
+
+**const, uint64_t: BF_CONTROL_OP_AGAIN_IDX_VAL**
+| Value | Description |
+| :---- | :---------- |
+| 0x0000000000000002 | Defines the index for bf_control_op_again |
+
 ## 2.10. Handle Syscalls
 
 ### 2.10.1. bf_handle_op_open_handle, OP=0x1, IDX=0x0
@@ -923,7 +931,7 @@ This syscall tells the microkernel to unmap a previously mapped virtual address 
 
 ### 2.13.3. bf_vm_op_unmap_direct_broadcast, OP=0x4, IDX=0x4
 
-This syscall tells the microkernel to unmap a previously mapped virtual address in the direct map. Unlike bf_vm_op_unmap_direct, this syscall performs a broadcast TLB flush which means it can be safely used on all direct mapped addresses. The downside of using this function is that it can be a lot slower than bf_vm_op_unmap_direct, especially on systems with a lot of cores.
+This syscall tells the microkernel to unmap a previously mapped virtual address in the direct map. Unlike bf_vm_op_unmap_direct, this syscall performs a broadcast TLB flush which means it can be safely used on all direct mapped addresses. The downside of using this function is that it can be a lot slower than bf_vm_op_unmap_direct, especially on systems with a lot of PPs.
 
 **Input:**
 | Register Name | Bits | Description |
@@ -939,9 +947,25 @@ This syscall tells the microkernel to unmap a previously mapped virtual address 
 | :---- | :---------- |
 | 0x0000000000000004 | Defines the index for bf_vm_op_unmap_direct_broadcast |
 
+### 2.15.3. bf_vm_op_tlb_flush, OP=0x4, IDX=0x5
+
+Given the ID of a VM, invalidates the VM's TLB on the PP that this is executed on.
+
+**Input:**
+| Register Name | Bits | Description |
+| :------------ | :--- | :---------- |
+| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
+| REG1 | 15:0 | The ID of the VM to invalidate |
+| REG1 | 63:16 | REVI |
+
+**const, uint64_t: BF_VM_OP_TLB_FLUSH_IDX_VAL**
+| Value | Description |
+| :---- | :---------- |
+| 0x0000000000000005 | Defines the index for bf_vm_op_tlb_flush |
+
 ## 2.14. Virtual Processor Syscalls
 
-A Virtual Processor or VP virtually represents a logical core. Although the microkernel has an internal representation of a VP, it doesn't understand what a VP is outside of resource management, and it is up to the extension to define what a VM is and how it should operate.
+A Virtual Processor or VP virtually represents a PP. Although the microkernel has an internal representation of a VP, it doesn't understand what a VP is outside of resource management, and it is up to the extension to define what a VM is and how it should operate.
 
 Once a VP is run, it is assigned to the VM it was run on, and cannot be run on any other VM for the remainder of it's lifetime. A VP is also assigned to a specific PP (physical processor). Unlike the assigned VM, the assigned PP can be changed by migrating the VP to another PP.
 
@@ -1083,7 +1107,7 @@ Writes to a CPU register in the VS given a bf_reg_t and the value to write. Note
 | :---- | :---------- |
 | 0x0000000000000004 | Defines the index for bf_vs_op_write |
 
-### 2.14.12. bf_vs_op_run, OP=0x5, IDX=0x5
+### 2.14.12. bf_vs_op_run, OP=0x6, IDX=0x5
 
 TODO
 
@@ -1103,7 +1127,7 @@ TODO
 | :---- | :---------- |
 | 0x0000000000000005 | Defines the index for bf_vs_op_run |
 
-### 2.14.13. bf_vs_op_run_current, OP=0x5, IDX=0x6
+### 2.14.13. bf_vs_op_run_current, OP=0x6, IDX=0x6
 
 bf_vs_op_run_current tells the microkernel to execute the currently active VS, VP and VM.
 
@@ -1117,7 +1141,7 @@ bf_vs_op_run_current tells the microkernel to execute the currently active VS, V
 | :---- | :---------- |
 | 0x0000000000000006 | Defines the index for bf_vs_op_run_current |
 
-### 2.14.14. bf_vs_op_advance_ip_and_run_impl, OP=0x5, IDX=0x7
+### 2.14.14. bf_vs_op_advance_ip_and_run_impl, OP=0x6, IDX=0x7
 
 TODO
 
@@ -1133,7 +1157,7 @@ TODO
 | :---- | :---------- |
 | 0x0000000000000007 | Defines the index for bf_vs_op_advance_ip_and_run_impl |
 
-### 2.14.15. bf_vs_op_advance_ip_and_run_current, OP=0x5, IDX=0x8
+### 2.14.15. bf_vs_op_advance_ip_and_run_current, OP=0x6, IDX=0x8
 
 TODO
 
@@ -1147,7 +1171,7 @@ TODO
 | :---- | :---------- |
 | 0x0000000000000008 | Defines the index for bf_vs_op_advance_ip_and_run_current |
 
-### 2.14.16. bf_vs_op_promote, OP=0x5, IDX=0x9
+### 2.14.16. bf_vs_op_promote, OP=0x6, IDX=0x9
 
 bf_vs_op_promote tells the microkernel to promote the requested VS. bf_vs_op_promote will stop the hypervisor on the physical processor and replace its state with the state in the given VS. Note that this syscall only returns on error.
 
@@ -1163,7 +1187,7 @@ bf_vs_op_promote tells the microkernel to promote the requested VS. bf_vs_op_pro
 | :---- | :---------- |
 | 0x0000000000000009 | Defines the index for bf_vs_op_promote |
 
-### 2.14.17. bf_vs_op_clear, OP=0x5, IDX=0xA
+### 2.14.17. bf_vs_op_clear, OP=0x6, IDX=0xA
 
 bf_vs_op_clear tells the microkernel to clear the VS's hardware cache, if one exists. How this is used depends entirely on the hardware and is associated with AMD's VMCB Clean Bits, and Intel's VMClear instruction. See the associated documentation for more details. On AMD, this ABI clears the entire VMCB. For more fine grained control, use the write ABIs to manually modify the VMCB.
 
@@ -1179,7 +1203,7 @@ bf_vs_op_clear tells the microkernel to clear the VS's hardware cache, if one ex
 | :---- | :---------- |
 | 0x000000000000000A | Defines the index for bf_vs_op_clear |
 
-### 2.14.17. bf_vs_op_migrate, OP=0x5, IDX=0xB
+### 2.14.17. bf_vs_op_migrate, OP=0x6, IDX=0xB
 
 TODO
 
@@ -1197,7 +1221,7 @@ TODO
 | :---- | :---------- |
 | 0x000000000000000B | Defines the index for bf_vs_op_migrate |
 
-### 2.14.17. bf_vs_op_set_active, OP=0x5, IDX=0xC
+### 2.14.17. bf_vs_op_set_active, OP=0x6, IDX=0xC
 
 Sets the active VM, VP and VS to the provided VM, VP and VS.
 
@@ -1217,7 +1241,7 @@ Sets the active VM, VP and VS to the provided VM, VP and VS.
 | :---- | :---------- |
 | 0x000000000000000C | Defines the index for bf_vs_op_set_active |
 
-### 2.14.17. bf_vs_op_advance_ip_and_set_active, OP=0x5, IDX=0xD
+### 2.14.17. bf_vs_op_advance_ip_and_set_active, OP=0x6, IDX=0xD
 
 Advances the IP of the current VS and then sets the active VM, VP and VS to the provided VM, VP and VS.
 
@@ -1236,6 +1260,23 @@ Advances the IP of the current VS and then sets the active VM, VP and VS to the 
 | Value | Description |
 | :---- | :---------- |
 | 0x000000000000000D | Defines the index for bf_vs_op_advance_ip_and_set_active |
+
+### 2.15.3. bf_vs_op_tlb_flush, OP=0x6, IDX=0xE
+
+Given the ID of a VS, invalidates a TLB entry for a given GLA on the PP that this is executed on.
+
+**Input:**
+| Register Name | Bits | Description |
+| :------------ | :--- | :---------- |
+| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
+| REG1 | 15:0 | The ID of the VS to invalidate |
+| REG1 | 63:16 | REVI |
+| REG2 | 63:0 | The GLA to invalidate |
+
+**const, uint64_t: BF_VS_OP_TLB_FLUSH_IDX_VAL**
+| Value | Description |
+| :---- | :---------- |
+| 0x000000000000000E | Defines the index for bf_vs_op_tlb_flush |
 
 ## 2.15. Intrinsic Syscalls
 
@@ -1277,56 +1318,6 @@ Writes to an MSR directly from the CPU given the address of the MSR to write and
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the index for bf_intrinsic_op_wrmsr |
 
-### 2.15.3. bf_intrinsic_op_invlpga, OP=0x7, IDX=0x2
-
-Invalidates the TLB mapping for a given virtual page and a given ASID. Note that this is specific to AMD only.
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 63:0 | The address to invalidate |
-| REG2 | 63:0 | The ASID to invalidate |
-
-**const, uint64_t: BF_INTRINSIC_OP_INVLPGA_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x0000000000000002 | Defines the index for bf_intrinsic_op_invlpga |
-
-### 2.15.4. bf_intrinsic_op_invept, OP=0x7, IDX=0x3
-
-Invalidates mappings in the translation lookaside buffers (TLBs) and paging-structure caches that were derived from extended page tables (EPT). Note that this is specific to Intel only.
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 63:0 | The EPTP to invalidate |
-| REG2 | 63:0 | The INVEPT type (see the Intel SDM for details) |
-
-**const, uint64_t: BF_INTRINSIC_OP_INVEPT_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x0000000000000003 | Defines the index for bf_intrinsic_op_invept |
-
-### 2.15.5. bf_intrinsic_op_invvpid, OP=0x7, IDX=0x4
-
-Invalidates mappings in the translation lookaside buffers (TLBs) and paging-structure caches based on virtual-processor identifier (VPID). Note that this is specific to Intel only.
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 63:0 | The address to invalidate |
-| REG2 | 15:0 | The VPID to invalidate |
-| REG2 | 63:16 | REVI |
-| REG3 | 63:0 | The INVVPID type (see the Intel SDM for details) |
-
-**const, uint64_t: BF_INTRINSIC_OP_INVVPID_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x0000000000000004 | Defines the index for bf_intrinsic_op_invvpid |
-
 ## 2.16. Mem Syscalls
 
 Each extension has access to several different memory pools:
@@ -1347,7 +1338,7 @@ Thread-Local Storage (TLS) memory (typically allocated using `thread_local`) pro
 
 The direct map provides an extension with a means to access any physical address by accessing the direct map region of the virtual address space (depends on the hypervisor's configuration). By default, on Intel/AMD with 4-level paging, this region starts at 0x0000600000000000, but it can be changed using CMake. An extension can access any physical address by simply adding 0x0000600000000000 to the physical address and dereferencing the resulting value. When a VM is destroyed, all physical memory maps associated with that VM will be removed. The direct map is also where page and huge page allocations are mapped, providing an extension with a simple means for performing a virtual address to physical address (and vice versa) translations.
 
-### 2.16.1. bf_mem_op_alloc_page, OP=0x7, IDX=0x0
+### 2.16.1. bf_mem_op_alloc_page, OP=0x8, IDX=0x0
 
 bf_mem_op_alloc_page allocates a page, and maps this page into the direct map of the VM.
 
@@ -1367,7 +1358,7 @@ bf_mem_op_alloc_page allocates a page, and maps this page into the direct map of
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the index for bf_mem_op_alloc_page |
 
-### 2.16.2. bf_mem_op_free_page, OP=0x7, IDX=0x1
+### 2.16.2. bf_mem_op_free_page, OP=0x8, IDX=0x1
 
 Frees a page previously allocated by bf_mem_op_alloc_page. This operation is optional and not all microkernels may implement it.
 
@@ -1387,7 +1378,7 @@ Frees a page previously allocated by bf_mem_op_alloc_page. This operation is opt
 | 0x0000000000000001 | Defines the index for bf_mem_op_free_page |
 
 
-### 2.16.3. bf_mem_op_alloc_huge, OP=0x7, IDX=0x2
+### 2.16.3. bf_mem_op_alloc_huge, OP=0x8, IDX=0x2
 
 bf_mem_op_alloc_huge allocates a physically contiguous block of memory. When allocating a page, the extension should keep in mind the following:
 - The total memory available to allocate from this pool is extremely limited. This should only be used when absolutely needed, and extensions should not expect more than 1 MB (might be less) of total memory available.
@@ -1410,7 +1401,7 @@ bf_mem_op_alloc_huge allocates a physically contiguous block of memory. When all
 | :---- | :---------- |
 | 0x0000000000000002 | Defines the index for bf_mem_op_alloc_huge |
 
-### 2.16.4. bf_mem_op_free_huge, OP=0x7, IDX=0x3
+### 2.16.4. bf_mem_op_free_huge, OP=0x8, IDX=0x3
 
 Frees memory previously allocated by bf_mem_op_alloc_huge. This operation is optional and not all microkernels may implement it.
 
@@ -1428,28 +1419,3 @@ Frees memory previously allocated by bf_mem_op_alloc_huge. This operation is opt
 | Value | Description |
 | :---- | :---------- |
 | 0x0000000000000003 | Defines the index for bf_mem_op_free_huge |
-
-### 2.16.5. bf_mem_op_alloc_heap, OP=0x7, IDX=0x4
-
-bf_mem_op_alloc_heap allocates heap memory. When allocating heap memory, the extension should keep in mind the following:
-- This ABI is designed to work similar to sbrk() to support malloc/free implementations common with existing open source libraries.
-- Calling this ABI with with a size of 0 will return the current heap location.
-- Calling this ABI with a size (in bytes) will result in return the previous heap location. The current heap location will be set to the previous location, plus the provide size, rounded to the nearest page size.
-- The heap is not mapped into the direct map, so virtual to physical (and vice versa) translations are not possible.
-- There is no ability to free heap memory
-
-**Input:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | Set to the result of bf_handle_op_open_handle |
-| REG1 | 63:0 | The number of bytes to increase the heap by |
-
-**Output:**
-| Register Name | Bits | Description |
-| :------------ | :--- | :---------- |
-| REG0 | 63:0 | The virtual address of the previous heap location |
-
-**const, uint64_t: BF_MEM_OP_ALLOC_HEAP_IDX_VAL**
-| Value | Description |
-| :---- | :---------- |
-| 0x0000000000000004 | Defines the index for bf_mem_op_alloc_heap |

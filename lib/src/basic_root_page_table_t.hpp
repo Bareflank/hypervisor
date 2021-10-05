@@ -433,7 +433,7 @@ namespace lib
         ///   @tparam E the type of entry to allocate a table for
         ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
-        ///   @param mut_sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use (optional)
         ///   @return Returns a pointer to a newly allocated table. On failure
         ///     returns a nullptr.
         ///
@@ -468,7 +468,7 @@ namespace lib
         ///   @tparam E the type of entry to add the table to
         ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
-        ///   @param mut_sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use (optional)
         ///   @param pmut_entry the entry to configure to point to the newly
         ///     created table
         ///   @return Returns a pointer to the newly created table on success.
@@ -762,7 +762,7 @@ namespace lib
         ///     map, or unmapping a previously mapped virtual address.
         ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
-        ///   @param mut_sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use (optional)
         ///   @param page_virt the virtual address to decode
         ///   @return Returns all of the entries that are identified during the
         ///     translation of the provided virtual address.
@@ -1038,7 +1038,7 @@ namespace lib
         /// <!-- inputs/outputs -->
         ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
-        ///   @param mut_sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use (optional)
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -1151,7 +1151,7 @@ namespace lib
         ///   @param page_phys the physical address to map
         ///   @param page_flgs defines how memory should be mapped
         ///   @param require_explicit_unmap tells the RPT that the virtual
-        ///   @param mut_sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use (optional)
         ///     address must be explicitly unmapped before the RPT can be
         ///     released. Otherwise the release will fail.
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
@@ -1194,7 +1194,6 @@ namespace lib
 
             auto *const pmut_entry{get_entry_from_entries<E>(
                 this->get_entries<E>(tls, mut_page_pool, page_virt, mut_sys))};
-
             if (bsl::unlikely(nullptr == pmut_entry)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
@@ -1244,7 +1243,7 @@ namespace lib
         ///   @param page_virt the virtual address to map the allocated
         ///     basic_page_4k_t to
         ///   @param page_flgs defines how memory should be mapped
-        ///   @param mut_sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use (optional)
         ///   @return Returns a pointer to the newly allocated basic_page_4k_t as
         ///     a type T *, or a nullptr on failure.
         ///
@@ -1319,7 +1318,7 @@ namespace lib
         ///   @tparam OFFSET the offset to map the allocate page to
         ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
-        ///   @param mut_sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use (optional)
         ///   @return Returns a basic_alloc_page_t containing the virtual address
         ///     and physical address that was allocated and mapped using
         ///     OFFSET.
@@ -1384,13 +1383,11 @@ namespace lib
         }
 
         /// <!-- description -->
-        ///   @brief Unmaps a page from the root page table.
-        ///
-        /// <!-- notes -->
-        ///   @note IMPORTANT: This function is slow if a broadcast TLB is
-        ///     requested. If you choose to use a local flush, you better
-        ///     be sure other cores never saw the mapped address, otherwise
-        ///     you will end up with a really hard bug to find.
+        ///   @brief Unmaps a page from the root page table and returns a
+        ///     list of all of the entries associated with the map. It is
+        ///     the caller's responsibility to flush the TLB as needed. This
+        ///     might include the need to flush the unmapped page on all PPs
+        ///     that have touched the page.
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam E the entry type to use. Valid inputs are L2E_TYPE, L1E_TYPE
@@ -1400,13 +1397,13 @@ namespace lib
         ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param page_virt the virtual address to unmap
-        ///   @param mut_sys the bf_syscall_t to use
+        ///   @param mut_sys the bf_syscall_t to use (optional)
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         template<typename E = L0E_TYPE>
         [[nodiscard]] constexpr auto
-        unmap_page(
+        unmap(
             TLS_TYPE const &tls,
             PAGE_POOL_TYPE &mut_page_pool,
             bsl::safe_u64 const &page_virt,
@@ -1446,11 +1443,11 @@ namespace lib
                     return bsl::errc_success;
                 }
 
-                bsl::error() << "the virtual address "                // --
-                             << bsl::hex(page_virt)                   // --
-                             << " was not mapped a 1g granularity"    // --
-                             << bsl::endl                             // --
-                             << bsl::here();                          // --
+                bsl::error() << "the virtual address "                   // --
+                             << bsl::hex(page_virt)                      // --
+                             << " was not mapped at a 1g granularity"    // --
+                             << bsl::endl                                // --
+                             << bsl::here();                             // --
 
                 return bsl::errc_failure;
             }
@@ -1465,11 +1462,11 @@ namespace lib
                     return bsl::errc_success;
                 }
 
-                bsl::error() << "the virtual address "                // --
-                             << bsl::hex(page_virt)                   // --
-                             << " was not mapped a 2m granularity"    // --
-                             << bsl::endl                             // --
-                             << bsl::here();                          // --
+                bsl::error() << "the virtual address "                   // --
+                             << bsl::hex(page_virt)                      // --
+                             << " was not mapped at a 2m granularity"    // --
+                             << bsl::endl                                // --
+                             << bsl::here();                             // --
 
                 return bsl::errc_failure;
             }
@@ -1490,8 +1487,6 @@ namespace lib
                              << " was not mapped at a 4k granularity"    // --
                              << bsl::endl                                // --
                              << bsl::here();                             // --
-
-                return bsl::errc_failure;
             }
 
             return bsl::errc_failure;

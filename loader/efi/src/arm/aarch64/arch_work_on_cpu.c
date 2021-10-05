@@ -48,10 +48,10 @@ work_on_cpu_callback(void *const ProcedureArgument)
 
 /**
  * <!-- description -->
- *   @brief Executes a callback on a specific core on this architecture.
+ *   @brief Executes a callback on a specific PP on this architecture.
  *
  * <!-- inputs/outputs -->
- *   @param cpu the core to execute the callback on
+ *   @param cpu the PP to execute the callback on
  *   @param callback the callback to call
  *   @param args the arguments for work_on_cpu_callback
  */
@@ -65,14 +65,14 @@ arch_work_on_cpu(
      *   implemented in UEFI yet. ServerReady systems will almost certainly
      *   need some form of MP services (using ACPI maybe?) so this is likely
      *   a temporary problem.
-     * - Unlike x86, ARMv8 starts all of the cores all at the same time, and
-     *   it leaves the process of how to bootstrap each core to the firmware.
+     * - Unlike x86, ARMv8 starts all of the PPs all at the same time, and
+     *   it leaves the process of how to bootstrap each PP to the firmware.
      *   This means that right now, there is no standard way to start up
-     *   each core. On the Raspberry Pi 4, when each core starts, they check
+     *   each PP. On the Raspberry Pi 4, when each PP starts, they check
      *   their processor ID. If it is zero, it boots. If it is not zero, it
      *   enters an endless loop, waiting for a memory location to be written
      *   to. The OS is supposed to write the address of a function it wishes to
-     *   be executed to memory locations specific to each core that the core
+     *   be executed to memory locations specific to each PP that the PP
      *   is waiting on. It will then jump to this address and continue to
      *   bootstrap using whatever logic you provide. This will work for now,
      *   but adding more devices will likely require device specific logic

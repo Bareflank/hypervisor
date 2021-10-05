@@ -26,10 +26,10 @@
 #define INTRINSIC_HPP
 
 #include <bf_constants.hpp>
-#include <tlb_flush_type_t.hpp>
 
 #include <bsl/cstdint.hpp>
 #include <bsl/debug.hpp>
+#include <bsl/dontcare_t.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/expects.hpp>
 #include <bsl/safe_integral.hpp>
@@ -139,47 +139,49 @@ namespace mk
     {
     public:
         /// <!-- description -->
-        ///   @brief Invalidates TLB entries given a address
+        ///   @brief Invalidates TLB entries given an address and an ASID.
+        ///     If the ASID is set to 0, an extension address is invalidated.
+        ///     If the ASID is non-0, a guest address is invalidated using the
+        ///     ASID. On AMD, this function does not invalidate an entire guest
+        ///     VS (the vs_t must be used for that operation).
         ///
         /// <!-- inputs/outputs -->
-        ///   @param type determines which type of flush to perform
-        ///   @param addr the address to invalidate
-        ///   @param vmid if set to a valid ID, will flush the address for
-        ///     the given VMID as an ASID.
+        ///   @param addr the address to invalidate.
+        ///   @param asid the ASID (as defined by AMD) to flush.
         ///
         static constexpr void
         tlb_flush(
-            tlb_flush_type_t const type,
-            bsl::safe_u64 const &addr,
-            bsl::safe_u16 const &vmid = syscall::BF_INVALID_ID) noexcept
+            bsl::safe_u64 const &addr, bsl::safe_u16 const &asid = syscall::BF_INVALID_ID) noexcept
         {
             bsl::expects(addr.is_valid_and_checked());
             bsl::expects(addr.is_pos());
-            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(asid.is_valid_and_checked());
+            bsl::expects(asid.is_pos());
 
-            /// NOTE:
-            /// - Since we only plan to support Zen 3 and above, for a
-            ///   broadcast TLB flush, just use the broadcast TLB flush
-            ///   instructions. Don't forget to sync.
-            ///
-
-            switch (type) {
-                case tlb_flush_type_t::local: {
-                    if (syscall::BF_INVALID_ID == vmid) {
-                        intrinsic_invlpg(addr.get());
-                    }
-                    else {
-                        intrinsic_invlpga(addr.get(), bsl::to_u64(vmid).get());
-                    }
-
-                    break;
-                }
-
-                case tlb_flush_type_t::broadcast: {
-                    bsl::alert() << "broadcast TLB flush not yet implemented\n" << bsl::here();
-                    break;
-                }
+            if (syscall::BF_INVALID_ID == asid) {
+                return intrinsic_invlpg(addr.get());
             }
+
+            return intrinsic_invlpga(addr.get(), bsl::to_u64(asid).get());
+        }
+
+        /// <!-- description -->
+        ///   @brief Invalidates TLB entries given an address and an ASID.
+        ///     If the ASID is set to 0, an extension address is invalidated.
+        ///     If the ASID is non-0, a guest address is invalidated using the
+        ///     ASID. On AMD, this function does not invalidate an entire guest
+        ///     VS (the vs_t must be used for that operation).
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param addr the address to invalidate.
+        ///   @param asid the ASID (as defined by AMD) to flush.
+        ///
+        static constexpr void
+        tlb_flush(
+            void const *const addr, bsl::safe_u16 const &asid = syscall::BF_INVALID_ID) noexcept
+        {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+            return tlb_flush(bsl::to_u64(reinterpret_cast<bsl::uint64>(addr)), asid);
         }
 
         /// <!-- description -->

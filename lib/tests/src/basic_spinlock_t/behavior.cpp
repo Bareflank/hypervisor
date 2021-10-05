@@ -151,7 +151,7 @@ namespace lib
                         //   otherwise this count would be higher than 1.
                         // - What is great about this approach is that it will
                         //   work no matter how many threads you create, and
-                        //   it will also work on single core systems. It also
+                        //   it will also work on single PP systems. It also
                         //   ensures that every line and break is executed, so
                         //   there are no race conditions, which previous
                         //   attempts at this test had.

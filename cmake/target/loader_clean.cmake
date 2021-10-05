@@ -22,28 +22,22 @@
 if(HYPERVISOR_BUILD_LOADER AND NOT HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_custom_target(loader_clean
-            COMMAND ${CMAKE_COMMAND} --build . --target loader_unload
-            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux make clean CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
+            COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/linux make clean CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
             COMMAND sync
             VERBATIM
         )
         add_custom_target(driver_clean
-            COMMAND ${CMAKE_COMMAND} --build . --target driver_unload
-            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux make clean CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
+            COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/linux make clean CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
             COMMAND sync
             VERBATIM
         )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         add_custom_target(loader_clean
-            COMMAND ${CMAKE_COMMAND} --build . --target loader_unload
-            COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows/x64
-            COMMAND sync
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ${hypervisor_SOURCE_DIR}/loader/windows/x64
             VERBATIM
         )
         add_custom_target(driver_clean
-            COMMAND ${CMAKE_COMMAND} --build . --target driver_unload
-            COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows/x64
-            COMMAND sync
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ${hypervisor_SOURCE_DIR}/loader/windows/x64
             VERBATIM
         )
     else()

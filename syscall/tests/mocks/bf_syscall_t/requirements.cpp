@@ -110,6 +110,14 @@ main() noexcept -> bsl::exit_code
                 static_assert(noexcept(mut_sys.set_bf_vm_op_create_vm({})));
                 static_assert(noexcept(mut_sys.bf_vm_op_destroy_vm({})));
                 static_assert(noexcept(mut_sys.set_bf_vm_op_destroy_vm({}, {})));
+                static_assert(noexcept(mut_sys.bf_vm_op_map_direct<page_t>({}, {})));
+                static_assert(noexcept(mut_sys.set_bf_vm_op_map_direct({}, {})));
+                static_assert(noexcept(mut_sys.bf_vm_op_unmap_direct<page_t>({}, {})));
+                static_assert(noexcept(mut_sys.set_bf_vm_op_unmap_direct({}, {})));
+                static_assert(noexcept(mut_sys.bf_vm_op_unmap_direct_broadcast<page_t>({}, {})));
+                static_assert(noexcept(mut_sys.set_bf_vm_op_unmap_direct_broadcast({}, {})));
+                static_assert(noexcept(mut_sys.bf_vm_op_tlb_flush({})));
+                static_assert(noexcept(mut_sys.set_bf_vm_op_tlb_flush({}, {})));
                 static_assert(noexcept(mut_sys.bf_vp_op_create_vp({})));
                 static_assert(noexcept(mut_sys.set_bf_vp_op_create_vp({}, {})));
                 static_assert(noexcept(mut_sys.bf_vp_op_destroy_vp({})));
@@ -143,6 +151,8 @@ main() noexcept -> bsl::exit_code
                 static_assert(noexcept(mut_sys.bf_vs_op_advance_ip_and_set_active({}, {}, {})));
                 static_assert(
                     noexcept(mut_sys.set_bf_vs_op_advance_ip_and_set_active({}, {}, {}, {})));
+                static_assert(noexcept(mut_sys.bf_vs_op_tlb_flush({}, {})));
+                static_assert(noexcept(mut_sys.set_bf_vs_op_tlb_flush({}, {}, {})));
                 static_assert(noexcept(mut_sys.bf_intrinsic_op_rdmsr({})));
                 static_assert(noexcept(mut_sys.set_bf_intrinsic_op_rdmsr({}, {})));
                 static_assert(noexcept(mut_sys.bf_intrinsic_op_wrmsr({}, {})));

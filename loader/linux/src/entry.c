@@ -46,24 +46,6 @@
 #include <stop_vmm_args_t.h>
 #include <types.h>
 
-int64_t
-mark_gdt_writable(uint32_t const cpu)
-{
-    (void)cpu;
-
-    load_direct_gdt(raw_smp_processor_id());
-    return LOADER_SUCCESS;
-}
-
-int64_t
-mark_gdt_readonly(uint32_t const cpu)
-{
-    (void)cpu;
-
-    load_fixmap_gdt(raw_smp_processor_id());
-    return LOADER_SUCCESS;
-}
-
 static int
 dev_open(struct inode *inode, struct file *file)
 {
@@ -257,11 +239,6 @@ static struct notifier_block pm_notifier_block = {.notifier_call = dev_pm};
 int
 dev_init(void)
 {
-    if (platform_on_each_cpu(mark_gdt_writable, PLATFORM_FORWARD)) {
-        bferror("mark_gdt_writable failed");
-        return -EPERM;
-    }
-
     register_reboot_notifier(&reboot_notifier_block);
     register_pm_notifier(&pm_notifier_block);
 
@@ -298,10 +275,6 @@ dev_exit(void)
     loader_fini();
     unregister_pm_notifier(&pm_notifier_block);
     unregister_reboot_notifier(&reboot_notifier_block);
-
-    if (platform_on_each_cpu(mark_gdt_readonly, PLATFORM_FORWARD)) {
-        bferror("mark_gdt_readonly failed");
-    }
 }
 
 module_init(dev_init);

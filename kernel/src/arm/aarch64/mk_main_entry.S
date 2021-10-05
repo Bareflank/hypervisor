@@ -91,7 +91,7 @@ mk_main_entry:
      * - The next thing to do is get the TLS block for this PP. Each PP has
      *   it's own TLS block (both in the microkernel, and in each extension)
      *   which means that our definition of a thread is similar to that of
-     *   Intel's and AMD's, meaning each logical core is a thread.
+     *   Intel's and AMD's, meaning each PP is a thread.
      * - The loader will tell us in the args that it provided what the PPID
      *   is. Remember that this entry point will be called for each PP, so it
      *   is called more than once. Once we have the PPID, we can calculate

@@ -76,6 +76,8 @@ namespace syscall
         bsl::unordered_map<bsl::safe_u16, bsl::errc_type> m_bf_vm_op_unmap_direct{};
         /// @brief stores the results for bf_vm_op_unmap_direct_broadcast
         bsl::unordered_map<bsl::safe_u16, bsl::errc_type> m_bf_vm_op_unmap_direct_broadcast{};
+        /// @brief stores the results for bf_vm_op_tlb_flush
+        bsl::unordered_map<bsl::safe_u16, bsl::errc_type> m_bf_vm_op_tlb_flush{};
         /// @brief stores the results for bf_vp_op_create_vp
         bsl::unordered_map<bsl::safe_u16, bsl::safe_u16> m_bf_vp_op_create_vp{};
         /// @brief stores the results for bf_vp_op_destroy_vp
@@ -108,6 +110,8 @@ namespace syscall
         bsl::unordered_map<std::tuple<bsl::safe_u16, bsl::safe_u16, bsl::safe_u16>, bsl::errc_type> m_bf_vs_op_set_active{};
         /// @brief stores the results for bf_vs_op_advance_ip_and_set_active
         bsl::unordered_map<std::tuple<bsl::safe_u16, bsl::safe_u16, bsl::safe_u16>, bsl::errc_type> m_bf_vs_op_advance_ip_and_set_active{};
+        /// @brief stores the results for bf_vs_op_tlb_flush
+        bsl::unordered_map<std::tuple<bsl::safe_u16, bsl::safe_u64>, bsl::errc_type> m_bf_vs_op_tlb_flush{};
         /// @brief stores the results for bf_intrinsic_op_rdmsr
         bsl::unordered_map<bsl::safe_u32, bsl::safe_u64> m_bf_intrinsic_op_rdmsr{};
         /// @brief stores the results for bf_intrinsic_op_wrmsr
@@ -165,6 +169,8 @@ namespace syscall
         bsl::safe_umx m_bf_vm_op_unmap_direct_count{};
         /// @brief stores the call count for bf_vm_op_unmap_direct_broadcast
         bsl::safe_umx m_bf_vm_op_unmap_direct_broadcast_count{};
+        /// @brief stores the call count for bf_vm_op_tlb_flush
+        bsl::safe_umx m_bf_vm_op_tlb_flush_count{};
         /// @brief stores the call count for bf_vp_op_create_vp
         bsl::safe_umx m_bf_vp_op_create_vp_count{};
         /// @brief stores the call count for bf_vp_op_destroy_vp
@@ -197,6 +203,8 @@ namespace syscall
         bsl::safe_umx m_bf_vs_op_set_active_count{};
         /// @brief stores the call count for bf_vs_op_advance_ip_and_set_active
         bsl::safe_umx m_bf_vs_op_advance_ip_and_set_active_count{};
+        /// @brief stores the call count for bf_vs_op_tlb_flush
+        bsl::safe_umx m_bf_vs_op_tlb_flush_count{};
         /// @brief stores the call count for bf_intrinsic_op_rdmsr
         bsl::safe_umx m_bf_intrinsic_op_rdmsr_count{};
         /// @brief stores the call count for bf_intrinsic_op_wrmsr
@@ -1412,7 +1420,7 @@ namespace syscall
         ///     which means it can be safely used on all direct mapped
         ///     addresses. The downside of using this function is that it can
         ///     be a lot slower than bf_vm_op_unmap_direct, especially on
-        ///     systems with a lot of cores.
+        ///     systems with a lot of PPs.
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of pointer to return. Must be a POD type and
@@ -1480,6 +1488,55 @@ namespace syscall
         bf_vm_op_unmap_direct_broadcast_count() const noexcept -> bsl::safe_umx
         {
             return m_bf_vm_op_unmap_direct_broadcast_count.checked();
+        }
+
+        /// <!-- description -->
+        ///   @brief Given the ID of a VM, invalidates a TLB entry for a given
+        ///     GLA on the PP that this is executed on.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vmid The ID of the VM to invalidate
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        bf_vm_op_tlb_flush(bsl::safe_u16 const &vmid) noexcept -> bsl::errc_type
+        {
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(vmid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vmid) < HYPERVISOR_MAX_VMS);
+
+            ++m_bf_vm_op_tlb_flush_count;
+            return m_bf_vm_op_tlb_flush.at(vmid);
+        }
+
+        /// <!-- description -->
+        ///   @brief Sets the return value of bf_vm_op_tlb_flush.
+        ///     (unit testing only)
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vmid The ID of the VM to invalidate
+        ///   @param errc the bsl::errc_type to return when executing
+        ///     bf_vm_op_tlb_flush
+        ///
+        constexpr void
+        set_bf_vm_op_tlb_flush(bsl::safe_u16 const &vmid, bsl::errc_type const errc) noexcept
+        {
+            m_bf_vm_op_tlb_flush.at(vmid) = errc;
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the total number of times bf_vm_op_tlb_flush
+        ///     has been called (unit testing only)
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the total number of times bf_vm_op_tlb_flush
+        ///     has been called
+        ///
+        [[nodiscard]] constexpr auto
+        bf_vm_op_tlb_flush_count() const noexcept -> bsl::safe_umx
+        {
+            return m_bf_vm_op_tlb_flush_count.checked();
         }
 
         // ---------------------------------------------------------------------
@@ -2352,6 +2409,62 @@ namespace syscall
         bf_vs_op_advance_ip_and_set_active_count() const noexcept -> bsl::safe_umx
         {
             return m_bf_vs_op_advance_ip_and_set_active_count.checked();
+        }
+
+        /// <!-- description -->
+        ///   @brief Given the ID of a VS, invalidates a TLB entry for a given
+        ///     GLA on the PP that this is executed on.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vsid The ID of the VS to invalidate
+        ///   @param gla The GLA to invalidate
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        bf_vs_op_tlb_flush(bsl::safe_u16 const &vsid, bsl::safe_u64 const &gla) noexcept
+            -> bsl::errc_type
+        {
+            bsl::expects(vsid.is_valid_and_checked());
+            bsl::expects(vsid != BF_INVALID_ID);
+            bsl::expects(bsl::to_umx(vsid) < HYPERVISOR_MAX_VSS);
+            bsl::expects(gla.is_valid_and_checked());
+            bsl::expects(gla.is_pos());
+            bsl::expects(bf_is_page_aligned(gla));
+
+            ++m_bf_vs_op_tlb_flush_count;
+            return m_bf_vs_op_tlb_flush.at({vsid, gla});
+        }
+
+        /// <!-- description -->
+        ///   @brief Sets the return value of bf_vs_op_tlb_flush.
+        ///     (unit testing only)
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vsid The ID of the VS to invalidate
+        ///   @param gla The GLA to invalidate
+        ///   @param errc the bsl::errc_type to return when executing
+        ///     bf_vs_op_tlb_flush
+        ///
+        constexpr void
+        set_bf_vs_op_tlb_flush(
+            bsl::safe_u16 const &vsid, bsl::safe_u64 const &gla, bsl::errc_type const errc) noexcept
+        {
+            m_bf_vs_op_tlb_flush.at({vsid, gla}) = errc;
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the total number of times bf_vs_op_tlb_flush
+        ///     has been called (unit testing only)
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the total number of times bf_vs_op_tlb_flush
+        ///     has been called
+        ///
+        [[nodiscard]] constexpr auto
+        bf_vs_op_tlb_flush_count() const noexcept -> bsl::safe_umx
+        {
+            return m_bf_vs_op_tlb_flush_count.checked();
         }
 
         // ---------------------------------------------------------------------

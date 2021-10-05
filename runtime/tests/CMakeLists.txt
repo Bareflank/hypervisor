@@ -39,9 +39,10 @@ list(APPEND SYSTEM_INCLUDES
 # ------------------------------------------------------------------------------
 
 list(APPEND DEFINES
-    HYPERVISOR_START_NAME=ut_start
     HYPERVISOR_STACK_CHK_FAIL_NAME=ut_stack_chk_fail
     HYPERVISOR_STACK_CHK_GUARD_NAME=ut_stack_chk_guard
+    HYPERVISOR_START_NAME=ut_start
+    HYPERVISOR_INTRINSIC_ASSERT_NAME=ut_intrinsic_assert
     HYPERVISOR_MEMCPY_NAME=ut_memcpy
     HYPERVISOR_MEMSET_NAME=ut_memset
     HYPERVISOR_PAGE_SIZE=0x1000_umx

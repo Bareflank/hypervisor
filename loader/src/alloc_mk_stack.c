@@ -38,20 +38,13 @@
  *     a default number of pages.
  *
  * <!-- inputs/outputs -->
- *   @param size the total number of pages (not bytes) to allocate
  *   @param stack the span_t to store the stack addr/size.
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
 int64_t
-alloc_mk_stack(uint32_t const size, struct span_t *const stack)
+alloc_mk_stack(struct span_t *const stack)
 {
-    if (0U == size) {
-        stack->size = HYPERVISOR_MK_STACK_SIZE;
-    }
-    else {
-        stack->size = HYPERVISOR_PAGE_SIZE * (uint64_t)size;
-    }
-
+    stack->size = HYPERVISOR_MK_STACK_SIZE;
     stack->addr = (uint8_t *)platform_alloc(stack->size);
     if (((void *)0) == stack->addr) {
         bferror("platform_alloc failed");

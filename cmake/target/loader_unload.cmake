@@ -23,21 +23,21 @@ if(HYPERVISOR_BUILD_LOADER AND NOT HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_custom_target(loader_unload
             COMMAND sync
-            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux sudo make unload CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
+            COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/linux sudo make unload CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
             VERBATIM
         )
         add_custom_target(driver_unload
             COMMAND sync
-            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux sudo make unload CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
+            COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/linux sudo make unload CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
             VERBATIM
         )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         add_custom_target(loader_unload
-            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows devcon remove ROOT\\loader
+            COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/windows devcon remove ROOT\\loader
             VERBATIM
         )
         add_custom_target(driver_unload
-            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows devcon remove ROOT\\loader
+            COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/windows devcon remove ROOT\\loader
             VERBATIM
         )
     else()

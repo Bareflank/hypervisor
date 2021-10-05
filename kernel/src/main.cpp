@@ -25,7 +25,6 @@
 #include <dispatch_esr.hpp>
 #include <dispatch_syscall.hpp>
 #include <ext_pool_t.hpp>
-#include <fast_fail.hpp>
 #include <huge_pool_t.hpp>
 #include <intrinsic_t.hpp>
 #include <mk_args_t.hpp>
@@ -105,9 +104,7 @@ namespace mk
     dispatch_esr_trampoline(tls_t *const pmut_tls) noexcept -> bsl::errc_type
     {
         bsl::expects(nullptr != pmut_tls);
-
-        return dispatch_esr(
-            *pmut_tls, g_mut_page_pool, g_mut_intrinsic, static_cast<ext_t *>(pmut_tls->ext));
+        return dispatch_esr(*pmut_tls, g_mut_intrinsic);
     }
 
     /// <!-- description -->
@@ -119,7 +116,7 @@ namespace mk
     ///     otherwise
     ///
     [[nodiscard]] extern "C" auto
-    dispatch_syscall_trampoline(tls_t *const pmut_tls) noexcept -> syscall::bf_status_t::value_type
+    dispatch_syscall_trampoline(tls_t *const pmut_tls) noexcept -> bsl::uint64
     {
         bsl::expects(nullptr != pmut_tls);
         bsl::expects(nullptr != pmut_tls->ext);
@@ -135,42 +132,6 @@ namespace mk
                    g_mut_ext_pool,
                    g_mut_vmexit_log)
             .get();
-    }
-
-    /// <!-- description -->
-    ///   @brief remove me
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param pmut_tls the current TLS block
-    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    ///     otherwise
-    ///
-    extern "C" [[nodiscard]] auto
-    vmexit_loop_trampoline(tls_t *const pmut_tls) noexcept -> bsl::errc_type
-    {
-        bsl::expects(nullptr != pmut_tls);
-
-        return vmexit_loop(
-            *pmut_tls,
-            g_mut_intrinsic,
-            g_mut_vs_pool,
-            *static_cast<ext_t *>(pmut_tls->ext),
-            g_mut_vmexit_log);
-    }
-
-    /// <!-- description -->
-    ///   @brief remove me
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param pmut_tls the current TLS block
-    ///   @return Returns bsl::errc_success if the fail was handled,
-    ///     bsl::errc_failure otherwise.
-    ///
-    extern "C" [[nodiscard]] auto
-    fast_fail_trampoline(tls_t *const pmut_tls) noexcept -> bsl::errc_type
-    {
-        bsl::expects(nullptr != pmut_tls);
-        return fast_fail(*pmut_tls, g_mut_intrinsic, static_cast<ext_t *>(pmut_tls->ext));
     }
 
     /// <!-- description -->
@@ -200,6 +161,7 @@ namespace mk
             g_mut_vs_pool,
             g_mut_ext_pool,
             g_mut_system_rpt,
+            g_mut_vmexit_log,
             *pmut_args);
     }
 }

@@ -59,6 +59,10 @@ namespace helpers
             return lib::basic_entry_status_t::reserved;
         }
 
+        if (bsl::safe_u64::magic_0() != pudm_entry->alias) {
+            return lib::basic_entry_status_t::reserved;
+        }
+
         return lib::basic_entry_status_t::present;
     }
 
@@ -105,6 +109,24 @@ namespace helpers
     template<typename E>
     constexpr void
     configure_entry_as_ptr_to_table(E *const pmut_entry) noexcept
+    {
+        bsl::expects(nullptr != pmut_entry);
+
+        pmut_entry->p = bsl::safe_u64::magic_1().get();
+        pmut_entry->rw = bsl::safe_u64::magic_1().get();
+        pmut_entry->us = bsl::safe_u64::magic_1().get();
+    }
+
+    /// <!-- description -->
+    ///   @brief Flushes the TLB for an entry
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @tparam E the type of entry to flush the TLB for
+    ///   @param pmut_entry the entry to flush the TLB for
+    ///
+    template<typename E>
+    constexpr void
+    flush_tlb_for_entry(E *const pmut_entry) noexcept
     {
         bsl::expects(nullptr != pmut_entry);
 

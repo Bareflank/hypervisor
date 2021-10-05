@@ -104,7 +104,7 @@ start_vmm_per_cpu(uint32_t const cpu)
         return LOADER_FAILURE;
     }
 
-    if (alloc_mk_stack(0U, &g_mk_stack[cpu])) {
+    if (alloc_mk_stack(&g_mk_stack[cpu])) {
         bferror("alloc_mk_stack failed");
         goto alloc_mk_stack_failed;
     }
@@ -204,7 +204,11 @@ start_vmm_per_cpu(uint32_t const cpu)
     dump_mk_args(g_mk_args[cpu], cpu);
 #endif
 
-    if (demote(g_mk_args[cpu], g_mk_state[cpu], g_root_vp_state[cpu])) {
+    platform_mark_gdt_writable();
+    ret = demote(g_mk_args[cpu], g_mk_state[cpu], g_root_vp_state[cpu]);
+    platform_mark_gdt_readonly();
+
+    if (ret) {
         platform_dump_vmm();
         bferror("demote failed");
         goto demote_failed;

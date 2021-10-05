@@ -37,18 +37,6 @@
 
     /** @brief defines the size of the TLS block */
     #define TLS_SIZE 0x300
-    /** @brief defines the offset of tls_t.current_fast_fail_ip */
-    #define TLS_OFFSET_CURRENT_FAST_FAIL_IP 0x180
-    /** @brief defines the offset of tls_t.current_fast_fail_sp */
-    #define TLS_OFFSET_CURRENT_FAST_FAIL_SP 0x188
-    /** @brief defines the offset of tls_t.mk_main_fast_fail_ip */
-    #define TLS_OFFSET_MK_MAIN_FAST_FAIL_IP 0x190
-    /** @brief defines the offset of tls_t.mk_main_fast_fail_sp */
-    #define TLS_OFFSET_MK_MAIN_FAST_FAIL_SP 0x198
-    /** @brief defines the offset of tls_t.call_ext_fast_fail_ip */
-    #define TLS_OFFSET_CALL_EXT_FAST_FAIL_IP 0x1A0
-    /** @brief defines the offset of tls_t.dispatch_syscall_fast_fail_ip */
-    #define TLS_OFFSET_DISPATCH_SYSCALL_FAST_FAIL_IP 0x1B0
     /** @brief defines the offset of tls_t.self */
     #define TLS_OFFSET_SELF 0x200
     /** @brief defines the offset of tls_t.ppid */
@@ -104,7 +92,7 @@ mk_main_entry:
      * - The next thing to do is get the TLS block for this PP. Each PP has
      *   it's own TLS block (both in the microkernel, and in each extension)
      *   which means that our definition of a thread is similar to that of
-     *   Intel's and AMD's, meaning each logical core is a thread.
+     *   Intel's and AMD's, meaning each PP is a thread.
      * - The loader will tell us in the args that it provided what the PPID
      *   is. Remember that this entry point will be called for each PP, so it
      *   is called more than once. Once we have the PPID, we can calculate
@@ -149,20 +137,6 @@ mk_main_entry:
 
     mov rax, INVALID_IDS
     mov gs:[TLS_OFFSET_ACTIVE_IDS], rax
-
-    /**
-     * NOTE:
-     * - Next we set some of the fast fail entry points in the TLS block.
-     *   These will be used when an error or exception occurs so that
-     *   we can gracefully handle issues.
-     */
-
-    lea rax, [rip + mk_main_fast_fail_entry]
-    mov gs:[TLS_OFFSET_MK_MAIN_FAST_FAIL_IP], rax
-    lea rax, [rip + call_ext_fast_fail_entry]
-    mov gs:[TLS_OFFSET_CALL_EXT_FAST_FAIL_IP], rax
-    lea rax, [rip + dispatch_syscall_fast_fail_entry]
-    mov gs:[TLS_OFFSET_DISPATCH_SYSCALL_FAST_FAIL_IP], rax
 
     /**
      * NOTE:
@@ -321,15 +295,21 @@ mk_main_entry:
 
     /**
      * NOTE:
-     * - Next we transfer the NMI pending bit. If this is set, we need to hand
+     * - Restore the parameters to mk_main.
+     */
+
+    pop rdi
+    pop rsi
+
+    /**
+     * NOTE:
+     * - Lastly transfer the NMI pending bit. If this is set, we need to hand
      *   it to the extension so that it can handle the NMI appropriately as
      *   the microkernel has no way of handling NMIs, so basically any NMI
      *   that might fire at any point during the loading process has to be
      *   recorded and transfered all the way to the extension so that it can
      *   handle it properly.
      */
-
-    pop rdi
 
     mov rdx, [rdi + ARGS_OFFSET_ROOT_VP_STATE]
     mov rax, [rdx + SS_OFFSET_NMI]
@@ -338,65 +318,15 @@ mk_main_entry:
     xor rax, rax
     mov [rdx + SS_OFFSET_NMI], rax
 
-    pop rsi
-
     /**
      * NOTE:
-     * - This next block of assembly is seen throughout the assembly code.
-     *   Basically, it stores the information needed for fast failing. Each
-     *   time we enter a new context like calling into an extension, handling
-     *   a syscall, etc, we need to swap around the fast fail handler and RSP
-     *   so that we know where to return to in the event of an error.
-     */
-
-    mov gs:[TLS_OFFSET_MK_MAIN_FAST_FAIL_SP], rsp
-    mov gs:[TLS_OFFSET_CURRENT_FAST_FAIL_SP], rsp
-    mov rax, gs:[TLS_OFFSET_MK_MAIN_FAST_FAIL_IP]
-    mov gs:[TLS_OFFSET_CURRENT_FAST_FAIL_IP], rax
-
-    /**
-     * NOTE:
-     * - Finally, call the main trampoline.
+     * - Call the main trampoline.
      */
 
     call mk_main
-
-    /**
-     * NOTE:
-     * - If we get here, it is because an error occurred and we need to
-     *   fast fail.
-     */
-
-    jmp return_to_current_fast_fail
+    int 3
 
     .size mk_main_entry, .-mk_main_entry
-
-    /**************************************************************************/
-    /* Fast Fail Routine                                                      */
-    /**************************************************************************/
-
-    .globl  mk_main_fast_fail_entry
-    .type   mk_main_fast_fail_entry, @function
-mk_main_fast_fail_entry:
-
-    /**
-     * NOTE:
-     * - In the beginning of mk_main_entry, we saved the original arguments
-     *   to the stack which we will use here.
-     */
-
-    pop rdi
-
-    /**
-     * NOTE:
-     * - Promote back to the root OS on failure.
-     */
-
-    mov rdi, [rdi + ARGS_OFFSET_ROOT_VP_STATE]
-    mov rsi, 0xFFFFFFFFFFFFFFFF
-    jmp promote
-
-    .size mk_main_fast_fail_entry, .-mk_main_fast_fail_entry
 
     /**************************************************************************/
     /* Runtime Helpers                                                        */

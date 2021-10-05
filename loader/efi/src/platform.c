@@ -287,10 +287,10 @@ platform_num_online_cpus(void)
 
 /**
  * <!-- description -->
- *   @brief Executes a callback on a specific core.
+ *   @brief Executes a callback on a specific PP.
  *
  * <!-- inputs/outputs -->
- *   @param cpu the core to execute the callback on
+ *   @param cpu the PP to execute the callback on
  *   @param callback the callback to call
  *   @param args the arguments for work_on_cpu_callback
  */
@@ -408,3 +408,19 @@ platform_arch_init(void)
 {
     return arch_init();
 }
+
+/**
+ * <!-- description -->
+ *   @brief Marks the current GDT as read/write
+ */
+void
+platform_mark_gdt_writable(void)
+{}
+
+/**
+ * <!-- description -->
+ *   @brief Marks the current GDT as read-only
+ */
+void
+platform_mark_gdt_readonly(void)
+{}

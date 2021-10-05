@@ -33,5 +33,6 @@ pause:
 
     pause
     ret
+    int 3
 
     .size pause, .-pause

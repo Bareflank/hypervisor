@@ -70,9 +70,9 @@ setup_tss(void)
      *   the microkernel, the promote logic doesn't have a TR to flip the
      *   TSS busy bit for. As a result, it has to leave the TR set to the
      *   microkernel's TR which leaks it's resources.
-     * - UEFI also seems to copy the GDT from one core to another as it starts
+     * - UEFI also seems to copy the GDT from one PP to another as it starts
      *   each AP. This means that we need to cache the original GDT so that
-     *   we can use it for reference. Otherwise, on other cores, you would
+     *   we can use it for reference. Otherwise, on other PPs, you would
      *   get the GDT you created on the BSP, which already has a TSS and it
      *   cannot be shared (due to the TSS busy bit).
      */

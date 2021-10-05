@@ -36,27 +36,6 @@ namespace integration
 {
     /// <!-- description -->
     ///   @brief Reports passed/failed so that a script can detect if the
-    ///     failed text shows up in the log.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param test the results to query
-    ///   @param sloc used to identify the location in the integration test
-    ///     where a check failed.
-    ///
-    constexpr void
-    verify(bool const test, bsl::source_location const &sloc = bsl::here()) noexcept
-    {
-        if (bsl::unlikely(!test)) {
-            bsl::print() << bsl::red << "integration test failed";
-            bsl::print() << bsl::rst << sloc;
-        }
-        else {
-            bsl::touch();
-        }
-    }
-
-    /// <!-- description -->
-    ///   @brief Reports passed/failed so that a script can detect if the
     ///     failed text shows up in the log. If the test fails, this
     ///     function will abort.
     ///
@@ -89,8 +68,7 @@ namespace integration
     ///     where a check failed.
     ///
     constexpr void
-    require_success(
-        bsl::errc_type const ec, bsl::source_location const &sloc = bsl::here()) noexcept
+    require(bsl::errc_type const ec, bsl::source_location const &sloc = bsl::here()) noexcept
     {
         if (bsl::unlikely(!ec.success())) {
             bsl::print() << bsl::red << "integration test failed";

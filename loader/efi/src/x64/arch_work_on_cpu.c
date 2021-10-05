@@ -32,10 +32,10 @@
 
 /**
  * <!-- description -->
- *   @brief Executes a callback on a specific core on this architecture.
+ *   @brief Executes a callback on a specific PP on this architecture.
  *
  * <!-- inputs/outputs -->
- *   @param cpu the core to execute the callback on
+ *   @param cpu the PP to execute the callback on
  *   @param callback the callback to call
  *   @param args the arguments for work_on_cpu_callback
  */

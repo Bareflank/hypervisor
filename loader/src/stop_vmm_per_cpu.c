@@ -35,6 +35,7 @@
 #include <g_mk_stack.h>
 #include <g_mk_state.h>
 #include <g_root_vp_state.h>
+#include <platform.h>
 #include <send_command_report_off.h>
 #include <send_command_stop.h>
 #include <types.h>

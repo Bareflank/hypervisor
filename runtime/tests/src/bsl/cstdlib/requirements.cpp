@@ -34,7 +34,7 @@ namespace
     ///   @brief Implements the ABI for bf_control_op_exit.
     ///
     extern "C" inline void
-    bf_control_op_exit_impl() noexcept
+    ut_intrinsic_assert() noexcept
     {}
 }
 
@@ -49,7 +49,7 @@ namespace
 [[nodiscard]] auto
 main() noexcept -> bsl::exit_code
 {
-    bf_control_op_exit_impl();
+    ut_intrinsic_assert();
 
     bsl::ut_scenario{"verify noexcept"} = []() noexcept {
         bsl::ut_given{} = []() noexcept {

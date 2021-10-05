@@ -450,3 +450,23 @@ platform_arch_init(void)
 {
     return LOADER_SUCCESS;
 }
+
+/**
+ * <!-- description -->
+ *   @brief Marks the current GDT as read/write
+ */
+void
+platform_mark_gdt_writable(void)
+{
+    load_direct_gdt(raw_smp_processor_id());
+}
+
+/**
+ * <!-- description -->
+ *   @brief Marks the current GDT as read-only
+ */
+void
+platform_mark_gdt_readonly(void)
+{
+    load_fixmap_gdt(raw_smp_processor_id());
+}

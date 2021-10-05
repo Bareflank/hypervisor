@@ -22,22 +22,22 @@
 if(HYPERVISOR_BUILD_LOADER AND NOT HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_custom_target(loader_build
-            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux make CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
+            COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/linux make CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
             COMMAND sync
             VERBATIM
         )
         add_custom_target(driver_build
-            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/linux make CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
+            COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/linux make CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
             COMMAND sync
             VERBATIM
         )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         add_custom_target(loader_build
-            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows MSBuild.exe /p:Configuration=Debug /p:Platform=x64 /p:Arch=${HYPERVISOR_TARGET_ARCH} /p:CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}
+            COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/windows MSBuild.exe /p:Configuration=Debug /p:Platform=x64 /p:Arch=${HYPERVISOR_TARGET_ARCH} /p:CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}
             VERBATIM
         )
         add_custom_target(driver_build
-            COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/../../loader/windows MSBuild.exe /p:Configuration=Debug /p:Platform=x64 /p:Arch=${HYPERVISOR_TARGET_ARCH} /p:CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}
+            COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/windows MSBuild.exe /p:Configuration=Debug /p:Platform=x64 /p:Arch=${HYPERVISOR_TARGET_ARCH} /p:CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}
             VERBATIM
         )
     else()

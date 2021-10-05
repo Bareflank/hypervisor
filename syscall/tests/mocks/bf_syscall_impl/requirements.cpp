@@ -82,6 +82,7 @@ main() noexcept -> bsl::exit_code
             static_assert(noexcept(syscall::bf_tls_online_pps_impl()));
             static_assert(noexcept(syscall::bf_control_op_exit_impl()));
             static_assert(noexcept(syscall::bf_control_op_wait_impl()));
+            static_assert(noexcept(syscall::bf_control_op_again_impl()));
             static_assert(noexcept(syscall::bf_handle_op_open_handle_impl({}, {})));
             static_assert(noexcept(syscall::bf_handle_op_close_handle_impl({})));
             static_assert(noexcept(syscall::bf_debug_op_out_impl({}, {})));
@@ -100,6 +101,10 @@ main() noexcept -> bsl::exit_code
             static_assert(noexcept(syscall::bf_callback_op_register_fail_impl({}, {})));
             static_assert(noexcept(syscall::bf_vm_op_create_vm_impl({}, {})));
             static_assert(noexcept(syscall::bf_vm_op_destroy_vm_impl({}, {})));
+            static_assert(noexcept(syscall::bf_vm_op_map_direct_impl({}, {}, {}, {})));
+            static_assert(noexcept(syscall::bf_vm_op_unmap_direct_impl({}, {}, {})));
+            static_assert(noexcept(syscall::bf_vm_op_unmap_direct_broadcast_impl({}, {}, {})));
+            static_assert(noexcept(syscall::bf_vm_op_tlb_flush_impl({}, {})));
             static_assert(noexcept(syscall::bf_vp_op_create_vp_impl({}, {}, {})));
             static_assert(noexcept(syscall::bf_vp_op_destroy_vp_impl({}, {})));
             static_assert(noexcept(syscall::bf_vs_op_create_vs_impl({}, {}, {}, {})));
@@ -117,6 +122,7 @@ main() noexcept -> bsl::exit_code
             static_assert(noexcept(syscall::bf_vs_op_set_active_impl({}, {}, {}, {})));
             static_assert(
                 noexcept(syscall::bf_vs_op_advance_ip_and_set_active_impl({}, {}, {}, {})));
+            static_assert(noexcept(syscall::bf_vs_op_tlb_flush_impl({}, {}, {})));
             static_assert(noexcept(syscall::bf_intrinsic_op_rdmsr_impl({}, {}, {})));
             static_assert(noexcept(syscall::bf_intrinsic_op_wrmsr_impl({}, {}, {})));
             static_assert(noexcept(syscall::bf_mem_op_alloc_page_impl({}, {}, {})));

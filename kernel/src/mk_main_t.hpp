@@ -33,7 +33,7 @@
 #include <root_page_table_t.hpp>
 #include <tls_t.hpp>
 #include <vm_pool_t.hpp>
-#include <vmexit_loop_entry.hpp>
+#include <vmexit_loop.hpp>
 #include <vp_pool_t.hpp>
 #include <vs_pool_t.hpp>
 
@@ -84,7 +84,7 @@ namespace mk
             ///
 
             bsl::expects(bsl::to_u16(mut_args.online_pps) == mut_tls.online_pps);
-            bsl::expects(bsl::to_umx(mut_args.online_pps) < HYPERVISOR_MAX_PPS);
+            bsl::expects(bsl::to_umx(mut_args.online_pps) <= HYPERVISOR_MAX_PPS);
 
             /// NOTE:
             /// - The online PPS should be set by the microkernel's entry logic
@@ -201,6 +201,77 @@ namespace mk
             auto const sp{(stack_addr + (stack_size_with_guard * ppid) + stack_size).checked()};
 
             mut_tls.sp = sp.get();
+            mut_tls.ext_sp = sp.get();
+        }
+
+        /// <!-- description -->
+        ///   @brief Sets the extension stack pointer given a TLS block,
+        ///     based on what PP we are currently executing on.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///
+        static constexpr void
+        set_extension_fail_sp(tls_t &mut_tls) noexcept
+        {
+            constexpr auto stack_addr{HYPERVISOR_EXT_FAIL_STACK_ADDR};
+            constexpr auto stack_size{HYPERVISOR_EXT_FAIL_STACK_SIZE};
+            constexpr auto stack_size_with_guard{stack_size + HYPERVISOR_PAGE_SIZE};
+
+            /// NOTE:
+            /// - Each extension has it's own address space, and their stacks
+            ///   are all in the same location in each of their address spaces.
+            /// - This function is calculating the stack pointer for each
+            ///   extension for each PP.
+            /// - Each PP is given it's own stack. This is similar to a thread
+            ///   in userspace. They need to be able to execute symmetrically
+            ///   and therefore, each extension has one stack per PP.
+            /// - Although extensions have their own address spaces, similar to
+            ///   userspace applications, their stacks all start at the
+            ///   same location in this address space, and each PP has it's
+            ///   own stack, each PP does NOT have it's own address space.
+            ///   Again, this is similar to threads in userspace. Because of
+            ///   this, each stack in an extension needs to have it's own
+            ///   unique address in the extension's address space.
+            /// - To make this all work, each extension is given one giant blob
+            ///   of stack space starting at EXT_STACK_ADDR
+            /// - For each PP, the ext_t allocates EXT_STACK_SIZE, and maps
+            ///   it into the extension's address space, starting at
+            ///   EXT_STACK_ADDR. Each time a PP's stack is mapped, the address
+            ///   is incremented by EXT_STACK_SIZE + one page.
+            /// - The extra page is a guard page. If a PP overruns it's stack
+            ///   it will cause a page fault, at least preventing corruption
+            ///   of the other stacks. Note that this will not prevent attacks
+            ///   that jump passed this guard page. It is just there for sanity
+            ///   purposes.
+            /// - So, the TL;DR is, the stack space for an extension looks like
+            ///   this:
+            ///
+            ///   --------------------   EXT_STACK_ADDR
+            ///   |                  |
+            ///   |    PP 0 Stack    |
+            ///   |                  |
+            ///   --------------------
+            ///   |    Guard Page    |
+            ///   --------------------
+            ///   |                  |
+            ///   |    PP 1 Stack    |
+            ///   |                  |
+            ///   --------------------
+            ///   |    Guard Page    |
+            ///   --------------------
+            ///           ...
+            ///
+            /// - One question that might come up is, why do this math here
+            ///   and not in the extension. This is because these addresses
+            ///   are the same for all extensions. There is no need to do
+            ///   these calculations more than once.
+            ///
+
+            auto const ppid{bsl::to_umx(mut_tls.ppid)};
+            auto const sp{(stack_addr + (stack_size_with_guard * ppid) + stack_size).checked()};
+
+            mut_tls.ext_fail_sp = sp.get();
         }
 
         /// <!-- description -->
@@ -402,6 +473,7 @@ namespace mk
         ///   @param mut_vs_pool the vs_pool_t to use
         ///   @param mut_ext_pool the ext_pool_t to use
         ///   @param mut_system_rpt the system RPT provided by the loader
+        ///   @param mut_log the VMExit log to use
         ///   @param mut_args the loader provided arguments to the microkernel.
         ///   @return If the user provided command succeeds, this function
         ///     will return bsl::errc_success, otherwise this function
@@ -418,6 +490,7 @@ namespace mk
             vs_pool_t &mut_vs_pool,
             ext_pool_t &mut_ext_pool,
             root_page_table_t &mut_system_rpt,
+            vmexit_log_t &mut_log,
             loader::mk_args_t &mut_args) noexcept -> bsl::errc_type
         {
             bsl::errc_type mut_ret{};
@@ -460,6 +533,7 @@ namespace mk
             ///
 
             set_extension_sp(mut_tls);
+            set_extension_fail_sp(mut_tls);
             set_extension_tp(mut_tls, mut_intrinsic);
 
             /// NOTE:
@@ -518,7 +592,7 @@ namespace mk
             /// - Start the hypervisor.
             ///
 
-            return vmexit_loop_entry();
+            return vmexit_loop(mut_tls, mut_intrinsic, mut_vs_pool, mut_log);
         }
     };
 }

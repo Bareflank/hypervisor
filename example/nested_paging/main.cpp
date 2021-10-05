@@ -67,7 +67,7 @@ namespace example
     ///   @param fail_reason the exit reason associated with the fail
     ///
     extern "C" void
-    fail_entry(syscall::bf_status_t::value_type const fail_reason) noexcept
+    fail_entry(bsl::uint64 const fail_reason) noexcept
     {
         bsl::discard(fail_reason);
 

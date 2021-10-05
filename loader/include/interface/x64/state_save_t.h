@@ -98,7 +98,7 @@ struct state_save_t
     struct tss_t *tss;
 
     /** @brief stores a pointer to the ist #1 */
-    void *ist;
+    uint8_t *ist;
 
     /**************************************************************************/
     /* Descriptor Table Information                                           */

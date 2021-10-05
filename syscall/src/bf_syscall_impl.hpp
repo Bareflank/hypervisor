@@ -54,7 +54,7 @@ namespace syscall
 
     /// @brief Defines the signature of the fast fail callback handler
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    using bf_callback_handler_fail_t = void (*)(bsl::uint16, bsl::uint64);
+    using bf_callback_handler_fail_t = void (*)(bsl::uint64, bsl::uint64);
 
     // -------------------------------------------------------------------------
     // TLS ops
@@ -362,6 +362,11 @@ namespace syscall
     ///
     extern "C" void bf_control_op_wait_impl() noexcept;
 
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_control_op_again.
+    ///
+    extern "C" void bf_control_op_again_impl() noexcept;
+
     // -------------------------------------------------------------------------
     // bf_handle_ops
     // -------------------------------------------------------------------------
@@ -575,6 +580,18 @@ namespace syscall
     ///
     extern "C" [[nodiscard]] auto bf_vm_op_unmap_direct_broadcast_impl(
         bsl::uint64 const reg0_in, bsl::uint16 const reg1_in, bsl::uint64 const reg2_in) noexcept
+        -> bsl::uint64;
+
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_vm_op_tlb_flush.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] auto
+    bf_vm_op_tlb_flush_impl(bsl::uint64 const reg0_in, bsl::uint16 const reg1_in) noexcept
         -> bsl::uint64;
 
     // -------------------------------------------------------------------------
@@ -803,6 +820,19 @@ namespace syscall
         bsl::uint16 const reg1_in,
         bsl::uint16 const reg2_in,
         bsl::uint16 const reg3_in) noexcept -> bsl::uint64;
+
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_vs_op_tlb_flush.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
+    ///   @param reg2_in n/a
+    ///   @return n/a
+    ///
+    extern "C" [[nodiscard]] auto bf_vs_op_tlb_flush_impl(
+        bsl::uint64 const reg0_in, bsl::uint16 const reg1_in, bsl::uint64 const reg2_in) noexcept
+        -> bsl::uint64;
 
     // -------------------------------------------------------------------------
     // bf_intrinsic_ops

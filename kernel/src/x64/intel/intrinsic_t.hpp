@@ -28,7 +28,7 @@
 #include <bf_constants.hpp>
 #include <invept_descriptor_t.hpp>
 #include <invvpid_descriptor_t.hpp>
-#include <tlb_flush_type_t.hpp>
+#include <vmcs_t.hpp>
 
 #include <bsl/cstdint.hpp>
 #include <bsl/debug.hpp>
@@ -321,83 +321,74 @@ namespace mk
     {
     public:
         /// <!-- description -->
-        ///   @brief Invalidates TLB entries given a address
+        ///   @brief Invalidates TLB entries given an address and a VPID.
+        ///     If the VPID is set to BF_INVALID_ID, an extension address
+        ///     is invalidated. If the VPID is valid, a guest address is
+        ///     invalidated using the VPID. If the address is valid, the
+        ///     address is invalidated for the guest. If the address is
+        ///     0, the entire VM is invalidated using the currently loaded
+        ///     VS's EPTP. If EPTP is never set by the extension, all VMs
+        ///     are flushed.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param type determines which type of flush to perform
-        ///   @param addr the address to invalidate
-        ///   @param vmid if set to a valid ID, will flush the address for
-        ///     the given VMID as a VPID (remember that Intel calls the tag
-        ///      VPID, and that is not the same thing as a Bareflank VPID as
-        ///      an Intel VPID really is the VMID as VMCS VPIDs need to be the
-        ///      same for all VPs in a VM for things to make sense from a
-        ///      cache point of view).
+        ///   @param addr the address to invalidate.
+        ///   @param vpid the VPID (as defined by Intel) to flush.
         ///
         static constexpr void
         tlb_flush(
-            tlb_flush_type_t const type,
-            bsl::safe_u64 const &addr,
-            bsl::safe_u16 const &vmid = syscall::BF_INVALID_ID) noexcept
+            bsl::safe_u64 const &addr, bsl::safe_u16 const &vpid = syscall::BF_INVALID_ID) noexcept
         {
             bsl::expects(addr.is_valid_and_checked());
-            bsl::expects(addr.is_pos());
-            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(vpid.is_valid_and_checked());
 
-            /// NOTE:
-            /// - See the documentation on IPI for how to implement a broadcast
-            ///   TLB flush on Intel. MicroV/mono already has the code for
-            ///   this. Basically, when the intrinsics class is implemented,
-            ///   it will need a bool array for each PP. Before this code is
-            ///   executed, it should set all of the bits in the array. Then
-            ///   it would execute a broadcast INIT to all of the CPUs. The
-            ///   INIT will always trap on Intel, but the microkernel should
-            ///   check to see if a TLB flush is active by asking the intrinsic
-            ///   class if the bit in the array is set. If it is, it will not
-            ///   send the INIT to the extension, but instead will call this
-            ///   function with broadcast set to false. This will always clear
-            ///   the bit and perform a local TLB flush. The PP that made the
-            ///   broadcast call will simply spin, checking to see if any of the
-            ///   bits in the array are set. Once all of the bits are clear, it
-            ///   can return.
-            /// - Obviously, setting all of the bits in the array will have to
-            ///   be mutex locked. Otherwise, two cores could try to flush the
-            ///   TLB at the same time. A local flush should NOT take the
-            ///   mutex. If a race occurs, its fine because the flush will have
-            ///   happened.
-            /// - Might also need to store the enum that tells this function
-            ///   what kind of local flush should occur. When the microkernel
-            ///   gets the INIT, the function that returns the status can
-            ///   actually return this enum, so that it knows that local flush
-            ///   to call.
-            /// - If no flush is in progress, the extension should get the
-            ///   INIT.
-            /// - The biggest problem with all of this is that sending an INIT
-            ///   requires you to communicate with the APIC. My advice is
-            ///   we should only ever support the x2APIC. Meaning, MicroV on
-            ///   Intel should only ever start if the x2APIC is enabled. This
-            ///   way, we do not have to worry about the memory mapped version
-            ///   which is not easy to deal with. Then, all you have to do is
-            ///   call a write MSR to send the broadcast INIT.
-            ///
-
-            switch (type) {
-                case tlb_flush_type_t::local: {
-                    if (syscall::BF_INVALID_ID == vmid) {
-                        intrinsic_invlpg(addr.get());
-                    }
-                    else {
-                        invvpid_descriptor_t const desc{vmid.get(), {}, {}, {}, addr.get()};
-                        intrinsic_invvpid(&desc, {});
-                    }
-
-                    break;
-                }
-
-                case tlb_flush_type_t::broadcast: {
-                    bsl::alert() << "broadcast TLB flush not yet implemented\n" << bsl::here();
-                    break;
-                }
+            if (syscall::BF_INVALID_ID == vpid) {
+                return intrinsic_invlpg(addr.get());
             }
+
+            if (vpid.is_zero()) {
+                constexpr auto type{2_u64};
+                invept_descriptor_t const desc{{}, {}};
+                return intrinsic_invept(&desc, type.get());
+            }
+
+            if (addr.is_zero()) {
+                auto const eptp{vmrd64(VMCS_EPTP_INDEX)};
+                if (eptp.is_zero()) {
+                    constexpr auto type{2_u64};
+                    invept_descriptor_t const desc{{}, {}};
+                    return intrinsic_invept(&desc, type.get());
+                }
+
+                constexpr auto type{1_u64};
+                invept_descriptor_t const desc{eptp.get(), {}};
+                return intrinsic_invept(&desc, type.get());
+            }
+
+            constexpr auto type{0_u64};
+            invvpid_descriptor_t const desc{vpid.get(), {}, {}, {}, addr.get()};
+            return intrinsic_invvpid(&desc, type.get());
+        }
+
+        /// <!-- description -->
+        ///   @brief Invalidates TLB entries given an address and a VPID.
+        ///     If the VPID is set to BF_INVALID_ID, an extension address
+        ///     is invalidated. If the VPID is valid, a guest address is
+        ///     invalidated using the VPID. If the address is valid, the
+        ///     address is invalidated for the guest. If the address is
+        ///     0, the entire VM is invalidated using the currently loaded
+        ///     VS's EPTP. If EPTP is never set by the extension, all VMs
+        ///     are flushed.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param addr the address to invalidate.
+        ///   @param vpid the VPID (as defined by Intel) to flush.
+        ///
+        static constexpr void
+        tlb_flush(
+            void const *const addr, bsl::safe_u16 const &vpid = syscall::BF_INVALID_ID) noexcept
+        {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+            return tlb_flush(bsl::to_u64(reinterpret_cast<bsl::uint64>(addr)), vpid);
         }
 
         /// <!-- description -->

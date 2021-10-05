@@ -264,6 +264,16 @@ macro(hypervisor_add_info)
     )
 
     add_custom_command(TARGET info
+        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_EXT_FAIL_STACK_ADDR      ${BF_COLOR_CYN}${HYPERVISOR_EXT_FAIL_STACK_ADDR}${BF_COLOR_RST}"
+        VERBATIM
+    )
+
+    add_custom_command(TARGET info
+        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_EXT_FAIL_STACK_SIZE      ${BF_COLOR_CYN}${HYPERVISOR_EXT_FAIL_STACK_SIZE}${BF_COLOR_RST}"
+        VERBATIM
+    )
+
+    add_custom_command(TARGET info
         COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_EXT_CODE_ADDR       ${BF_COLOR_CYN}${HYPERVISOR_EXT_CODE_ADDR}${BF_COLOR_RST}"
         VERBATIM
     )
@@ -300,16 +310,6 @@ macro(hypervisor_add_info)
 
     add_custom_command(TARGET info
         COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_EXT_HUGE_POOL_SIZE  ${BF_COLOR_CYN}${HYPERVISOR_EXT_HUGE_POOL_SIZE}${BF_COLOR_RST}"
-        VERBATIM
-    )
-
-    add_custom_command(TARGET info
-        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_EXT_HEAP_POOL_ADDR  ${BF_COLOR_CYN}${HYPERVISOR_EXT_HEAP_POOL_ADDR}${BF_COLOR_RST}"
-        VERBATIM
-    )
-
-    add_custom_command(TARGET info
-        COMMAND ${CMAKE_COMMAND} -E echo "${BF_COLOR_YLW}   HYPERVISOR_EXT_HEAP_POOL_SIZE  ${BF_COLOR_CYN}${HYPERVISOR_EXT_HEAP_POOL_SIZE}${BF_COLOR_RST}"
         VERBATIM
     )
 

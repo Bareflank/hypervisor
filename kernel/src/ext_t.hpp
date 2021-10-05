@@ -108,7 +108,9 @@ namespace mk
         /// @brief stores the extension's handle
         bsl::safe_u16 m_handle{};
         /// @brief stores true if start() has been executed
-        bool m_started{};
+        bool m_has_executed_start{};
+        /// @brief stores true if fail_entry() is being executed
+        bool m_is_executing_fail{};
 
         /// @brief stores the main rpt
         root_page_table_t m_main_rpt{};
@@ -543,6 +545,94 @@ namespace mk
         }
 
         /// <!-- description -->
+        ///   @brief Adds an exteneion's fail stack for a specific PP to the
+        ///     provided root page table at the provided address.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_rpt the root page table to add too
+        ///   @param addr the address of where to put the stack
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] static constexpr auto
+        add_fail_stack(
+            tls_t &mut_tls,
+            page_pool_t &mut_page_pool,
+            root_page_table_t &mut_rpt,
+            bsl::safe_umx const &addr) noexcept -> bsl::errc_type
+        {
+            constexpr auto size{HYPERVISOR_EXT_FAIL_STACK_SIZE};
+            for (bsl::safe_idx mut_i{}; mut_i < size; mut_i += bsl::to_idx(HYPERVISOR_PAGE_SIZE)) {
+                auto const virt{(addr + bsl::to_umx(mut_i)).checked()};
+
+                /// NOTE:
+                /// - The virtual address provided to allocate_page cannot
+                ///   overflow because add_fail_stacks ensures that this is not
+                ///   possible, which is why it is marked as checked.
+                ///
+
+                auto const *const page{
+                    mut_rpt.allocate_page<page_4k_t>(mut_tls, mut_page_pool, virt, MAP_PAGE_RW)};
+
+                if (bsl::unlikely(nullptr == page)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return bsl::errc_failure;
+                }
+
+                bsl::touch();
+            }
+
+            return bsl::errc_success;
+        }
+
+        /// <!-- description -->
+        ///   @brief Adds the exteneion's fail stacks to the provided
+        ///     root page table.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_rpt the root page table to add too
+        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
+        ///     and friends otherwise
+        ///
+        [[nodiscard]] constexpr auto
+        add_fail_stacks(
+            tls_t &mut_tls, page_pool_t &mut_page_pool, root_page_table_t &mut_rpt) noexcept
+            -> bsl::errc_type
+        {
+            constexpr auto stack_addr{HYPERVISOR_EXT_FAIL_STACK_ADDR};
+            constexpr auto stack_size{HYPERVISOR_EXT_FAIL_STACK_SIZE};
+
+            for (bsl::safe_idx mut_i{}; mut_i < bsl::to_idx(mut_tls.online_pps); ++mut_i) {
+                auto const offs{(stack_size + HYPERVISOR_PAGE_SIZE) * bsl::to_umx(mut_i)};
+                auto const addr{(stack_addr + offs).checked()};
+
+                /// NOTE:
+                /// - CMake is responsible for ensuring that the values for
+                ///   stack_addr and stack_size make sense. The only way the
+                ///   the math above could overflow is if the provided online
+                ///   PPs is invalid while at the same time CMake was
+                ///   configured with values that could result in overflow.
+                ///   This is considered extremely unlikely and therefore
+                ///   undefined, which is why addr is marked as checked.
+                ///
+
+                auto const ret{this->add_fail_stack(mut_tls, mut_page_pool, mut_rpt, addr)};
+                if (bsl::unlikely(!ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return bsl::errc_failure;
+                }
+
+                bsl::touch();
+            }
+
+            return bsl::errc_success;
+        }
+
+        /// <!-- description -->
         ///   @brief Adds an exteneion's TLS (has nothing to do with the
         ///     microkernel's TLS). Remember that each extension has two pages
         ///     of TLS block stuff. One page for TLS data, which is anything
@@ -774,6 +864,12 @@ namespace mk
                 return bsl::errc_failure;
             }
 
+            mut_ret = this->add_fail_stacks(mut_tls, mut_page_pool, mut_rpt);
+            if (bsl::unlikely(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::errc_failure;
+            }
+
             mut_ret = this->add_tls_blocks(mut_tls, mut_page_pool, mut_rpt, file);
             if (bsl::unlikely(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
@@ -932,10 +1028,14 @@ namespace mk
 
             if (mut_tls.ext != this) {
                 mut_tls.ext = this;
-                mut_tls.active_extid = m_id.get();
+                mut_tls.active_extid = this->id().get();
             }
             else {
                 bsl::touch();
+            }
+
+            if (ip == m_fail_ip) {
+                return call_ext(ip.get(), mut_tls.ext_fail_sp, arg0.get(), arg1.get());
             }
 
             return call_ext(ip.get(), mut_tls.sp, arg0.get(), arg1.get());
@@ -977,9 +1077,7 @@ namespace mk
                 return ret;
             }
 
-            m_handle = i;
-            m_id = i;
-
+            m_id = ~i;
             return ret;
         }
 
@@ -1004,7 +1102,8 @@ namespace mk
 
             m_main_rpt.release(mut_tls, mut_page_pool);
 
-            m_started = {};
+            m_is_executing_fail = {};
+            m_has_executed_start = {};
             m_handle = {};
             m_id = {};
         }
@@ -1016,11 +1115,10 @@ namespace mk
         ///   @return Returns the ID of this ext_t
         ///
         [[nodiscard]] constexpr auto
-        id() const noexcept -> bsl::safe_u16 const &
+        id() const noexcept -> bsl::safe_u16
         {
             bsl::ensures(m_id.is_valid_and_checked());
-            bsl::ensures(m_id != syscall::BF_INVALID_ID);
-            return m_id;
+            return ~m_id;
         }
 
         /// <!-- description -->
@@ -1125,19 +1223,13 @@ namespace mk
         [[nodiscard]] constexpr auto
         open_handle() noexcept -> bsl::safe_umx
         {
-            if (bsl::unlikely(m_handle != this->id())) {
+            if (bsl::unlikely(this->handle() == this->id())) {
                 bsl::error() << "handle already opened\n" << bsl::here();
                 return bsl::safe_umx::failure();
             }
 
-            /// NOTE:
-            /// - Since the id field cannot be an invalid id, this
-            ///   math will never overflow which is why it is marked
-            ///   as checked.
-            ///
-
-            m_handle = (m_handle + bsl::safe_u16::magic_1()).checked();
-            return bsl::to_umx(m_handle);
+            m_handle = m_id;
+            return bsl::to_umx(this->handle());
         }
 
         /// <!-- description -->
@@ -1146,33 +1238,34 @@ namespace mk
         constexpr void
         close_handle() noexcept
         {
-            m_handle = this->id();
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns true if the extension's handle is open.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return Returns true if the extension's handle is open.
-        ///
-        [[nodiscard]] constexpr auto
-        is_handle_open() const noexcept -> bool
-        {
-            return m_handle != this->id();
+            m_handle = {};
         }
 
         /// <!-- description -->
         ///   @brief Returns true if provided handle is valid
         ///
         /// <!-- inputs/outputs -->
-        ///   @param handle the handle to verify
+        ///   @param hndl the handle to verify
         ///   @return Returns true if provided handle is valid
         ///
         [[nodiscard]] constexpr auto
-        is_handle_valid(bsl::safe_umx const &handle) const noexcept -> bool
+        is_handle_valid(bsl::safe_u16 const &hndl) const noexcept -> bool
         {
-            bsl::expects(handle.is_valid_and_checked());
-            return handle == bsl::to_umx(m_handle);
+            bsl::expects(hndl.is_valid_and_checked());
+            return hndl == this->handle();
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns the ID of this ext_t
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the ID of this ext_t
+        ///
+        [[nodiscard]] constexpr auto
+        handle() const noexcept -> bsl::safe_u16
+        {
+            bsl::ensures(m_handle.is_valid_and_checked());
+            return ~m_handle;
         }
 
         /// <!-- description -->
@@ -1186,7 +1279,21 @@ namespace mk
         [[nodiscard]] constexpr auto
         is_started() const noexcept -> bool
         {
-            return m_started;
+            return m_has_executed_start;
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns true if the extension's main function is
+        ///     executing the fail_entry().
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns true if the extension's main function is
+        ///     executing the fail_entry().
+        ///
+        [[nodiscard]] constexpr auto
+        is_executing_fail() const noexcept -> bool
+        {
+            return m_is_executing_fail;
         }
 
         /// <!-- description -->
@@ -1276,7 +1383,7 @@ namespace mk
             bsl::expects(huge_phys.is_valid_and_checked());
             bsl::expects(huge_phys.is_pos());
 
-            auto const huge_virt{(HYPERVISOR_EXT_PAGE_POOL_ADDR + huge_phys).checked()};
+            auto const huge_virt{(HYPERVISOR_EXT_HUGE_POOL_ADDR + huge_phys).checked()};
             bsl::expects(huge_virt.is_valid_and_checked());
             bsl::expects(huge_virt.is_pos());
 
@@ -1409,7 +1516,13 @@ namespace mk
                 mut_tls, mut_page_pool, page_virt, page_phys, MAP_PAGE_RW)};
 
             if (ret == bsl::errc_already_exists) {
-                return page_virt;
+                bsl::error() << "physical address "     // --
+                             << bsl::hex(page_phys)     // --
+                             << " is already mapped"    // --
+                             << bsl::endl               // --
+                             << bsl::here();            // --
+
+                return bsl::safe_umx::failure();
             }
 
             if (bsl::unlikely(!ret)) {
@@ -1418,65 +1531,6 @@ namespace mk
             }
 
             return page_virt;
-        }
-
-        /// <!-- description -->
-        ///   @brief Maps a page into the direct map portion of the current
-        ///     direct map root page table that is active.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
-        ///   @param mut_page_pool the page_pool_t to use
-        ///   @param page_virt the virtual address to map the physical address too
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] constexpr auto
-        map_page_direct(
-            tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_umx const &page_virt) noexcept
-            -> bsl::errc_type
-        {
-            /// TODO:
-            /// - This should be a config option that is on by default.
-            ///
-
-            bsl::error() << "attempt to map virtual address: "           // --
-                         << bsl::hex(page_virt)                          // --
-                         << " without using bf_vm_op_map_direct"         // --
-                         << " is not supported by this configuration"    // --
-                         << bsl::endl                                    // --
-                         << bsl::here();                                 // --
-
-            return bsl::errc_failure;
-
-            bsl::expects(bsl::to_umx(mut_tls.active_vmid) < m_direct_map_rpts.size());
-            bsl::expects(page_virt.is_valid_and_checked());
-
-            auto *const pmut_direct_map_rpt{
-                m_direct_map_rpts.at_if(bsl::to_idx(mut_tls.active_vmid))};
-            bsl::expects(nullptr != pmut_direct_map_rpt);
-
-            auto const aligned_virt{syscall::bf_page_aligned(page_virt)};
-            auto const aligned_phys{(page_virt - HYPERVISOR_EXT_DIRECT_MAP_ADDR).checked()};
-
-            /// NOTE:
-            /// - The validity of page_virt is performed above which is why
-            ///   the math below is marked as checked.
-            ///
-
-            auto const ret{pmut_direct_map_rpt->map_page(
-                mut_tls, mut_page_pool, aligned_virt, aligned_phys, MAP_PAGE_RW)};
-
-            if (ret == bsl::errc_already_exists) {
-                return bsl::errc_success;
-            }
-
-            if (bsl::unlikely(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
-            return ret;
         }
 
         /// <!-- description -->
@@ -1489,7 +1543,6 @@ namespace mk
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vmid the ID of the VM to unmap page_virt to
         ///   @param page_virt the virtual address to map
-        ///   @param type the type of TLB flush to perform
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -1499,8 +1552,7 @@ namespace mk
             page_pool_t &mut_page_pool,
             intrinsic_t const &intrinsic,
             bsl::safe_u16 const &vmid,
-            bsl::safe_umx const &page_virt,
-            tlb_flush_type_t const type) noexcept -> bsl::errc_type
+            bsl::safe_umx const &page_virt) noexcept -> bsl::errc_type
         {
             constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
             constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_DIRECT_MAP_SIZE).checked()};
@@ -1515,14 +1567,13 @@ namespace mk
             auto *const pmut_direct_map_rpt{m_direct_map_rpts.at_if(bsl::to_idx(vmid))};
             bsl::expects(nullptr != pmut_direct_map_rpt);
 
-            auto const ret{pmut_direct_map_rpt->unmap_page(mut_tls, mut_page_pool, page_virt)};
-
+            auto const ret{pmut_direct_map_rpt->unmap(mut_tls, mut_page_pool, page_virt)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
             }
 
-            intrinsic.tlb_flush(type, page_virt);
+            intrinsic.tlb_flush(page_virt);
             return ret;
         }
 
@@ -1618,7 +1669,7 @@ namespace mk
                 return ret;
             }
 
-            m_started = true;
+            m_has_executed_start = true;
             return ret;
         }
 
@@ -1638,7 +1689,7 @@ namespace mk
         {
             if (bsl::unlikely(m_bootstrap_ip.is_zero())) {
                 bsl::error() << "a bootstrap handler was not registered for ext "    // --
-                             << bsl::hex(m_id)                                       // --
+                             << bsl::hex(this->id())                                 // --
                              << bsl::endl                                            // --
                              << bsl::here();                                         // --
 
@@ -1692,16 +1743,27 @@ namespace mk
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param mut_intrinsic the intrinsic_t to use
+        ///   @param errc the reason for the failure, which is CPU
+        ///     specific. On x86, this is a combination of the exception
+        ///     vector and error code.
+        ///   @param addr contains a faulting address if the fail reason
+        ///     is associated with an error that involves a faulting address (
+        ///     for example like a page fault). Otherwise, the value of this
+        ///     input is undefined.
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
         [[nodiscard]] constexpr auto
-        fail(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept -> bsl::errc_type
+        fail(
+            tls_t &mut_tls,
+            intrinsic_t &mut_intrinsic,
+            bsl::safe_u64 const &errc,
+            bsl::safe_u64 const &addr) noexcept -> bsl::errc_type
         {
-            auto const arg0{bsl::to_umx(mut_tls.active_vsid)};
-            auto const arg1{syscall::BF_STATUS_FAILURE_UNKNOWN};
+            m_is_executing_fail = true;
+            auto const ret{this->execute(mut_tls, mut_intrinsic, m_fail_ip, errc, addr)};
+            m_is_executing_fail = {};
 
-            auto const ret{this->execute(mut_tls, mut_intrinsic, m_fail_ip, arg0, arg1)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return ret;
@@ -1724,7 +1786,7 @@ namespace mk
             }
 
             bsl::print() << bsl::mag << "ext [";
-            bsl::print() << bsl::rst << bsl::hex(m_id);
+            bsl::print() << bsl::rst << bsl::hex(this->id());
             bsl::print() << bsl::mag << "] dump: ";
             bsl::print() << bsl::rst << bsl::endl;
 
@@ -1750,7 +1812,7 @@ namespace mk
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<14s", "started "};
             bsl::print() << bsl::ylw << "| ";
-            if (m_started) {
+            if (m_has_executed_start) {
                 bsl::print() << bsl::grn << bsl::fmt{"^19s", "yes "};
             }
             else {
@@ -1765,7 +1827,7 @@ namespace mk
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<14s", "active "};
             bsl::print() << bsl::ylw << "| ";
-            if (tls.active_extid == m_id) {
+            if (tls.active_extid == this->id()) {
                 bsl::print() << bsl::grn << bsl::fmt{"^19s", "yes "};
             }
             else {

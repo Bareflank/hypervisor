@@ -21,13 +21,17 @@
 
 if(HYPERVISOR_BUILD_LOADER AND NOT HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     add_custom_target(loader_quick
-        COMMAND ${CMAKE_COMMAND} --build . --target loader_clean
-        COMMAND ${CMAKE_COMMAND} --build . --target loader_load
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR} ${CMAKE_COMMAND} --build . --target loader_unload
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR} ${CMAKE_COMMAND} --build . --target loader_clean
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR} ${CMAKE_COMMAND} --build . --target loader_build
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR} ${CMAKE_COMMAND} --build . --target loader_load
         VERBATIM
     )
     add_custom_target(driver_quick
-        COMMAND ${CMAKE_COMMAND} --build . --target driver_clean
-        COMMAND ${CMAKE_COMMAND} --build . --target driver_load
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR} ${CMAKE_COMMAND} --build . --target driver_unload
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR} ${CMAKE_COMMAND} --build . --target driver_clean
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR} ${CMAKE_COMMAND} --build . --target driver_build
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR} ${CMAKE_COMMAND} --build . --target driver_load
         VERBATIM
     )
 endif()
