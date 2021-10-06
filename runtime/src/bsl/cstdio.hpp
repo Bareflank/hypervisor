@@ -26,6 +26,7 @@
 #define BSL_CSTDIO_HPP
 
 #include <bsl/char_type.hpp>
+#include <bsl/cstdint.hpp>
 #include <bsl/cstr_type.hpp>
 #include <bsl/is_constant_evaluated.hpp>
 
@@ -59,9 +60,11 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
     ///
-    extern "C" void
-    bf_debug_op_write_str_impl(bsl::char_type const *const reg0_in) noexcept;    // NOLINT
+    extern "C" void bf_debug_op_write_str_impl(    // NOLINT
+        bsl::char_type const *const reg0_in,
+        bsl::uintmx const reg1_in) noexcept;
 }
 
 namespace bsl
@@ -87,15 +90,16 @@ namespace bsl
     ///
     /// <!-- inputs/outputs -->
     ///   @param str the string to output
+    ///   @param len the total number of bytes to output
     ///
     constexpr void
-    stdio_out_cstr(bsl::cstr_type const str) noexcept
+    stdio_out_cstr(bsl::cstr_type const str, bsl::uintmx const len) noexcept
     {
         if (bsl::is_constant_evaluated()) {
             return;
         }
 
-        syscall::bf_debug_op_write_str_impl(str);
+        syscall::bf_debug_op_write_str_impl(str, len);
     }
 }
 

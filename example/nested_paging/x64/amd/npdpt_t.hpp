@@ -38,8 +38,6 @@ namespace example
     /// @brief defined the expected size of the npdpt_t struct
     constexpr bsl::safe_umx NUM_NPDPT_ENTRIES{bsl::to_umx(512)};
 
-    /// @struct example::npdpt_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the layout of a page-directory-pionter table (npdpt).
     ///

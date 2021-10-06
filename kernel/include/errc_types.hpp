@@ -25,7 +25,6 @@
 #ifndef ERRC_TYPES_HPP
 #define ERRC_TYPES_HPP
 
-#include <bsl/convert.hpp>
 #include <bsl/errc_type.hpp>
 
 namespace mk

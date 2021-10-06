@@ -25,16 +25,10 @@
 #ifndef MOCK_INTRINSIC_HPP
 #define MOCK_INTRINSIC_HPP
 
-#include <basic_tlb_flush_type_t.hpp>
-
-#include <bsl/discard.hpp>
-#include <bsl/expects.hpp>
 #include <bsl/safe_integral.hpp>
 
 namespace lib
 {
-    /// @class lib::intrinsic_t
-    ///
     /// <!-- description -->
     ///   @brief Provides raw access to intrinsics. Instead of using global
     ///     functions, the intrinsics class provides a means for the rest of
@@ -46,27 +40,6 @@ namespace lib
         bsl::safe_u64 m_rpt{};
 
     public:
-        /// <!-- description -->
-        ///   @brief Invalidates TLB entries given a address
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param type determines which type of flush to perform
-        ///   @param addr the address to invalidate
-        ///   @param vmid if set to a valid ID, will flush the address for
-        ///     the given VMID as an ASID.
-        ///
-        static constexpr void
-        tlb_flush(
-            basic_tlb_flush_type_t const type,
-            bsl::safe_u64 const &addr,
-            bsl::safe_u16 const &vmid = {}) noexcept
-        {
-            bsl::discard(type);
-            bsl::expects(addr.is_valid_and_checked());
-            bsl::expects(addr.is_pos());
-            bsl::expects(vmid.is_valid_and_checked());
-        }
-
         /// <!-- description -->
         ///   @brief Sets the RPT pointer
         ///

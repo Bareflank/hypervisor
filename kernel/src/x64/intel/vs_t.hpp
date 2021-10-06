@@ -29,27 +29,31 @@
 #include <bf_constants.hpp>
 #include <bf_reg_t.hpp>
 #include <general_purpose_regs_t.hpp>
+#include <global_descriptor_table_register_t.hpp>
+#include <interrupt_descriptor_table_register_t.hpp>
 #include <intrinsic_t.hpp>
 #include <missing_registers_t.hpp>
 #include <page_pool_t.hpp>
-#include <running_status_t.hpp>
+#include <state_save_t.hpp>
 #include <tls_t.hpp>
 #include <vmcs_t.hpp>
 #include <vmexit_log_t.hpp>
 
-#include <bsl/array.hpp>
+#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
+#include <bsl/ensures.hpp>
 #include <bsl/errc_type.hpp>
-#include <bsl/finally.hpp>
+#include <bsl/expects.hpp>
 #include <bsl/is_same.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/string_view.hpp>
+#include <bsl/touch.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
 {
     /// @brief entry point prototype
-    extern "C" void intrinsic_vmexit(void) noexcept;
+    extern "C" void intrinsic_vmexit(void) noexcept;    // NOLINT
 
     /// @brief defines the VMX_BASIC MSR
     constexpr auto MSR_VMX_BASIC{0x480_u32};
@@ -96,8 +100,6 @@ namespace mk
     /// @brief defines the MSR_VMX_TRUE_PROC2_CTLS MSR
     constexpr auto MSR_VMX_TRUE_PROC2_CTLS{0x0000048B_u32};
 
-    /// @class mk::vs_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the microkernel's notion of a VS.
     ///
@@ -107,8 +109,6 @@ namespace mk
         bsl::safe_u16 m_id{};
         /// @brief stores whether or not this vp_t is allocated.
         allocated_status_t m_allocated{};
-        /// @brief stores the status of the vs_t
-        running_status_t m_status{};
         /// @brief stores the ID of the VM this vs_t is assigned to
         bsl::safe_u16 m_assigned_vmid{};
         /// @brief stores the ID of the VP this vs_t is assigned to
@@ -192,16 +192,12 @@ namespace mk
                 return;
             }
 
-            auto const rowcolor{get_row_color(val)};
-
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<40s", str};
             bsl::print() << bsl::ylw << "| ";
 
             if (val.is_valid()) {
-                if constexpr (bsl::is_same<T, bsl::uint8>::value) {
-                    bsl::print() << rowcolor << "       " << bsl::hex(val) << "        ";
-                }
+                auto const rowcolor{get_row_color(val)};
 
                 if constexpr (bsl::is_same<T, bsl::uint16>::value) {
                     bsl::print() << rowcolor << "      " << bsl::hex(val) << "       ";
@@ -312,14 +308,14 @@ namespace mk
         ///   @return Returns a sanitized version of the pin_ctls
         ///
         [[nodiscard]] constexpr auto
-        sanitize_pin_ctls(bsl::safe_u64 const &val) noexcept -> bsl::safe_u32
+        sanitize_pin_ctls(bsl::safe_u32 const &val) noexcept -> bsl::safe_u32
         {
-            constexpr auto vmcs_pin_ctls_mask{0x28_u64};
+            constexpr auto vmcs_pin_ctls_mask{0x28_u32};
             auto mut_val{val | vmcs_pin_ctls_mask};
 
-            mut_val |= m_vmx_pin_fixed0;
-            mut_val &= m_vmx_pin_fixed1;
-            return bsl::to_u32(mut_val);
+            mut_val |= bsl::to_u32(m_vmx_pin_fixed0);
+            mut_val &= bsl::to_u32(m_vmx_pin_fixed1);
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -330,14 +326,14 @@ namespace mk
         ///   @return Returns a sanitized version of the proc_ctls
         ///
         [[nodiscard]] constexpr auto
-        sanitize_proc_ctls(bsl::safe_u64 const &val) noexcept -> bsl::safe_u32
+        sanitize_proc_ctls(bsl::safe_u32 const &val) noexcept -> bsl::safe_u32
         {
-            constexpr auto vmcs_proc_ctls_mask{0x80000000_u64};
+            constexpr auto vmcs_proc_ctls_mask{0x80000000_u32};
             auto mut_val{val | vmcs_proc_ctls_mask};
 
-            mut_val |= m_vmx_proc_fixed0;
-            mut_val &= m_vmx_proc_fixed1;
-            return bsl::to_u32(mut_val);
+            mut_val |= bsl::to_u32(m_vmx_proc_fixed0);
+            mut_val &= bsl::to_u32(m_vmx_proc_fixed1);
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -348,14 +344,14 @@ namespace mk
         ///   @return Returns a sanitized version of the exit_ctls
         ///
         [[nodiscard]] constexpr auto
-        sanitize_exit_ctls(bsl::safe_u64 const &val) noexcept -> bsl::safe_u32
+        sanitize_exit_ctls(bsl::safe_u32 const &val) noexcept -> bsl::safe_u32
         {
-            constexpr auto vmcs_exit_ctls_mask{0x3C0204_u64};
+            constexpr auto vmcs_exit_ctls_mask{0x3C0204_u32};
             auto mut_val{val | vmcs_exit_ctls_mask};
 
-            mut_val |= m_vmx_exit_fixed0;
-            mut_val &= m_vmx_exit_fixed1;
-            return bsl::to_u32(mut_val);
+            mut_val |= bsl::to_u32(m_vmx_exit_fixed0);
+            mut_val &= bsl::to_u32(m_vmx_exit_fixed1);
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -366,14 +362,14 @@ namespace mk
         ///   @return Returns a sanitized version of the entry_ctls
         ///
         [[nodiscard]] constexpr auto
-        sanitize_entry_ctls(bsl::safe_u64 const &val) noexcept -> bsl::safe_u32
+        sanitize_entry_ctls(bsl::safe_u32 const &val) noexcept -> bsl::safe_u32
         {
-            constexpr auto vmcs_entry_ctls_mask{0xC004_u64};
+            constexpr auto vmcs_entry_ctls_mask{0xC004_u32};
             auto mut_val{val | vmcs_entry_ctls_mask};
 
-            mut_val |= m_vmx_entry_fixed0;
-            mut_val &= m_vmx_entry_fixed1;
-            return bsl::to_u32(mut_val);
+            mut_val |= bsl::to_u32(m_vmx_entry_fixed0);
+            mut_val &= bsl::to_u32(m_vmx_entry_fixed1);
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -384,16 +380,16 @@ namespace mk
         ///   @return Returns a sanitized version of the proc2_ctls
         ///
         [[nodiscard]] constexpr auto
-        sanitize_proc2_ctls(bsl::safe_u64 const &val) noexcept -> bsl::safe_u32
+        sanitize_proc2_ctls(bsl::safe_u32 const &val) noexcept -> bsl::safe_u32
         {
-            constexpr auto vmcs_proc2_ctls_mask{0x0_u64};
+            constexpr auto vmcs_proc2_ctls_mask{0x0_u32};
             auto mut_val{val | vmcs_proc2_ctls_mask};
 
-            mut_val |= m_vmx_proc2_fixed0;
-            mut_val &= m_vmx_proc2_fixed1;
+            mut_val |= bsl::to_u32(m_vmx_proc2_fixed0);
+            mut_val &= bsl::to_u32(m_vmx_proc2_fixed1);
 
             constexpr auto pg_pe{0x80000001_u64};
-            constexpr auto unrestricted_guest_mode{0x00000080_u64};
+            constexpr auto unrestricted_guest_mode{0x00000080_u32};
             if ((mut_val & unrestricted_guest_mode).is_pos()) {
                 m_vmx_cr0_fixed0 &= ~pg_pe;
             }
@@ -401,7 +397,7 @@ namespace mk
                 m_vmx_cr0_fixed0 |= pg_pe;
             }
 
-            return bsl::to_u32(mut_val);
+            return mut_val;
         }
 
         /// <!-- description -->
@@ -464,7 +460,6 @@ namespace mk
         ensure_this_vs_is_loaded(tls_t &mut_tls, intrinsic_t const &intrinsic) const noexcept
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
-            bsl::expects(running_status_t::running != m_status);
             bsl::expects(mut_tls.ppid == this->assigned_pp());
 
             if (this->id() == mut_tls.loaded_vsid) {
@@ -669,7 +664,6 @@ namespace mk
         {
             bsl::expects(this->id() != syscall::BF_INVALID_ID);
             bsl::expects(allocated_status_t::deallocated == m_allocated);
-            bsl::expects(running_status_t::initial == m_status);
 
             bsl::expects(vmid.is_valid_and_checked());
             bsl::expects(vmid != syscall::BF_INVALID_ID);
@@ -706,20 +700,23 @@ namespace mk
         constexpr void
         deallocate(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept
         {
-            bsl::expects(running_status_t::running != m_status);
             bsl::expects(this->is_active().is_invalid());
 
             m_missing_registers = {};
             m_gprs = {};
 
-            mut_page_pool.deallocate(mut_tls, m_vmcs);
-            m_vmcs = {};
-            m_vmcs_phys = {};
+            if (nullptr != m_vmcs) {
+                mut_page_pool.deallocate(mut_tls, m_vmcs);
+                m_vmcs = {};
+                m_vmcs_phys = {};
+            }
+            else {
+                bsl::touch();
+            }
 
             m_assigned_ppid = {};
             m_assigned_vpid = {};
             m_assigned_vmid = {};
-            m_status = running_status_t::initial;
             m_allocated = allocated_status_t::deallocated;
         }
 
@@ -758,7 +755,6 @@ namespace mk
         set_active(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
-            bsl::expects(running_status_t::running != m_status);
             bsl::expects(syscall::BF_INVALID_ID == mut_tls.active_vsid);
 
             mut_intrinsic.set_tls_reg(syscall::TLS_OFFSET_RAX, bsl::to_u64(m_gprs.rax));
@@ -792,7 +788,6 @@ namespace mk
         set_inactive(tls_t &mut_tls, intrinsic_t const &intrinsic) noexcept
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
-            bsl::expects(running_status_t::running != m_status);
             bsl::expects(this->id() == mut_tls.active_vsid);
 
             m_gprs.rax = intrinsic.tls_reg(syscall::TLS_OFFSET_RAX).get();
@@ -855,25 +850,16 @@ namespace mk
         ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsic_t to use
         ///   @param ppid the ID of the PP to migrate to
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] constexpr auto
+        constexpr void
         migrate(tls_t &mut_tls, intrinsic_t const &intrinsic, bsl::safe_u16 const &ppid) noexcept
-            -> bsl::errc_type
         {
             bsl::expects(allocated_status_t::allocated == m_allocated);
             bsl::expects(ppid.is_valid_and_checked());
             bsl::expects(ppid != syscall::BF_INVALID_ID);
 
-            auto const ret{this->clear(mut_tls, intrinsic)};
-            if (bsl::unlikely(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return ret;
-            }
-
+            this->clear(mut_tls, intrinsic);
             m_assigned_ppid = ~ppid;
-            return ret;
         }
 
         /// <!-- description -->
@@ -1348,7 +1334,6 @@ namespace mk
 
             switch (reg) {
                 case syscall::bf_reg_t::bf_reg_t_unsupported: {
-                    bsl::error() << "unsupported bf_reg_t\n" << bsl::here();
                     break;
                 }
 
@@ -1694,8 +1679,8 @@ namespace mk
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_tls_multiplier: {
-                    mut_ret = intrinsic.vmrd64(VMCS_TLS_MULTIPLIER, mut_val.data());
+                case syscall::bf_reg_t::bf_reg_t_tsc_multiplier: {
+                    mut_ret = intrinsic.vmrd64(VMCS_TSC_MULTIPLIER, mut_val.data());
                     break;
                 }
 
@@ -2203,10 +2188,22 @@ namespace mk
                     return bsl::to_u64(m_missing_registers.guest_xcr0);
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_invalid: {
-                    bsl::error() << "invalid bf_reg_t\n" << bsl::here();
+                case syscall::bf_reg_t::bf_reg_t_invalid:
+                    [[fallthrough]];
+                default: {
                     break;
                 }
+            }
+
+            if (bsl::unlikely(!mut_ret)) {
+                bsl::error() << "vs "                                                     // --
+                             << bsl::hex(this->id())                                      // --
+                             << " attempted to read from unknown/unsupported regiter "    // --
+                             << static_cast<bsl::uint64>(reg)                             // --
+                             << bsl::endl                                                 // --
+                             << bsl::here();                                              // --
+
+                return bsl::safe_umx::failure();
             }
 
             return mut_val;
@@ -2238,7 +2235,6 @@ namespace mk
 
             switch (reg) {
                 case syscall::bf_reg_t::bf_reg_t_unsupported: {
-                    bsl::error() << "unsupported bf_reg_t\n" << bsl::here();
                     break;
                 }
 
@@ -2428,695 +2424,1050 @@ namespace mk
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_virtual_processor_identifier: {
-                    mut_ret =
-                        mut_intrinsic.vmwr16(VMCS_VIRTUAL_PROCESSOR_IDENTIFIER, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr16(VMCS_VIRTUAL_PROCESSOR_IDENTIFIER, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_posted_interrupt_notification_vector: {
-                    mut_ret = mut_intrinsic.vmwr16(
-                        VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret =
+                        mut_intrinsic.vmwr16(VMCS_POSTED_INTERRUPT_NOTIFICATION_VECTOR, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_eptp_index: {
-                    mut_ret = mut_intrinsic.vmwr16(VMCS_EPTP_INDEX, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr16(VMCS_EPTP_INDEX, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_selector: {
-                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_ES_SELECTOR, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_ES_SELECTOR, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_selector: {
-                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_CS_SELECTOR, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_CS_SELECTOR, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_selector: {
-                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_SS_SELECTOR, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_SS_SELECTOR, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_selector: {
-                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_DS_SELECTOR, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_DS_SELECTOR, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_selector: {
-                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_FS_SELECTOR, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_FS_SELECTOR, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_selector: {
-                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_GS_SELECTOR, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_GS_SELECTOR, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_selector: {
-                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_LDTR_SELECTOR, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_LDTR_SELECTOR, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_selector: {
-                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_TR_SELECTOR, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_TR_SELECTOR, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_interrupt_status: {
-                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_INTERRUPT_STATUS, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr16(VMCS_GUEST_INTERRUPT_STATUS, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pml_index: {
-                    mut_ret = mut_intrinsic.vmwr16(VMCS_PML_INDEX, bsl::to_u16(val));
+                    auto const val16{bsl::to_u16(val)};
+                    if (bsl::unlikely(val16.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr16(VMCS_PML_INDEX, val16);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_address_of_io_bitmap_a: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_ADDRESS_OF_IO_BITMAP_A, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_ADDRESS_OF_IO_BITMAP_A, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_address_of_io_bitmap_b: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_ADDRESS_OF_IO_BITMAP_B, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_ADDRESS_OF_IO_BITMAP_B, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_address_of_msr_bitmaps: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_ADDRESS_OF_MSR_BITMAPS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_ADDRESS_OF_MSR_BITMAPS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmexit_msr_store_address: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_VMEXIT_MSR_STORE_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_VMEXIT_MSR_STORE_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmexit_msr_load_address: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_VMEXIT_MSR_LOAD_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_VMEXIT_MSR_LOAD_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmentry_msr_load_address: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_VMENTRY_MSR_LOAD_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_VMENTRY_MSR_LOAD_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_executive_vmcs_pointer: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_EXECUTIVE_VMCS_POINTER, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_EXECUTIVE_VMCS_POINTER, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pml_address: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_PML_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_PML_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tsc_offset: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_TSC_OFFSET, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_TSC_OFFSET, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_virtual_apic_address: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_VIRTUAL_APIC_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_VIRTUAL_APIC_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_apic_access_address: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_APIC_ACCESS_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_APIC_ACCESS_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_posted_interrupt_descriptor_address: {
-                    mut_ret = mut_intrinsic.vmwr64(
-                        VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vm_function_controls: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_VM_FUNCTION_CONTROLS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_VM_FUNCTION_CONTROLS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ept_pointer: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_EPT_POINTER, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_EPT_POINTER, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_eoi_exit_bitmap0: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_EOI_EXIT_BITMAP0, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_EOI_EXIT_BITMAP0, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_eoi_exit_bitmap1: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_EOI_EXIT_BITMAP1, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_EOI_EXIT_BITMAP1, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_eoi_exit_bitmap2: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_EOI_EXIT_BITMAP2, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_EOI_EXIT_BITMAP2, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_eoi_exit_bitmap3: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_EOI_EXIT_BITMAP3, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_EOI_EXIT_BITMAP3, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_eptp_list_address: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_EPTP_LIST_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_EPTP_LIST_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmread_bitmap_address: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_VMREAD_BITMAP_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_VMREAD_BITMAP_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmwrite_bitmap_address: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_VMWRITE_BITMAP_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_VMWRITE_BITMAP_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_virt_exception_information_address: {
-                    mut_ret = mut_intrinsic.vmwr64(
-                        VMCS_VIRT_EXCEPTION_INFORMATION_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_VIRT_EXCEPTION_INFORMATION_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_xss_exiting_bitmap: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_XSS_EXITING_BITMAP, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_XSS_EXITING_BITMAP, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_encls_exiting_bitmap: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_ENCLS_EXITING_BITMAP, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_ENCLS_EXITING_BITMAP, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_sub_page_permission_table_pointer: {
-                    mut_ret = mut_intrinsic.vmwr64(
-                        VMCS_SUB_PAGE_PERMISSION_TABLE_POINTER, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_SUB_PAGE_PERMISSION_TABLE_POINTER, val);
                     break;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_tls_multiplier: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_TLS_MULTIPLIER, bsl::to_u64(val));
+                case syscall::bf_reg_t::bf_reg_t_tsc_multiplier: {
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_TSC_MULTIPLIER, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_physical_address: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PHYSICAL_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PHYSICAL_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmcs_link_pointer: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_VMCS_LINK_POINTER, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_VMCS_LINK_POINTER, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_debugctl: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_DEBUGCTL, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_DEBUGCTL, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pat: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PAT, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PAT, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_efer: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_EFER, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_EFER, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_perf_global_ctrl: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PERF_GLOBAL_CTRL, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PERF_GLOBAL_CTRL, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pdpte0: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PDPTE0, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PDPTE0, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pdpte1: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PDPTE1, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PDPTE1, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pdpte2: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PDPTE2, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PDPTE2, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pdpte3: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PDPTE3, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PDPTE3, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_bndcfgs: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_BNDCFGS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_BNDCFGS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rtit_ctl: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_RTIT_CTL, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_RTIT_CTL, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pin_based_vm_execution_ctls: {
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
                     mut_ret = mut_intrinsic.vmwr32(
-                        VMCS_PIN_BASED_VM_EXECUTION_CTLS, sanitize_pin_ctls(val));
+                        VMCS_PIN_BASED_VM_EXECUTION_CTLS, sanitize_pin_ctls(val32));
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls: {
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
                     mut_ret = mut_intrinsic.vmwr32(
-                        VMCS_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS, sanitize_proc_ctls(val));
+                        VMCS_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS, sanitize_proc_ctls(val32));
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_exception_bitmap: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_EXCEPTION_BITMAP, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_EXCEPTION_BITMAP, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_page_fault_error_code_mask: {
-                    mut_ret =
-                        mut_intrinsic.vmwr32(VMCS_PAGE_FAULT_ERROR_CODE_MASK, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_PAGE_FAULT_ERROR_CODE_MASK, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_page_fault_error_code_match: {
-                    mut_ret =
-                        mut_intrinsic.vmwr32(VMCS_PAGE_FAULT_ERROR_CODE_MATCH, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_PAGE_FAULT_ERROR_CODE_MATCH, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr3_target_count: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_CR3_TARGET_COUNT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_CR3_TARGET_COUNT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmexit_ctls: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMEXIT_CTLS, sanitize_exit_ctls(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMEXIT_CTLS, sanitize_exit_ctls(val32));
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmexit_msr_store_count: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMEXIT_MSR_STORE_COUNT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMEXIT_MSR_STORE_COUNT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmexit_msr_load_count: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMEXIT_MSR_LOAD_COUNT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMEXIT_MSR_LOAD_COUNT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmentry_ctls: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMENTRY_CTLS, sanitize_entry_ctls(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMENTRY_CTLS, sanitize_entry_ctls(val32));
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmentry_msr_load_count: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMENTRY_MSR_LOAD_COUNT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMENTRY_MSR_LOAD_COUNT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmentry_interrupt_information_field: {
-                    mut_ret = mut_intrinsic.vmwr32(
-                        VMCS_VMENTRY_INTERRUPT_INFORMATION_FIELD, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMENTRY_INTERRUPT_INFORMATION_FIELD, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmentry_exception_error_code: {
-                    mut_ret =
-                        mut_intrinsic.vmwr32(VMCS_VMENTRY_EXCEPTION_ERROR_CODE, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMENTRY_EXCEPTION_ERROR_CODE, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmentry_instruction_length: {
-                    mut_ret =
-                        mut_intrinsic.vmwr32(VMCS_VMENTRY_INSTRUCTION_LENGTH, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMENTRY_INSTRUCTION_LENGTH, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tpr_threshold: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_TPR_THRESHOLD, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_TPR_THRESHOLD, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_secondary_proc_based_vm_execution_ctls: {
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
                     mut_ret = mut_intrinsic.vmwr32(
-                        VMCS_SECONDARY_PROC_BASED_VM_EXECUTION_CTLS, sanitize_proc2_ctls(val));
+                        VMCS_SECONDARY_PROC_BASED_VM_EXECUTION_CTLS, sanitize_proc2_ctls(val32));
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ple_gap: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_PLE_GAP, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_PLE_GAP, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ple_window: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_PLE_WINDOW, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_PLE_WINDOW, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vm_instruction_error: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_VM_INSTRUCTION_ERROR, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VM_INSTRUCTION_ERROR, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_exit_reason: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_EXIT_REASON, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_EXIT_REASON, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmexit_interruption_information: {
-                    mut_ret = mut_intrinsic.vmwr32(
-                        VMCS_VMEXIT_INTERRUPTION_INFORMATION, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMEXIT_INTERRUPTION_INFORMATION, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmexit_interruption_error_code: {
-                    mut_ret =
-                        mut_intrinsic.vmwr32(VMCS_VMEXIT_INTERRUPTION_ERROR_CODE, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMEXIT_INTERRUPTION_ERROR_CODE, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idt_vectoring_information_field: {
-                    mut_ret = mut_intrinsic.vmwr32(
-                        VMCS_IDT_VECTORING_INFORMATION_FIELD, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_IDT_VECTORING_INFORMATION_FIELD, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idt_vectoring_error_code: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_IDT_VECTORING_ERROR_CODE, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_IDT_VECTORING_ERROR_CODE, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmexit_instruction_length: {
-                    mut_ret =
-                        mut_intrinsic.vmwr32(VMCS_VMEXIT_INSTRUCTION_LENGTH, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMEXIT_INSTRUCTION_LENGTH, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmexit_instruction_information: {
-                    mut_ret =
-                        mut_intrinsic.vmwr32(VMCS_VMEXIT_INSTRUCTION_INFORMATION, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMEXIT_INSTRUCTION_INFORMATION, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_limit: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_ES_LIMIT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_ES_LIMIT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_limit: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_CS_LIMIT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_CS_LIMIT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_limit: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_SS_LIMIT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_SS_LIMIT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_limit: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_DS_LIMIT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_DS_LIMIT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_limit: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_FS_LIMIT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_FS_LIMIT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_limit: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_GS_LIMIT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_GS_LIMIT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_limit: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_LDTR_LIMIT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_LDTR_LIMIT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_limit: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_TR_LIMIT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_TR_LIMIT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gdtr_limit: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_GDTR_LIMIT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_GDTR_LIMIT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idtr_limit: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_IDTR_LIMIT, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_IDTR_LIMIT, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_attrib: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_ES_ACCESS_RIGHTS, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_ES_ACCESS_RIGHTS, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_attrib: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_CS_ACCESS_RIGHTS, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_CS_ACCESS_RIGHTS, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_attrib: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_SS_ACCESS_RIGHTS, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_SS_ACCESS_RIGHTS, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_attrib: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_DS_ACCESS_RIGHTS, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_DS_ACCESS_RIGHTS, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_attrib: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_FS_ACCESS_RIGHTS, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_FS_ACCESS_RIGHTS, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_attrib: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_GS_ACCESS_RIGHTS, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_GS_ACCESS_RIGHTS, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_attrib: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_LDTR_ACCESS_RIGHTS, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_LDTR_ACCESS_RIGHTS, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_attrib: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_TR_ACCESS_RIGHTS, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_TR_ACCESS_RIGHTS, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_interruptibility_state: {
-                    mut_ret =
-                        mut_intrinsic.vmwr32(VMCS_GUEST_INTERRUPTIBILITY_STATE, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_INTERRUPTIBILITY_STATE, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_activity_state: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_ACTIVITY_STATE, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_ACTIVITY_STATE, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_smbase: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_SMBASE, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_SMBASE, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_sysenter_cs: {
-                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_SYSENTER_CS, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_GUEST_SYSENTER_CS, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_vmx_preemption_timer_value: {
-                    mut_ret =
-                        mut_intrinsic.vmwr32(VMCS_VMX_PREEMPTION_TIMER_VALUE, bsl::to_u32(val));
+                    auto const val32{bsl::to_u32(val)};
+                    if (bsl::unlikely(val32.is_invalid())) {
+                        mut_ret = bsl::errc_narrow_overflow;
+                        break;
+                    }
+
+                    mut_ret = mut_intrinsic.vmwr32(VMCS_VMX_PREEMPTION_TIMER_VALUE, val32);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr0_guest_host_mask: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR0_GUEST_HOST_MASK, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR0_GUEST_HOST_MASK, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr4_guest_host_mask: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR4_GUEST_HOST_MASK, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR4_GUEST_HOST_MASK, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr0_read_shadow: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR0_READ_SHADOW, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR0_READ_SHADOW, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr4_read_shadow: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR4_READ_SHADOW, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR4_READ_SHADOW, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr3_target_value0: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR3_TARGET_VALUE0, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR3_TARGET_VALUE0, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr3_target_value1: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR3_TARGET_VALUE1, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR3_TARGET_VALUE1, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr3_target_value2: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR3_TARGET_VALUE2, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR3_TARGET_VALUE2, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr3_target_value3: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR3_TARGET_VALUE3, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_CR3_TARGET_VALUE3, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_exit_qualification: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_EXIT_QUALIFICATION, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_EXIT_QUALIFICATION, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_io_rcx: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_IO_RCX, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_IO_RCX, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_io_rsi: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_IO_RSI, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_IO_RSI, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_io_rdi: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_IO_RDI, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_IO_RDI, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_io_rip: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_IO_RIP, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_IO_RIP, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_linear_address: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_LINEAR_ADDRESS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_LINEAR_ADDRESS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr0: {
-                    auto const sanitized{this->sanitize_cr0(bsl::to_u64(val))};
+                    auto const sanitized{this->sanitize_cr0(val)};
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CR0, sanitized);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr3: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CR3, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CR3, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cr4: {
-                    auto const sanitized{this->sanitize_cr4(bsl::to_u64(val))};
+                    auto const sanitized{this->sanitize_cr4(val)};
                     mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CR4, sanitized);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_es_base: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_ES_BASE, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_ES_BASE, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_cs_base: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CS_BASE, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_CS_BASE, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ss_base: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_SS_BASE, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_SS_BASE, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ds_base: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_DS_BASE, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_DS_BASE, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_fs_base: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_FS_BASE, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_FS_BASE, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gs_base: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_GS_BASE, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_GS_BASE, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_ldtr_base: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_LDTR_BASE, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_LDTR_BASE, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_tr_base: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_TR_BASE, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_TR_BASE, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_gdtr_base: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_GDTR_BASE, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_GDTR_BASE, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_idtr_base: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IDTR_BASE, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_IDTR_BASE, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_dr7: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_DR7, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_DR7, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rsp: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_RSP, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_RSP, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rip: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_RIP, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_RIP, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_rflags: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_RFLAGS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_RFLAGS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_pending_debug_exceptions: {
-                    mut_ret =
-                        mut_intrinsic.vmwr64(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_sysenter_esp: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_SYSENTER_ESP, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_SYSENTER_ESP, val);
                     break;
                 }
 
                 case syscall::bf_reg_t::bf_reg_t_sysenter_eip: {
-                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_SYSENTER_EIP, bsl::to_u64(val));
+                    mut_ret = mut_intrinsic.vmwr64(VMCS_GUEST_SYSENTER_EIP, val);
                     break;
                 }
 
@@ -3150,13 +3501,39 @@ namespace mk
                     return bsl::errc_success;
                 }
 
-                case syscall::bf_reg_t::bf_reg_t_invalid: {
-                    bsl::error() << "invalid bf_reg_t\n" << bsl::here();
+                case syscall::bf_reg_t::bf_reg_t_invalid:
+                    [[fallthrough]];
+                default: {
                     break;
                 }
             }
 
-            return mut_ret;
+            if (bsl::errc_narrow_overflow == mut_ret) {
+                bsl::error() << "vs "                                        // --
+                             << bsl::hex(this->id())                         // --
+                             << " attempted to write to regiter "            // --
+                             << static_cast<bsl::uint64>(reg)                // --
+                             << " with val "                                 // --
+                             << bsl::hex(val)                                // --
+                             << " which would have resulted in data loss"    // --
+                             << bsl::endl                                    // --
+                             << bsl::here();                                 // --
+
+                return bsl::errc_narrow_overflow;
+            }
+
+            if (bsl::unlikely(!mut_ret)) {
+                bsl::error() << "vs "                                                    // --
+                             << bsl::hex(this->id())                                     // --
+                             << " attempted to write to unknown/unsupported regiter "    // --
+                             << static_cast<bsl::uint64>(reg)                            // --
+                             << bsl::endl                                                // --
+                             << bsl::here();                                             // --
+
+                return bsl::errc_failure;
+            }
+
+            return bsl::errc_success;
         }
 
         /// <!-- description -->
@@ -3176,10 +3553,7 @@ namespace mk
             -> bsl::safe_umx
         {
             this->ensure_this_vs_is_loaded(mut_tls, mut_intrinsic);
-
-            m_status = running_status_t::running;
             auto const exit_reason{mut_intrinsic.vmrun(&m_missing_registers)};
-            m_status = running_status_t::handling_vmexit;
 
             if constexpr (BSL_DEBUG_LEVEL >= bsl::VV) {
                 mut_log.add(
@@ -3243,24 +3617,12 @@ namespace mk
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsic_t to use
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] constexpr auto
-        clear(tls_t &mut_tls, intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
+        constexpr void
+        clear(tls_t &mut_tls, intrinsic_t const &intrinsic) noexcept
         {
-            bsl::discard(intrinsic);
             bsl::expects(allocated_status_t::allocated == m_allocated);
-
-            if (bsl::unlikely(running_status_t::running == m_status)) {
-                bsl::error() << "vs "                                                 // --
-                             << bsl::hex(this->id())                                  // --
-                             << " is still running and cannot be cleared/migrated"    // --
-                             << bsl::endl                                             // --
-                             << bsl::here();                                          // --
-
-                return bsl::errc_failure;
-            }
+            bsl::expects(this->is_active().is_invalid());
 
             bsl::expects(intrinsic.vmcl(&m_vmcs_phys));
             m_missing_registers.launched = {};
@@ -3271,8 +3633,6 @@ namespace mk
             else {
                 bsl::touch();
             }
-
-            return bsl::errc_success;
         }
 
         /// <!-- description -->
@@ -3324,8 +3684,6 @@ namespace mk
                 return;
             }
 
-            this->ensure_this_vs_is_loaded(mut_tls, intrinsic);
-
             // clang-format off
 
             bsl::print() << bsl::mag << "vs [";
@@ -3360,6 +3718,21 @@ namespace mk
             }
             else {
                 bsl::print() << bsl::red << bsl::fmt{"^19s", "no "};
+            }
+            bsl::print() << bsl::ylw << "| ";
+            bsl::print() << bsl::rst << bsl::endl;
+
+            /// Assigned VM
+            ///
+
+            bsl::print() << bsl::ylw << "| ";
+            bsl::print() << bsl::rst << bsl::fmt{"<40s", "assigned vm "};
+            bsl::print() << bsl::ylw << "| ";
+            if (this->assigned_vm() != syscall::BF_INVALID_ID) {
+                bsl::print() << bsl::grn << "      " << bsl::hex(this->assigned_vm()) << "       ";
+            }
+            else {
+                bsl::print() << bsl::red << "      " << bsl::hex(this->assigned_vm()) << "       ";
             }
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::endl;
@@ -3403,6 +3776,8 @@ namespace mk
             if (!this->is_allocated()) {
                 return;
             }
+
+            this->ensure_this_vs_is_loaded(mut_tls, intrinsic);
 
             if (mut_tls.active_vsid == this->id()) {
                 this->dump_field("rax ", intrinsic.tls_reg(syscall::TLS_OFFSET_RAX));
@@ -3497,7 +3872,7 @@ namespace mk
             this->dump_field("xss_exiting_bitmap ", intrinsic.vmrd64(VMCS_XSS_EXITING_BITMAP));
             this->dump_field("encls_exiting_bitmap ", intrinsic.vmrd64(VMCS_ENCLS_EXITING_BITMAP));
             this->dump_field("sub_page_permission_table_pointer ", intrinsic.vmrd64(VMCS_SUB_PAGE_PERMISSION_TABLE_POINTER));
-            this->dump_field("tls_multiplier ", intrinsic.vmrd64(VMCS_TLS_MULTIPLIER));
+            this->dump_field("tls_multiplier ", intrinsic.vmrd64(VMCS_TSC_MULTIPLIER));
 
             /// 64 Bit Read-Only Fields
             ///

@@ -27,8 +27,6 @@
 
 namespace example
 {
-    /// @class example::intrinsic_t
-    ///
     /// <!-- description -->
     ///   @brief Provides raw access to intrinsics used for unit testing.
     ///     Specifically, this version only contains portions that are common

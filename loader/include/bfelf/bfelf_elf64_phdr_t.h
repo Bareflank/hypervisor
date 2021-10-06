@@ -70,8 +70,6 @@
 #define bfelf_pf_maskproc ((uint32_t)0xFF000000U)
 
 /**
- * @struct bfelf_elf64_phdr_t
- *
  * <!-- description -->
  *   @brief In executable and shared object files, sections are grouped
  *     into segments for loading. The program header table contains a

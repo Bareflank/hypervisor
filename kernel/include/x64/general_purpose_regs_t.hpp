@@ -31,8 +31,6 @@
 
 namespace mk
 {
-    /// @struct mk::general_purpose_regs_t
-    ///
     /// <!-- description -->
     ///   @brief Stores the state of the general purpose registers. Note
     ///     that this storage is only used when swapping from one VS to

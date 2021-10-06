@@ -32,8 +32,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct l2te_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a level-2 table entry (L2TE).
  */

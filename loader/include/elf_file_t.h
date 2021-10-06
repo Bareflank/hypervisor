@@ -33,8 +33,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct elf_file_t
- *
  * <!-- description -->
  *   @brief Defines the address and size of an ELF file.
  */

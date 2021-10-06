@@ -451,8 +451,10 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
     ///
-    extern "C" void bf_debug_op_write_str_impl(bsl::char_type const *const reg0_in) noexcept;
+    extern "C" void bf_debug_op_write_str_impl(
+        bsl::char_type const *const reg0_in, bsl::uintmx const reg1_in) noexcept;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_debug_op_dump_ext.
@@ -884,18 +886,6 @@ namespace syscall
         bsl::uint64 *const pmut_reg1_out) noexcept -> bsl::uint64;
 
     /// <!-- description -->
-    ///   @brief Implements the ABI for bf_mem_op_free_page.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param pmut_reg1_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto
-    bf_mem_op_free_page_impl(bsl::uint64 const reg0_in, void *const pmut_reg1_in) noexcept
-        -> bsl::uint64;
-
-    /// <!-- description -->
     ///   @brief Implements the ABI for bf_mem_op_alloc_huge.
     ///
     /// <!-- inputs/outputs -->
@@ -910,18 +900,6 @@ namespace syscall
         bsl::uint64 const reg1_in,
         void **const pmut_reg0_out,
         bsl::uint64 *const pmut_reg1_out) noexcept -> bsl::uint64;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_mem_op_free_huge.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param pmut_reg1_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto
-    bf_mem_op_free_huge_impl(bsl::uint64 const reg0_in, void *const pmut_reg1_in) noexcept
-        -> bsl::uint64;
 }
 
 #endif

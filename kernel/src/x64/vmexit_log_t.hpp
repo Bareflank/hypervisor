@@ -26,17 +26,19 @@
 #define VMEXIT_LOG_T_HPP
 
 #include <vmexit_log_pp_t.hpp>
+#include <vmexit_log_record_t.hpp>
 
 #include <bsl/array.hpp>
+#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
+#include <bsl/expects.hpp>
+#include <bsl/safe_idx.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/string_view.hpp>
-#include <bsl/unlikely.hpp>
+#include <bsl/touch.hpp>
 
 namespace mk
 {
-    /// @class mk::vmexit_log_t
-    ///
     /// <!-- description -->
     ///   @brief Stores a log of all VMExits that occur. Each PP has one log
     ///     that is shared between all of the VSs so that you get a consistent
@@ -78,23 +80,17 @@ namespace mk
         constexpr void
         add(bsl::safe_u16 const &ppid, vmexit_log_record_t const &rec) noexcept
         {
-            if constexpr (!bsl::debug_level_is_at_least_vv()) {
-                return;
-            }
-
             auto *const pmut_pp_log{m_vmexit_logs.at_if(bsl::to_idx(ppid))};
-            if (bsl::unlikely(nullptr == pmut_pp_log)) {
-                return;
-            }
+            bsl::expects(nullptr != pmut_pp_log);
 
             *pmut_pp_log->log.at_if(pmut_pp_log->crsr) = rec;
 
             ++pmut_pp_log->crsr;
-            if (pmut_pp_log->crsr < pmut_pp_log->log.size()) {
-                bsl::touch();
+            if (pmut_pp_log->crsr >= pmut_pp_log->log.size()) {
+                pmut_pp_log->crsr = {};
             }
             else {
-                pmut_pp_log->crsr = {};
+                bsl::touch();
             }
         }
 
@@ -107,19 +103,8 @@ namespace mk
         constexpr void
         dump(bsl::safe_u16 const &ppid) const noexcept
         {
-            if constexpr (!bsl::debug_level_is_at_least_vv()) {
-                return;
-            }
-
             auto const *const pp_log{m_vmexit_logs.at_if(bsl::to_idx(ppid))};
-            if (bsl::unlikely(nullptr == pp_log)) {
-                bsl::error() << "invalid ppid "    // --
-                             << bsl::hex(ppid)     // --
-                             << bsl::endl          // --
-                             << bsl::here();       // --
-
-                return;
-            }
+            bsl::expects(nullptr != pp_log);
 
             bsl::print() << bsl::mag << "vmexit log for pp [";
             bsl::print() << bsl::rst << bsl::hex(ppid);
@@ -134,7 +119,6 @@ namespace mk
             bsl::safe_idx mut_crsr{pp_log->crsr};
             for (bsl::safe_idx mut_i{}; mut_i < pp_log->log.size(); ++mut_i) {
                 auto const *const rec{pp_log->log.at_if(mut_crsr)};
-
                 if (rec->rip.is_pos()) {
                     bsl::print() << bsl::ylw << "| ";
                     bsl::print() << bsl::blu << "VM:";
@@ -207,11 +191,11 @@ namespace mk
                 }
 
                 ++mut_crsr;
-                if (mut_crsr < pp_log->log.size()) {
-                    bsl::touch();
+                if (mut_crsr >= pp_log->log.size()) {
+                    mut_crsr = {};
                 }
                 else {
-                    mut_crsr = {};
+                    bsl::touch();
                 }
             }
         }

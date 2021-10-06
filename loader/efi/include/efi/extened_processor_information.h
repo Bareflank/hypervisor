@@ -33,8 +33,6 @@
 #define CPU_V2_EXTENDED_TOPOLOGY BIT24
 
 /**
- * @struct EXTENDED_PROCESSOR_INFORMATION
- *
  * <!-- description -->
  *   @brief Defines the layout of the EXTENDED_PROCESSOR_INFORMATION struct:
  *     https://uefi.org/sites/default/files/resources/PI_Spec_1_7_A_final_May1.pdf

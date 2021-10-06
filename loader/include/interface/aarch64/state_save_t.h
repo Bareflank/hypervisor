@@ -32,8 +32,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct state_save_t
- *
  * <!-- description -->
  *   @brief Stores the registers and processor state that is used by the
  *     microkernel that must be restored in the event of an error or the

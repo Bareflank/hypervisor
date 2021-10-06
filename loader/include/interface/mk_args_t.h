@@ -37,8 +37,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct mk_args_t
- *
  * <!-- description -->
  *   @brief Defines the arguments sent to the _start function of the
  *     microkernel. The microkernel will have it's own C++ version of this

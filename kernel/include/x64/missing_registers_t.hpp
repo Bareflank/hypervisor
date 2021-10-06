@@ -31,8 +31,6 @@
 
 namespace mk
 {
-    /// @struct mk::missing_registers_t
-    ///
     /// <!-- description -->
     ///   @brief Stores the state for the VS that the VMCB/VMCS cannot like
     ///     the general purpose registers, debug registers, control registers,

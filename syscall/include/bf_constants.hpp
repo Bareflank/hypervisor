@@ -473,12 +473,8 @@ namespace syscall
 
     /// @brief Defines the index for bf_mem_op_alloc_page
     constexpr auto BF_MEM_OP_ALLOC_PAGE_IDX_VAL{0x0000000000000000_u64};
-    /// @brief Defines the index for bf_mem_op_free_page
-    constexpr auto BF_MEM_OP_FREE_PAGE_IDX_VAL{0x0000000000000001_u64};
     /// @brief Defines the index for bf_mem_op_alloc_huge
     constexpr auto BF_MEM_OP_ALLOC_HUGE_IDX_VAL{0x0000000000000002_u64};
-    /// @brief Defines the index for bf_mem_op_free_huge
-    constexpr auto BF_MEM_OP_FREE_HUGE_IDX_VAL{0x0000000000000003_u64};
 }
 
 #endif

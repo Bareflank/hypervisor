@@ -102,8 +102,6 @@
 #define bfelf_et_hiproc ((uint16_t)0xFFFFU)
 
 /**
- * @struct bfelf_elf64_ehdr_t
- *
  * <!-- description -->
  *   @brief The file header is located at the beginning of the file,
  *     and is used to locate the other parts of the file

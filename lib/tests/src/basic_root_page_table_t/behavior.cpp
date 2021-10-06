@@ -22,16 +22,22 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "../../../mocks/basic_page_pool_t.hpp"
 #include "../../../src/basic_root_page_table_t.hpp"
-#include "l0e_t.hpp"
-#include "l1e_t.hpp"
-#include "l2e_t.hpp"
-#include "l3e_t.hpp"
 
+#include <basic_alloc_page_t.hpp>
+#include <basic_entries_t.hpp>
+#include <basic_page_4k_t.hpp>
+#include <basic_page_pool_t.hpp>
 #include <intrinsic_t.hpp>
+#include <l0e_t.hpp>
+#include <l1e_t.hpp>
+#include <l2e_t.hpp>
+#include <l3e_t.hpp>
 #include <tls_t.hpp>
 
+#include <bsl/array.hpp>
+#include <bsl/convert.hpp>
+#include <bsl/dontcare_t.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/ut.hpp>
@@ -42,8 +48,15 @@ namespace lib
     using page_pool_t = lib::basic_page_pool_t<tls_t>;
 
     /// @brief defines the root_page_table_t used by the microkernel
-    using root_page_table_t =
-        lib::basic_root_page_table_t<tls_t, page_pool_t, intrinsic_t, l3e_t, l2e_t, l1e_t, l0e_t>;
+    using root_page_table_t = lib::basic_root_page_table_t<
+        tls_t,
+        bsl::dontcare_t,
+        page_pool_t,
+        intrinsic_t,
+        l3e_t,
+        l2e_t,
+        l1e_t,
+        l0e_t>;
 
     /// <!-- description -->
     ///   @brief Used to execute the actual checks. We put the checks in this
@@ -57,13 +70,17 @@ namespace lib
     [[nodiscard]] constexpr auto
     tests() noexcept -> bsl::exit_code
     {
-        bsl::ut_scenario{"initialize allocate fails"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
+        constexpr auto enabled{bsl::safe_u64::magic_1()};
+        constexpr auto disabled{bsl::safe_u64::magic_0()};
+
+        bsl::ut_scenario{"initialize allocate fails"} = [&]() noexcept {
+            bsl::ut_given_at_runtime{} = [&]() noexcept {
                 root_page_table_t mut_rpt{};
-                page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto phys{0x1000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_oneshot<helpers::l3t_t>(nullptr, {});
+                    mut_page_pool.set_allocate<helpers::l3t_t>(nullptr, phys);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(!mut_rpt.initialize(mut_tls, mut_page_pool));
                     };
@@ -71,11 +88,11 @@ namespace lib
             };
         };
 
-        bsl::ut_scenario{"initialize success"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
+        bsl::ut_scenario{"initialize success"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
                 root_page_table_t mut_rpt{};
-                page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_cleanup{} = [&]() noexcept {
@@ -85,22 +102,22 @@ namespace lib
             };
         };
 
-        bsl::ut_scenario{"release without initialize"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
+        bsl::ut_scenario{"release without initialize"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
                 root_page_table_t mut_rpt{};
-                page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
                 bsl::ut_then{} = [&]() noexcept {
                     mut_rpt.release(mut_tls, mut_page_pool);
                 };
             };
         };
 
-        bsl::ut_scenario{"release success"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
+        bsl::ut_scenario{"release success"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
                 root_page_table_t mut_rpt{};
-                page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_cleanup{} = [&]() noexcept {
@@ -110,11 +127,11 @@ namespace lib
             };
         };
 
-        bsl::ut_scenario{"is_initialized"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
+        bsl::ut_scenario{"is_initialized"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
                 root_page_table_t mut_rpt{};
-                page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(!mut_rpt.is_initialized());
@@ -131,11 +148,11 @@ namespace lib
             };
         };
 
-        bsl::ut_scenario{"activate"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
+        bsl::ut_scenario{"activate"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
                 root_page_table_t mut_rpt{};
-                page_pool_t mut_page_pool{};
                 tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
                 intrinsic_t mut_intrinsic{};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
@@ -151,1480 +168,3312 @@ namespace lib
             };
         };
 
-        // bsl::ut_scenario{"map_page uninitialized fails"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_then{} = [&]() noexcept {
-        //             bsl::ut_check(
-        //                 !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"is_inactive"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                intrinsic_t mut_intrinsic{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.is_inactive(mut_tls));
+                    };
 
-        // bsl::ut_scenario{"map_page invalid virt (0)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.is_inactive(mut_tls));
+                    };
 
-        // bsl::ut_scenario{"map_page invalid virt (failure)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{bsl::safe_umx::failure()};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+                    mut_rpt.activate(mut_tls, mut_intrinsic);
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.is_inactive(mut_tls));
+                    };
 
-        // bsl::ut_scenario{"map_page invalid virt (page alignment)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{42_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page invalid phys (0)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"spa"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.spa().is_valid_and_checked());
+                        bsl::ut_check(mut_rpt.spa().is_pos());
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page invalid phys (failure)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{bsl::safe_umx::failure()};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k page"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x1000_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto expected_phys{0x1_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l0e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr != ents.l0e);
+                        bsl::ut_check(ents.l0e->auto_release == disabled);
+                        bsl::ut_check(ents.l0e->points_to_block == enabled);
+                        bsl::ut_check(ents.l0e->alias == disabled);
+                        bsl::ut_check(ents.l0e->phys == expected_phys);
+                        bsl::ut_check(ents.l0e->explicit_unmap == disabled);
+                        bsl::ut_check(nullptr != ents.l1e);
+                        bsl::ut_check(ents.l1e->auto_release == disabled);
+                        bsl::ut_check(ents.l1e->points_to_block == disabled);
+                        bsl::ut_check(ents.l1e->alias == disabled);
+                        bsl::ut_check(ents.l1e->explicit_unmap == disabled);
+                        bsl::ut_check(nullptr != ents.l2e);
+                        bsl::ut_check(ents.l2e->auto_release == disabled);
+                        bsl::ut_check(ents.l2e->points_to_block == disabled);
+                        bsl::ut_check(ents.l2e->alias == disabled);
+                        bsl::ut_check(ents.l2e->explicit_unmap == disabled);
+                        bsl::ut_check(nullptr != ents.l3e);
+                        bsl::ut_check(ents.l3e->auto_release == disabled);
+                        bsl::ut_check(ents.l3e->points_to_block == disabled);
+                        bsl::ut_check(ents.l3e->alias == disabled);
+                        bsl::ut_check(ents.l3e->explicit_unmap == disabled);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page invalid phys (page alignment)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{42_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m page"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x200000_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto expected_phys{0x200_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l1e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l0e);
+                        bsl::ut_check(nullptr != ents.l1e);
+                        bsl::ut_check(ents.l1e->auto_release == disabled);
+                        bsl::ut_check(ents.l1e->points_to_block == enabled);
+                        bsl::ut_check(ents.l1e->alias == disabled);
+                        bsl::ut_check(ents.l1e->phys == expected_phys);
+                        bsl::ut_check(ents.l1e->explicit_unmap == disabled);
+                        bsl::ut_check(nullptr != ents.l2e);
+                        bsl::ut_check(ents.l2e->auto_release == disabled);
+                        bsl::ut_check(ents.l2e->points_to_block == disabled);
+                        bsl::ut_check(ents.l2e->alias == disabled);
+                        bsl::ut_check(ents.l2e->explicit_unmap == disabled);
+                        bsl::ut_check(nullptr != ents.l3e);
+                        bsl::ut_check(ents.l3e->auto_release == disabled);
+                        bsl::ut_check(ents.l3e->points_to_block == disabled);
+                        bsl::ut_check(ents.l3e->alias == disabled);
+                        bsl::ut_check(ents.l3e->explicit_unmap == disabled);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page invalid flags (0)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{0_umx};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 1g page"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x40000000_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto expected_phys{0x40000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l2e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l0e);
+                        bsl::ut_check(nullptr == ents.l1e);
+                        bsl::ut_check(nullptr != ents.l2e);
+                        bsl::ut_check(ents.l2e->auto_release == disabled);
+                        bsl::ut_check(ents.l2e->points_to_block == enabled);
+                        bsl::ut_check(ents.l2e->alias == disabled);
+                        bsl::ut_check(ents.l2e->phys == expected_phys);
+                        bsl::ut_check(ents.l2e->explicit_unmap == disabled);
+                        bsl::ut_check(nullptr != ents.l3e);
+                        bsl::ut_check(ents.l3e->auto_release == disabled);
+                        bsl::ut_check(ents.l3e->points_to_block == disabled);
+                        bsl::ut_check(ents.l3e->alias == disabled);
+                        bsl::ut_check(ents.l3e->explicit_unmap == disabled);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page invalid flags (failure)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{bsl::safe_umx::failure()};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k page twice"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x0_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l0e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l0e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page invalid flags (w/e)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_WRITE | MAP_PAGE_EXECUTE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m page twice"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x0_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l1e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l1e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page invalid auto_release (failure)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{bsl::safe_umx::failure()};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 1g page twice"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x0_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l2e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l2e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page invalid auto_release (out of range)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{9_umx};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k page on already mapped 1g page"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x0_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l2e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l0e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page twice fails"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(
-        //                 mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m page on already mapped 1g page"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x0_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l2e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l1e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page add_pdpt allocation fails"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             mut_page_pool.set_allocate<pdpt_t>(ALLOCATE_TAG_PDPTS, nullptr, {});
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m page on already mapped 4k page"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x0_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l0e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l1e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page add_pdpt virt to phys fails"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         pdpt_t mut_pdpt{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             mut_page_pool.set_allocate<pdpt_t>(ALLOCATE_TAG_PDPTS, &mut_pdpt, phys);
-        //             mut_page_pool.set_virt_to_phys(&mut_pdpt, bsl::safe_umx::failure());
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 1g page on already mapped 4k page"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x0_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l0e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l2e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page add_pdt allocation fails"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             mut_page_pool.set_allocate<pdt_t>(ALLOCATE_TAG_PDTS, nullptr, {});
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k page add_table (l2t_t) fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x1000_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l0e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page add_pdt virt to phys fails"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         pdt_t mut_pdt{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             mut_page_pool.set_allocate<pdt_t>(ALLOCATE_TAG_PDTS, &mut_pdt, phys);
-        //             mut_page_pool.set_virt_to_phys(&mut_pdt, bsl::safe_umx::failure());
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k page add_table (l1t_t) fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x1000_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l1t_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l0e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page add_pt allocation fails"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             mut_page_pool.set_allocate<pt_t>(ALLOCATE_TAG_PTS, nullptr, {});
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k page add_table (l0t_t) fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x1000_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l0t_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l0e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page add_pt virt to phys fails"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         pt_t mut_pt{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             mut_page_pool.set_allocate<pt_t>(ALLOCATE_TAG_PTS, &mut_pt, phys);
-        //             mut_page_pool.set_virt_to_phys(&mut_pt, bsl::safe_umx::failure());
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m page add_table (l2t_t) fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x200000_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l1e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page map into kernel memory fails"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         pml4t_t mut_pml4t{};
-        //         constexpr auto pml4t_phys{0x200000_umx};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         constexpr auto enable{1_umx};
-        //         constexpr auto disable{0_umx};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             mut_page_pool.set_allocate<pml4t_t>(
-        //                 ALLOCATE_TAG_PML4TS, &mut_pml4t, pml4t_phys);
-        //             mut_pml4t.entries.front().p = enable.get();
-        //             mut_pml4t.entries.front().us = disable.get();
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     !mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m page add_table (l1t_t) fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x200000_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l1t_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l1e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page read/write success"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 1g page add_table (l2t_t) fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x40000000_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.map<l2e_t>(
+                            mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page read/execute success"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_EXECUTE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     mut_rpt.map_page(mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k page as explicit unmap"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x0_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{true};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l0e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.unmap<l0e_t>(mut_tls, mut_page_pool, virt));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page multiple virtual address"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt1{0x1000_umx};
-        //         constexpr auto virt2{0x2000_umx};
-        //         constexpr auto virt3{0x201000_umx};
-        //         constexpr auto virt4{0x202000_umx};
-        //         constexpr auto virt5{0x40001000_umx};
-        //         constexpr auto virt6{0x40002000_umx};
-        //         constexpr auto virt7{0x8000001000_umx};
-        //         constexpr auto virt8{0x8000002000_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     mut_rpt.map_page(mut_tls, mut_page_pool, virt1, phys, flgs, atrl));
-        //                 bsl::ut_check(
-        //                     mut_rpt.map_page(mut_tls, mut_page_pool, virt2, phys, flgs, atrl));
-        //                 bsl::ut_check(
-        //                     mut_rpt.map_page(mut_tls, mut_page_pool, virt3, phys, flgs, atrl));
-        //                 bsl::ut_check(
-        //                     mut_rpt.map_page(mut_tls, mut_page_pool, virt4, phys, flgs, atrl));
-        //                 bsl::ut_check(
-        //                     mut_rpt.map_page(mut_tls, mut_page_pool, virt5, phys, flgs, atrl));
-        //                 bsl::ut_check(
-        //                     mut_rpt.map_page(mut_tls, mut_page_pool, virt6, phys, flgs, atrl));
-        //                 bsl::ut_check(
-        //                     mut_rpt.map_page(mut_tls, mut_page_pool, virt7, phys, flgs, atrl));
-        //                 bsl::ut_check(
-        //                     mut_rpt.map_page(mut_tls, mut_page_pool, virt8, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m page as explicit unmap"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x0_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{true};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l1e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.unmap<l1e_t>(mut_tls, mut_page_pool, virt));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"map_page_unaligned"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1042_umx};
-        //         constexpr auto phys{0x1000_umx};
-        //         constexpr auto flgs{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto atrl{MAP_PAGE_NO_AUTO_RELEASE};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(mut_rpt.map_page_unaligned(
-        //                     mut_tls, mut_page_pool, virt, phys, flgs, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 1g page as explicit unmap"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x0_u64};
+                constexpr auto flgs{0x0_u64};
+                bool const explicit_unmap{true};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(mut_rpt.map<l2e_t>(
+                        mut_tls, mut_page_pool, virt, phys, flgs, explicit_unmap, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.unmap<l2e_t>(mut_tls, mut_page_pool, virt));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw without initialize fails"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_then{} = [&]() noexcept {
-        //             bsl::ut_check(
-        //                 nullptr ==
-        //                 mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //             bsl::ut_check(
-        //                 nullptr ==
-        //                 mut_rpt.allocate_page_rw<ext_tcb_t>(mut_tls, mut_page_pool, virt, atrl));
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k adjacent 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x1000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, virt, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw twice fails (stack)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(
-        //                 nullptr !=
-        //                 mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k adjacent 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x1000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, virt, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw twice fails (tls)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TLS};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(
-        //                 nullptr !=
-        //                 mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m adjacent 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x200000_umx};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, virt, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw twice fails (tcb)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TCB};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(
-        //                 nullptr !=
-        //                 mut_rpt.allocate_page_rw<ext_tcb_t>(mut_tls, mut_page_pool, virt, atrl));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rw<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k reserved l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l3t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw twice fails (elf)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_ELF};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(
-        //                 nullptr !=
-        //                 mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m reserved l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l3t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw invalid virt (0"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rw<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 1g reserved l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l3t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw invalid virt (failure)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{bsl::safe_umx::failure()};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rw<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k reserved l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l2t_t l2t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l2t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw invalid virt (page alignment)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{42_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rw<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m reserved l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l2t_t l2t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l2t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw invalid auto_release (0)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{0_umx};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rw<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 1g reserved l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l2t_t l2t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l2t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw invalid auto_release (failure)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{bsl::safe_umx::failure()};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rw<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k reserved l1e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l1t_t l1t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l1t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l1t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw virt to phys fails (page_t)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         page_t mut_page{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             mut_page_pool.set_allocate<page_t>(ALLOCATE_TAG_EXT_STACK, &mut_page, {});
-        //             mut_page_pool.set_virt_to_phys(&mut_page, bsl::safe_umx::failure());
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m reserved l1e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l1t_t l1t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l1t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l1t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw virt to phys fails (ext_tcb_t)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         ext_tcb_t mut_page{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TCB};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             mut_page_pool.set_allocate<ext_tcb_t>(ALLOCATE_TAG_EXT_TCB, &mut_page, {});
-        //             mut_page_pool.set_virt_to_phys(&mut_page, bsl::safe_umx::failure());
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rw<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k reserved l0e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l0t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l0t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw MAP_PAGE_AUTO_RELEASE_STACK"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr !=
-        //                     mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k unknown l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l3t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l3t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw MAP_PAGE_AUTO_RELEASE_TLS"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TLS};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr !=
-        //                     mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m unknown l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l3t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l3t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw MAP_PAGE_AUTO_RELEASE_TCB"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TCB};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr != mut_rpt.allocate_page_rw<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 1g unknown l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l3t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l3t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rw MAP_PAGE_AUTO_RELEASE_ELF"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_ELF};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr !=
-        //                     mut_rpt.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k unknown l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l2t_t l2t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l2t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l2t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx without initialize fails"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_then{} = [&]() noexcept {
-        //             bsl::ut_check(
-        //                 nullptr ==
-        //                 mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //             bsl::ut_check(
-        //                 nullptr ==
-        //                 mut_rpt.allocate_page_rx<ext_tcb_t>(mut_tls, mut_page_pool, virt, atrl));
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m unknown l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l2t_t l2t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l2t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l2t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx twice fails (stack)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(
-        //                 nullptr !=
-        //                 mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 1g unknown l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l2t_t l2t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l2t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l2t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx twice fails (tls)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TLS};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(
-        //                 nullptr !=
-        //                 mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k unknown l1e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l1t_t l1t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l1t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l1t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx twice fails (tcb)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TCB};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(
-        //                 nullptr !=
-        //                 mut_rpt.allocate_page_rx<ext_tcb_t>(mut_tls, mut_page_pool, virt, atrl));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rx<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 2m unknown l1e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l1t_t l1t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l1t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l1t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx twice fails (elf)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_ELF};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(
-        //                 nullptr !=
-        //                 mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"map 4k unknown l0e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    l0t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l0t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx invalid virt (0"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rx<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"allocate_page"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto flgs{0x0_u64};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        nullptr != mut_rpt.allocate_page<basic_page_4k_t>(
+                                       mut_tls, mut_page_pool, virt, flgs, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr != ents.l0e);
+                        bsl::ut_check(ents.l0e->auto_release == enabled);
+                        bsl::ut_check(ents.l0e->points_to_block == enabled);
+                        bsl::ut_check(ents.l0e->alias == disabled);
+                        bsl::ut_check(ents.l0e->explicit_unmap == disabled);
+                        bsl::ut_check(nullptr != ents.l1e);
+                        bsl::ut_check(ents.l1e->auto_release == disabled);
+                        bsl::ut_check(ents.l1e->points_to_block == disabled);
+                        bsl::ut_check(ents.l1e->alias == disabled);
+                        bsl::ut_check(ents.l1e->explicit_unmap == disabled);
+                        bsl::ut_check(nullptr != ents.l2e);
+                        bsl::ut_check(ents.l2e->auto_release == disabled);
+                        bsl::ut_check(ents.l2e->points_to_block == disabled);
+                        bsl::ut_check(ents.l2e->alias == disabled);
+                        bsl::ut_check(ents.l2e->explicit_unmap == disabled);
+                        bsl::ut_check(nullptr != ents.l3e);
+                        bsl::ut_check(ents.l3e->auto_release == disabled);
+                        bsl::ut_check(ents.l3e->points_to_block == disabled);
+                        bsl::ut_check(ents.l3e->alias == disabled);
+                        bsl::ut_check(ents.l3e->explicit_unmap == disabled);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx invalid virt (failure)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{bsl::safe_umx::failure()};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rx<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"allocate_page allocation fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x1000_u64};
+                constexpr auto flgs{0x0_u64};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<basic_page_4k_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            nullptr == mut_rpt.allocate_page<basic_page_4k_t>(
+                                           mut_tls, mut_page_pool, virt, flgs, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx invalid virt (page alignment)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{42_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rx<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"allocate_page add_table (l2t_t) fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x1000_u64};
+                constexpr auto flgs{0x0_u64};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            nullptr == mut_rpt.allocate_page<basic_page_4k_t>(
+                                           mut_tls, mut_page_pool, virt, flgs, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx invalid auto_release (0)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{0_umx};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rx<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"allocate_page add_table (l1t_t) fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x1000_u64};
+                constexpr auto flgs{0x0_u64};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l1t_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            nullptr == mut_rpt.allocate_page<basic_page_4k_t>(
+                                           mut_tls, mut_page_pool, virt, flgs, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx invalid auto_release (failure)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{bsl::safe_umx::failure()};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rx<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"allocate_page add_table (l0t_t) fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto phys{0x1000_u64};
+                constexpr auto flgs{0x0_u64};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l0t_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            nullptr == mut_rpt.allocate_page<basic_page_4k_t>(
+                                           mut_tls, mut_page_pool, virt, flgs, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx virt to phys fails (page_t)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         page_t mut_page{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             mut_page_pool.set_allocate<page_t>(ALLOCATE_TAG_EXT_STACK, &mut_page, {});
-        //             mut_page_pool.set_virt_to_phys(&mut_page, bsl::safe_umx::failure());
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr ==
-        //                     mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"allocate_page twice"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto virt{0x0_u64};
+                constexpr auto flgs{0x0_u64};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        nullptr != mut_rpt.allocate_page<basic_page_4k_t>(
+                                       mut_tls, mut_page_pool, virt, flgs, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            nullptr == mut_rpt.allocate_page<basic_page_4k_t>(
+                                           mut_tls, mut_page_pool, virt, flgs, mut_sys));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx virt to phys fails (ext_tcb_t)"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         ext_tcb_t mut_page{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TCB};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             mut_page_pool.set_allocate<ext_tcb_t>(ALLOCATE_TAG_EXT_TCB, &mut_page, {});
-        //             mut_page_pool.set_virt_to_phys(&mut_page, bsl::safe_umx::failure());
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr == mut_rpt.allocate_page_rx<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"allocate_page<offset>"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto offs{0x1000_u64};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    auto const page{
+                        mut_rpt.allocate_page<offs.get()>(mut_tls, mut_page_pool, mut_sys)};
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, page.virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr != ents.l0e);
+                        bsl::ut_check(ents.l0e->auto_release == enabled);
+                        bsl::ut_check(ents.l0e->points_to_block == enabled);
+                        bsl::ut_check(ents.l0e->alias == disabled);
+                        bsl::ut_check(ents.l0e->explicit_unmap == disabled);
+                        bsl::ut_check(nullptr != ents.l1e);
+                        bsl::ut_check(ents.l1e->auto_release == disabled);
+                        bsl::ut_check(ents.l1e->points_to_block == disabled);
+                        bsl::ut_check(ents.l1e->alias == disabled);
+                        bsl::ut_check(ents.l1e->explicit_unmap == disabled);
+                        bsl::ut_check(nullptr != ents.l2e);
+                        bsl::ut_check(ents.l2e->auto_release == disabled);
+                        bsl::ut_check(ents.l2e->points_to_block == disabled);
+                        bsl::ut_check(ents.l2e->alias == disabled);
+                        bsl::ut_check(ents.l2e->explicit_unmap == disabled);
+                        bsl::ut_check(nullptr != ents.l3e);
+                        bsl::ut_check(ents.l3e->auto_release == disabled);
+                        bsl::ut_check(ents.l3e->points_to_block == disabled);
+                        bsl::ut_check(ents.l3e->alias == disabled);
+                        bsl::ut_check(ents.l3e->explicit_unmap == disabled);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx MAP_PAGE_AUTO_RELEASE_STACK"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr !=
-        //                     mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"allocate_page<offset> allocation fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto offs{0x1000_u64};
+                constexpr auto phys{0x1000_u64};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<basic_page_4k_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    auto const page{
+                        mut_rpt.allocate_page<offs.get()>(mut_tls, mut_page_pool, mut_sys)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(page.virt.is_invalid());
+                        bsl::ut_check(page.phys.is_invalid());
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx MAP_PAGE_AUTO_RELEASE_TLS"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TLS};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr !=
-        //                     mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"allocate_page<offset> add_table (l2t_t) fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto offs{0x1000_u64};
+                constexpr auto phys{0x1000_u64};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    auto const page{
+                        mut_rpt.allocate_page<offs.get()>(mut_tls, mut_page_pool, mut_sys)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(page.virt.is_invalid());
+                        bsl::ut_check(page.phys.is_invalid());
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx MAP_PAGE_AUTO_RELEASE_TCB"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_TCB};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr != mut_rpt.allocate_page_rx<ext_tcb_t>(
-        //                                    mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"allocate_page<offset> add_table (l1t_t) fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto offs{0x1000_u64};
+                constexpr auto phys{0x1000_u64};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l1t_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    auto const page{
+                        mut_rpt.allocate_page<offs.get()>(mut_tls, mut_page_pool, mut_sys)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(page.virt.is_invalid());
+                        bsl::ut_check(page.phys.is_invalid());
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"allocate_page_rx MAP_PAGE_AUTO_RELEASE_ELF"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_ELF};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(
-        //                     nullptr !=
-        //                     mut_rpt.allocate_page_rx<page_t>(mut_tls, mut_page_pool, virt, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"allocate_page<offset> add_table (l0t_t) fails"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                constexpr auto offs{0x1000_u64};
+                constexpr auto phys{0x1000_u64};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l0t_t>(nullptr, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    auto const page{
+                        mut_rpt.allocate_page<offs.get()>(mut_tls, mut_page_pool, mut_sys)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(page.virt.is_invalid());
+                        bsl::ut_check(page.phys.is_invalid());
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"add_tables without initialize rpt1"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt1{};
-        //         root_page_table_t mut_rpt2{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt2.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(!mut_rpt2.add_tables(mut_tls, mut_rpt1));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt2.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"unmap 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.unmap<l0e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"add_tables without initialize rpt2"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt1{};
-        //         root_page_table_t mut_rpt2{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt1{0x1000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt1.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(
-        //                 nullptr !=
-        //                 mut_rpt1.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt1, atrl));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(!mut_rpt2.add_tables(mut_tls, mut_rpt1));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt1.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"unmap 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.unmap<l1e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"add_tables"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt1{};
-        //         root_page_table_t mut_rpt2{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         constexpr auto virt1{0x1000_umx};
-        //         constexpr auto virt2{0x2000_umx};
-        //         constexpr auto atrl{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             bsl::ut_required_step(mut_rpt1.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(mut_rpt2.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(
-        //                 nullptr !=
-        //                 mut_rpt1.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt1, atrl));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 bsl::ut_check(mut_rpt2.add_tables(mut_tls, mut_rpt1));
-        //                 bsl::ut_check(
-        //                     nullptr !=
-        //                     mut_rpt2.allocate_page_rw<page_t>(mut_tls, mut_page_pool, virt2, atrl));
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt1.release(mut_tls, mut_page_pool);
-        //                     mut_rpt2.release(mut_tls, mut_page_pool);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"unmap 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.unmap<l2e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"dump without initialize"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t const rpt{};
-        //         page_pool_t const page_pool{};
-        //         bsl::ut_then{} = [&]() noexcept {
-        //             rpt.dump(page_pool);
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"unmap allocated 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        nullptr != mut_rpt.allocate_page<basic_page_4k_t>(
+                                       mut_tls, mut_page_pool, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.unmap<l0e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
-        // bsl::ut_scenario{"dump"} = []() noexcept {
-        //     bsl::ut_given{} = []() noexcept {
-        //         root_page_table_t mut_rpt{};
-        //         page_pool_t mut_page_pool{};
-        //         tls_t mut_tls{};
-        //         page_t *pmut_mut_page0{};
-        //         page_t *pmut_mut_page1{};
-        //         page_t *pmut_mut_page2{};
-        //         page_t *pmut_mut_page3{};
-        //         page_t *pmut_mut_page4{};
-        //         ext_tcb_t *pmut_mut_page5{};
-        //         page_t *pmut_mut_page6{};
-        //         pml4t_t mut_pml4t{};
-        //         constexpr auto pml4t_phys{0x200000_umx};
-        //         constexpr auto virt0{0x1000_umx};
-        //         constexpr auto virt1{0x2000_umx};
-        //         constexpr auto virt2{0x3000_umx};
-        //         constexpr auto virt3{0x4000_umx};
-        //         constexpr auto virt4{0x5000_umx};
-        //         constexpr auto virt5{0x6000_umx};
-        //         constexpr auto virt6{0x7000_umx};
-        //         bsl::safe_umx mut_phys0{};
-        //         bsl::safe_umx mut_phys1{};
-        //         bsl::safe_umx mut_phys2{};
-        //         bsl::safe_umx mut_phys3{};
-        //         bsl::safe_umx mut_phys4{};
-        //         bsl::safe_umx mut_phys5{};
-        //         bsl::safe_umx mut_phys6{};
-        //         constexpr auto flgs0{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto flgs1{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto flgs2{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto flgs3{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto flgs4{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto flgs5{MAP_PAGE_READ | MAP_PAGE_WRITE};
-        //         constexpr auto flgs6{MAP_PAGE_READ | MAP_PAGE_EXECUTE};
-        //         constexpr auto atrl0{MAP_PAGE_NO_AUTO_RELEASE};
-        //         constexpr auto atrl1{MAP_PAGE_AUTO_RELEASE_ALLOC_PAGE};
-        //         constexpr auto atrl3{MAP_PAGE_AUTO_RELEASE_STACK};
-        //         constexpr auto atrl4{MAP_PAGE_AUTO_RELEASE_TLS};
-        //         constexpr auto atrl5{MAP_PAGE_AUTO_RELEASE_TCB};
-        //         constexpr auto atrl6{MAP_PAGE_AUTO_RELEASE_ELF};
-        //         constexpr auto enable{1_umx};
-        //         constexpr auto disable{0_umx};
-        //         constexpr auto pml4te_index0{510_umx};
-        //         constexpr auto pml4te_index1{511_umx};
-        //         bsl::ut_when{} = [&]() noexcept {
-        //             pmut_mut_page0 =
-        //                 mut_page_pool.allocate<page_t>(mut_tls, ALLOCATE_TAG_BF_MEM_OP_ALLOC_PAGE);
-        //             pmut_mut_page1 =
-        //                 mut_page_pool.allocate<page_t>(mut_tls, ALLOCATE_TAG_BF_MEM_OP_ALLOC_PAGE);
-        //             pmut_mut_page2 =
-        //                 mut_page_pool.allocate<page_t>(mut_tls, ALLOCATE_TAG_EXT_STACK);
-        //             pmut_mut_page4 = mut_page_pool.allocate<page_t>(mut_tls, ALLOCATE_TAG_EXT_TLS);
-        //             pmut_mut_page5 =
-        //                 mut_page_pool.allocate<ext_tcb_t>(mut_tls, ALLOCATE_TAG_EXT_TCB);
-        //             pmut_mut_page6 = mut_page_pool.allocate<page_t>(mut_tls, ALLOCATE_TAG_EXT_ELF);
-        //             mut_phys0 = mut_page_pool.virt_to_phys(pmut_mut_page0);
-        //             mut_phys1 = mut_page_pool.virt_to_phys(pmut_mut_page1);
-        //             mut_phys2 = mut_page_pool.virt_to_phys(pmut_mut_page2);
-        //             mut_phys3 = mut_page_pool.virt_to_phys(pmut_mut_page3);
-        //             mut_phys4 = mut_page_pool.virt_to_phys(pmut_mut_page4);
-        //             mut_phys5 = mut_page_pool.virt_to_phys(pmut_mut_page5);
-        //             mut_phys6 = mut_page_pool.virt_to_phys(pmut_mut_page6);
-        //             mut_page_pool.set_allocate<pml4t_t>(
-        //                 ALLOCATE_TAG_PML4TS, &mut_pml4t, pml4t_phys);
-        //             mut_pml4t.entries.at_if(pml4te_index0)->p = enable.get();
-        //             mut_pml4t.entries.at_if(pml4te_index0)->us = disable.get();
-        //             mut_pml4t.entries.at_if(pml4te_index0)->alias = disable.get();
-        //             mut_pml4t.entries.at_if(pml4te_index1)->p = enable.get();
-        //             mut_pml4t.entries.at_if(pml4te_index1)->us = disable.get();
-        //             mut_pml4t.entries.at_if(pml4te_index1)->alias = enable.get();
-        //             bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-        //             bsl::ut_required_step(
-        //                 mut_rpt.map_page(mut_tls, mut_page_pool, virt0, mut_phys0, flgs0, atrl0));
-        //             bsl::ut_required_step(
-        //                 mut_rpt.map_page(mut_tls, mut_page_pool, virt1, mut_phys1, flgs1, atrl1));
-        //             bsl::ut_required_step(
-        //                 mut_rpt.map_page(mut_tls, mut_page_pool, virt2, mut_phys2, flgs2, atrl2));
-        //             bsl::ut_required_step(
-        //                 mut_rpt.map_page(mut_tls, mut_page_pool, virt3, mut_phys3, flgs3, atrl3));
-        //             bsl::ut_required_step(
-        //                 mut_rpt.map_page(mut_tls, mut_page_pool, virt4, mut_phys4, flgs4, atrl4));
-        //             bsl::ut_required_step(
-        //                 mut_rpt.map_page(mut_tls, mut_page_pool, virt5, mut_phys5, flgs5, atrl5));
-        //             bsl::ut_required_step(
-        //                 mut_rpt.map_page(mut_tls, mut_page_pool, virt6, mut_phys6, flgs6, atrl6));
-        //             bsl::ut_then{} = [&]() noexcept {
-        //                 mut_rpt.dump(mut_page_pool);
-        //                 bsl::ut_cleanup{} = [&]() noexcept {
-        //                     mut_rpt.release(mut_tls, mut_page_pool);
-        //                     mut_page_pool.deallocate(
-        //                         mut_tls, pmut_mut_page0, ALLOCATE_TAG_BF_MEM_OP_ALLOC_PAGE);
-        //                 };
-        //             };
-        //         };
-        //     };
-        // };
+        bsl::ut_scenario{"unmap 1 of 2 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt0{0x0000_u64};
+                constexpr auto virt1{0x1000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, virt0, {}, {}, {}, mut_sys));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, virt1, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.unmap<l0e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"unmap 1 of 2 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt0{0x000000_u64};
+                constexpr auto virt1{0x200000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, virt0, {}, {}, {}, mut_sys));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, virt1, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.unmap<l1e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"unmap 1 of 2 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt0{0x00000000_u64};
+                constexpr auto virt1{0x40000000_umx};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, virt0, {}, {}, {}, mut_sys));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, virt1, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_rpt.unmap<l2e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"map 4k, unmap 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.unmap<l2e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"map 4k, unmap 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.unmap<l2e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"map 2m, unmap 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.unmap<l2e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"map 2m, unmap 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.unmap<l0e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"map 1g, unmap 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.unmap<l1e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"map 1g, unmap 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.unmap<l0e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"unmap never mapped 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.unmap<l0e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"unmap never mapped 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.unmap<l1e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"unmap never mapped 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_rpt.unmap<l2e_t>(mut_tls, mut_page_pool, {}));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr != ents.l3e);
+                        bsl::ut_check(nullptr != ents.l2e);
+                        bsl::ut_check(nullptr != ents.l1e);
+                        bsl::ut_check(nullptr != ents.l0e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr != ents.l3e);
+                        bsl::ut_check(nullptr != ents.l2e);
+                        bsl::ut_check(nullptr != ents.l1e);
+                        bsl::ut_check(nullptr == ents.l0e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr != ents.l3e);
+                        bsl::ut_check(nullptr != ents.l2e);
+                        bsl::ut_check(nullptr == ents.l1e);
+                        bsl::ut_check(nullptr == ents.l0e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 4k, get 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 4k, get 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 2m, get 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 2m, get 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 1g, get 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 1g, get 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 4k never mapped"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 2m never mapped"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 1g never mapped"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 4k adjacent, never mapped 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x1000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 4k adjacent, never mapped 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x200000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 4k adjacent, never mapped 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x40000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 2m adjacent, never mapped 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x1000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 2m adjacent, never mapped 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x200000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 2m adjacent, never mapped 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x40000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 1g adjacent, never mapped 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x1000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 1g adjacent, never mapped 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x200000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 1g adjacent, never mapped 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x40000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 4k adjacent (2m), never mapped 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x200000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 4k adjacent (2m), never mapped 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x200000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 4k adjacent (1g), never mapped 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x40000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 4k adjacent (1g), never mapped 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x40000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 4k adjacent (1g), never mapped 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x40000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 2m adjacent (2m), never mapped 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x200000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 2m adjacent (2m), never mapped 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x200000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 2m adjacent (1g), never mapped 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x40000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 2m adjacent (1g), never mapped 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x40000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 2m adjacent (1g), never mapped 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x40000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 1g adjacent (2m), never mapped 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x200000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 1g adjacent (2m), never mapped 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x200000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 1g adjacent (1g), never mapped 4k"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x40000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 1g adjacent (1g), never mapped 2m"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x40000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries map 1g adjacent (1g), never mapped 1g"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                constexpr auto virt{0x40000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, virt)};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 4k reserved l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l3t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 2m reserved l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l3t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 1g reserved l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l3t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 4k reserved l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l2t_t l2t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l2t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 2m reserved l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l2t_t l2t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l2t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 1g reserved l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l2t_t l2t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l2t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 4k reserved l1e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l1t_t l1t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l1t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l1t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 2m reserved l1e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l1t_t l1t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l1t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l1t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 4k reserved l0e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l0t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l0t.entries.front().alias = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 4k unknown l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l3t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l3t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 2m unknown l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l3t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l3t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 1g unknown l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l3t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l3t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 4k unknown l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l2t_t l2t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l2t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l2t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 2m unknown l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l2t_t l2t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l2t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l2t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 1g unknown l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l2t_t l2t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l2t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l2t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 4k unknown l1e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l1t_t l1t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l1t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l1t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 2m unknown l1e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l1t_t l1t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l1t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l1t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"entries 4k unknown l0e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l0t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(nullptr == ents.l3e);
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        l0t.entries.front().u = {};
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release without initialize"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release 4k without explicit unmap l0e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                helpers::l2t_t l2t{};
+                helpers::l1t_t l1t{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys3{0x000FFFFF00003000_u64};
+                constexpr auto phys2{0x000FFFFF00002000_u64};
+                constexpr auto phys1{0x000FFFFF00001000_u64};
+                constexpr auto phys0{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l0t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release 4k without explicit unmap l1e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                helpers::l2t_t l2t{};
+                helpers::l1t_t l1t{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys3{0x000FFFFF00003000_u64};
+                constexpr auto phys2{0x000FFFFF00002000_u64};
+                constexpr auto phys1{0x000FFFFF00001000_u64};
+                constexpr auto phys0{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l1t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release 4k without explicit unmap l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                helpers::l2t_t l2t{};
+                helpers::l1t_t l1t{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys3{0x000FFFFF00003000_u64};
+                constexpr auto phys2{0x000FFFFF00002000_u64};
+                constexpr auto phys1{0x000FFFFF00001000_u64};
+                constexpr auto phys0{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l2t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release 4k without explicit unmap l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                helpers::l2t_t l2t{};
+                helpers::l1t_t l1t{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys3{0x000FFFFF00003000_u64};
+                constexpr auto phys2{0x000FFFFF00002000_u64};
+                constexpr auto phys1{0x000FFFFF00001000_u64};
+                constexpr auto phys0{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l3t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release 2m without explicit unmap l0e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                helpers::l2t_t l2t{};
+                helpers::l1t_t l1t{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys3{0x000FFFFF00003000_u64};
+                constexpr auto phys2{0x000FFFFF00002000_u64};
+                constexpr auto phys1{0x000FFFFF00001000_u64};
+                constexpr auto phys0{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l0t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release 2m without explicit unmap l1e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                helpers::l2t_t l2t{};
+                helpers::l1t_t l1t{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys3{0x000FFFFF00003000_u64};
+                constexpr auto phys2{0x000FFFFF00002000_u64};
+                constexpr auto phys1{0x000FFFFF00001000_u64};
+                constexpr auto phys0{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l1t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release 2m without explicit unmap l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                helpers::l2t_t l2t{};
+                helpers::l1t_t l1t{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys3{0x000FFFFF00003000_u64};
+                constexpr auto phys2{0x000FFFFF00002000_u64};
+                constexpr auto phys1{0x000FFFFF00001000_u64};
+                constexpr auto phys0{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l2t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release 2m without explicit unmap l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                helpers::l2t_t l2t{};
+                helpers::l1t_t l1t{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys3{0x000FFFFF00003000_u64};
+                constexpr auto phys2{0x000FFFFF00002000_u64};
+                constexpr auto phys1{0x000FFFFF00001000_u64};
+                constexpr auto phys0{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l3t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release 1g without explicit unmap l0e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                helpers::l2t_t l2t{};
+                helpers::l1t_t l1t{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys3{0x000FFFFF00003000_u64};
+                constexpr auto phys2{0x000FFFFF00002000_u64};
+                constexpr auto phys1{0x000FFFFF00001000_u64};
+                constexpr auto phys0{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l0t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release 1g without explicit unmap l1e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                helpers::l2t_t l2t{};
+                helpers::l1t_t l1t{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys3{0x000FFFFF00003000_u64};
+                constexpr auto phys2{0x000FFFFF00002000_u64};
+                constexpr auto phys1{0x000FFFFF00001000_u64};
+                constexpr auto phys0{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l1t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release 1g without explicit unmap l2e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                helpers::l2t_t l2t{};
+                helpers::l1t_t l1t{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys3{0x000FFFFF00003000_u64};
+                constexpr auto phys2{0x000FFFFF00002000_u64};
+                constexpr auto phys1{0x000FFFFF00001000_u64};
+                constexpr auto phys0{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l2t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"release 1g without explicit unmap l3e"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                root_page_table_t mut_rpt{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                bsl::dontcare_t mut_sys{};
+                helpers::l3t_t l3t{};
+                helpers::l2t_t l2t{};
+                helpers::l1t_t l1t{};
+                helpers::l0t_t l0t{};
+                constexpr auto phys3{0x000FFFFF00003000_u64};
+                constexpr auto phys2{0x000FFFFF00002000_u64};
+                constexpr auto phys1{0x000FFFFF00001000_u64};
+                constexpr auto phys0{0x000FFFFF00000000_u64};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
+                    bsl::ut_required_step(
+                        mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
+                    l3t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_rpt.release(mut_tls, mut_page_pool);
+                    };
+                };
+            };
+        };
 
         return bsl::ut_success();
     }

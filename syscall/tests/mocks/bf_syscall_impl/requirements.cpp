@@ -92,7 +92,7 @@ main() noexcept -> bsl::exit_code
             static_assert(noexcept(syscall::bf_debug_op_dump_vmexit_log_impl({})));
             static_assert(noexcept(syscall::bf_debug_op_dump_vmexit_log_impl({})));
             static_assert(noexcept(syscall::bf_debug_op_write_c_impl({})));
-            static_assert(noexcept(syscall::bf_debug_op_write_str_impl({})));
+            static_assert(noexcept(syscall::bf_debug_op_write_str_impl({}, {})));
             static_assert(noexcept(syscall::bf_debug_op_dump_ext_impl({})));
             static_assert(noexcept(syscall::bf_debug_op_dump_page_pool_impl()));
             static_assert(noexcept(syscall::bf_debug_op_dump_huge_pool_impl()));
@@ -126,9 +126,7 @@ main() noexcept -> bsl::exit_code
             static_assert(noexcept(syscall::bf_intrinsic_op_rdmsr_impl({}, {}, {})));
             static_assert(noexcept(syscall::bf_intrinsic_op_wrmsr_impl({}, {}, {})));
             static_assert(noexcept(syscall::bf_mem_op_alloc_page_impl({}, {}, {})));
-            static_assert(noexcept(syscall::bf_mem_op_free_page_impl({}, {})));
             static_assert(noexcept(syscall::bf_mem_op_alloc_huge_impl({}, {}, {}, {})));
-            static_assert(noexcept(syscall::bf_mem_op_free_huge_impl({}, {})));
         };
     };
 

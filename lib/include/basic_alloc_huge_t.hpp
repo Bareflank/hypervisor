@@ -29,8 +29,6 @@
 
 namespace lib
 {
-    /// @struct lib::basic_alloc_huge_t
-    ///
     /// <!-- description -->
     ///   @brief Defines a basic_alloc_huge_t
     ///

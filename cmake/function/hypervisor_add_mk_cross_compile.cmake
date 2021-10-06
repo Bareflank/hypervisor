@@ -69,7 +69,7 @@ function(hypervisor_add_mk_cross_compile SOURCE_DIR)
         SOURCE_DIR      ${CMAKE_CURRENT_LIST_DIR}/${SOURCE_DIR}
         CMAKE_ARGS      ${CMAKE_ARGS}
         UPDATE_COMMAND  cmake -E echo -- Skip
-        INSTALL_COMMAND cmake -E copy_if_different ${CMAKE_BINARY_DIR}/mk_cross_compile/build/kernel/kernel ${CMAKE_BINARY_DIR}/kernel
+        INSTALL_COMMAND cmake -E copy_if_different ${CMAKE_BINARY_DIR}/mk_cross_compile/build/kernel/kernel_bin ${CMAKE_BINARY_DIR}/kernel_bin
     )
 
     ExternalProject_Add_Step(

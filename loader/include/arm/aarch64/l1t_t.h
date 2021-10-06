@@ -37,8 +37,6 @@
 #define LOADER_NUM_L1T_ENTRIES ((uint64_t)512)
 
 /**
- * @struct l1t_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a level-1 table (L1T).
  */

@@ -27,6 +27,9 @@
 
 #include <alloc_huge_t.hpp>
 #include <alloc_page_t.hpp>
+#include <basic_alloc_page_t.hpp>
+#include <basic_page_4k_t.hpp>
+#include <basic_root_page_table_t.hpp>
 #include <bf_constants.hpp>
 #include <bfelf/elf64_ehdr_t.hpp>
 #include <bfelf/elf64_phdr_t.hpp>
@@ -40,13 +43,21 @@
 #include <page_aligned_bytes_t.hpp>
 #include <page_pool_t.hpp>
 #include <root_page_table_t.hpp>
-#include <start_vmm_args_t.hpp>
 #include <tls_t.hpp>
 
 #include <bsl/array.hpp>
+#include <bsl/convert.hpp>
+#include <bsl/cstring.hpp>
+#include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
+#include <bsl/ensures.hpp>
+#include <bsl/errc_type.hpp>
+#include <bsl/expects.hpp>
 #include <bsl/finally.hpp>
+#include <bsl/safe_idx.hpp>
 #include <bsl/safe_integral.hpp>
+#include <bsl/span.hpp>
+#include <bsl/touch.hpp>
 #include <bsl/unlikely.hpp>
 
 /// TODO:
@@ -92,8 +103,6 @@
 
 namespace mk
 {
-    /// @class mk::ext_t
-    ///
     /// <!-- description -->
     ///   @brief Defines an extension WRT to the microkernel. Whenever an
     ///     executes, it must go through this class to do so. This class
@@ -118,13 +127,18 @@ namespace mk
         bsl::array<root_page_table_t, HYPERVISOR_MAX_VMS.get()> m_direct_map_rpts{};
 
         /// @brief stores the main IP registered by the extension
-        bsl::safe_umx m_entry_ip{};
+        bsl::safe_u64 m_entry_ip{};
         /// @brief stores the bootstrap IP registered by the extension
-        bsl::safe_umx m_bootstrap_ip{};
+        bsl::safe_u64 m_bootstrap_ip{};
         /// @brief stores the vmexit IP registered by the extension
-        bsl::safe_umx m_vmexit_ip{};
+        bsl::safe_u64 m_vmexit_ip{};
         /// @brief stores the fail IP registered by the extension
-        bsl::safe_umx m_fail_ip{};
+        bsl::safe_u64 m_fail_ip{};
+
+        /// @brief stores the direct map rpts
+        bsl::array<bsl::span<page_4k_t>, HYPERVISOR_MAX_HUGE_ALLOCS.get()> m_huge_allocs{};
+        /// @brief stores the index into m_huge_allocs
+        bsl::safe_idx m_huge_allocs_idx{};
 
         /// <!-- description -->
         ///   @brief Returns the program header table
@@ -208,14 +222,14 @@ namespace mk
             bsl::expects((phdr->p_vaddr) >= min_vaddr);
             bsl::expects((phdr->p_vaddr + bsl::to_umx(phdr->p_memsz)).checked() <= max_vaddr);
 
-            if (bsl::safe_u32::magic_1() == (phdr->p_flags & bfelf::PF_W)) {
+            if (bsl::safe_u32::magic_0() != (phdr->p_flags & bfelf::PF_W)) {
                 bsl::expects(bsl::safe_u32::magic_0() == (phdr->p_flags & bfelf::PF_X));
             }
             else {
                 bsl::touch();
             }
 
-            if (bsl::safe_u32::magic_1() == (phdr->p_flags & bfelf::PF_X)) {
+            if (bsl::safe_u32::magic_0() != (phdr->p_flags & bfelf::PF_X)) {
                 bsl::expects(bsl::safe_u32::magic_0() == (phdr->p_flags & bfelf::PF_W));
             }
             else {
@@ -414,14 +428,14 @@ namespace mk
             root_page_table_t &mut_rpt,
             loader::ext_elf_file_t const *const file) noexcept -> bsl::errc_type
         {
-            auto mut_tls_vaddr{bsl::safe_umx::max_value()};
+            auto mut_tls_vaddr{bsl::safe_u64::max_value()};
 
             auto const phdrtab{get_phdrtab(file)};
             for (bsl::safe_idx mut_i{}; mut_i < phdrtab.size(); ++mut_i) {
                 auto const *const phdr{phdrtab.at_if(mut_i)};
 
                 if (bfelf::PT_TLS == phdr->p_type) {
-                    mut_tls_vaddr = bsl::to_umx(phdr->p_vaddr);
+                    mut_tls_vaddr = bsl::to_u64(phdr->p_vaddr);
                     break;
                 }
 
@@ -474,11 +488,11 @@ namespace mk
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             root_page_table_t &mut_rpt,
-            bsl::safe_umx const &addr) noexcept -> bsl::errc_type
+            bsl::safe_u64 const &addr) noexcept -> bsl::errc_type
         {
             constexpr auto size{HYPERVISOR_EXT_STACK_SIZE};
             for (bsl::safe_idx mut_i{}; mut_i < size; mut_i += bsl::to_idx(HYPERVISOR_PAGE_SIZE)) {
-                auto const virt{(addr + bsl::to_umx(mut_i)).checked()};
+                auto const virt{(addr + bsl::to_u64(mut_i)).checked()};
 
                 /// NOTE:
                 /// - The virtual address provided to allocate_page cannot
@@ -519,7 +533,7 @@ namespace mk
             constexpr auto stack_size{HYPERVISOR_EXT_STACK_SIZE};
 
             for (bsl::safe_idx mut_i{}; mut_i < bsl::to_idx(mut_tls.online_pps); ++mut_i) {
-                auto const offs{(stack_size + HYPERVISOR_PAGE_SIZE) * bsl::to_umx(mut_i)};
+                auto const offs{(stack_size + HYPERVISOR_PAGE_SIZE) * bsl::to_u64(mut_i)};
                 auto const addr{(stack_addr + offs).checked()};
 
                 /// NOTE:
@@ -561,11 +575,11 @@ namespace mk
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             root_page_table_t &mut_rpt,
-            bsl::safe_umx const &addr) noexcept -> bsl::errc_type
+            bsl::safe_u64 const &addr) noexcept -> bsl::errc_type
         {
             constexpr auto size{HYPERVISOR_EXT_FAIL_STACK_SIZE};
             for (bsl::safe_idx mut_i{}; mut_i < size; mut_i += bsl::to_idx(HYPERVISOR_PAGE_SIZE)) {
-                auto const virt{(addr + bsl::to_umx(mut_i)).checked()};
+                auto const virt{(addr + bsl::to_u64(mut_i)).checked()};
 
                 /// NOTE:
                 /// - The virtual address provided to allocate_page cannot
@@ -607,7 +621,7 @@ namespace mk
             constexpr auto stack_size{HYPERVISOR_EXT_FAIL_STACK_SIZE};
 
             for (bsl::safe_idx mut_i{}; mut_i < bsl::to_idx(mut_tls.online_pps); ++mut_i) {
-                auto const offs{(stack_size + HYPERVISOR_PAGE_SIZE) * bsl::to_umx(mut_i)};
+                auto const offs{(stack_size + HYPERVISOR_PAGE_SIZE) * bsl::to_u64(mut_i)};
                 auto const addr{(stack_addr + offs).checked()};
 
                 /// NOTE:
@@ -661,7 +675,7 @@ namespace mk
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             root_page_table_t &mut_rpt,
-            bsl::safe_umx const &addr,
+            bsl::safe_u64 const &addr,
             bfelf::elf64_phdr_t const *const phdr) noexcept -> bsl::errc_type
         {
             auto *const pmut_page{
@@ -679,9 +693,6 @@ namespace mk
             ///
 
             bsl::span const src{phdr->p_offset, bsl::to_umx(phdr->p_filesz)};
-            if (src.empty()) {
-                return bsl::errc_success;
-            }
 
             /// NOTE:
             /// - The dst_idx is needed because the TLS data is in a sense,
@@ -713,7 +724,7 @@ namespace mk
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             root_page_table_t &mut_rpt,
-            bsl::safe_umx const &addr) noexcept -> bsl::errc_type
+            bsl::safe_u64 const &addr) noexcept -> bsl::errc_type
         {
             auto *const pmut_page{
                 mut_rpt.allocate_page<ext_tcb_t>(mut_tls, mut_page_pool, addr, MAP_PAGE_RW)};
@@ -751,7 +762,7 @@ namespace mk
             constexpr auto tls_size{HYPERVISOR_EXT_TLS_SIZE};
 
             for (bsl::safe_idx mut_i{}; mut_i < bsl::to_umx(mut_tls.online_pps); ++mut_i) {
-                auto const offs{(tls_size + HYPERVISOR_PAGE_SIZE) * bsl::to_umx(mut_i)};
+                auto const offs{(tls_size + HYPERVISOR_PAGE_SIZE) * bsl::to_u64(mut_i)};
                 auto const addr{(tls_addr + offs + HYPERVISOR_PAGE_SIZE).checked()};
 
                 /// NOTE:
@@ -790,7 +801,7 @@ namespace mk
             }
 
             for (bsl::safe_idx mut_i{}; mut_i < bsl::to_umx(mut_tls.online_pps); ++mut_i) {
-                auto const offs{(tls_size + HYPERVISOR_PAGE_SIZE) * bsl::to_umx(mut_i)};
+                auto const offs{(tls_size + HYPERVISOR_PAGE_SIZE) * bsl::to_u64(mut_i)};
                 auto const addr{(tls_addr + offs).checked()};
 
                 /// NOTE:
@@ -908,73 +919,15 @@ namespace mk
         }
 
         /// <!-- description -->
-        ///   @brief There are three different types of memory that an
-        ///     extension can allocate: page, huge and heap. The page and
-        ///     huge memory are allocated into the direct map, which provides
-        ///     the extension with the ability to do virtual address to
-        ///     physical address conversions. The heap is different in that it
-        ///     must be virtual contiguous, which means that a virtual address
-        ///     to physical address conversion would require a page walk, and
-        ///     we really want to discourage that.
-        ///
-        ///     There are also two different ways to map memory into an
-        ///     extension. You can map the memory in using m_main_rpt, which
-        ///     is the RPT that is shared between all VMs. Meaning, no matter
-        ///     which VM is executing, the extension will always be able to
-        ///     use memory mapped into this RPT. The second RPT is the direct
-        ///     map RPTs. Extensions ALWAYS uses a direct map RPT to execute
-        ///     By default, VM 0 is used unless the extension runs another VM.
-        ///
-        ///     To map in page, huge or heap memory, we have two options: map
-        ///     the memory into m_main_rpt or m_direct_map_rpts. ALL memory
-        ///     that is mapped into the direct map must be mapped using the
-        ///     m_direct_map_rpts. The reason is, the PML4 entries associated
-        ///     with the direct map CANNOT be mapped into the m_main_rpt.
-        ///     Doing so would cause the extension to be able to see most, if
-        ///     not all of the direct mapped memory that has nothing to do
-        ///     with the page and huge memory allocations. The problem is
-        ///     if a page is allocated into a direct map, when a VM is deleted,
-        ///     what do we do? How do we know when to actually release the
-        ///     allocated memory back to the microkernel's page/huge pools.
-        ///
-        ///     To handle this issue, we map all memory that is allocated
-        ///     using the page/huge memory into the direct map for VM 0.
-        ///     The extension is not allowed to destroy VM 0. In addition,
-        ///     since this memory is allocated into VM 0, when an extension
-        ///     attempts to access this memory from a different VM, it will
-        ///     generate a page fault. This memory address is however a direct
-        ///     map address, and as such, the extension will map in this
-        ///     memory the same way it would for any other direct map address,
-        ///     with auto_release turned off. When the extension is finally
-        ///     removed, we remove the direct maps, including VM 0, and the
-        ///     memory is properly freed.
-        ///
-        ///     All we have left to do is deal with heap memory. We cannot
-        ///     allocate this memory into the direct map because it needs
-        ///     to be virtually contiguous. This means that we HAVE to map
-        ///     this memory into m_main_rpt. The problem is, this RPT is
-        ///     created when the extension is initialized, and then it is
-        ///     only used when you initialize a direct map. But what if an
-        ///     extension allocates heap memory after the direct map is
-        ///     initialized? That's where this function comes into play. It's
-        ///     job is to make sure that we add any PML4 entires from
-        ///     m_main_rpt that may have been added back into the direct
-        ///     maps that are active so that any changes to m_main_rpt are
-        ///     properly accounted for.
-        ///
-        ///     Just as a reminder, the way that these RPTs are layed out,
-        ///     is each PML4 is dedicated to a specific purpose, and these
-        ///     cannot be shared. For example, some PML4s are dedicated to
-        ///     the microkernel's memory, some for the extension, the stacks
-        ///     the TLS blocks, etc... You cannot mix and match.
+        ///   @brief Makes sure that all m_main_rpt aliases are updated
+        ///     in all of the direct maps. This ensures that any allocations
+        ///     are mapped into all VMs.
         ///
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] constexpr auto
-        update_direct_map_rpts(tls_t &mut_tls) noexcept -> bsl::errc_type
+        constexpr void
+        update_direct_map_rpts(tls_t &mut_tls) noexcept
         {
             for (auto &mut_rpt : m_direct_map_rpts) {
                 if (!mut_rpt.is_initialized()) {
@@ -983,8 +936,6 @@ namespace mk
 
                 mut_rpt.add_tables(mut_tls, m_main_rpt);
             }
-
-            return bsl::errc_success;
         }
 
         /// <!-- description -->
@@ -1007,9 +958,9 @@ namespace mk
         execute(
             tls_t &mut_tls,
             intrinsic_t &mut_intrinsic,
-            bsl::safe_umx const &ip,
-            bsl::safe_umx const &arg0 = {},
-            bsl::safe_umx const &arg1 = {}) noexcept -> bsl::errc_type
+            bsl::safe_u64 const &ip,
+            bsl::safe_u64 const &arg0 = {},
+            bsl::safe_u64 const &arg1 = {}) noexcept -> bsl::errc_type
         {
             bsl::expects(ip.is_valid_and_checked());
             bsl::expects(ip.is_pos());
@@ -1087,10 +1038,31 @@ namespace mk
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_huge_pool the huge_pool_t to use
         ///
         constexpr void
-        release(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept
+        release(tls_t &mut_tls, page_pool_t &mut_page_pool, huge_pool_t &mut_huge_pool) noexcept
         {
+            for (bsl::safe_idx mut_i; mut_i < m_huge_allocs_idx; ++mut_i) {
+                auto *const pmut_huge{m_huge_allocs.at_if(mut_i)};
+
+                auto const huge_phys{mut_huge_pool.virt_to_phys(pmut_huge->data())};
+                bsl::expects(huge_phys.is_valid_and_checked());
+                bsl::expects(huge_phys.is_pos());
+
+                auto const huge_virt{(HYPERVISOR_EXT_HUGE_POOL_ADDR + huge_phys).checked()};
+                bsl::expects(huge_virt.is_valid_and_checked());
+                bsl::expects(huge_virt.is_pos());
+
+                bsl::discard(m_main_rpt.unmap(mut_tls, mut_page_pool, huge_virt));
+                mut_huge_pool.deallocate(mut_tls, *pmut_huge);
+            }
+
+            m_huge_allocs_idx = {};
+            for (auto &elem : m_huge_allocs) {
+                elem = {};
+            }
+
             m_fail_ip = {};
             m_vmexit_ip = {};
             m_bootstrap_ip = {};
@@ -1128,7 +1100,7 @@ namespace mk
         ///   @return Returns the bootstrap IP for this extension.
         ///
         [[nodiscard]] constexpr auto
-        bootstrap_ip() const noexcept -> bsl::safe_umx const &
+        bootstrap_ip() const noexcept -> bsl::safe_u64 const &
         {
             bsl::ensures(m_bootstrap_ip.is_valid_and_checked());
             return m_bootstrap_ip;
@@ -1144,7 +1116,7 @@ namespace mk
         ///   @param ip the bootstrap IP to use
         ///
         constexpr void
-        set_bootstrap_ip(bsl::safe_umx const &ip) noexcept
+        set_bootstrap_ip(bsl::safe_u64 const &ip) noexcept
         {
             bsl::expects(ip.is_valid_and_checked());
             bsl::expects(ip.is_pos());
@@ -1159,7 +1131,7 @@ namespace mk
         ///   @return Returns the VMExit IP for this extension.
         ///
         [[nodiscard]] constexpr auto
-        vmexit_ip() const noexcept -> bsl::safe_umx const &
+        vmexit_ip() const noexcept -> bsl::safe_u64 const &
         {
             bsl::ensures(m_vmexit_ip.is_valid_and_checked());
             return m_vmexit_ip;
@@ -1175,7 +1147,7 @@ namespace mk
         ///   @param ip the VMExit IP to use
         ///
         constexpr void
-        set_vmexit_ip(bsl::safe_umx const &ip) noexcept
+        set_vmexit_ip(bsl::safe_u64 const &ip) noexcept
         {
             bsl::expects(ip.is_valid_and_checked());
             bsl::expects(ip.is_pos());
@@ -1190,7 +1162,7 @@ namespace mk
         ///   @return Returns the fast fail IP for this extension.
         ///
         [[nodiscard]] constexpr auto
-        fail_ip() const noexcept -> bsl::safe_umx const &
+        fail_ip() const noexcept -> bsl::safe_u64 const &
         {
             bsl::ensures(m_fail_ip.is_valid_and_checked());
             return m_fail_ip;
@@ -1206,7 +1178,7 @@ namespace mk
         ///   @param ip the fail IP to use
         ///
         constexpr void
-        set_fail_ip(bsl::safe_umx const &ip) noexcept
+        set_fail_ip(bsl::safe_u64 const &ip) noexcept
         {
             bsl::expects(ip.is_valid_and_checked());
             bsl::expects(ip.is_pos());
@@ -1221,15 +1193,15 @@ namespace mk
         ///   @return Opens a handle and returns the resulting handle
         ///
         [[nodiscard]] constexpr auto
-        open_handle() noexcept -> bsl::safe_umx
+        open_handle() noexcept -> bsl::safe_u64
         {
-            if (bsl::unlikely(this->handle() == this->id())) {
+            if (bsl::unlikely(m_handle.is_pos())) {
                 bsl::error() << "handle already opened\n" << bsl::here();
-                return bsl::safe_umx::failure();
+                return bsl::safe_u64::failure();
             }
 
             m_handle = m_id;
-            return bsl::to_umx(this->handle());
+            return this->handle();
         }
 
         /// <!-- description -->
@@ -1249,7 +1221,7 @@ namespace mk
         ///   @return Returns true if provided handle is valid
         ///
         [[nodiscard]] constexpr auto
-        is_handle_valid(bsl::safe_u16 const &hndl) const noexcept -> bool
+        is_handle_valid(bsl::safe_u64 const &hndl) const noexcept -> bool
         {
             bsl::expects(hndl.is_valid_and_checked());
             return hndl == this->handle();
@@ -1262,10 +1234,10 @@ namespace mk
         ///   @return Returns the ID of this ext_t
         ///
         [[nodiscard]] constexpr auto
-        handle() const noexcept -> bsl::safe_u16
+        handle() const noexcept -> bsl::safe_u64
         {
             bsl::ensures(m_handle.is_valid_and_checked());
-            return ~m_handle;
+            return ~bsl::to_u64(m_handle);
         }
 
         /// <!-- description -->
@@ -1313,35 +1285,11 @@ namespace mk
             auto const page{m_main_rpt.allocate_page<>(mut_tls, mut_page_pool)};
             if (bsl::unlikely(page.virt.is_invalid())) {
                 bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
+                return {bsl::safe_u64::failure(), bsl::safe_u64::failure()};
             }
 
-            auto const ret{this->update_direct_map_rpts(mut_tls)};
-            if (bsl::unlikely(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
-            }
-
+            this->update_direct_map_rpts(mut_tls);
             return page;
-        }
-
-        /// <!-- description -->
-        ///   @brief Frees a page that was mapped it into the extension's
-        ///     address space.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param page_virt the virtual address to free
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        free_page(bsl::safe_umx const &page_virt) noexcept -> bsl::errc_type
-        {
-            bsl::expects(page_virt.is_valid_and_checked());
-            bsl::expects(page_virt.is_pos());
-
-            bsl::error() << "free_page is currently unsupported\n" << bsl::here();
-            return bsl::errc_failure;
         }
 
         /// <!-- description -->
@@ -1367,17 +1315,40 @@ namespace mk
             bsl::expects(size.is_valid_and_checked());
             bsl::expects(size.is_pos());
 
+            if (bsl::unlikely(m_huge_allocs_idx >= HYPERVISOR_MAX_HUGE_ALLOCS)) {
+                bsl::error() << "ext out of huge allocation slots\n" << bsl::endl;
+                return {bsl::safe_u64::failure(), bsl::safe_u64::failure()};
+            }
+
             auto [mut_bytes, mut_pages]{size_to_page_aligned_bytes(size)};
             if (bsl::unlikely(mut_bytes.is_poisoned())) {
                 bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
+                return {bsl::safe_u64::failure(), bsl::safe_u64::failure()};
             }
 
             auto mut_huge{mut_huge_pool.allocate(mut_tls, mut_pages)};
             if (bsl::unlikely(mut_huge.is_invalid())) {
                 bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
+                return {bsl::safe_u64::failure(), bsl::safe_u64::failure()};
             }
+
+            /// TODO:
+            /// - We really should register the allocation at the end of this
+            ///   function, and on failure, we would just call free_huge()
+            ///   so that all of the memory can be unmapped and deallocated
+            ///   there. By registering here, if the map() below fails, we
+            ///   are not leaking memory, but the allocation is lost and can
+            ///   never be used again.
+            ///
+            /// - For now this works because if the allocation fails, there
+            ///   likely is no way to recover anyways as this is such a
+            ///   limited resource, but if free_huge() is ever implemented,
+            ///   this should be changed to "undo" what was done here so
+            ///   that the huge allocation can be used in the future.
+            ///
+
+            *m_huge_allocs.at_if(m_huge_allocs_idx) = mut_huge;
+            ++m_huge_allocs_idx;
 
             auto const huge_phys{mut_huge_pool.virt_to_phys(mut_huge.data())};
             bsl::expects(huge_phys.is_valid_and_checked());
@@ -1395,81 +1366,24 @@ namespace mk
             ///   they are marked as checked().
             ///
 
-            /// TODO:
-            /// - If the map fails for any reason, this function should
-            ///   return the allocated memory to the huge pool and remove
-            ///   any maps that did succeed. This is not a huge issued right
-            ///   now because we cannot free to the huge pool anyway.
-            ///
-
             constexpr auto inc{bsl::to_idx(HYPERVISOR_PAGE_SIZE)};
             for (bsl::safe_idx mut_i{}; mut_i < mut_bytes; mut_i += inc) {
-                auto const page_virt{(huge_virt + bsl::to_umx(mut_i)).checked()};
-                auto const page_phys{(huge_phys + bsl::to_umx(mut_i)).checked()};
+                auto const page_virt{(huge_virt + bsl::to_u64(mut_i)).checked()};
+                auto const page_phys{(huge_phys + bsl::to_u64(mut_i)).checked()};
 
-                auto const ret{m_main_rpt.map_page(
+                auto const ret{m_main_rpt.map(
                     mut_tls, mut_page_pool, page_virt, page_phys, MAP_PAGE_RW, true)};
 
                 if (bsl::unlikely(!ret)) {
                     bsl::print<bsl::V>() << bsl::here();
-                    return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
+                    return {bsl::safe_u64::failure(), bsl::safe_u64::failure()};
                 }
 
                 bsl::touch();
             }
 
-            auto const ret{this->update_direct_map_rpts(mut_tls)};
-            if (bsl::unlikely(!ret)) {
-                bsl::print<bsl::V>() << bsl::here();
-                return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
-            }
-
+            this->update_direct_map_rpts(mut_tls);
             return {huge_virt, huge_phys};
-        }
-
-        /// <!-- description -->
-        ///   @brief Frees a physically contiguous block of memory that was
-        ///     mapped it into the extension's address space.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param huge_virt the virtual address to free
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
-        ///
-        [[nodiscard]] static constexpr auto
-        free_huge(bsl::safe_umx const &huge_virt) noexcept -> bsl::errc_type
-        {
-            bsl::expects(huge_virt.is_valid_and_checked());
-            bsl::expects(huge_virt.is_pos());
-
-            bsl::error() << "free_huge is currently unsupported\n" << bsl::here();
-            return bsl::errc_failure;
-        }
-
-        /// <!-- description -->
-        ///   @brief Allocates heap memory and maps it into the extension's
-        ///     address space.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
-        ///   @param mut_page_pool the page_pool_t to use
-        ///   @param size the total number of bytes to allocate and add
-        ///     to the heap.
-        ///   @return On success, alloc_heap returns the previous address
-        ///     virtual address of the heap. If an error occurs, this
-        ///     function returns bsl::safe_umx::failure().
-        ///
-        [[nodiscard]] static constexpr auto
-        alloc_heap(tls_t &mut_tls, page_pool_t &mut_page_pool, bsl::safe_umx const &size) noexcept
-            -> bsl::safe_umx
-        {
-            bsl::discard(mut_tls);
-            bsl::discard(mut_page_pool);
-            bsl::expects(size.is_valid_and_checked());
-            bsl::expects(size.is_pos());
-
-            bsl::error() << "alloc_heap not implemented\n" << bsl::endl;
-            return bsl::safe_umx::failure();
         }
 
         /// <!-- description -->
@@ -1483,14 +1397,14 @@ namespace mk
         ///   @param page_phys the physical address to map
         ///   @return Returns the virtual address the physical address was
         ///     mapped to in the direct map. On failure returns
-        ///     bsl::safe_umx::failure().
+        ///     bsl::safe_u64::failure().
         ///
         [[nodiscard]] constexpr auto
         map_page_direct(
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
             bsl::safe_u16 const &vmid,
-            bsl::safe_umx const &page_phys) noexcept -> bsl::safe_umx
+            bsl::safe_u64 const &page_phys) noexcept -> bsl::safe_u64
         {
             constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
 
@@ -1512,22 +1426,11 @@ namespace mk
             auto *const pmut_direct_map_rpt{m_direct_map_rpts.at_if(bsl::to_idx(vmid))};
             bsl::expects(nullptr != pmut_direct_map_rpt);
 
-            auto const ret{pmut_direct_map_rpt->map_page(
+            auto const ret{pmut_direct_map_rpt->map(
                 mut_tls, mut_page_pool, page_virt, page_phys, MAP_PAGE_RW)};
-
-            if (ret == bsl::errc_already_exists) {
-                bsl::error() << "physical address "     // --
-                             << bsl::hex(page_phys)     // --
-                             << " is already mapped"    // --
-                             << bsl::endl               // --
-                             << bsl::here();            // --
-
-                return bsl::safe_umx::failure();
-            }
-
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return bsl::safe_umx::failure();
+                return bsl::safe_u64::failure();
             }
 
             return page_virt;
@@ -1552,7 +1455,7 @@ namespace mk
             page_pool_t &mut_page_pool,
             intrinsic_t const &intrinsic,
             bsl::safe_u16 const &vmid,
-            bsl::safe_umx const &page_virt) noexcept -> bsl::errc_type
+            bsl::safe_u64 const &page_virt) noexcept -> bsl::errc_type
         {
             constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
             constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_DIRECT_MAP_SIZE).checked()};
@@ -1662,7 +1565,7 @@ namespace mk
         [[nodiscard]] constexpr auto
         start(tls_t &mut_tls, intrinsic_t &mut_intrinsic) noexcept -> bsl::errc_type
         {
-            auto const arg{bsl::to_umx(syscall::BF_ALL_SPECS_SUPPORTED_VAL)};
+            auto const arg{bsl::to_u64(syscall::BF_ALL_SPECS_SUPPORTED_VAL)};
             auto const ret{this->execute(mut_tls, mut_intrinsic, m_entry_ip, arg)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
@@ -1696,7 +1599,7 @@ namespace mk
                 return bsl::errc_failure;
             }
 
-            auto const arg{bsl::to_umx(mut_tls.ppid)};
+            auto const arg{bsl::to_u64(mut_tls.ppid)};
             auto const ret{this->execute(mut_tls, mut_intrinsic, m_bootstrap_ip, arg)};
             if (bsl::unlikely(!ret)) {
                 bsl::print<bsl::V>() << bsl::here();
@@ -1720,10 +1623,10 @@ namespace mk
         ///
         [[nodiscard]] constexpr auto
         vmexit(
-            tls_t &mut_tls, intrinsic_t &mut_intrinsic, bsl::safe_umx const &exit_reason) noexcept
+            tls_t &mut_tls, intrinsic_t &mut_intrinsic, bsl::safe_u64 const &exit_reason) noexcept
             -> bsl::errc_type
         {
-            auto const arg0{bsl::to_umx(mut_tls.active_vsid)};
+            auto const arg0{bsl::to_u64(mut_tls.active_vsid)};
             auto const arg1{exit_reason};
 
             auto const ret{this->execute(mut_tls, mut_intrinsic, m_vmexit_ip, arg0, arg1)};

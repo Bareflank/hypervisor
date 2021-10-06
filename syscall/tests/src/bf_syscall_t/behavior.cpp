@@ -1551,7 +1551,6 @@ namespace syscall
                     pmut_mut_ptr = mut_sys.bf_mem_op_alloc_page<page_t>(mut_phys);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(pmut_mut_ptr != nullptr);
-                        bsl::ut_check(mut_sys.bf_mem_op_free_page(pmut_mut_ptr));
                     };
                 };
 
@@ -1559,30 +1558,6 @@ namespace syscall
                     pmut_mut_ptr = mut_sys.bf_mem_op_alloc_page<page_t>();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(pmut_mut_ptr != nullptr);
-                        bsl::ut_check(mut_sys.bf_mem_op_free_page(pmut_mut_ptr));
-                    };
-                };
-            };
-        };
-
-        bsl::ut_scenario{"bf_mem_op_free_page failure/success"} = []() noexcept {
-            bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_syscall_t mut_sys{};
-                page_t *pmut_mut_ptr{};
-                bsl::ut_when{} = [&]() noexcept {
-                    g_mut_errc.clear();
-                    g_mut_data.clear();
-                    g_mut_ptrs.at("bf_mem_op_alloc_page_impl_reg0_out") = &pmut_mut_ptr;
-
-                    pmut_mut_ptr = mut_sys.bf_mem_op_alloc_page<page_t>();
-                    g_mut_errc.at("bf_mem_op_free_page_impl") = BF_STATUS_FAILURE_UNKNOWN;
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_sys.bf_mem_op_free_page(pmut_mut_ptr));
-                    };
-
-                    g_mut_errc.at("bf_mem_op_free_page_impl") = BF_STATUS_SUCCESS;
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_mem_op_free_page(pmut_mut_ptr));
                     };
                 };
             };
@@ -1619,7 +1594,6 @@ namespace syscall
                     pmut_mut_ptr = mut_sys.bf_mem_op_alloc_huge<page_t>(size, mut_phys);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(pmut_mut_ptr != nullptr);
-                        bsl::ut_check(mut_sys.bf_mem_op_free_huge(pmut_mut_ptr));
                     };
                 };
 
@@ -1627,31 +1601,6 @@ namespace syscall
                     pmut_mut_ptr = mut_sys.bf_mem_op_alloc_huge<page_t>(size);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(pmut_mut_ptr != nullptr);
-                        bsl::ut_check(mut_sys.bf_mem_op_free_huge(pmut_mut_ptr));
-                    };
-                };
-            };
-        };
-
-        bsl::ut_scenario{"bf_mem_op_free_huge failure/success"} = []() noexcept {
-            bsl::ut_given_at_runtime{} = []() noexcept {
-                bf_syscall_t mut_sys{};
-                bsl::safe_u64 const size{HYPERVISOR_PAGE_SIZE};
-                page_t *pmut_mut_ptr{};
-                bsl::ut_when{} = [&]() noexcept {
-                    g_mut_errc.clear();
-                    g_mut_data.clear();
-                    g_mut_ptrs.at("bf_mem_op_alloc_huge_impl_reg0_out") = &pmut_mut_ptr;
-
-                    pmut_mut_ptr = mut_sys.bf_mem_op_alloc_huge<page_t>(size);
-                    g_mut_errc.at("bf_mem_op_free_huge_impl") = BF_STATUS_FAILURE_UNKNOWN;
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_sys.bf_mem_op_free_huge(pmut_mut_ptr));
-                    };
-
-                    g_mut_errc.at("bf_mem_op_free_huge_impl") = BF_STATUS_SUCCESS;
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_mem_op_free_huge(pmut_mut_ptr));
                     };
                 };
             };

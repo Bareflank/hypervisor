@@ -178,8 +178,6 @@ typedef EFI_STATUS(EFIAPI *EFI_TEXT_ENABLE_CURSOR)(
     IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This, IN BOOLEAN Visible);
 
 /**
- * @struct EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

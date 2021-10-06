@@ -172,8 +172,6 @@ namespace example
         return a.addr < b.addr;
     };
 
-    /// @class example::mtrrs_t
-    ///
     /// <!-- description -->
     ///   @brief Parses the MTRRs and provides a continuous, non-overlapping
     ///     view of the ranges as needed.

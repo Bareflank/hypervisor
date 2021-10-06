@@ -28,8 +28,6 @@
 #define EFI_CONFIGURATION_TABLE_H
 
 /**
- * @struct EFI_CONFIGURATION_TABLE
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_CONFIGURATION_TABLE struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

@@ -32,8 +32,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct l1te_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a level-1 table entry (L1TE).
  */

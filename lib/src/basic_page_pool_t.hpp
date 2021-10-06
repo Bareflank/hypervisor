@@ -26,17 +26,20 @@
 #define BASIC_PAGE_POOL_T_HPP
 
 #if __has_include("page_pool_helpers.hpp")
-#include "page_pool_helpers.hpp"    // IWYU pragma: export
+#include <page_pool_helpers.hpp>    // IWYU pragma: export
 #endif
 
 #if __has_include("basic_page_pool_helpers.hpp")
-#include "basic_page_pool_helpers.hpp"    // IWYU pragma: export
+#include <basic_page_pool_helpers.hpp>    // IWYU pragma: export
 #endif
 
-#include "basic_page_pool_node_t.hpp"    // IWYU pragma: export
+// IWYU pragma: no_include "page_pool_helpers.hpp"
+// IWYU pragma: no_include "basic_page_pool_helpers.hpp"
+// IWYU pragma: no_include "basic_page_pool_node_t.hpp"
 
-#include <basic_lock_guard_t.hpp>    // IWYU pragma: keep
-#include <basic_spinlock_t.hpp>      // IWYU pragma: keep
+#include <basic_lock_guard_t.hpp>        // IWYU pragma: keep
+#include <basic_page_pool_node_t.hpp>    // IWYU pragma: export
+#include <basic_spinlock_t.hpp>          // IWYU pragma: keep
 
 #include <bsl/construct_at.hpp>
 #include <bsl/convert.hpp>
@@ -54,8 +57,6 @@
 
 namespace lib
 {
-    /// @class lib::basic_page_pool_t
-    ///
     /// <!-- description -->
     ///   @brief the basic_page_pool_t is responsible for allocating and freeing
     ///      pages. The loader provides a linked list with the pages that

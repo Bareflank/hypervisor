@@ -25,13 +25,17 @@
 #ifndef DISPATCH_SYSCALL_BF_INTRINSIC_OP_HPP
 #define DISPATCH_SYSCALL_BF_INTRINSIC_OP_HPP
 
+#include "../dispatch_syscall_helpers.hpp"
+
 #include <bf_constants.hpp>
-#include <ext_t.hpp>
+#include <bf_types.hpp>
 #include <intrinsic_t.hpp>
 #include <tls_t.hpp>
 
+#include <bsl/basic_errc_type.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
+#include <bsl/expects.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
 
@@ -50,10 +54,7 @@ namespace mk
         -> syscall::bf_status_t
     {
         auto const msr{get_msr(mut_tls.ext_reg1)};
-        if (bsl::unlikely(msr.is_invalid())) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::BF_STATUS_INVALID_INPUT_REG1;
-        }
+        bsl::expects(msr.is_valid_and_checked());
 
         auto const val{intrinsic.rdmsr(msr)};
         if (bsl::unlikely(val.is_invalid())) {
@@ -78,10 +79,7 @@ namespace mk
         -> syscall::bf_status_t
     {
         auto const msr{get_msr(mut_tls.ext_reg1)};
-        if (bsl::unlikely(msr.is_invalid())) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::BF_STATUS_INVALID_INPUT_REG1;
-        }
+        bsl::expects(msr.is_valid_and_checked());
 
         auto const ret{mut_intrinsic.wrmsr(msr, bsl::to_u64(mut_tls.ext_reg2))};
         if (bsl::unlikely(!ret)) {

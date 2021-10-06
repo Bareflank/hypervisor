@@ -40,7 +40,7 @@
 # Executable
 # ------------------------------------------------------------------------------
 
-add_executable(example_default)
+add_executable(extension_bin)
 
 # ------------------------------------------------------------------------------
 # Macros
@@ -71,33 +71,33 @@ endmacro(example_target_source)
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
     if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
-        target_include_directories(example_default PRIVATE
+        target_include_directories(extension_bin PRIVATE
             include/x64/amd
             src/x64/amd
         )
     endif()
 
     if(HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
-        target_include_directories(example_default PRIVATE
+        target_include_directories(extension_bin PRIVATE
             include/x64/intel
             src/x64/intel
         )
     endif()
 
-    target_include_directories(example_default PRIVATE
+    target_include_directories(extension_bin PRIVATE
         include/x64
         src/x64
     )
 endif()
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
-    target_include_directories(example_default PRIVATE
+    target_include_directories(extension_bin PRIVATE
         include/arm/aarch64
         src/arm/aarch64
     )
 endif()
 
-target_include_directories(example_default PRIVATE
+target_include_directories(extension_bin PRIVATE
     include
     src
 )
@@ -157,10 +157,10 @@ endif()
 #   use the macro for doing this.
 #
 
-example_target_source(example_default src/main.cpp ${HEADERS})
+example_target_source(extension_bin src/main.cpp ${HEADERS})
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
-    example_target_source(example_default src/x64/intrinsic_cpuid_impl.S ${HEADERS})
+    example_target_source(extension_bin src/x64/intrinsic_cpuid_impl.S ${HEADERS})
 endif()
 
 # ------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ endif()
 #   old implementation, or write your own.
 #
 
-target_link_libraries(example_default PRIVATE
+target_link_libraries(extension_bin PRIVATE
     runtime
     bsl
     loader
@@ -196,5 +196,5 @@ target_link_libraries(example_default PRIVATE
 #
 
 if(CMAKE_BUILD_TYPE STREQUAL RELEASE OR CMAKE_BUILD_TYPE STREQUAL MINSIZEREL)
-    add_custom_command(TARGET example_default POST_BUILD COMMAND ${CMAKE_STRIP} example_default)
+    add_custom_command(TARGET extension_bin POST_BUILD COMMAND ${CMAKE_STRIP} extension_bin)
 endif()

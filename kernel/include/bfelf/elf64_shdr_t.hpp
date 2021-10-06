@@ -31,8 +31,6 @@
 
 namespace bfelf
 {
-    /// @struct elf64_shdr_t
-    ///
     /// <!-- description -->
     ///   @brief Sections provide different information from relocation
     ///     instructions to strings stored in the executable.

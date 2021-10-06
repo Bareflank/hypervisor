@@ -30,8 +30,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct code_aliases_t
- *
  * <!-- description -->
  *   @brief Stores pointers to memory that is allocated for executable
  *     code that is compiled into the kernel, that must be mapped into the

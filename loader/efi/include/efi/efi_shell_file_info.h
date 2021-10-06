@@ -35,8 +35,6 @@
 typedef VOID *SHELL_FILE_HANDLE;
 
 /**
- * @struct EFI_SHELL_FILE_INFO
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_SHELL_FILE_INFO struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Shell_2_2.pdf

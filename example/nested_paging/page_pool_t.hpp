@@ -44,8 +44,6 @@
 
 namespace example
 {
-    /// @class example::page_pool_t
-    ///
     /// <!-- description -->
     ///   @brief The page pool is responsible for allocating and freeing
     ///      pages. The page pool exists in the extensions's direct map and so
@@ -56,7 +54,7 @@ namespace example
     ///
     ///      One question you might ask if, why have a page_pool_t in the
     ///      extension in the first place? The reason is because some
-    ///      microkernel implementation might not implement the free_page
+    ///      microkernel implementations might not implement the free_page
     ///      ABI as it is optional, but the extension will still need to be
     ///      able to free memory and reuse it. For this reason, all allocations
     ///      are done using this class, instead of allocating memory manually.

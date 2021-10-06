@@ -33,8 +33,6 @@
 
 namespace loader
 {
-    /// @struct loader::debug_ring_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the structure of the microkernel's debug ring
     ///

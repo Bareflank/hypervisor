@@ -31,8 +31,6 @@
 
 namespace example
 {
-    /// @class example::spinlock
-    ///
     /// <!-- description -->
     ///   @brief Implements a spinlock
     ///

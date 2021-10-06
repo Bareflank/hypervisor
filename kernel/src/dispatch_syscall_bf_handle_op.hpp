@@ -28,9 +28,12 @@
 #include "dispatch_syscall_helpers.hpp"
 
 #include <bf_constants.hpp>
+#include <bf_types.hpp>
+#include <ext_t.hpp>
 #include <tls_t.hpp>
 
 #include <bsl/debug.hpp>
+#include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk

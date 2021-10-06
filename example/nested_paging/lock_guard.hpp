@@ -27,8 +27,6 @@
 
 namespace example
 {
-    /// @class example::lock_guard
-    ///
     /// <!-- description -->
     ///   @brief Implements a lock_guard.
     ///

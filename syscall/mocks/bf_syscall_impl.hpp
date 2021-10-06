@@ -29,6 +29,7 @@
 #include <bf_reg_t.hpp>
 #include <iostream>
 #include <string>
+#include <string_view>
 
 #include <bsl/char_type.hpp>
 #include <bsl/convert.hpp>
@@ -786,12 +787,14 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
     ///
     extern "C" inline void
-    bf_debug_op_write_str_impl(bsl::char_type const *const reg0_in) noexcept
+    bf_debug_op_write_str_impl(
+        bsl::char_type const *const reg0_in, bsl::uintmx const reg1_in) noexcept
     {
         g_mut_bf_debug_op_write_str_impl_executed = true;
-        std::cout << reg0_in;
+        std::cout << std::string_view{reg0_in, reg1_in};
     }
 
     /// <!-- description -->
@@ -1540,24 +1543,6 @@ namespace syscall
     }
 
     /// <!-- description -->
-    ///   @brief Implements the ABI for bf_mem_op_free_page.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param pmut_reg1_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] inline auto
-    bf_mem_op_free_page_impl(bsl::uint64 const reg0_in, void *const pmut_reg1_in) noexcept
-        -> bsl::uint64
-    {
-        bsl::discard(reg0_in);
-        bsl::discard(pmut_reg1_in);
-
-        return g_mut_errc.at("bf_mem_op_free_page_impl").get();
-    }
-
-    /// <!-- description -->
     ///   @brief Implements the ABI for bf_mem_op_alloc_huge.
     ///
     /// <!-- inputs/outputs -->
@@ -1594,24 +1579,6 @@ namespace syscall
         }
 
         return g_mut_errc.at("bf_mem_op_alloc_huge_impl").get();
-    }
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_mem_op_free_huge.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param pmut_reg1_in n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] inline auto
-    bf_mem_op_free_huge_impl(bsl::uint64 const reg0_in, void *const pmut_reg1_in) noexcept
-        -> bsl::uint64
-    {
-        bsl::discard(reg0_in);
-        bsl::discard(pmut_reg1_in);
-
-        return g_mut_errc.at("bf_mem_op_free_huge_impl").get();
     }
 }
 

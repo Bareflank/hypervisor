@@ -25,6 +25,7 @@
 #include "../../../../src/bsl/cstdio.hpp"
 
 #include <bsl/char_type.hpp>
+#include <bsl/cstdint.hpp>
 #include <bsl/discard.hpp>
 #include <bsl/ut.hpp>
 
@@ -47,11 +48,14 @@ namespace
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
     ///
     extern "C" inline void
-    bf_debug_op_write_str_impl(bsl::char_type const *const reg0_in) noexcept
+    bf_debug_op_write_str_impl(
+        bsl::char_type const *const reg0_in, bsl::uintmx const reg1_in) noexcept
     {
         bsl::discard(reg0_in);
+        bsl::discard(reg1_in);
     }
 }
 
@@ -67,13 +71,13 @@ namespace
 main() noexcept -> bsl::exit_code
 {
     bf_debug_op_write_c_impl('*');
-    bf_debug_op_write_str_impl("the answer is 42");
+    bf_debug_op_write_str_impl("the answer is 42", {});
 
     bsl::ut_scenario{"verify noexcept"} = []() noexcept {
         bsl::ut_given{} = []() noexcept {
             bsl::ut_then{} = []() noexcept {
                 static_assert(noexcept(bsl::stdio_out_char('*')));
-                static_assert(noexcept(bsl::stdio_out_cstr("the answer is 42")));
+                static_assert(noexcept(bsl::stdio_out_cstr("the answer is 42", {})));
             };
         };
     };

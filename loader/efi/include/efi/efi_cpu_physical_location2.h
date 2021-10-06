@@ -28,8 +28,6 @@
 #define EFI_CPU_PHYSICAL_LOCATION2_H
 
 /**
- * @struct EFI_CPU_PHYSICAL_LOCATION2
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_CPU_PHYSICAL_LOCATION2 struct:
  *     https://uefi.org/sites/default/files/resources/PI_Spec_1_7_A_final_May1.pdf

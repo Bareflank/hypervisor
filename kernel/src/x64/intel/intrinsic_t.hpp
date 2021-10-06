@@ -26,292 +26,49 @@
 #define INTRINSIC_HPP
 
 #include <bf_constants.hpp>
+#include <intrinsic_cr0.hpp>
+#include <intrinsic_cr3.hpp>
+#include <intrinsic_cr4.hpp>
+#include <intrinsic_cs_selector.hpp>
+#include <intrinsic_ds_selector.hpp>
+#include <intrinsic_es_selector.hpp>
+#include <intrinsic_fs_selector.hpp>
+#include <intrinsic_gs_selector.hpp>
+#include <intrinsic_invept.hpp>
+#include <intrinsic_invlpg.hpp>
+#include <intrinsic_invvpid.hpp>
+#include <intrinsic_rdmsr.hpp>
+#include <intrinsic_set_cr3.hpp>
+#include <intrinsic_set_tls_reg.hpp>
+#include <intrinsic_set_tp.hpp>
+#include <intrinsic_ss_selector.hpp>
+#include <intrinsic_tls_reg.hpp>
+#include <intrinsic_tr_selector.hpp>
+#include <intrinsic_vmcl.hpp>
+#include <intrinsic_vmld.hpp>
+#include <intrinsic_vmrd16.hpp>
+#include <intrinsic_vmrd32.hpp>
+#include <intrinsic_vmrd64.hpp>
+#include <intrinsic_vmrun.hpp>
+#include <intrinsic_vmwr16.hpp>
+#include <intrinsic_vmwr32.hpp>
+#include <intrinsic_vmwr64.hpp>
+#include <intrinsic_vmwrfunc.hpp>
+#include <intrinsic_wrmsr.hpp>
 #include <invept_descriptor_t.hpp>
 #include <invvpid_descriptor_t.hpp>
 #include <vmcs_t.hpp>
 
-#include <bsl/cstdint.hpp>
+#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
+#include <bsl/ensures.hpp>
 #include <bsl/errc_type.hpp>
+#include <bsl/expects.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
 {
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::invlpg
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param val n/a
-    ///
-    extern "C" void intrinsic_invlpg(bsl::uint64 const val) noexcept;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::invept
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param desc n/a
-    ///   @param type n/a
-    ///
-    extern "C" void intrinsic_invept(void const *const desc, bsl::uint64 const type) noexcept;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::invvpid
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param desc n/a
-    ///   @param type n/a
-    ///
-    extern "C" void intrinsic_invvpid(void const *const desc, bsl::uint64 const type) noexcept;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::es_selector
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_es_selector() noexcept -> bsl::uint16;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::es_selector
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_cs_selector() noexcept -> bsl::uint16;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::es_selector
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_ss_selector() noexcept -> bsl::uint16;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::es_selector
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_ds_selector() noexcept -> bsl::uint16;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::es_selector
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_fs_selector() noexcept -> bsl::uint16;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::es_selector
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_gs_selector() noexcept -> bsl::uint16;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::tr_selector
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_tr_selector() noexcept -> bsl::uint16;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::cr0
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_cr0() noexcept -> bsl::uint64;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::cr3
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_cr3() noexcept -> bsl::uint64;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::cr4
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_cr4() noexcept -> bsl::uint64;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::set_cr3
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param val n/a
-    ///
-    extern "C" void intrinsic_set_cr3(bsl::uint64 const val) noexcept;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::set_tp
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param val n/a
-    ///
-    extern "C" void intrinsic_set_tp(bsl::uint64 const val) noexcept;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::tls_reg
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_tls_reg(bsl::uint64 const reg) noexcept -> bsl::uint64;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::set_tls_reg
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg n/a
-    ///   @param val n/a
-    ///
-    extern "C" void intrinsic_set_tls_reg(bsl::uint64 const reg, bsl::uint64 const val) noexcept;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::rdmsr
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param msr n/a
-    ///   @param pmut_val n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto
-    intrinsic_rdmsr(bsl::uint32 const msr, bsl::uint64 *const pmut_val) noexcept -> bsl::errc_type;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::wrmsr
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param msr n/a
-    ///   @param val n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto
-    intrinsic_wrmsr(bsl::uint32 const msr, bsl::uint64 const val) noexcept -> bsl::errc_type;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::vmld
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param phys n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_vmld(void const *const phys) noexcept -> bsl::errc_type;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::vmcl
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param phys n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_vmcl(void const *const phys) noexcept -> bsl::errc_type;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::vmrd16
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param field n/a
-    ///   @param pmut_val n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto
-    intrinsic_vmrd16(bsl::uint64 const field, bsl::uint16 *const pmut_val) noexcept
-        -> bsl::errc_type;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::vmrd32
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param field n/a
-    ///   @param pmut_val n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto
-    intrinsic_vmrd32(bsl::uint64 const field, bsl::uint32 *const pmut_val) noexcept
-        -> bsl::errc_type;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::vmrd64
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param field n/a
-    ///   @param pmut_val n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto
-    intrinsic_vmrd64(bsl::uint64 const field, bsl::uint64 *const pmut_val) noexcept
-        -> bsl::errc_type;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::vmwr16
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param field n/a
-    ///   @param val n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto
-    intrinsic_vmwr16(bsl::uint64 const field, bsl::uint16 const val) noexcept -> bsl::errc_type;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::vmwr32
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param field n/a
-    ///   @param val n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto
-    intrinsic_vmwr32(bsl::uint64 const field, bsl::uint32 const val) noexcept -> bsl::errc_type;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::vmwr64
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param field n/a
-    ///   @param val n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto
-    intrinsic_vmwr64(bsl::uint64 const field, bsl::uint64 const val) noexcept -> bsl::errc_type;
-
-    /// <!-- description -->
-    ///   @brief Implements intrinsic_t::vmwrfunc
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param field n/a
-    ///   @param pmut_func n/a
-    ///   @return n/a
-    ///
-    extern "C" [[nodiscard]] auto
-    intrinsic_vmwrfunc(bsl::uint64 const field, void (*const pmut_func)() noexcept) noexcept
-        -> bsl::errc_type;
-
-    /// <!-- description -->
-    ///   @brief Executes the VMLaunch/VMResume instructions. When this
-    ///     function returns, a "VMExit" has occurred and must be handled.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param pmut_missing_registers a pointer to the missing registers
-    ///   @return Returns the exit reason associated with the VMExit
-    ///
-    extern "C" [[nodiscard]] auto intrinsic_vmrun(void *const pmut_missing_registers) noexcept
-        -> bsl::uintmx;
-
-    /// @class mk::intrinsic_t
-    ///
     /// <!-- description -->
     ///   @brief Provides raw access to intrinsics. Instead of using global
     ///     functions, the intrinsics class provides a means for the rest of
@@ -352,43 +109,14 @@ namespace mk
             }
 
             if (addr.is_zero()) {
-                auto const eptp{vmrd64(VMCS_EPTP_INDEX)};
-                if (eptp.is_zero()) {
-                    constexpr auto type{2_u64};
-                    invept_descriptor_t const desc{{}, {}};
-                    return intrinsic_invept(&desc, type.get());
-                }
-
                 constexpr auto type{1_u64};
-                invept_descriptor_t const desc{eptp.get(), {}};
+                invept_descriptor_t const desc{vmrd64(VMCS_EPTP_INDEX).get(), {}};
                 return intrinsic_invept(&desc, type.get());
             }
 
             constexpr auto type{0_u64};
             invvpid_descriptor_t const desc{vpid.get(), {}, {}, {}, addr.get()};
             return intrinsic_invvpid(&desc, type.get());
-        }
-
-        /// <!-- description -->
-        ///   @brief Invalidates TLB entries given an address and a VPID.
-        ///     If the VPID is set to BF_INVALID_ID, an extension address
-        ///     is invalidated. If the VPID is valid, a guest address is
-        ///     invalidated using the VPID. If the address is valid, the
-        ///     address is invalidated for the guest. If the address is
-        ///     0, the entire VM is invalidated using the currently loaded
-        ///     VS's EPTP. If EPTP is never set by the extension, all VMs
-        ///     are flushed.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param addr the address to invalidate.
-        ///   @param vpid the VPID (as defined by Intel) to flush.
-        ///
-        static constexpr void
-        tlb_flush(
-            void const *const addr, bsl::safe_u16 const &vpid = syscall::BF_INVALID_ID) noexcept
-        {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-            return tlb_flush(bsl::to_u64(reinterpret_cast<bsl::uint64>(addr)), vpid);
         }
 
         /// <!-- description -->
@@ -638,8 +366,6 @@ namespace mk
         // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
         vmld(void const *const phys) noexcept -> bsl::errc_type
         {
-            bsl::expects(nullptr != phys);
-
             auto const ret{intrinsic_vmld(phys)};
             if (bsl::unlikely(!ret)) {
                 bsl::error() << "vmld failed for "     // --
@@ -668,8 +394,6 @@ namespace mk
         [[nodiscard]] static constexpr auto
         vmcl(void const *const phys) noexcept -> bsl::errc_type
         {
-            bsl::expects(nullptr != phys);
-
             auto const ret{intrinsic_vmcl(phys)};
             if (bsl::unlikely(!ret)) {
                 bsl::error() << "vmcl failed for "     // --
@@ -698,7 +422,6 @@ namespace mk
         vmrd16(bsl::safe_u64 const &field, bsl::uint16 *const pmut_val) noexcept -> bsl::errc_type
         {
             bsl::expects(field.is_valid_and_checked());
-            bsl::expects(nullptr != pmut_val);
 
             auto const ret{intrinsic_vmrd16(field.get(), pmut_val)};
             if (bsl::unlikely(!ret)) {
@@ -751,7 +474,6 @@ namespace mk
         vmrd32(bsl::safe_u64 const &field, bsl::uint32 *const pmut_val) noexcept -> bsl::errc_type
         {
             bsl::expects(field.is_valid_and_checked());
-            bsl::expects(nullptr != pmut_val);
 
             auto const ret{intrinsic_vmrd32(field.get(), pmut_val)};
             if (bsl::unlikely(!ret)) {
@@ -804,7 +526,6 @@ namespace mk
         vmrd64(bsl::safe_u64 const &field, bsl::uint64 *const pmut_val) noexcept -> bsl::errc_type
         {
             bsl::expects(field.is_valid_and_checked());
-            bsl::expects(nullptr != pmut_val);
 
             auto const ret{intrinsic_vmrd64(field.get(), pmut_val)};
             if (bsl::unlikely(!ret)) {
@@ -955,7 +676,6 @@ namespace mk
             -> bsl::errc_type
         {
             bsl::expects(field.is_valid_and_checked());
-            bsl::expects(nullptr != pmut_func);
 
             auto const ret{intrinsic_vmwrfunc(field.get(), pmut_func)};
             if (bsl::unlikely(!ret)) {

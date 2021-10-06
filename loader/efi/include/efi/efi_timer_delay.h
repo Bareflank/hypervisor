@@ -28,8 +28,6 @@
 #define EFI_TIMER_DELAY_H
 
 /**
- * @struct EFI_TIMER_DELAY
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_TIMER_DELAY struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

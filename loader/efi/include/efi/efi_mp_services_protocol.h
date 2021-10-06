@@ -270,8 +270,6 @@ typedef EFI_STATUS(EFIAPI *EFI_MP_SERVICES_WHOAMI)(
     IN EFI_MP_SERVICES_PROTOCOL *This, OUT UINTN *ProcessorNumber);
 
 /**
- * @struct EFI_MP_SERVICES_PROTOCOL
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_MP_SERVICES_PROTOCOL struct:
  *     https://uefi.org/sites/default/files/resources/PI_Spec_1_7_A_final_May1.pdf

@@ -51,8 +51,6 @@
 #define PROCESSOR_HEALTH_STATUS_BIT 0x00000004
 
 /**
- * @struct EFI_PROCESSOR_INFORMATION
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_PROCESSOR_INFORMATION struct:
  *     https://uefi.org/sites/default/files/resources/PI_Spec_1_7_A_final_May1.pdf

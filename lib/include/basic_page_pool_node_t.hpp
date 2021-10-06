@@ -36,8 +36,6 @@ namespace lib
     /// @brief stores the size of the data portion of basic_page_pool_node_t
     constexpr auto BASIC_PAGE_POOL_NODE_DATA_SIZE{0xFF8_umx};
 
-    /// @struct lib::basic_page_pool_node_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the node type used by the basic_page_pool_t
     ///

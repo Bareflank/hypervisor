@@ -83,6 +83,7 @@ list(APPEND COMMON_DEFINES
     HYPERVISOR_PAGE_SIZE=0x1000_umx
     HYPERVISOR_MK_DIRECT_MAP_ADDR=0x1000_umx
     HYPERVISOR_MK_DIRECT_MAP_SIZE=0x0000200000000000_umx
+    HYPERVISOR_EXT_PAGE_POOL_ADDR=0x0000200000000000_umx
 )
 
 list(APPEND X64_DEFINES
@@ -105,11 +106,13 @@ list(APPEND AARCH64_DEFINES
 # Tests
 # ------------------------------------------------------------------------------
 
-add_subdirectory(mocks/basic_lock_guard_t)
+add_subdirectory(include/basic_lock_guard_t)
+add_subdirectory(include/basic_queue_t)
+
 add_subdirectory(mocks/basic_page_pool_t)
+add_subdirectory(mocks/basic_root_page_table_t)
 add_subdirectory(mocks/basic_spinlock_t)
 
-add_subdirectory(src/basic_lock_guard_t)
 add_subdirectory(src/basic_page_pool_t)
-# add_subdirectory(src/basic_root_page_table_t)
+add_subdirectory(src/basic_root_page_table_t)
 add_subdirectory(src/basic_spinlock_t)

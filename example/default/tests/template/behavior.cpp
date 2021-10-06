@@ -82,8 +82,8 @@ namespace example
         ///     is used to verify that your unit test's set up is correct.
         ///
 
-        bsl::ut_scenario{"this is what I am testing"} = []() noexcept {
-            bsl::ut_given{"given the following"} = []() noexcept {
+        bsl::ut_scenario{"this is what I am testing"} = [&]() noexcept {
+            bsl::ut_given{"given the following"} = [&]() noexcept {
                 /// add variables here
                 bsl::ut_when{"when we do the following"} = [&]() noexcept {
                     /// add function calls here
@@ -99,8 +99,8 @@ namespace example
         ///   is to group tests under the same scenario as follows:
         ///
 
-        bsl::ut_scenario{"verify +="} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
+        bsl::ut_scenario{"verify +="} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
                 constexpr auto data1{42_umx};
                 bsl::safe_umx mut_data2{};
                 bsl::ut_when{} = [&]() noexcept {
@@ -111,7 +111,7 @@ namespace example
                 };
             };
 
-            bsl::ut_given_at_runtime{} = []() noexcept {
+            bsl::ut_given_at_runtime{} = [&]() noexcept {
                 constexpr auto data1{42_umx};
                 auto mut_data2{bsl::safe_umx::failure()};
                 bsl::ut_when{} = [&]() noexcept {
@@ -133,8 +133,8 @@ namespace example
         ///   are only changing one thing (or even a single character)
         ///
 
-        bsl::ut_scenario{"verify += adds correctly"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
+        bsl::ut_scenario{"verify += adds correctly"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
                 constexpr auto data1{42_umx};
                 bsl::safe_umx mut_data2{};
                 bsl::ut_when{} = [&]() noexcept {
@@ -146,8 +146,8 @@ namespace example
             };
         };
 
-        bsl::ut_scenario{"verify += preserves the error flag"} = []() noexcept {
-            bsl::ut_given_at_runtime{} = []() noexcept {
+        bsl::ut_scenario{"verify += preserves the error flag"} = [&]() noexcept {
+            bsl::ut_given_at_runtime{} = [&]() noexcept {
                 constexpr auto data1{42_umx};
                 auto mut_data2{bsl::safe_umx::failure()};
                 bsl::ut_when{} = [&]() noexcept {
@@ -168,15 +168,15 @@ namespace example
         ///   was no additional action to take.
         ///
 
-        bsl::ut_scenario{"test something at runtime only"} = []() noexcept {
-            bsl::ut_given_at_runtime{} = []() noexcept {
+        bsl::ut_scenario{"test something at runtime only"} = [&]() noexcept {
+            bsl::ut_given_at_runtime{} = [&]() noexcept {
                 constexpr auto val{42_umx};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(runtime_only_function_that_knows_all(val));
                 };
             };
 
-            bsl::ut_given_at_runtime{} = []() noexcept {
+            bsl::ut_given_at_runtime{} = [&]() noexcept {
                 constexpr auto val{23_umx};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(!runtime_only_function_that_knows_all(val));
@@ -194,8 +194,8 @@ namespace example
         ///   block, and has a different name just to help with readability.
         ///
 
-        bsl::ut_scenario{"verify += preserves the error flag"} = []() noexcept {
-            bsl::ut_given_at_runtime{} = []() noexcept {
+        bsl::ut_scenario{"verify += preserves the error flag"} = [&]() noexcept {
+            bsl::ut_given_at_runtime{} = [&]() noexcept {
                 constexpr auto data1{42_umx};
                 auto mut_data2{bsl::safe_umx::failure()};
                 bsl::ut_when{} = [&]() noexcept {
@@ -220,8 +220,8 @@ namespace example
         ///   when we do this, we need to add the mutable keyword.
         ///
 
-        bsl::ut_scenario{"verify two different conditions"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
+        bsl::ut_scenario{"verify two different conditions"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
                 constexpr auto data1{42_umx};
                 bsl::safe_umx mut_data2{};
                 bsl::ut_when{} = [&, mut_data2]() mutable noexcept {
@@ -252,8 +252,8 @@ namespace example
         /// - Good luck!!!
         ///
 
-        bsl::ut_scenario{"description"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
+        bsl::ut_scenario{"description"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_required_step(true);
                     bsl::ut_then{} = [&]() noexcept {

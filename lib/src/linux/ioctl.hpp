@@ -44,8 +44,6 @@ namespace lib
     /// @brief defines what an invalid handle is.
     constexpr auto IOCTL_INVALID_HNDL{-1_i32};
 
-    /// @class lib::ioctl
-    ///
     /// <!-- description -->
     ///   @brief Executes IOCTL commands to a driver.
     ///

@@ -37,8 +37,6 @@
 #define LOADER_NUM_PML4T_ENTRIES ((uint64_t)512)
 
 /**
- * @struct pml4t_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a page-map level-4 table (pml4).
  */

@@ -31,8 +31,6 @@
 
 namespace mk
 {
-    /// @struct mk::invvpid_descriptor_t
-    ///
     /// <!-- description -->
     ///   @brief Stores information needed to execute invvpid
     ///

@@ -28,8 +28,6 @@
 #define EFI_LOCATE_SEARCH_TYPE_H
 
 /**
- * @struct EFI_LOCATE_SEARCH_TYPE
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_LOCATE_SEARCH_TYPE struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

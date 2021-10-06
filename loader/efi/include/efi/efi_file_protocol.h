@@ -303,8 +303,6 @@ typedef EFI_STATUS(EFIAPI *EFI_FILE_FLUSH_EX)(
     IN EFI_FILE_PROTOCOL *This, IN OUT EFI_FILE_IO_TOKEN *Token);
 
 /**
- * @struct EFI_FILE_PROTOCOL
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_FILE_PROTOCOL struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

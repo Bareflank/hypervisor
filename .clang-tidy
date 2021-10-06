@@ -33,8 +33,10 @@ Checks:
       -clang-analyzer-core.NullDereference,
       -clang-analyzer-core.NonNullParamChecker,
       -clang-analyzer-cplusplus.NewDelete,
+      -clang-analyzer-unix.cstring.NullArg,
     cppcoreguidelines-*,
     hicpp-*,
+      -hicpp-function-size,
     misc-*,
       -misc-misplaced-const,
     modernize-*,
@@ -43,7 +45,8 @@ Checks:
     readability-*,
       -readability-redundant-member-init,
       -readability-avoid-const-params-in-decls,
-      -readability-static-accessed-through-instance
+      -readability-static-accessed-through-instance,
+      -readability-function-size
   '
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'

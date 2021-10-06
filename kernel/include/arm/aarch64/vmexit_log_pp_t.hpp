@@ -32,8 +32,6 @@
 
 namespace mk
 {
-    /// @class mk::vmexit_log_pp_t
-    ///
     /// <!-- description -->
     ///   @brief Stores information about each VMExit per PP
     ///

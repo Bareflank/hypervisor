@@ -70,8 +70,6 @@ namespace bfelf
     /// @brief defines p_flags for environment-specific use
     constexpr auto PF_MASKPROC{0xFF000000_u32};
 
-    /// @struct elf64_phdr_t
-    ///
     /// <!-- description -->
     ///   @brief In executable and shared object files, sections are grouped
     ///     into segments for loading. The program header table contains a
@@ -84,7 +82,7 @@ namespace bfelf
         /// @brief segment attributes
         bsl::uint32 p_flags;
         /// @brief offset of segment in ELF file
-        bsl::uint8 *p_offset;
+        bsl::uint8 const *p_offset;
         /// @brief virtual address of segment
         bsl::uint64 p_vaddr;
         /// @brief physical address of segment

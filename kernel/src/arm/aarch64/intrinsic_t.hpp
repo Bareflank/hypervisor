@@ -35,8 +35,6 @@
 
 namespace mk
 {
-    /// @class mk::intrinsic_t
-    ///
     /// <!-- description -->
     ///   @brief Provides raw access to intrinsics. Instead of using global
     ///     functions, the intrinsics class provides a means for the rest of

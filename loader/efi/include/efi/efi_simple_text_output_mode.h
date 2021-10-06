@@ -28,8 +28,6 @@
 #define EFI_SIMPLE_TEXT_OUTPUT_MODE_H
 
 /**
- * @struct SIMPLE_TEXT_OUTPUT_MODE
- *
  * <!-- description -->
  *   @brief Defines the layout of the SIMPLE_TEXT_OUTPUT_MODE struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

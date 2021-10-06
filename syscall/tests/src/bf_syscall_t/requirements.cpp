@@ -126,10 +126,8 @@ main() noexcept -> bsl::exit_code
                 static_assert(noexcept(mut_sys.bf_intrinsic_op_wrmsr({}, {})));
                 static_assert(noexcept(mut_sys.bf_mem_op_alloc_page<page_t>(mut_phys)));
                 static_assert(noexcept(mut_sys.bf_mem_op_alloc_page<page_t>()));
-                static_assert(noexcept(mut_sys.bf_mem_op_free_page<page_t>({})));
                 static_assert(noexcept(mut_sys.bf_mem_op_alloc_huge<page_t>({}, mut_phys)));
                 static_assert(noexcept(mut_sys.bf_mem_op_alloc_huge<page_t>({})));
-                static_assert(noexcept(mut_sys.bf_mem_op_free_huge<page_t>({})));
 
                 static_assert(noexcept(sys.bf_tls_rax()));
                 static_assert(noexcept(sys.bf_tls_set_rax({})));

@@ -266,6 +266,14 @@ bf_add_config(
 )
 
 bf_add_config(
+    CONFIG_NAME HYPERVISOR_MAX_HUGE_ALLOCS
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "64"
+    DESCRIPTION "Defines the hypervisor's max number of huge allocations supported"
+    SKIP_VALIDATION
+)
+
+bf_add_config(
     CONFIG_NAME HYPERVISOR_MK_DIRECT_MAP_ADDR
     CONFIG_TYPE STRING
     DEFAULT_VAL "0x0000400000000000"

@@ -39,8 +39,6 @@ namespace lib
     constexpr auto BASIC_PAGE_4K_T_MASK{
         bsl::to_u64(BASIC_PAGE_4K_T_SIZE) - bsl::safe_u64::magic_1()};
 
-    /// @struct lib::basic_page_4k_t
-    ///
     /// <!-- description -->
     ///   @brief Defines a 4k page
     ///

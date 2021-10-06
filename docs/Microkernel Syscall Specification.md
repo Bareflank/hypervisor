@@ -1323,7 +1323,6 @@ Writes to an MSR directly from the CPU given the address of the MSR to write and
 Each extension has access to several different memory pools:
 - The page pool (used for allocating pages)
 - The huge pool (used for allocating physically contiguous pages)
-- The heap pool (used for allocating heap memory)
 - TLS (used for thread-local storage)
 - The direct map
 
@@ -1331,8 +1330,6 @@ The page pool provides a means to allocate a page.
 
 The huge pool provides a method for allocating physically contiguous memory. This pool is small and platform-dependent (as in less than a megabyte total).
 It should be noted that some microkernels may choose not to implement bf_mem_op_free_huge which is optional.
-
-The heap pool provides memory that can only be grown, meaning the memory must always remain virtually contiguous. An extension is free to use heap memory or the page pool. The only difference between these two pools is the page pool can only allocate a single page at a time and may or may not be fragmented (depends on the implementation). The heap pool can allocate memory of any size (must be a multiple of a page) and never fragments.
 
 Thread-Local Storage (TLS) memory (typically allocated using `thread_local`) provides per-physical processor storage. The amount of TLS available to an extension is 1 page per physical processor.
 

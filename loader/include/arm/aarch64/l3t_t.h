@@ -36,8 +36,6 @@
 #define LOADER_NUM_L3T_ENTRIES ((uint64_t)512)
 
 /**
- * @struct l3t_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a level-3 table (L3T).
  */

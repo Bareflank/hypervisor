@@ -49,8 +49,6 @@
 
 namespace lib
 {
-    /// @class lib::ioctl
-    ///
     /// <!-- description -->
     ///   @brief Executes IOCTL commands to a driver.
     ///

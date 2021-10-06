@@ -31,8 +31,6 @@
 
 namespace mk
 {
-    /// @struct mk::invept_descriptor_t
-    ///
     /// <!-- description -->
     ///   @brief Stores information needed to execute invept
     ///

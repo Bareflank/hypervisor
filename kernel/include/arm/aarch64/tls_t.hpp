@@ -56,8 +56,6 @@ namespace mk
     /// @brief defines the the total size of the TLS block
     constexpr auto TLS_T_SIZE{0x400_umx};
 
-    /// @struct mk::tls_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the layout of the microkernel's TLS block. This
     ///     should not be confused with the TLS blocks given to an extension,

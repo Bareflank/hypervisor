@@ -33,8 +33,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct debug_ring_t
- *
  * <!-- description -->
  *   @brief Defines the structure of the microkernel's debug ring
  */

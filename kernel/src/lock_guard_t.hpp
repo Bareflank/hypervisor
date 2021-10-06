@@ -25,11 +25,13 @@
 #ifndef LOCK_GUARD_T_HPP
 #define LOCK_GUARD_T_HPP
 
-#include "lock_guard_helpers.hpp"
-#include "spinlock_helpers.hpp"
-
 #include <basic_lock_guard_t.hpp>
 #include <basic_spinlock_t.hpp>
+#include <lock_guard_helpers.hpp>    // IWYU pragma: export
+#include <spinlock_helpers.hpp>      // IWYU pragma: export
+
+// IWYU pragma: no_include "lock_guard_helpers.hpp"
+// IWYU pragma: no_include "spinlock_helpers.hpp"
 
 namespace mk
 {

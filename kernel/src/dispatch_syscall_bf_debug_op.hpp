@@ -28,6 +28,7 @@
 #include "dispatch_syscall_helpers.hpp"
 
 #include <bf_constants.hpp>
+#include <bf_types.hpp>
 #include <ext_pool_t.hpp>
 #include <huge_pool_t.hpp>
 #include <intrinsic_t.hpp>
@@ -38,9 +39,11 @@
 #include <vp_pool_t.hpp>
 #include <vs_pool_t.hpp>
 
-#include <bsl/char_type.hpp>
+#include <bsl/convert.hpp>
 #include <bsl/cstr_type.hpp>
 #include <bsl/debug.hpp>
+#include <bsl/safe_integral.hpp>
+#include <bsl/string_view.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
@@ -82,22 +85,46 @@ namespace mk
             }
 
             case syscall::BF_DEBUG_OP_DUMP_VM_IDX_VAL.get(): {
-                vm_pool.dump(mut_tls, get_vmid(mut_tls.ext_reg0));
+                auto const vmid{get_vmid(mut_tls.ext_reg0)};
+                if (bsl::unlikely(vmid.is_invalid())) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return syscall::BF_STATUS_INVALID_INPUT_REG0;
+                }
+
+                vm_pool.dump(mut_tls, vmid);
                 return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_VP_IDX_VAL.get(): {
-                vp_pool.dump(get_vpid(mut_tls.ext_reg0));
+                auto const vpid{get_vpid(mut_tls.ext_reg0)};
+                if (bsl::unlikely(vpid.is_invalid())) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return syscall::BF_STATUS_INVALID_INPUT_REG0;
+                }
+
+                vp_pool.dump(vpid);
                 return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_VS_IDX_VAL.get(): {
-                vs_pool.dump(mut_tls, intrinsic, get_vsid(mut_tls.ext_reg0));
+                auto const vsid{get_vsid(mut_tls.ext_reg0)};
+                if (bsl::unlikely(vsid.is_invalid())) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return syscall::BF_STATUS_INVALID_INPUT_REG0;
+                }
+
+                vs_pool.dump(mut_tls, intrinsic, vsid);
                 return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_VMEXIT_LOG_IDX_VAL.get(): {
-                log.dump(get_ppid(mut_tls, mut_tls.ext_reg0));
+                auto const ppid{get_ppid(mut_tls, mut_tls.ext_reg0)};
+                if (bsl::unlikely(ppid.is_invalid())) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return syscall::BF_STATUS_INVALID_INPUT_REG0;
+                }
+
+                log.dump(ppid);
                 return syscall::BF_STATUS_SUCCESS;
             }
 
@@ -118,13 +145,22 @@ namespace mk
                 ///   information.
                 ///
 
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-                bsl::print() << reinterpret_cast<bsl::cstr_type>(mut_tls.ext_reg0);
+                bsl::print() << bsl::string_view{
+                    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+                    reinterpret_cast<bsl::cstr_type>(mut_tls.ext_reg0),
+                    bsl::to_umx(mut_tls.ext_reg1)};
+
                 return syscall::BF_STATUS_SUCCESS;
             }
 
             case syscall::BF_DEBUG_OP_DUMP_EXT_IDX_VAL.get(): {
-                ext_pool.dump(mut_tls, get_extid(mut_tls.ext_reg0));
+                auto const extid{get_extid(mut_tls.ext_reg0)};
+                if (bsl::unlikely(extid.is_invalid())) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return syscall::BF_STATUS_INVALID_INPUT_REG0;
+                }
+
+                ext_pool.dump(mut_tls, extid);
                 return syscall::BF_STATUS_SUCCESS;
             }
 

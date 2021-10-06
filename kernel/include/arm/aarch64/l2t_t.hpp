@@ -38,8 +38,6 @@ namespace mk
     /// @brief defines total number of entries in the L2T
     constexpr auto NUM_L2T_ENTRIES{512_umx};
 
-    /// @struct mk::l2t_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the layout of a level-2 table (L2T).
     ///

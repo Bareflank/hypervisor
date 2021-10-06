@@ -29,8 +29,6 @@
 
 namespace lib
 {
-    /// @struct lib::basic_alloc_page_t
-    ///
     /// <!-- description -->
     ///   @brief Defines a basic_alloc_page_t
     ///

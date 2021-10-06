@@ -25,16 +25,22 @@
 #ifndef DISPATCH_SYSCALL_BF_VM_OP_HPP
 #define DISPATCH_SYSCALL_BF_VM_OP_HPP
 
+#include "dispatch_syscall_helpers.hpp"
+
 #include <bf_constants.hpp>
+#include <bf_types.hpp>
 #include <ext_pool_t.hpp>
 #include <ext_t.hpp>
+#include <intrinsic_t.hpp>
+#include <page_pool_t.hpp>
 #include <tls_t.hpp>
 #include <vm_pool_t.hpp>
 #include <vp_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
+#include <bsl/basic_errc_type.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
-#include <bsl/finally.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
 

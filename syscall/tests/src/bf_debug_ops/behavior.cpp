@@ -116,7 +116,7 @@ namespace syscall
             bsl::ut_given_at_runtime{} = []() noexcept {
                 g_mut_bf_debug_op_write_str_impl_executed = {};
                 bsl::ut_when{} = []() noexcept {
-                    bf_debug_op_write_str({});
+                    bf_debug_op_write_str({}, {});
                     bsl::ut_then{} = []() noexcept {
                         bsl::ut_check(g_mut_bf_debug_op_write_str_impl_executed);
                     };

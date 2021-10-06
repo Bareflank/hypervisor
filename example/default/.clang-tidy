@@ -33,6 +33,7 @@ Checks:
       -clang-analyzer-core.NullDereference,
       -clang-analyzer-core.NonNullParamChecker,
       -clang-analyzer-cplusplus.NewDelete,
+      -clang-analyzer-unix.cstring.NullArg,
     cppcoreguidelines-*,
     hicpp-*,
     misc-*,

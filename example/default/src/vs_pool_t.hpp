@@ -42,8 +42,6 @@
 
 namespace example
 {
-    /// @class example::vs_pool_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the extension's VS pool
     ///

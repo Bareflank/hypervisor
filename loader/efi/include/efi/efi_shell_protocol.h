@@ -613,8 +613,6 @@ typedef EFI_STATUS(EFIAPI *EFI_SHELL_WRITE_FILE)(
     IN SHELL_FILE_HANDLE FileHandle, IN OUT UINTN *BufferSize, OUT VOID *Buffer);
 
 /**
- * @struct EFI_SHELL_PROTOCOL
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_SHELL_PROTOCOL struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Shell_2_2.pdf

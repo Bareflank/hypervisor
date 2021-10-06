@@ -63,8 +63,6 @@ namespace mk
     /// @brief defines the size of the reserved13 field in the VMCB
     constexpr auto VMCB_GIB_SIZE{0xF_umx};
 
-    /// @struct mk::vmcb_t
-    ///
     /// <!-- description -->
     ///   @brief The following defines the structure of the VMCB used by AMD's
     ///     hypervisor extensions.

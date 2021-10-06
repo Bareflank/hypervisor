@@ -31,7 +31,7 @@ namespace syscall
 {
     /// @brief stores the max value for a bf_reg_t
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    constexpr bsl::uint64 BF_MAX_REG_T{static_cast<bsl::uint64>(122)};
+    constexpr bsl::uint64 BF_MAX_REG_T{static_cast<bsl::uint64>(121)};
 
     /// <!-- description -->
     ///   @brief Defines which register to use for read/write
@@ -265,25 +265,25 @@ namespace syscall
         /// @brief defines the dbgctl register
         bf_reg_t_dbgctl = static_cast<bsl::uint64>(110),
         /// @brief defines the br_from register
-        bf_reg_t_br_from = static_cast<bsl::uint64>(112),
+        bf_reg_t_br_from = static_cast<bsl::uint64>(111),
         /// @brief defines the br_to register
-        bf_reg_t_br_to = static_cast<bsl::uint64>(113),
+        bf_reg_t_br_to = static_cast<bsl::uint64>(112),
         /// @brief defines the lastexcpfrom register
-        bf_reg_t_lastexcpfrom = static_cast<bsl::uint64>(114),
+        bf_reg_t_lastexcpfrom = static_cast<bsl::uint64>(113),
         /// @brief defines the lastexcpto register
-        bf_reg_t_lastexcpto = static_cast<bsl::uint64>(115),
+        bf_reg_t_lastexcpto = static_cast<bsl::uint64>(114),
         /// @brief defines the cr8 register
-        bf_reg_t_cr8 = static_cast<bsl::uint64>(116),
+        bf_reg_t_cr8 = static_cast<bsl::uint64>(115),
         /// @brief defines the dr0 register
-        bf_reg_t_dr0 = static_cast<bsl::uint64>(117),
+        bf_reg_t_dr0 = static_cast<bsl::uint64>(116),
         /// @brief defines the dr1 register
-        bf_reg_t_dr1 = static_cast<bsl::uint64>(118),
+        bf_reg_t_dr1 = static_cast<bsl::uint64>(117),
         /// @brief defines the dr2 register
-        bf_reg_t_dr2 = static_cast<bsl::uint64>(119),
+        bf_reg_t_dr2 = static_cast<bsl::uint64>(118),
         /// @brief defines the dr3 register
-        bf_reg_t_dr3 = static_cast<bsl::uint64>(120),
+        bf_reg_t_dr3 = static_cast<bsl::uint64>(119),
         /// @brief defines the xcr0 register
-        bf_reg_t_xcr0 = static_cast<bsl::uint64>(121),
+        bf_reg_t_xcr0 = static_cast<bsl::uint64>(120),
         /// @brief defines an invalid bf_reg_t
         bf_reg_t_invalid = static_cast<bsl::uint64>(BF_MAX_REG_T)
     };

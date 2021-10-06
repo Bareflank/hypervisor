@@ -34,8 +34,6 @@ struct _EFI_LIST_ENTRY;
 typedef struct _EFI_LIST_ENTRY EFI_LIST_ENTRY;
 
 /**
- * @struct EFI_LIST_ENTRY
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_LIST_ENTRY struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Shell_2_2.pdf

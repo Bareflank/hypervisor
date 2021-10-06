@@ -25,7 +25,7 @@
 #ifndef ROOT_PAGE_TABLE_T_HPP
 #define ROOT_PAGE_TABLE_T_HPP
 
-#include "root_page_table_helpers.hpp"
+#include "root_page_table_helpers.hpp"    // IWYU pragma: export
 
 #include <basic_root_page_table_t.hpp>
 #include <intrinsic_t.hpp>
@@ -44,10 +44,10 @@ namespace mk
         bsl::dontcare_t,
         page_pool_t,
         intrinsic_t,
-        l3e_t,
-        l2e_t,
-        l1e_t,
-        l0e_t>;
+        lib::l3e_t,
+        lib::l2e_t,
+        lib::l1e_t,
+        lib::l0e_t>;
 }
 
 #endif

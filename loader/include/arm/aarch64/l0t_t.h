@@ -37,8 +37,6 @@
 #define LOADER_NUM_L0T_ENTRIES ((uint64_t)512)
 
 /**
- * @struct l0t_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a level-0 table (L0T).
  */

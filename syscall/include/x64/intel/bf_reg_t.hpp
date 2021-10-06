@@ -160,8 +160,8 @@ namespace syscall
         bf_reg_t_encls_exiting_bitmap = static_cast<bsl::uint64>(59),
         /// @brief defines the sub_page_permission_table_pointer register
         bf_reg_t_sub_page_permission_table_pointer = static_cast<bsl::uint64>(60),
-        /// @brief defines the tls_multiplier register
-        bf_reg_t_tls_multiplier = static_cast<bsl::uint64>(61),
+        /// @brief defines the tsc_multiplier register
+        bf_reg_t_tsc_multiplier = static_cast<bsl::uint64>(61),
         /// @brief defines the guest_physical_address register
         bf_reg_t_physical_address = static_cast<bsl::uint64>(62),
         /// @brief defines the vmcs_link_pointer register

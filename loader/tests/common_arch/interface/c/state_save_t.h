@@ -28,8 +28,6 @@
 #define STATE_SAVE_T_H
 
 /**
- * @struct state_save_t
- *
  * <!-- description -->
  *   @brief Defines a dummy state_save_t for common code that doesn't
  *     actually access the contents of this arch specific structure.

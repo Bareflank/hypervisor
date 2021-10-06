@@ -25,12 +25,13 @@
 #ifndef PAGE_POOL_T_HPP
 #define PAGE_POOL_T_HPP
 
-#include "page_pool_helpers.hpp"
-
 #include <basic_page_pool_t.hpp>
+#include <page_pool_helpers.hpp>    // IWYU pragma: export
 #include <tls_t.hpp>
 
 #include <bsl/dontcare_t.hpp>
+
+// IWYU pragma: no_include "page_pool_helpers.hpp"
 
 namespace mk
 {

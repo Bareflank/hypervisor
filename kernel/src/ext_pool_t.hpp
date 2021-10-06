@@ -26,26 +26,26 @@
 #define EXT_POOL_T_HPP
 
 #include <ext_t.hpp>
+#include <huge_pool_t.hpp>
 #include <intrinsic_t.hpp>
+#include <mk_args_t.hpp>
 #include <page_pool_t.hpp>
 #include <root_page_table_t.hpp>
-#include <start_vmm_args_t.hpp>
 #include <tls_t.hpp>
 
 #include <bsl/array.hpp>
-#include <bsl/as_const.hpp>
+#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/expects.hpp>
 #include <bsl/finally.hpp>
-#include <bsl/move.hpp>
+#include <bsl/safe_idx.hpp>
+#include <bsl/safe_integral.hpp>
 #include <bsl/touch.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
 {
-    /// @class mk::ext_pool_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the microkernel's extension pool
     ///
@@ -76,6 +76,7 @@ namespace mk
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_huge_pool the huge_pool_t to use
         ///   @param system_rpt the system RPT provided by the loader
         ///   @param elf_files the ext_elf_files provided by the loader
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
@@ -85,12 +86,14 @@ namespace mk
         initialize(
             tls_t &mut_tls,
             page_pool_t &mut_page_pool,
+            huge_pool_t &mut_huge_pool,
             root_page_table_t const &system_rpt,
             loader::ext_elf_files_t const &elf_files) noexcept -> bsl::errc_type
         {
-            bsl::finally mut_release_on_error{[this, &mut_tls, &mut_page_pool]() noexcept -> void {
-                this->release(mut_tls, mut_page_pool);
-            }};
+            bsl::finally mut_release_on_error{
+                [this, &mut_tls, &mut_page_pool, &mut_huge_pool]() noexcept -> void {
+                    this->release(mut_tls, mut_page_pool, mut_huge_pool);
+                }};
 
             for (bsl::safe_idx mut_i{}; mut_i < m_pool.size(); ++mut_i) {
                 auto *const pmut_ext{m_pool.at_if(mut_i)};
@@ -124,12 +127,13 @@ namespace mk
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
+        ///   @param mut_huge_pool the huge_pool_t to use
         ///
         constexpr void
-        release(tls_t &mut_tls, page_pool_t &mut_page_pool) noexcept
+        release(tls_t &mut_tls, page_pool_t &mut_page_pool, huge_pool_t &mut_huge_pool) noexcept
         {
             for (auto &mut_ext : m_pool) {
-                mut_ext.release(mut_tls, mut_page_pool);
+                mut_ext.release(mut_tls, mut_page_pool, mut_huge_pool);
             }
         }
 

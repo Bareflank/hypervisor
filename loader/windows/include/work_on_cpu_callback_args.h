@@ -31,8 +31,6 @@
 #include <types.h>
 
 /**
- * @struct work_on_cpu_callback_args
- *
  * <!-- description -->
  *   @brief Defines the args passed to the platform_on_each_cpu_callback
  *     function.
