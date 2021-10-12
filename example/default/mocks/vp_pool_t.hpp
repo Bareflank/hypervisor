@@ -37,8 +37,6 @@
 
 namespace example
 {
-    /// @class example::vp_pool_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the extension's VP pool
     ///

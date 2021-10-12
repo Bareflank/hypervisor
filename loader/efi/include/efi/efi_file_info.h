@@ -40,8 +40,6 @@
     }
 
 /**
- * @struct EFI_FILE_INFO
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_FILE_INFO struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

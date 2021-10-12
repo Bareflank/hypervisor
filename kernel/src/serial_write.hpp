@@ -28,6 +28,7 @@
 #include <serial_write_c.hpp>
 
 #include <bsl/char_type.hpp>
+#include <bsl/cstdint.hpp>
 #include <bsl/cstr_type.hpp>
 
 namespace mk
@@ -37,13 +38,19 @@ namespace mk
     ///
     /// <!-- inputs/outputs -->
     ///   @param str the string to output
+    ///   @param len the total number of bytes to output
     ///
     constexpr void
-    serial_write(bsl::cstr_type const str) noexcept
+    serial_write(bsl::cstr_type const str, bsl::uintmx const len) noexcept
     {
         // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-        for (bsl::uintmx mut_i{}; '\0' != str[mut_i]; ++mut_i) {
-            serial_write_c(str[mut_i]);
+        for (bsl::uintmx mut_i{}; mut_i < len; ++mut_i) {
+            bsl::char_type const c{str[mut_i]};
+            if ('\0' == c) {
+                return;
+            }
+
+            serial_write_c(c);
         }
     }
 }

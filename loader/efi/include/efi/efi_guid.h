@@ -31,8 +31,6 @@
 #define EFI_GUID_DATA4_SIZE 8
 
 /**
- * @struct EFI_GUID
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_GUID struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

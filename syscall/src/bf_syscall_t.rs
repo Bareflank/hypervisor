@@ -1442,34 +1442,6 @@ impl BfSyscallT {
     // }
 
     // /// <!-- description -->
-    // ///   @brief Frees a page previously allocated by bf_mem_op_alloc_page.
-    // ///     This operation is optional and not all microkernels may implement
-    // ///     it.
-    // ///
-    // /// <!-- inputs/outputs -->
-    // ///   @param virt The virtual address of the page to free
-    // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    // ///     otherwise
-    // ///
-    //
-    // bf_mem_op_free_page(void *const virt) -> bsl::errc_type
-    // {
-    //     bsl::expects(nullptr != virt);
-
-    //     bf_status_t const ret{bf_mem_op_free_page_impl(m_hndl.get(), virt)};
-    //     if (ret != BF_STATUS_SUCCESS)) {
-    //         bsl::error() << "bf_mem_op_free_page failed with status "    // --
-    //                         << bsl::hex(ret)                                // --
-    //                         << bsl::endl                                    // --
-    //                         << bsl::here();
-
-    //         return bsl::errc_failure;
-    //     }
-
-    //     return bsl::errc_success;
-    // }
-
-    // /// <!-- description -->
     // ///   @brief bf_mem_op_alloc_huge allocates a physically contiguous block
     // ///     of memory. When allocating a page, the extension should keep in
     // ///     mind the following:
@@ -1541,77 +1513,5 @@ impl BfSyscallT {
     // {
     //     bsl::safe_u64 mut_ignored{};
     //     return this->bf_mem_op_alloc_huge(size, mut_ignored);
-    // }
-
-    // /// <!-- description -->
-    // ///   @brief Frees memory previously allocated by bf_mem_op_alloc_huge.
-    // ///     This operation is optional and not all microkernels may implement
-    // ///     it.
-    // ///
-    // /// <!-- inputs/outputs -->
-    // ///   @param virt The virtual address of the memory to free
-    // ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    // ///     otherwise
-    // ///
-    //
-    // bf_mem_op_free_huge(void *const virt) -> bsl::errc_type
-    // {
-    //     bsl::expects(nullptr != virt);
-
-    //     bf_status_t const ret{bf_mem_op_free_huge_impl(m_hndl.get(), virt)};
-    //     if (ret != BF_STATUS_SUCCESS)) {
-    //         bsl::error() << "bf_mem_op_free_huge failed with status "    // --
-    //                         << bsl::hex(ret)                                // --
-    //                         << bsl::endl                                    // --
-    //                         << bsl::here();
-
-    //         return bsl::errc_failure;
-    //     }
-
-    //     return bsl::errc_success;
-    // }
-
-    // /// <!-- description -->
-    // ///   @brief bf_mem_op_alloc_heap allocates heap memory. When allocating
-    // ///     heap memory, the extension should keep in mind the following:
-    // ///       - This ABI is designed to work similar to sbrk() to support
-    // ///         malloc/free implementations common with existing open source
-    // ///         libraries.
-    // ///       - Calling this ABI with with a size of 0 will return the current
-    // ///         heap location.
-    // ///       - Calling this ABI with a size (in bytes) will result in return
-    // ///         the previous heap location. The current heap location will be
-    // ///         set to the previous location, plus the provide size, rounded to
-    // ///         the nearest page size.
-    // ///       - The heap is not mapped into the direct map, so virtual to
-    // ///         physical (and vice versa) translations are not possible.
-    // ///       - There is no ability to free heap memory
-    // ///
-    // /// <!-- inputs/outputs -->
-    // ///   @param size The number of bytes to increase the heap by
-    // ///   @return Returns a pointer to the newly allocated memory on success,
-    // ///     or a nullptr on failure.
-    // ///
-    //
-    // bf_mem_op_alloc_heap(bsl::safe_u64 const &size) -> void *
-    // {
-    //     bsl::expects(size.is_valid_and_checked());
-    //     bsl::expects(size.is_pos());
-    //     bsl::expects(bf_is_page_aligned(size));
-
-    //     void *mut_ptr{};
-
-    //     bf_status_t const ret{
-    //         bf_mem_op_alloc_heap_impl(m_hndl.get(), size.get(), &mut_ptr)};
-    //     if (ret != BF_STATUS_SUCCESS)) {
-    //         bsl::error() << "bf_mem_op_alloc_heap failed with status "    // --
-    //                         << bsl::hex(ret)                                 // --
-    //                         << bsl::endl                                     // --
-    //                         << bsl::here();
-
-    //         return nullptr;
-    //     }
-
-    //     return mut_ptr;
     // }
 }

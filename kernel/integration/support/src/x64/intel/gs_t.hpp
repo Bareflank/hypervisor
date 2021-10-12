@@ -31,8 +31,6 @@
 
 namespace syscall
 {
-    /// @class example::gs_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the extension's Global Storage (GS).
     ///     Extensions can use this to store global variables as needed.

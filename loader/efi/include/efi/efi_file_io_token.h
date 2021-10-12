@@ -28,8 +28,6 @@
 #define EFI_FILE_IO_TOKEN_H
 
 /**
- * @struct EFI_FILE_IO_TOKEN
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_FILE_IO_TOKEN struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

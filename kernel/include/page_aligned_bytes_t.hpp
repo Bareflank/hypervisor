@@ -29,8 +29,6 @@
 
 namespace mk
 {
-    /// @struct mk::page_aligned_bytes_t
-    ///
     /// <!-- description -->
     ///   @brief Used to return page aligned bytes as well as the total number
     ///     of pages.

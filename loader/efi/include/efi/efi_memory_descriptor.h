@@ -135,8 +135,6 @@
 #define EFI_MEMORY_RUNTIME 0x8000000000000000
 
 /**
- * @struct EFI_MEMORY_DESCRIPTOR
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_MEMORY_DESCRIPTOR struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

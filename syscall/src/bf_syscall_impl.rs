@@ -789,16 +789,6 @@ extern "C" {
     ) -> u64;
 
     /// <!-- description -->
-    ///   @brief Implements the ABI for bf_mem_op_free_page.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @return n/a
-    ///
-    pub fn bf_mem_op_free_page_impl(reg0_in: u64, reg1_in: BfCptrT) -> u64;
-
-    /// <!-- description -->
     ///   @brief Implements the ABI for bf_mem_op_alloc_huge.
     ///
     /// <!-- inputs/outputs -->
@@ -814,14 +804,4 @@ extern "C" {
         reg0_out: *mut BfCptrT,
         reg1_out: *const u64,
     ) -> u64;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_mem_op_free_huge.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @return n/a
-    ///
-    pub fn bf_mem_op_free_huge_impl(reg0_in: u64, reg1_in: BfCptrT) -> u64;
 }

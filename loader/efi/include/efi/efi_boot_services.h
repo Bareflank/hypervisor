@@ -988,8 +988,6 @@ typedef EFI_STATUS(EFIAPI *EFI_CREATE_EVENT_EX)(
     OUT EFI_EVENT *Event);
 
 /**
- * @struct EFI_BOOT_SERVICES
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_BOOT_SERVICES struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

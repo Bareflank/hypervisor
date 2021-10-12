@@ -29,24 +29,28 @@
 #include <ext_pool_t.hpp>
 #include <huge_pool_t.hpp>
 #include <intrinsic_t.hpp>
+#include <mk_args_t.hpp>
 #include <page_pool_t.hpp>
 #include <root_page_table_t.hpp>
 #include <tls_t.hpp>
 #include <vm_pool_t.hpp>
+#include <vmexit_log_t.hpp>
 #include <vmexit_loop.hpp>
 #include <vp_pool_t.hpp>
 #include <vs_pool_t.hpp>
 
+#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
+#include <bsl/ensures.hpp>
 #include <bsl/errc_type.hpp>
-#include <bsl/finally.hpp>
+#include <bsl/expects.hpp>
+#include <bsl/safe_integral.hpp>
+#include <bsl/span.hpp>
 #include <bsl/touch.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
 {
-    /// @class mk::mk_main_t
-    ///
     /// <!-- description -->
     ///   @brief Provide the main entry point for the microkernel. The
     ///     microkernel actually starts in the _start function, and immediately
@@ -397,7 +401,7 @@ namespace mk
             mut_vm_pool.initialize();
 
             mut_ret = mut_ext_pool.initialize(
-                mut_tls, mut_page_pool, mut_system_rpt, mut_args.ext_elf_files);
+                mut_tls, mut_page_pool, mut_huge_pool, mut_system_rpt, mut_args.ext_elf_files);
             if (bsl::unlikely(!mut_ret)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;

@@ -28,22 +28,15 @@
 #include <allocated_status_t.hpp>
 #include <bf_constants.hpp>
 #include <tls_t.hpp>
-#include <vs_pool_t.hpp>
 
+#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/ensures.hpp>
-#include <bsl/errc_type.hpp>
 #include <bsl/expects.hpp>
-#include <bsl/finally.hpp>
 #include <bsl/safe_integral.hpp>
-#include <bsl/unlikely.hpp>
 
 namespace mk
 {
-    class vm_pool_t;
-
-    /// @class mk::vp_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the microkernel's notion of a VP
     ///

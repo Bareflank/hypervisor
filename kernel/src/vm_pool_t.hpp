@@ -25,27 +25,25 @@
 #ifndef VM_POOL_T_HPP
 #define VM_POOL_T_HPP
 
-#include "lock_guard_t.hpp"
-#include "spinlock_t.hpp"
-
 #include <bf_constants.hpp>
 #include <ext_pool_t.hpp>
+#include <lock_guard_t.hpp>
+#include <page_pool_t.hpp>
+#include <spinlock_t.hpp>
 #include <tls_t.hpp>
 #include <vm_t.hpp>
-#include <vp_pool_t.hpp>
 
 #include <bsl/array.hpp>
+#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
-#include <bsl/ensures.hpp>
-#include <bsl/errc_type.hpp>
 #include <bsl/expects.hpp>
-#include <bsl/finally.hpp>
+#include <bsl/safe_idx.hpp>
+#include <bsl/safe_integral.hpp>
+#include <bsl/touch.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
 {
-    /// @class mk::vm_pool_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the microkernel's vm_pool_t
     ///

@@ -32,8 +32,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct interrupt_descriptor_table_register_t
- *
  * <!-- description -->
  *   @brief Defines the structure of the interrupt descriptor table register
  *     as defined by Intel and AMD.

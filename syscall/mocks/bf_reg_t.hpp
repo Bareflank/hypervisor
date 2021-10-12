@@ -29,6 +29,10 @@
 
 namespace syscall
 {
+    /// @brief stores the max value for a bf_reg_t
+    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
+    constexpr bsl::uint64 BF_MAX_REG_T{static_cast<bsl::uint64>(2)};
+
     /// <!-- description -->
     ///   @brief Defines which register to use for read/write
     ///
@@ -39,7 +43,7 @@ namespace syscall
         /// @brief defines as dummy bf_reg_t
         bf_reg_t_dummy = static_cast<bsl::uint64>(1),
         /// @brief defines an invalid bf_reg_t
-        bf_reg_t_invalid = static_cast<bsl::uint64>(42)
+        bf_reg_t_invalid = static_cast<bsl::uint64>(BF_MAX_REG_T)
     };
 }
 

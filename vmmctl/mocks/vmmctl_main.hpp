@@ -30,8 +30,6 @@
 
 namespace vmmctl
 {
-    /// @class vmmctl::vmmctl_main
-    ///
     /// <!-- description -->
     ///   @brief Provides the main implementation of the vmmctl application.
     ///     This application is used to start and stop the VMM as well as

@@ -38,8 +38,6 @@ namespace mk
     /// @brief defines total number of entries in the L3T
     constexpr auto NUM_L3T_ENTRIES{512_umx};
 
-    /// @struct mk::l3t_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the layout of a level-3 table (L3T).
     ///

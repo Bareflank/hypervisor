@@ -26,12 +26,15 @@
 #define BASIC_SPINLOCK_T_HPP
 
 #if __has_include("spinlock_helpers.hpp")
-#include "spinlock_helpers.hpp"    // IWYU pragma: export
+#include <spinlock_helpers.hpp>    // IWYU pragma: export
 #endif
 
 #if __has_include("basic_spinlock_helpers.hpp")
-#include "basic_spinlock_helpers.hpp"    // IWYU pragma: export
+#include <basic_spinlock_helpers.hpp>    // IWYU pragma: export
 #endif
+
+// IWYU pragma: no_include "spinlock_helpers.hpp"
+// IWYU pragma: no_include "basic_spinlock_helpers.hpp"
 
 #include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
@@ -41,8 +44,6 @@
 
 namespace lib
 {
-    /// @class lib::basic_spinlock_t
-    ///
     /// <!-- description -->
     ///   @brief Implements a basic_spinlock_t. Unlike the std::lock_guard_t
     ///     this lock is aware of which PP has acquired the lock. If the same

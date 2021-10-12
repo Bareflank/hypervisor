@@ -33,8 +33,6 @@
 #define EFI_DEVICE_PATH_PROTOCOL_LENGTH_SIZE 2
 
 /**
- * @struct EFI_DEVICE_PATH_PROTOCOL
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_DEVICE_PATH_PROTOCOL struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

@@ -25,16 +25,12 @@
 #ifndef GLOBAL_DESCRIPTOR_TABLE_REGISTER_T_HPP
 #define GLOBAL_DESCRIPTOR_TABLE_REGISTER_T_HPP
 
-#include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
-#include <bsl/safe_integral.hpp>
 
 #pragma pack(push, 1)
 
 namespace loader
 {
-    /// @struct loader::global_descriptor_table_register_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the structure of the global descriptor table register
     ///     as defined by Intel and AMD

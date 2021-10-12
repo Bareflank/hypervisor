@@ -30,8 +30,6 @@
 #include <efi/efi_types.h>
 
 /**
- * @struct EFI_OPEN_PROTOCOL_INFORMATION_ENTRY
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_OPEN_PROTOCOL_INFORMATION_ENTRY struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

@@ -30,8 +30,6 @@
 #include <efi/efi_types.h>
 
 /**
- * @struct EFI_TABLE_HEADER
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_TABLE_HEADER struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

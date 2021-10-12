@@ -26,24 +26,29 @@
 #define MOCK_BASIC_PAGE_POOL_T_HPP
 
 #if __has_include("page_pool_helpers.hpp")
-#include "page_pool_helpers.hpp"    // IWYU pragma: export
+#include <page_pool_helpers.hpp>    // IWYU pragma: export
 #endif
 
 #if __has_include("basic_page_pool_helpers.hpp")
-#include "basic_page_pool_helpers.hpp"    // IWYU pragma: export
+#include <basic_page_pool_helpers.hpp>    // IWYU pragma: export
 #endif
+
+// IWYU pragma: no_include "page_pool_helpers.hpp"
+// IWYU pragma: no_include "basic_page_pool_helpers.hpp"
+
+#include <basic_page_pool_node_t.hpp>
 
 #include <bsl/discard.hpp>
 #include <bsl/dontcare_t.hpp>
 #include <bsl/expects.hpp>
 #include <bsl/is_pod.hpp>
 #include <bsl/safe_integral.hpp>
+#include <bsl/span.hpp>
+#include <bsl/touch.hpp>
 #include <bsl/unordered_map.hpp>
 
 namespace lib
 {
-    /// @class lib::basic_page_pool_t
-    ///
     /// <!-- description -->
     ///   @brief the basic_page_pool_t is responsible for allocating and freeing
     ///      pages. The loader provides a linked list with the pages that
@@ -58,18 +63,20 @@ namespace lib
     template<typename TLS_TYPE, typename SYS_TYPE = bsl::dontcare_t>
     class basic_page_pool_t final
     {
+        /// @brief store the max number of allocations
+        bsl::safe_umx m_max{};
+        /// @brief store whether or not a max value is enabled.
+        bool m_enable_max{};
         /// @brief stores the total number of bytes given to the basic_page_pool_t.
         bsl::safe_umx m_size{};
         /// @brief stores the total number of bytes given to the basic_page_pool_t.
         bsl::safe_umx m_used{};
         /// @brief store the virt to phys translations
-        bsl::unordered_map<void const *, bsl::safe_umx> m_virt_to_phys{};
+        bsl::unordered_map<void const *, bsl::safe_u64> m_virt_to_phys{};
         /// @brief store the virt to phys translations
-        bsl::unordered_map<bsl::safe_umx, helpers::virt_storage_t> m_phys_to_virt{};
+        bsl::unordered_map<bsl::safe_u64, helpers::page_pool_storage_t> m_phys_to_virt{};
         /// @brief store a single virtual address based on type
-        helpers::virt_storage_t m_oneshot_virt{};
-        /// @brief store a single physical address based on type
-        bsl::safe_umx m_oneshot_phys{};
+        helpers::page_pool_storage_t m_allocate{};
 
         /// <!-- description -->
         ///   @brief Returns the number of bytes allocated.
@@ -107,6 +114,20 @@ namespace lib
 
     public:
         /// <!-- description -->
+        ///   @brief Creates the basic_page_pool_t given a mutable_buffer_t to
+        ///     the basic_page_pool_t as well as the virtual address base of the
+        ///     page pool which is used for virt to phys translations.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param pool the mutable_buffer_t of the basic_page_pool_t
+        ///
+        static constexpr void
+        initialize(bsl::span<basic_page_pool_node_t> const &pool) noexcept
+        {
+            bsl::discard(pool);
+        }
+
+        /// <!-- description -->
         ///   @brief Allocates a page from the basic_page_pool_t.
         ///
         /// <!-- inputs/outputs -->
@@ -135,7 +156,7 @@ namespace lib
         allocate(TLS_TYPE const &tls, SYS_TYPE const &sys) noexcept -> T *
         {
             T *pmut_mut_virt{};
-            bsl::safe_umx mut_phys{};
+            bsl::safe_u64 mut_phys{};
 
             static_assert(bsl::is_pod<T>::value);
             static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);
@@ -146,9 +167,20 @@ namespace lib
             m_size += HYPERVISOR_PAGE_SIZE;
             m_used += HYPERVISOR_PAGE_SIZE;
 
-            if (helpers::is_virt_a_t<T>(m_oneshot_virt)) {
-                pmut_mut_virt = helpers::get_virt<T>(m_oneshot_virt);
-                mut_phys = m_oneshot_phys;
+            if (m_enable_max) {
+                if (m_max.is_zero()) {
+                    return nullptr;
+                }
+
+                m_max = (--m_max).checked();
+            }
+            else {
+                bsl::touch();
+            }
+
+            if (helpers::is_page_pool_storage_set<T>(m_allocate)) {
+                pmut_mut_virt = helpers::get_virt<T>(m_allocate);
+                mut_phys = helpers::get_phys<T>(m_allocate);
             }
             else {
                 // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
@@ -157,14 +189,13 @@ namespace lib
             }
 
             m_virt_to_phys.at(pmut_mut_virt) = mut_phys;
-            helpers::set_virt(m_phys_to_virt.at(mut_phys), pmut_mut_virt);
+            helpers::set_page_pool_storage<T>(m_phys_to_virt.at(mut_phys), pmut_mut_virt, mut_phys);
 
             return pmut_mut_virt;
         }
 
         /// <!-- description -->
-        ///   @brief Sets a oneshot virt to phys answer for an allocation of
-        ///     type T.
+        ///   @brief Sets the results of allocate for a specific type
         ///
         /// <!-- inputs/outputs -->
         ///   @tparam T the type of pointer to set
@@ -173,13 +204,27 @@ namespace lib
         ///
         template<typename T>
         constexpr void
-        set_oneshot(T *const pmut_virt, bsl::safe_umx const &phys) noexcept
+        set_allocate(T *const pmut_virt, bsl::safe_u64 const &phys) noexcept
         {
             static_assert(bsl::is_pod<T>::value);
             static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);
 
-            helpers::set_virt(m_oneshot_virt, pmut_virt);
-            m_oneshot_phys = phys;
+            helpers::set_page_pool_storage(m_allocate, pmut_virt, phys);
+        }
+
+        /// <!-- description -->
+        ///   @brief Sets the max number of allocations before the allocator
+        ///     will return a nullptr as if it were out of memory.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param max the max number of supported allocations
+        ///
+        constexpr void
+        set_max(bsl::safe_umx const &max) noexcept
+        {
+            bsl::expects(max.is_valid_and_checked());
+            m_max = max;
+            m_enable_max = true;
         }
 
         /// <!-- description -->
@@ -204,9 +249,8 @@ namespace lib
             auto const phys{this->virt_to_phys(virt)};
             m_used -= HYPERVISOR_PAGE_SIZE;
 
-            if (helpers::is_virt_a_t<T>(m_oneshot_virt)) {
-                m_oneshot_virt = {};
-                m_oneshot_phys = {};
+            if (helpers::is_page_pool_storage_set<T>(m_allocate)) {
+                helpers::set_page_pool_storage<T>(m_allocate, {}, {});
             }
             else {
                 // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
@@ -288,7 +332,7 @@ namespace lib
         ///
         template<typename T>
         [[nodiscard]] constexpr auto
-        phys_to_virt(bsl::safe_umx const &phys) const noexcept -> T *
+        phys_to_virt(bsl::safe_u64 const &phys) const noexcept -> T *
         {
             static_assert(bsl::is_pod<T>::value);
             static_assert(sizeof(T) == HYPERVISOR_PAGE_SIZE);

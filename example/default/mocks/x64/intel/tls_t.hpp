@@ -29,8 +29,6 @@
 
 namespace example
 {
-    /// @class example::tls_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the extension's mocked version of tls_t, used for
     ///     unit testing. Specifically, this version only contains portions

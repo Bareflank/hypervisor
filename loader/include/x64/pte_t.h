@@ -36,8 +36,6 @@
 #endif
 
 /**
- * @struct pte_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a page table entry (PTE).
  */

@@ -25,16 +25,12 @@
 #ifndef TSS_T_HPP
 #define TSS_T_HPP
 
-#include <bsl/convert.hpp>
 #include <bsl/cstdint.hpp>
-#include <bsl/safe_integral.hpp>
 
 #pragma pack(push, 1)
 
 namespace loader
 {
-    /// @struct loader::tss_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the structure of the task state segment
     ///     as defined by the AMD SDM.

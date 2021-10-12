@@ -29,8 +29,6 @@
 
 namespace example
 {
-    /// @struct example::range_t
-    ///
     /// <!-- description -->
     ///   @brief Defines a MTRR range used by the mtrr_t class.
     ///

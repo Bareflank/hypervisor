@@ -44,8 +44,6 @@
 
 namespace syscall
 {
-    /// @class syscall::bf_syscall_t
-    ///
     /// <!-- description -->
     ///   @brief Provides an API wrapper around all of the microkernel ABIs.
     ///     For more information about these APIs, please see the Microkernel
@@ -1681,40 +1679,6 @@ namespace syscall
         }
 
         /// <!-- description -->
-        ///   @brief Frees a page previously allocated by bf_mem_op_alloc_page.
-        ///     This operation is optional and not all microkernels may implement
-        ///     it.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam T the type of pointer to return. Must be a POD type and
-        ///     the size of a page.
-        ///   @param pmut_virt The virtual address of the page to free
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        template<typename T>
-        [[nodiscard]] constexpr auto
-        bf_mem_op_free_page(T *const pmut_virt) noexcept -> bsl::errc_type
-        {
-            bsl::expects(nullptr != pmut_virt);
-
-            static_assert(bsl::is_pod<T>::value);
-            static_assert(sizeof(T) <= HYPERVISOR_PAGE_SIZE);
-
-            bf_status_t const ret{bf_mem_op_free_page_impl(m_hndl.get(), pmut_virt)};
-            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_mem_op_free_page failed with status "    // --
-                             << bsl::hex(ret)                                // --
-                             << bsl::endl                                    // --
-                             << bsl::here();
-
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
         ///   @brief bf_mem_op_alloc_huge allocates a physically contiguous block
         ///     of memory. When allocating a page, the extension should keep in
         ///     mind the following:
@@ -1795,40 +1759,6 @@ namespace syscall
         {
             bsl::safe_u64 mut_ignored{};
             return this->bf_mem_op_alloc_huge<T>(size, mut_ignored);
-        }
-
-        /// <!-- description -->
-        ///   @brief Frees memory previously allocated by bf_mem_op_alloc_huge.
-        ///     This operation is optional and not all microkernels may implement
-        ///     it.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam T the type of pointer to return. Must be a POD type and
-        ///     the size of a page.
-        ///   @param pmut_virt The virtual address of the memory to free
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        template<typename T>
-        [[nodiscard]] constexpr auto
-        bf_mem_op_free_huge(T *const pmut_virt) noexcept -> bsl::errc_type
-        {
-            bsl::expects(nullptr != pmut_virt);
-
-            static_assert(bsl::is_pod<T>::value);
-            static_assert(sizeof(T) <= HYPERVISOR_PAGE_SIZE);
-
-            bf_status_t const ret{bf_mem_op_free_huge_impl(m_hndl.get(), pmut_virt)};
-            if (bsl::unlikely(ret != BF_STATUS_SUCCESS)) {
-                bsl::error() << "bf_mem_op_free_huge failed with status "    // --
-                             << bsl::hex(ret)                                // --
-                             << bsl::endl                                    // --
-                             << bsl::here();
-
-                return bsl::errc_failure;
-            }
-
-            return bsl::errc_success;
         }
     };
 }

@@ -25,33 +25,20 @@
 #ifndef MK_ARGS_T_HPP
 #define MK_ARGS_T_HPP
 
+#include <basic_page_4k_t.hpp>
+#include <basic_page_pool_node_t.hpp>
+#include <basic_page_table_t.hpp>
 #include <bfelf/elf64_ehdr_t.hpp>
+#include <debug_ring_t.hpp>
+#include <l3e_t.hpp>
 #include <state_save_t.hpp>
 
 #include <bsl/array.hpp>
-#include <bsl/convert.hpp>
-#include <bsl/cstdint.hpp>
+#include <bsl/convert.hpp>    // IWYU pragma: keep
 #include <bsl/safe_integral.hpp>
 #include <bsl/span.hpp>
 
 #pragma pack(push, 1)
-
-namespace mk
-{
-    /// @brief defines a prototype for l3e_t
-    struct l3e_t;
-}
-
-namespace lib
-{
-    /// @brief defines a prototype for basic_page_table_t
-    template<typename E>
-    struct basic_page_table_t;
-    /// @brief defines a prototype for basic_page_pool_node_t
-    struct basic_page_pool_node_t;
-    /// @brief defines a prototype for basic_page_4k_t
-    struct basic_page_4k_t;
-}
 
 namespace loader
 {
@@ -60,8 +47,6 @@ namespace loader
     /// @brief defines the ext_elf_files type
     using ext_elf_files_t = bsl::array<ext_elf_file_t const *, HYPERVISOR_MAX_EXTENSIONS.get()>;
 
-    /// @struct loader::mk_args_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the arguments sent to the _start function of the
     ///     microkernel. The microkernel will have it's own C++ version of this
@@ -87,7 +72,7 @@ namespace loader
         /// @brief stores the location of the extension's ELF files
         ext_elf_files_t ext_elf_files;
         /// @brief stores the virtual address of the MK's RPT for this CPU
-        lib::basic_page_table_t<mk::l3e_t> *rpt;
+        lib::basic_page_table_t<lib::l3e_t> *rpt;
         /// @brief stores the physical address of the MK's RPT for this CPU
         bsl::uint64 rpt_phys;
         /// @brief stores the location of the microkernel's page pool

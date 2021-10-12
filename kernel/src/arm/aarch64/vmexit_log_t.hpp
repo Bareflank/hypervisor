@@ -35,8 +35,6 @@
 
 namespace mk
 {
-    /// @class mk::vmexit_log_t
-    ///
     /// <!-- description -->
     ///   @brief Stores a log of all VMExits that occur. Each PP has one log
     ///     that is shared between all of the VSs so that you get a consistent

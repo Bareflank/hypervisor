@@ -25,7 +25,10 @@
 #ifndef DISPATCH_SYSCALL_HPP
 #define DISPATCH_SYSCALL_HPP
 
+#include "dispatch_syscall_helpers.hpp"
+
 #include <bf_constants.hpp>
+#include <bf_types.hpp>
 #include <dispatch_syscall_bf_callback_op.hpp>
 #include <dispatch_syscall_bf_control_op.hpp>
 #include <dispatch_syscall_bf_debug_op.hpp>
@@ -36,7 +39,6 @@
 #include <dispatch_syscall_bf_vp_op.hpp>
 #include <dispatch_syscall_bf_vs_op.hpp>
 #include <ext_pool_t.hpp>
-#include <ext_t.hpp>
 #include <huge_pool_t.hpp>
 #include <intrinsic_t.hpp>
 #include <page_pool_t.hpp>
@@ -47,7 +49,8 @@
 #include <vs_pool_t.hpp>
 
 #include <bsl/debug.hpp>
-#include <bsl/errc_type.hpp>
+#include <bsl/expects.hpp>
+#include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
@@ -83,26 +86,6 @@ namespace mk
         bsl::expects(nullptr != mut_tls.ext);
 
         switch (syscall::bf_syscall_opcode(mut_tls.ext_syscall).get()) {
-            case syscall::BF_CONTROL_OP_VAL.get(): {
-                auto const ret{dispatch_syscall_bf_control_op(mut_tls)};
-                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                return ret;
-            }
-
-            case syscall::BF_HANDLE_OP_VAL.get(): {
-                auto const ret{dispatch_syscall_bf_handle_op(mut_tls)};
-                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                return ret;
-            }
-
             case syscall::BF_DEBUG_OP_VAL.get(): {
                 auto const ret{dispatch_syscall_bf_debug_op(
                     mut_tls,
@@ -123,8 +106,25 @@ namespace mk
                 return ret;
             }
 
-            case syscall::BF_CALLBACK_OP_VAL.get(): {
-                auto const ret{dispatch_syscall_bf_callback_op(mut_tls)};
+            case syscall::BF_VS_OP_VAL.get(): {
+                auto const ret{dispatch_syscall_bf_vs_op(
+                    mut_tls,
+                    mut_page_pool,
+                    mut_intrinsic,
+                    mut_vm_pool,
+                    mut_vp_pool,
+                    mut_vs_pool,
+                    mut_ext_pool)};
+                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return ret;
+                }
+
+                return ret;
+            }
+
+            case syscall::BF_MEM_OP_VAL.get(): {
+                auto const ret{dispatch_syscall_bf_mem_op(mut_tls, mut_page_pool, mut_huge_pool)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;
@@ -161,23 +161,6 @@ namespace mk
                 return ret;
             }
 
-            case syscall::BF_VS_OP_VAL.get(): {
-                auto const ret{dispatch_syscall_bf_vs_op(
-                    mut_tls,
-                    mut_page_pool,
-                    mut_intrinsic,
-                    mut_vm_pool,
-                    mut_vp_pool,
-                    mut_vs_pool,
-                    mut_ext_pool)};
-                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                return ret;
-            }
-
             case syscall::BF_INTRINSIC_OP_VAL.get(): {
                 auto const ret{dispatch_syscall_bf_intrinsic_op(mut_tls, mut_intrinsic)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
@@ -188,8 +171,28 @@ namespace mk
                 return ret;
             }
 
-            case syscall::BF_MEM_OP_VAL.get(): {
-                auto const ret{dispatch_syscall_bf_mem_op(mut_tls, mut_page_pool, mut_huge_pool)};
+            case syscall::BF_CONTROL_OP_VAL.get(): {
+                auto const ret{dispatch_syscall_bf_control_op(mut_tls)};
+                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return ret;
+                }
+
+                return ret;
+            }
+
+            case syscall::BF_HANDLE_OP_VAL.get(): {
+                auto const ret{dispatch_syscall_bf_handle_op(mut_tls)};
+                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return ret;
+                }
+
+                return ret;
+            }
+
+            case syscall::BF_CALLBACK_OP_VAL.get(): {
+                auto const ret{dispatch_syscall_bf_callback_op(mut_tls)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;

@@ -51,8 +51,6 @@ namespace vmmctl
     /// @brief defines the IOCTL version this code supports.
     constexpr auto IOCTL_VERSION{1_umx};
 
-    /// @class vmmctl::vmmctl_main
-    ///
     /// <!-- description -->
     ///   @brief Provides the main implementation of the vmmctl application.
     ///     This application is used to start and stop the VMM as well as

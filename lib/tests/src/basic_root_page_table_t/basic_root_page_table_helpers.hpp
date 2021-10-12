@@ -26,8 +26,8 @@
 #define MOCK_BASIC_ROOT_PAGE_TABLE_HELPERS_HPP
 
 #include <basic_entry_status_t.hpp>
-#include <basic_map_page_flags.hpp>
 
+#include <bsl/convert.hpp>
 #include <bsl/expects.hpp>
 #include <bsl/safe_integral.hpp>
 
@@ -51,12 +51,13 @@ namespace helpers
     {
         bsl::expects(nullptr != pmut_entry);
 
-        if (bsl::safe_u64::magic_0() == pmut_entry->p) {
-            return lib::basic_entry_status_t::not_present;
+        if (bsl::safe_u64::magic_0() != pmut_entry->u) {
+            constexpr auto garbage{0x42_u64};
+            return static_cast<lib::basic_entry_status_t>(garbage.get());
         }
 
-        if (bsl::safe_u64::magic_0() == pmut_entry->us) {
-            return lib::basic_entry_status_t::reserved;
+        if (bsl::safe_u64::magic_0() == pmut_entry->p) {
+            return lib::basic_entry_status_t::not_present;
         }
 
         return lib::basic_entry_status_t::present;
@@ -78,21 +79,6 @@ namespace helpers
         bsl::expects(page_flgs.is_valid_and_checked());
 
         pmut_entry->p = bsl::safe_u64::magic_1().get();
-        pmut_entry->us = bsl::safe_u64::magic_1().get();
-
-        if ((page_flgs & lib::BASIC_MAP_PAGE_WRITE).is_zero()) {
-            pmut_entry->rw = bsl::safe_u64::magic_0().get();
-        }
-        else {
-            pmut_entry->rw = bsl::safe_u64::magic_1().get();
-        }
-
-        if ((page_flgs & lib::BASIC_MAP_PAGE_EXECUTE).is_zero()) {
-            pmut_entry->nx = bsl::safe_u64::magic_1().get();
-        }
-        else {
-            pmut_entry->nx = bsl::safe_u64::magic_0().get();
-        }
     }
 
     /// <!-- description -->
@@ -107,10 +93,7 @@ namespace helpers
     configure_entry_as_ptr_to_table(E *const pmut_entry) noexcept
     {
         bsl::expects(nullptr != pmut_entry);
-
         pmut_entry->p = bsl::safe_u64::magic_1().get();
-        pmut_entry->rw = bsl::safe_u64::magic_1().get();
-        pmut_entry->us = bsl::safe_u64::magic_1().get();
     }
 }
 

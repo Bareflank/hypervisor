@@ -36,8 +36,6 @@
 #define LOADER_NUM_PT_ENTRIES ((uint64_t)512)
 
 /**
- * @struct pt_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a page table (pt).
  */

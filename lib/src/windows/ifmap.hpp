@@ -54,8 +54,6 @@
 
 namespace lib
 {
-    /// @class lib::ifmap
-    ///
     /// <!-- description -->
     ///   @brief Maps a file as read-only, and returns a pointer to the file
     ///     via data() as well as the size of the mapped file via size().

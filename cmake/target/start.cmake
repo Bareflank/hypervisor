@@ -23,12 +23,12 @@ if(HYPERVISOR_BUILD_VMMCTL AND NOT HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_custom_target(start
             COMMAND sync
-            COMMAND sudo vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/kernel ${CMAKE_BINARY_DIR}/${HYPERVISOR_EXTENSIONS}
+            COMMAND sudo vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/kernel_bin ${CMAKE_BINARY_DIR}/extension_bin
             VERBATIM
         )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         add_custom_target(start
-            COMMAND vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/kernel ${CMAKE_BINARY_DIR}/${HYPERVISOR_EXTENSIONS}
+            COMMAND vmmctl/vmmctl start ${CMAKE_BINARY_DIR}/kernel_bin ${CMAKE_BINARY_DIR}/extension_bin
             VERBATIM
         )
     else()

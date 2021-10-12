@@ -30,8 +30,6 @@
 
 namespace syscall
 {
-    /// @class example::tls_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the extension's Thread Local Storage (TLS).
     ///     Extensions can use this to store data specific to a PP as needed.

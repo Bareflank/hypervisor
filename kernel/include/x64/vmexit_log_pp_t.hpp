@@ -28,12 +28,12 @@
 #include <vmexit_log_record_t.hpp>
 
 #include <bsl/array.hpp>
+#include <bsl/convert.hpp>    // IWYU pragma: keep
+#include <bsl/safe_idx.hpp>
 #include <bsl/safe_integral.hpp>
 
 namespace mk
 {
-    /// @class mk::vmexit_log_pp_t
-    ///
     /// <!-- description -->
     ///   @brief Stores information about each VMExit per PP
     ///

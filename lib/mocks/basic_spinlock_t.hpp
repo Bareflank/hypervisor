@@ -29,8 +29,6 @@
 
 namespace lib
 {
-    /// @class lib::basic_spinlock_t
-    ///
     /// <!-- description -->
     ///   @brief Implements a mocked version of basic_spinlock_t
     ///

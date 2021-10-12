@@ -28,9 +28,12 @@
 #include "dispatch_syscall_helpers.hpp"
 
 #include <bf_constants.hpp>
+#include <bf_types.hpp>
+#include <ext_t.hpp>
 #include <tls_t.hpp>
 
 #include <bsl/debug.hpp>
+#include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
@@ -78,13 +81,6 @@ namespace mk
             return syscall::BF_STATUS_INVALID_INPUT_REG1;
         }
 
-        bool const already_registered_by_active_ext{
-            has_active_ext_registered_a_callback(mut_tls, mut_tls.ext->vmexit_ip(), "vmexit")};
-        if (bsl::unlikely(already_registered_by_active_ext)) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::BF_STATUS_FAILURE_UNKNOWN;
-        }
-
         bool const already_registered_by_any_ext{
             has_any_ext_registered_a_callback(mut_tls.ext_vmexit, "vmexit")};
         if (bsl::unlikely(already_registered_by_any_ext)) {
@@ -112,13 +108,6 @@ namespace mk
         if (bsl::unlikely(callback.is_invalid())) {
             bsl::print<bsl::V>() << bsl::here();
             return syscall::BF_STATUS_INVALID_INPUT_REG1;
-        }
-
-        bool const already_registered_by_active_ext{
-            has_active_ext_registered_a_callback(mut_tls, mut_tls.ext->fail_ip(), "fail")};
-        if (bsl::unlikely(already_registered_by_active_ext)) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::BF_STATUS_FAILURE_UNKNOWN;
         }
 
         bool const already_registered_by_any_ext{

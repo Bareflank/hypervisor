@@ -37,8 +37,6 @@
 #define LOADER_NUM_L2T_ENTRIES ((uint64_t)512)
 
 /**
- * @struct l2t_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a level-2 table (L2T).
  */

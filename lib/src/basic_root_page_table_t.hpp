@@ -26,35 +26,38 @@
 #define BASIC_ROOT_PAGE_TABLE_T_HPP
 
 #if __has_include("root_page_table_helpers.hpp")
-#include "root_page_table_helpers.hpp"    // IWYU pragma: export
+#include <root_page_table_helpers.hpp>    // IWYU pragma: export
 #endif
 
 #if __has_include("second_level_page_table_helpers.hpp")
-#include "second_level_page_table_helpers.hpp"    // IWYU pragma: export
+#include <second_level_page_table_helpers.hpp>    // IWYU pragma: export
 #endif
 
 #if __has_include("basic_root_page_table_helpers.hpp")
-#include "basic_root_page_table_helpers.hpp"    // IWYU pragma: export
+#include <basic_root_page_table_helpers.hpp>    // IWYU pragma: export
 #endif
 
-#include "basic_alloc_page_t.hpp"
-#include "basic_entries_t.hpp"
-#include "basic_entry_status_t.hpp"
-#include "basic_map_page_flags.hpp"
-#include "basic_page_1g_t.hpp"
-#include "basic_page_2m_t.hpp"
-#include "basic_page_4k_t.hpp"
-#include "basic_page_table_t.hpp"
-#include "basic_tlb_flush_type_t.hpp"
+// IWYU pragma: no_include "root_page_table_helpers.hpp"
+// IWYU pragma: no_include "second_level_page_table_helpers.hpp"
+// IWYU pragma: no_include "basic_root_page_table_helpers.hpp"
 
+#include <basic_alloc_page_t.hpp>
+#include <basic_entries_t.hpp>
+#include <basic_entry_status_t.hpp>
 #include <basic_lock_guard_t.hpp>    // IWYU pragma: keep
-#include <basic_spinlock_t.hpp>      // IWYU pragma: keep
+#include <basic_map_page_flags.hpp>
+#include <basic_page_1g_t.hpp>
+#include <basic_page_2m_t.hpp>
+#include <basic_page_4k_t.hpp>
+#include <basic_page_pool_t.hpp>    // IWYU pragma: keep
+#include <basic_page_table_t.hpp>
+#include <basic_spinlock_t.hpp>    // IWYU pragma: keep
 
 #include <bsl/construct_at.hpp>
 #include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
-#include <bsl/discard.hpp>
 #include <bsl/dontcare_t.hpp>
+#include <bsl/ensures.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/expects.hpp>
 #include <bsl/finally.hpp>
@@ -69,8 +72,6 @@
 
 namespace lib
 {
-    /// @class lib::basic_root_page_table_t
-    ///
     /// <!-- description -->
     ///   @brief Implements an interface to a root page table. The root page
     ///     table (RPT) is the highest level page table, and provides an
@@ -134,7 +135,7 @@ namespace lib
     ///       to a table owned by a different RPT. If this bit is set, when
     ///       the RPT is released, it will not deallocate page tables with
     ///       the alias bit set.
-    ///     - a 1bit require_explicit_unmap field, which tells the RPT that
+    ///     - a 1bit explicit_unmap field, which tells the RPT that
     ///       the map must be explicitly unmapped before the RPT can be
     ///       released. For example, if you allocate memory and then use
     ///       the map function, you will likely want to set this flag to
@@ -214,9 +215,32 @@ namespace lib
         /// @brief stores a pointer to the l3t
         l3t_t *m_l3t{};
         /// @brief stores the physical address of the l3t
-        bsl::safe_umx m_l3t_phys{};
+        bsl::safe_umx m_l3t_spa{};
         /// @brief safe guards operations on the RPT.
         mutable basic_spinlock_t m_lock{};
+
+        /// <!-- description -->
+        ///   @brief Returns reserved if the entry is marked as an alias.
+        ///     Otherwise, returns helpers::entry_status(pudm_entry).
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @tparam E the type of entry to query
+        ///   @param pudm_entry the entry to query
+        ///   @return Returns reserved if the entry is marked as an alias.
+        ///     Otherwise, returns helpers::entry_status(pudm_entry).
+        ///
+        template<typename E>
+        [[nodiscard]] static constexpr auto
+        entry_status(E *const pudm_entry) noexcept -> lib::basic_entry_status_t
+        {
+            bsl::expects(nullptr != pudm_entry);
+
+            if (bsl::safe_u64::magic_0() != pudm_entry->alias) {
+                return lib::basic_entry_status_t::reserved;
+            }
+
+            return helpers::entry_status(pudm_entry);
+        }
 
         /// <!-- description -->
         ///   @brief Returns the level-3 table (L3T) offset given a
@@ -328,45 +352,6 @@ namespace lib
         }
 
         /// <!-- description -->
-        ///   @brief Returns the 1g page aligned version of addr.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param addr the address to page align
-        ///   @return Returns the 1g page aligned version of addr
-        ///
-        [[nodiscard]] static constexpr auto
-        page_1g_aligned(bsl::safe_u64 const &addr) noexcept -> bsl::safe_u64
-        {
-            return (addr & (~BASIC_PAGE_1G_T_MASK));
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the 2m page aligned version of addr.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param addr the address to page align
-        ///   @return Returns the 2m page aligned version of addr
-        ///
-        [[nodiscard]] static constexpr auto
-        page_2m_aligned(bsl::safe_u64 const &addr) noexcept -> bsl::safe_u64
-        {
-            return (addr & (~BASIC_PAGE_2M_T_MASK));
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the 4k page aligned version of addr.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param addr the address to page align
-        ///   @return Returns the 4k page aligned version of addr
-        ///
-        [[nodiscard]] static constexpr auto
-        page_4k_aligned(bsl::safe_u64 const &addr) noexcept -> bsl::safe_u64
-        {
-            return (addr & (~BASIC_PAGE_4K_T_MASK));
-        }
-
-        /// <!-- description -->
         ///   @brief Returns the virtual address of a basic_page_4k_t given a
         ///     table entry.
         ///
@@ -441,9 +426,7 @@ namespace lib
         [[nodiscard]] static constexpr auto
         // NOLINTNEXTLINE(bsl-auto-type-usage)
         allocate_table(
-            TLS_TYPE const &tls,
-            PAGE_POOL_TYPE &mut_page_pool,
-            SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> auto
+            TLS_TYPE const &tls, PAGE_POOL_TYPE &mut_page_pool, SYS_TYPE &mut_sys) noexcept -> auto
         {
             static_assert(bsl::is_one_of<E, L3E_TYPE, L2E_TYPE, L1E_TYPE>::value);
 
@@ -480,8 +463,7 @@ namespace lib
             TLS_TYPE const &tls,
             PAGE_POOL_TYPE &mut_page_pool,
             E *const pmut_entry,
-            SYS_TYPE &mut_sys = bsl::dontcare) noexcept
-            -> decltype(allocate_table<E>(tls, mut_page_pool, mut_sys))
+            SYS_TYPE &mut_sys) noexcept -> decltype(allocate_table<E>(tls, mut_page_pool, mut_sys))
         {
             auto *const pmut_table{allocate_table<E>(tls, mut_page_pool, mut_sys)};
             if (bsl::unlikely(nullptr == pmut_table)) {
@@ -497,7 +479,7 @@ namespace lib
             pmut_entry->points_to_block = bsl::safe_u64::magic_0().get();
             pmut_entry->alias = bsl::safe_u64::magic_0().get();
             pmut_entry->phys = (mut_table_phys >> BASIC_PAGE_4K_T_SHFT).get();
-            pmut_entry->require_explicit_unmap = bsl::safe_u64::magic_0().get();
+            pmut_entry->explicit_unmap = bsl::safe_u64::magic_0().get();
             helpers::configure_entry_as_ptr_to_table(pmut_entry);
 
             return pmut_table;
@@ -512,7 +494,7 @@ namespace lib
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param pmut_table the table to release
         ///   @param cleanup allow an entry to be released automatically
-        ///     if it is not marked as require_explicit_unmap
+        ///     if it is not marked as explicit_unmap
         ///   @return Returns true if the table is empty. Returns
         ///     false otherwise.
         ///
@@ -555,7 +537,7 @@ namespace lib
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param pmut_entry the entry that points to the table to release
         ///   @param cleanup allow an entry to be released automatically
-        ///     if it is not marked as require_explicit_unmap
+        ///     if it is not marked as explicit_unmap
         ///   @return Returns true if the entry points to an empty block
         ///     or table. Returns false otherwise.
         ///
@@ -574,7 +556,7 @@ namespace lib
             ///   * map() during an error
             ///
             /// - If unmap() is called, the leaf entry that is being unmapped
-            ///   has require_explicit_unmap set to 0, meaning it has been
+            ///   has explicit_unmap set to 0, meaning it has been
             ///   explicitly unmapped using the unmap() function and can
             ///   now be released. This function starts by unmapping the leaf
             ///   entry with cleanup set to true, and then releases the entry
@@ -585,7 +567,7 @@ namespace lib
             ///   use, and it is also efficient.
             ///
             /// - If release() is called, it is time to cleanup all of the
-            ///   page tables as nothing is in use. If require_explicit_unmap
+            ///   page tables as nothing is in use. If explicit_unmap
             ///   is still marked as present, it means that an unmap() was
             ///   never called, and that means we cannot actually release
             ///   all of memory, and the tables are left in place. Typically,
@@ -595,7 +577,7 @@ namespace lib
             ///   Otherwise, information about the huge allocation is lost
             ///   and cannot be freed at all. It also indicates an issue with
             ///   the code that needs to be fixed. For second level paging,
-            ///   this should never be an issue as require_explicit_unmap will
+            ///   this should never be an issue as explicit_unmap will
             ///   never be used.
             ///
             /// - If the map() function encounters an error, it has to clean
@@ -607,7 +589,7 @@ namespace lib
             ///
             /// - So, the TL;DR is, if we get here, the entry must be marked
             ///   as present. If cleanup is true, it means that we are allowed
-            ///   to release the entry so long as require_explicit_unmap is
+            ///   to release the entry so long as explicit_unmap is
             ///   not set. If cleanup is false, there is nothing to do here.
             ///
 
@@ -615,9 +597,9 @@ namespace lib
                 return false;
             }
 
-            if (bsl::unlikely(bsl::safe_u64::magic_1() == pmut_entry->require_explicit_unmap)) {
+            if (bsl::unlikely(bsl::safe_u64::magic_1() == pmut_entry->explicit_unmap)) {
                 bsl::alert() << "release_entry_to_block failed due to "
-                             << "require_explicit_unmap being set on the entry. "
+                             << "explicit_unmap being set on the entry. "
                              << "memory was likely leaked as a result" << bsl::endl
                              << bsl::here();
 
@@ -648,7 +630,7 @@ namespace lib
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param pmut_entry the entry that points to the table to release
         ///   @param cleanup allow an entry to be released automatically
-        ///     if it is not marked as require_explicit_unmap
+        ///     if it is not marked as explicit_unmap
         ///   @return Returns true if the entry points to an empty block
         ///     or table. Returns false otherwise.
         ///
@@ -720,7 +702,7 @@ namespace lib
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param pmut_entry the entry that points to the table to release
         ///   @param cleanup allow an entry to be released automatically
-        ///     if it is not marked as require_explicit_unmap
+        ///     if it is not marked as explicit_unmap
         ///   @return Returns true if the entry points to an empty block
         ///     or table. Returns false otherwise.
         ///
@@ -732,16 +714,32 @@ namespace lib
             E *const pmut_entry,
             bool const cleanup) noexcept -> bool
         {
-            if (helpers::entry_status(pmut_entry) != basic_entry_status_t::present) {
+            bsl::expects(nullptr != pmut_entry);
+
+            if (entry_status(pmut_entry) != basic_entry_status_t::present) {
                 return true;
             }
 
-            if (bsl::safe_u64::magic_1() == pmut_entry->alias) {
-                return true;
+            if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
+                if (bsl::safe_u64::magic_1() == pmut_entry->points_to_block) {
+                    return release_entry_to_block(tls, mut_page_pool, pmut_entry, cleanup);
+                }
+
+                bsl::touch();
             }
 
-            if (bsl::safe_u64::magic_1() == pmut_entry->points_to_block) {
+            if constexpr (bsl::is_same<E, L1E_TYPE>::value) {
+                if (bsl::safe_u64::magic_1() == pmut_entry->points_to_block) {
+                    return release_entry_to_block(tls, mut_page_pool, pmut_entry, cleanup);
+                }
+
+                bsl::touch();
+            }
+
+            if constexpr (bsl::is_same<E, L0E_TYPE>::value) {
                 return release_entry_to_block(tls, mut_page_pool, pmut_entry, cleanup);
+
+                bsl::touch();
             }
 
             return release_entry_to_table(tls, mut_page_pool, pmut_entry, cleanup);
@@ -752,198 +750,609 @@ namespace lib
         ///     translation of the provided virtual address.
         ///
         /// <!-- inputs/outputs -->
-        ///   @tparam E the entry type requested. For example, if a 1G
-        ///     map/unmap request is made, E should be L2E_TYPE.
-        ///   @tparam MAP_OP if true, this function will add tables to the
-        ///     heirarchy as needed. If false, when a non-present entry is
-        ///     encountered, a nullptr will be returned instead. MAP_OP
-        ///     should be set to true for all map style functions, while
-        ///     MAP_OP should be set to false when modifying an existing
-        ///     map, or unmapping a previously mapped virtual address.
-        ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
-        ///   @param mut_sys the bf_syscall_t to use (optional)
         ///   @param page_virt the virtual address to decode
         ///   @return Returns all of the entries that are identified during the
         ///     translation of the provided virtual address.
         ///
-        template<typename E, bool MAP_OP = true>
         [[nodiscard]] constexpr auto
-        get_entries(
-            TLS_TYPE const &tls,
-            PAGE_POOL_TYPE &mut_page_pool,
-            bsl::safe_u64 const &page_virt,
-            SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> entries_t
+        get_4k_for_query(PAGE_POOL_TYPE &mut_page_pool, bsl::safe_u64 const &page_virt) noexcept
+            -> entries_t
         {
             entries_t mut_ret{};
             l2t_t *pmut_mut_l2t{};
             l1t_t *pmut_mut_l1t{};
             l0t_t *pmut_mut_l0t{};
 
-            bsl::finally mut_release_l2t_on_error{
-                bsl::dormant, [&tls, &mut_page_pool, &mut_ret]() noexcept -> void {
-                    if constexpr (MAP_OP) {
-                        release_entry(tls, mut_page_pool, mut_ret.l3e, false);
-                    }
-                    else {
-                        bsl::discard(tls);
-                        bsl::discard(mut_page_pool);
-                        bsl::discard(mut_ret);
-                    }
-                }};
-
-            bsl::finally mut_release_l1t_on_error{
-                bsl::dormant, [&tls, &mut_page_pool, &mut_ret]() noexcept -> void {
-                    if constexpr (MAP_OP) {
-                        release_entry(tls, mut_page_pool, mut_ret.l2e, false);
-                    }
-                    else {
-                        bsl::discard(tls);
-                        bsl::discard(mut_page_pool);
-                        bsl::discard(mut_ret);
-                    }
-                }};
-
-            bsl::finally mut_release_l0t_on_error{
-                bsl::dormant, [&tls, &mut_page_pool, &mut_ret]() noexcept -> void {
-                    if constexpr (MAP_OP) {
-                        release_entry(tls, mut_page_pool, mut_ret.l1e, false);
-                    }
-                    else {
-                        bsl::discard(tls);
-                        bsl::discard(mut_page_pool);
-                        bsl::discard(mut_ret);
-                    }
-                }};
+            // -----------------------------------------------------------------
+            // Get L3 Entry
+            // -----------------------------------------------------------------
 
             mut_ret.l3e = m_l3t->entries.at_if(virt_to_l3to(page_virt));
-            switch (helpers::entry_status(mut_ret.l3e)) {
+            switch (entry_status(mut_ret.l3e)) {
                 case basic_entry_status_t::not_present: {
-                    if constexpr (MAP_OP) {
-                        if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
-                            return mut_ret;
-                        }
-
-                        pmut_mut_l2t = add_table(tls, mut_page_pool, mut_ret.l3e, mut_sys);
-                        if (bsl::unlikely(nullptr == pmut_mut_l2t)) {
-                            bsl::print<bsl::V>() << bsl::here();
-                            return {};
-                        }
-
-                        mut_release_l2t_on_error.activate();
-                    }
-                    else {
-                        bsl::error() << "l3t_t entry for the virtual address "    // --
-                                     << bsl::hex(page_virt)                       // --
-                                     << " is not marked present"                  // --
-                                     << bsl::endl                                 // --
-                                     << bsl::here();                              // --
-
-                        return {};
-                    }
+                    bsl::error() << "l3t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " is not marked present"                  // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
 
                     break;
                 }
 
                 case basic_entry_status_t::present: {
-                    if (bsl::safe_u64::magic_1() == mut_ret.l3e->points_to_block) {
-                        return mut_ret;
-                    }
-
                     pmut_mut_l2t = entry_to_table(mut_page_pool, mut_ret.l3e);
                     break;
                 }
 
-                case basic_entry_status_t::reserved: {
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
                     bsl::error() << "l3t_t entry for the virtual address "             // --
                                  << bsl::hex(page_virt)                                // --
                                  << " is not marked reserved and cannot be queried"    // --
                                  << bsl::endl                                          // --
                                  << bsl::here();                                       // --
 
-                    return {};
+                    break;
                 }
             }
 
+            if (bsl::unlikely(nullptr == pmut_mut_l2t)) {
+                return {};
+            }
+
+            // -----------------------------------------------------------------
+            // Get L2 Entry
+            // -----------------------------------------------------------------
+
             mut_ret.l2e = pmut_mut_l2t->entries.at_if(virt_to_l2to(page_virt));
-            switch (helpers::entry_status(mut_ret.l2e)) {
+            switch (entry_status(mut_ret.l2e)) {
                 case basic_entry_status_t::not_present: {
-                    if constexpr (MAP_OP) {
-                        if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
-                            mut_release_l2t_on_error.ignore();
-                            return mut_ret;
-                        }
-
-                        pmut_mut_l1t = add_table(tls, mut_page_pool, mut_ret.l2e, mut_sys);
-                        if (bsl::unlikely(nullptr == pmut_mut_l1t)) {
-                            bsl::print<bsl::V>() << bsl::here();
-                            return {};
-                        }
-
-                        mut_release_l1t_on_error.activate();
-                    }
-                    else {
-                        bsl::error() << "l2t_t entry for the virtual address "    // --
-                                     << bsl::hex(page_virt)                       // --
-                                     << " is not marked present"                  // --
-                                     << bsl::endl                                 // --
-                                     << bsl::here();                              // --
-
-                        return {};
-                    }
+                    bsl::error() << "l2t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " is not marked present"                  // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
 
                     break;
                 }
 
                 case basic_entry_status_t::present: {
-                    if (bsl::safe_u64::magic_1() == mut_ret.l2e->points_to_block) {
-                        if constexpr (MAP_OP) {
-                            mut_release_l2t_on_error.ignore();
-                        }
-
-                        return mut_ret;
+                    if (bsl::safe_u64::magic_0() == mut_ret.l2e->points_to_block) {
+                        pmut_mut_l1t = entry_to_table(mut_page_pool, mut_ret.l2e);
+                        break;
                     }
 
-                    pmut_mut_l1t = entry_to_table(mut_page_pool, mut_ret.l2e);
+                    bsl::error() << "l2t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " was mapped as an entry, not a table"    // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
                     break;
                 }
 
-                case basic_entry_status_t::reserved: {
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
                     bsl::error() << "l2t_t entry for the virtual address "             // --
                                  << bsl::hex(page_virt)                                // --
                                  << " is not marked reserved and cannot be queried"    // --
                                  << bsl::endl                                          // --
                                  << bsl::here();                                       // --
 
-                    return {};
+                    break;
                 }
             }
 
+            if (bsl::unlikely(nullptr == pmut_mut_l1t)) {
+                return {};
+            }
+
+            // -----------------------------------------------------------------
+            // Get L1 Entry
+            // -----------------------------------------------------------------
+
             mut_ret.l1e = pmut_mut_l1t->entries.at_if(virt_to_l1to(page_virt));
-            switch (helpers::entry_status(mut_ret.l1e)) {
+            switch (entry_status(mut_ret.l1e)) {
                 case basic_entry_status_t::not_present: {
-                    if constexpr (MAP_OP) {
-                        if constexpr (bsl::is_same<E, L1E_TYPE>::value) {
-                            mut_release_l1t_on_error.ignore();
-                            mut_release_l2t_on_error.ignore();
-                            return mut_ret;
-                        }
+                    bsl::error() << "l1t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " is not marked present"                  // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
 
-                        pmut_mut_l0t = add_table(tls, mut_page_pool, mut_ret.l1e, mut_sys);
-                        if (bsl::unlikely(nullptr == pmut_mut_l0t)) {
-                            bsl::print<bsl::V>() << bsl::here();
-                            return {};
-                        }
+                    break;
+                }
 
-                        mut_release_l0t_on_error.activate();
+                case basic_entry_status_t::present: {
+                    if (bsl::safe_u64::magic_0() == mut_ret.l1e->points_to_block) {
+                        pmut_mut_l0t = entry_to_table(mut_page_pool, mut_ret.l1e);
+                        break;
                     }
-                    else {
-                        bsl::error() << "l1t_t entry for the virtual address "    // --
-                                     << bsl::hex(page_virt)                       // --
-                                     << " is not marked present"                  // --
-                                     << bsl::endl                                 // --
-                                     << bsl::here();                              // --
 
+                    bsl::error() << "l1t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " was mapped as an entry, not a table"    // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l1t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            if (bsl::unlikely(nullptr == pmut_mut_l0t)) {
+                return {};
+            }
+
+            // -----------------------------------------------------------------
+            // Get L0 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l0e = pmut_mut_l0t->entries.at_if(virt_to_l0to(page_virt));
+            switch (entry_status(mut_ret.l0e)) {
+                case basic_entry_status_t::not_present: {
+                    bsl::error() << "l0t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " is not marked present"                  // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::present: {
+                    return mut_ret;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l0t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            return {};
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param page_virt the virtual address to decode
+        ///   @return Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        [[nodiscard]] constexpr auto
+        get_2m_for_query(PAGE_POOL_TYPE &mut_page_pool, bsl::safe_u64 const &page_virt) noexcept
+            -> entries_t
+        {
+            entries_t mut_ret{};
+            l2t_t *pmut_mut_l2t{};
+            l1t_t *pmut_mut_l1t{};
+
+            // -----------------------------------------------------------------
+            // Get L3 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l3e = m_l3t->entries.at_if(virt_to_l3to(page_virt));
+            switch (entry_status(mut_ret.l3e)) {
+                case basic_entry_status_t::not_present: {
+                    bsl::error() << "l3t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " is not marked present"                  // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::present: {
+                    pmut_mut_l2t = entry_to_table(mut_page_pool, mut_ret.l3e);
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l3t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            if (bsl::unlikely(nullptr == pmut_mut_l2t)) {
+                return {};
+            }
+
+            // -----------------------------------------------------------------
+            // Get L2 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l2e = pmut_mut_l2t->entries.at_if(virt_to_l2to(page_virt));
+            switch (entry_status(mut_ret.l2e)) {
+                case basic_entry_status_t::not_present: {
+                    bsl::error() << "l2t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " is not marked present"                  // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::present: {
+                    if (bsl::safe_u64::magic_0() == mut_ret.l2e->points_to_block) {
+                        pmut_mut_l1t = entry_to_table(mut_page_pool, mut_ret.l2e);
+                        break;
+                    }
+
+                    bsl::error() << "l2t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " was mapped as an entry, not a table"    // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l2t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            if (bsl::unlikely(nullptr == pmut_mut_l1t)) {
+                return {};
+            }
+
+            // -----------------------------------------------------------------
+            // Get L1 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l1e = pmut_mut_l1t->entries.at_if(virt_to_l1to(page_virt));
+            switch (entry_status(mut_ret.l1e)) {
+                case basic_entry_status_t::not_present: {
+                    bsl::error() << "l1t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " is not marked present"                  // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::present: {
+                    if (bsl::safe_u64::magic_0() != mut_ret.l1e->points_to_block) {
+                        return mut_ret;
+                    }
+
+                    bsl::error() << "l1t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " was mapped as a table, not an entry"    // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l1t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            return {};
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param page_virt the virtual address to decode
+        ///   @return Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        [[nodiscard]] constexpr auto
+        get_1g_for_query(PAGE_POOL_TYPE &mut_page_pool, bsl::safe_u64 const &page_virt) noexcept
+            -> entries_t
+        {
+            entries_t mut_ret{};
+            l2t_t *pmut_mut_l2t{};
+
+            // -----------------------------------------------------------------
+            // Get L3 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l3e = m_l3t->entries.at_if(virt_to_l3to(page_virt));
+            switch (entry_status(mut_ret.l3e)) {
+                case basic_entry_status_t::not_present: {
+                    bsl::error() << "l3t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " is not marked present"                  // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::present: {
+                    pmut_mut_l2t = entry_to_table(mut_page_pool, mut_ret.l3e);
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l3t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            if (bsl::unlikely(nullptr == pmut_mut_l2t)) {
+                return {};
+            }
+
+            // -----------------------------------------------------------------
+            // Get L2 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l2e = pmut_mut_l2t->entries.at_if(virt_to_l2to(page_virt));
+            switch (entry_status(mut_ret.l2e)) {
+                case basic_entry_status_t::not_present: {
+                    bsl::error() << "l2t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " is not marked present"                  // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::present: {
+                    if (bsl::safe_u64::magic_0() != mut_ret.l2e->points_to_block) {
+                        return mut_ret;
+                    }
+
+                    bsl::error() << "l2t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " was mapped as a table, not an entry"    // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l2t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            return {};
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @tparam E the entry type requested. For example, if a 1G
+        ///     map/unmap request is made, E should be L2E_TYPE.
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param page_virt the virtual address to decode
+        ///   @return Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        template<typename E>
+        [[nodiscard]] constexpr auto
+        get_for_query(PAGE_POOL_TYPE &mut_page_pool, bsl::safe_u64 const &page_virt) noexcept
+            -> entries_t
+        {
+            static_assert(bsl::is_one_of<E, L2E_TYPE, L1E_TYPE, L0E_TYPE>::value);
+
+            if constexpr (bsl::is_same<E, L0E_TYPE>::value) {
+                return get_4k_for_query(mut_page_pool, page_virt);
+            }
+
+            if constexpr (bsl::is_same<E, L1E_TYPE>::value) {
+                return get_2m_for_query(mut_page_pool, page_virt);
+            }
+
+            if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
+                return get_1g_for_query(mut_page_pool, page_virt);
+            }
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param page_virt the virtual address to decode
+        ///   @param mut_sys the bf_syscall_t to use (optional)
+        ///   @return Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        [[nodiscard]] constexpr auto
+        get_4k_for_map(
+            TLS_TYPE const &tls,
+            PAGE_POOL_TYPE &mut_page_pool,
+            bsl::safe_u64 const &page_virt,
+            SYS_TYPE &mut_sys) noexcept -> entries_t
+        {
+            entries_t mut_ret{};
+            l2t_t *pmut_mut_l2t{};
+            l1t_t *pmut_mut_l1t{};
+            l0t_t *pmut_mut_l0t{};
+
+            // -----------------------------------------------------------------
+            // Cleanup
+            // -----------------------------------------------------------------
+
+            bsl::finally mut_release_l2t_on_error{
+                bsl::dormant, [&tls, &mut_page_pool, &mut_ret]() noexcept -> void {
+                    release_entry(tls, mut_page_pool, mut_ret.l3e, false);
+                }};
+
+            bsl::finally mut_release_l1t_on_error{
+                bsl::dormant, [&tls, &mut_page_pool, &mut_ret]() noexcept -> void {
+                    release_entry(tls, mut_page_pool, mut_ret.l2e, false);
+                }};
+
+            // -----------------------------------------------------------------
+            // Get L3 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l3e = m_l3t->entries.at_if(virt_to_l3to(page_virt));
+            switch (entry_status(mut_ret.l3e)) {
+                case basic_entry_status_t::not_present: {
+                    pmut_mut_l2t = add_table(tls, mut_page_pool, mut_ret.l3e, mut_sys);
+                    if (bsl::unlikely(nullptr == pmut_mut_l2t)) {
+                        bsl::print<bsl::V>() << bsl::here();
+                        return {};
+                    }
+
+                    mut_release_l2t_on_error.activate();
+                    break;
+                }
+
+                case basic_entry_status_t::present: {
+                    pmut_mut_l2t = entry_to_table(mut_page_pool, mut_ret.l3e);
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l3t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            if (bsl::unlikely(nullptr == pmut_mut_l2t)) {
+                return {};
+            }
+
+            // -----------------------------------------------------------------
+            // Get L2 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l2e = pmut_mut_l2t->entries.at_if(virt_to_l2to(page_virt));
+            switch (entry_status(mut_ret.l2e)) {
+                case basic_entry_status_t::not_present: {
+                    pmut_mut_l1t = add_table(tls, mut_page_pool, mut_ret.l2e, mut_sys);
+                    if (bsl::unlikely(nullptr == pmut_mut_l1t)) {
+                        bsl::print<bsl::V>() << bsl::here();
+                        return {};
+                    }
+
+                    mut_release_l1t_on_error.activate();
+                    break;
+                }
+
+                case basic_entry_status_t::present: {
+                    if (bsl::safe_u64::magic_0() == mut_ret.l2e->points_to_block) {
+                        pmut_mut_l1t = entry_to_table(mut_page_pool, mut_ret.l2e);
+                        break;
+                    }
+
+                    bsl::error() << "l2t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " was mapped as an entry, not a table"    // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l2t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            if (bsl::unlikely(nullptr == pmut_mut_l1t)) {
+                return {};
+            }
+
+            // -----------------------------------------------------------------
+            // Get L1 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l1e = pmut_mut_l1t->entries.at_if(virt_to_l1to(page_virt));
+            switch (entry_status(mut_ret.l1e)) {
+                case basic_entry_status_t::not_present: {
+                    pmut_mut_l0t = add_table(tls, mut_page_pool, mut_ret.l1e, mut_sys);
+                    if (bsl::unlikely(nullptr == pmut_mut_l0t)) {
+                        bsl::print<bsl::V>() << bsl::here();
                         return {};
                     }
 
@@ -951,55 +1360,381 @@ namespace lib
                 }
 
                 case basic_entry_status_t::present: {
-                    if (bsl::safe_u64::magic_1() == mut_ret.l1e->points_to_block) {
-                        if constexpr (MAP_OP) {
-                            mut_release_l1t_on_error.ignore();
-                            mut_release_l2t_on_error.ignore();
-                        }
-
-                        return mut_ret;
+                    if (bsl::safe_u64::magic_0() == mut_ret.l1e->points_to_block) {
+                        pmut_mut_l0t = entry_to_table(mut_page_pool, mut_ret.l1e);
+                        break;
                     }
 
-                    pmut_mut_l0t = entry_to_table(mut_page_pool, mut_ret.l1e);
+                    bsl::error() << "l1t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " was mapped as an entry, not a table"    // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
                     break;
                 }
 
-                case basic_entry_status_t::reserved: {
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
                     bsl::error() << "l1t_t entry for the virtual address "             // --
                                  << bsl::hex(page_virt)                                // --
                                  << " is not marked reserved and cannot be queried"    // --
                                  << bsl::endl                                          // --
                                  << bsl::here();                                       // --
 
-                    return {};
+                    break;
                 }
             }
 
+            if (bsl::unlikely(nullptr == pmut_mut_l0t)) {
+                return {};
+            }
+
+            // -----------------------------------------------------------------
+            // Get L0 Entry
+            // -----------------------------------------------------------------
+
             mut_ret.l0e = pmut_mut_l0t->entries.at_if(virt_to_l0to(page_virt));
-            switch (helpers::entry_status(mut_ret.l0e)) {
+            switch (entry_status(mut_ret.l0e)) {
                 case basic_entry_status_t::not_present: {
-                    mut_release_l0t_on_error.ignore();
+                    mut_release_l2t_on_error.ignore();
                     mut_release_l1t_on_error.ignore();
+                    return mut_ret;
+                }
+
+                case basic_entry_status_t::present: {
+                    bsl::error() << "the virtual address "    // --
+                                 << bsl::hex(page_virt)       // --
+                                 << " is already mapped"      // --
+                                 << bsl::endl                 // --
+                                 << bsl::here();              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l0t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            return {};
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param page_virt the virtual address to decode
+        ///   @param mut_sys the bf_syscall_t to use (optional)
+        ///   @return Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        [[nodiscard]] constexpr auto
+        get_2m_for_map(
+            TLS_TYPE const &tls,
+            PAGE_POOL_TYPE &mut_page_pool,
+            bsl::safe_u64 const &page_virt,
+            SYS_TYPE &mut_sys) noexcept -> entries_t
+        {
+            entries_t mut_ret{};
+            l2t_t *pmut_mut_l2t{};
+            l1t_t *pmut_mut_l1t{};
+
+            // -----------------------------------------------------------------
+            // Cleanup
+            // -----------------------------------------------------------------
+
+            bsl::finally mut_release_l2t_on_error{
+                bsl::dormant, [&tls, &mut_page_pool, &mut_ret]() noexcept -> void {
+                    release_entry(tls, mut_page_pool, mut_ret.l3e, false);
+                }};
+
+            // -----------------------------------------------------------------
+            // Get L3 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l3e = m_l3t->entries.at_if(virt_to_l3to(page_virt));
+            switch (entry_status(mut_ret.l3e)) {
+                case basic_entry_status_t::not_present: {
+                    pmut_mut_l2t = add_table(tls, mut_page_pool, mut_ret.l3e, mut_sys);
+                    if (bsl::unlikely(nullptr == pmut_mut_l2t)) {
+                        bsl::print<bsl::V>() << bsl::here();
+                        return {};
+                    }
+
+                    mut_release_l2t_on_error.activate();
+                    break;
+                }
+
+                case basic_entry_status_t::present: {
+                    pmut_mut_l2t = entry_to_table(mut_page_pool, mut_ret.l3e);
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l3t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            if (bsl::unlikely(nullptr == pmut_mut_l2t)) {
+                return {};
+            }
+
+            // -----------------------------------------------------------------
+            // Get L2 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l2e = pmut_mut_l2t->entries.at_if(virt_to_l2to(page_virt));
+            switch (entry_status(mut_ret.l2e)) {
+                case basic_entry_status_t::not_present: {
+                    pmut_mut_l1t = add_table(tls, mut_page_pool, mut_ret.l2e, mut_sys);
+                    if (bsl::unlikely(nullptr == pmut_mut_l1t)) {
+                        bsl::print<bsl::V>() << bsl::here();
+                        return {};
+                    }
+
+                    break;
+                }
+
+                case basic_entry_status_t::present: {
+                    if (bsl::safe_u64::magic_0() == mut_ret.l2e->points_to_block) {
+                        pmut_mut_l1t = entry_to_table(mut_page_pool, mut_ret.l2e);
+                        break;
+                    }
+
+                    bsl::error() << "l2t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " was mapped as an entry, not a table"    // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l2t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            if (bsl::unlikely(nullptr == pmut_mut_l1t)) {
+                return {};
+            }
+
+            // -----------------------------------------------------------------
+            // Get L1 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l1e = pmut_mut_l1t->entries.at_if(virt_to_l1to(page_virt));
+            switch (entry_status(mut_ret.l1e)) {
+                case basic_entry_status_t::not_present: {
                     mut_release_l2t_on_error.ignore();
                     return mut_ret;
                 }
 
                 case basic_entry_status_t::present: {
-                    mut_release_l0t_on_error.ignore();
-                    mut_release_l1t_on_error.ignore();
-                    mut_release_l2t_on_error.ignore();
-                    return mut_ret;
+                    if (bsl::safe_u64::magic_0() == mut_ret.l1e->points_to_block) {
+                        bsl::error() << "the virtual address "    // --
+                                     << bsl::hex(page_virt)       // --
+                                     << " is already mapped"      // --
+                                     << bsl::endl                 // --
+                                     << bsl::here();              // --
+
+                        break;
+                    }
+
+                    bsl::error() << "l1t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " was mapped as an entry, not a table"    // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
                 }
 
-                case basic_entry_status_t::reserved: {
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
                     bsl::error() << "l1t_t entry for the virtual address "             // --
                                  << bsl::hex(page_virt)                                // --
                                  << " is not marked reserved and cannot be queried"    // --
                                  << bsl::endl                                          // --
                                  << bsl::here();                                       // --
 
-                    return {};
+                    break;
                 }
+            }
+
+            return {};
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param page_virt the virtual address to decode
+        ///   @param mut_sys the bf_syscall_t to use (optional)
+        ///   @return Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        [[nodiscard]] constexpr auto
+        get_1g_for_map(
+            TLS_TYPE const &tls,
+            PAGE_POOL_TYPE &mut_page_pool,
+            bsl::safe_u64 const &page_virt,
+            SYS_TYPE &mut_sys) noexcept -> entries_t
+        {
+            entries_t mut_ret{};
+            l2t_t *pmut_mut_l2t{};
+
+            // -----------------------------------------------------------------
+            // Get L3 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l3e = m_l3t->entries.at_if(virt_to_l3to(page_virt));
+            switch (entry_status(mut_ret.l3e)) {
+                case basic_entry_status_t::not_present: {
+                    pmut_mut_l2t = add_table(tls, mut_page_pool, mut_ret.l3e, mut_sys);
+                    if (bsl::unlikely(nullptr == pmut_mut_l2t)) {
+                        bsl::print<bsl::V>() << bsl::here();
+                        return {};
+                    }
+
+                    break;
+                }
+
+                case basic_entry_status_t::present: {
+                    pmut_mut_l2t = entry_to_table(mut_page_pool, mut_ret.l3e);
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l3t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            if (bsl::unlikely(nullptr == pmut_mut_l2t)) {
+                return {};
+            }
+
+            // -----------------------------------------------------------------
+            // Get L2 Entry
+            // -----------------------------------------------------------------
+
+            mut_ret.l2e = pmut_mut_l2t->entries.at_if(virt_to_l2to(page_virt));
+            switch (entry_status(mut_ret.l2e)) {
+                case basic_entry_status_t::not_present: {
+                    return mut_ret;
+                }
+
+                case basic_entry_status_t::present: {
+                    if (bsl::safe_u64::magic_0() == mut_ret.l2e->points_to_block) {
+                        bsl::error() << "the virtual address "    // --
+                                     << bsl::hex(page_virt)       // --
+                                     << " is already mapped"      // --
+                                     << bsl::endl                 // --
+                                     << bsl::here();              // --
+
+                        break;
+                    }
+
+                    bsl::error() << "l2t_t entry for the virtual address "    // --
+                                 << bsl::hex(page_virt)                       // --
+                                 << " was mapped as an entry, not a table"    // --
+                                 << bsl::endl                                 // --
+                                 << bsl::here();                              // --
+
+                    break;
+                }
+
+                case basic_entry_status_t::reserved:
+                    [[fallthrough]];
+                default: {
+                    bsl::error() << "l2t_t entry for the virtual address "             // --
+                                 << bsl::hex(page_virt)                                // --
+                                 << " is not marked reserved and cannot be queried"    // --
+                                 << bsl::endl                                          // --
+                                 << bsl::here();                                       // --
+
+                    break;
+                }
+            }
+
+            return {};
+        }
+
+        /// <!-- description -->
+        ///   @brief Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @tparam E the entry type requested. For example, if a 1G
+        ///     map/unmap request is made, E should be L2E_TYPE.
+        ///   @param tls the current TLS block
+        ///   @param mut_page_pool the page_pool_t to use
+        ///   @param page_virt the virtual address to decode
+        ///   @param mut_sys the bf_syscall_t to use (optional)
+        ///   @return Returns all of the entries that are identified during the
+        ///     translation of the provided virtual address.
+        ///
+        template<typename E>
+        [[nodiscard]] constexpr auto
+        get_for_map(
+            TLS_TYPE const &tls,
+            PAGE_POOL_TYPE &mut_page_pool,
+            bsl::safe_u64 const &page_virt,
+            SYS_TYPE &mut_sys) noexcept -> entries_t
+        {
+            static_assert(bsl::is_one_of<E, L2E_TYPE, L1E_TYPE, L0E_TYPE>::value);
+
+            if constexpr (bsl::is_same<E, L0E_TYPE>::value) {
+                return get_4k_for_map(tls, mut_page_pool, page_virt, mut_sys);
+            }
+
+            if constexpr (bsl::is_same<E, L1E_TYPE>::value) {
+                return get_2m_for_map(tls, mut_page_pool, page_virt, mut_sys);
+            }
+
+            if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
+                return get_1g_for_map(tls, mut_page_pool, page_virt, mut_sys);
             }
         }
 
@@ -1056,7 +1791,7 @@ namespace lib
                 return bsl::errc_failure;
             }
 
-            m_l3t_phys = mut_page_pool.virt_to_phys(m_l3t);
+            m_l3t_spa = mut_page_pool.virt_to_phys(m_l3t);
             return bsl::errc_success;
         }
 
@@ -1076,7 +1811,7 @@ namespace lib
 
             this->release_table(tls, mut_page_pool, m_l3t, true);
 
-            m_l3t_phys = {};
+            m_l3t_spa = {};
             m_l3t = {};
         }
 
@@ -1105,7 +1840,7 @@ namespace lib
             bsl::expects(nullptr != m_l3t);
 
             mut_tls.active_rpt = this;
-            mut_intrinsic.set_rpt(m_l3t_phys);
+            mut_intrinsic.set_rpt(m_l3t_spa);
         }
 
         /// <!-- description -->
@@ -1122,18 +1857,19 @@ namespace lib
         }
 
         /// <!-- description -->
-        ///   @brief Returns the physical address of the RPT.
+        ///   @brief Returns the system physical address of the RPT.
         ///
         /// <!-- inputs/outputs -->
-        ///   @return Returns the physical address of the RPT.
+        ///   @return Returns the system physical address of the RPT.
         ///
         [[nodiscard]] constexpr auto
-        phys() const noexcept -> bsl::safe_umx
+        spa() const noexcept -> bsl::safe_umx
         {
             bsl::expects(nullptr != m_l3t);
-            bsl::ensures(m_l3t_phys.is_valid_and_checked());
 
-            return m_l3t_phys;
+            bsl::ensures(m_l3t_spa.is_valid_and_checked());
+            bsl::ensures(m_l3t_spa.is_pos());
+            return m_l3t_spa;
         }
 
         /// <!-- description -->
@@ -1150,7 +1886,7 @@ namespace lib
         ///     address to
         ///   @param page_phys the physical address to map
         ///   @param page_flgs defines how memory should be mapped
-        ///   @param require_explicit_unmap tells the RPT that the virtual
+        ///   @param explicit_unmap tells the RPT that the virtual
         ///   @param mut_sys the bf_syscall_t to use (optional)
         ///     address must be explicitly unmapped before the RPT can be
         ///     released. Otherwise the release will fail.
@@ -1159,13 +1895,12 @@ namespace lib
         ///
         template<typename E = L0E_TYPE>
         [[nodiscard]] constexpr auto
-        map_page(
-            TLS_TYPE const &tls,
+        map(TLS_TYPE const &tls,
             PAGE_POOL_TYPE &mut_page_pool,
             bsl::safe_u64 const &page_virt,
             bsl::safe_u64 const &page_phys,
             bsl::safe_u64 const &page_flgs,
-            bool const require_explicit_unmap = false,
+            bool const explicit_unmap = false,
             SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> bsl::errc_type
         {
             static_assert(bsl::is_one_of<E, L2E_TYPE, L1E_TYPE, L0E_TYPE>::value);
@@ -1193,32 +1928,18 @@ namespace lib
             basic_lock_guard_t mut_lock{tls, m_lock};
 
             auto *const pmut_entry{get_entry_from_entries<E>(
-                this->get_entries<E>(tls, mut_page_pool, page_virt, mut_sys))};
+                this->get_for_map<E>(tls, mut_page_pool, page_virt, mut_sys))};
+
             if (bsl::unlikely(nullptr == pmut_entry)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
-            if (helpers::entry_status(pmut_entry) == basic_entry_status_t::present) {
-                if (bsl::unlikely(bsl::safe_u64::magic_0() == pmut_entry->points_to_block)) {
-                    bsl::error() << "the virtual address "                  // --
-                                 << bsl::hex(page_virt)                     // --
-                                 << " is already mapped to a table"         // --
-                                 << " and cannot be remapped to a block"    // --
-                                 << bsl::endl                               // --
-                                 << bsl::here();                            // --
-
-                    return bsl::errc_failure;
-                }
-
-                return bsl::errc_already_exists;
-            }
-
-            if (require_explicit_unmap) {
-                pmut_entry->require_explicit_unmap = bsl::safe_u64::magic_1().get();
+            if (explicit_unmap) {
+                pmut_entry->explicit_unmap = bsl::safe_u64::magic_1().get();
             }
             else {
-                pmut_entry->require_explicit_unmap = bsl::safe_u64::magic_0().get();
+                pmut_entry->explicit_unmap = bsl::safe_u64::magic_0().get();
             }
 
             pmut_entry->auto_release = bsl::safe_u64::magic_0().get();
@@ -1264,8 +1985,6 @@ namespace lib
             bsl::expects(is_page_4k_aligned(page_virt));
             bsl::expects(page_flgs.is_valid_and_checked());
 
-            basic_lock_guard_t mut_lock{tls, m_lock};
-
             auto *const pmut_ptr{mut_page_pool.template allocate<basic_page_4k_t>(tls, mut_sys)};
             if (bsl::unlikely(nullptr == pmut_ptr)) {
                 bsl::print<bsl::V>() << bsl::here();
@@ -1277,22 +1996,13 @@ namespace lib
                     mut_page_pool.deallocate(tls, pmut_ptr);
                 }};
 
+            basic_lock_guard_t mut_lock{tls, m_lock};
+
             auto *const pmut_entry{get_entry_from_entries<L0E_TYPE>(
-                this->get_entries<L0E_TYPE>(tls, mut_page_pool, page_virt))};
+                this->get_for_map<L0E_TYPE>(tls, mut_page_pool, page_virt, mut_sys))};
 
             if (bsl::unlikely(nullptr == pmut_entry)) {
                 bsl::print<bsl::V>() << bsl::here();
-                return nullptr;
-            }
-
-            if (bsl::unlikely(helpers::entry_status(pmut_entry) == basic_entry_status_t::present)) {
-                bsl::error() << "the virtual address "             // --
-                             << bsl::hex(page_virt)                // --
-                             << " is already mapped to a block"    // --
-                             << " and cannot be remapped"          // --
-                             << bsl::endl                          // --
-                             << bsl::here();                       // --
-
                 return nullptr;
             }
 
@@ -1300,7 +2010,7 @@ namespace lib
             pmut_entry->points_to_block = bsl::safe_u64::magic_1().get();
             pmut_entry->alias = bsl::safe_u64::magic_0().get();
             pmut_entry->phys = (mut_page_pool.virt_to_phys(pmut_ptr) >> BASIC_PAGE_4K_T_SHFT).get();
-            pmut_entry->require_explicit_unmap = bsl::safe_u64::magic_0().get();
+            pmut_entry->explicit_unmap = bsl::safe_u64::magic_0().get();
             helpers::configure_entry_as_ptr_to_block(pmut_entry, page_flgs);
 
             mut_deallocate_on_error.ignore();
@@ -1331,7 +2041,6 @@ namespace lib
             SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> basic_alloc_page_t
         {
             bsl::expects(nullptr != m_l3t);
-            basic_lock_guard_t mut_lock{tls, m_lock};
 
             auto *const pmut_ptr{mut_page_pool.template allocate<basic_page_4k_t>(tls, mut_sys)};
             if (bsl::unlikely(nullptr == pmut_ptr)) {
@@ -1352,30 +2061,23 @@ namespace lib
                     mut_page_pool.deallocate(tls, pmut_ptr);
                 }};
 
+            basic_lock_guard_t mut_lock{tls, m_lock};
+
             auto *const pmut_entry{get_entry_from_entries<L0E_TYPE>(
-                this->get_entries<L0E_TYPE>(tls, mut_page_pool, page_virt))};
+                this->get_for_map<L0E_TYPE>(tls, mut_page_pool, page_virt, mut_sys))};
 
             if (bsl::unlikely(nullptr == pmut_entry)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
             }
 
-            if (bsl::unlikely(helpers::entry_status(pmut_entry) == basic_entry_status_t::present)) {
-                bsl::error() << "the virtual address "             // --
-                             << bsl::hex(page_virt)                // --
-                             << " is already mapped to a block"    // --
-                             << " and cannot be remapped"          // --
-                             << bsl::endl                          // --
-                             << bsl::here();                       // --
-
-                return {bsl::safe_umx::failure(), bsl::safe_umx::failure()};
-            }
+            bsl::expects(entry_status(pmut_entry) != basic_entry_status_t::present);
 
             pmut_entry->auto_release = bsl::safe_u64::magic_1().get();
             pmut_entry->points_to_block = bsl::safe_u64::magic_1().get();
             pmut_entry->alias = bsl::safe_u64::magic_0().get();
             pmut_entry->phys = (page_phys >> BASIC_PAGE_4K_T_SHFT).get();
-            pmut_entry->require_explicit_unmap = bsl::safe_u64::magic_0().get();
+            pmut_entry->explicit_unmap = bsl::safe_u64::magic_0().get();
             helpers::configure_entry_as_ptr_to_block(pmut_entry, BASIC_MAP_PAGE_RW);
 
             mut_deallocate_on_error.ignore();
@@ -1397,7 +2099,6 @@ namespace lib
         ///   @param tls the current TLS block
         ///   @param mut_page_pool the page_pool_t to use
         ///   @param page_virt the virtual address to unmap
-        ///   @param mut_sys the bf_syscall_t to use (optional)
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
         ///     and friends otherwise
         ///
@@ -1406,8 +2107,7 @@ namespace lib
         unmap(
             TLS_TYPE const &tls,
             PAGE_POOL_TYPE &mut_page_pool,
-            bsl::safe_u64 const &page_virt,
-            SYS_TYPE &mut_sys = bsl::dontcare) noexcept -> bsl::errc_type
+            bsl::safe_u64 const &page_virt) noexcept -> bsl::errc_type
         {
             static_assert(bsl::is_one_of<E, L2E_TYPE, L1E_TYPE, L0E_TYPE>::value);
 
@@ -1427,69 +2127,36 @@ namespace lib
             }
 
             basic_lock_guard_t mut_lock{tls, m_lock};
+            auto const ents{this->get_for_query<E>(mut_page_pool, page_virt)};
 
-            auto const ents{this->get_entries<E, false>(tls, mut_page_pool, page_virt, mut_sys)};
-            if (bsl::unlikely(nullptr == ents.l2e)) {
+            if (bsl::unlikely(nullptr == ents.l3e)) {
                 bsl::print<bsl::V>() << bsl::here();
                 return bsl::errc_failure;
             }
 
             if constexpr (bsl::is_same<E, L2E_TYPE>::value) {
-                if (bsl::safe_u64::magic_1() == ents.l2e->points_to_block) {
-                    ents.l2e->require_explicit_unmap = bsl::safe_u64::magic_0().get();
-                    release_entry(tls, mut_page_pool, ents.l2e, true);
-                    release_entry(tls, mut_page_pool, ents.l3e, false);
-
-                    return bsl::errc_success;
-                }
-
-                bsl::error() << "the virtual address "                   // --
-                             << bsl::hex(page_virt)                      // --
-                             << " was not mapped at a 1g granularity"    // --
-                             << bsl::endl                                // --
-                             << bsl::here();                             // --
-
-                return bsl::errc_failure;
+                ents.l2e->explicit_unmap = bsl::safe_u64::magic_0().get();
+                release_entry(tls, mut_page_pool, ents.l2e, true);
+                release_entry(tls, mut_page_pool, ents.l3e, false);
+                return bsl::errc_success;
             }
 
             if constexpr (bsl::is_same<E, L1E_TYPE>::value) {
-                if (bsl::safe_u64::magic_1() == ents.l1e->points_to_block) {
-                    ents.l1e->require_explicit_unmap = bsl::safe_u64::magic_0().get();
-                    release_entry(tls, mut_page_pool, ents.l1e, true);
-                    release_entry(tls, mut_page_pool, ents.l2e, false);
-                    release_entry(tls, mut_page_pool, ents.l3e, false);
-
-                    return bsl::errc_success;
-                }
-
-                bsl::error() << "the virtual address "                   // --
-                             << bsl::hex(page_virt)                      // --
-                             << " was not mapped at a 2m granularity"    // --
-                             << bsl::endl                                // --
-                             << bsl::here();                             // --
-
-                return bsl::errc_failure;
+                ents.l1e->explicit_unmap = bsl::safe_u64::magic_0().get();
+                release_entry(tls, mut_page_pool, ents.l1e, true);
+                release_entry(tls, mut_page_pool, ents.l2e, false);
+                release_entry(tls, mut_page_pool, ents.l3e, false);
+                return bsl::errc_success;
             }
 
             if constexpr (bsl::is_same<E, L0E_TYPE>::value) {
-                if (bsl::safe_u64::magic_1() == ents.l0e->points_to_block) {
-                    ents.l0e->require_explicit_unmap = bsl::safe_u64::magic_0().get();
-                    release_entry(tls, mut_page_pool, ents.l0e, true);
-                    release_entry(tls, mut_page_pool, ents.l1e, false);
-                    release_entry(tls, mut_page_pool, ents.l2e, false);
-                    release_entry(tls, mut_page_pool, ents.l3e, false);
-
-                    return bsl::errc_success;
-                }
-
-                bsl::error() << "the virtual address "                   // --
-                             << bsl::hex(page_virt)                      // --
-                             << " was not mapped at a 4k granularity"    // --
-                             << bsl::endl                                // --
-                             << bsl::here();                             // --
+                ents.l0e->explicit_unmap = bsl::safe_u64::magic_0().get();
+                release_entry(tls, mut_page_pool, ents.l0e, true);
+                release_entry(tls, mut_page_pool, ents.l1e, false);
+                release_entry(tls, mut_page_pool, ents.l2e, false);
+                release_entry(tls, mut_page_pool, ents.l3e, false);
+                return bsl::errc_success;
             }
-
-            return bsl::errc_failure;
         }
 
         /// <!-- description -->
@@ -1500,7 +2167,7 @@ namespace lib
         ///   @tparam E the entry type requested. L2E_TYPE for a 1G request,
         ///     L1E_TYPE for a 2M and L2E_TYPE for a 4K.
         ///   @param tls the current TLS block
-        ///   @param page_pool the page_pool_t to use
+        ///   @param mut_page_pool the page_pool_t to use
         ///   @param page_virt the virtual address to decode
         ///   @return Returns all of the entries that are identified during the
         ///     translation of the provided virtual address.
@@ -1509,7 +2176,7 @@ namespace lib
         [[nodiscard]] constexpr auto
         entries(
             TLS_TYPE const &tls,
-            PAGE_POOL_TYPE const &page_pool,
+            PAGE_POOL_TYPE &mut_page_pool,
             bsl::safe_u64 const &page_virt) noexcept -> entries_t
         {
             static_assert(bsl::is_one_of<E, L2E_TYPE, L1E_TYPE, L0E_TYPE>::value);
@@ -1530,7 +2197,7 @@ namespace lib
             }
 
             basic_lock_guard_t mut_lock{tls, m_lock};
-            return this->get_entries<E, false>(tls, page_pool, page_virt);
+            return this->get_for_query<E>(mut_page_pool, page_virt);
         }
 
         /// <!-- description -->
@@ -1557,7 +2224,7 @@ namespace lib
                 auto const *const src_l3e{l3t->entries.at_if(mut_i)};
                 auto *const pmut_dst_l3e{m_l3t->entries.at_if(mut_i)};
 
-                if (helpers::entry_status(src_l3e) == basic_entry_status_t::not_present) {
+                if (entry_status(src_l3e) == basic_entry_status_t::not_present) {
                     continue;
                 }
 
@@ -1583,111 +2250,6 @@ namespace lib
         {
             this->add_tables(tls, rpt.m_l3t);
         }
-
-        // template<typename E>
-        // static constexpr auto
-        // entry_to_virt(bsl::safe_idx const &i, bsl::safe_u64 const &addr) noexcept -> bsl::safe_u64
-        // {
-        //     static_assert(bsl::is_one_of<bsl::remove_const_t<E>, L3E_TYPE, L2E_TYPE, L1E_TYPE, L0E_TYPE>::value);
-
-        //     if constexpr (bsl::is_same<bsl::remove_const_t<E>, L3E_TYPE>::value) {
-        //         constexpr auto shift{39_u64};
-        //         return (addr | (bsl::to_u64(i) << shift)).checked();
-        //     }
-
-        //     if constexpr (bsl::is_same<bsl::remove_const_t<E>, L2E_TYPE>::value) {
-        //         constexpr auto shift{30_u64};
-        //         return (addr | (bsl::to_u64(i) << shift)).checked();
-        //     }
-
-        //     if constexpr (bsl::is_same<bsl::remove_const_t<E>, L1E_TYPE>::value) {
-        //         constexpr auto shift{21_u64};
-        //         return (addr | (bsl::to_u64(i) << shift)).checked();
-        //     }
-
-        //     if constexpr (bsl::is_same<bsl::remove_const_t<E>, L0E_TYPE>::value) {
-        //         constexpr auto shift{12_u64};
-        //         return (addr | (bsl::to_u64(i) << shift)).checked();
-        //     }
-        // }
-
-        // template<typename E>
-        // static constexpr void
-        // dump_entry(PAGE_POOL_TYPE const &page_pool, E const *const entry, bsl::safe_u64 const &addr, bsl::safe_idx const &i) noexcept
-        // {
-        //     auto const virt{entry_to_virt<E>(i, addr)};
-        //     auto const data{*reinterpret_cast<bsl::uint64 const *>(entry)};
-
-        //     bsl::safe_umx mut_idnt{};
-        //     bsl::string_view mut_name{};
-
-        //     if constexpr (bsl::is_same<bsl::remove_const_t<E>, L3E_TYPE>::value) {
-        //         mut_idnt = 0_umx;
-        //         mut_name = "L3E_TYPE";
-        //     }
-
-        //     if constexpr (bsl::is_same<bsl::remove_const_t<E>, L2E_TYPE>::value) {
-        //         mut_idnt = 2_umx;
-        //         mut_name = "L2E_TYPE";
-        //     }
-
-        //     if constexpr (bsl::is_same<bsl::remove_const_t<E>, L1E_TYPE>::value) {
-        //         mut_idnt = 4_umx;
-        //         mut_name = "L1E_TYPE";
-        //     }
-
-        //     if constexpr (bsl::is_same<bsl::remove_const_t<E>, L0E_TYPE>::value) {
-        //         mut_idnt = 6_umx;
-        //         mut_name = "L0E_TYPE";
-        //     }
-
-        //     for (bsl::safe_idx mut_i{}; mut_i < mut_idnt; ++mut_i) {
-        //         bsl::print() << ' ';
-        //     }
-
-        //     bsl::print() << mut_name << " [" << bsl::hex(virt) << "]: " << bsl::hex(data) << bsl::endl;
-
-        //     if (bsl::safe_u64::magic_0() != entry->points_to_block) {
-        //         return;
-        //     }
-
-        //     if (helpers::entry_status(entry) == basic_entry_status_t::reserved) {
-        //         return;
-        //     }
-
-        //     if constexpr (bsl::is_same<bsl::remove_const_t<E>, L3E_TYPE>::value) {
-        //         dump_table(page_pool, entry_to_table(page_pool, entry), virt);
-        //     }
-
-        //     if constexpr (bsl::is_same<bsl::remove_const_t<E>, L2E_TYPE>::value) {
-        //         dump_table(page_pool, entry_to_table(page_pool, entry), virt);
-        //     }
-
-        //     if constexpr (bsl::is_same<bsl::remove_const_t<E>, L1E_TYPE>::value) {
-        //         dump_table(page_pool, entry_to_table(page_pool, entry), virt);
-        //     }
-        // }
-
-        // template<typename T>
-        // static constexpr void
-        // dump_table(PAGE_POOL_TYPE const &page_pool, T const *const table, bsl::safe_u64 const &addr) noexcept
-        // {
-        //     for (bsl::safe_idx mut_i{}; mut_i < table->entries.size(); ++mut_i) {
-        //         auto const *const entry{table->entries.at_if(mut_i)};
-        //         if (helpers::entry_status(entry) == basic_entry_status_t::not_present) {
-        //             continue;
-        //         }
-
-        //         dump_entry(page_pool, entry, addr, mut_i);
-        //     }
-        // }
-
-        // constexpr void
-        // dump(PAGE_POOL_TYPE const &page_pool) noexcept
-        // {
-        //     bsl::safe_u64 addr{};
-        //     dump_table(page_pool, m_l3t, addr);
-        // }
     };
 }
 

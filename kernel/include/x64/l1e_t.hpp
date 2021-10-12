@@ -29,10 +29,8 @@
 
 #pragma pack(push, 1)
 
-namespace mk
+namespace lib
 {
-    /// @struct mk::l1e_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the layout of the level-1 table entry (l1e).
     ///
@@ -64,8 +62,8 @@ namespace mk
         bsl::uint64 alias : static_cast<bsl::uint64>(1);
         /// @brief defines the "physical address" field in the page
         bsl::uint64 phys : static_cast<bsl::uint64>(40);
-        /// @brief defines our "require_explicit_unmap" field in the page
-        bsl::uint64 require_explicit_unmap : static_cast<bsl::uint64>(1);
+        /// @brief defines our "explicit_unmap" field in the page
+        bsl::uint64 explicit_unmap : static_cast<bsl::uint64>(1);
         /// @brief defines the "available to software" field in the page
         bsl::uint64 available1 : static_cast<bsl::uint64>(10);
         /// @brief defines the "no-execute" field in the page

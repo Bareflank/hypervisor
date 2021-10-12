@@ -120,8 +120,6 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
     hypervisor_target_source(syscall src/x64/bf_intrinsic_op_wrmsr_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_mem_op_alloc_huge_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_mem_op_alloc_page_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_mem_op_free_huge_impl.S ${HEADERS})
-    hypervisor_target_source(syscall src/x64/bf_mem_op_free_page_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_tls_extid_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_tls_online_pps_impl.S ${HEADERS})
     hypervisor_target_source(syscall src/x64/bf_tls_ppid_impl.S ${HEADERS})

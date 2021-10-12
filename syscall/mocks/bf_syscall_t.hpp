@@ -48,8 +48,6 @@
 
 namespace syscall
 {
-    /// @class syscall::bf_syscall_t
-    ///
     /// <!-- description -->
     ///   @brief Provides an API wrapper around all of the microkernel ABIs.
     ///     For more information about these APIs, please see the Microkernel
@@ -118,12 +116,8 @@ namespace syscall
         bsl::unordered_map<std::tuple<bsl::safe_u32, bsl::safe_u64>, bsl::errc_type> m_bf_intrinsic_op_wrmsr{};
         /// @brief stores the results for bf_mem_op_alloc_page
         bsl::errc_type m_bf_mem_op_alloc_page{};
-        /// @brief stores the results for bf_mem_op_free_page
-        bsl::errc_type m_bf_mem_op_free_page{};
         /// @brief stores the results for bf_mem_op_alloc_huge
         bsl::errc_type m_bf_mem_op_alloc_huge{};
-        /// @brief stores the results for bf_mem_op_free_huge
-        bsl::errc_type m_bf_mem_op_free_huge{};
 
         /// @brief stores the call count for initialize
         bsl::safe_umx m_initialize_count{};
@@ -211,12 +205,8 @@ namespace syscall
         bsl::safe_umx m_bf_intrinsic_op_wrmsr_count{};
         /// @brief stores the call count for bf_mem_op_alloc_page
         bsl::safe_umx m_bf_mem_op_alloc_page_count{};
-        /// @brief stores the call count for bf_mem_op_free_page
-        bsl::safe_umx m_bf_mem_op_free_page_count{};
         /// @brief stores the call count for bf_mem_op_alloc_huge
         bsl::safe_umx m_bf_mem_op_alloc_huge_count{};
-        /// @brief stores the call count for bf_mem_op_free_huge
-        bsl::safe_umx m_bf_mem_op_free_huge_count{};
 
 
         /// @brief stores the direct map with a phys to virt relationship
@@ -2657,72 +2647,6 @@ namespace syscall
         }
 
         /// <!-- description -->
-        ///   @brief Frees a page previously allocated by bf_mem_op_alloc_page.
-        ///     This operation is optional and not all microkernels may implement
-        ///     it.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam T the type of pointer to return. Must be a POD type and
-        ///     the size of a page.
-        ///   @param pmut_virt The virtual address of the page to free
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        template<typename T>
-        [[nodiscard]] constexpr auto
-        bf_mem_op_free_page(T *const pmut_virt) noexcept -> bsl::errc_type
-        {
-            bsl::expects(nullptr != pmut_virt);
-
-            static_assert(bsl::is_pod<T>::value);
-            static_assert(sizeof(T) <= HYPERVISOR_PAGE_SIZE);
-
-            auto const phys{m_alloc_page_virt_to_phys.at(pmut_virt)};
-            bsl::expects(phys.is_valid_and_checked());
-            bsl::expects(phys.is_pos());
-
-            ++m_bf_mem_op_free_page_count;
-            if (!m_bf_mem_op_free_page) {
-                return m_bf_mem_op_free_page;
-            }
-
-            // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-            delete pmut_virt;    // GRCOV_EXCLUDE_BR
-            bsl::discard(m_alloc_page_phys_to_virt.erase(phys));
-            bsl::discard(m_alloc_page_virt_to_phys.erase(pmut_virt));
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the return value of bf_mem_op_free_page.
-        ///     (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param errc the bsl::errc_type to return when executing
-        ///     bf_mem_op_free_page
-        ///
-        constexpr void
-        set_bf_mem_op_free_page(bsl::errc_type const errc) noexcept
-        {
-            m_bf_mem_op_free_page = errc;
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the total number of times bf_mem_op_free_page
-        ///     has been called (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return Returns the total number of times bf_mem_op_free_page
-        ///     has been called
-        ///
-        [[nodiscard]] constexpr auto
-        bf_mem_op_free_page_count() const noexcept -> bsl::safe_umx
-        {
-            return m_bf_mem_op_free_page_count.checked();
-        }
-
-        /// <!-- description -->
         ///   @brief bf_mem_op_alloc_huge allocates a physically contiguous block
         ///     of memory. When allocating a page, the extension should keep in
         ///     mind the following:
@@ -2850,72 +2774,6 @@ namespace syscall
         bf_mem_op_alloc_huge_count() const noexcept -> bsl::safe_umx
         {
             return m_bf_mem_op_alloc_huge_count.checked();
-        }
-
-        /// <!-- description -->
-        ///   @brief Frees memory previously allocated by bf_mem_op_alloc_huge.
-        ///     This operation is optional and not all microkernels may implement
-        ///     it.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @tparam T the type of pointer to return. Must be a POD type and
-        ///     the size of a page.
-        ///   @param pmut_virt The virtual address of the memory to free
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     otherwise
-        ///
-        template<typename T>
-        [[nodiscard]] constexpr auto
-        bf_mem_op_free_huge(T *const pmut_virt) noexcept -> bsl::errc_type
-        {
-            bsl::expects(nullptr != pmut_virt);
-
-            static_assert(bsl::is_pod<T>::value);
-            static_assert(sizeof(T) <= HYPERVISOR_PAGE_SIZE);
-
-            auto const phys{m_alloc_huge_virt_to_phys.at(pmut_virt)};
-            bsl::expects(phys.is_valid_and_checked());
-            bsl::expects(phys.is_pos());
-
-            ++m_bf_mem_op_free_huge_count;
-            if (!m_bf_mem_op_free_huge) {
-                return m_bf_mem_op_free_huge;
-            }
-
-            // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-            delete[] pmut_virt;    // GRCOV_EXCLUDE_BR
-            bsl::discard(m_alloc_huge_phys_to_virt.erase(phys));
-            bsl::discard(m_alloc_huge_virt_to_phys.erase(pmut_virt));
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Sets the return value of bf_mem_op_free_huge.
-        ///     (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param errc the bsl::errc_type to return when executing
-        ///     bf_mem_op_free_huge
-        ///
-        constexpr void
-        set_bf_mem_op_free_huge(bsl::errc_type const errc) noexcept
-        {
-            m_bf_mem_op_free_huge = errc;
-        }
-
-        /// <!-- description -->
-        ///   @brief Returns the total number of times bf_mem_op_free_huge
-        ///     has been called (unit testing only)
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return Returns the total number of times bf_mem_op_free_huge
-        ///     has been called
-        ///
-        [[nodiscard]] constexpr auto
-        bf_mem_op_free_huge_count() const noexcept -> bsl::safe_umx
-        {
-            return m_bf_mem_op_free_huge_count.checked();
         }
     };
 }

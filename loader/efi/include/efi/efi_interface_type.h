@@ -28,8 +28,6 @@
 #define EFI_INTERFACE_TYPE_H
 
 /**
- * @struct EFI_INTERFACE_TYPE
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_INTERFACE_TYPE struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

@@ -32,8 +32,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct span_t
- *
  * <!-- description -->
  *   @brief Defines the address and size of an array.
  */

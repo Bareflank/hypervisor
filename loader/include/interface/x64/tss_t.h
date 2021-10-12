@@ -33,8 +33,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct tss_t
- *
  * <!-- description -->
  *   @brief Defines the structure of the task state segment
  *     as defined by the AMD SDM.

@@ -32,8 +32,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct global_descriptor_table_register_t
- *
  * <!-- description -->
  *   @brief Defines the structure of the global descriptor table register
  *     as defined by Intel and AMD

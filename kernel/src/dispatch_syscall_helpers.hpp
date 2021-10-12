@@ -26,7 +26,9 @@
 #define DISPATCH_SYSCALL_HELPERS_HPP
 
 #include <bf_constants.hpp>
+#include <bf_reg_t.hpp>
 #include <bf_types.hpp>
+#include <ext_t.hpp>
 #include <tls_t.hpp>
 #include <vm_pool_t.hpp>
 #include <vp_pool_t.hpp>
@@ -117,7 +119,7 @@ namespace mk
     // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
     is_version_supported(bsl::uint64 const reg) noexcept -> bool
     {
-        auto const version{bsl::to_u32(reg)};
+        auto const version{bsl::to_u32_unsafe(reg)};
         if (bsl::unlikely(version != syscall::BF_SPEC_ID1_VAL)) {
             bsl::error() << "unsupported syscall ABI "    //--
                          << bsl::hex(version)             //--
@@ -142,7 +144,7 @@ namespace mk
     [[nodiscard]] constexpr auto
     verify_handle_for_current_ext(tls_t const &tls) noexcept -> bool
     {
-        bool const valid{tls.ext->is_handle_valid(bsl::to_u16_unsafe(tls.ext_reg0))};
+        bool const valid{tls.ext->is_handle_valid(bsl::to_u64(tls.ext_reg0))};
         if (bsl::unlikely(!valid)) {
             bsl::error() << "invalid handle "         // --
                          << bsl::hex(tls.ext_reg0)    // --
@@ -1061,132 +1063,6 @@ namespace mk
     {
         constexpr auto min_addr{HYPERVISOR_EXT_DIRECT_MAP_ADDR};
         constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_DIRECT_MAP_SIZE).checked()};
-
-        auto const virt{bsl::to_umx(reg)};
-        if (bsl::unlikely(virt.is_zero())) {
-            bsl::error() << "the virtual address "                     // --
-                         << bsl::hex(virt)                             // --
-                         << " is a NULL address and cannot be used"    // --
-                         << bsl::endl                                  // --
-                         << bsl::here();                               // --
-
-            return bsl::safe_umx::failure();
-        }
-
-        if (bsl::unlikely(virt <= min_addr)) {
-            bsl::error() << "the virtual address "                   // --
-                         << bsl::hex(virt)                           // --
-                         << " is out of range and cannot be used"    // --
-                         << bsl::endl                                // --
-                         << bsl::here();                             // --
-
-            return bsl::safe_umx::failure();
-        }
-
-        if (bsl::unlikely(virt >= max_addr)) {
-            bsl::error() << "the virtual address "                   // --
-                         << bsl::hex(virt)                           // --
-                         << " is out of range and cannot be used"    // --
-                         << bsl::endl                                // --
-                         << bsl::here();                             // --
-
-            return bsl::safe_umx::failure();
-        }
-
-        bool const aligned{syscall::bf_is_page_aligned(virt)};
-        if (bsl::unlikely(!aligned)) {
-            bsl::error() << "the virtual address "                       // --
-                         << bsl::hex(virt)                               // --
-                         << " is not page aligned and cannot be used"    // --
-                         << bsl::endl                                    // --
-                         << bsl::here();                                 // --
-
-            return bsl::safe_umx::failure();
-        }
-
-        return virt;
-    }
-
-    /// <!-- description -->
-    ///   @brief Given an input register, returns a virtual address if the
-    ///     provided register contains a valid virtual address. Otherwise,
-    ///     this function returns bsl::safe_umx::failure().
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg the register to get the virtual address from.
-    ///   @return Given an input register, returns a virtual address if the
-    ///     provided register contains a valid virtual address. Otherwise,
-    ///     this function returns bsl::safe_umx::failure().
-    ///
-    [[nodiscard]] constexpr auto
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    get_page_pool_virt(bsl::uint64 const reg) noexcept -> bsl::safe_umx
-    {
-        constexpr auto min_addr{HYPERVISOR_EXT_PAGE_POOL_ADDR};
-        constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_PAGE_POOL_SIZE).checked()};
-
-        auto const virt{bsl::to_umx(reg)};
-        if (bsl::unlikely(virt.is_zero())) {
-            bsl::error() << "the virtual address "                     // --
-                         << bsl::hex(virt)                             // --
-                         << " is a NULL address and cannot be used"    // --
-                         << bsl::endl                                  // --
-                         << bsl::here();                               // --
-
-            return bsl::safe_umx::failure();
-        }
-
-        if (bsl::unlikely(virt <= min_addr)) {
-            bsl::error() << "the virtual address "                   // --
-                         << bsl::hex(virt)                           // --
-                         << " is out of range and cannot be used"    // --
-                         << bsl::endl                                // --
-                         << bsl::here();                             // --
-
-            return bsl::safe_umx::failure();
-        }
-
-        if (bsl::unlikely(virt >= max_addr)) {
-            bsl::error() << "the virtual address "                   // --
-                         << bsl::hex(virt)                           // --
-                         << " is out of range and cannot be used"    // --
-                         << bsl::endl                                // --
-                         << bsl::here();                             // --
-
-            return bsl::safe_umx::failure();
-        }
-
-        bool const aligned{syscall::bf_is_page_aligned(virt)};
-        if (bsl::unlikely(!aligned)) {
-            bsl::error() << "the virtual address "                       // --
-                         << bsl::hex(virt)                               // --
-                         << " is not page aligned and cannot be used"    // --
-                         << bsl::endl                                    // --
-                         << bsl::here();                                 // --
-
-            return bsl::safe_umx::failure();
-        }
-
-        return virt;
-    }
-
-    /// <!-- description -->
-    ///   @brief Given an input register, returns a virtual address if the
-    ///     provided register contains a valid virtual address. Otherwise,
-    ///     this function returns bsl::safe_umx::failure().
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg the register to get the virtual address from.
-    ///   @return Given an input register, returns a virtual address if the
-    ///     provided register contains a valid virtual address. Otherwise,
-    ///     this function returns bsl::safe_umx::failure().
-    ///
-    [[nodiscard]] constexpr auto
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    get_huge_pool_virt(bsl::uint64 const reg) noexcept -> bsl::safe_umx
-    {
-        constexpr auto min_addr{HYPERVISOR_EXT_HUGE_POOL_ADDR};
-        constexpr auto max_addr{(min_addr + HYPERVISOR_EXT_HUGE_POOL_SIZE).checked()};
 
         auto const virt{bsl::to_umx(reg)};
         if (bsl::unlikely(virt.is_zero())) {

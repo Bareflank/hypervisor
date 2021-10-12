@@ -27,11 +27,13 @@
 
 #include <ext_t.hpp>
 #include <intrinsic_t.hpp>
+#include <tls_t.hpp>
 #include <vmexit_log_t.hpp>
 #include <vs_pool_t.hpp>
 
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
+#include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk

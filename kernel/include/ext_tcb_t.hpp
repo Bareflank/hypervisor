@@ -26,13 +26,11 @@
 #define EXT_TLS_T_HPP
 
 #include <bsl/array.hpp>
-#include <bsl/convert.hpp>
-#include <bsl/cstdint.hpp>
+#include <bsl/convert.hpp>    // IWYU pragma: keep
+#include <bsl/safe_integral.hpp>
 
 namespace mk
 {
-    /// @struct mk::ext_tcb_t
-    ///
     /// <!-- description -->
     ///   @brief A thread is a PP, meaning each PP represents a thread. Each
     ///     extension is given two pages of TLS storage per thread. The first

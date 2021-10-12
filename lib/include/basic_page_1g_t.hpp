@@ -39,8 +39,6 @@ namespace lib
     constexpr auto BASIC_PAGE_1G_T_MASK{
         bsl::to_u64(BASIC_PAGE_1G_T_SIZE) - bsl::safe_u64::magic_1()};
 
-    /// @struct lib::basic_page_1g_t
-    ///
     /// <!-- description -->
     ///   @brief Defines a 1g page
     ///

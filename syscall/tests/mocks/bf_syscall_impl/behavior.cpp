@@ -540,7 +540,7 @@ namespace syscall
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bsl::ut_when{} = []() noexcept {
                     g_mut_bf_debug_op_write_str_impl_executed = {};
-                    bf_debug_op_write_str_impl({});
+                    bf_debug_op_write_str_impl({}, {});
                     bsl::ut_then{} = []() noexcept {
                         bsl::ut_check(g_mut_bf_debug_op_write_str_impl_executed);
                     };
@@ -1538,33 +1538,6 @@ namespace syscall
             };
         };
 
-        bsl::ut_scenario{"bf_mem_op_free_page_impl failure"} = []() noexcept {
-            bsl::ut_given_at_runtime{} = []() noexcept {
-                bsl::ut_when{} = []() noexcept {
-                    g_mut_errc.clear();
-                    g_mut_data.clear();
-                    g_mut_errc.at("bf_mem_op_free_page_impl") = BF_STATUS_FAILURE_UNKNOWN;
-                    bsl::ut_then{} = []() noexcept {
-                        bf_status_t const ret{bf_mem_op_free_page_impl({}, {})};
-                        bsl::ut_check(BF_STATUS_FAILURE_UNKNOWN == ret);
-                    };
-                };
-            };
-        };
-
-        bsl::ut_scenario{"bf_mem_op_free_page_impl success"} = []() noexcept {
-            bsl::ut_given_at_runtime{} = []() noexcept {
-                bsl::ut_when{} = []() noexcept {
-                    g_mut_errc.clear();
-                    g_mut_data.clear();
-                    bsl::ut_then{} = []() noexcept {
-                        bf_status_t const ret{bf_mem_op_free_page_impl({}, {})};
-                        bsl::ut_check(BF_STATUS_SUCCESS == ret);
-                    };
-                };
-            };
-        };
-
         bsl::ut_scenario{"bf_mem_op_alloc_huge_impl invalid arg0"} = []() noexcept {
             bsl::ut_given_at_runtime{} = []() noexcept {
                 bsl::safe_u64 mut_reg1_out{};
@@ -1632,33 +1605,6 @@ namespace syscall
                         bsl::ut_check(BF_STATUS_SUCCESS == ret);
                         bsl::ut_check(&pmut_mut_reg0_out == pmut_mut_reg0_out);
                         bsl::ut_check(ANSWER64 == mut_reg1_out);
-                    };
-                };
-            };
-        };
-
-        bsl::ut_scenario{"bf_mem_op_free_huge_impl failure"} = []() noexcept {
-            bsl::ut_given_at_runtime{} = []() noexcept {
-                bsl::ut_when{} = []() noexcept {
-                    g_mut_errc.clear();
-                    g_mut_data.clear();
-                    g_mut_errc.at("bf_mem_op_free_huge_impl") = BF_STATUS_FAILURE_UNKNOWN;
-                    bsl::ut_then{} = []() noexcept {
-                        bf_status_t const ret{bf_mem_op_free_huge_impl({}, {})};
-                        bsl::ut_check(BF_STATUS_FAILURE_UNKNOWN == ret);
-                    };
-                };
-            };
-        };
-
-        bsl::ut_scenario{"bf_mem_op_free_huge_impl success"} = []() noexcept {
-            bsl::ut_given_at_runtime{} = []() noexcept {
-                bsl::ut_when{} = []() noexcept {
-                    g_mut_errc.clear();
-                    g_mut_data.clear();
-                    bsl::ut_then{} = []() noexcept {
-                        bf_status_t const ret{bf_mem_op_free_huge_impl({}, {})};
-                        bsl::ut_check(BF_STATUS_SUCCESS == ret);
                     };
                 };
             };

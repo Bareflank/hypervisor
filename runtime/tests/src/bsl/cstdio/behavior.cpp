@@ -25,6 +25,7 @@
 #include "../../../../src/bsl/cstdio.hpp"
 
 #include <bsl/char_type.hpp>
+#include <bsl/cstdint.hpp>
 #include <bsl/discard.hpp>
 #include <bsl/ut.hpp>
 
@@ -53,11 +54,15 @@ namespace runtime
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
     ///
     extern "C" inline void
-    bf_debug_op_write_str_impl(bsl::char_type const *const reg0_in) noexcept
+    bf_debug_op_write_str_impl(
+        bsl::char_type const *const reg0_in, bsl::uintmx const reg1_in) noexcept
     {
         bsl::discard(reg0_in);
+        bsl::discard(reg1_in);
+
         g_mut_bf_debug_op_write_str_impl_executed = true;
     }
 
@@ -84,7 +89,7 @@ namespace runtime
         bsl::ut_scenario{"stdio_out_cstr executes"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 bsl::ut_then{} = []() noexcept {
-                    bsl::stdio_out_cstr("the answer is 42");
+                    bsl::stdio_out_cstr("the answer is 42", {});
                 };
             };
         };

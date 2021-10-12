@@ -35,8 +35,6 @@ namespace loader
     /// @brief defines the IOCTL index for stopping the VMM
     constexpr auto STOP_VMM_CMD{0xBF02_u32};
 
-    /// @struct loader::stop_vmm_args_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the information that a userspace application needs to
     ///     provide to stop the VMM.

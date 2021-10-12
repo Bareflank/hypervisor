@@ -27,7 +27,6 @@
 
 #include <bsl/array.hpp>
 #include <bsl/convert.hpp>
-#include <bsl/cstdint.hpp>
 #include <bsl/safe_integral.hpp>
 
 #pragma pack(push, 1)
@@ -133,8 +132,8 @@ namespace mk
     constexpr auto VMCS_ENCLS_EXITING_BITMAP{0x202E_umx};
     /// @brief encoding for: sub_page_permission_table_pointer
     constexpr auto VMCS_SUB_PAGE_PERMISSION_TABLE_POINTER{0x2030_umx};
-    /// @brief encoding for: tls_multiplier
-    constexpr auto VMCS_TLS_MULTIPLIER{0x2032_umx};
+    /// @brief encoding for: tsc_multiplier
+    constexpr auto VMCS_TSC_MULTIPLIER{0x2032_umx};
 
     /// @brief encoding for: guest_physical_address
     constexpr auto VMCS_GUEST_PHYSICAL_ADDRESS{0x2400_umx};
@@ -371,8 +370,6 @@ namespace mk
     /// @brief encoding for: host_rip
     constexpr auto VMCS_HOST_RIP{0x6C16_umx};
 
-    /// @struct mk::vmcs_t
-    ///
     /// <!-- description -->
     ///   @brief The following defines the structure of the VMCS used by
     ///     Intel's hypervisor extensions.

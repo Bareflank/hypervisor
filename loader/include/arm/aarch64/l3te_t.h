@@ -35,8 +35,6 @@
 #define bfelf_pf_nc ((uint32_t)0x01000000U)
 
 /**
- * @struct l3te_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a level-3 table entry (L3TE).
  */

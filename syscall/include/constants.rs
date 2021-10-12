@@ -511,9 +511,5 @@ pub const BF_INTRINSIC_OP_WRMSR_IDX_VAL: u64 = 0x0000000000000001;
 
 /// @brief Defines the index for bf_mem_op_alloc_page
 pub const BF_MEM_OP_ALLOC_PAGE_IDX_VAL: u64 = 0x0000000000000000;
-/// @brief Defines the index for bf_mem_op_free_page
-pub const BF_MEM_OP_FREE_PAGE_IDX_VAL: u64 = 0x0000000000000001;
 /// @brief Defines the index for bf_mem_op_alloc_huge
 pub const BF_MEM_OP_ALLOC_HUGE_IDX_VAL: u64 = 0x0000000000000002;
-/// @brief Defines the index for bf_mem_op_free_huge
-pub const BF_MEM_OP_FREE_HUGE_IDX_VAL: u64 = 0x0000000000000003;

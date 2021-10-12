@@ -35,8 +35,6 @@
 #define LOADER_STOP_VMM_CMD ((uint32_t)0xBF02)
 
 /**
- * @struct stop_vmm_args_t
- *
  * <!-- description -->
  *   @brief Defines the information that a userspace application needs to
  *     provide to stop the VMM.

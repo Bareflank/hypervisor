@@ -37,8 +37,6 @@
 #define LOADER_NUM_PDPT_ENTRIES ((uint64_t)512)
 
 /**
- * @struct pdpt_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a page-directory-pionter table (pdpt).
  */

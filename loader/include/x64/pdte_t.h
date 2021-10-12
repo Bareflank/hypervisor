@@ -36,8 +36,6 @@
 #endif
 
 /**
- * @struct pdte_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a page-directory table entry (PDTE).
  */

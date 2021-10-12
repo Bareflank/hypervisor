@@ -30,7 +30,7 @@
 
 #include <bsl/array.hpp>
 #include <bsl/convert.hpp>
-#include <bsl/cstdint.hpp>
+#include <bsl/safe_idx.hpp>
 
 #pragma pack(push, 1)
 
@@ -105,8 +105,6 @@ namespace bfelf
     /// @brief shortcut for the e_ident entry in the ehdr.
     using e_ident_t = bsl::array<bsl::uint8, EI_NIDENT.get()>;
 
-    /// @struct elf64_ehdr_t
-    ///
     /// <!-- description -->
     ///   @brief The file header is located at the beginning of the file,
     ///     and is used to locate the other parts of the file
@@ -124,9 +122,9 @@ namespace bfelf
         /// @brief entry point address
         bsl::uint64 e_entry;
         /// @brief pointer to program header
-        bfelf::elf64_phdr_t *e_phdr;
+        bfelf::elf64_phdr_t const *e_phdr;
         /// @brief pointer to section header
-        bfelf::elf64_shdr_t *e_shdr;
+        bfelf::elf64_shdr_t const *e_shdr;
         /// @brief processor-specific flags
         bsl::uint32 e_flags;
         /// @brief ELF header size

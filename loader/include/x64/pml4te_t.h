@@ -36,8 +36,6 @@
 #endif
 
 /**
- * @struct pml4te_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a page-map level-4 table entry (PML4TE).
  */

@@ -47,7 +47,7 @@ main() noexcept -> bsl::exit_code
             static_assert(noexcept(syscall::bf_debug_op_dump_vs({})));
             static_assert(noexcept(syscall::bf_debug_op_dump_vmexit_log({})));
             static_assert(noexcept(syscall::bf_debug_op_write_c({})));
-            static_assert(noexcept(syscall::bf_debug_op_write_str({})));
+            static_assert(noexcept(syscall::bf_debug_op_write_str({}, {})));
             static_assert(noexcept(syscall::bf_debug_op_dump_ext({})));
             static_assert(noexcept(syscall::bf_debug_op_dump_page_pool()));
             static_assert(noexcept(syscall::bf_debug_op_dump_huge_pool()));

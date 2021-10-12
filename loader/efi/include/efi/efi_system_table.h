@@ -67,8 +67,6 @@
 #define EFI_SYSTEM_TABLE_REVISION EFI_2_8_SYSTEM_TABLE_REVISION
 
 /**
- * @struct EFI_SYSTEM_TABLE
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_SYSTEM_TABLE struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

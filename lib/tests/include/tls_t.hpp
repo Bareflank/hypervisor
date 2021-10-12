@@ -22,15 +22,20 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef MOCK_TLS_T_HPP
-#define MOCK_TLS_T_HPP
+#ifndef TLS_T_HPP
+#define TLS_T_HPP
+
+#include <basic_entries_t.hpp>
+#include <l0e_t.hpp>
+#include <l1e_t.hpp>
+#include <l2e_t.hpp>
+#include <l3e_t.hpp>
 
 #include <bsl/errc_type.hpp>
+#include <bsl/safe_integral.hpp>
 
 namespace lib
 {
-    /// @class lib::tls_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the extension's mocked version of tls_t, used for
     ///     unit testing. Specifically, this version only contains portions
@@ -38,12 +43,30 @@ namespace lib
     ///
     struct tls_t final
     {
-        /// @brief store the ID of the PP this tls_t is assigned to
+        /// --------------------------------------------------------------------
+        /// Context Information
+        /// --------------------------------------------------------------------
+
+        /// @brief stores the currently active VMID
         bsl::uint16 ppid;
-        /// @brief stores a pointer to the active root page table
+        /// @brief stores the total number of online PPs
+        bsl::uint16 online_pps;
+
+        /// @brief stores the currently active root page table
         void *active_rpt;
-        /// @brief tells certain mocks when to fail
+
+        /// --------------------------------------------------------------------
+        /// Unit Test Only
+        /// --------------------------------------------------------------------
+
+        /// @brief API specific return type for tests
         bsl::errc_type test_ret;
+        /// @brief API specific return type for tests
+        bsl::safe_u64 test_virt;
+        /// @brief API specific return type for tests
+        bsl::safe_u64 test_phys;
+        /// @brief API specific return type for tests
+        basic_entries_t<l3e_t, l2e_t, l1e_t, l0e_t> test_ents;
     };
 }
 

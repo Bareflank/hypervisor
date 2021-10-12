@@ -25,11 +25,17 @@
 #ifndef DISPATCH_SYSCALL_BF_MEM_OP_HPP
 #define DISPATCH_SYSCALL_BF_MEM_OP_HPP
 
+#include "dispatch_syscall_helpers.hpp"
+
+#include <basic_alloc_huge_t.hpp>
+#include <basic_alloc_page_t.hpp>
 #include <bf_constants.hpp>
+#include <bf_types.hpp>
 #include <ext_t.hpp>
+#include <huge_pool_t.hpp>
+#include <page_pool_t.hpp>
 #include <tls_t.hpp>
 
-#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
@@ -56,41 +62,6 @@ namespace mk
 
         mut_tls.ext_reg0 = page.virt.get();
         mut_tls.ext_reg1 = page.phys.get();
-
-        return syscall::BF_STATUS_SUCCESS;
-    }
-
-    /// <!-- description -->
-    ///   @brief Implements the bf_mem_op_free_page syscall
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param mut_tls the current TLS block
-    ///   @return Returns a bf_status_t containing success or failure
-    ///
-    [[nodiscard]] constexpr auto
-    syscall_bf_mem_op_free_page(tls_t &mut_tls) noexcept -> syscall::bf_status_t
-    {
-        auto const virt{get_page_pool_virt(mut_tls.ext_reg1)};
-        if (bsl::unlikely(virt.is_invalid())) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::BF_STATUS_INVALID_INPUT_REG1;
-        }
-
-        /// TODO:
-        /// - We need to actually verify that the virtual address is mapped
-        ///   into the extension's page tables, otherwise, one extension
-        ///   could corrupt the resources for another.
-        /// - We need to make sure that this is actually an allocated virtual
-        ///   address. To do that, we need to make sure that auto release is
-        ///   set as all auto_release memory in the direct map is a page
-        ///   allocation.
-        ///
-
-        auto const ret{mut_tls.ext->free_page(virt)};
-        if (bsl::unlikely(!ret)) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::BF_STATUS_FAILURE_UNKNOWN;
-        }
 
         return syscall::BF_STATUS_SUCCESS;
     }
@@ -128,43 +99,6 @@ namespace mk
     }
 
     /// <!-- description -->
-    ///   @brief Implements the bf_mem_op_free_huge syscall
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param mut_tls the current TLS block
-    ///   @return Returns a bf_status_t containing success or failure
-    ///
-    [[nodiscard]] constexpr auto
-    syscall_bf_mem_op_free_huge(tls_t &mut_tls) noexcept -> syscall::bf_status_t
-    {
-        auto const virt{get_huge_pool_virt(mut_tls.ext_reg1)};
-        if (bsl::unlikely(virt.is_invalid())) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::BF_STATUS_INVALID_INPUT_REG1;
-        }
-
-        /// TODO:
-        /// - We need to actually verify that the virtual address is mapped
-        ///   into the extension's page tables, otherwise, one extension
-        ///   could corrupt the resources for another.
-        /// - We need to ensure that the allocation is huge. Specifically this
-        ///   would be done by making sure that the virtual address has at
-        ///   least one page next to it that is physically contiguous and that
-        ///   auto release is not enabled, and manual release is set as all
-        ///   manual, non-auto release memory is that is in the direct map is
-        ///   from the huge pool.
-        ///
-
-        auto const ret{mut_tls.ext->free_huge(virt)};
-        if (bsl::unlikely(!ret)) {
-            bsl::print<bsl::V>() << bsl::here();
-            return syscall::BF_STATUS_FAILURE_UNKNOWN;
-        }
-
-        return syscall::BF_STATUS_SUCCESS;
-    }
-
-    /// <!-- description -->
     ///   @brief Dispatches the bf_mem_op syscalls
     ///
     /// <!-- inputs/outputs -->
@@ -194,28 +128,8 @@ namespace mk
                 return ret;
             }
 
-            case syscall::BF_MEM_OP_FREE_PAGE_IDX_VAL.get(): {
-                auto const ret{syscall_bf_mem_op_free_page(mut_tls)};
-                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                return ret;
-            }
-
             case syscall::BF_MEM_OP_ALLOC_HUGE_IDX_VAL.get(): {
                 auto const ret{syscall_bf_mem_op_alloc_huge(mut_tls, mut_page_pool, mut_huge_pool)};
-                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
-                    bsl::print<bsl::V>() << bsl::here();
-                    return ret;
-                }
-
-                return ret;
-            }
-
-            case syscall::BF_MEM_OP_FREE_HUGE_IDX_VAL.get(): {
-                auto const ret{syscall_bf_mem_op_free_huge(mut_tls)};
                 if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
                     bsl::print<bsl::V>() << bsl::here();
                     return ret;

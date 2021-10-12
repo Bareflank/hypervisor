@@ -1384,7 +1384,7 @@ namespace syscall
                     pmut_mut_ptr = mut_sys.bf_mem_op_alloc_page<page_t>(mut_phys);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(pmut_mut_ptr != nullptr);
-                        bsl::ut_check(mut_sys.bf_mem_op_free_page(pmut_mut_ptr));
+                        delete pmut_mut_ptr;    // NOLINT // GRCOV_EXCLUDE_BR
                         bsl::ut_check(mut_sys.bf_mem_op_alloc_page_count().is_pos());
                     };
                 };
@@ -1393,29 +1393,8 @@ namespace syscall
                     pmut_mut_ptr = mut_sys.bf_mem_op_alloc_page<page_t>();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(pmut_mut_ptr != nullptr);
-                        bsl::ut_check(mut_sys.bf_mem_op_free_page(pmut_mut_ptr));
+                        delete pmut_mut_ptr;    // NOLINT // GRCOV_EXCLUDE_BR
                         bsl::ut_check(mut_sys.bf_mem_op_alloc_page_count().is_pos());
-                    };
-                };
-            };
-        };
-
-        bsl::ut_scenario{"bf_mem_op_free_page failure/success"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
-                bf_syscall_t mut_sys{};
-                lib::basic_page_4k_t *pmut_mut_ptr{};
-                bsl::ut_when{} = [&]() noexcept {
-                    pmut_mut_ptr = mut_sys.bf_mem_op_alloc_page<page_t>();
-                    mut_sys.set_bf_mem_op_free_page(bsl::errc_failure);
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_sys.bf_mem_op_free_page(pmut_mut_ptr));
-                        bsl::ut_check(mut_sys.bf_mem_op_free_page_count().is_pos());
-                    };
-
-                    mut_sys.set_bf_mem_op_free_page(bsl::errc_success);
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_mem_op_free_page(pmut_mut_ptr));
-                        bsl::ut_check(mut_sys.bf_mem_op_free_page_count().is_pos());
                     };
                 };
             };
@@ -1447,7 +1426,7 @@ namespace syscall
                     pmut_mut_ptr = mut_sys.bf_mem_op_alloc_huge<page_t>(size, mut_phys);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(pmut_mut_ptr != nullptr);
-                        bsl::ut_check(mut_sys.bf_mem_op_free_huge(pmut_mut_ptr));
+                        delete[] pmut_mut_ptr;    // NOLINT // GRCOV_EXCLUDE_BR
                         bsl::ut_check(mut_sys.bf_mem_op_alloc_huge_count().is_pos());
                     };
                 };
@@ -1456,30 +1435,8 @@ namespace syscall
                     pmut_mut_ptr = mut_sys.bf_mem_op_alloc_huge<page_t>(size);
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(pmut_mut_ptr != nullptr);
-                        bsl::ut_check(mut_sys.bf_mem_op_free_huge(pmut_mut_ptr));
+                        delete[] pmut_mut_ptr;    // NOLINT // GRCOV_EXCLUDE_BR
                         bsl::ut_check(mut_sys.bf_mem_op_alloc_huge_count().is_pos());
-                    };
-                };
-            };
-        };
-
-        bsl::ut_scenario{"bf_mem_op_free_huge failure/success"} = []() noexcept {
-            bsl::ut_given{} = []() noexcept {
-                bf_syscall_t mut_sys{};
-                bsl::safe_u64 const size{HYPERVISOR_PAGE_SIZE};
-                lib::basic_page_4k_t *pmut_mut_ptr{};
-                bsl::ut_when{} = [&]() noexcept {
-                    pmut_mut_ptr = mut_sys.bf_mem_op_alloc_huge<page_t>(size);
-                    mut_sys.set_bf_mem_op_free_huge(bsl::errc_failure);
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!mut_sys.bf_mem_op_free_huge(pmut_mut_ptr));
-                        bsl::ut_check(mut_sys.bf_mem_op_free_huge_count().is_pos());
-                    };
-
-                    mut_sys.set_bf_mem_op_free_huge(bsl::errc_success);
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_sys.bf_mem_op_free_huge(pmut_mut_ptr));
-                        bsl::ut_check(mut_sys.bf_mem_op_free_huge_count().is_pos());
                     };
                 };
             };

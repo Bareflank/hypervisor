@@ -32,8 +32,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct elf_segment_t
- *
  * <!-- description -->
  *   @brief Defines the address and size of an array. In addition, this also
  *     stores some information about the ELF segment itself.

@@ -31,7 +31,6 @@
 
 #include <bsl/array.hpp>
 #include <bsl/convert.hpp>
-#include <bsl/cstdint.hpp>
 #include <bsl/safe_integral.hpp>
 
 #pragma pack(push, 1)
@@ -49,8 +48,6 @@ namespace loader
     /// @brief the size of reserved #3 in the state_save_t
     constexpr auto SS_RESERVED3_SIZE{0x7_umx};
 
-    /// @struct loader::state_save_t
-    ///
     /// <!-- description -->
     ///   @brief Stores the registers and processor state that is used by the
     ///     microkernel that must be restored in the event of an error or the

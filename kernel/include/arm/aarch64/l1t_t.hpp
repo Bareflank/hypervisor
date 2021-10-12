@@ -38,8 +38,6 @@ namespace mk
     /// @brief defines total number of entries in the L1T
     constexpr auto NUM_L1T_ENTRIES{512_umx};
 
-    /// @struct mk::l1t_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the layout of a level-1 table (L1T).
     ///

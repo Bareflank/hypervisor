@@ -61,8 +61,6 @@ typedef struct _EFI_LOADED_IMAGE_PROTOCOL EFI_LOADED_IMAGE_PROTOCOL;
 typedef EFI_STATUS(EFIAPI *EFI_IMAGE_UNLOAD)(IN EFI_HANDLE ImageHandle);
 
 /**
- * @struct EFI_LOADED_IMAGE_PROTOCOL
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_LOADED_IMAGE_PROTOCOL struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf

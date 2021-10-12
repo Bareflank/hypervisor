@@ -55,8 +55,6 @@ namespace syscall
         return ((val & mask) & (val >> shift)).checked();
     };
 
-    /// @class example::vs_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the extension's notion of a VS
     ///

@@ -25,9 +25,10 @@
 #ifndef SPINLOCK_T_HPP
 #define SPINLOCK_T_HPP
 
-#include "spinlock_helpers.hpp"
-
 #include <basic_spinlock_t.hpp>
+#include <spinlock_helpers.hpp>    // IWYU pragma: export
+
+// IWYU pragma: no_include "spinlock_helpers.hpp"
 
 namespace mk
 {

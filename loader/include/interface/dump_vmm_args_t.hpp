@@ -37,8 +37,6 @@ namespace loader
     /// @brief defines the IOCTL index for dumping a VMs debug ring
     constexpr auto DUMP_VMM_CMD{0xBF03_u32};
 
-    /// @struct loader::dump_vmm_args_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the information that a userspace application needs to
     ///     provide to dump the VMM.

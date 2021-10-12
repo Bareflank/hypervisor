@@ -23,10 +23,13 @@
 /// SOFTWARE.
 
 #include "../../../mocks/basic_page_pool_t.hpp"
-#include "basic_page_4k_t.hpp"
-#include "basic_page_pool_node_t.hpp"
 
+#include <basic_page_4k_t.hpp>
+#include <basic_page_pool_node_t.hpp>
+#include <ext_tcb_t.hpp>
 #include <tls_t.hpp>
+#include <vmcb_t.hpp>
+#include <vmcs_t.hpp>
 
 #include <bsl/convert.hpp>
 #include <bsl/discard.hpp>
@@ -78,41 +81,73 @@ namespace lib
         bsl::ut_scenario{"allocate/deallocate"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 basic_page_pool_t<tls_t> mut_page_pool{};
-                tls_t mut_tls{};
                 bsl::ut_when{} = [&]() noexcept {
-                    auto *const pmut_ptr0{mut_page_pool.allocate<T>(mut_tls)};
-                    auto *const pmut_ptr1{mut_page_pool.allocate<T>(mut_tls)};
-                    auto *const pmut_ptr2{mut_page_pool.allocate<T>(mut_tls)};
+                    helpers::page_pool_storage_t mut_store{};
+                    auto *const pmut_ptr0{mut_page_pool.allocate<T>({})};
+                    auto *const pmut_ptr1{mut_page_pool.allocate<T>({})};
+                    helpers::set_page_pool_storage<T>(mut_store, mut_page_pool.allocate<T>({}), {});
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(pmut_ptr0 != nullptr);
                         bsl::ut_check(pmut_ptr1 != nullptr);
-                        bsl::ut_check(pmut_ptr2 != nullptr);
                         bsl::ut_cleanup{} = [&]() noexcept {
-                            mut_page_pool.deallocate(mut_tls, pmut_ptr0);
-                            mut_page_pool.deallocate(mut_tls, pmut_ptr1);
-                            mut_page_pool.deallocate(mut_tls, pmut_ptr2);
+                            mut_page_pool.deallocate({}, pmut_ptr0);
+                            mut_page_pool.deallocate({}, pmut_ptr1);
+                            helpers::clr_page_pool_storage(mut_page_pool, mut_store);
                         };
                     };
                 };
             };
         };
 
-        bsl::ut_scenario{"allocate/deallocate oneshot"} = []() noexcept {
+        bsl::ut_scenario{"allocate/deallocate set_allocate"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 basic_page_pool_t<tls_t> mut_page_pool{};
-                tls_t mut_tls{};
                 T mut_virt_backing{};
                 T *const pmut_virt{&mut_virt_backing};
                 constexpr bsl::safe_umx phys{HYPERVISOR_PAGE_SIZE};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_oneshot(pmut_virt, phys);
-                    auto const *const ptr{mut_page_pool.allocate<T>(mut_tls)};
+                    mut_page_pool.set_allocate(pmut_virt, phys);
+                    auto const *const ptr{mut_page_pool.allocate<T>({})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(ptr == pmut_virt);
                         bsl::ut_check(mut_page_pool.virt_to_phys(pmut_virt) == phys);
                         bsl::ut_check(mut_page_pool.phys_to_virt<T>(phys) == pmut_virt);
                         bsl::ut_cleanup{} = [&]() noexcept {
-                            mut_page_pool.deallocate(mut_tls, ptr);
+                            mut_page_pool.deallocate({}, ptr);
+                        };
+                    };
+                };
+
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_allocate(pmut_virt, phys);
+                    auto *const mut_ptr{mut_page_pool.allocate<T>({})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_ptr == pmut_virt);
+                        bsl::ut_check(mut_page_pool.virt_to_phys(pmut_virt) == phys);
+                        bsl::ut_check(mut_page_pool.phys_to_virt<T>(phys) == pmut_virt);
+                        bsl::ut_cleanup{} = [&]() noexcept {
+                            mut_page_pool.deallocate({}, mut_ptr);
+                        };
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"allocate/deallocate set_max"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                basic_page_pool_t<tls_t> mut_page_pool{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_page_pool.set_max(bsl::safe_umx::magic_2());
+                    auto *const pmut_ptr0{mut_page_pool.allocate<T>({})};
+                    auto *const pmut_ptr1{mut_page_pool.allocate<T>({})};
+                    auto *const pmut_ptr2{mut_page_pool.allocate<T>({})};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(pmut_ptr0 != nullptr);
+                        bsl::ut_check(pmut_ptr1 != nullptr);
+                        bsl::ut_check(pmut_ptr2 == nullptr);
+                        bsl::ut_cleanup{} = [&]() noexcept {
+                            mut_page_pool.deallocate({}, pmut_ptr0);
+                            mut_page_pool.deallocate({}, pmut_ptr1);
                         };
                     };
                 };
@@ -122,25 +157,24 @@ namespace lib
         bsl::ut_scenario{"size"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 basic_page_pool_t<tls_t> mut_page_pool{};
-                tls_t mut_tls{};
                 auto const expected_size{(3_umx * HYPERVISOR_PAGE_SIZE).checked()};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_page_pool.size().is_zero());
                     };
 
-                    auto *const pmut_ptr0{mut_page_pool.allocate<T>(mut_tls)};
-                    auto *const pmut_ptr1{mut_page_pool.allocate<T>(mut_tls)};
-                    auto *const pmut_ptr2{mut_page_pool.allocate<T>(mut_tls)};
+                    auto *const pmut_ptr0{mut_page_pool.allocate<T>({})};
+                    auto *const pmut_ptr1{mut_page_pool.allocate<T>({})};
+                    auto *const pmut_ptr2{mut_page_pool.allocate<T>({})};
 
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_page_pool.size() == expected_size);
                     };
 
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        mut_page_pool.deallocate(mut_tls, pmut_ptr0);
-                        mut_page_pool.deallocate(mut_tls, pmut_ptr1);
-                        mut_page_pool.deallocate(mut_tls, pmut_ptr2);
+                        mut_page_pool.deallocate({}, pmut_ptr0);
+                        mut_page_pool.deallocate({}, pmut_ptr1);
+                        mut_page_pool.deallocate({}, pmut_ptr2);
                     };
                 };
             };
@@ -149,35 +183,34 @@ namespace lib
         bsl::ut_scenario{"allocated"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 basic_page_pool_t<tls_t> mut_page_pool{};
-                tls_t mut_tls{};
                 auto const expected0{(0_umx * HYPERVISOR_PAGE_SIZE).checked()};
                 auto const expected1{(1_umx * HYPERVISOR_PAGE_SIZE).checked()};
                 auto const expected2{(2_umx * HYPERVISOR_PAGE_SIZE).checked()};
                 auto const expected3{(3_umx * HYPERVISOR_PAGE_SIZE).checked()};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_page_pool.allocated(mut_tls) == expected0);
+                        bsl::ut_check(mut_page_pool.allocated({}) == expected0);
                     };
 
-                    auto *const pmut_ptr0{mut_page_pool.allocate<T>(mut_tls)};
+                    auto *const pmut_ptr0{mut_page_pool.allocate<T>({})};
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_page_pool.allocated(mut_tls) == expected1);
+                        bsl::ut_check(mut_page_pool.allocated({}) == expected1);
                     };
 
-                    auto *const pmut_ptr1{mut_page_pool.allocate<T>(mut_tls)};
+                    auto *const pmut_ptr1{mut_page_pool.allocate<T>({})};
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_page_pool.allocated(mut_tls) == expected2);
+                        bsl::ut_check(mut_page_pool.allocated({}) == expected2);
                     };
 
-                    auto *const pmut_ptr2{mut_page_pool.allocate<T>(mut_tls)};
+                    auto *const pmut_ptr2{mut_page_pool.allocate<T>({})};
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_page_pool.allocated(mut_tls) == expected3);
+                        bsl::ut_check(mut_page_pool.allocated({}) == expected3);
                     };
 
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        mut_page_pool.deallocate(mut_tls, pmut_ptr0);
-                        mut_page_pool.deallocate(mut_tls, pmut_ptr1);
-                        mut_page_pool.deallocate(mut_tls, pmut_ptr2);
+                        mut_page_pool.deallocate({}, pmut_ptr0);
+                        mut_page_pool.deallocate({}, pmut_ptr1);
+                        mut_page_pool.deallocate({}, pmut_ptr2);
                     };
                 };
             };
@@ -186,32 +219,31 @@ namespace lib
         bsl::ut_scenario{"remaining"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 basic_page_pool_t<tls_t> mut_page_pool{};
-                tls_t mut_tls{};
                 auto const expected{(0_umx * HYPERVISOR_PAGE_SIZE).checked()};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_page_pool.remaining(mut_tls) == expected);
+                        bsl::ut_check(mut_page_pool.remaining({}) == expected);
                     };
 
-                    auto *const pmut_ptr0{mut_page_pool.allocate<T>(mut_tls)};
+                    auto *const pmut_ptr0{mut_page_pool.allocate<T>({})};
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_page_pool.remaining(mut_tls) == expected);
+                        bsl::ut_check(mut_page_pool.remaining({}) == expected);
                     };
 
-                    auto *const pmut_ptr1{mut_page_pool.allocate<T>(mut_tls)};
+                    auto *const pmut_ptr1{mut_page_pool.allocate<T>({})};
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_page_pool.remaining(mut_tls) == expected);
+                        bsl::ut_check(mut_page_pool.remaining({}) == expected);
                     };
 
-                    auto *const pmut_ptr2{mut_page_pool.allocate<T>(mut_tls)};
+                    auto *const pmut_ptr2{mut_page_pool.allocate<T>({})};
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_page_pool.remaining(mut_tls) == expected);
+                        bsl::ut_check(mut_page_pool.remaining({}) == expected);
                     };
 
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        mut_page_pool.deallocate(mut_tls, pmut_ptr0);
-                        mut_page_pool.deallocate(mut_tls, pmut_ptr1);
-                        mut_page_pool.deallocate(mut_tls, pmut_ptr2);
+                        mut_page_pool.deallocate({}, pmut_ptr0);
+                        mut_page_pool.deallocate({}, pmut_ptr1);
+                        mut_page_pool.deallocate({}, pmut_ptr2);
                     };
                 };
             };
@@ -220,16 +252,15 @@ namespace lib
         bsl::ut_scenario{"virt_to_phys/phys_to_virt"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 basic_page_pool_t<tls_t> mut_page_pool{};
-                tls_t mut_tls{};
                 bsl::ut_when{} = [&]() noexcept {
-                    auto const *const virt{mut_page_pool.allocate<T>(mut_tls)};
+                    auto const *const virt{mut_page_pool.allocate<T>({})};
                     auto const phys{mut_page_pool.virt_to_phys(virt)};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(mut_page_pool.phys_to_virt<T>(phys) == virt);
                     };
 
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        mut_page_pool.deallocate(mut_tls, virt);
+                        mut_page_pool.deallocate({}, virt);
                     };
                 };
             };
@@ -238,9 +269,8 @@ namespace lib
         bsl::ut_scenario{"dump"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
                 basic_page_pool_t<tls_t> mut_page_pool{};
-                tls_t mut_tls{};
                 bsl::ut_then{} = [&]() noexcept {
-                    mut_page_pool.dump(mut_tls);
+                    mut_page_pool.dump({});
                 };
             };
         };
@@ -262,11 +292,25 @@ main() noexcept -> bsl::exit_code
 {
     bsl::enable_color();
 
+    static_assert(lib::tests<helpers::l3t_t>() == bsl::ut_success());
+    static_assert(lib::tests<helpers::l2t_t>() == bsl::ut_success());
+    static_assert(lib::tests<helpers::l1t_t>() == bsl::ut_success());
+    static_assert(lib::tests<helpers::l0t_t>() == bsl::ut_success());
     static_assert(lib::tests<lib::basic_page_4k_t>() == bsl::ut_success());
     static_assert(lib::tests<lib::basic_page_pool_node_t>() == bsl::ut_success());
+    static_assert(lib::tests<mk::ext_tcb_t>() == bsl::ut_success());
+    static_assert(lib::tests<mk::vmcb_t>() == bsl::ut_success());
+    static_assert(lib::tests<mk::vmcs_t>() == bsl::ut_success());
 
+    bsl::discard(lib::tests<helpers::l3t_t>());
+    bsl::discard(lib::tests<helpers::l2t_t>());
+    bsl::discard(lib::tests<helpers::l1t_t>());
+    bsl::discard(lib::tests<helpers::l0t_t>());
     bsl::discard(lib::tests<lib::basic_page_4k_t>());
     bsl::discard(lib::tests<lib::basic_page_pool_node_t>());
+    bsl::discard(lib::tests<mk::ext_tcb_t>());
+    bsl::discard(lib::tests<mk::vmcb_t>());
+    bsl::discard(lib::tests<mk::vmcs_t>());
 
     return bsl::ut_success();
 }

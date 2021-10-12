@@ -28,8 +28,6 @@
 #define EFI_TIME_H
 
 /**
- * @struct EFI_TIME
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_TIME struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

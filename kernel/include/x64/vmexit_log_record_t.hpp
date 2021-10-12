@@ -29,8 +29,6 @@
 
 namespace mk
 {
-    /// @struct mk::vmexit_log_record_t
-    ///
     /// <!-- description -->
     ///   @brief Stores information about each VMExit
     ///

@@ -25,9 +25,12 @@
 #ifndef DISPATCH_SYSCALL_BF_VP_OP_HPP
 #define DISPATCH_SYSCALL_BF_VP_OP_HPP
 
+#include "dispatch_syscall_helpers.hpp"
+
 #include <bf_constants.hpp>
-#include <ext_t.hpp>
+#include <bf_types.hpp>
 #include <tls_t.hpp>
+#include <vm_pool_t.hpp>
 #include <vp_pool_t.hpp>
 #include <vs_pool_t.hpp>
 

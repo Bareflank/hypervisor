@@ -50,8 +50,6 @@
 
 namespace example
 {
-    /// @class example::nested_page_table_t
-    ///
     /// <!-- description -->
     ///   @brief Implements the nested pages tables used by the extension
     ///     for mapping guest physical memory.

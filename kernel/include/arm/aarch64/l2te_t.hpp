@@ -31,8 +31,6 @@
 
 namespace mk
 {
-    /// @struct mk::l2te_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the layout of a level-2 table entry (L2TE).
     ///

@@ -32,8 +32,6 @@
 #pragma pack(push, 1)
 
 /**
- * @struct l0te_t
- *
  * <!-- description -->
  *   @brief Defines the layout of a level-0 table entry (L0TE).
  */

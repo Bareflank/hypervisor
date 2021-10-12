@@ -43,8 +43,6 @@ namespace loader
     /// @brief defines the type used for passing the ext ELF files
     using ext_elf_files_type = bsl::array<elf_file_type, HYPERVISOR_MAX_EXTENSIONS.get()>;
 
-    /// @struct loader::start_vmm_args_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the information that a userspace application needs to
     ///     provide to start the VMM.

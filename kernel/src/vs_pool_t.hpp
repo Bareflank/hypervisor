@@ -25,29 +25,29 @@
 #ifndef VS_POOL_T_HPP
 #define VS_POOL_T_HPP
 
-#include "lock_guard_t.hpp"
-#include "spinlock_t.hpp"
-
 #include <bf_constants.hpp>
 #include <bf_reg_t.hpp>
 #include <intrinsic_t.hpp>
+#include <lock_guard_t.hpp>
 #include <page_pool_t.hpp>
+#include <spinlock_t.hpp>
+#include <state_save_t.hpp>
 #include <tls_t.hpp>
 #include <vmexit_log_t.hpp>
 #include <vs_t.hpp>
 
 #include <bsl/array.hpp>
+#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
-#include <bsl/finally.hpp>
+#include <bsl/expects.hpp>
+#include <bsl/safe_idx.hpp>
+#include <bsl/safe_integral.hpp>
+#include <bsl/touch.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
 {
-    class vs_pool_t;
-
-    /// @class mk::vs_pool_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the microkernel's vs_pool_t
     ///
@@ -269,17 +269,15 @@ namespace mk
         ///   @param mut_intrinsic the intrinsic_t to use
         ///   @param ppid the ID of the PP to migrate to
         ///   @param vsid the ID of the vs_t to migrate
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] constexpr auto
+        constexpr void
         migrate(
             tls_t &mut_tls,
             intrinsic_t &mut_intrinsic,
             bsl::safe_u16 const &ppid,
-            bsl::safe_u16 const &vsid) noexcept -> bsl::errc_type
+            bsl::safe_u16 const &vsid) noexcept
         {
-            return this->get_vs(vsid)->migrate(mut_tls, mut_intrinsic, ppid);
+            this->get_vs(vsid)->migrate(mut_tls, mut_intrinsic, ppid);
         }
 
         /// <!-- description -->
@@ -319,6 +317,62 @@ namespace mk
         assigned_pp(bsl::safe_u16 const &vsid) const noexcept -> bsl::safe_u16
         {
             return this->get_vs(vsid)->assigned_pp();
+        }
+
+        /// <!-- description -->
+        ///   @brief If the requested VM is assigned to a vs_t in the pool,
+        ///     the ID of the first vs_t found is returned. Otherwise, this
+        ///     function will return bsl::safe_u16::failure()
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param vmid the ID fo the VM to query
+        ///   @return If the requested VM is assigned to a vs_t in the pool,
+        ///     the ID of the first vs_t found is returned. Otherwise, this
+        ///     function will return bsl::safe_u16::failure()
+        ///
+        [[nodiscard]] constexpr auto
+        vs_assigned_to_vm(bsl::safe_u16 const &vmid) const noexcept -> bsl::safe_u16
+        {
+            bsl::expects(vmid.is_valid_and_checked());
+            bsl::expects(vmid != syscall::BF_INVALID_ID);
+
+            for (auto const &vs : m_pool) {
+                if (vs.assigned_vm() == vmid) {
+                    return vs.id();
+                }
+
+                bsl::touch();
+            }
+
+            return bsl::safe_u16::failure();
+        }
+
+        /// <!-- description -->
+        ///   @brief If the requested PP is assigned to a vs_t in the pool,
+        ///     the ID of the first vs_t found is returned. Otherwise, this
+        ///     function will return bsl::safe_u16::failure()
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @param ppid the ID fo the PP to query
+        ///   @return If the requested PP is assigned to a vs_t in the pool,
+        ///     the ID of the first vs_t found is returned. Otherwise, this
+        ///     function will return bsl::safe_u16::failure()
+        ///
+        [[nodiscard]] constexpr auto
+        vs_assigned_to_pp(bsl::safe_u16 const &ppid) const noexcept -> bsl::safe_u16
+        {
+            bsl::expects(ppid.is_valid_and_checked());
+            bsl::expects(ppid != syscall::BF_INVALID_ID);
+
+            for (auto const &vs : m_pool) {
+                if (vs.assigned_pp() == ppid) {
+                    return vs.id();
+                }
+
+                bsl::touch();
+            }
+
+            return bsl::safe_u16::failure();
         }
 
         /// <!-- description -->
@@ -365,7 +419,7 @@ namespace mk
             loader::state_save_t const *const state,
             bsl::safe_u16 const &vsid) noexcept
         {
-            return this->get_vs(vsid)->state_save_to_vs(mut_tls, mut_intrinsic, state);
+            this->get_vs(vsid)->state_save_to_vs(mut_tls, mut_intrinsic, state);
         }
 
         /// <!-- description -->
@@ -384,7 +438,7 @@ namespace mk
             loader::state_save_t *const pmut_state,
             bsl::safe_u16 const &vsid) const noexcept
         {
-            return this->get_vs(vsid)->vs_to_state_save(mut_tls, intrinsic, pmut_state);
+            this->get_vs(vsid)->vs_to_state_save(mut_tls, intrinsic, pmut_state);
         }
 
         /// <!-- description -->
@@ -476,14 +530,11 @@ namespace mk
         ///   @param mut_tls the current TLS block
         ///   @param intrinsic the intrinsic_t to use
         ///   @param vsid the ID of the vs_t to clear
-        ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-        ///     and friends otherwise
         ///
-        [[nodiscard]] constexpr auto
+        constexpr void
         clear(tls_t &mut_tls, intrinsic_t const &intrinsic, bsl::safe_u16 const &vsid) noexcept
-            -> bsl::errc_type
         {
-            return this->get_vs(vsid)->clear(mut_tls, intrinsic);
+            this->get_vs(vsid)->clear(mut_tls, intrinsic);
         }
 
         /// <!-- description -->

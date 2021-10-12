@@ -27,6 +27,7 @@
 
 #include <debug_ring_t.hpp>
 
+#include <bsl/carray.hpp>
 #include <bsl/char_type.hpp>
 #include <bsl/cstdint.hpp>
 #include <bsl/cstr_type.hpp>
@@ -34,36 +35,23 @@
 
 namespace mk
 {
-    extern "C"
-    {
-        /// @brief stores a pointer to the debug ring provided by the loader
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-        extern loader::debug_ring_t *g_pmut_mut_debug_ring;
-    }
-
     /// <!-- description -->
     ///   @brief Outputs a character to the serial port.
     ///
     /// <!-- inputs/outputs -->
+    ///   @param mut_ring the debug ring to output to
     ///   @param c the character to output
     ///
-    extern "C" constexpr void
-    debug_ring_write(bsl::char_type const c) noexcept
+    constexpr void
+    debug_ring_write(loader::debug_ring_t &mut_ring, bsl::char_type const c) noexcept
     {
-        bsl::uintmx mut_epos{g_pmut_mut_debug_ring->epos};
-        bsl::uintmx mut_spos{g_pmut_mut_debug_ring->spos};
+        bsl::uintmx mut_epos{mut_ring.epos};
+        bsl::uintmx mut_spos{mut_ring.spos};
 
-        if (!(g_pmut_mut_debug_ring->buf.size() > mut_epos)) {
-            mut_epos = {};
-        }
-        else {
-            bsl::touch();
-        }
-
-        *g_pmut_mut_debug_ring->buf.at_if(mut_epos) = c;
+        *mut_ring.buf.at_if(mut_epos) = c;
         ++mut_epos;
 
-        if (!(g_pmut_mut_debug_ring->buf.size() > mut_epos)) {
+        if (mut_epos >= mut_ring.buf.size()) {
             mut_epos = {};
         }
         else {
@@ -73,7 +61,7 @@ namespace mk
         if (mut_epos == mut_spos) {
             ++mut_spos;
 
-            if (!(g_pmut_mut_debug_ring->buf.size() > mut_spos)) {
+            if (mut_spos >= mut_ring.buf.size()) {
                 mut_spos = {};
             }
             else {
@@ -84,22 +72,30 @@ namespace mk
             bsl::touch();
         }
 
-        g_pmut_mut_debug_ring->epos = mut_epos;
-        g_pmut_mut_debug_ring->spos = mut_spos;
+        mut_ring.epos = mut_epos;
+        mut_ring.spos = mut_spos;
     }
 
     /// <!-- description -->
     ///   @brief Outputs a string to the serial port.
     ///
     /// <!-- inputs/outputs -->
+    ///   @param mut_ring the debug ring to output to
     ///   @param str the string to output
+    ///   @param len the total number of bytes to output
     ///
     constexpr void
-    debug_ring_write(bsl::cstr_type const str) noexcept
+    debug_ring_write(
+        loader::debug_ring_t &mut_ring, bsl::cstr_type const str, bsl::uintmx const len) noexcept
     {
         // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-        for (bsl::uintmx mut_i{}; '\0' != str[mut_i]; ++mut_i) {
-            debug_ring_write(str[mut_i]);
+        for (bsl::uintmx mut_i{}; mut_i < len; ++mut_i) {
+            bsl::char_type const c{str[mut_i]};
+            if ('\0' == c) {
+                return;
+            }
+
+            debug_ring_write(mut_ring, c);
         }
     }
 }

@@ -29,7 +29,6 @@
 #include <tls_t.hpp>
 
 #include <bsl/discard.hpp>
-#include <bsl/errc_type.hpp>
 
 namespace mk
 {

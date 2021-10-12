@@ -36,8 +36,6 @@
 #define LOADER_DUMP_VMM_CMD ((uint32_t)0xBF03)
 
 /**
- * @struct dump_vmm_args_t
- *
  * <!-- description -->
  *   @brief Defines the information that a userspace application needs to
  *     provide to dump the VMM.

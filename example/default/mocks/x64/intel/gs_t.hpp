@@ -32,8 +32,6 @@
 
 namespace example
 {
-    /// @class example::gs_t
-    ///
     /// <!-- description -->
     ///   @brief  Defines the extension's mocked version of gs_t, used for
     ///     unit testing. Specifically, this version is architecture specific.

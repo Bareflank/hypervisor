@@ -28,8 +28,6 @@
 #define EFI_SIMPLE_TEXT_INPUT_PROTOCOL_H
 
 /**
- * @struct EFI_SIMPLE_TEXT_INPUT_PROTOCOL
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_SIMPLE_TEXT_INPUT_PROTOCOL struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

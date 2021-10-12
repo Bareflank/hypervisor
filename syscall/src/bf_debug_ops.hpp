@@ -149,15 +149,16 @@ namespace syscall
     ///
     /// <!-- inputs/outputs -->
     ///   @param str The virtual address of a null terminated string to output
+    ///   @param len the total number of bytes to output
     ///
     constexpr void
-    bf_debug_op_write_str(bsl::cstr_type const str) noexcept
+    bf_debug_op_write_str(bsl::cstr_type const str, bsl::uintmx const len) noexcept
     {
         if (bsl::is_constant_evaluated()) {
             return;
         }
 
-        bf_debug_op_write_str_impl(str);
+        bf_debug_op_write_str_impl(str, len);
     }
 
     /// <!-- description -->

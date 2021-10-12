@@ -38,8 +38,6 @@
 
 namespace example
 {
-    /// @class example::vp_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the extension's notion of a VP
     ///

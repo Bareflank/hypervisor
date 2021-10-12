@@ -28,8 +28,13 @@
 #include "dispatch_syscall_helpers.hpp"
 
 #include <bf_constants.hpp>
+#include <bf_types.hpp>
+#include <ext_t.hpp>
 #include <return_to_mk.hpp>
 #include <tls_t.hpp>
+
+#include <bsl/errc_type.hpp>
+#include <bsl/safe_integral.hpp>
 
 namespace mk
 {

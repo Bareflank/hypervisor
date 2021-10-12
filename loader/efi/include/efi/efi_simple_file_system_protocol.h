@@ -64,8 +64,6 @@ typedef EFI_STATUS(EFIAPI *EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_OPEN_VOLUME)(
     IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *This, OUT EFI_FILE_PROTOCOL **Root);
 
 /**
- * @struct EFI_SIMPLE_FILE_SYSTEM_PROTOCOL
- *
  * <!-- description -->
  *   @brief Defines the layout of the EFI_SIMPLE_FILE_SYSTEM_PROTOCOL struct:
  *     https://uefi.org/sites/default/files/resources/UEFI_Spec_2_8_final.pdf

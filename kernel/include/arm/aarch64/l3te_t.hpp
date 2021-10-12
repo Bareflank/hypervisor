@@ -31,8 +31,6 @@
 
 namespace mk
 {
-    /// @struct mk::l3te_t
-    ///
     /// <!-- description -->
     ///   @brief Defines the layout of a level-3 table entry (L3TE).
     ///

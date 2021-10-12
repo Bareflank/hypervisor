@@ -31,17 +31,17 @@
 #include <tls_t.hpp>
 
 #include <bsl/convert.hpp>
+#include <bsl/cstring.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
+#include <bsl/ensures.hpp>
+#include <bsl/expects.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/span.hpp>
-#include <bsl/touch.hpp>
 #include <bsl/unlikely.hpp>
 
 namespace mk
 {
-    /// @class mk::huge_pool_t
-    ///
     /// <!-- description -->
     ///   @brief The huge pool provides access to physically contiguous
     ///     memory. The amount of memory that is available is really, really
@@ -154,14 +154,14 @@ namespace mk
         ///   @brief Allocates memory from the huge pool.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param pages the total number of pages to allocate.
         ///   @return Returns bsl::span containing the allocated memory
         ///
         [[nodiscard]] constexpr auto
-        allocate(tls_t &mut_tls, bsl::safe_umx const &pages) noexcept -> bsl::span<page_4k_t>
+        allocate(tls_t const &tls, bsl::safe_umx const &pages) noexcept -> bsl::span<page_4k_t>
         {
-            lock_guard_t mut_lock{mut_tls, m_lock};
+            lock_guard_t mut_lock{tls, m_lock};
 
             bsl::expects(pages.is_valid_and_checked());
             bsl::expects(pages.is_pos());
@@ -189,13 +189,13 @@ namespace mk
         ///   @brief Not supported
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @param buf the bsl::span containing the memory to deallocate
         ///
         constexpr void
-        deallocate(tls_t &mut_tls, bsl::span<page_4k_t> const &buf) noexcept
+        deallocate(tls_t const &tls, bsl::span<page_4k_t> const &buf) noexcept
         {
-            lock_guard_t mut_lock{mut_tls, m_lock};
+            lock_guard_t mut_lock{tls, m_lock};
             bsl::discard(buf);
 
             /// NOTE:
@@ -238,13 +238,13 @@ namespace mk
         ///   @brief Returns the number of bytes allocated.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @return Returns the number of bytes allocated.
         ///
         [[nodiscard]] constexpr auto
-        allocated(tls_t &mut_tls) const noexcept -> bsl::safe_umx
+        allocated(tls_t const &tls) const noexcept -> bsl::safe_umx
         {
-            lock_guard_t mut_lock{mut_tls, m_lock};
+            lock_guard_t mut_lock{tls, m_lock};
             return this->allocated();
         }
 
@@ -252,13 +252,13 @@ namespace mk
         ///   @brief Returns this->size() - this->allocated().
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///   @return Returns this->size() - this->allocated().
         ///
         [[nodiscard]] constexpr auto
-        remaining(tls_t &mut_tls) const noexcept -> bsl::safe_umx
+        remaining(tls_t const &tls) const noexcept -> bsl::safe_umx
         {
-            lock_guard_t mut_lock{mut_tls, m_lock};
+            lock_guard_t mut_lock{tls, m_lock};
             return this->remaining();
         }
 
@@ -298,12 +298,12 @@ namespace mk
         ///   @brief Dumps the page_pool_t
         ///
         /// <!-- inputs/outputs -->
-        ///   @param mut_tls the current TLS block
+        ///   @param tls the current TLS block
         ///
         constexpr void
-        dump(tls_t &mut_tls) const noexcept
+        dump(tls_t const &tls) const noexcept
         {
-            lock_guard_t mut_lock{mut_tls, m_lock};
+            lock_guard_t mut_lock{tls, m_lock};
 
             constexpr auto kb{1024_umx};
             constexpr auto mb{kb * kb};

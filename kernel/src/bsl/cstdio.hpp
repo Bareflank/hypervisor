@@ -37,6 +37,13 @@
 
 namespace bsl
 {
+    extern "C"
+    {
+        /// @brief stores a pointer to the debug ring provided by the loader
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+        extern loader::debug_ring_t *g_pmut_mut_debug_ring;
+    }
+
     /// <!-- description -->
     ///   @brief Output a character to stdout
     ///
@@ -50,7 +57,7 @@ namespace bsl
             return;
         }
 
-        mk::debug_ring_write(c);
+        mk::debug_ring_write(*g_pmut_mut_debug_ring, c);
         mk::serial_write_c(c);
     }
 
@@ -59,16 +66,17 @@ namespace bsl
     ///
     /// <!-- inputs/outputs -->
     ///   @param str the string to output
+    ///   @param len the total number of bytes to output
     ///
     constexpr void
-    stdio_out_cstr(bsl::cstr_type const str) noexcept
+    stdio_out_cstr(bsl::cstr_type const str, bsl::uintmx const len) noexcept
     {
         if (bsl::is_constant_evaluated()) {
             return;
         }
 
-        mk::debug_ring_write(str);
-        mk::serial_write(str);
+        mk::debug_ring_write(*g_pmut_mut_debug_ring, str, len);
+        mk::serial_write(str, len);
     }
 }
 

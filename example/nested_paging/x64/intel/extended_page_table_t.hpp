@@ -50,8 +50,6 @@
 
 namespace example
 {
-    /// @class example::extended_page_table_t
-    ///
     /// <!-- description -->
     ///   @brief Implements the extended pages tables used by the extension
     ///     for mapping guest physical memory.
