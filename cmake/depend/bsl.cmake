@@ -19,10 +19,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+set(GIT_TAG         4215efc76ff0997a44f39a16f6f84b487cef5bf6)
+
 FetchContent_Declare(
     bsl
     GIT_REPOSITORY  https://github.com/bareflank/bsl.git
-    GIT_TAG         4215efc76ff0997a44f39a16f6f84b487cef5bf6
+    GIT_TAG         ${GIT_TAG}
 )
 
 FetchContent_GetProperties(bsl)
@@ -33,3 +35,6 @@ if(NOT bsl_POPULATED)
     FetchContent_Populate(bsl)
     add_subdirectory(${bsl_SOURCE_DIR} ${bsl_BINARY_DIR})
 endif()
+
+include(${bsl_SOURCE_DIR}/cmake/function/bf_check_dependency.cmake)
+bf_check_dependency(bsl ${GIT_TAG})
