@@ -30,18 +30,29 @@
 #include <mutable_span_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function gets the addr of the microkernel's page pool=
- *
- * <!-- inputs/outputs -->
- *   @param page_pool a pointer to a mutable_span_t that stores the page pool
- *   @param base_virt provide the base virtual address that the page pool
- *     was mapped to.
- *   @param addr where to store the resulting addr of the page pool
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t get_mk_page_pool_addr(
-    struct mutable_span_t const *const page_pool, uint64_t const base_virt, uint8_t **const addr);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function gets the addr of the microkernel's page pool=
+     *
+     * <!-- inputs/outputs -->
+     *   @param page_pool a pointer to a mutable_span_t that stores the page pool
+     *   @param base_virt provide the base virtual address that the page pool
+     *     was mapped to.
+     *   @param pmut_addr where to store the resulting addr of the page pool
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t get_mk_page_pool_addr(
+        struct mutable_span_t const *const page_pool,
+        uint64_t const base_virt,
+        uint8_t **const pmut_addr) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

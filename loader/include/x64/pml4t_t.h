@@ -31,23 +31,32 @@
 #include <pml4te_t.h>
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
 /** @brief defines total number of entries in the PML4T */
 #define LOADER_NUM_PML4T_ENTRIES ((uint64_t)512)
 
-/**
- * <!-- description -->
- *   @brief Defines the layout of a page-map level-4 table (pml4).
- */
-struct pml4t_t
-{
-    /** @brief stores the entries for this page table */
-    struct pml4te_t entires[LOADER_NUM_PML4T_ENTRIES];
-    /** @brief stores pointers to child tables */
-    struct pdpt_t *tables[LOADER_NUM_PML4T_ENTRIES];
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the layout of a page-map level-4 table (pml4).
+     */
+    struct pml4t_t
+    {
+        /** @brief stores the entries for this page table */
+        struct pml4te_t entires[LOADER_NUM_PML4T_ENTRIES];
+        /** @brief stores pointers to child tables */
+        struct pdpt_t *tables[LOADER_NUM_PML4T_ENTRIES];
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

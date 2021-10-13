@@ -24,11 +24,13 @@
  * SOFTWARE.
  */
 
+#include <alloc_and_copy_mk_elf_segments.h>
+#include <bfelf/bfelf_elf64_ehdr_t.h>
 #include <bfelf/bfelf_elf64_phdr_t.h>
-#include <constants.h>
 #include <debug.h>
 #include <elf_file_t.h>
 #include <elf_segment_t.h>
+#include <free_mk_elf_segments.h>
 #include <platform.h>
 #include <types.h>
 
@@ -40,41 +42,31 @@
  *
  * <!-- inputs/outputs -->
  *   @param phdr the program header describing the ELF segment to copy
- *   @param mk_elf_segment where to copy the ELF segment too
+ *   @param pmut_mk_elf_segment where to copy the ELF segment too
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
+NODISCARD static int64_t
 alloc_and_copy_mk_elf_segment(
-    struct bfelf_elf64_phdr_t const *const phdr, struct elf_segment_t *const mk_elf_segment)
+    struct bfelf_elf64_phdr_t const *const phdr,
+    struct elf_segment_t *const pmut_mk_elf_segment) NOEXCEPT
 {
     uint8_t const *const src_addr = phdr->p_offset;
     uint64_t const dst_size = phdr->p_memsz;
 
-    uint8_t *const dst_addr = (uint8_t *)platform_alloc(dst_size);
-    if (((void *)0) == dst_addr) {
+    uint8_t *const pmut_dst_addr = (uint8_t *)platform_alloc(dst_size);
+    if (NULLPTR == pmut_dst_addr) {
         bferror("platform_alloc failed");
-        goto platform_alloc_failed;
+        return LOADER_FAILURE;
     }
 
-    if (platform_memcpy(dst_addr, src_addr, phdr->p_filesz)) {
-        bferror("platform_memcpy failed");
-        goto platform_memcpy_failed;
-    }
+    platform_memcpy(pmut_dst_addr, src_addr, phdr->p_filesz);
 
-    mk_elf_segment->addr = dst_addr;
-    mk_elf_segment->size = dst_size;
-    mk_elf_segment->virt = phdr->p_vaddr;
-    mk_elf_segment->flags = phdr->p_flags;
+    pmut_mk_elf_segment->addr = pmut_dst_addr;
+    pmut_mk_elf_segment->size = dst_size;
+    pmut_mk_elf_segment->virt = phdr->p_vaddr;
+    pmut_mk_elf_segment->flags = phdr->p_flags;
 
     return LOADER_SUCCESS;
-
-platform_memcpy_failed:
-
-    platform_free(dst_addr, dst_size);
-platform_alloc_failed:
-
-    platform_memset(mk_elf_segment, 0, sizeof(struct elf_segment_t));
-    return LOADER_FAILURE;
 }
 
 /**
@@ -92,44 +84,45 @@ platform_alloc_failed:
  *
  * <!-- inputs/outputs -->
  *   @param mk_elf_file the ELF file to copy the segments from
- *   @param mk_elf_segments where to copy the ELF segments too
+ *   @param pmut_mk_elf_segments where to copy the ELF segments too
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
+NODISCARD int64_t
 alloc_and_copy_mk_elf_segments(
-    struct elf_file_t *const mk_elf_file, struct elf_segment_t *const mk_elf_segments)
+    struct elf_file_t const *const mk_elf_file,
+    struct elf_segment_t *const pmut_mk_elf_segments) NOEXCEPT
 {
-    uint64_t seg_i = ((uint64_t)0);
-    uint64_t hdr_i = ((uint64_t)0);
+    uint64_t mut_seg_i = ((uint64_t)0);
+    uint64_t mut_hdr_i = ((uint64_t)0);
 
     if (validate_elf64_ehdr(mk_elf_file->addr)) {
         bferror("validate_elf64_ehdr failed");
         goto validate_elf64_ehdr_failed;
     }
 
-    for (hdr_i = ((uint64_t)0); hdr_i < mk_elf_file->addr->e_phnum; ++hdr_i) {
-        struct bfelf_elf64_phdr_t const *const phdr = &mk_elf_file->addr->e_phdr[hdr_i];
+    for (mut_hdr_i = ((uint64_t)0); mut_hdr_i < (uint64_t)mk_elf_file->addr->e_phnum; ++mut_hdr_i) {
+        struct bfelf_elf64_phdr_t const *const phdr = &mk_elf_file->addr->e_phdr[mut_hdr_i];
 
         if (bfelf_pt_load != phdr->p_type) {
             continue;
         }
 
-        if (!(seg_i < HYPERVISOR_MAX_SEGMENTS)) {
+        if (!(mut_seg_i < HYPERVISOR_MAX_SEGMENTS)) {
             bferror("provided ELF file has too many PT_LOAD segments");
             goto segment_index_check_failed;
         }
 
-        if (alloc_and_copy_mk_elf_segment(phdr, &mk_elf_segments[seg_i])) {
+        if (alloc_and_copy_mk_elf_segment(phdr, &pmut_mk_elf_segments[mut_seg_i])) {
             bferror("alloc_and_copy_mk_elf_segment failed");
             goto alloc_and_copy_mk_elf_segment_failed;
         }
 
-        ++seg_i;
+        ++mut_seg_i;
     }
 
-    for (; seg_i < HYPERVISOR_MAX_SEGMENTS; ++seg_i) {
-        struct elf_segment_t *const segment = &mk_elf_segments[seg_i];
-        platform_memset(segment, 0, sizeof(struct elf_segment_t));
+    for (; mut_seg_i < HYPERVISOR_MAX_SEGMENTS; ++mut_seg_i) {
+        struct elf_segment_t *const pmut_segment = &pmut_mk_elf_segments[mut_seg_i];
+        platform_memset(pmut_segment, ((uint8_t)0), sizeof(struct elf_segment_t));
     }
 
     return LOADER_SUCCESS;
@@ -138,11 +131,6 @@ alloc_and_copy_mk_elf_segment_failed:
 segment_index_check_failed:
 validate_elf64_ehdr_failed:
 
-    for (seg_i = ((uint64_t)0); seg_i < HYPERVISOR_MAX_SEGMENTS; ++seg_i) {
-        struct elf_segment_t *const segment = &mk_elf_segments[seg_i];
-        platform_free(segment->addr, segment->size);
-        platform_memset(segment, 0, sizeof(struct elf_segment_t));
-    }
-
+    free_mk_elf_segments(pmut_mk_elf_segments);
     return LOADER_FAILURE;
 }

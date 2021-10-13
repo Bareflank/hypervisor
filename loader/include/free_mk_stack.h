@@ -28,15 +28,25 @@
 #define FREE_MK_STACK_H
 
 #include <span_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Releases a previously allocated span_t that was allocated
- *     using the alloc_mk_stack function.
- *
- * <!-- inputs/outputs -->
- *   @param stack the span_t to free.
- */
-void free_mk_stack(struct span_t *const stack);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Releases a previously allocated span_t that was allocated
+     *     using the alloc_mk_stack function.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_stack the span_t to free.
+     */
+    void free_mk_stack(struct span_t *const pmut_stack) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

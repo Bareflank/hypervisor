@@ -29,26 +29,35 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
-/**
- * <!-- description -->
- *   @brief Defines the address and size of an array. In addition, this also
- *     stores some information about the ELF segment itself.
- */
-struct elf_segment_t
-{
-    /** @brief stores a pointer to the array */
-    uint8_t const *addr;
-    /** @brief stores the size in bytes of the array */
-    uint64_t size;
+    /**
+     * <!-- description -->
+     *   @brief Defines the address and size of an array. In addition, this also
+     *     stores some information about the ELF segment itself.
+     */
+    struct elf_segment_t
+    {
+        /** @brief stores a pointer to the array */
+        uint8_t const *addr;
+        /** @brief stores the size in bytes of the array */
+        uint64_t size;
 
-    /** @brief stores virtual address of the segment from the MK's POV */
-    uint64_t virt;
-    /** @brief stores the segment's flags (e.g., access rights) */
-    uint32_t flags;
-};
+        /** @brief stores virtual address of the segment from the MK's POV */
+        uint64_t virt;
+        /** @brief stores the segment's flags (e.g., access rights) */
+        uint32_t flags;
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

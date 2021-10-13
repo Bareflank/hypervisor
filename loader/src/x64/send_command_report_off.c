@@ -33,14 +33,14 @@
  *   @brief Tells the hypervisor to report off
  */
 void
-send_command_report_off(void)
+send_command_report_off(void) NOEXCEPT
 {
-    uint32_t eax;
-    uint32_t ebx;
-    uint32_t ecx;
-    uint32_t edx;
+    uint32_t mut_eax;
+    uint32_t mut_ebx;
+    uint32_t mut_ecx;
+    uint32_t mut_edx;
 
-    eax = CPUID_COMMAND_EAX;
-    ecx = CPUID_COMMAND_ECX_REPORT_OFF;
-    intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
+    mut_eax = CPUID_COMMAND_EAX;
+    mut_ecx = CPUID_COMMAND_ECX_REPORT_OFF;
+    intrinsic_cpuid(&mut_eax, &mut_ebx, &mut_ecx, &mut_edx);
 }

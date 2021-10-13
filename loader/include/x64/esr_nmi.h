@@ -27,10 +27,21 @@
 #ifndef ESR_NMI_H
 #define ESR_NMI_H
 
-/**
- * <!-- description -->
- *   @brief Defines the exception service routine for NMIs
- */
-void esr_nmi(void);
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Defines the exception service routine for NMIs
+     */
+    void esr_nmi(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

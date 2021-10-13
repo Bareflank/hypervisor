@@ -29,14 +29,23 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Turns VT-x on
- *
- * <!-- inputs/outputs -->
- *   @param phys a pointer to the physical address of the VMXON region
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t intrinsic_vmxon(void *const phys);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Turns VT-x on
+     *
+     * <!-- inputs/outputs -->
+     *   @param phys a pointer to the physical address of the VMXON region
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t intrinsic_vmxon(void *const phys) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

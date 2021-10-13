@@ -30,20 +30,29 @@
 #include <state_save_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief The function's main purpose is to save state from a root VP.
- *     The root VP is the thing executing the root VM's operating system
- *     (i.e., the kernel running this driver) for a specific processor.
- *     When the microkernel is started, it will overwrite this state, and
- *     then it will eventually take the state saved by this function and
- *     use it to run the OS inside a VM, in effect, demoting the currently
- *     running OS.
- *
- * <!-- inputs/outputs -->
- *   @param state where to save the newly allocated state to
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t alloc_and_copy_root_vp_state(struct state_save_t **const state);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief The function's main purpose is to save state from a root VP.
+     *     The root VP is the thing executing the root VM's operating system
+     *     (i.e., the kernel running this driver) for a specific processor.
+     *     When the microkernel is started, it will overwrite this state, and
+     *     then it will eventually take the state saved by this function and
+     *     use it to run the OS inside a VM, in effect, demoting the currently
+     *     running OS.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_state where to save the newly allocated state to
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t alloc_and_copy_root_vp_state(struct state_save_t **const pmut_state) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

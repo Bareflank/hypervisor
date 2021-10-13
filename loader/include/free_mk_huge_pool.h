@@ -28,15 +28,25 @@
 #define FREE_MK_HUGE_POOL_H
 
 #include <mutable_span_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Releases a previously allocated mutable_span_t that was allocated
- *     using the alloc_mk_huge_pool function.
- *
- * <!-- inputs/outputs -->
- *   @param huge_pool the mutable_span_t to free.
- */
-void free_mk_huge_pool(struct mutable_span_t *const huge_pool);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Releases a previously allocated mutable_span_t that was allocated
+     *     using the alloc_mk_huge_pool function.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_huge_pool the mutable_span_t to free.
+     */
+    void free_mk_huge_pool(struct mutable_span_t *const pmut_huge_pool) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

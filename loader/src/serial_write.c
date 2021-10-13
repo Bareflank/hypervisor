@@ -36,11 +36,11 @@
  *   @param str the string to write to the serial.
  */
 void
-serial_write(char const *const str)
+serial_write(char const *const str) NOEXCEPT
 {
-    uint64_t i;
+    uint64_t mut_i;
 
-    for (i = 0; str[i] != '\0'; ++i) {
-        serial_write_c(str[i]);
+    for (mut_i = ((uint64_t)0); '\0' != str[mut_i]; ++mut_i) {
+        serial_write_c(str[mut_i]);
     }
 }

@@ -24,9 +24,10 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
+#include <dump_mk_elf_segments.h>
 #include <elf_segment_t.h>
+#include <platform.h>
 #include <types.h>
 
 /**
@@ -37,22 +38,21 @@
  *   @param segments the array of mk ELF segments to output
  */
 void
-dump_mk_elf_segments(struct elf_segment_t *const segments)
+dump_mk_elf_segments(struct elf_segment_t const *const segments) NOEXCEPT
 {
-    uint64_t i;
+    uint64_t mut_i;
+    platform_expects(NULLPTR != segments);
 
-    if (((void *)0) == segments) {
-        bferror("segments is NULL");
-        return;
-    }
-
-    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_SEGMENTS; ++i) {
-        if (((void *)0) != segments[i].addr) {
-            bfdebug_d32("mk elf segment", (uint32_t)i);
-            bfdebug_ptr(" - addr", segments[i].addr);
-            bfdebug_x64(" - size", segments[i].size);
-            bfdebug_x64(" - virt", segments[i].virt);
-            bfdebug_x32(" - flgs", segments[i].flags);
+    for (mut_i = ((uint64_t)0); mut_i < HYPERVISOR_MAX_SEGMENTS; ++mut_i) {
+        if (NULLPTR != segments[mut_i].addr) {
+            bfdebug_d32("mk elf segment", (uint32_t)mut_i);
+            bfdebug_ptr(" - addr", segments[mut_i].addr);
+            bfdebug_x64(" - size", segments[mut_i].size);
+            bfdebug_x64(" - virt", segments[mut_i].virt);
+            bfdebug_x32(" - flgs", segments[mut_i].flags);
+        }
+        else {
+            bf_touch();
         }
     }
 }

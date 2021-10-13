@@ -71,8 +71,8 @@
  *   @return Return 0 if running on an AMD processor, LOADER_FAILURE
  *     otherwise.
  */
-static inline int64_t
-check_for_amd(void)
+NODISCARD static inline int64_t
+check_for_amd(void) NOEXCEPT
 {
     uint32_t eax;
     uint32_t ebx;
@@ -108,8 +108,8 @@ check_for_amd(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success, LOADER_FAILURE otherwise.
  */
-static inline int64_t
-check_for_svm(void)
+NODISCARD static inline int64_t
+check_for_svm(void) NOEXCEPT
 {
     uint32_t eax;
     uint32_t ebx;
@@ -135,8 +135,8 @@ check_for_svm(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success, LOADER_FAILURE otherwise.
  */
-static inline int64_t
-check_for_svm_disabled(void)
+NODISCARD static inline int64_t
+check_for_svm_disabled(void) NOEXCEPT
 {
     uint64_t msr = intrinsic_rdmsr(MSR_VM_CR);
 
@@ -155,8 +155,8 @@ check_for_svm_disabled(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success, LOADER_FAILURE otherwise.
  */
-static inline int64_t
-check_the_configuration_of_efer(void)
+NODISCARD static inline int64_t
+check_the_configuration_of_efer(void) NOEXCEPT
 {
     uint64_t msr = intrinsic_rdmsr(MSR_EFER);
 
@@ -180,8 +180,8 @@ check_the_configuration_of_efer(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success, LOADER_FAILURE otherwise.
  */
-static inline int64_t
-check_for_xsave(void)
+NODISCARD static inline int64_t
+check_for_xsave(void) NOEXCEPT
 {
     uint32_t eax;
     uint32_t ebx;
@@ -213,8 +213,8 @@ check_for_xsave(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t
-check_cpu_configuration(void)
+NODISCARD int64_t
+check_cpu_configuration(void) NOEXCEPT
 {
     if (check_for_amd()) {
         bferror("check_for_amd failed");

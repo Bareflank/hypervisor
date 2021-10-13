@@ -27,8 +27,8 @@
 #include <bfelf/bfelf_elf64_phdr_t.h>
 #include <debug.h>
 #include <map_4k_page.h>
-#include <platform.h>
 #include <root_page_table_t.h>
+#include <types.h>
 
 /**
  * <!-- description -->
@@ -44,15 +44,16 @@
  * <!-- inputs/outputs -->
  *   @param virt the virtual address to map phys to
  *   @param phys the physical address to map
- *   @param rpt the root page table to place the resulting map
+ *   @param pmut_rpt the root page table to place the resulting map
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_4k_page_rx(void const *const virt, uint64_t const phys, root_page_table_t *const rpt)
+NODISCARD int64_t
+map_4k_page_rx(
+    void const *const virt, uint64_t const phys, root_page_table_t *const pmut_rpt) NOEXCEPT
 {
     uint32_t const rw = bfelf_pf_r | bfelf_pf_x;
 
-    if (map_4k_page((uint64_t)virt, phys, rw, rpt)) {
+    if (map_4k_page((uint64_t)virt, phys, rw, pmut_rpt)) {
         bferror("map_4k_page failed");
         return LOADER_FAILURE;
     }

@@ -24,9 +24,7 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
-#include <flush_cache.h>
 #include <pdpt_t.h>
 #include <pdpte_t.h>
 #include <pdpto.h>
@@ -41,52 +39,46 @@
  *     this function will fail.
  *
  * <!-- inputs/outputs -->
- *   @param pdpt the pdpt to add the newly allocated pdt to
+ *   @param pmut_pdpt the pdpt to add the newly allocated pdt to
  *   @param virt the virtual address to get the PDPT offset from.
- *   @return a pointer to the newly allocated pdt on success, ((void *)0) otherwise.
+ *   @return a pointer to the newly allocated pdt on success, NULLPTR otherwise.
  */
-struct pdt_t *
-alloc_pdt(struct pdpt_t *const pdpt, uint64_t const virt)
+NODISCARD struct pdt_t *
+alloc_pdt(struct pdpt_t *const pmut_pdpt, uint64_t const virt) NOEXCEPT
 {
-    uint64_t i;
-    uint64_t phys;
-    struct pdt_t *pdt;
-    struct pdpte_t *pdpte;
+    uint64_t mut_phys = ((uint64_t)0);
+    struct pdt_t *pmut_mut_pdt = NULLPTR;
+    struct pdpte_t *pmut_mut_pdpte = NULLPTR;
 
-    pdpte = &pdpt->entires[pdpto(virt)];
-    if (pdpte->p != ((uint64_t)0)) {
+    pmut_mut_pdpte = &pmut_pdpt->entires[pdpto(virt)];
+    if (((uint64_t)0) != (uint64_t)pmut_mut_pdpte->p) {
         bferror_x64("pdt already present", virt);
-        return ((void *)0);
+        return NULLPTR;
     }
 
-    pdt = (struct pdt_t *)platform_alloc(sizeof(struct pdt_t));
-    if (((void *)0) == pdt) {
+    pmut_mut_pdt = (struct pdt_t *)platform_alloc(sizeof(struct pdt_t));
+    if (NULLPTR == pmut_mut_pdt) {
         bferror("platform_alloc failed");
         goto platform_alloc_pdt_failed;
     }
 
-    for (i = 0; i < LOADER_NUM_PDT_ENTRIES; ++i) {
-        flush_cache(&(pdt->entires[i]));
-    }
-
-    phys = platform_virt_to_phys(pdt);
-    if (((uint64_t)0) == phys) {
+    mut_phys = platform_virt_to_phys(pmut_mut_pdt);
+    if (((uint64_t)0) == mut_phys) {
         bferror("platform_virt_to_phys_pdt failed");
         goto platform_virt_to_phys_pdt_failed;
     }
 
-    pdpt->tables[pdpto(virt)] = pdt;
-    pdpte->phys = (phys >> HYPERVISOR_PAGE_SHIFT);
-    pdpte->p = ((uint64_t)1);
-    pdpte->rw = ((uint64_t)1);
+    pmut_pdpt->tables[pdpto(virt)] = pmut_mut_pdt;
+    pmut_mut_pdpte->phys = (mut_phys >> HYPERVISOR_PAGE_SHIFT);
+    pmut_mut_pdpte->p = ((uint64_t)1);
+    pmut_mut_pdpte->rw = ((uint64_t)1);
 
-    flush_cache(pdpte);
-    return pdt;
+    return pmut_mut_pdt;
 
 platform_virt_to_phys_pdt_failed:
 
-    platform_free(pdt, sizeof(struct pdt_t));
+    platform_free(pmut_mut_pdt, sizeof(struct pdt_t));
 platform_alloc_pdt_failed:
 
-    return ((void *)0);
+    return NULLPTR;
 }

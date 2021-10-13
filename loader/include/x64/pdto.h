@@ -29,24 +29,33 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /** @brief defines the size of the PDT offset */
 #define PDT_OFFSET_MASK ((uint64_t)0x1FF)
 /** @brief defines the bit location of the PDT offset */
 #define PDT_OFFSET_SHIFT ((uint64_t)21)
 
-/**
- * <!-- description -->
- *   @brief Returns the page-directory table (PDT) offset given a
- *     virtual address.
- *
- * <!-- inputs/outputs -->
- *   @param virt the virtual address to get the PDT offset from.
- *   @return the PDT offset from the virtual address
- */
-static inline uint64_t
-pdto(uint64_t const virt)
-{
-    return ((virt >> PDT_OFFSET_SHIFT) & PDT_OFFSET_MASK);
+    /**
+     * <!-- description -->
+     *   @brief Returns the page-directory table (PDT) offset given a
+     *     virtual address.
+     *
+     * <!-- inputs/outputs -->
+     *   @param virt the virtual address to get the PDT offset from.
+     *   @return the PDT offset from the virtual address
+     */
+    NODISCARD static inline uint64_t
+    pdto(uint64_t const virt) NOEXCEPT
+    {
+        return ((virt >> PDT_OFFSET_SHIFT) & PDT_OFFSET_MASK);
+    }
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif

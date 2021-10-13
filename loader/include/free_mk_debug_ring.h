@@ -28,15 +28,25 @@
 #define FREE_MK_DEBUG_RING_H
 
 #include <debug_ring_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Releases a previously allocated debug_ring_t that was allocated
- *     using the alloc_mk_debug_ring function.
- *
- * <!-- inputs/outputs -->
- *   @param debug_ring the debug_ring_t to free.
- */
-void free_mk_debug_ring(struct debug_ring_t **const debug_ring);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Releases a previously allocated debug_ring_t that was allocated
+     *     using the alloc_mk_debug_ring function.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_debug_ring the debug_ring_t to free.
+     */
+    void free_mk_debug_ring(struct debug_ring_t **const pmut_debug_ring) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

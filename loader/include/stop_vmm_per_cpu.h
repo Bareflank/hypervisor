@@ -29,17 +29,26 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function contains all of the code that is common between
- *     all archiectures and all platforms for stopping the VMM. This function
- *     will call platform and architecture specific functions as needed.
- *     Unlike stop_vmm, this function is called on each CPU.
- *
- * <!-- inputs/outputs -->
- *   @param cpu the id of the cpu to stop
- *   @return Returns 0 on success
- */
-int64_t stop_vmm_per_cpu(uint32_t const cpu);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function contains all of the code that is common between
+     *     all archiectures and all platforms for stopping the VMM. This function
+     *     will call platform and architecture specific functions as needed.
+     *     Unlike stop_vmm, this function is called on each CPU.
+     *
+     * <!-- inputs/outputs -->
+     *   @param cpu the id of the cpu to stop
+     *   @return Returns 0 on success
+     */
+    NODISCARD int64_t stop_vmm_per_cpu(uint32_t const cpu) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

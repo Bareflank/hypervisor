@@ -25,6 +25,8 @@
  */
 
 #include <debug.h>
+#include <dump_mk_root_page_table.h>
+#include <platform.h>
 #include <root_page_table_t.h>
 #include <types.h>
 
@@ -36,12 +38,9 @@
  *   @param rpt the mk root page table to output
  */
 void
-dump_mk_root_page_table(root_page_table_t *const rpt)
+dump_mk_root_page_table(root_page_table_t const *const rpt) NOEXCEPT
 {
-    if (((void *)0) == rpt) {
-        bferror("rpt is NULL");
-        return;
-    }
+    platform_expects(NULLPTR != rpt);
 
     bfdebug("mk root page table:");
     bfdebug_ptr(" - addr", rpt);

@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
+#include <alloc_mk_args.h>
 #include <debug.h>
 #include <mk_args_t.h>
 #include <platform.h>
@@ -36,14 +36,14 @@
  *     passed to the microkernel's _start function
  *
  * <!-- inputs/outputs -->
- *   @param args the mk_args_t to store the mk _start args
+ *   @param pmut_args the mk_args_t to store the mk _start args
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-alloc_mk_args(struct mk_args_t **const args)
+NODISCARD int64_t
+alloc_mk_args(struct mk_args_t **const pmut_args) NOEXCEPT
 {
-    *args = (struct mk_args_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (((void *)0) == *args) {
+    *pmut_args = (struct mk_args_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
+    if (NULLPTR == *pmut_args) {
         bferror("platform_alloc failed");
         return LOADER_FAILURE;
     }

@@ -63,15 +63,15 @@
  *   @param state where to save the newly set up state to
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
+NODISCARD int64_t
 alloc_and_copy_mk_state(
     root_page_table_t const *const rpt,
     struct span_t const *const mk_elf_file,
     struct span_t const *const mk_stack,
     uint64_t const mk_stack_virt,
-    struct state_save_t **const state)
+    struct state_save_t **const state) NOEXCEPT
 {
-    struct bfelf_elf64_ehdr_t const *ehdr = ((void *)0);
+    struct bfelf_elf64_ehdr_t const *ehdr = NULLPTR;
     if (get_elf64_ehdr(mk_elf_file->addr, &ehdr)) {
         bferror("get_elf64_ehdr failed");
         return LOADER_FAILURE;
@@ -82,7 +82,7 @@ alloc_and_copy_mk_state(
     /**************************************************************************/
 
     *state = (struct state_save_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (((void *)0) == *state) {
+    if (NULLPTR == *state) {
         bferror("platform_alloc failed");
         return LOADER_FAILURE;
     }

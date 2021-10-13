@@ -163,7 +163,7 @@ namespace lib
         [[nodiscard]] constexpr auto
         full() const noexcept -> bool
         {
-            auto next_head{m_head + bsl::safe_idx::magic_1()};
+            auto const next_head{m_head + bsl::safe_idx::magic_1()};
             if (next_head >= N) {
                 return m_tail.is_zero();
             }

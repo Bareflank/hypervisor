@@ -28,15 +28,25 @@
 #define FREE_MK_ARGS_H
 
 #include <mk_args_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Releases a previously allocated mk_args_t that was allocated
- *     using the alloc_mk_args function.
- *
- * <!-- inputs/outputs -->
- *   @param args the mk_args_t to free.
- */
-void free_mk_args(struct mk_args_t **const args);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Releases a previously allocated mk_args_t that was allocated
+     *     using the alloc_mk_args function.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_args the mk_args_t to free.
+     */
+    void free_mk_args(struct mk_args_t **const pmut_args) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

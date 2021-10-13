@@ -47,17 +47,17 @@ namespace mk
     {
         bsl::ut_scenario{"add"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                vmexit_log_t log{};
+                vmexit_log_t mut_log{};
                 constexpr auto loops{10_umx};
                 constexpr auto ppid0{0x0_u16};
                 constexpr auto ppid1{0x1_u16};
                 bsl::ut_then{} = [&]() noexcept {
                     for (bsl::safe_idx mut_i{}; mut_i < loops; ++mut_i) {
-                        log.add(ppid0, {});
+                        mut_log.add(ppid0, {});
                     }
 
                     for (bsl::safe_idx mut_i{}; mut_i < loops; ++mut_i) {
-                        log.add(ppid1, {});
+                        mut_log.add(ppid1, {});
                     }
                 };
             };
@@ -65,37 +65,37 @@ namespace mk
 
         bsl::ut_scenario{"dump"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                vmexit_log_t log{};
+                vmexit_log_t mut_log{};
                 constexpr auto loops{10_umx};
                 constexpr auto ppid0{0x0_u16};
                 constexpr auto ppid1{0x1_u16};
                 vmexit_log_record_t mut_rec{};
                 bsl::ut_then{} = [&]() noexcept {
-                    log.dump(ppid0);
-                    log.dump(ppid1);
+                    mut_log.dump(ppid0);
+                    mut_log.dump(ppid1);
 
                     for (bsl::safe_idx mut_i{}; mut_i < loops; ++mut_i) {
-                        log.add(ppid0, mut_rec);
+                        mut_log.add(ppid0, mut_rec);
                     }
 
-                    log.dump(ppid0);
-                    log.dump(ppid1);
+                    mut_log.dump(ppid0);
+                    mut_log.dump(ppid1);
 
                     mut_rec.rip = bsl::safe_u64::magic_1();
                     for (bsl::safe_idx mut_i{}; mut_i < loops; ++mut_i) {
-                        log.add(ppid1, mut_rec);
+                        mut_log.add(ppid1, mut_rec);
                     }
 
                     mut_rec.rax = bsl::safe_u64::magic_1();
-                    log.dump(ppid0);
-                    log.dump(ppid1);
+                    mut_log.dump(ppid0);
+                    mut_log.dump(ppid1);
 
                     for (bsl::safe_idx mut_i{}; mut_i < loops; ++mut_i) {
-                        log.add(ppid0, mut_rec);
+                        mut_log.add(ppid0, mut_rec);
                     }
 
-                    log.dump(ppid0);
-                    log.dump(ppid1);
+                    mut_log.dump(ppid0);
+                    mut_log.dump(ppid1);
                 };
             };
         };

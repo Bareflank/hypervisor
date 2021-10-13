@@ -29,12 +29,53 @@
 #include <arch_work_on_cpu.h>
 #include <constants.h>
 #include <debug.h>
+#include <debug_ring_t.h>
 #include <efi/efi_status.h>
 #include <efi/efi_system_table.h>
 #include <efi/efi_types.h>
-#include <g_mk_debug_ring.h>
+#include <g_pmut_mut_mk_debug_ring.h>
 #include <platform.h>
 #include <work_on_cpu_callback.h>
+
+/**
+ * <!-- description -->
+ *   @brief If test is false, a contract violation has occurred. This
+ *     should be used to assert preconditions that if not meet, would
+ *     result in undefined behavior. These should not be tested by a
+ *     unit test, meaning they are contract violations. These asserts
+ *     are simply there as a sanity check during a debug build.
+ *
+ * <!-- inputs/outputs -->
+ *   @param test the contract to check
+ */
+void
+platform_expects(int const test) NOEXCEPT
+{
+    if (0 == test) {
+        bferror("expects contract violation");
+        (void)g_st->BootServices->Stall(((UINTN)0xFFFFFFFFFFFFFFFF));
+    }
+}
+
+/**
+ * <!-- description -->
+ *   @brief If test is false, a contract violation has occurred. This
+ *     should be used to assert postconditions that if not meet, would
+ *     result in undefined behavior. These should not be tested by a
+ *     unit test, meaning they are contract violations. These asserts
+ *     are simply there as a sanity check during a debug build.
+ *
+ * <!-- inputs/outputs -->
+ *   @param test the contract to check
+ */
+void
+platform_ensures(int const test) NOEXCEPT
+{
+    if (0 == test) {
+        bferror("ensures contract violation");
+        (void)g_st->BootServices->Stall(((UINTN)0xFFFFFFFFFFFFFFFF));
+    }
+}
 
 /**
  * <!-- description -->
@@ -51,16 +92,13 @@
  *   @return Returns a pointer to the newly allocated memory on success.
  *     Returns a nullptr on failure.
  */
-void *
+NODISCARD void *
 platform_alloc(uint64_t size)
 {
     EFI_STATUS status = EFI_SUCCESS;
     EFI_PHYSICAL_ADDRESS ret = ((EFI_PHYSICAL_ADDRESS)0);
 
-    if (((uint64_t)0) == size) {
-        bferror("invalid number of bytes (i.e., size)");
-        return NULL;
-    }
+    platform_expects(((uint64_t)0) != size);
 
     if (((uint64_t)0) != (size & (HYPERVISOR_PAGE_SIZE - ((uint64_t)1)))) {
         size += HYPERVISOR_PAGE_SIZE;
@@ -93,7 +131,7 @@ platform_alloc(uint64_t size)
  *   @return Returns a pointer to the newly allocated memory on success.
  *     Returns a nullptr on failure.
  */
-void *
+NODISCARD void *
 platform_alloc_contiguous(uint64_t const size)
 {
     return platform_alloc(size);
@@ -114,14 +152,15 @@ platform_alloc_contiguous(uint64_t const size)
 void
 platform_free(void const *const ptr, uint64_t size)
 {
+    platform_expects(NULLPTR != ptr);
+    platform_expects(((uint64_t)0) != size);
+
     if (((uint64_t)0) != (size & (HYPERVISOR_PAGE_SIZE - ((uint64_t)1)))) {
         size += HYPERVISOR_PAGE_SIZE;
         size &= ~(HYPERVISOR_PAGE_SIZE - ((uint64_t)1));
     }
 
-    if (NULL != ptr) {
-        g_st->BootServices->FreePages((EFI_PHYSICAL_ADDRESS)ptr, size / HYPERVISOR_PAGE_SIZE);
-    }
+    g_st->BootServices->FreePages((EFI_PHYSICAL_ADDRESS)ptr, size / HYPERVISOR_PAGE_SIZE);
 }
 
 /**
@@ -152,9 +191,10 @@ platform_free_contiguous(void const *const ptr, uint64_t const size)
  *   @return Given a virtual address, this function returns the virtual
  *     address's physical address. Returns NULL if the conversion failed.
  */
-uintptr_t
+NODISCARD uintptr_t
 platform_virt_to_phys(void const *const virt)
 {
+    platform_expects(NULLPTR != virt);
     return (uintptr_t)virt;
 }
 
@@ -162,54 +202,40 @@ platform_virt_to_phys(void const *const virt)
  * <!-- description -->
  *   @brief Sets "num" bytes in the memory pointed to by "ptr" to "val".
  *     If the provided parameters are valid, returns 0, otherwise
- *     returns LOADER_FAILURE.
+ *     returns SHIM_FAILURE.
  *
  * <!-- inputs/outputs -->
- *   @param ptr a pointer to the memory to set
+ *   @param pmut_ptr a pointer to the memory to set
  *   @param val the value to set each byte to
- *   @param num the number of bytes in "ptr" to set to "val".
- *   @return If the provided parameters are valid, returns 0, otherwise
- *     returns LOADER_FAILURE.
+ *   @param num the number of bytes in "pmut_ptr" to set to "val".
  */
-int64_t
-platform_memset(void *const ptr, uint8_t const val, uint64_t const num)
+void
+platform_memset(void *const pmut_ptr, uint8_t const val, uint64_t const num) NOEXCEPT
 {
-    if (!ptr) {
-        bferror("invalid ptr");
-        return LOADER_FAILURE;
-    }
+    platform_expects(NULLPTR != pmut_ptr);
+    platform_expects(((uint64_t)0) != num);
 
-    g_st->BootServices->SetMem(ptr, num, val);
-    return LOADER_SUCCESS;
+    g_st->BootServices->SetMem(pmut_ptr, num, val);
 }
 
 /**
  * <!-- description -->
- *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     NULL, returns LOADER_FAILURE, otherwise returns 0.
+ *   @brief Copies "num" bytes from "src" to "pmut_dst". If "src" or "pmut_dst" are
+ *     NULLPTR, returns SHIM_FAILURE, otherwise returns 0.
  *
  * <!-- inputs/outputs -->
- *   @param dst a pointer to the memory to copy to
+ *   @param pmut_dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are NULL, returns LOADER_FAILURE, otherwise
- *     returns 0.
  */
-int64_t
-platform_memcpy(void *const dst, void const *const src, uint64_t const num)
+void
+platform_memcpy(void *const pmut_dst, void const *const src, uint64_t const num) NOEXCEPT
 {
-    if (NULL == dst) {
-        bferror("invalid pointer");
-        return LOADER_FAILURE;
-    }
+    platform_expects(NULLPTR != pmut_dst);
+    platform_expects(NULLPTR != src);
+    platform_expects(((uint64_t)0) != num);
 
-    if (NULL == src) {
-        bferror("invalid pointer");
-        return LOADER_FAILURE;
-    }
-
-    g_st->BootServices->CopyMem(dst, ((VOID *)src), num);
-    return LOADER_SUCCESS;
+    g_st->BootServices->CopyMem(pmut_dst, ((VOID *)src), num);
 }
 
 /**
@@ -219,26 +245,20 @@ platform_memcpy(void *const dst, void const *const src, uint64_t const num)
  *     be used to copy memory from userspace via an IOCTL.
  *
  * <!-- inputs/outputs -->
- *   @param dst a pointer to the memory to copy to
+ *   @param pmut_dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
  *   @return If "src" or "dst" are NULL, returns LOADER_FAILURE, otherwise
  *     returns 0.
  */
-int64_t
-platform_copy_from_user(void *const dst, void const *const src, uint64_t const num)
+NODISCARD int64_t
+platform_copy_from_user(void *const pmut_dst, void const *const src, uint64_t const num) NOEXCEPT
 {
-    if (NULL == dst) {
-        bferror("invalid pointer");
-        return LOADER_FAILURE;
-    }
+    platform_expects(NULLPTR != pmut_dst);
+    platform_expects(NULLPTR != src);
+    platform_expects(((uint64_t)0) != num);
 
-    if (NULL == src) {
-        bferror("invalid pointer");
-        return LOADER_FAILURE;
-    }
-
-    g_st->BootServices->CopyMem(dst, ((VOID *)src), num);
+    g_st->BootServices->CopyMem(pmut_dst, ((VOID *)src), num);
     return LOADER_SUCCESS;
 }
 
@@ -249,26 +269,20 @@ platform_copy_from_user(void *const dst, void const *const src, uint64_t const n
  *     be used to copy memory to userspace via an IOCTL.
  *
  * <!-- inputs/outputs -->
- *   @param dst a pointer to the memory to copy to
+ *   @param pmut_dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
  *   @return If "src" or "dst" are NULL, returns LOADER_FAILURE, otherwise
  *     returns 0.
  */
-int64_t
-platform_copy_to_user(void *const dst, void const *const src, uint64_t const num)
+NODISCARD int64_t
+platform_copy_to_user(void *const pmut_dst, void const *const src, uint64_t const num) NOEXCEPT
 {
-    if (NULL == dst) {
-        bferror("invalid pointer");
-        return LOADER_FAILURE;
-    }
+    platform_expects(NULLPTR != pmut_dst);
+    platform_expects(NULLPTR != src);
+    platform_expects(((uint64_t)0) != num);
 
-    if (NULL == src) {
-        bferror("invalid pointer");
-        return LOADER_FAILURE;
-    }
-
-    g_st->BootServices->CopyMem(dst, ((VOID *)src), num);
+    g_st->BootServices->CopyMem(pmut_dst, ((VOID *)src), num);
     return LOADER_SUCCESS;
 }
 
@@ -279,8 +293,8 @@ platform_copy_to_user(void *const dst, void const *const src, uint64_t const num
  * <!-- inputs/outputs -->
  *   @return Returns the total number of online CPUs (i.e. PPs)
  */
-uint32_t
-platform_num_online_cpus(void)
+NODISCARD uint32_t
+platform_num_online_cpus(void) NOEXCEPT
 {
     return arch_num_online_cpus();
 }
@@ -295,7 +309,8 @@ platform_num_online_cpus(void)
  *   @param args the arguments for work_on_cpu_callback
  */
 void
-work_on_cpu(uint32_t const cpu, void *const callback, struct work_on_cpu_callback_args *const args)
+work_on_cpu(
+    uint32_t const cpu, void *const callback, struct work_on_cpu_callback_args *const args) NOEXCEPT
 {
     arch_work_on_cpu(cpu, callback, args);
 }
@@ -314,8 +329,8 @@ work_on_cpu(uint32_t const cpu, void *const callback, struct work_on_cpu_callbac
  *   @return If each callback returns 0, this function returns 0, otherwise
  *     this function returns a non-0 value
  */
-static int64_t
-platform_on_each_cpu_forward(platform_per_cpu_func const func)
+NODISCARD static int64_t
+platform_on_each_cpu_forward(platform_per_cpu_func const func) NOEXCEPT
 {
     uint32_t cpu;
 
@@ -347,10 +362,11 @@ platform_on_each_cpu_forward(platform_per_cpu_func const func)
  *   @return If each callback returns 0, this function returns 0, otherwise
  *     this function returns a non-0 value
  */
-int64_t
-platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const order)
+NODISCARD int64_t
+platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const order) NOEXCEPT
 {
     int64_t ret;
+    platform_expects(NULLPTR != func);
 
     if (PLATFORM_FORWARD == order) {
         ret = platform_on_each_cpu_forward(func);
@@ -368,10 +384,10 @@ platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const order)
  *   @brief Dumps the contents of the VMM's ring buffer.
  */
 void
-platform_dump_vmm(void)
+platform_dump_vmm(void) NOEXCEPT
 {
-    uint64_t epos = g_mk_debug_ring->epos;
-    uint64_t spos = g_mk_debug_ring->spos;
+    uint64_t epos = g_pmut_mut_mk_debug_ring->epos;
+    uint64_t spos = g_pmut_mut_mk_debug_ring->spos;
 
     if (!(HYPERVISOR_DEBUG_RING_SIZE > epos)) {
         epos = ((uint64_t)0);
@@ -387,7 +403,7 @@ platform_dump_vmm(void)
             spos = ((uint64_t)0);
         }
 
-        console_write_c(g_mk_debug_ring->buf[spos]);
+        console_write_c(g_pmut_mut_mk_debug_ring->buf[spos]);
         ++spos;
     }
 
@@ -403,8 +419,8 @@ platform_dump_vmm(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success, LOADER_FAILURE otherwise
  */
-int64_t
-platform_arch_init(void)
+NODISCARD int64_t
+platform_arch_init(void) NOEXCEPT
 {
     return arch_init();
 }
@@ -414,7 +430,7 @@ platform_arch_init(void)
  *   @brief Marks the current GDT as read/write
  */
 void
-platform_mark_gdt_writable(void)
+platform_mark_gdt_writable(void) NOEXCEPT
 {}
 
 /**
@@ -422,5 +438,5 @@ platform_mark_gdt_writable(void)
  *   @brief Marks the current GDT as read-only
  */
 void
-platform_mark_gdt_readonly(void)
+platform_mark_gdt_readonly(void) NOEXCEPT
 {}

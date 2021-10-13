@@ -29,26 +29,37 @@
 
 #include <elf_file_t.h>
 #include <span_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief When the start VMM function is executed, the user must provide
- *     the address and size of the microkernel ELF file to be loaded and
- *     executed. This ELF file exists in user-space memory and cannot be
- *     directly accessed. As a result, we must copy this array from user
- *     space into a array in the kernel where the loader exists. This
- *     function performs this copy by first allocating a array the size
- *     of the ELF file being copied and then copies the contents to this
- *     newly allocated array. For this reason, once this ELF file is no
- *     longer needed, you must free the ELF file as memory was previously
- *     allocated.
- *
- * <!-- inputs/outputs -->
- *   @param mk_elf_file_from_user the ELF file to copy
- *   @param copied_mk_elf_file where to copy the ELF file too
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t alloc_and_copy_mk_elf_file_from_user(
-    struct span_t const *const mk_elf_file_from_user, struct elf_file_t *const copied_mk_elf_file);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief When the start VMM function is executed, the user must provide
+     *     the address and size of the microkernel ELF file to be loaded and
+     *     executed. This ELF file exists in user-space memory and cannot be
+     *     directly accessed. As a result, we must copy this array from user
+     *     space into a array in the kernel where the loader exists. This
+     *     function performs this copy by first allocating a array the size
+     *     of the ELF file being copied and then copies the contents to this
+     *     newly allocated array. For this reason, once this ELF file is no
+     *     longer needed, you must free the ELF file as memory was previously
+     *     allocated.
+     *
+     * <!-- inputs/outputs -->
+     *   @param mk_elf_file_from_user the ELF file to copy
+     *   @param pmut_copied_mk_elf_file where to copy the ELF file too
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t alloc_and_copy_mk_elf_file_from_user(
+        struct span_t const *const mk_elf_file_from_user,
+        struct elf_file_t *const pmut_copied_mk_elf_file) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

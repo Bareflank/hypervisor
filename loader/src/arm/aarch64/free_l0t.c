@@ -40,13 +40,13 @@
  *   @param l0t the l0t_t to free
  */
 void
-free_l0t(struct l0t_t *const l0t)
+free_l0t(struct l0t_t *const l0t) NOEXCEPT
 {
     uint64_t i;
 
     for (i = ((uint64_t)0); i < LOADER_NUM_L0T_ENTRIES; ++i) {
         struct l1t_t *const l1t = l0t->tables[i];
-        if (((void *)0) != l1t) {
+        if (NULLPTR != l1t) {
             free_l1t(l1t);
             platform_free(l1t, sizeof(struct l1t_t));
         }

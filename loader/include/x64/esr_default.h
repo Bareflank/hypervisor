@@ -27,10 +27,21 @@
 #ifndef ESR_DEFAULT_H
 #define ESR_DEFAULT_H
 
-/**
- * <!-- description -->
- *   @brief Defines the default exception service routine for ESRs
- */
-void esr_default(void);
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Defines the default exception service routine for ESRs
+     */
+    void esr_default(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -32,5 +32,5 @@
  *   @brief Tells the hypervisor to report on
  */
 void
-send_command_report_on(void)
+send_command_report_on(void) NOEXCEPT
 {}

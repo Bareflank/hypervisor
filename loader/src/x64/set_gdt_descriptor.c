@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-#include <debug.h>
 #include <global_descriptor_table_register_t.h>
+#include <platform.h>
 #include <types.h>
 
 /** @brief defines the first set of bits associated with the attrib field */
@@ -86,65 +86,43 @@
  *     at the provided index
  *   @param attrib the attributes to set the decriptor to in the provided GDT
  *     at the provided index
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
+void
 set_gdt_descriptor(
     struct global_descriptor_table_register_t const *const gdtr,
     uint16_t const selector,
     uint64_t const base,
     uint32_t const limit,
-    uint16_t const attrib)
+    uint16_t const attrib) NOEXCEPT
 {
-    uint64_t bytes64_0;
-    uint64_t bytes64_1;
+    uint64_t const idx64_0 = (((uint64_t)selector) >> ((uint64_t)3)) + ((uint64_t)0);
+    uint64_t const idx64_1 = (((uint64_t)selector) >> ((uint64_t)3)) + ((uint64_t)1);
 
-    uint64_t idx64_0 = (((uint64_t)selector) >> ((uint64_t)3)) + ((uint64_t)0);
-    uint64_t idx64_1 = (((uint64_t)selector) >> ((uint64_t)3)) + ((uint64_t)1);
+    uint64_t const base64 = ((uint64_t)base);
+    uint64_t mut_limit64 = ((uint64_t)limit);
+    uint64_t const attrib64 = ((uint64_t)attrib);
 
-    uint64_t base64 = ((uint64_t)base);
-    uint64_t limit64 = ((uint64_t)limit);
-    uint64_t attrib64 = ((uint64_t)attrib);
+    platform_expects(NULLPTR != gdtr);
 
-    if (((void *)0) == gdtr) {
-        bferror("invalid argument: gdtr == NULL");
-        return LOADER_FAILURE;
+    if (((uint64_t)0) != ((attrib64 << ATTRIB_SHIFT2) & GRANULARITY_BIT)) {
+        mut_limit64 >>= LIMIT_SHIFTG;
     }
-
-    bytes64_0 = ((uint64_t)gdtr->limit) + ((uint64_t)1);
-    bytes64_1 = ((uint64_t)gdtr->limit) + ((uint64_t)1) - sizeof(uint64_t);
-
-    if (((uint64_t)0) == idx64_0) {
-        return LOADER_SUCCESS;
-    }
-
-    if (idx64_0 >= (bytes64_0 / sizeof(uint64_t))) {
-        bferror("invalid argument: index into GDT is out of range");
-        return LOADER_FAILURE;
-    }
-
-    if (((attrib64 << ATTRIB_SHIFT1) & SYSTEM_BIT) == ((uint64_t)0)) {
-        if (idx64_1 >= (bytes64_1 / sizeof(uint64_t))) {
-            bferror("invalid argument: index into GDT is out of range");
-            return LOADER_FAILURE;
-        }
-    }
-
-    if (((attrib64 << ATTRIB_SHIFT2) & GRANULARITY_BIT) != ((uint64_t)0)) {
-        limit64 >>= LIMIT_SHIFTG;
+    else {
+        bf_touch();
     }
 
     gdtr->base[idx64_0] |= ((base64 << BASE_SHIFT1) & BASE_MASK1);
     gdtr->base[idx64_0] |= ((base64 << BASE_SHIFT2) & BASE_MASK2);
     gdtr->base[idx64_0] |= ((base64 << BASE_SHIFT3) & BASE_MASK3);
-    gdtr->base[idx64_0] |= ((limit64 << LIMIT_SHIFT1) & LIMIT_MASK1);
-    gdtr->base[idx64_0] |= ((limit64 << LIMIT_SHIFT2) & LIMIT_MASK2);
+    gdtr->base[idx64_0] |= ((mut_limit64 << LIMIT_SHIFT1) & LIMIT_MASK1);
+    gdtr->base[idx64_0] |= ((mut_limit64 << LIMIT_SHIFT2) & LIMIT_MASK2);
     gdtr->base[idx64_0] |= ((attrib64 << ATTRIB_SHIFT1) & ATTRIB_MASK1);
     gdtr->base[idx64_0] |= ((attrib64 << ATTRIB_SHIFT2) & ATTRIB_MASK2);
 
-    if (((attrib64 << ATTRIB_SHIFT1) & SYSTEM_BIT) == ((uint64_t)0)) {
+    if (((uint64_t)0) == ((attrib64 << ATTRIB_SHIFT1) & SYSTEM_BIT)) {
         gdtr->base[idx64_1] = ((base64 >> BASE_SHIFT4) & BASE_MASK4);
     }
-
-    return LOADER_SUCCESS;
+    else {
+        bf_touch();
+    }
 }

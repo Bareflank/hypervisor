@@ -28,15 +28,25 @@
 #define FREE_MK_PAGE_POOL_H
 
 #include <mutable_span_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Releases a previously allocated mutable_span_t that was allocated
- *     using the alloc_mk_page_pool function.
- *
- * <!-- inputs/outputs -->
- *   @param page_pool the mutable_span_t to free.
- */
-void free_mk_page_pool(struct mutable_span_t *const page_pool);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Releases a previously allocated mutable_span_t that was allocated
+     *     using the alloc_mk_page_pool function.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_page_pool the mutable_span_t to free.
+     */
+    void free_mk_page_pool(struct mutable_span_t *const pmut_page_pool) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -30,18 +30,28 @@
 #include <mutable_span_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Allocates a chunk of memory for the huge pool used by the
- *     microkernel. Note that the "size" parameter is in total pages and
- *     not in bytes. Finally, if the provided size is 0, this function
- *     will allocate a default number of pages.
- *
- * <!-- inputs/outputs -->
- *   @param size the total number of pages (not bytes) to allocate
- *   @param page_pool the mutable_span_t to store the huge pool addr/size.
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t alloc_mk_huge_pool(uint32_t const size, struct mutable_span_t *const page_pool);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Allocates a chunk of memory for the huge pool used by the
+     *     microkernel. Note that the "size" parameter is in total pages and
+     *     not in bytes. Finally, if the provided size is 0, this function
+     *     will allocate a default number of pages.
+     *
+     * <!-- inputs/outputs -->
+     *   @param size the total number of pages (not bytes) to allocate
+     *   @param pmut_huge_pool the mutable_span_t to store the huge pool addr/size.
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t
+    alloc_mk_huge_pool(uint32_t const size, struct mutable_span_t *const pmut_huge_pool) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

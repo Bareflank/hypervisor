@@ -29,26 +29,37 @@
 
 #include <elf_file_t.h>
 #include <elf_segment_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief When the start VMM function is executed, the user must provide
- *     the address and size of the microkernel ELF file to be loaded and
- *     executed. Once this memory is mapped into the kernel address space,
- *     we need to allocate memory for each program segment in the ELF file
- *     and copy the contents of each ELF segment into the newly allocated
- *     memory. This is because we cannot execute directly from the ELF file
- *     itself, but instead of execute from the "loaded" version of the ELF
- *     file. Later, we will take each ELF segment and map it into the
- *     microkernel's memory space, ensuring the microkernel is capable of
- *     being executed given it's memory space.
- *
- * <!-- inputs/outputs -->
- *   @param mk_elf_file the ELF file to copy the segments from
- *   @param mk_elf_segments where to copy the ELF segments too
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t alloc_and_copy_mk_elf_segments(
-    struct elf_file_t const *const mk_elf_file, struct elf_segment_t *const mk_elf_segments);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief When the start VMM function is executed, the user must provide
+     *     the address and size of the microkernel ELF file to be loaded and
+     *     executed. Once this memory is mapped into the kernel address space,
+     *     we need to allocate memory for each program segment in the ELF file
+     *     and copy the contents of each ELF segment into the newly allocated
+     *     memory. This is because we cannot execute directly from the ELF file
+     *     itself, but instead of execute from the "loaded" version of the ELF
+     *     file. Later, we will take each ELF segment and map it into the
+     *     microkernel's memory space, ensuring the microkernel is capable of
+     *     being executed given it's memory space.
+     *
+     * <!-- inputs/outputs -->
+     *   @param mk_elf_file the ELF file to copy the segments from
+     *   @param pmut_mk_elf_segments where to copy the ELF segments too
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t alloc_and_copy_mk_elf_segments(
+        struct elf_file_t const *const mk_elf_file,
+        struct elf_segment_t *const pmut_mk_elf_segments) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

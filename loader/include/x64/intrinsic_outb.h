@@ -29,15 +29,24 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Executes the OUTB instruction given the provided Port
- *     and value
- *
- * <!-- inputs/outputs -->
- *   @param port the port to write to
- *   @param val the value to write to the given Port
- */
-void intrinsic_outb(uint16_t const port, uint8_t val);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Executes the OUTB instruction given the provided Port
+     *     and value
+     *
+     * <!-- inputs/outputs -->
+     *   @param port the port to write to
+     *   @param val the value to write to the given Port
+     */
+    void intrinsic_outb(uint16_t const port, uint8_t const val) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

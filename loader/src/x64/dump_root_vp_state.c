@@ -25,6 +25,9 @@
  */
 
 #include <debug.h>
+#include <global_descriptor_table_register_t.h>
+#include <interrupt_descriptor_table_register_t.h>
+#include <platform.h>
 #include <state_save_t.h>
 #include <types.h>
 
@@ -37,12 +40,9 @@
  *   @param cpu the CPU that this root vp state belongs to
  */
 void
-dump_root_vp_state(struct state_save_t *const state, uint32_t const cpu)
+dump_root_vp_state(struct state_save_t const *const state, uint32_t const cpu) NOEXCEPT
 {
-    if (((void *)0) == state) {
-        bferror("state is NULL");
-        return;
-    }
+    platform_expects(NULLPTR != state);
 
     bfdebug_d32("root vp state on cpu", cpu);
     bfdebug_ptr(" - virt", state);

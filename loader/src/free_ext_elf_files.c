@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <elf_file_t.h>
+#include <free_ext_elf_files.h>
 #include <platform.h>
 #include <types.h>
 
@@ -35,16 +35,17 @@
  *     using the alloc_and_copy_ext_elf_files function.
  *
  * <!-- inputs/outputs -->
- *   @param ext_elf_files the elf_file_t to free.
+ *   @param pmut_ext_elf_files the elf_file_t to free.
  */
 void
-free_ext_elf_files(struct elf_file_t *const ext_elf_files)
+free_ext_elf_files(struct elf_file_t *const pmut_ext_elf_files) NOEXCEPT
 {
-    uint64_t i;
+    uint64_t mut_i;
+    platform_expects(NULLPTR != pmut_ext_elf_files);
 
-    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_EXTENSIONS; ++i) {
-        struct elf_file_t *const file = &ext_elf_files[i];
-        platform_free(file->addr, file->size);
-        platform_memset(file, 0, sizeof(struct elf_file_t));
+    for (mut_i = ((uint64_t)0); mut_i < HYPERVISOR_MAX_EXTENSIONS; ++mut_i) {
+        struct elf_file_t *const pmut_file = &pmut_ext_elf_files[mut_i];
+        platform_free(pmut_file->addr, pmut_file->size);
+        platform_memset(pmut_file, ((uint8_t)0), sizeof(struct elf_file_t));
     }
 }

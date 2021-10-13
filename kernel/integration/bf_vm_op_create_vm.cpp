@@ -102,12 +102,12 @@ namespace syscall
     ///     called on each PP while the hypervisor is being bootstrapped.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param ppid the physical process to bootstrap
+    ///   @param ppid0 the physical process to bootstrap
     ///
     extern "C" void
-    bootstrap_entry(bsl::safe_u16::value_type const ppid) noexcept
+    bootstrap_entry(bsl::safe_u16::value_type const ppid0) noexcept
     {
-        bsl::discard(ppid);
+        bsl::discard(ppid0);
 
         // create with invalid handle
         {
@@ -120,7 +120,8 @@ namespace syscall
 
         // create all and prove that creating one more will fail
         {
-            for (bsl::safe_idx i{bsl::safe_idx::magic_1()}; i < HYPERVISOR_MAX_VMS; ++i) {
+            constexpr auto one{bsl::safe_idx::magic_1()};
+            for (bsl::safe_idx mut_i{one}; mut_i < HYPERVISOR_MAX_VMS; ++mut_i) {
                 auto const vmid{g_mut_sys.bf_vm_op_create_vm()};
                 integration::require(vmid.is_valid());
             }

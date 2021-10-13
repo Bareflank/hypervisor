@@ -24,20 +24,21 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
 #include <free_mk_args.h>
 #include <free_mk_stack.h>
 #include <free_mk_state.h>
 #include <free_root_vp_state.h>
-#include <g_cpu_status.h>
-#include <g_mk_args.h>
-#include <g_mk_stack.h>
-#include <g_mk_state.h>
-#include <g_root_vp_state.h>
-#include <platform.h>
+#include <g_mut_cpu_status.h>
+#include <g_mut_mk_args.h>
+#include <g_mut_mk_stack.h>
+#include <g_mut_mk_state.h>
+#include <g_mut_root_vp_state.h>
+#include <mk_args_t.h>
 #include <send_command_report_off.h>
 #include <send_command_stop.h>
+#include <span_t.h>
+#include <state_save_t.h>
 #include <types.h>
 
 /**
@@ -51,36 +52,39 @@
  *   @param cpu the id of the cpu to stop
  *   @return Returns 0 on success
  */
-int64_t
-stop_vmm_per_cpu(uint32_t const cpu)
+NODISCARD int64_t
+stop_vmm_per_cpu(uint32_t const cpu) NOEXCEPT
 {
     if (((uint64_t)cpu) >= HYPERVISOR_MAX_PPS) {
         bferror("cpu out of range");
         return LOADER_FAILURE;
     }
 
-    if (CPU_STATUS_STOPPED == g_cpu_status[cpu]) {
-        return LOADER_SUCCESS;
-    }
-
-    if (CPU_STATUS_CORRUPT == g_cpu_status[cpu]) {
-        bferror("Unable to stop, previous CPU stopped in a corrupt state");
+    if (CPU_STATUS_CORRUPT == g_mut_cpu_status[cpu]) {
+        bferror_d32("Unable to stop, previous CPU stopped in a corrupt state", cpu);
         return LOADER_FAILURE;
     }
 
-    send_command_report_off();
+    if (CPU_STATUS_RUNNING == g_mut_cpu_status[cpu]) {
+        send_command_report_off();
 
-    if (send_command_stop()) {
-        bferror("send_command_stop failed");
-        g_cpu_status[cpu] = CPU_STATUS_CORRUPT;
-        return LOADER_FAILURE;
+        if (send_command_stop()) {
+            bferror("send_command_stop failed");
+            g_mut_cpu_status[cpu] = CPU_STATUS_CORRUPT;
+            return LOADER_FAILURE;
+        }
+
+        bf_touch();
+    }
+    else {
+        bf_touch();
     }
 
-    free_mk_args(&g_mk_args[cpu]);
-    free_root_vp_state(&g_root_vp_state[cpu]);
-    free_mk_state(&g_mk_state[cpu]);
-    free_mk_stack(&g_mk_stack[cpu]);
+    free_mk_args(&g_mut_mk_args[cpu]);
+    free_root_vp_state(&g_mut_root_vp_state[cpu]);
+    free_mk_state(&g_mut_mk_state[cpu]);
+    free_mk_stack(&g_mut_mk_stack[cpu]);
 
-    g_cpu_status[cpu] = CPU_STATUS_STOPPED;
+    g_mut_cpu_status[cpu] = CPU_STATUS_STOPPED;
     return LOADER_SUCCESS;
 }

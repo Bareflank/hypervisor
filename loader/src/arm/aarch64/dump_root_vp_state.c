@@ -37,9 +37,9 @@
  *   @param cpu the CPU that this root vp state belongs to
  */
 void
-dump_root_vp_state(struct state_save_t *const state, uint32_t const cpu)
+dump_root_vp_state(struct state_save_t *const state, uint32_t const cpu) NOEXCEPT
 {
-    if (((void *)0) == state) {
+    if (NULLPTR == state) {
         bferror("state is NULL");
         return;
     }

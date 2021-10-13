@@ -29,15 +29,24 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Executes the RDMSR instruction given the provided MSR
- *     and returns the results
- *
- * <!-- inputs/outputs -->
- *   @param ecx the MSR to read
- *   @return Returns the resulting MSR value
- */
-uint64_t intrinsic_rdmsr(uint32_t const ecx);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Executes the RDMSR instruction given the provided MSR
+     *     and returns the results
+     *
+     * <!-- inputs/outputs -->
+     *   @param ecx the MSR to read
+     *   @return Returns the resulting MSR value
+     */
+    NODISCARD uint64_t intrinsic_rdmsr(uint32_t const ecx) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

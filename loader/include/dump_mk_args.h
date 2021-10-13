@@ -30,14 +30,23 @@
 #include <mk_args_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Outputs the contents of a provided mk args.
- *
- * <!-- inputs/outputs -->
- *   @param args the mk args to output
- *   @param cpu the CPU that this mk args belongs to
- */
-void dump_mk_args(struct mk_args_t *const args, uint32_t const cpu);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Outputs the contents of a provided mk args.
+     *
+     * <!-- inputs/outputs -->
+     *   @param args the mk args to output
+     *   @param cpu the CPU that this mk args belongs to
+     */
+    void dump_mk_args(struct mk_args_t const *const args, uint32_t const cpu) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

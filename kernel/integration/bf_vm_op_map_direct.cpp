@@ -103,12 +103,12 @@ namespace syscall
     ///     called on each PP while the hypervisor is being bootstrapped.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param ppid the physical process to bootstrap
+    ///   @param ppid0 the physical process to bootstrap
     ///
     extern "C" void
-    bootstrap_entry(bsl::safe_u16::value_type const ppid) noexcept
+    bootstrap_entry(bsl::safe_u16::value_type const ppid0) noexcept
     {
-        bsl::discard(ppid);
+        bsl::discard(ppid0);
         bf_status_t mut_ret{};
 
         // create with invalid handle
@@ -198,7 +198,7 @@ namespace syscall
 
         // Map a bunch of addresses
         {
-            bsl::uint8 data{};
+            bsl::uint8 mut_data{};
             constexpr auto num_pages{0x5000_umx};
 
             for (bsl::safe_idx mut_i{bsl::safe_idx::magic_1()}; mut_i < num_pages; ++mut_i) {
@@ -207,10 +207,10 @@ namespace syscall
                 auto const *const ptr{g_mut_sys.bf_vm_op_map_direct<page_4k_t>({}, phys)};
                 integration::require(nullptr != ptr);
 
-                data += ptr->data.front();    // NOLINT
+                mut_data += ptr->data.front();    // NOLINT
             }
 
-            bsl::print() << "data: " << bsl::hex(data) << bsl::endl;
+            bsl::print() << "data: " << bsl::hex(mut_data) << bsl::endl;
         }
 
         bsl::debug() << "success. remaining backtrace is expected\n" << bsl::here();

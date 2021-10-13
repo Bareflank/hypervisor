@@ -30,28 +30,36 @@
 #include <interrupt_descriptor_table_register_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Sets an IDT's descriptor given an index into the IDT to
- *     set and the offset, selector and attribute values to set the descriptor
- *     to.
- *
- * <!-- inputs/outputs -->
- *   @param idtr a pointer to the idtr that stores the IDT to set
- *   @param idx the index of the descriptor in the provided IDT to set
- *   @param offset the offset to set the decriptor to in the provided IDT
- *     at the provided index
- *   @param selector the selector to set the decriptor to in the provided IDT
- *     at the provided index
- *   @param attrib the attributes to set the decriptor to in the provided IDT
- *     at the provided index
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t set_idt_descriptor(
-    struct interrupt_descriptor_table_register_t const *const idtr,
-    uint32_t const idx,
-    uint64_t const offset,
-    uint16_t const selector,
-    uint16_t const attrib);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Sets an IDT's descriptor given an index into the IDT to
+     *     set and the offset, selector and attribute values to set the descriptor
+     *     to.
+     *
+     * <!-- inputs/outputs -->
+     *   @param idtr a pointer to the idtr that stores the IDT to set
+     *   @param idx the index of the descriptor in the provided IDT to set
+     *   @param offset the offset to set the decriptor to in the provided IDT
+     *     at the provided index
+     *   @param selector the selector to set the decriptor to in the provided IDT
+     *     at the provided index
+     *   @param attrib the attributes to set the decriptor to in the provided IDT
+     *     at the provided index
+     */
+    void set_idt_descriptor(
+        struct interrupt_descriptor_table_register_t const *const idtr,
+        uint32_t const idx,
+        uint64_t const offset,
+        uint16_t const selector,
+        uint16_t const attrib) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

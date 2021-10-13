@@ -27,14 +27,25 @@
 #ifndef SERIAL_WRITE_H
 #define SERIAL_WRITE_H
 
-/**
- * <!-- description -->
- *   @brief Writes a string to the serial port. Note that you must initialize
- *     the serial port before you can use it.
- *
- * <!-- inputs/outputs -->
- *   @param str the string to write to the serial port.
- */
-void serial_write(char const *const str);
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Writes a string to the serial port. Note that you must initialize
+     *     the serial port before you can use it.
+     *
+     * <!-- inputs/outputs -->
+     *   @param str the string to write to the serial port.
+     */
+    void serial_write(char const *const str) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

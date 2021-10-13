@@ -30,14 +30,23 @@
 #include <root_page_table_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Releases a previously allocated root_page_table_t that was
- *     allocated using the alloc_mk_root_page_table function.
- *
- * <!-- inputs/outputs -->
- *   @param rpt the root_page_table_t to free.
- */
-void free_mk_root_page_table(root_page_table_t **const rpt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Releases a previously allocated root_page_table_t that was
+     *     allocated using the alloc_mk_root_page_table function.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_rpt the root_page_table_t to free.
+     */
+    void free_mk_root_page_table(root_page_table_t **const pmut_rpt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

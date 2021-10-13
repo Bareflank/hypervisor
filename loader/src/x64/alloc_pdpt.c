@@ -24,9 +24,7 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
-#include <flush_cache.h>
 #include <pdpt_t.h>
 #include <platform.h>
 #include <pml4t_t.h>
@@ -41,52 +39,46 @@
  *     this function will fail.
  *
  * <!-- inputs/outputs -->
- *   @param pml4t the pml4t to add the newly allocated pdpt to
+ *   @param pmut_pml4t the pml4t to add the newly allocated pdpt to
  *   @param virt the virtual address to get the PML4 offset from.
- *   @return a pointer to the newly allocated pdpt on success, ((void *)0) otherwise.
+ *   @return a pointer to the newly allocated pdpt on success, NULLPTR otherwise.
  */
-struct pdpt_t *
-alloc_pdpt(struct pml4t_t *const pml4t, uint64_t const virt)
+NODISCARD struct pdpt_t *
+alloc_pdpt(struct pml4t_t *const pmut_pml4t, uint64_t const virt) NOEXCEPT
 {
-    uint64_t i;
-    uint64_t phys;
-    struct pdpt_t *pdpt;
-    struct pml4te_t *pml4te;
+    uint64_t mut_phys = ((uint64_t)0);
+    struct pdpt_t *pmut_mut_pdpt = NULLPTR;
+    struct pml4te_t *pmut_mut_pml4te = NULLPTR;
 
-    pml4te = &pml4t->entires[pml4to(virt)];
-    if (pml4te->p != ((uint64_t)0)) {
+    pmut_mut_pml4te = &pmut_pml4t->entires[pml4to(virt)];
+    if (((uint64_t)0) != (uint64_t)pmut_mut_pml4te->p) {
         bferror_x64("pdpt already present", virt);
-        return ((void *)0);
+        return NULLPTR;
     }
 
-    pdpt = (struct pdpt_t *)platform_alloc(sizeof(struct pdpt_t));
-    if (((void *)0) == pdpt) {
+    pmut_mut_pdpt = (struct pdpt_t *)platform_alloc(sizeof(struct pdpt_t));
+    if (NULLPTR == pmut_mut_pdpt) {
         bferror("platform_alloc failed");
         goto platform_alloc_pdpt_failed;
     }
 
-    for (i = 0; i < LOADER_NUM_PDPT_ENTRIES; ++i) {
-        flush_cache(&(pdpt->entires[i]));
-    }
-
-    phys = platform_virt_to_phys(pdpt);
-    if (((uint64_t)0) == phys) {
+    mut_phys = platform_virt_to_phys(pmut_mut_pdpt);
+    if (((uint64_t)0) == mut_phys) {
         bferror("platform_virt_to_phys_pdpt failed");
         goto platform_virt_to_phys_pdpt_failed;
     }
 
-    pml4t->tables[pml4to(virt)] = pdpt;
-    pml4te->phys = (phys >> HYPERVISOR_PAGE_SHIFT);
-    pml4te->p = ((uint64_t)1);
-    pml4te->rw = ((uint64_t)1);
+    pmut_pml4t->tables[pml4to(virt)] = pmut_mut_pdpt;
+    pmut_mut_pml4te->phys = (mut_phys >> HYPERVISOR_PAGE_SHIFT);
+    pmut_mut_pml4te->p = ((uint64_t)1);
+    pmut_mut_pml4te->rw = ((uint64_t)1);
 
-    flush_cache(pml4te);
-    return pdpt;
+    return pmut_mut_pdpt;
 
 platform_virt_to_phys_pdpt_failed:
 
-    platform_free(pdpt, sizeof(struct pdpt_t));
+    platform_free(pmut_mut_pdpt, sizeof(struct pdpt_t));
 platform_alloc_pdpt_failed:
 
-    return ((void *)0);
+    return NULLPTR;
 }

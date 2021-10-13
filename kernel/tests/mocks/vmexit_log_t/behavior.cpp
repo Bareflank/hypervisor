@@ -42,18 +42,18 @@ namespace mk
     {
         bsl::ut_scenario{"add"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                vmexit_log_t log{};
+                vmexit_log_t mut_log{};
                 bsl::ut_then{} = [&]() noexcept {
-                    log.add({}, {});
+                    mut_log.add({}, {});
                 };
             };
         };
 
         bsl::ut_scenario{"dump"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                vmexit_log_t log{};
+                vmexit_log_t mut_log{};
                 bsl::ut_then{} = [&]() noexcept {
-                    log.dump({});
+                    mut_log.dump({});
                 };
             };
         };

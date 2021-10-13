@@ -29,15 +29,24 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Executes the INB instruction given the provided Port
- *     and returns the results
- *
- * <!-- inputs/outputs -->
- *   @param port the port to read
- *   @return Returns the resulting port IO value
- */
-uint8_t intrinsic_inb(uint16_t const port);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Executes the INB instruction given the provided Port
+     *     and returns the results
+     *
+     * <!-- inputs/outputs -->
+     *   @param port the port to read
+     *   @return Returns the resulting port IO value
+     */
+    NODISCARD uint8_t intrinsic_inb(uint16_t const port) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

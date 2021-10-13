@@ -29,17 +29,29 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Defines the exception service routine
- *
- * <!-- inputs/outputs -->
- *   @param vec the esr's vector #
- *   @param esr_el2 the value of esr_el2
- *   @param far_el2 the value of far_el2
- *   @param spsr_el2 the value of spsr_el2
- */
-void
-esr(uint64_t const vec, uint64_t const esr_el2, uint64_t const far_el2, uint64_t const spsr_el2);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Defines the exception service routine
+     *
+     * <!-- inputs/outputs -->
+     *   @param vec the esr's vector #
+     *   @param esr_el2 the value of esr_el2
+     *   @param far_el2 the value of far_el2
+     *   @param spsr_el2 the value of spsr_el2
+     */
+    void
+    esr(uint64_t const vec,
+        uint64_t const esr_el2,
+        uint64_t const far_el2,
+        uint64_t const spsr_el2) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

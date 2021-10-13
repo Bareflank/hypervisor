@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-#include <debug.h>
 #include <interrupt_descriptor_table_register_t.h>
+#include <platform.h>
 #include <types.h>
 
 /** @brief defines the first set of bits associated with the attrib field */
@@ -66,49 +66,27 @@
  *     at the provided index
  *   @param attrib the attributes to set the decriptor to in the provided IDT
  *     at the provided index
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
+void
 set_idt_descriptor(
     struct interrupt_descriptor_table_register_t const *const idtr,
     uint32_t const idx,
     uint64_t const offset,
     uint16_t const selector,
-    uint16_t const attrib)
+    uint16_t const attrib) NOEXCEPT
 {
-    uint64_t bytes64_0;
-    uint64_t bytes64_1;
+    uint64_t const idx64_0 = (((uint64_t)idx) * ((uint64_t)2)) + ((uint64_t)0);
+    uint64_t const idx64_1 = (((uint64_t)idx) * ((uint64_t)2)) + ((uint64_t)1);
 
-    uint64_t idx64_0 = (((uint64_t)idx) * ((uint64_t)2)) + ((uint64_t)0);
-    uint64_t idx64_1 = (((uint64_t)idx) * ((uint64_t)2)) + ((uint64_t)1);
+    uint64_t const offset64 = ((uint64_t)offset);
+    uint64_t const selector64 = ((uint64_t)selector);
+    uint64_t const attrib64 = ((uint64_t)attrib);
 
-    uint64_t offset64 = ((uint64_t)offset);
-    uint64_t selector64 = ((uint64_t)selector);
-    uint64_t attrib64 = ((uint64_t)attrib);
-
-    if (((void *)0) == idtr) {
-        bferror("invalid argument: idtr == NULL");
-        return LOADER_FAILURE;
-    }
-
-    bytes64_0 = ((uint64_t)idtr->limit) + ((uint64_t)1);
-    bytes64_1 = ((uint64_t)idtr->limit) + ((uint64_t)1) - sizeof(uint64_t);
-
-    if (idx64_0 >= (bytes64_0 / sizeof(uint64_t))) {
-        bferror("invalid argument: index into GDT is out of range");
-        return LOADER_FAILURE;
-    }
-
-    if (idx64_1 >= (bytes64_1 / sizeof(uint64_t))) {
-        bferror("invalid argument: index into GDT is out of range");
-        return LOADER_FAILURE;
-    }
+    platform_expects(NULLPTR != idtr);
 
     idtr->base[idx64_0] |= ((offset64 << OFFSET_SHIFT1) & OFFSET_MASK1);
     idtr->base[idx64_0] |= ((offset64 << OFFSET_SHIFT2) & OFFSET_MASK2);
     idtr->base[idx64_1] |= ((offset64 >> OFFSET_SHIFT3) & OFFSET_MASK3);
     idtr->base[idx64_0] |= ((selector64 << SELECTOR_SHIFT1) & SELECTOR_MASK1);
     idtr->base[idx64_0] |= ((attrib64 << ATTRIB_SHIFT1) & ATTRIB_MASK1);
-
-    return LOADER_SUCCESS;
 }

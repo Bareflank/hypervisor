@@ -27,22 +27,31 @@
 #ifndef SPAN_T_H
 #define SPAN_T_H
 
-#include <stdint.h>
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #pragma pack(push, 1)
 
-/**
- * <!-- description -->
- *   @brief Defines the address and size of an array.
- */
-struct span_t
-{
-    /** @brief stores a pointer to the array */
-    uint8_t const *addr;
-    /** @brief stores the size in bytes of the array */
-    uint64_t size;
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the address and size of an array.
+     */
+    struct span_t
+    {
+        /** @brief stores a pointer to the array */
+        uint8_t const *addr;
+        /** @brief stores the size in bytes of the array */
+        uint64_t size;
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

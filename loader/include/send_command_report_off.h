@@ -29,10 +29,19 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Tells the hypervisor to report off
- */
-void send_command_report_off(void);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Tells the hypervisor to report off
+     */
+    void send_command_report_off(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

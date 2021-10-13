@@ -35,17 +35,19 @@
  *     using the alloc_mk_root_page_table function.
  *
  * <!-- inputs/outputs -->
- *   @param rpt the root_page_table_t to free.
+ *   @param pmut_rpt the root_page_table_t to free.
  */
 void
-free_mk_root_page_table(root_page_table_t **const rpt)
+free_mk_root_page_table(root_page_table_t **const pmut_rpt) NOEXCEPT
 {
-    if (((void *)0) == *rpt) {
+    platform_expects(NULLPTR != pmut_rpt);
+
+    if (NULLPTR == *pmut_rpt) {
         return;
     }
 
-    free_pml4t(*rpt);
+    free_pml4t(*pmut_rpt);
 
-    platform_free(*rpt, sizeof(root_page_table_t));
-    *rpt = ((void *)0);
+    platform_free(*pmut_rpt, sizeof(root_page_table_t));
+    *pmut_rpt = NULLPTR;
 }

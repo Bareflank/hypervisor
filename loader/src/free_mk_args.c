@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
+#include <free_mk_args.h>
 #include <mk_args_t.h>
 #include <platform.h>
 #include <types.h>
@@ -35,11 +35,17 @@
  *     using the alloc_mk_args function.
  *
  * <!-- inputs/outputs -->
- *   @param args the mk_args_t to free.
+ *   @param pmut_args the mk_args_t to free.
  */
 void
-free_mk_args(struct mk_args_t **const args)
+free_mk_args(struct mk_args_t **const pmut_args) NOEXCEPT
 {
-    platform_free(*args, HYPERVISOR_PAGE_SIZE);
-    *args = ((void *)0);
+    platform_expects(NULLPTR != pmut_args);
+
+    if (NULLPTR == *pmut_args) {
+        return;
+    }
+
+    platform_free(*pmut_args, HYPERVISOR_PAGE_SIZE);
+    *pmut_args = NULLPTR;
 }

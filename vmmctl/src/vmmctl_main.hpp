@@ -27,8 +27,8 @@
 
 #include <debug_ring_t.hpp>
 #include <dump_vmm_args_t.hpp>
-#include <ifmap.hpp>
-#include <ioctl.hpp>
+#include <ifmap_t.hpp>
+#include <ioctl_t.hpp>
 #include <loader_platform_interface.hpp>
 #include <start_vmm_args_t.hpp>
 #include <stop_vmm_args_t.hpp>
@@ -59,17 +59,6 @@ namespace vmmctl
     ///
     class vmmctl_main final
     {
-        /// @brief stores the mapped ELF file for the microkernel
-        lib::ifmap m_mapped_mk_elf_file{};
-        /// @brief stores the mapped ELF files for each extension
-        bsl::array<lib::ifmap, HYPERVISOR_MAX_EXTENSIONS.get()> m_mapped_ext_elf_files{};
-        /// @brief stores the arguments for starting the VMM.
-        loader::start_vmm_args_t m_start_vmm_ctl_args{};
-        /// @brief stores the arguments for stopping the VMM.
-        loader::stop_vmm_args_t m_stop_vmm_ctl_args{IOCTL_VERSION.get()};
-        /// @brief stores the arguments for dumping the VMM.
-        loader::dump_vmm_args_t m_dump_vmm_ctl_args{IOCTL_VERSION.get(), {}};
-
         /// <!-- description -->
         ///   @brief Displays the help menu for vmmctl
         ///
@@ -85,23 +74,66 @@ namespace vmmctl
         }
 
         /// <!-- description -->
-        ///   @brief Starts the VMM given a set of lib::ioctl arguments to send
+        ///   @brief Starts the VMM given a set of ioctl_t arguments to send
         ///     to the loader.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param ctl_args the command line arguments provided by the user.
+        ///   @param mut_args the command line arguments provided by the user.
+        ///   @param mut_ioctl the ioctl_t to use
         ///   @return Returns bsl::errc_success if the VMM was successfully
         ///     started, otherwise returns bsl::errc_failure.
         ///
         [[nodiscard]] static constexpr auto
-        start_vmm(loader::start_vmm_args_t const *const ctl_args) noexcept -> bsl::errc_type
+        start_vmm(bsl::arguments &mut_args, ioctl_t &mut_ioctl) noexcept -> bsl::errc_type
         {
-            lib::ioctl const ctl{loader::DEVICE_NAME};
-            if (bsl::unlikely(!ctl.is_open())) {
+            loader::start_vmm_args_t mut_start_args{IOCTL_VERSION.get(), {}, {}, {}, {}};
+
+            auto const mk_filename{mut_args.front<bsl::string_view>()};
+            if (mk_filename.empty()) {
+                bsl::error() << "the microkernel's path is either missing or empty\n";
+                help();
                 return bsl::errc_failure;
             }
 
-            auto const ret{ctl.write(loader::START_VMM, ctl_args)};
+            ifmap_t const mk_map{mk_filename};
+            if (bsl::unlikely(mk_map.empty())) {
+                help();
+                return bsl::errc_failure;
+            }
+
+            mut_start_args.mk_elf_file = mk_map.view();
+
+            ++mut_args;
+            auto mut_ext_filename{mut_args.front<bsl::string_view>()};
+            if (mut_ext_filename.empty()) {
+                bsl::error() << "the extension's path is either missing or empty\n";
+                help();
+                return bsl::errc_failure;
+            }
+
+            bsl::array<ifmap_t, HYPERVISOR_MAX_EXTENSIONS.get()> mut_ext_maps{};
+            for (bsl::safe_idx mut_i{}; mut_i < HYPERVISOR_MAX_EXTENSIONS; ++mut_i) {
+                auto *const pmut_ext_map{mut_ext_maps.at_if(mut_i)};
+                auto *const pmut_ext_elf{mut_start_args.ext_elf_files.at_if(mut_i)};
+
+                *pmut_ext_map = ifmap_t{mut_ext_filename};
+                if (bsl::unlikely(pmut_ext_map->empty())) {
+                    help();
+                    return bsl::errc_failure;
+                }
+
+                *pmut_ext_elf = pmut_ext_map->view();
+
+                ++mut_args;
+                mut_ext_filename = mut_args.front<bsl::string_view>();
+                if (mut_ext_filename.empty()) {
+                    break;
+                }
+
+                bsl::touch();
+            }
+
+            auto const ret{mut_ioctl.write(loader::START_VMM, &mut_start_args)};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "vmmctl failed. check kernel logs details\n";
                 return bsl::errc_failure;
@@ -111,23 +143,20 @@ namespace vmmctl
         }
 
         /// <!-- description -->
-        ///   @brief Stops the VMM given a set of lib::ioctl arguments to send
+        ///   @brief Stops the VMM given a set of ioctl_t arguments to send
         ///     to the loader.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param ctl_args the command line arguments provided by the user.
+        ///   @param mut_ioctl the ioctl_t to use
         ///   @return Returns bsl::errc_success if the VMM was successfully
         ///     stopped, otherwise returns bsl::errc_failure.
         ///
         [[nodiscard]] static constexpr auto
-        stop_vmm(loader::stop_vmm_args_t const *const ctl_args) noexcept -> bsl::errc_type
+        stop_vmm(ioctl_t &mut_ioctl) noexcept -> bsl::errc_type
         {
-            lib::ioctl const ctl{loader::DEVICE_NAME};
-            if (bsl::unlikely(!ctl.is_open())) {
-                return bsl::errc_failure;
-            }
+            loader::stop_vmm_args_t const stop_args{IOCTL_VERSION.get()};
 
-            auto const ret{ctl.write(loader::STOP_VMM, ctl_args)};
+            auto const ret{mut_ioctl.write(loader::STOP_VMM, &stop_args)};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "vmmctl failed. check kernel logs details\n";
                 return bsl::errc_failure;
@@ -137,36 +166,36 @@ namespace vmmctl
         }
 
         /// <!-- description -->
-        ///   @brief Dumps the VMM given a set of lib::ioctl arguments to send
+        ///   @brief Dumps the VMM given a set of ioctl_t arguments to send
         ///     to the loader.
         ///
         /// <!-- inputs/outputs -->
-        ///   @param pmut_ctl_args the command line arguments provided by the user.
+        ///   @param mut_ioctl the ioctl_t to use
         ///   @return Returns bsl::errc_success if the VMM was successfully
         ///     dumped to the console, otherwise returns bsl::errc_failure.
         ///
         [[nodiscard]] static constexpr auto
-        dump_vmm(loader::dump_vmm_args_t *const pmut_ctl_args) noexcept -> bsl::errc_type
+        dump_vmm(ioctl_t &mut_ioctl) noexcept -> bsl::errc_type
         {
-            lib::ioctl const ctl{loader::DEVICE_NAME};
-            if (bsl::unlikely(!ctl.is_open())) {
-                return bsl::errc_failure;
-            }
+            loader::dump_vmm_args_t mut_dump_args{IOCTL_VERSION.get(), {}};
 
-            auto const ret{ctl.read_write(loader::DUMP_VMM, pmut_ctl_args)};
+            auto const ret{mut_ioctl.read_write(loader::DUMP_VMM, &mut_dump_args)};
             if (bsl::unlikely(ret.is_neg())) {
                 bsl::error() << "vmmctl failed. check kernel logs details\n";
                 return bsl::errc_failure;
             }
 
-            bsl::safe_idx mut_epos{pmut_ctl_args->debug_ring.epos};
-            bsl::safe_idx mut_spos{pmut_ctl_args->debug_ring.spos};
+            bsl::safe_idx mut_epos{mut_dump_args.debug_ring.epos};
+            bsl::safe_idx mut_spos{mut_dump_args.debug_ring.spos};
 
-            if (!(pmut_ctl_args->debug_ring.buf.size() > mut_epos)) {
-                mut_epos = {};
+            if (bsl::unlikely(mut_epos >= mut_dump_args.debug_ring.buf.size())) {
+                bsl::error() << "kernel returned an invalid debug ring\n";
+                return bsl::errc_failure;
             }
-            else {
-                bsl::touch();
+
+            if (bsl::unlikely(mut_spos >= mut_dump_args.debug_ring.buf.size())) {
+                bsl::error() << "kernel returned an invalid debug ring\n";
+                return bsl::errc_failure;
             }
 
             if (mut_spos == mut_epos) {
@@ -175,186 +204,19 @@ namespace vmmctl
             }
 
             while (mut_spos != mut_epos) {
-                if (!(pmut_ctl_args->debug_ring.buf.size() > mut_spos)) {
+                if (mut_spos >= mut_dump_args.debug_ring.buf.size()) {
                     mut_spos = {};
                 }
                 else {
                     bsl::touch();
                 }
 
-                bsl::print() << *pmut_ctl_args->debug_ring.buf.at_if(mut_spos.get());
+                bsl::print() << *mut_dump_args.debug_ring.buf.at_if(mut_spos.get());
                 ++mut_spos;
             }
 
             bsl::print() << bsl::endl;
             return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Maps an ELF file by getting the filename and path from
-        ///     the arguments provided by the user, opening the ELF file, and
-        ///     then storing the newly opened map in the map provided. Returns
-        ///     bsl::errc_success and increments the provided arguments if the
-        ///     ELF file was successfully mapped, otherwise this function
-        ///     returns bsl::errc_failure.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param mut_args the user provided arguments. It is assumed that the
-        ///     "front" of these args stores a string containing the filename
-        ///     and path to the ELF file to map and store.
-        ///   @param mut_map the map to store the newly opened ELF file.
-        ///   @return Returns bsl::errc_success and increments the provided
-        ///     arguments if the ELF file was successfully mapped, otherwise
-        ///     this function returns bsl::errc_failure.
-        ///
-        [[nodiscard]] static constexpr auto
-        map_elf_file(bsl::arguments &mut_args, lib::ifmap &mut_map) noexcept -> bsl::errc_type
-        {
-            mut_map = lib::ifmap{mut_args.front<bsl::string_view>()};
-            if (bsl::unlikely(!mut_map)) {
-                return bsl::errc_failure;
-            }
-
-            ++mut_args;
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief This function maps the microkernel ELF file provided by
-        ///     the user. When we map the ELF file, we store the map in a
-        ///     private member variable. This ensures the map is not unmapped
-        ///     until the start command is complete.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param mut_args the arguments provided by the user.
-        ///   @return Returns bsl::errc_success and increments the provided
-        ///     arguments if the microkernel ELF file was successfully mapped,
-        ///     otherwise this function returns bsl::errc_failure.
-        ///
-        [[nodiscard]] constexpr auto
-        map_mk_elf_file_from_user(bsl::arguments &mut_args) noexcept -> bsl::errc_type
-        {
-            return this->map_elf_file(mut_args, m_mapped_mk_elf_file);
-        }
-
-        /// <!-- description -->
-        ///   @brief This function maps the extension ELF files provided by
-        ///     the user. When we map the ELF files, we store the maps in a
-        ///     private member variable. This ensures the maps are not unmapped
-        ///     until the start command is complete.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param mut_args the arguments provided by the user.
-        ///   @return Returns bsl::errc_success and increments the provided
-        ///     arguments if the extension ELF filed were successfully mapped,
-        ///     otherwise this function returns bsl::errc_failure.
-        ///
-        [[nodiscard]] constexpr auto
-        map_ext_elf_files_from_user(bsl::arguments &mut_args) noexcept -> bsl::errc_type
-        {
-            for (auto &mut_mapped_ext_elf_file : m_mapped_ext_elf_files) {
-                if (mut_args.is_invalid()) {
-                    break;
-                }
-
-                auto const ret{this->map_elf_file(mut_args, mut_mapped_ext_elf_file)};
-                if (bsl::unlikely(!ret)) {
-                    return ret;
-                }
-
-                bsl::touch();
-            }
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief Converts the extension ELF files from an array of lib::ifmaps
-        ///     to an array of buffer_t structs so that the ELF files can be
-        ///     passed to the loader.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @return Return resulting array of buffer_t structs
-        ///
-        [[nodiscard]] constexpr auto
-        convert_mapped_ext_elf_files_to_array_of_spans() const noexcept
-            -> loader::ext_elf_files_type
-        {
-            using dst_t = loader::ext_elf_files_type;
-            using src_t = decltype(m_mapped_ext_elf_files);
-            static_assert(dst_t::size() == src_t::size());
-
-            dst_t mut_files{};
-            for (bsl::safe_idx mut_i{}; mut_i < m_mapped_ext_elf_files.size(); ++mut_i) {
-                *mut_files.at_if(mut_i) = m_mapped_ext_elf_files.at_if(mut_i)->view();
-            }
-
-            return mut_files;
-        }
-
-        /// <!-- description -->
-        ///   @brief Given arguments from the user, this function creates the
-        ///     lib::ioctl equivalent arguments that the loader expects for
-        ///     starting the VMM
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param mut_args the user provided arguments
-        ///   @param mut_start_args the resulting start_vmm_args_t
-        ///   @return The resulting lib::ioctl arguments
-        ///
-        [[nodiscard]] constexpr auto
-        make_start_vmm_args(
-            bsl::arguments &mut_args, loader::start_vmm_args_t &mut_start_args) noexcept
-            -> bsl::errc_type
-        {
-            auto const remaining{mut_args.remaining()};
-
-            if (bsl::unlikely(bsl::safe_umx::magic_0() == remaining)) {
-                bsl::error() << "missing the microkernel elf file\n";
-                return bsl::errc_failure;
-            }
-
-            if (bsl::unlikely(bsl::safe_umx::magic_1() == remaining)) {
-                bsl::error() << "at least one extension is required\n";
-                return bsl::errc_failure;
-            }
-
-            if (bsl::unlikely(!this->map_mk_elf_file_from_user(mut_args))) {
-                return bsl::errc_failure;
-            }
-
-            if (bsl::unlikely(!this->map_ext_elf_files_from_user(mut_args))) {
-                return bsl::errc_failure;
-            }
-
-            mut_start_args = loader::start_vmm_args_t{
-                IOCTL_VERSION.get(),
-                0U,
-                0U,
-                m_mapped_mk_elf_file.view(),
-                this->convert_mapped_ext_elf_files_to_array_of_spans()};
-
-            return bsl::errc_success;
-        }
-
-        /// <!-- description -->
-        ///   @brief This function is called if an error was encountered while
-        ///     attempting to parse the command that the user provided.
-        ///
-        /// <!-- inputs/outputs -->
-        ///   @param cmd the user provided command
-        ///
-        static constexpr void
-        process_cmd_output_error(bsl::string_view const &cmd) noexcept
-        {
-            if (cmd.empty()) {
-                bsl::error() << "missing command. ";
-            }
-            else {
-                bsl::error() << "invalid command: \"" << cmd << "\". ";
-            }
-
-            bsl::print() << "use vmmctl -h for usage info\n";
         }
 
         /// <!-- description -->
@@ -366,34 +228,37 @@ namespace vmmctl
         ///
         /// <!-- inputs/outputs -->
         ///   @param mut_args the command line arguments provided by the user.
+        ///   @param mut_ioctl the ioctl_t to use
         ///   @return If the user provided command succeeds, this function
         ///     will return bsl::errc_success, otherwise this function
         ///     will return bsl::errc_failure.
         ///
         [[nodiscard]] constexpr auto
-        process_cmd(bsl::arguments &mut_args) noexcept -> bsl::errc_type
+        process_cmd(bsl::arguments &mut_args, ioctl_t &mut_ioctl) noexcept -> bsl::errc_type
         {
             auto const cmd{mut_args.front<bsl::string_view>()};
             ++mut_args;
 
             if (cmd == "start") {
-                auto const ret{this->make_start_vmm_args(mut_args, m_start_vmm_ctl_args)};
-                if (bsl::unlikely(!ret)) {
-                    return ret;
-                }
-
-                return this->start_vmm(&m_start_vmm_ctl_args);
+                return this->start_vmm(mut_args, mut_ioctl);
             }
 
             if (cmd == "stop") {
-                return this->stop_vmm(&m_stop_vmm_ctl_args);
+                return this->stop_vmm(mut_ioctl);
             }
 
             if (cmd == "dump") {
-                return this->dump_vmm(&m_dump_vmm_ctl_args);
+                return this->dump_vmm(mut_ioctl);
             }
 
-            this->process_cmd_output_error(cmd);
+            if (cmd.empty()) {
+                bsl::error() << "missing command\n";
+            }
+            else {
+                bsl::error() << "invalid command: \"" << cmd << "\"\n";
+            }
+
+            help();
             return bsl::errc_failure;
         }
 
@@ -406,12 +271,13 @@ namespace vmmctl
         ///
         /// <!-- inputs/outputs -->
         ///   @param mut_args the command line arguments provided by the user.
+        ///   @param mut_ioctl the ioctl_t to use
         ///   @return If the user provided command succeeds, this function
         ///     will return bsl::errc_success, otherwise this function
         ///     will return bsl::errc_failure.
         ///
         [[nodiscard]] constexpr auto
-        process(bsl::arguments &mut_args) noexcept -> bsl::errc_type
+        process(bsl::arguments &mut_args, ioctl_t &mut_ioctl) noexcept -> bsl::errc_type
         {
             if (mut_args.get<bool>("-h")) {
                 this->help();
@@ -423,7 +289,7 @@ namespace vmmctl
                 return bsl::errc_success;
             }
 
-            return this->process_cmd(mut_args);
+            return this->process_cmd(mut_args, mut_ioctl);
         }
     };
 }

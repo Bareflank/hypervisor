@@ -24,9 +24,10 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
-#include <span_t.h>
+#include <dump_ext_elf_files.h>
+#include <elf_file_t.h>
+#include <platform.h>
 #include <types.h>
 
 /**
@@ -37,20 +38,19 @@
  *   @param files the array of extension ELF files to output
  */
 void
-dump_ext_elf_files(struct span_t *const files)
+dump_ext_elf_files(struct elf_file_t const *const files) NOEXCEPT
 {
-    uint64_t i;
+    uint64_t mut_i;
+    platform_expects(NULLPTR != files);
 
-    if (((void *)0) == files) {
-        bferror("files is NULL");
-        return;
-    }
-
-    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_EXTENSIONS; ++i) {
-        if (((void *)0) != files[i].addr) {
-            bfdebug_d32("ext elf file", (uint32_t)i);
-            bfdebug_x64(" - addr", (uint64_t)files[i].addr);
-            bfdebug_x64(" - size", files[i].size);
+    for (mut_i = ((uint64_t)0); mut_i < HYPERVISOR_MAX_EXTENSIONS; ++mut_i) {
+        if (NULLPTR != files[mut_i].addr) {
+            bfdebug_d32("ext elf file", (uint32_t)mut_i);
+            bfdebug_x64(" - addr", (uint64_t)files[mut_i].addr);
+            bfdebug_x64(" - size", files[mut_i].size);
+        }
+        else {
+            bf_touch();
         }
     }
 }

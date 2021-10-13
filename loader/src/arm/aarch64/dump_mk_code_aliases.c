@@ -36,9 +36,9 @@
  *   @param a the code_aliases_t to output
  */
 void
-dump_mk_code_aliases(struct code_aliases_t *const a)
+dump_mk_code_aliases(struct code_aliases_t *const a) NOEXCEPT
 {
-    if (((void *)0) == a) {
+    if (NULLPTR == a) {
         bferror("a is NULL");
         return;
     }

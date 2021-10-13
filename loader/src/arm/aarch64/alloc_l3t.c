@@ -42,11 +42,11 @@
  * <!-- inputs/outputs -->
  *   @param l2 the l2t_t to add the newly allocated l3t_t to
  *   @param virt the virtual address to get the l2t_t offset from.
- *   @return a pointer to the newly allocated l3t_t on success, ((void *)0)
+ *   @return a pointer to the newly allocated l3t_t on success, NULLPTR
  *     otherwise.
  */
-struct l3t_t *
-alloc_l3t(struct l2t_t *const l2t, uint64_t const virt)
+NODISCARD struct l3t_t *
+alloc_l3t(struct l2t_t *const l2t, uint64_t const virt) NOEXCEPT
 {
     uint64_t i;
     uint64_t phys;
@@ -56,11 +56,11 @@ alloc_l3t(struct l2t_t *const l2t, uint64_t const virt)
     l2te = &l2t->entires[l2to(virt)];
     if (l2te->p != ((uint64_t)0)) {
         bferror_x64("l3t already present", virt);
-        return ((void *)0);
+        return NULLPTR;
     }
 
     l3t = (struct l3t_t *)platform_alloc(sizeof(struct l3t_t));
-    if (((void *)0) == l3t) {
+    if (NULLPTR == l3t) {
         bferror("platform_alloc failed");
         goto platform_alloc_l3t_failed;
     }
@@ -88,5 +88,5 @@ platform_virt_to_phys_l3t_failed:
     platform_free(l3t, sizeof(struct l3t_t));
 platform_alloc_l3t_failed:
 
-    return ((void *)0);
+    return NULLPTR;
 }

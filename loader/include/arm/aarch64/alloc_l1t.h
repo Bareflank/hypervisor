@@ -31,18 +31,27 @@
 #include <l1t_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Given a l0t_t and a virtual address, this function allocates a
- *     l1t_t and adds it to the l0t_t. If an l1t_t has already been allocated,
- *     this function will fail.
- *
- * <!-- inputs/outputs -->
- *   @param l0 the l0t_t to add the newly allocated l1t_t to
- *   @param virt the virtual address to get the l0t_t offset from.
- *   @return a pointer to the newly allocated l1t_t on success, ((void *)0)
- *     otherwise.
- */
-struct l1t_t *alloc_l1t(struct l0t_t *const l0, uint64_t const virt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Given a l0t_t and a virtual address, this function allocates a
+     *     l1t_t and adds it to the l0t_t. If an l1t_t has already been allocated,
+     *     this function will fail.
+     *
+     * <!-- inputs/outputs -->
+     *   @param l0 the l0t_t to add the newly allocated l1t_t to
+     *   @param virt the virtual address to get the l0t_t offset from.
+     *   @return a pointer to the newly allocated l1t_t on success, NULLPTR
+     *     otherwise.
+     */
+    NODISCARD struct l1t_t *alloc_l1t(struct l0t_t *const l0, uint64_t const virt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

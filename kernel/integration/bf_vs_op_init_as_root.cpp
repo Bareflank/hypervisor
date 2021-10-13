@@ -22,130 +22,231 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#include "integration_utils.hpp"
+#include <bf_control_ops.hpp>
+#include <bf_syscall_t.hpp>
+#include <dispatch_bootstrap.hpp>
+#include <dispatch_fail.hpp>
+#include <dispatch_vmexit.hpp>
+#include <gs_initialize.hpp>
+#include <gs_t.hpp>
+#include <integration_utils.hpp>
+#include <intrinsic_t.hpp>
+#include <tls_t.hpp>
+#include <vp_pool_t.hpp>
+#include <vs_pool_t.hpp>
 
-#include <arch_support.hpp>
-#include <bf_constants.hpp>
-
+#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
-#include <bsl/exit_code.hpp>
+#include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
 
-namespace integration
+namespace syscall
 {
-    /// @brief stores the handle the extension will use
-    constinit inline bf_handle_t g_handle{};
+    /// NOTE:
+    /// - This is where we store all of our global and thread local variables.
+    ///   All of the variables are marked as static to ensure they are not
+    ///   visable to the rest of the code.
+    /// - All global and thread local variables must be passed around from
+    ///   function to function as needed. This ensures that constexpr unit
+    ///   tests work properly as the rest of the code never relies on global
+    ///   variables. In addition, it dramatically simplifies unit testing, so
+    ///   enforcing this coding style, although annoying for the function
+    ///   signatures, makes working with the rest of the code a lot easier.
+    /// - We use constinit here, which works around a specific AUTOSAR rule
+    ///   that does not allow global constructors/destructors. By using
+    ///   constinit, we are sure that runtime global constructors are not used.
+    ///   Bareflank does not attempt to run any init/fini sections of the
+    ///   ELF binary, so if you use accidentally forget constinit, the code
+    ///   will likely not execute and fail as a reminder. Instead, use the
+    ///   initialization/release pattern that this example provides.
+    /// - From a unit testing point of view, each of these will have dummy
+    ///   versions that are used for testing. When the code is compiled, each
+    ///   source file and head file is compiled in isolation, meaning they are
+    ///   not given include folder access to all of the code. This means that
+    ///   each of these must be mocked, and the unit tests are given include
+    ///   access to the MOCK. This prevents the need for templates, and
+    ///   instead, all mock injection is done using the build system, greatly
+    ///   simplifying both the code and branch analysis during unit tests as
+    ///   the removal of templates also removes issues with branches being
+    ///   counted for each instantiaion of a template type.
+    /// - Finally, some of these are not really needed for this simple example,
+    ///   but we added them for completness so that it is easier to get
+    ///   started with your own extension as more complicated code will likely
+    ///   need most of these if not all.
+    ///
+
+    /// @brief stores the bf_syscall_t that this code will use
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit bf_syscall_t g_mut_sys{};
+    /// @brief stores the intrinsic_t that this code will use
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit intrinsic_t g_mut_intrinsic{};
+
+    /// @brief stores the pool of VPs that we will use
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit vp_pool_t g_mut_vp_pool{};
+    /// @brief stores the pool of VSs that we will use
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit vs_pool_t g_mut_vs_pool{};
+
+    /// @brief stores the Global Storage for this extension
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit gs_t g_mut_gs{};
+    /// @brief stores the Thread Local Storage for this extension on this PP
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit thread_local tls_t g_mut_tls{};
 
     /// <!-- description -->
-    ///   @brief Implements the VPExit entry function.
+    ///   @brief Implements the bootstrap entry function. This function is
+    ///     called on each PP while the hypervisor is being bootstrapped.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param vsid the ID of the VS that generated the VPExit
-    ///   @param exit_reason the exit reason associated with the VPExit
+    ///   @param ppid0 the physical process to bootstrap
     ///
-    void
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    vmexit_entry(bsl::uint16 const vsid, bsl::uint64 const exit_reason) noexcept
+    extern "C" void
+    bootstrap_entry(bsl::safe_u16::value_type const ppid0) noexcept
     {
-        bsl::errc_type ret{};
+        constexpr auto one{bsl::safe_u16::magic_1()};
 
-        bsl::discard(vsid);
-        bsl::discard(exit_reason);
+        auto const vpid{g_mut_sys.bf_vp_op_create_vp({})};
+        integration::require(vpid.is_valid());
 
-        // ---------------------------------------------------------------------
-        // VMExit Tests
-        // ---------------------------------------------------------------------
+        // invalid handle
+        {
+            constexpr auto hndl{BF_INVALID_HANDLE};
+            bf_status_t const ret{bf_vs_op_init_as_root_impl(hndl.get(), {})};
+            integration::require(ret != BF_STATUS_SUCCESS);
+        }
 
-        // destroy assigned VP (turns VP into zombie)
-        ret = bf_vs_op_destroy_vs(g_handle, bf_tls_vsid());
-        integration::require(bsl::errc_failure == ret);
+        // invalid id
+        {
+            constexpr auto vsid{BF_INVALID_ID};
+            bf_status_t const ret{bf_vs_op_init_as_root_impl({}, vsid.get())};
+            integration::require(ret != BF_STATUS_SUCCESS);
+        }
 
-        // destroy zombie
-        ret = bf_vs_op_destroy_vs(g_handle, bf_tls_vsid());
-        integration::require(bsl::errc_failure == ret);
+        // id out of range
+        {
+            constexpr auto vsid{(bsl::to_u16(HYPERVISOR_MAX_VSS) + one).checked()};
+            bf_status_t const ret{bf_vs_op_init_as_root_impl({}, vsid.get())};
+            integration::require(ret != BF_STATUS_SUCCESS);
+        }
 
-        // ---------------------------------------------------------------------
-        // Done
-        // ---------------------------------------------------------------------
+        // id never allocated
+        {
+            constexpr auto vsid{(bsl::to_u16(HYPERVISOR_MAX_VSS) - one).checked()};
+            bf_status_t const ret{bf_vs_op_init_as_root_impl({}, vsid.get())};
+            integration::require(ret != BF_STATUS_SUCCESS);
+        }
 
-        bf_control_op_exit();
+        auto const vsid{g_mut_sys.bf_vs_op_create_vs(vpid, bsl::to_u16(ppid0))};
+        integration::require(vsid.is_valid());
+
+        // success
+        {
+            auto const ret{g_mut_sys.bf_vs_op_init_as_root(vsid)};
+            integration::require(ret);
+        }
+
+        bsl::debug() << "success. remaining backtrace is expected\n" << bsl::here();
+        return bf_control_op_exit();
     }
 
     /// <!-- description -->
-    ///   @brief Implements the fast fail entry function.
+    ///   @brief Implements the fast fail entry function. This is registered
+    ///     by the main function to execute whenever a fast fail occurs.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param fail_reason the exit reason associated with the fail
+    ///   @param errc the reason for the failure, which is CPU
+    ///     specific. On x86, this is a combination of the exception
+    ///     vector and error code.
+    ///   @param addr contains a faulting address if the fail reason
+    ///     is associated with an error that involves a faulting address (
+    ///     for example like a page fault). Otherwise, the value of this
+    ///     input is undefined.
     ///
-    void
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    fail_entry(bsl::uint64 const fail_reason) noexcept
+    extern "C" void
+    fail_entry(bsl::safe_u64::value_type const errc, bsl::safe_u64::value_type const addr) noexcept
     {
-        bsl::discard(fail_reason);
-        bf_control_op_exit();
+        /// NOTE:
+        /// - Call into the fast fail handler. This entry point serves as a
+        ///   trampoline between C and C++. Specifically, the microkernel
+        ///   cannot call a member function directly, and can only call
+        ///   a C style function.
+        ///
+
+        auto const ret{dispatch_fail(    // --
+            g_mut_gs,                    // --
+            g_mut_tls,                   // --
+            g_mut_sys,                   // --
+            g_mut_intrinsic,             // --
+            g_mut_vp_pool,               // --
+            g_mut_vs_pool,               // --
+            bsl::to_u64(errc),           // --
+            bsl::to_u64(addr))};
+
+        if (bsl::unlikely(!ret)) {
+            bsl::print<bsl::V>() << bsl::here();
+            return bf_control_op_exit();
+        }
+
+        /// NOTE:
+        /// - This code should never be reached. The fast fail handler should
+        ///   always call one of the "run" ABIs to return back to the
+        ///   microkernel when a fast fail is finished. If this is called, it
+        ///   is because the fast fail handler returned with an error.
+        ///
+
+        return bf_control_op_exit();
     }
 
     /// <!-- description -->
-    ///   @brief Implements the bootstrap entry function.
+    ///   @brief Implements the VMExit entry function. This is registered
+    ///     by the main function to execute whenever a VMExit occurs.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param ppid the physical process to bootstrap
+    ///   @param vsid the ID of the VS that generated the VMExit
+    ///   @param exit_reason the exit reason associated with the VMExit
     ///
-    void
-    // NOLINTNEXTLINE(bsl-non-safe-integral-types-are-forbidden)
-    bootstrap_entry(bsl::uint16 const ppid) noexcept
+    extern "C" void
+    vmexit_entry(
+        bsl::safe_u16::value_type const vsid, bsl::safe_u64::value_type const exit_reason) noexcept
     {
-        bsl::errc_type ret{};
+        /// NOTE:
+        /// - Call into the vmexit handler. This entry point serves as a
+        ///   trampoline between C and C++. Specifically, the microkernel
+        ///   cannot call a member function directly, and can only call
+        ///   a C style function.
+        ///
 
-        bsl::safe_u16 vpid{};
-        bsl::safe_u16 vsid{};
+        auto const ret{dispatch_vmexit(    // --
+            g_mut_gs,                      // --
+            g_mut_tls,                     // --
+            g_mut_sys,                     // --
+            g_mut_intrinsic,               // --
+            g_mut_vp_pool,                 // --
+            g_mut_vs_pool,                 // --
+            bsl::to_u16(vsid),             // --
+            bsl::to_u64(exit_reason))};
 
-        // ---------------------------------------------------------------------
-        // Setup
-        // ---------------------------------------------------------------------
+        if (bsl::unlikely(!ret)) {
+            bsl::print<bsl::V>() << bsl::here();
+            return bf_control_op_exit();
+        }
 
-        ret = bf_vp_op_create_vp(g_handle, BF_ROOT_VMID, ppid, vpid);
-        integration::require_success(ret);
+        /// NOTE:
+        /// - This code should never be reached. The VMExit handler should
+        ///   always call one of the "run" ABIs to return back to the
+        ///   microkernel when a VMExit is finished. If this is called, it
+        ///   is because the VMExit handler returned with an error.
+        ///
 
-        ret = bf_vs_op_create_vs(g_handle, vpid, ppid, vsid);
-        integration::require_success(ret);
-
-        // ---------------------------------------------------------------------
-        // Bootstrap Tests
-        // ---------------------------------------------------------------------
-
-        // init with invalid handle
-        ret = bf_vs_op_init_as_root({}, vsid);
-        integration::require_success(ret);
-
-        // destroy with invalid ID
-        ret = bf_vs_op_init_as_root({}, BF_INVALID_ID);
-        integration::require_success(ret);
-
-        // ---------------------------------------------------------------------
-        // The following is needed to setup the remaining tests
-        // ---------------------------------------------------------------------
-
-        ret = bf_vs_op_create_vs(g_handle, vpid, ppid, vsid);
-        integration::require_success(ret);
-
-        ret = bf_vs_op_init_as_root(g_handle, vsid);
-        integration::require_success(ret);
-
-        ret = init_vs(g_handle, vsid);
-        integration::require_success(ret);
-
-        ret = bf_vs_op_run(g_handle, BF_ROOT_VMID, vpid, vsid);
-        integration::require_success(ret);
-
-        bsl::print<bsl::V>() << bsl::here();
-        bf_control_op_exit();
+        return bf_control_op_exit();
     }
 
     /// <!-- description -->
-    ///   @brief Implements the main entry function for this integration
-    ///     test
+    ///   @brief Implements the main entry function for this example
     ///
     /// <!-- inputs/outputs -->
     ///   @param version the version of the spec implemented by the
@@ -155,25 +256,59 @@ namespace integration
     extern "C" void
     ext_main_entry(bsl::uint32 const version) noexcept
     {
-        bsl::errc_type ret{};
+        bsl::errc_type mut_ret{};
 
-        if (bsl::unlikely(!bf_is_spec1_supported(version))) {
-            bsl::error() << "integration test not supported\n" << bsl::here();
+        /// NOTE:
+        /// - Initialize the bf_syscall_t. This will validate the ABI version,
+        ///   open a handle to the microkernel and register the required
+        ///   callbacks. If this fails, we call bf_control_op_exit, which is
+        ///   similar to exit() from POSIX, except that the return value is
+        ///   always the same.
+        ///
+
+        mut_ret = g_mut_sys.initialize(    // --
+            bsl::to_u32(version),          // --
+            &bootstrap_entry,              // --
+            &vmexit_entry,                 // --
+            &fail_entry);                  // --
+
+        if (bsl::unlikely(!mut_ret)) {
+            bsl::print<bsl::V>() << bsl::here();
             return bf_control_op_exit();
         }
 
-        ret = bf_handle_op_open_handle(BF_SPEC_ID1_VAL, g_handle);
-        integration::require_success(ret);
+        mut_ret = gs_initialize(g_mut_gs, g_mut_sys, g_mut_intrinsic);
+        if (bsl::unlikely(!mut_ret)) {
+            bsl::print<bsl::V>() << bsl::here();
+            return bf_control_op_exit();
+        }
 
-        ret = bf_callback_op_register_bootstrap(g_handle, &bootstrap_entry);
-        integration::require_success(ret);
+        /// NOTE:
+        /// - Initialize the vp_pool_t. This will give all of our vp_t's
+        ///   their IDs so that they can be allocated.
+        ///
 
-        ret = bf_callback_op_register_vmexit(g_handle, &vmexit_entry);
-        integration::require_success(ret);
+        g_mut_vp_pool.initialize(g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic);
 
-        ret = bf_callback_op_register_fail(g_handle, &fail_entry);
-        integration::require_success(ret);
+        /// NOTE:
+        /// - Initialize the vs_pool_t. This will give all of our vs_t's
+        ///   their IDs so that they can be allocated.
+        ///
 
-        bf_control_op_wait();
+        g_mut_vs_pool.initialize(g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic);
+
+        /// NOTE:
+        /// - Wait for callbacks. Note that this function does not return.
+        ///   The next time the extension is executed, it will be the
+        ///   bootstrap callback that was just previously registered, which
+        ///   will be called on each PP that is online. Failure to call this
+        ///   function leads to undefined behaviour (likely a page fault).
+        /// - This is similar to the wait() function from POSIX after having
+        ///   just started some processes, with the difference being that
+        ///   this will never return, so there is no need to pass in status
+        ///   as there is nothing to process after this call.
+        ///
+
+        return bf_control_op_wait();
     }
 }

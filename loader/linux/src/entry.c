@@ -110,7 +110,7 @@ dispatch_dump_vmm(void *const ioctl_args)
 
     args = (struct dump_vmm_args_t *)platform_alloc(
         sizeof(struct dump_vmm_args_t));
-    if (((void *)0) == args) {
+    if (NULLPTR == args) {
         bferror("platform_alloc failed");
         return LOADER_FAILURE;
     }

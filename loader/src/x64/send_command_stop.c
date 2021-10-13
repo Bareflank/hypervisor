@@ -37,27 +37,27 @@
  * <!-- inputs/outputs -->
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-send_command_stop(void)
+NODISCARD int64_t
+send_command_stop(void) NOEXCEPT
 {
-    uint32_t eax;
-    uint32_t ebx;
-    uint32_t ecx;
-    uint32_t edx;
+    uint32_t mut_eax;
+    uint32_t mut_ebx;
+    uint32_t mut_ecx;
+    uint32_t mut_edx;
 
-    eax = CPUID_COMMAND_EAX;
-    ecx = CPUID_COMMAND_ECX_STOP;
+    mut_eax = CPUID_COMMAND_EAX;
+    mut_ecx = CPUID_COMMAND_ECX_STOP;
     platform_mark_gdt_writable();
-    intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
+    intrinsic_cpuid(&mut_eax, &mut_ebx, &mut_ecx, &mut_edx);
     platform_mark_gdt_readonly();
 
-    if (((uint32_t)0) != eax) {
+    if (((uint32_t)0) != mut_eax) {
         bferror("stop cpuid command failed");
         return LOADER_FAILURE;
     }
 
-    if (CPUID_COMMAND_ECX_STOP != ecx) {
-        bferror("stop cpuid command failed");
+    if (CPUID_COMMAND_ECX_STOP != mut_ecx) {
+        bferror("stop cpuid command failed because ecx was not CPUID_COMMAND_ECX_STOP");
         return LOADER_FAILURE;
     }
 

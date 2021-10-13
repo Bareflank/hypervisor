@@ -25,7 +25,9 @@
  */
 
 #include <debug.h>
-#include <span_t.h>
+#include <dump_mk_elf_file.h>
+#include <elf_file_t.h>
+#include <platform.h>
 #include <types.h>
 
 /**
@@ -36,12 +38,9 @@
  *   @param file the mk elf file to output
  */
 void
-dump_mk_elf_file(struct span_t *const file)
+dump_mk_elf_file(struct elf_file_t const *const file) NOEXCEPT
 {
-    if (((void *)0) == file) {
-        bferror("file is NULL");
-        return;
-    }
+    platform_expects(NULLPTR != file);
 
     bfdebug("mk elf file:");
     bfdebug_ptr(" - addr", file->addr);

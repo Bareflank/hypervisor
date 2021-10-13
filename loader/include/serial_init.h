@@ -27,10 +27,20 @@
 #ifndef SERIAL_INIT_H
 #define SERIAL_INIT_H
 
-/**
- * <!-- description -->
- *   @brief Initializes the serial port for use
- */
-void serial_init(void);
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+    /**
+     * <!-- description -->
+     *   @brief Initializes the serial port for use
+     */
+    void serial_init(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

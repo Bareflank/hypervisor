@@ -24,12 +24,12 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
 #include <map_4k_page_rw.h>
 #include <mutable_span_t.h>
 #include <platform.h>
 #include <root_page_table_t.h>
+#include <types.h>
 
 /**
  * <!-- description -->
@@ -51,34 +51,38 @@
  * <!-- inputs/outputs -->
  *   @param page_pool a pointer to a mutable_span_t that stores the page pool
  *     being mapped
- *   @param rpt the root page table to map the page pool into
+ *   @param pmut_rpt the root page table to map the page pool into
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_mk_page_pool(struct mutable_span_t const *const page_pool, root_page_table_t *const rpt)
+NODISCARD int64_t
+map_mk_page_pool(
+    struct mutable_span_t const *const page_pool, root_page_table_t *const pmut_rpt) NOEXCEPT
 {
-    uint64_t off;
-    uint64_t *prev = ((void *)0);
+    uint64_t mut_i;
+    uint64_t *pmut_mut_prev = NULLPTR;
     uint64_t const base_virt = HYPERVISOR_MK_PAGE_POOL_ADDR;
 
-    for (off = ((uint64_t)0); off < page_pool->size; off += HYPERVISOR_PAGE_SIZE) {
+    for (mut_i = ((uint64_t)0); mut_i < page_pool->size; mut_i += HYPERVISOR_PAGE_SIZE) {
 
-        uint64_t phys = platform_virt_to_phys(page_pool->addr + off);
+        uint64_t const phys = platform_virt_to_phys(page_pool->addr + mut_i);
         if (((uint64_t)0) == phys) {
             bferror("platform_virt_to_phys failed");
             return LOADER_FAILURE;
         }
 
-        if (map_4k_page_rw((void *)(base_virt + phys), phys, rpt)) {
+        if (map_4k_page_rw((void *)(base_virt + phys), phys, pmut_rpt)) {
             bferror("map_4k_page_rw failed");
             return LOADER_FAILURE;
         }
 
-        if (((void *)0) != prev) {
-            prev[0] = base_virt + phys;
+        if (NULLPTR != pmut_mut_prev) {
+            pmut_mut_prev[0] = base_virt + phys;
+        }
+        else {
+            bf_touch();
         }
 
-        prev = ((uint64_t *)(page_pool->addr + off));
+        pmut_mut_prev = ((uint64_t *)(page_pool->addr + mut_i));
     }
 
     return LOADER_SUCCESS;

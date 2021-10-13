@@ -27,54 +27,62 @@
 #ifndef TSS_T_H
 #define TSS_T_H
 
-#include <constants.h>
 #include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #pragma pack(push, 1)
 
-/**
- * <!-- description -->
- *   @brief Defines the structure of the task state segment
- *     as defined by the AMD SDM.
- */
-struct tss_t
-{
-    /** @brief reserved (0x000) */
-    uint32_t reserved1;
-    /** @brief rsp for privilege level 0 (0x004) */
-    uint64_t rsp0;
-    /** @brief rsp for privilege level 1 (0x00C) */
-    uint64_t rsp1;
-    /** @brief rsp for privilege level 2 (0x014) */
-    uint64_t rsp2;
-    /** @brief reserved (0x01C) */
-    uint32_t reserved2;
-    /** @brief reserved (0x020) */
-    uint32_t reserved3;
-    /** @brief address of the interrupt-stack-table pointer #1 (0x024) */
-    uint64_t ist1;
-    /** @brief address of the interrupt-stack-table pointer #2 (0x02C) */
-    uint64_t ist2;
-    /** @brief address of the interrupt-stack-table pointer #3 (0x034) */
-    uint64_t ist3;
-    /** @brief address of the interrupt-stack-table pointer #4 (0x03C) */
-    uint64_t ist4;
-    /** @brief address of the interrupt-stack-table pointer #5 (0x044) */
-    uint64_t ist5;
-    /** @brief address of the interrupt-stack-table pointer #6 (0x04C) */
-    uint64_t ist6;
-    /** @brief address of the interrupt-stack-table pointer #7 (0x054) */
-    uint64_t ist7;
-    /** @brief reserved (0x05C) */
-    uint32_t reserved4;
-    /** @brief reserved (0x060) */
-    uint32_t reserved5;
-    /** @brief reserved (0x064) */
-    uint16_t reserved6;
-    /** @brief offset to the IO map base address (0x066) */
-    uint16_t iomap;
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the structure of the task state segment
+     *     as defined by the AMD SDM.
+     */
+    struct tss_t
+    {
+        /** @brief reserved (0x000) */
+        uint32_t reserved1;
+        /** @brief rsp for privilege level 0 (0x004) */
+        uint64_t rsp0;
+        /** @brief rsp for privilege level 1 (0x00C) */
+        uint64_t rsp1;
+        /** @brief rsp for privilege level 2 (0x014) */
+        uint64_t rsp2;
+        /** @brief reserved (0x01C) */
+        uint32_t reserved2;
+        /** @brief reserved (0x020) */
+        uint32_t reserved3;
+        /** @brief address of the interrupt-stack-table pointer #1 (0x024) */
+        uint64_t ist1;
+        /** @brief address of the interrupt-stack-table pointer #2 (0x02C) */
+        uint64_t ist2;
+        /** @brief address of the interrupt-stack-table pointer #3 (0x034) */
+        uint64_t ist3;
+        /** @brief address of the interrupt-stack-table pointer #4 (0x03C) */
+        uint64_t ist4;
+        /** @brief address of the interrupt-stack-table pointer #5 (0x044) */
+        uint64_t ist5;
+        /** @brief address of the interrupt-stack-table pointer #6 (0x04C) */
+        uint64_t ist6;
+        /** @brief address of the interrupt-stack-table pointer #7 (0x054) */
+        uint64_t ist7;
+        /** @brief reserved (0x05C) */
+        uint32_t reserved4;
+        /** @brief reserved (0x060) */
+        uint32_t reserved5;
+        /** @brief reserved (0x064) */
+        uint16_t reserved6;
+        /** @brief offset to the IO map base address (0x066) */
+        uint16_t iomap;
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -102,7 +102,9 @@ typedef uint16_t CHAR16;
 typedef void VOID;
 
 /** @brief NULL type*/
+#ifndef NULL
 #define NULL ((VOID *)0)
+#endif
 
 /** @brief A collection of related interfaces. Type VOID *. */
 typedef VOID *EFI_HANDLE;

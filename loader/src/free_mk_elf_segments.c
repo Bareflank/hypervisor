@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <elf_segment_t.h>
+#include <free_mk_elf_segments.h>
 #include <platform.h>
 #include <types.h>
 
@@ -35,16 +35,17 @@
  *     using the alloc_and_copy_mk_elf_segments function.
  *
  * <!-- inputs/outputs -->
- *   @param mk_elf_segments the elf_segment_t to free.
+ *   @param pmut_mk_elf_segments the elf_segment_t to free.
  */
 void
-free_mk_elf_segments(struct elf_segment_t *const mk_elf_segments)
+free_mk_elf_segments(struct elf_segment_t *const pmut_mk_elf_segments) NOEXCEPT
 {
-    uint64_t i;
+    uint64_t mut_i;
+    platform_expects(NULLPTR != pmut_mk_elf_segments);
 
-    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_SEGMENTS; ++i) {
-        struct elf_segment_t *const segment = &mk_elf_segments[i];
-        platform_free(segment->addr, segment->size);
-        platform_memset(segment, 0, sizeof(struct elf_segment_t));
+    for (mut_i = ((uint64_t)0); mut_i < HYPERVISOR_MAX_SEGMENTS; ++mut_i) {
+        struct elf_segment_t *const pmut_segment = &pmut_mk_elf_segments[mut_i];
+        platform_free(pmut_segment->addr, pmut_segment->size);
+        platform_memset(pmut_segment, ((uint8_t)0), sizeof(struct elf_segment_t));
     }
 }

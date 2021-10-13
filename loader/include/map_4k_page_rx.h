@@ -30,23 +30,33 @@
 #include <root_page_table_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function maps a 4k page given a physical address into a
- *     provided root page table at the provided virtual address. If the page
- *     is already mapped, this function will fail. Also note that this memory
- *     might need to allocate memory to expand the size of the page table
- *     tree. If this function fails, it will NOT attempt to cleanup memory
- *     that it allocated. Instead, you should free the provided root page
- *     table as a whole on error, or once it is no longer needed. Finally,
- *     this function will map using read/execute access permissions.
- *
- * <!-- inputs/outputs -->
- *   @param virt the virtual address to map phys to
- *   @param phys the physical address to map
- *   @param rpt the root page table to place the resulting map
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t map_4k_page_rx(void const *const virt, uint64_t const phys, root_page_table_t *const rpt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function maps a 4k page given a physical address into a
+     *     provided root page table at the provided virtual address. If the page
+     *     is already mapped, this function will fail. Also note that this memory
+     *     might need to allocate memory to expand the size of the page table
+     *     tree. If this function fails, it will NOT attempt to cleanup memory
+     *     that it allocated. Instead, you should free the provided root page
+     *     table as a whole on error, or once it is no longer needed. Finally,
+     *     this function will map using read/execute access permissions.
+     *
+     * <!-- inputs/outputs -->
+     *   @param virt the virtual address to map phys to
+     *   @param phys the physical address to map
+     *   @param pmut_rpt the root page table to place the resulting map
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t map_4k_page_rx(
+        void const *const virt, uint64_t const phys, root_page_table_t *const pmut_rpt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -31,17 +31,26 @@
 #include <state_save_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This promotes the OS by overwriting the state of the microkernel
- *     with the OS's state. This can be called when an error occurs during
- *     the initialization of the microkernel and it can also be called when
- *     the hypervisor is asked to stop.
- *
- * <!-- inputs/outputs -->
- *   @param mk_args_t the arguments that were passed to the microkernel
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t promote(struct mk_args_t const *const args);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This promotes the OS by overwriting the state of the microkernel
+     *     with the OS's state. This can be called when an error occurs during
+     *     the initialization of the microkernel and it can also be called when
+     *     the hypervisor is asked to stop.
+     *
+     * <!-- inputs/outputs -->
+     *   @param args the arguments that were passed to the microkernel
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t promote(struct mk_args_t const *const args) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

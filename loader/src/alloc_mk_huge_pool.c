@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
+#include <alloc_mk_huge_pool.h>
 #include <debug.h>
 #include <mutable_span_t.h>
 #include <platform.h>
@@ -39,21 +39,21 @@
  *
  * <!-- inputs/outputs -->
  *   @param size the total number of pages (not bytes) to allocate
- *   @param huge_pool the mutable_span_t to store the page pool addr/size.
+ *   @param pmut_huge_pool the mutable_span_t to store the page pool addr/size.
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-alloc_mk_huge_pool(uint32_t const size, struct mutable_span_t *const huge_pool)
+NODISCARD int64_t
+alloc_mk_huge_pool(uint32_t const size, struct mutable_span_t *const pmut_huge_pool) NOEXCEPT
 {
     if (0U == size) {
-        huge_pool->size = HYPERVISOR_MK_HUGE_POOL_SIZE;
+        pmut_huge_pool->size = HYPERVISOR_MK_HUGE_POOL_SIZE;
     }
     else {
-        huge_pool->size = HYPERVISOR_PAGE_SIZE * (uint64_t)size;
+        pmut_huge_pool->size = HYPERVISOR_PAGE_SIZE * (uint64_t)size;
     }
 
-    huge_pool->addr = platform_alloc_contiguous(huge_pool->size);
-    if (((void *)0) == huge_pool->addr) {
+    pmut_huge_pool->addr = platform_alloc_contiguous(pmut_huge_pool->size);
+    if (NULLPTR == pmut_huge_pool->addr) {
         bferror("platform_alloc failed");
         goto platform_alloc_failed;
     }
@@ -62,6 +62,6 @@ alloc_mk_huge_pool(uint32_t const size, struct mutable_span_t *const huge_pool)
 
 platform_alloc_failed:
 
-    platform_memset(huge_pool, 0, sizeof(struct mutable_span_t));
+    platform_memset(pmut_huge_pool, ((uint8_t)0), sizeof(struct mutable_span_t));
     return LOADER_FAILURE;
 }

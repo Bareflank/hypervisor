@@ -27,24 +27,33 @@
 #ifndef STOP_VMM_ARGS_T_H
 #define STOP_VMM_ARGS_T_H
 
-#include <stdint.h>
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #pragma pack(push, 1)
 
 /** @brief defines the IOCTL index for stopping the VMM */
 #define LOADER_STOP_VMM_CMD ((uint32_t)0xBF02)
 
-/**
- * <!-- description -->
- *   @brief Defines the information that a userspace application needs to
- *     provide to stop the VMM.
- */
-struct stop_vmm_args_t
-{
-    /** @brief set to HYPERVISOR_VERSION */
-    uint64_t ver;
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the information that a userspace application needs to
+     *     provide to stop the VMM.
+     */
+    struct stop_vmm_args_t
+    {
+        /** @brief set to HYPERVISOR_VERSION */
+        uint64_t ver;
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

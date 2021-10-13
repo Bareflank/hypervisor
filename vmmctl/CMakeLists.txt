@@ -40,11 +40,9 @@ target_include_directories(vmmctl SYSTEM PRIVATE
 # ------------------------------------------------------------------------------
 
 list(APPEND HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/src/ifmap_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/ioctl_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vmmctl_main.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/../lib/src/linux/ifmap.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/../lib/src/linux/ioctl.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/../lib/src/windows/ifmap.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/../lib/src/windows/ioctl.hpp
 )
 
 # ------------------------------------------------------------------------------

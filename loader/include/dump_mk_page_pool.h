@@ -30,13 +30,22 @@
 #include <mutable_span_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Outputs the contents of a provided mk page pool.
- *
- * <!-- inputs/outputs -->
- *   @param page_pool the mk page pool to output
- */
-void dump_mk_page_pool(struct mutable_span_t *const page_pool);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Outputs the contents of a provided mk page pool.
+     *
+     * <!-- inputs/outputs -->
+     *   @param page_pool the mk page pool to output
+     */
+    void dump_mk_page_pool(struct mutable_span_t const *const page_pool) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

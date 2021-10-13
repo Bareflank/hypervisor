@@ -44,6 +44,40 @@
 
 /**
  * <!-- description -->
+ *   @brief If test is false, a contract violation has occurred. This
+ *     should be used to assert preconditions that if not meet, would
+ *     result in undefined behavior. These should not be tested by a
+ *     unit test, meaning they are contract violations. These asserts
+ *     are simply there as a sanity check during a debug build.
+ *
+ * <!-- inputs/outputs -->
+ *   @param test the contract to check
+ */
+void
+platform_expects(int const test) NOEXCEPT
+{
+    NT_ASSERT(!test);
+}
+
+/**
+ * <!-- description -->
+ *   @brief If test is false, a contract violation has occurred. This
+ *     should be used to assert postconditions that if not meet, would
+ *     result in undefined behavior. These should not be tested by a
+ *     unit test, meaning they are contract violations. These asserts
+ *     are simply there as a sanity check during a debug build.
+ *
+ * <!-- inputs/outputs -->
+ *   @param test the contract to check
+ */
+void
+platform_ensures(int const test) NOEXCEPT
+{
+    NT_ASSERT(!test);
+}
+
+/**
+ * <!-- description -->
  *   @brief This function allocates read/write virtual memory from the
  *     kernel. This memory is not physically contiguous. The resulting
  *     pointer is at least 4k aligned, so use this function sparingly
@@ -57,20 +91,20 @@
  *   @return Returns a pointer to the newly allocated memory on success.
  *     Returns a nullptr on failure.
  */
-void *
-platform_alloc(uint64_t const size)
+NODISCARD void *
+platform_alloc(uint64_t const size) NOEXCEPT
 {
     void *ret;
 
     if (0 == size) {
         bferror("invalid number of bytes (i.e., size)");
-        return ((void *)0);
+        return NULLPTR;
     }
 
     ret = ExAllocatePoolWithTag(NonPagedPool, size, BF_TAG);
-    if (((void *)0) == ret) {
+    if (NULLPTR == ret) {
         bferror("vmalloc failed");
-        return ((void *)0);
+        return NULLPTR;
     }
 
     RtlFillMemory(ret, size, 0);
@@ -92,23 +126,23 @@ platform_alloc(uint64_t const size)
  *   @return Returns a pointer to the newly allocated memory on success.
  *     Returns a nullptr on failure.
  */
-void *
-platform_alloc_contiguous(uint64_t const size)
+NODISCARD void *
+platform_alloc_contiguous(uint64_t const size) NOEXCEPT
 {
     void *ret;
 
     if (0 == size) {
         bferror("invalid number of bytes (i.e., size)");
-        return ((void *)0);
+        return NULLPTR;
     }
 
     PHYSICAL_ADDRESS addr;
     addr.QuadPart = MAXULONG64;
 
     ret = MmAllocateContiguousMemory(size, addr);
-    if (((void *)0) == ret) {
+    if (NULLPTR == ret) {
         bferror("kmalloc failed");
-        return ((void *)0);
+        return NULLPTR;
     }
 
     RtlFillMemory(ret, size, 0);
@@ -128,11 +162,11 @@ platform_alloc_contiguous(uint64_t const size)
  *     may or may not be ignored depending on the platform.
  */
 void
-platform_free(void const *const ptr, uint64_t const size)
+platform_free(void const *const ptr, uint64_t const size) NOEXCEPT
 {
     (void)size;
 
-    if (((void *)0) != ptr) {
+    if (NULLPTR != ptr) {
         ExFreePoolWithTag((void *)ptr, BF_TAG);
     }
 }
@@ -150,11 +184,11 @@ platform_free(void const *const ptr, uint64_t const size)
  *     may or may not be ignored depending on the platform.
  */
 void
-platform_free_contiguous(void const *const ptr, uint64_t const size)
+platform_free_contiguous(void const *const ptr, uint64_t const size) NOEXCEPT
 {
     (void)size;
 
-    if (((void *)0) != ptr) {
+    if (NULLPTR != ptr) {
         MmFreeContiguousMemory((void *)ptr);
     }
 }
@@ -162,15 +196,15 @@ platform_free_contiguous(void const *const ptr, uint64_t const size)
 /**
  * <!-- description -->
  *   @brief Given a virtual address, this function returns the virtual
- *     address's physical address. Returns ((void *)0) if the conversion failed.
+ *     address's physical address. Returns NULLPTR if the conversion failed.
  *
  * <!-- inputs/outputs -->
  *   @param virt the virtual address to convert to a physical address
  *   @return Given a virtual address, this function returns the virtual
- *     address's physical address. Returns ((void *)0) if the conversion failed.
+ *     address's physical address. Returns NULLPTR if the conversion failed.
  */
-uintptr_t
-platform_virt_to_phys(void const *const virt)
+NODISCARD uintptr_t
+platform_virt_to_phys(void const *const virt) NOEXCEPT
 {
     PHYSICAL_ADDRESS addr = MmGetPhysicalAddress((PVOID)virt);
     return addr.QuadPart;
@@ -186,78 +220,54 @@ platform_virt_to_phys(void const *const virt)
  *   @param ptr a pointer to the memory to set
  *   @param val the value to set each byte to
  *   @param num the number of bytes in "ptr" to set to "val".
- *   @return If the provided parameters are valid, returns 0, otherwise
- *     returns LOADER_FAILURE.
  */
-int64_t
-platform_memset(void *const ptr, uint8_t const val, uint64_t const num)
+void
+platform_memset(void *const ptr, uint8_t const val, uint64_t const num) NOEXCEPT
 {
-    if (!ptr) {
-        bferror("invalid ptr");
-        return LOADER_FAILURE;
-    }
-
+    platform_expects(NULLPTR != ptr);
     RtlFillMemory(ptr, num, val);
-    return 0;
 }
 
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     ((void *)0), returns LOADER_FAILURE, otherwise returns 0.
+ *     NULLPTR, returns LOADER_FAILURE, otherwise returns 0.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are ((void *)0), returns LOADER_FAILURE, otherwise
- *     returns 0.
  */
-int64_t
-platform_memcpy(void *const dst, void const *const src, uint64_t const num)
+void
+platform_memcpy(void *const dst, void const *const src, uint64_t const num) NOEXCEPT
 {
-    if (((void *)0) == dst) {
-        bferror("invalid pointer");
-        return LOADER_FAILURE;
-    }
-
-    if (((void *)0) == src) {
-        bferror("invalid pointer");
-        return LOADER_FAILURE;
-    }
+    platform_expects(NULLPTR != dst);
+    platform_expects(NULLPTR != src);
 
     RtlCopyMemory(dst, src, num);
-    return 0;
 }
 
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     ((void *)0), returns FAILURE, otherwise returns 0. Note that this function can
+ *     NULLPTR, returns FAILURE, otherwise returns 0. Note that this function can
  *     be used to copy memory from userspace via an IOCTL.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
+ *   @return If "src" or "dst" are NULLPTR, returns FAILURE, otherwise
  *     returns 0.
  */
-int64_t
-platform_copy_from_user(void *const dst, void const *const src, uint64_t const num)
+NODISCARD int64_t
+platform_copy_from_user(void *const dst, void const *const src, uint64_t const num) NOEXCEPT
 {
     PMDL mdl = NULL;
     PVOID buffer = NULL;
 
-    if (((void *)0) == dst) {
-        bferror("invalid pointer");
-        return LOADER_FAILURE;
-    }
-
-    if (((void *)0) == src) {
-        bferror("invalid pointer");
-        return LOADER_FAILURE;
-    }
+    platform_expects(NULLPTR != dst);
+    platform_expects(NULLPTR != src);
 
     try {
         ProbeForRead((void *)src, num, sizeof(UCHAR));
@@ -309,31 +319,24 @@ probeforeread_failed:
 /**
  * <!-- description -->
  *   @brief Copies "num" bytes from "src" to "dst". If "src" or "dst" are
- *     ((void *)0), returns FAILURE, otherwise returns 0. Note that this function can
+ *     NULLPTR, returns FAILURE, otherwise returns 0. Note that this function can
  *     be used to copy memory to userspace via an IOCTL.
  *
  * <!-- inputs/outputs -->
  *   @param dst a pointer to the memory to copy to
  *   @param src a pointer to the memory to copy from
  *   @param num the number of bytes to copy
- *   @return If "src" or "dst" are ((void *)0), returns FAILURE, otherwise
+ *   @return If "src" or "dst" are NULLPTR, returns FAILURE, otherwise
  *     returns 0.
  */
-int64_t
-platform_copy_to_user(void *const dst, void const *const src, uint64_t const num)
+NODISCARD int64_t
+platform_copy_to_user(void *const dst, void const *const src, uint64_t const num) NOEXCEPT
 {
     PMDL mdl = NULL;
     PVOID buffer = NULL;
 
-    if (((void *)0) == dst) {
-        bferror("invalid pointer");
-        return LOADER_FAILURE;
-    }
-
-    if (((void *)0) == src) {
-        bferror("invalid pointer");
-        return LOADER_FAILURE;
-    }
+    platform_expects(NULLPTR != dst);
+    platform_expects(NULLPTR != src);
 
     try {
         ProbeForWrite((void *)dst, num, sizeof(UCHAR));
@@ -389,8 +392,8 @@ probeforeread_failed:
  * <!-- inputs/outputs -->
  *   @return Returns the total number of online CPUs (i.e. PPs)
  */
-uint32_t
-platform_num_online_cpus(void)
+NODISCARD uint32_t
+platform_num_online_cpus(void) NOEXCEPT
 {
     return ((uint32_t)KeQueryActiveProcessorCountEx(ALL_PROCESSOR_GROUPS));
 }
@@ -408,7 +411,8 @@ platform_num_online_cpus(void)
  *   @param SystemArgument2 ignored
  */
 VOID
-work_on_cpu_callback(KDPC *DPC, PVOID DeferredContext, PVOID SystemArgument1, PVOID SystemArgument2)
+work_on_cpu_callback(
+    KDPC *DPC, PVOID DeferredContext, PVOID SystemArgument1, PVOID SystemArgument2) NOEXCEPT
 {
     struct work_on_cpu_callback_args *args = ((struct work_on_cpu_callback_args *)DeferredContext);
 
@@ -433,7 +437,7 @@ void
 work_on_cpu(
     uint32_t const cpu,
     PKDEFERRED_ROUTINE const callback,
-    struct work_on_cpu_callback_args *const args)
+    struct work_on_cpu_callback_args *const args) NOEXCEPT
 {
     NTSTATUS status;
     PROCESSOR_NUMBER ProcNumber;
@@ -476,8 +480,8 @@ work_on_cpu(
  *   @return If each callback returns 0, this function returns 0, otherwise
  *     this function returns a non-0 value
  */
-static int64_t
-platform_on_each_cpu_forward(platform_per_cpu_func const func)
+NODISCARD static int64_t
+platform_on_each_cpu_forward(platform_per_cpu_func const func) NOEXCEPT
 {
     uint32_t cpu;
 
@@ -508,8 +512,8 @@ platform_on_each_cpu_forward(platform_per_cpu_func const func)
  *   @return If each callback returns 0, this function returns 0, otherwise
  *     this function returns a non-0 value
  */
-static int64_t
-platform_on_each_cpu_reverse(platform_per_cpu_func const func)
+NODISCARD static int64_t
+platform_on_each_cpu_reverse(platform_per_cpu_func const func) NOEXCEPT
 {
     uint32_t cpu;
 
@@ -541,8 +545,8 @@ platform_on_each_cpu_reverse(platform_per_cpu_func const func)
  *   @return If each callback returns 0, this function returns 0, otherwise
  *     this function returns a non-0 value
  */
-int64_t
-platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const order)
+NODISCARD int64_t
+platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const order) NOEXCEPT
 {
     int64_t ret;
 
@@ -561,7 +565,7 @@ platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const order)
  *   @brief Dumps the contents of the VMM's ring buffer.
  */
 void
-platform_dump_vmm(void)
+platform_dump_vmm(void) NOEXCEPT
 {}
 
 /**
@@ -573,8 +577,8 @@ platform_dump_vmm(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success, LOADER_FAILURE otherwise
  */
-int64_t
-platform_arch_init(void)
+NODISCARD int64_t
+platform_arch_init(void) NOEXCEPT
 {
     return LOADER_SUCCESS;
 }
@@ -584,7 +588,7 @@ platform_arch_init(void)
  *   @brief Marks the current GDT as read/write
  */
 void
-platform_mark_gdt_writable(void)
+platform_mark_gdt_writable(void) NOEXCEPT
 {}
 
 /**
@@ -592,5 +596,5 @@ platform_mark_gdt_writable(void)
  *   @brief Marks the current GDT as read-only
  */
 void
-platform_mark_gdt_readonly(void)
+platform_mark_gdt_readonly(void) NOEXCEPT
 {}

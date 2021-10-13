@@ -29,13 +29,22 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Loads the TR segment register with the provided value.
- *
- * <!-- inputs/outputs -->
- *   @param val the value to load into TR.
- */
-void intrinsic_ltr(uint16_t const val);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Loads the TR segment register with the provided value.
+     *
+     * <!-- inputs/outputs -->
+     *   @param val the value to load into TR.
+     */
+    void intrinsic_ltr(uint16_t const val) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

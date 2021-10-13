@@ -29,13 +29,22 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Reads the TR segment register and returns the result.
- *
- * <!-- inputs/outputs -->
- *   @return Reads the TR segment register and returns the result.
- */
-uint16_t intrinsic_str(void);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Reads the TR segment register and returns the result.
+     *
+     * <!-- inputs/outputs -->
+     *   @return Reads the TR segment register and returns the result.
+     */
+    NODISCARD uint16_t intrinsic_str(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -115,7 +115,7 @@ namespace mk
         /// @brief stores the ID associated with this ext_t
         bsl::safe_u16 m_id{};
         /// @brief stores the extension's handle
-        bsl::safe_u16 m_handle{};
+        bsl::safe_u64 m_handle{};
         /// @brief stores true if start() has been executed
         bool m_has_executed_start{};
         /// @brief stores true if fail_entry() is being executed
@@ -1029,6 +1029,7 @@ namespace mk
             }
 
             m_id = ~i;
+            m_handle = syscall::BF_INVALID_HANDLE;
             return ret;
         }
 
@@ -1059,8 +1060,8 @@ namespace mk
             }
 
             m_huge_allocs_idx = {};
-            for (auto &elem : m_huge_allocs) {
-                elem = {};
+            for (auto &mut_elem : m_huge_allocs) {
+                mut_elem = {};
             }
 
             m_fail_ip = {};
@@ -1195,12 +1196,12 @@ namespace mk
         [[nodiscard]] constexpr auto
         open_handle() noexcept -> bsl::safe_u64
         {
-            if (bsl::unlikely(m_handle.is_pos())) {
+            if (bsl::unlikely(m_handle.is_zero())) {
                 bsl::error() << "handle already opened\n" << bsl::here();
                 return bsl::safe_u64::failure();
             }
 
-            m_handle = m_id;
+            m_handle = {};
             return this->handle();
         }
 
@@ -1210,7 +1211,7 @@ namespace mk
         constexpr void
         close_handle() noexcept
         {
-            m_handle = {};
+            m_handle = syscall::BF_INVALID_HANDLE;
         }
 
         /// <!-- description -->
@@ -1224,7 +1225,7 @@ namespace mk
         is_handle_valid(bsl::safe_u64 const &hndl) const noexcept -> bool
         {
             bsl::expects(hndl.is_valid_and_checked());
-            return hndl == this->handle();
+            return hndl == m_handle;
         }
 
         /// <!-- description -->
@@ -1237,7 +1238,7 @@ namespace mk
         handle() const noexcept -> bsl::safe_u64
         {
             bsl::ensures(m_handle.is_valid_and_checked());
-            return ~bsl::to_u64(m_handle);
+            return m_handle;
         }
 
         /// <!-- description -->
@@ -1800,8 +1801,8 @@ namespace mk
             bsl::print() << bsl::ylw << "| ";
             bsl::print() << bsl::rst << bsl::fmt{"<14s", "handle "};
             bsl::print() << bsl::ylw << "| ";
-            if (m_handle.is_pos()) {
-                bsl::print() << bsl::rst << bsl::hex(m_handle) << ' ';
+            if (m_handle.is_zero()) {
+                bsl::print() << bsl::rst << "      " << bsl::hex(m_handle) << "       ";
             }
             else {
                 bsl::print() << bsl::red << bsl::fmt{"^19s", "not opened "};

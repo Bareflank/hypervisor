@@ -28,15 +28,25 @@
 #define DUMP_MK_DEBUG_RING_H
 
 #include <debug_ring_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Outputs information about the mk debug ring. Note that this does
- *     not actually output the debug ring itself, but information about it.
- *
- * <!-- inputs/outputs -->
- *   @param debug_ring the mk debug ring to output information about
- */
-void dump_mk_debug_ring(struct debug_ring_t *const debug_ring);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Outputs information about the mk debug ring. Note that this does
+     *     not actually output the debug ring itself, but information about it.
+     *
+     * <!-- inputs/outputs -->
+     *   @param debug_ring the mk debug ring to output information about
+     */
+    void dump_mk_debug_ring(struct debug_ring_t const *const debug_ring) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -24,6 +24,7 @@
  * SOFTWARE.
  */
 
+#include <free_mk_huge_pool.h>
 #include <mutable_span_t.h>
 #include <platform.h>
 #include <types.h>
@@ -34,11 +35,13 @@
  *     using the alloc_mk_huge_pool function.
  *
  * <!-- inputs/outputs -->
- *   @param huge_pool the mutable_span_t to free.
+ *   @param pmut_huge_pool the mutable_span_t to free.
  */
 void
-free_mk_huge_pool(struct mutable_span_t *const huge_pool)
+free_mk_huge_pool(struct mutable_span_t *const pmut_huge_pool) NOEXCEPT
 {
-    platform_free_contiguous(huge_pool->addr, huge_pool->size);
-    platform_memset(huge_pool, 0, sizeof(struct mutable_span_t));
+    platform_expects(NULLPTR != pmut_huge_pool);
+
+    platform_free_contiguous(pmut_huge_pool->addr, pmut_huge_pool->size);
+    platform_memset(pmut_huge_pool, ((uint8_t)0), sizeof(struct mutable_span_t));
 }

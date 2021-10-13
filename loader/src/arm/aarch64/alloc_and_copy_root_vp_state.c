@@ -54,11 +54,11 @@
  *   @param state where to save the newly set up state to
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-alloc_and_copy_root_vp_state(struct state_save_t **const state)
+NODISCARD int64_t
+alloc_and_copy_root_vp_state(struct state_save_t **const state) NOEXCEPT
 {
     *state = (struct state_save_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (((void *)0) == *state) {
+    if (NULLPTR == *state) {
         bferror("platform_alloc failed");
         return LOADER_FAILURE;
     }

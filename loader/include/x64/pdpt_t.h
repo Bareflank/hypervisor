@@ -31,23 +31,32 @@
 #include <pdt_t.h>
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
 /** @brief defines total number of entries in the pdpt */
 #define LOADER_NUM_PDPT_ENTRIES ((uint64_t)512)
 
-/**
- * <!-- description -->
- *   @brief Defines the layout of a page-directory-pionter table (pdpt).
- */
-struct pdpt_t
-{
-    /** @brief stores the entries for this page table */
-    struct pdpte_t entires[LOADER_NUM_PDPT_ENTRIES];
-    /** @brief stores pointers to child tables */
-    struct pdt_t *tables[LOADER_NUM_PDPT_ENTRIES];
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the layout of a page-directory-pionter table (pdpt).
+     */
+    struct pdpt_t
+    {
+        /** @brief stores the entries for this page table */
+        struct pdpte_t entires[LOADER_NUM_PDPT_ENTRIES];
+        /** @brief stores pointers to child tables */
+        struct pdt_t *tables[LOADER_NUM_PDPT_ENTRIES];
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

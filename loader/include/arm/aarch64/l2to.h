@@ -29,24 +29,33 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /** @brief defines the mask used for the L2T offset */
 #define L2T_OFFSET_MASK ((uint64_t)0x1FF)
 /** @brief defines the bit location of the L2T offset */
 #define L2T_OFFSET_SHIFT ((uint64_t)21)
 
-/**
- * <!-- description -->
- *   @brief Returns the level-2 table (L2T) offset given a
- *     virtual address.
- *
- * <!-- inputs/outputs -->
- *   @param virt the virtual address to get the L2T offset from.
- *   @return the L2T offset from the virtual address
- */
-static inline uint64_t
-l2to(uint64_t const virt)
-{
-    return ((virt >> L2T_OFFSET_SHIFT) & L2T_OFFSET_MASK);
+    /**
+     * <!-- description -->
+     *   @brief Returns the level-2 table (L2T) offset given a
+     *     virtual address.
+     *
+     * <!-- inputs/outputs -->
+     *   @param virt the virtual address to get the L2T offset from.
+     *   @return the L2T offset from the virtual address
+     */
+    NODISCARD static inline uint64_t
+    l2to(uint64_t const virt) NOEXCEPT
+    {
+        return ((virt >> L2T_OFFSET_SHIFT) & L2T_OFFSET_MASK);
+    }
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif

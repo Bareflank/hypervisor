@@ -24,8 +24,12 @@
  * SOFTWARE.
  */
 
+#include <bfelf/bfelf_elf64_ehdr_t.h>
 #include <debug.h>
+#include <dump_mk_args.h>
 #include <mk_args_t.h>
+#include <mutable_span_t.h>
+#include <platform.h>
 #include <types.h>
 
 /**
@@ -37,14 +41,10 @@
  *   @param cpu the CPU that this mk args belongs to
  */
 void
-dump_mk_args(struct mk_args_t *const args, uint32_t const cpu)
+dump_mk_args(struct mk_args_t const *const args, uint32_t const cpu) NOEXCEPT
 {
-    uint64_t i;
-
-    if (((void *)0) == args) {
-        bferror("args is NULL");
-        return;
-    }
+    uint64_t mut_i;
+    platform_expects(NULLPTR != args);
 
     bfdebug_d32("mk args on cpu", cpu);
     bfdebug_x16(" - online_pps", args->online_pps);
@@ -53,9 +53,12 @@ dump_mk_args(struct mk_args_t *const args, uint32_t const cpu)
     bfdebug_ptr(" - debug_ring", args->debug_ring);
     bfdebug_ptr(" - mk_elf_file", args->mk_elf_file);
 
-    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_EXTENSIONS; ++i) {
-        if (((void *)0) != args->ext_elf_files[i]) {
-            bfdebug_ptr(" - ext_elf_files", args->ext_elf_files[i]);
+    for (mut_i = ((uint64_t)0); mut_i < HYPERVISOR_MAX_EXTENSIONS; ++mut_i) {
+        if (NULLPTR != args->ext_elf_files[mut_i]) {
+            bfdebug_ptr(" - ext_elf_files", args->ext_elf_files[mut_i]);
+        }
+        else {
+            bf_touch();
         }
     }
 

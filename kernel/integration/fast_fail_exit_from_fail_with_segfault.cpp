@@ -101,10 +101,10 @@ namespace syscall
     ///     called on each PP while the hypervisor is being bootstrapped.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param ppid the physical process to bootstrap
+    ///   @param ppid0 the physical process to bootstrap
     ///
     extern "C" void
-    bootstrap_entry(bsl::safe_u16::value_type const ppid) noexcept
+    bootstrap_entry(bsl::safe_u16::value_type const ppid0) noexcept
     {
         /// NOTE:
         /// - Call into the bootstrap handler. This entry point serves as a
@@ -120,7 +120,7 @@ namespace syscall
             g_mut_intrinsic,                  // --
             g_mut_vp_pool,                    // --
             g_mut_vs_pool,                    // --
-            bsl::to_u16(ppid))};
+            bsl::to_u16(ppid0))};
 
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
@@ -157,10 +157,10 @@ namespace syscall
         bsl::discard(addr);
 
         bsl::error() << "extension purposely dereferencing nullptr. fault expected\n";
-        bool *i{};
+        bool *const pmut_i{};
         // This is intentional as it is what we are testing.
         // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
-        *i = true;
+        *pmut_i = true;
     }
 
     /// <!-- description -->
@@ -175,8 +175,8 @@ namespace syscall
     vmexit_entry(
         bsl::safe_u16::value_type const vsid, bsl::safe_u64::value_type const exit_reason) noexcept
     {
-        static constinit bsl::safe_idx s_count{};
-        ++s_count;
+        static constinit bsl::safe_idx s_mut_count{};
+        ++s_mut_count;
 
         /// NOTE:
         /// - Call into the vmexit handler. This entry point serves as a
@@ -185,7 +185,7 @@ namespace syscall
         ///   a C style function.
         ///
 
-        if (s_count == bsl::safe_idx::magic_1()) {
+        if (s_mut_count == bsl::safe_idx::magic_1()) {
             bsl::assert("force the fail entry to be called", bsl::here());
         }
         else {

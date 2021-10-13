@@ -25,7 +25,9 @@
  */
 
 #include <debug.h>
+#include <dump_mk_huge_pool.h>
 #include <mutable_span_t.h>
+#include <platform.h>
 #include <types.h>
 
 /**
@@ -36,12 +38,9 @@
  *   @param huge_pool the mk huge pool to output
  */
 void
-dump_mk_huge_pool(struct mutable_span_t *const huge_pool)
+dump_mk_huge_pool(struct mutable_span_t const *const huge_pool) NOEXCEPT
 {
-    if (((void *)0) == huge_pool) {
-        bferror("huge_pool is NULL");
-        return;
-    }
+    platform_expects(NULLPTR != huge_pool);
 
     bfdebug("mk huge pool:");
     bfdebug_ptr(" - addr", huge_pool->addr);

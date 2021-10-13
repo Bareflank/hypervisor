@@ -31,18 +31,28 @@
 #include <root_page_table_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function maps the code aliases into the microkernel's
- *     root page tables. For more information about how this mapping is
- *     performed, please see alloc_and_copy_mk_code_aliases.
- *
- * <!-- inputs/outputs -->
- *   @param a a pointer to a code_aliases_t that stores the aliases
- *     being mapped
- *   @param rpt the root page table to map the code aliases into
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t map_mk_code_aliases(struct code_aliases_t const *const a, root_page_table_t *const rpt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function maps the code aliases into the microkernel's
+     *     root page tables. For more information about how this mapping is
+     *     performed, please see alloc_and_copy_mk_code_aliases.
+     *
+     * <!-- inputs/outputs -->
+     *   @param a a pointer to a code_aliases_t that stores the aliases
+     *     being mapped
+     *   @param pmut_rpt the root page table to map the code aliases into
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t map_mk_code_aliases(
+        struct code_aliases_t const *const a, root_page_table_t *const pmut_rpt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

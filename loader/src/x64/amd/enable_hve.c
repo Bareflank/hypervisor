@@ -47,8 +47,8 @@
  *   @param state the mk state save containing the HVE page
  *   @return Returns 0 on success
  */
-int64_t
-enable_hve(struct state_save_t *const state)
+NODISCARD int64_t
+enable_hve(struct state_save_t *const state) NOEXCEPT
 {
     uint64_t phys;
     uint64_t efer;

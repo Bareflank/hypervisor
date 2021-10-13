@@ -34,43 +34,52 @@
 #include <state_save_t.h>
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
-/**
- * <!-- description -->
- *   @brief Defines the arguments sent to the _start function of the
- *     microkernel. The microkernel will have it's own C++ version of this
- *     struct that provides the actual types for each of the arguments as
- *     it expects them.
- */
-struct mk_args_t
-{
-    /** @brief stores the current ppid (0x000) */
-    uint16_t ppid;
-    /** @brief stores the number of online pps (0x002) */
-    uint16_t online_pps;
-    /** @brief reserved (0x004) */
-    uint32_t reserved;
-    /** @brief stores the location of the microkernel's state (0x008) */
-    struct state_save_t *mk_state;
-    /** @brief stores the location of the root vp state (0x010) */
-    struct state_save_t *root_vp_state;
-    /** @brief stores the location of the debug ring (0x018) */
-    struct debug_ring_t *debug_ring;
-    /** @brief stores the location of the microkernel's ELF file */
-    struct bfelf_elf64_ehdr_t const *mk_elf_file;
-    /** @brief stores the location of the extension's ELF files */
-    struct bfelf_elf64_ehdr_t const *ext_elf_files[HYPERVISOR_MAX_EXTENSIONS];
-    /** @brief stores the virtual address of the MK's RPT for this CPU */
-    void *rpt;
-    /** @brief stores the physical address of the MK's RPT for this CPU */
-    uint64_t rpt_phys;
-    /** @brief stores the location of the microkernel's page pool */
-    struct mutable_span_t page_pool;
-    /** @brief stores the location of the microkernel's huge pool */
-    struct mutable_span_t huge_pool;
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the arguments sent to the _start function of the
+     *     microkernel. The microkernel will have it's own C++ version of this
+     *     struct that provides the actual types for each of the arguments as
+     *     it expects them.
+     */
+    struct mk_args_t
+    {
+        /** @brief stores the current ppid (0x000) */
+        uint16_t ppid;
+        /** @brief stores the number of online pps (0x002) */
+        uint16_t online_pps;
+        /** @brief reserved (0x004) */
+        uint32_t reserved;
+        /** @brief stores the location of the microkernel's state (0x008) */
+        struct state_save_t *mk_state;
+        /** @brief stores the location of the root vp state (0x010) */
+        struct state_save_t *root_vp_state;
+        /** @brief stores the location of the debug ring (0x018) */
+        struct debug_ring_t *debug_ring;
+        /** @brief stores the location of the microkernel's ELF file */
+        struct bfelf_elf64_ehdr_t const *mk_elf_file;
+        /** @brief stores the location of the extension's ELF files */
+        struct bfelf_elf64_ehdr_t const *ext_elf_files[HYPERVISOR_MAX_EXTENSIONS];
+        /** @brief stores the virtual address of the MK's RPT for this CPU */
+        void *rpt;
+        /** @brief stores the physical address of the MK's RPT for this CPU */
+        uint64_t rpt_phys;
+        /** @brief stores the location of the microkernel's page pool */
+        struct mutable_span_t page_pool;
+        /** @brief stores the location of the microkernel's huge pool */
+        struct mutable_span_t huge_pool;
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

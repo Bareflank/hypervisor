@@ -28,15 +28,25 @@
 #define INTRINSIC_SIDT_H
 
 #include <interrupt_descriptor_table_register_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Executes the SIDT instruction given a pointer to a
- *     interrupt_descriptor_table_register_t.
- *
- * <!-- inputs/outputs -->
- *   @param idtr a pointer to a interrupt_descriptor_table_register_t
- */
-void intrinsic_sidt(struct interrupt_descriptor_table_register_t *const idtr);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Executes the SIDT instruction given a pointer to a
+     *     interrupt_descriptor_table_register_t.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_idtr a pointer to a interrupt_descriptor_table_register_t
+     */
+    void intrinsic_sidt(struct interrupt_descriptor_table_register_t *const pmut_idtr) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

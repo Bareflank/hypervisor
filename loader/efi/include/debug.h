@@ -134,7 +134,7 @@ static inline void
 bfdebug_x8(char const *const str, uint8_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE16);
+    (void)bfitoa(((uint64_t)val), num, BASE16);
 
     serial_write("[BAREFLANK DEBUG] ");
     serial_write(str);
@@ -161,7 +161,7 @@ static inline void
 bfdebug_x16(char const *const str, uint16_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE16);
+    (void)bfitoa(((uint64_t)val), num, BASE16);
 
     serial_write("[BAREFLANK DEBUG] ");
     serial_write(str);
@@ -188,7 +188,7 @@ static inline void
 bfdebug_x32(char const *const str, uint32_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE16);
+    (void)bfitoa(((uint64_t)val), num, BASE16);
 
     serial_write("[BAREFLANK DEBUG] ");
     serial_write(str);
@@ -215,7 +215,7 @@ static inline void
 bfdebug_x64(char const *const str, uint64_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE16);
+    (void)bfitoa(((uint64_t)val), num, BASE16);
 
     serial_write("[BAREFLANK DEBUG] ");
     serial_write(str);
@@ -244,8 +244,8 @@ bfdebug_x64_idx(char const *const str, uint64_t const idx, uint64_t const val)
 {
     char idx_num[65] = {0};
     char val_num[65] = {0};
-    bfitoa(((uint64_t)idx), idx_num, BASE16);
-    bfitoa(((uint64_t)val), val_num, BASE16);
+    (void)bfitoa(((uint64_t)idx), idx_num, BASE16);
+    (void)bfitoa(((uint64_t)val), val_num, BASE16);
 
     serial_write(str);
     serial_write("[0x");
@@ -267,7 +267,7 @@ static inline void
 bfdebug_d8(char const *const str, uint8_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE10);
+    (void)bfitoa(((uint64_t)val), num, BASE10);
 
     serial_write("[BAREFLANK DEBUG] ");
     serial_write(str);
@@ -294,7 +294,7 @@ static inline void
 bfdebug_d16(char const *const str, uint16_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE10);
+    (void)bfitoa(((uint64_t)val), num, BASE10);
 
     serial_write("[BAREFLANK DEBUG] ");
     serial_write(str);
@@ -321,7 +321,7 @@ static inline void
 bfdebug_d32(char const *const str, uint32_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE10);
+    (void)bfitoa(((uint64_t)val), num, BASE10);
 
     serial_write("[BAREFLANK DEBUG] ");
     serial_write(str);
@@ -348,7 +348,7 @@ static inline void
 bfdebug_d64(char const *const str, uint64_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE10);
+    (void)bfitoa(((uint64_t)val), num, BASE10);
 
     serial_write("[BAREFLANK DEBUG] ");
     serial_write(str);
@@ -375,7 +375,7 @@ static inline void
 bfdebug_ptr(char const *const str, void const *const p)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)p), num, BASE16);
+    (void)bfitoa(((uint64_t)p), num, BASE16);
 
     serial_write("[BAREFLANK DEBUG] ");
     serial_write(str);
@@ -421,7 +421,7 @@ static inline void
 bferror_x8(char const *const str, uint8_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE16);
+    (void)bfitoa(((uint64_t)val), num, BASE16);
 
     serial_write("[BAREFLANK ERROR] ");
     serial_write(str);
@@ -448,7 +448,7 @@ static inline void
 bferror_x16(char const *const str, uint16_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE16);
+    (void)bfitoa(((uint64_t)val), num, BASE16);
 
     serial_write("[BAREFLANK ERROR] ");
     serial_write(str);
@@ -475,7 +475,7 @@ static inline void
 bferror_x32(char const *const str, uint32_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE16);
+    (void)bfitoa(((uint64_t)val), num, BASE16);
 
     serial_write("[BAREFLANK ERROR] ");
     serial_write(str);
@@ -502,7 +502,7 @@ static inline void
 bferror_x64(char const *const str, uint64_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE16);
+    (void)bfitoa(((uint64_t)val), num, BASE16);
 
     serial_write("[BAREFLANK ERROR] ");
     serial_write(str);
@@ -529,7 +529,7 @@ static inline void
 bferror_d8(char const *const str, uint8_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE10);
+    (void)bfitoa(((uint64_t)val), num, BASE10);
 
     serial_write("[BAREFLANK ERROR] ");
     serial_write(str);
@@ -556,7 +556,7 @@ static inline void
 bferror_d16(char const *const str, uint16_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE10);
+    (void)bfitoa(((uint64_t)val), num, BASE10);
 
     serial_write("[BAREFLANK ERROR] ");
     serial_write(str);
@@ -583,7 +583,7 @@ static inline void
 bferror_d32(char const *const str, uint32_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE10);
+    (void)bfitoa(((uint64_t)val), num, BASE10);
 
     serial_write("[BAREFLANK ERROR] ");
     serial_write(str);
@@ -610,7 +610,7 @@ static inline void
 bferror_d64(char const *const str, uint64_t const val)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)val), num, BASE10);
+    (void)bfitoa(((uint64_t)val), num, BASE10);
 
     serial_write("[BAREFLANK ERROR] ");
     serial_write(str);
@@ -637,7 +637,7 @@ static inline void
 bferror_ptr(char const *const str, void const *const p)
 {
     char num[65] = {0};
-    bfitoa(((uint64_t)p), num, BASE16);
+    (void)bfitoa(((uint64_t)p), num, BASE16);
 
     serial_write("[BAREFLANK ERROR] ");
     serial_write(str);

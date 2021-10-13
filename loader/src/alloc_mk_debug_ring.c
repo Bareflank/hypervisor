@@ -24,6 +24,7 @@
  * SOFTWARE.
  */
 
+#include <alloc_mk_debug_ring.h>
 #include <debug.h>
 #include <debug_ring_t.h>
 #include <platform.h>
@@ -35,15 +36,15 @@
  *     used by the microkernel.
  *
  * <!-- inputs/outputs -->
- *   @param debug_ring the debug_ring_t to store the newly allocated
+ *   @param pmut_debug_ring the debug_ring_t to store the newly allocated
  *     debug ring
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-alloc_mk_debug_ring(struct debug_ring_t **const debug_ring)
+NODISCARD int64_t
+alloc_mk_debug_ring(struct debug_ring_t **const pmut_debug_ring) NOEXCEPT
 {
-    *debug_ring = (struct debug_ring_t *)platform_alloc(HYPERVISOR_DEBUG_RING_SIZE);
-    if (((void *)0) == *debug_ring) {
+    *pmut_debug_ring = (struct debug_ring_t *)platform_alloc(HYPERVISOR_DEBUG_RING_SIZE);
+    if (NULLPTR == *pmut_debug_ring) {
         bferror("platform_alloc failed");
         return LOADER_FAILURE;
     }

@@ -30,16 +30,25 @@
 #include <stop_vmm_args_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function contains all of the code that is common between
- *     all archiectures and all platforms for stopping the VMM. This function
- *     will call platform and architecture specific functions as needed.
- *
- * <!-- inputs/outputs -->
- *   @param ioctl_args arguments from the ioctl
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t stop_vmm(struct stop_vmm_args_t const *const ioctl_args);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function contains all of the code that is common between
+     *     all archiectures and all platforms for stopping the VMM. This function
+     *     will call platform and architecture specific functions as needed.
+     *
+     * <!-- inputs/outputs -->
+     *   @param ioctl_args arguments from the ioctl
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t stop_vmm(struct stop_vmm_args_t const *const ioctl_args) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -30,13 +30,22 @@
 #include <code_aliases_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Outputs the contents of a provided code_aliases_t.
- *
- * <!-- inputs/outputs -->
- *   @param a the code_aliases_t to output
- */
-void dump_mk_code_aliases(struct code_aliases_t *const a);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Outputs the contents of a provided code_aliases_t.
+     *
+     * <!-- inputs/outputs -->
+     *   @param a the code_aliases_t to output
+     */
+    void dump_mk_code_aliases(struct code_aliases_t const *const a) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

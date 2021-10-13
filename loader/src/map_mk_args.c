@@ -27,8 +27,8 @@
 #include <debug.h>
 #include <map_4k_page_rw.h>
 #include <mk_args_t.h>
-#include <platform.h>
 #include <root_page_table_t.h>
+#include <types.h>
 
 /**
  * <!-- description -->
@@ -38,13 +38,13 @@
  * <!-- inputs/outputs -->
  *   @param args a pointer to a mk_args_t that stores the args
  *     being mapped
- *   @param rpt the root page table to map the args into
+ *   @param pmut_rpt the root page table to map the args into
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_mk_args(struct mk_args_t const *const args, root_page_table_t *const rpt)
+NODISCARD int64_t
+map_mk_args(struct mk_args_t const *const args, root_page_table_t *const pmut_rpt) NOEXCEPT
 {
-    if (map_4k_page_rw(args, ((uint64_t)0), rpt)) {
+    if (map_4k_page_rw(args, ((uint64_t)0), pmut_rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }

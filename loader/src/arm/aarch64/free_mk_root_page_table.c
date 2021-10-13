@@ -38,14 +38,14 @@
  *   @param rpt the root_page_table_t to free.
  */
 void
-free_mk_root_page_table(root_page_table_t **const rpt)
+free_mk_root_page_table(root_page_table_t **const rpt) NOEXCEPT
 {
-    if (((void *)0) == *rpt) {
+    if (NULLPTR == *rpt) {
         return;
     }
 
     free_l0t(*rpt);
 
     platform_free(*rpt, sizeof(root_page_table_t));
-    *rpt = ((void *)0);
+    *rpt = NULLPTR;
 }

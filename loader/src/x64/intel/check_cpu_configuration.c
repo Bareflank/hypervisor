@@ -93,8 +93,8 @@
  *   @return Return 0 if running on an Intel processor, LOADER_FAILURE
  *     otherwise.
  */
-static inline int64_t
-check_for_intel(void)
+NODISCARD static inline int64_t
+check_for_intel(void) NOEXCEPT
 {
     uint32_t eax;
     uint32_t ebx;
@@ -130,8 +130,8 @@ check_for_intel(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success, LOADER_FAILURE otherwise.
  */
-static inline int64_t
-check_for_vmx(void)
+NODISCARD static inline int64_t
+check_for_vmx(void) NOEXCEPT
 {
     uint32_t eax;
     uint32_t ebx;
@@ -157,8 +157,8 @@ check_for_vmx(void)
  * <!-- inputs/outputs -->
  *   @return Return 0 if VMX is usable, LOADER_FAILURE otherwise.
  */
-static inline int64_t
-check_for_vmx_disabled(void)
+NODISCARD static inline int64_t
+check_for_vmx_disabled(void) NOEXCEPT
 {
     uint64_t msr = intrinsic_rdmsr(MSR_FEATURE_CTRL);
 
@@ -177,8 +177,8 @@ check_for_vmx_disabled(void)
  * <!-- inputs/outputs -->
  *   @return Return 0 on success, LOADER_FAILURE otherwise.
  */
-static inline int64_t
-check_vmx_capabilities(void)
+NODISCARD static inline int64_t
+check_vmx_capabilities(void) NOEXCEPT
 {
     uint64_t msr = intrinsic_rdmsr(MSR_VMX_BASIC);
 
@@ -207,8 +207,8 @@ check_vmx_capabilities(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success, LOADER_FAILURE otherwise.
  */
-static inline int64_t
-check_the_configuration_of_efer(void)
+NODISCARD static inline int64_t
+check_the_configuration_of_efer(void) NOEXCEPT
 {
     uint64_t msr = intrinsic_rdmsr(MSR_EFER);
 
@@ -232,8 +232,8 @@ check_the_configuration_of_efer(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success, LOADER_FAILURE otherwise.
  */
-static inline int64_t
-check_cr0(void)
+NODISCARD static inline int64_t
+check_cr0(void) NOEXCEPT
 {
     uint64_t cr0 = intrinsic_scr0();
     uint64_t vmx_cr0_fixed0 = intrinsic_rdmsr(MSR_VMX_CR0_FIXED0);
@@ -258,8 +258,8 @@ check_cr0(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success, LOADER_FAILURE otherwise.
  */
-static inline int64_t
-check_cr4(void)
+NODISCARD static inline int64_t
+check_cr4(void) NOEXCEPT
 {
     uint64_t cr4 = intrinsic_scr4() | CR4_VMXE;
     uint64_t vmx_cr4_fixed0 = intrinsic_rdmsr(MSR_VMX_CR4_FIXED0);
@@ -284,8 +284,8 @@ check_cr4(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success, LOADER_FAILURE otherwise.
  */
-static inline int64_t
-check_for_xsave(void)
+NODISCARD static inline int64_t
+check_for_xsave(void) NOEXCEPT
 {
     uint32_t eax;
     uint32_t ebx;
@@ -317,8 +317,8 @@ check_for_xsave(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t
-check_cpu_configuration(void)
+NODISCARD int64_t
+check_cpu_configuration(void) NOEXCEPT
 {
     if (check_for_intel()) {
         bferror("check_for_intel failed");

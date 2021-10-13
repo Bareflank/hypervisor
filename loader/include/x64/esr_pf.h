@@ -27,10 +27,21 @@
 #ifndef ESR_PF_H
 #define ESR_PF_H
 
-/**
- * <!-- description -->
- *   @brief Defines the exception service routine for page faults
- */
-void esr_pf(void);
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Defines the exception service routine for page faults
+     */
+    void esr_pf(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

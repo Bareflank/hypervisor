@@ -29,13 +29,22 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Turns VT-x off
- *
- * <!-- inputs/outputs -->
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t intrinsic_vmxoff(void);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Turns VT-x off
+     *
+     * <!-- inputs/outputs -->
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t intrinsic_vmxoff(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

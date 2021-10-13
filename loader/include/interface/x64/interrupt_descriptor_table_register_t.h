@@ -29,21 +29,30 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
-/**
- * <!-- description -->
- *   @brief Defines the structure of the interrupt descriptor table register
- *     as defined by Intel and AMD.
- */
-struct interrupt_descriptor_table_register_t
-{
-    /** @brief stores the size of the idt in bytes (minus 1) */
-    uint16_t limit;
-    /** @brief stores a pointer to the idt */
-    uint64_t *base;
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the structure of the interrupt descriptor table register
+     *     as defined by Intel and AMD.
+     */
+    struct interrupt_descriptor_table_register_t
+    {
+        /** @brief stores the size of the idt in bytes (minus 1) */
+        uint16_t limit;
+        /** @brief stores a pointer to the idt */
+        uint64_t *base;
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

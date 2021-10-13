@@ -24,10 +24,11 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
+#include <debug_ring_t.h>
+#include <dump_vmm.h>
 #include <dump_vmm_args_t.h>
-#include <g_mk_debug_ring.h>
+#include <g_pmut_mut_mk_debug_ring.h>
 #include <platform.h>
 #include <types.h>
 
@@ -39,8 +40,8 @@
  *   @param args the arguments to verify
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-static int64_t
-verify_dump_vmm_args(struct dump_vmm_args_t const *const args)
+NODISCARD static int64_t
+verify_dump_vmm_args(struct dump_vmm_args_t const *const args) NOEXCEPT
 {
     if (((uint64_t)1) != args->ver) {
         bferror("IOCTL ABI version not supported");
@@ -57,29 +58,20 @@ verify_dump_vmm_args(struct dump_vmm_args_t const *const args)
  *     will call platform and architecture specific functions as needed.
  *
  * <!-- inputs/outputs -->
- *   @param args arguments from the ioctl
+ *   @param pmut_args arguments from the ioctl
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-dump_vmm(struct dump_vmm_args_t *const args)
+NODISCARD int64_t
+dump_vmm(struct dump_vmm_args_t *const pmut_args) NOEXCEPT
 {
-    int64_t ret;
+    platform_expects(NULLPTR != pmut_args);
+    platform_expects(NULLPTR != g_pmut_mut_mk_debug_ring);
 
-    if (((void *)0) == args) {
-        bferror("args was NULL");
-        return LOADER_FAILURE;
-    }
-
-    if (verify_dump_vmm_args(args)) {
+    if (verify_dump_vmm_args(pmut_args)) {
         bferror("verify_dump_vmm_args failed");
         return LOADER_FAILURE;
     }
 
-    ret = platform_memcpy(&args->debug_ring, g_mk_debug_ring, sizeof(struct debug_ring_t));
-    if (ret) {
-        bferror("platform_memcpy failed");
-        return LOADER_FAILURE;
-    }
-
+    platform_memcpy(&pmut_args->debug_ring, g_pmut_mut_mk_debug_ring, sizeof(struct debug_ring_t));
     return LOADER_SUCCESS;
 }

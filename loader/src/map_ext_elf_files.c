@@ -24,12 +24,11 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
 #include <elf_file_t.h>
 #include <map_4k_page_rw.h>
-#include <platform.h>
 #include <root_page_table_t.h>
+#include <types.h>
 
 /**
  * <!-- description -->
@@ -38,20 +37,23 @@
  *
  * <!-- inputs/outputs -->
  *   @param ext_elf_file a pointer to the ext_elf_file to map
- *   @param rpt the root page table to map the ELF files into
+ *   @param pmut_rpt the root page table to map the ELF files into
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-static int64_t
-map_ext_elf_file(struct elf_file_t const *const ext_elf_file, root_page_table_t *const rpt)
+NODISCARD static int64_t
+map_ext_elf_file(
+    struct elf_file_t const *const ext_elf_file, root_page_table_t *const pmut_rpt) NOEXCEPT
 {
-    uint64_t i;
-    uint8_t const *file = ((uint8_t const *)ext_elf_file->addr);
+    uint64_t mut_i;
+    uint8_t const *mut_file = ((uint8_t const *)ext_elf_file->addr);
 
-    for (i = ((uint64_t)0); i < ext_elf_file->size; i += HYPERVISOR_PAGE_SIZE) {
-        if (map_4k_page_rw(file + i, ((uint64_t)0), rpt)) {
+    for (mut_i = ((uint64_t)0); mut_i < ext_elf_file->size; mut_i += HYPERVISOR_PAGE_SIZE) {
+        if (map_4k_page_rw(mut_file + mut_i, ((uint64_t)0), pmut_rpt)) {
             bferror("map_4k_page_rw failed");
             return LOADER_FAILURE;
         }
+
+        bf_touch();
     }
 
     return LOADER_SUCCESS;
@@ -64,19 +66,22 @@ map_ext_elf_file(struct elf_file_t const *const ext_elf_file, root_page_table_t 
  *
  * <!-- inputs/outputs -->
  *   @param ext_elf_files a pointer to the ext_elf_files to map
- *   @param rpt the root page table to map the ELF files into
+ *   @param pmut_rpt the root page table to map the ELF files into
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_ext_elf_files(struct elf_file_t const *const ext_elf_files, root_page_table_t *const rpt)
+NODISCARD int64_t
+map_ext_elf_files(
+    struct elf_file_t const *const ext_elf_files, root_page_table_t *const pmut_rpt) NOEXCEPT
 {
-    uint64_t i;
+    uint64_t mut_i;
 
-    for (i = ((uint64_t)0); i < HYPERVISOR_MAX_EXTENSIONS; ++i) {
-        if (map_ext_elf_file(&ext_elf_files[i], rpt)) {
+    for (mut_i = ((uint64_t)0); mut_i < HYPERVISOR_MAX_EXTENSIONS; ++mut_i) {
+        if (map_ext_elf_file(&ext_elf_files[mut_i], pmut_rpt)) {
             bferror("map_ext_elf_file failed");
             return LOADER_FAILURE;
         }
+
+        bf_touch();
     }
 
     return LOADER_SUCCESS;

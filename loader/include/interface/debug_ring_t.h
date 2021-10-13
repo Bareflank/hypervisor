@@ -27,26 +27,34 @@
 #ifndef DEBUG_RING_T_H
 #define DEBUG_RING_T_H
 
-#include <constants.h>
-#include <stdint.h>
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #pragma pack(push, 1)
 
-/**
- * <!-- description -->
- *   @brief Defines the structure of the microkernel's debug ring
- */
-struct debug_ring_t
-{
-    /** @brief stores the end position of the debug ring */
-    uint64_t epos;
-    /** @brief stores the start position of the debug ring */
-    uint64_t spos;
+    /**
+     * <!-- description -->
+     *   @brief Defines the structure of the microkernel's debug ring
+     */
+    struct debug_ring_t
+    {
+        /** @brief stores the end position of the debug ring */
+        uint64_t epos;
+        /** @brief stores the start position of the debug ring */
+        uint64_t spos;
 
-    /** @brief stores the characters in the debug ring */
-    char buf[HYPERVISOR_DEBUG_RING_SIZE];
-};
+        /** @brief stores the characters in the debug ring */
+        char buf[HYPERVISOR_DEBUG_RING_SIZE];
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

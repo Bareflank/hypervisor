@@ -48,8 +48,8 @@
  *   @param rpt the root page table to map the code aliases into
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_mk_code_aliases(struct code_aliases_t const *const a, root_page_table_t *const rpt)
+NODISCARD int64_t
+map_mk_code_aliases(struct code_aliases_t const *const a, root_page_table_t *const rpt) NOEXCEPT
 {
     if (map_4k_page_rx(demote, ((uint64_t)0), rpt)) {
         bferror("map_4k_page_rx failed");

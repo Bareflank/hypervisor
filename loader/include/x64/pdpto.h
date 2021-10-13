@@ -29,24 +29,33 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /** @brief defines the size of the PDPT offset */
 #define PDPT_OFFSET_MASK ((uint64_t)0x1FF)
 /** @brief defines the bit location of the PDPT offset */
 #define PDPT_OFFSET_SHIFT ((uint64_t)30)
 
-/**
- * <!-- description -->
- *   @brief Returns the page-directory-pointer table (PDPT) offset given a
- *     virtual address.
- *
- * <!-- inputs/outputs -->
- *   @param virt the virtual address to get the PDPT offset from.
- *   @return the PDPT offset from the virtual address
- */
-static uint64_t
-pdpto(uint64_t const virt)
-{
-    return ((virt >> PDPT_OFFSET_SHIFT) & PDPT_OFFSET_MASK);
+    /**
+     * <!-- description -->
+     *   @brief Returns the page-directory-pointer table (PDPT) offset given a
+     *     virtual address.
+     *
+     * <!-- inputs/outputs -->
+     *   @param virt the virtual address to get the PDPT offset from.
+     *   @return the PDPT offset from the virtual address
+     */
+    NODISCARD static uint64_t
+    pdpto(uint64_t const virt) NOEXCEPT
+    {
+        return ((virt >> PDPT_OFFSET_SHIFT) & PDPT_OFFSET_MASK);
+    }
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif

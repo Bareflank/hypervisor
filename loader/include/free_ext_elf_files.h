@@ -28,15 +28,25 @@
 #define FREE_EXT_ELF_FILES_H
 
 #include <elf_file_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Releases a previously allocated elf_file_t that was allocated
- *     using the alloc_and_copy_ext_elf_files function.
- *
- * <!-- inputs/outputs -->
- *   @param ext_elf_files the elf_file_t to free.
- */
-void free_ext_elf_files(struct elf_file_t *const ext_elf_files);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Releases a previously allocated elf_file_t that was allocated
+     *     using the alloc_and_copy_ext_elf_files function.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_ext_elf_files the elf_file_t to free.
+     */
+    void free_ext_elf_files(struct elf_file_t *const pmut_ext_elf_files) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -28,15 +28,25 @@
 #define FREE_PDPT_H
 
 #include <pdpt_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Given a pdpt_t, this function will free any previously allocated
- *     tables.
- *
- * <!-- inputs/outputs -->
- *   @param pdpt the pdpt_t to free
- */
-void free_pdpt(struct pdpt_t *const pdpt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Given a pdpt_t, this function will free any previously allocated
+     *     tables.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_pdpt the pdpt_t to free
+     */
+    void free_pdpt(struct pdpt_t *const pmut_pdpt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

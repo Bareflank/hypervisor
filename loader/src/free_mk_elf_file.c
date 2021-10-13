@@ -25,6 +25,7 @@
  */
 
 #include <elf_file_t.h>
+#include <free_mk_elf_file.h>
 #include <platform.h>
 #include <types.h>
 
@@ -34,11 +35,13 @@
  *     using the alloc_and_copy_mk_elf_file function.
  *
  * <!-- inputs/outputs -->
- *   @param mk_elf_file the elf_file_t to free.
+ *   @param pmut_mk_elf_file the elf_file_t to free.
  */
 void
-free_mk_elf_file(struct elf_file_t *const mk_elf_file)
+free_mk_elf_file(struct elf_file_t *const pmut_mk_elf_file) NOEXCEPT
 {
-    platform_free(mk_elf_file->addr, mk_elf_file->size);
-    platform_memset(mk_elf_file, 0, sizeof(struct elf_file_t));
+    platform_expects(NULLPTR != pmut_mk_elf_file);
+
+    platform_free(pmut_mk_elf_file->addr, pmut_mk_elf_file->size);
+    platform_memset(pmut_mk_elf_file, ((uint8_t)0), sizeof(struct elf_file_t));
 }

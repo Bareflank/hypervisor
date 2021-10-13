@@ -25,7 +25,11 @@
  */
 
 #include <debug.h>
+#include <global_descriptor_table_register_t.h>
+#include <interrupt_descriptor_table_register_t.h>
+#include <platform.h>
 #include <state_save_t.h>
+#include <tss_t.h>
 #include <types.h>
 
 /**
@@ -37,17 +41,10 @@
  *   @param cpu the CPU that this mk state belongs to
  */
 void
-dump_mk_state(struct state_save_t *const state, uint32_t const cpu)
+dump_mk_state(struct state_save_t const *const state, uint32_t const cpu) NOEXCEPT
 {
-    if (((void *)0) == state) {
-        bferror("state is NULL");
-        return;
-    }
-
-    if (((void *)0) == state->tss) {
-        bferror("state->tss is NULL");
-        return;
-    }
+    platform_expects(NULLPTR != state);
+    platform_expects(NULLPTR != state->tss);
 
     bfdebug_d32("mk state on cpu", cpu);
     bfdebug_ptr(" - virt", state);

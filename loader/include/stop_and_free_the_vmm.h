@@ -27,14 +27,25 @@
 #ifndef STOP_AND_FREE_VMM_H
 #define STOP_AND_FREE_VMM_H
 
-/**
- * <!-- description -->
- *   @brief Stops and frees the VMM. This function is used by both the
- *     stop_vmm() function and the start_vmm() function (in the event a
- *     perviously started VMM has not yet been stopped). The guts of actually
- *     stopping the VMM is defined here. There stop_vmm() function simply
- *     validates user inputs and then calls this function.
- */
-void stop_and_free_the_vmm(void);
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Stops and frees the VMM. This function is used by both the
+     *     stop_vmm() function and the start_vmm() function (in the event a
+     *     perviously started VMM has not yet been stopped). The guts of actually
+     *     stopping the VMM is defined here. There stop_vmm() function simply
+     *     validates user inputs and then calls this function.
+     */
+    void stop_and_free_the_vmm(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

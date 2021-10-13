@@ -30,15 +30,24 @@
 #include <mk_args_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Allocates a chunk of memory for the arguments that will be
- *     passed to the microkernel's _start function
- *
- * <!-- inputs/outputs -->
- *   @param args the mk_args_t to store the mk _start args
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t alloc_mk_args(struct mk_args_t **const args);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Allocates a chunk of memory for the arguments that will be
+     *     passed to the microkernel's _start function
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_args the mk_args_t to store the mk _start args
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t alloc_mk_args(struct mk_args_t **const pmut_args) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

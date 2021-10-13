@@ -28,15 +28,25 @@
 #define FREE_PML4_H
 
 #include <pml4t_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Given a pml4t_t, this function will free any previously allocated
- *     tables.
- *
- * <!-- inputs/outputs -->
- *   @param pml4t the pml4t_t to free
- */
-void free_pml4t(struct pml4t_t *const pml4t);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Given a pml4t_t, this function will free any previously allocated
+     *     tables.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_pml4t the pml4t_t to free
+     */
+    void free_pml4t(struct pml4t_t *const pmut_pml4t) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

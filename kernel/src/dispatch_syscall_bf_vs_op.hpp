@@ -286,17 +286,32 @@ namespace mk
     ///   @param mut_intrinsic the intrinsic_t to use
     ///   @param mut_vs_pool the vs_pool_t to use
     ///   @param advance_ip if true, the IP of the requested VS is advanced
+    ///   @return Returns a bf_status_t containing success or failure
     ///
-    constexpr void
+    [[nodiscard]] constexpr auto
     syscall_bf_vs_op_run_current(
         tls_t &mut_tls,
         intrinsic_t &mut_intrinsic,
         vs_pool_t &mut_vs_pool,
-        bool const advance_ip) noexcept
+        bool const advance_ip) noexcept -> syscall::bf_status_t
     {
-        bsl::expects(syscall::BF_INVALID_ID != mut_tls.active_vmid);
-        bsl::expects(syscall::BF_INVALID_ID != mut_tls.active_vpid);
-        bsl::expects(syscall::BF_INVALID_ID != mut_tls.active_vsid);
+        auto const active_vmid{get_vmid(static_cast<bsl::uint64>(mut_tls.active_vmid))};
+        if (bsl::unlikely(active_vmid.is_invalid())) {
+            bsl::print<bsl::V>() << bsl::here();
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
+        }
+
+        auto const active_vpid{get_vpid(static_cast<bsl::uint64>(mut_tls.active_vpid))};
+        if (bsl::unlikely(active_vpid.is_invalid())) {
+            bsl::print<bsl::V>() << bsl::here();
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
+        }
+
+        auto const active_vsid{get_vsid(static_cast<bsl::uint64>(mut_tls.active_vsid))};
+        if (bsl::unlikely(active_vsid.is_invalid())) {
+            bsl::print<bsl::V>() << bsl::here();
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
+        }
 
         if (advance_ip) {
             mut_vs_pool.advance_ip(mut_tls, mut_intrinsic, bsl::to_u16(mut_tls.active_vsid));
@@ -306,6 +321,7 @@ namespace mk
         }
 
         return_to_mk(vmexit_success);
+        return syscall::BF_STATUS_SUCCESS;
     }
 
     /// <!-- description -->
@@ -340,12 +356,14 @@ namespace mk
     ///   @param mut_tls the current TLS block
     ///   @param mut_intrinsic the intrinsic_t to use
     ///   @param mut_vs_pool the vs_pool_t to use
+    ///   @return Returns a bf_status_t containing success or failure
     ///
-    constexpr void
+    [[nodiscard]] constexpr auto
     syscall_bf_vs_op_advance_ip_and_run_current(
         tls_t &mut_tls, intrinsic_t &mut_intrinsic, vs_pool_t &mut_vs_pool) noexcept
+        -> syscall::bf_status_t
     {
-        syscall_bf_vs_op_run_current(mut_tls, mut_intrinsic, mut_vs_pool, true);
+        return syscall_bf_vs_op_run_current(mut_tls, mut_intrinsic, mut_vs_pool, true);
     }
 
     /// <!-- description -->
@@ -589,10 +607,21 @@ namespace mk
         vs_pool_t &mut_vs_pool,
         ext_pool_t &mut_ext_pool) noexcept -> syscall::bf_status_t
     {
-        mut_vs_pool.advance_ip(mut_tls, mut_intrinsic, bsl::to_u16(mut_tls.active_vsid));
+        auto const active_vsid{get_vsid(static_cast<bsl::uint64>(mut_tls.active_vsid))};
+        if (bsl::unlikely(active_vsid.is_invalid())) {
+            bsl::print<bsl::V>() << bsl::here();
+            return syscall::BF_STATUS_FAILURE_UNKNOWN;
+        }
 
-        return syscall_bf_vs_op_set_active(
-            mut_tls, mut_intrinsic, mut_vm_pool, mut_vp_pool, mut_vs_pool, mut_ext_pool, false);
+        auto const ret{syscall_bf_vs_op_set_active(
+            mut_tls, mut_intrinsic, mut_vm_pool, mut_vp_pool, mut_vs_pool, mut_ext_pool, false)};
+        if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
+            bsl::print<bsl::V>() << bsl::here();
+            return ret;
+        }
+
+        mut_vs_pool.advance_ip(mut_tls, mut_intrinsic, active_vsid);
+        return syscall::BF_STATUS_SUCCESS;
     }
 
     /// <!-- description -->
@@ -728,8 +757,14 @@ namespace mk
             }
 
             case syscall::BF_VS_OP_RUN_CURRENT_IDX_VAL.get(): {
-                syscall_bf_vs_op_run_current(mut_tls, mut_intrinsic, mut_vs_pool, false);
-                return syscall::BF_STATUS_SUCCESS;
+                auto const ret{
+                    syscall_bf_vs_op_run_current(mut_tls, mut_intrinsic, mut_vs_pool, false)};
+                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return ret;
+                }
+
+                return ret;
             }
 
             case syscall::BF_VS_OP_ADVANCE_IP_AND_RUN_IDX_VAL.get(): {
@@ -744,8 +779,14 @@ namespace mk
             }
 
             case syscall::BF_VS_OP_ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL.get(): {
-                syscall_bf_vs_op_advance_ip_and_run_current(mut_tls, mut_intrinsic, mut_vs_pool);
-                return syscall::BF_STATUS_SUCCESS;
+                auto const ret{syscall_bf_vs_op_advance_ip_and_run_current(
+                    mut_tls, mut_intrinsic, mut_vs_pool)};
+                if (bsl::unlikely(ret != syscall::BF_STATUS_SUCCESS)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return ret;
+                }
+
+                return ret;
             }
 
             case syscall::BF_VS_OP_PROMOTE_IDX_VAL.get(): {

@@ -78,7 +78,6 @@ list(APPEND HEADERS
 	${CMAKE_CURRENT_LIST_DIR}/include/arch_num_online_cpus.h
 	${CMAKE_CURRENT_LIST_DIR}/include/arch_work_on_cpu.h
 	${CMAKE_CURRENT_LIST_DIR}/include/debug.h
-	${CMAKE_CURRENT_LIST_DIR}/include/types.h
 	${CMAKE_CURRENT_LIST_DIR}/include/work_on_cpu_callback_args.h
 	${CMAKE_CURRENT_LIST_DIR}/include/work_on_cpu_callback.h
 	${CMAKE_CURRENT_LIST_DIR}/include/efi/efi_allocate_type.h
@@ -153,22 +152,22 @@ list(APPEND HEADERS
 	${CMAKE_CURRENT_LIST_DIR}/../include/free_mk_stack.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/free_mk_state.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/free_root_vp_state.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_cpu_status.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_mut_cpu_status.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/get_mk_huge_pool_addr.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/get_mk_page_pool_addr.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_ext_elf_files.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_mk_args.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_mk_code_aliases.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_mk_debug_ring.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_mk_elf_file.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_mk_elf_segments.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_mk_huge_pool.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_mk_page_pool.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_mk_root_page_table.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_mk_stack.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_mk_state.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_root_vp_state.h
-	${CMAKE_CURRENT_LIST_DIR}/../include/g_vmm_status.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_mut_ext_elf_files.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_mut_mk_args.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_mut_mk_code_aliases.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_pmut_mut_mk_debug_ring.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_mut_mk_elf_file.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_mut_mk_elf_segments.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_mut_mk_huge_pool.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_mut_mk_page_pool.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_pmut_mut_mk_root_page_table.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_mut_mk_stack.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_mut_mk_state.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_mut_root_vp_state.h
+	${CMAKE_CURRENT_LIST_DIR}/../include/g_mut_vmm_status.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/itoa.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/loader_fini.h
 	${CMAKE_CURRENT_LIST_DIR}/../include/loader_init.h
@@ -354,22 +353,22 @@ hypervisor_target_source(bareflank_efi_loader ../src/free_mk_elf_segments.c ${HE
 hypervisor_target_source(bareflank_efi_loader ../src/free_mk_huge_pool.c ${HEADERS})
 hypervisor_target_source(bareflank_efi_loader ../src/free_mk_page_pool.c ${HEADERS})
 hypervisor_target_source(bareflank_efi_loader ../src/free_mk_stack.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_cpu_status.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_mut_cpu_status.c ${HEADERS})
 hypervisor_target_source(bareflank_efi_loader ../src/get_mk_huge_pool_addr.c ${HEADERS})
 hypervisor_target_source(bareflank_efi_loader ../src/get_mk_page_pool_addr.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_ext_elf_files.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_mk_args.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_mk_code_aliases.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_mk_debug_ring.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_mk_elf_file.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_mk_elf_segments.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_mk_huge_pool.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_mk_page_pool.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_mk_root_page_table.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_mk_stack.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_mk_state.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_root_vp_state.c ${HEADERS})
-hypervisor_target_source(bareflank_efi_loader ../src/g_vmm_status.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_mut_ext_elf_files.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_mut_mk_args.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_mut_mk_code_aliases.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_pmut_mut_mk_debug_ring.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_mut_mk_elf_file.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_mut_mk_elf_segments.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_mut_mk_huge_pool.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_mut_mk_page_pool.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_pmut_mut_mk_root_page_table.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_mut_mk_stack.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_mut_mk_state.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_mut_root_vp_state.c ${HEADERS})
+hypervisor_target_source(bareflank_efi_loader ../src/g_mut_vmm_status.c ${HEADERS})
 hypervisor_target_source(bareflank_efi_loader ../src/loader_fini.c ${HEADERS})
 hypervisor_target_source(bareflank_efi_loader ../src/loader_init.c ${HEADERS})
 hypervisor_target_source(bareflank_efi_loader ../src/map_4k_page_rw.c ${HEADERS})

@@ -102,12 +102,12 @@ namespace syscall
     ///     called on each PP while the hypervisor is being bootstrapped.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param ppid the physical process to bootstrap
+    ///   @param ppid0 the physical process to bootstrap
     ///
     extern "C" void
-    bootstrap_entry(bsl::safe_u16::value_type const ppid) noexcept
+    bootstrap_entry(bsl::safe_u16::value_type const ppid0) noexcept
     {
-        bsl::discard(ppid);
+        bsl::discard(ppid0);
         bf_status_t mut_ret{};
 
         // create with invalid handle
@@ -137,26 +137,28 @@ namespace syscall
 
         // create all and and then make sure we can destroy them all
         {
-            for (bsl::safe_idx i{bsl::safe_idx::magic_1()}; i < HYPERVISOR_MAX_VMS; ++i) {
+            constexpr auto one{bsl::safe_idx::magic_1()};
+            for (bsl::safe_idx mut_i{one}; mut_i < HYPERVISOR_MAX_VMS; ++mut_i) {
                 auto const vmid{g_mut_sys.bf_vm_op_create_vm()};
                 integration::require(vmid.is_valid());
             }
 
-            for (bsl::safe_idx i{bsl::safe_idx::magic_1()}; i < HYPERVISOR_MAX_VMS; ++i) {
-                auto const ret{g_mut_sys.bf_vm_op_destroy_vm(bsl::to_u16(i))};
+            for (bsl::safe_idx mut_i{one}; mut_i < HYPERVISOR_MAX_VMS; ++mut_i) {
+                auto const ret{g_mut_sys.bf_vm_op_destroy_vm(bsl::to_u16(mut_i))};
                 integration::require(ret);
             }
         }
 
         // do it again to make sure that after destroy, create still works
         {
-            for (bsl::safe_idx i{bsl::safe_idx::magic_1()}; i < HYPERVISOR_MAX_VMS; ++i) {
+            constexpr auto one{bsl::safe_idx::magic_1()};
+            for (bsl::safe_idx mut_i{one}; mut_i < HYPERVISOR_MAX_VMS; ++mut_i) {
                 auto const vmid{g_mut_sys.bf_vm_op_create_vm()};
                 integration::require(vmid.is_valid());
             }
 
-            for (bsl::safe_idx i{bsl::safe_idx::magic_1()}; i < HYPERVISOR_MAX_VMS; ++i) {
-                auto const ret{g_mut_sys.bf_vm_op_destroy_vm(bsl::to_u16(i))};
+            for (bsl::safe_idx mut_i{one}; mut_i < HYPERVISOR_MAX_VMS; ++mut_i) {
+                auto const ret{g_mut_sys.bf_vm_op_destroy_vm(bsl::to_u16(mut_i))};
                 integration::require(ret);
             }
         }

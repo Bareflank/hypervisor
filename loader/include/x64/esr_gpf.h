@@ -27,10 +27,21 @@
 #ifndef ESR_GPF_H
 #define ESR_GPF_H
 
-/**
- * <!-- description -->
- *   @brief Defines the exception service routine for general protection fault
- */
-void esr_gpf(void);
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Defines the exception service routine for general protection fault
+     */
+    void esr_gpf(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

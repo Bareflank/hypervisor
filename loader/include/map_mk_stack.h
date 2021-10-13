@@ -31,20 +31,31 @@
 #include <span_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function maps the microkernel's stack into the microkernel's
- *     root page tables.
- *
- * <!-- inputs/outputs -->
- *   @param stack a pointer to a span_t that stores the stack
- *     being mapped
- *   @param virt provide the virtual address that the stack
- *     should be mapped to.
- *   @param rpt the root page table to map the stack into
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t
-map_mk_stack(struct span_t const *const stack, uint64_t const virt, root_page_table_t *const rpt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function maps the microkernel's stack into the microkernel's
+     *     root page tables.
+     *
+     * <!-- inputs/outputs -->
+     *   @param stack a pointer to a span_t that stores the stack
+     *     being mapped
+     *   @param virt provide the virtual address that the stack
+     *     should be mapped to.
+     *   @param pmut_rpt the root page table to map the stack into
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t map_mk_stack(
+        struct span_t const *const stack,
+        uint64_t const virt,
+        root_page_table_t *const pmut_rpt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
