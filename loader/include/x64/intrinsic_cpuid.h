@@ -29,18 +29,30 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Executes the CPUID instruction given the provided EAX and ECX
- *     and returns the results
- *
- * <!-- inputs/outputs -->
- *   @param eax the index used by CPUID, returns resulting eax
- *   @param ebx returns resulting ebx
- *   @param ecx the subindex used by CPUID, returns the resulting ecx
- *   @param edx returns resulting edx to.
- */
-void
-intrinsic_cpuid(uint32_t *const eax, uint32_t *const ebx, uint32_t *const ecx, uint32_t *const edx);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Executes the CPUID instruction given the provided EAX and ECX
+     *     and returns the results
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_eax the index used by CPUID, returns resulting eax
+     *   @param pmut_ebx returns resulting ebx
+     *   @param pmut_ecx the subindex used by CPUID, returns the resulting ecx
+     *   @param pmut_edx returns resulting edx to.
+     */
+    void intrinsic_cpuid(
+        uint32_t *const pmut_eax,
+        uint32_t *const pmut_ebx,
+        uint32_t *const pmut_ecx,
+        uint32_t *const pmut_edx) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

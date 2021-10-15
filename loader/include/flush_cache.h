@@ -27,14 +27,25 @@
 #ifndef FLUSH_CACHE_H
 #define FLUSH_CACHE_H
 
-/**
- * <!-- description -->
- *   @brief Flushes the cache line associated with the provided virtual
- *     address (i.e., ptr)
- *
- * <!-- inputs/outputs -->
- *   @param ptr the virtual address whose cache line should be flushed
- */
-void flush_cache(void const *const ptr);
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Flushes the cache line associated with the provided virtual
+     *     address (i.e., ptr)
+     *
+     * <!-- inputs/outputs -->
+     *   @param ptr the virtual address whose cache line should be flushed
+     */
+    void flush_cache(void const *const ptr) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

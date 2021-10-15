@@ -79,8 +79,8 @@
  *   @return Return 0 if running on a supported ARM processor, LOADER_FAILURE
  *     otherwise.
  */
-static inline int64_t
-check_for_el2(void)
+NODISCARD static inline int64_t
+check_for_el2(void) NOEXCEPT
 {
     if (CURRENTEL_EXPECTED != read_currentel()) {
         bferror("cpu is not in EL2");
@@ -98,8 +98,8 @@ check_for_el2(void)
  * <!-- inputs/outputs -->
  *   @return Returns 0 on success
  */
-int64_t
-check_cpu_configuration(void)
+NODISCARD int64_t
+check_cpu_configuration(void) NOEXCEPT
 {
     if (check_for_el2()) {
         bferror("check_for_el2 failed");

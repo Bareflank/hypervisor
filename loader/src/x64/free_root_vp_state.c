@@ -24,7 +24,6 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <platform.h>
 #include <state_save_t.h>
 #include <types.h>
@@ -35,15 +34,17 @@
  *     using the alloc_and_copy_root_vp_state function.
  *
  * <!-- inputs/outputs -->
- *   @param state the state_save_t to free.
+ *   @param pmut_state the state_save_t to free.
  */
 void
-free_root_vp_state(struct state_save_t **const state)
+free_root_vp_state(struct state_save_t **const pmut_state) NOEXCEPT
 {
-    if (((void *)0) == *state) {
+    platform_expects(NULLPTR != pmut_state);
+
+    if (NULLPTR == *pmut_state) {
         return;
     }
 
-    platform_free(*state, HYPERVISOR_PAGE_SIZE);
-    *state = ((void *)0);
+    platform_free(*pmut_state, HYPERVISOR_PAGE_SIZE);
+    *pmut_state = NULLPTR;
 }

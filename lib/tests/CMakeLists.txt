@@ -109,9 +109,19 @@ list(APPEND AARCH64_DEFINES
 add_subdirectory(include/basic_lock_guard_t)
 add_subdirectory(include/basic_queue_t)
 
+add_subdirectory(mocks/basic_ifmap_t)
+add_subdirectory(mocks/basic_ioctl_t)
 add_subdirectory(mocks/basic_page_pool_t)
 add_subdirectory(mocks/basic_root_page_table_t)
 add_subdirectory(mocks/basic_spinlock_t)
+
+# if(WIN32)
+#     add_subdirectory(src/windows/basic_ifmap_t)
+#     add_subdirectory(src/windows/basic_ioctl_t)
+# else()
+#     add_subdirectory(src/linux/basic_ifmap_t)
+#     add_subdirectory(src/linux/basic_ioctl_t)
+# endif()
 
 add_subdirectory(src/basic_page_pool_t)
 add_subdirectory(src/basic_root_page_table_t)

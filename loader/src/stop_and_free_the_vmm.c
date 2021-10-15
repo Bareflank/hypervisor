@@ -31,13 +31,13 @@
 #include <free_mk_huge_pool.h>
 #include <free_mk_page_pool.h>
 #include <free_mk_root_page_table.h>
-#include <g_ext_elf_files.h>
-#include <g_mk_elf_file.h>
-#include <g_mk_elf_segments.h>
-#include <g_mk_huge_pool.h>
-#include <g_mk_page_pool.h>
-#include <g_mk_root_page_table.h>
-#include <g_vmm_status.h>
+#include <g_mut_ext_elf_files.h>
+#include <g_mut_mk_elf_file.h>
+#include <g_mut_mk_elf_segments.h>
+#include <g_mut_mk_huge_pool.h>
+#include <g_mut_mk_page_pool.h>
+#include <g_mut_vmm_status.h>
+#include <g_pmut_mut_mk_root_page_table.h>
 #include <platform.h>
 #include <stop_vmm_per_cpu.h>
 #include <types.h>
@@ -51,13 +51,9 @@
  *     validates user inputs and then calls this function.
  */
 void
-stop_and_free_the_vmm(void)
+stop_and_free_the_vmm(void) NOEXCEPT
 {
-    if (VMM_STATUS_STOPPED == g_vmm_status) {
-        return;
-    }
-
-    if (VMM_STATUS_CORRUPT == g_vmm_status) {
+    if (VMM_STATUS_CORRUPT == g_mut_vmm_status) {
         bferror("Unable to stop, previous VMM stopped in a corrupt state");
         return;
     }
@@ -67,18 +63,17 @@ stop_and_free_the_vmm(void)
         goto stop_vmm_per_cpu_failed;
     }
 
-    free_mk_huge_pool(&g_mk_huge_pool);
-    free_mk_page_pool(&g_mk_page_pool);
-    free_mk_elf_segments(g_mk_elf_segments);
-    free_ext_elf_files(g_ext_elf_files);
-    free_mk_elf_file(&g_mk_elf_file);
-    free_mk_root_page_table(&g_mk_root_page_table);
+    free_mk_huge_pool(&g_mut_mk_huge_pool);
+    free_mk_page_pool(&g_mut_mk_page_pool);
+    free_mk_elf_segments(g_mut_mk_elf_segments);
+    free_ext_elf_files(g_mut_ext_elf_files);
+    free_mk_elf_file(&g_mut_mk_elf_file);
+    free_mk_root_page_table(&g_pmut_mut_mk_root_page_table);
 
-    g_vmm_status = VMM_STATUS_STOPPED;
+    g_mut_vmm_status = VMM_STATUS_STOPPED;
     return;
 
 stop_vmm_per_cpu_failed:
 
-    g_vmm_status = VMM_STATUS_CORRUPT;
-    return;
+    g_mut_vmm_status = VMM_STATUS_CORRUPT;
 }

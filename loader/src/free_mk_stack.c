@@ -24,6 +24,7 @@
  * SOFTWARE.
  */
 
+#include <free_mk_stack.h>
 #include <platform.h>
 #include <span_t.h>
 #include <types.h>
@@ -34,11 +35,13 @@
  *     using the alloc_mk_stack function.
  *
  * <!-- inputs/outputs -->
- *   @param stack the span_t to free.
+ *   @param pmut_stack the span_t to free.
  */
 void
-free_mk_stack(struct span_t *const stack)
+free_mk_stack(struct span_t *const pmut_stack) NOEXCEPT
 {
-    platform_free(stack->addr, stack->size);
-    platform_memset(stack, 0, sizeof(struct span_t));
+    platform_expects(NULLPTR != pmut_stack);
+
+    platform_free(pmut_stack->addr, pmut_stack->size);
+    platform_memset(pmut_stack, ((uint8_t)0), sizeof(struct span_t));
 }

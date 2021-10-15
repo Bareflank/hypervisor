@@ -30,16 +30,25 @@
 #include <debug_ring_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Allocates a chunk of memory for the debug ring that will be
- *     used by the microkernel.
- *
- * <!-- inputs/outputs -->
- *   @param debug_ring the debug_ring_t to store the newly allocated
- *     debug ring
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t alloc_mk_debug_ring(struct debug_ring_t **const debug_ring);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Allocates a chunk of memory for the debug ring that will be
+     *     used by the microkernel.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_debug_ring the debug_ring_t to store the newly allocated
+     *     debug ring
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t alloc_mk_debug_ring(struct debug_ring_t **const pmut_debug_ring) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

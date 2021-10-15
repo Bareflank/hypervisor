@@ -28,15 +28,25 @@
 #define FREE_MK_ELF_SEGMENTS_H
 
 #include <elf_segment_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Releases a previously allocated elf_segment_t that was allocated
- *     using the alloc_and_copy_mk_elf_segments function.
- *
- * <!-- inputs/outputs -->
- *   @param mk_elf_segments the elf_segment_t to free.
- */
-void free_mk_elf_segments(struct elf_segment_t *const mk_elf_segments);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Releases a previously allocated elf_segment_t that was allocated
+     *     using the alloc_and_copy_mk_elf_segments function.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_mk_elf_segments the elf_segment_t to free.
+     */
+    void free_mk_elf_segments(struct elf_segment_t *const pmut_mk_elf_segments) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -30,14 +30,23 @@
 #include <code_aliases_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Releases a previously allocated code_aliases_t that was allocated
- *     using the alloc_and_copy_mk_code_aliases function.
- *
- * <!-- inputs/outputs -->
- *   @param a the code_aliases_t to free.
- */
-void free_mk_code_aliases(struct code_aliases_t *const a);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Releases a previously allocated code_aliases_t that was allocated
+     *     using the alloc_and_copy_mk_code_aliases function.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_a the code_aliases_t to free.
+     */
+    void free_mk_code_aliases(struct code_aliases_t *const pmut_a) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

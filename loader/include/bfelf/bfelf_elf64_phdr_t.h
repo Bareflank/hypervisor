@@ -29,6 +29,11 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
 /** @brief defines p_type for unused entry */
@@ -69,24 +74,36 @@
 /** @brief defines p_flags for environment-specific use */
 #define bfelf_pf_maskproc ((uint32_t)0xFF000000U)
 
-/**
- * <!-- description -->
- *   @brief In executable and shared object files, sections are grouped
- *     into segments for loading. The program header table contains a
- *     list of entries describing each segment.
- */
-struct bfelf_elf64_phdr_t
-{
-    uint32_t p_type;   /**< Type of segment */
-    uint32_t p_flags;  /**< Segment attributes */
-    uint8_t *p_offset; /**< Offset of segment in ELF file */
-    uint64_t p_vaddr;  /**< Virtual address of segment */
-    uint64_t p_paddr;  /**< Physical address of segment */
-    uint64_t p_filesz; /**< Size of segment in ELF file */
-    uint64_t p_memsz;  /**< Size of segment in memory */
-    uint64_t p_align;  /**< Segment alignment */
-};
+    /**
+     * <!-- description -->
+     *   @brief In executable and shared object files, sections are grouped
+     *     into segments for loading. The program header table contains a
+     *     list of entries describing each segment.
+     */
+    struct bfelf_elf64_phdr_t
+    {
+        /** @brief Type of segment */
+        uint32_t p_type;
+        /** @brief Segment attributes */
+        uint32_t p_flags;
+        /** @brief Offset of segment in ELF file */
+        uint8_t *p_offset;
+        /** @brief Virtual address of segment */
+        uint64_t p_vaddr;
+        /** @brief Physical address of segment */
+        uint64_t p_paddr;
+        /** @brief Size of segment in ELF file */
+        uint64_t p_filesz;
+        /** @brief Size of segment in memory */
+        uint64_t p_memsz;
+        /** @brief Segment alignment */
+        uint64_t p_align;
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

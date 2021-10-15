@@ -31,23 +31,32 @@
 #include <l1t_t.h>
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
 /** @brief defines total number of entries in the L0T */
 #define LOADER_NUM_L0T_ENTRIES ((uint64_t)512)
 
-/**
- * <!-- description -->
- *   @brief Defines the layout of a level-0 table (L0T).
- */
-struct l0t_t
-{
-    /** @brief stores the entries for this page table */
-    struct l0te_t entires[LOADER_NUM_L0T_ENTRIES];
-    /** @brief stores pointers to child tables */
-    struct l1t_t *tables[LOADER_NUM_L0T_ENTRIES];
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the layout of a level-0 table (L0T).
+     */
+    struct l0t_t
+    {
+        /** @brief stores the entries for this page table */
+        struct l0te_t entires[LOADER_NUM_L0T_ENTRIES];
+        /** @brief stores pointers to child tables */
+        struct l1t_t *tables[LOADER_NUM_L0T_ENTRIES];
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

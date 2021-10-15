@@ -30,21 +30,30 @@
 #include <l3te_t.h>
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
 /** @brief defines total number of entries in the L3T */
 #define LOADER_NUM_L3T_ENTRIES ((uint64_t)512)
 
-/**
- * <!-- description -->
- *   @brief Defines the layout of a level-3 table (L3T).
- */
-struct l3t_t
-{
-    /** @brief stores the entries for this page table */
-    struct l3te_t entires[LOADER_NUM_L3T_ENTRIES];
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the layout of a level-3 table (L3T).
+     */
+    struct l3t_t
+    {
+        /** @brief stores the entries for this page table */
+        struct l3te_t entires[LOADER_NUM_L3T_ENTRIES];
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -29,16 +29,25 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function contains all of the code that is common between
- *     all archiectures and all platforms that is needed for initializing
- *     the loader. This function will call platform and architecture specific
- *     functions as needed.
- *
- * <!-- inputs/outputs -->
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t loader_init(void);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function contains all of the code that is common between
+     *     all archiectures and all platforms that is needed for initializing
+     *     the loader. This function will call platform and architecture specific
+     *     functions as needed.
+     *
+     * <!-- inputs/outputs -->
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t loader_init(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

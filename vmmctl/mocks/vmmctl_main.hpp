@@ -25,7 +25,10 @@
 #ifndef MOCKS_VMMCTL_MAIN_HPP
 #define MOCKS_VMMCTL_MAIN_HPP
 
+#include <ioctl_t.hpp>
+
 #include <bsl/arguments.hpp>
+#include <bsl/discard.hpp>
 #include <bsl/errc_type.hpp>
 
 namespace vmmctl
@@ -47,13 +50,16 @@ namespace vmmctl
         ///
         /// <!-- inputs/outputs -->
         ///   @param mut_args the command line arguments provided by the user.
+        ///   @param ioctl the ioctl_t to use
         ///   @return If the user provided command succeeds, this function
         ///     will return bsl::errc_success, otherwise this function
         ///     will return bsl::errc_failure.
         ///
         [[nodiscard]] static constexpr auto
-        process(bsl::arguments &mut_args) noexcept -> bsl::errc_type
+        process(bsl::arguments &mut_args, ioctl_t const &ioctl) noexcept -> bsl::errc_type
         {
+            bsl::discard(ioctl);
+
             if (mut_args.get<bool>("fail")) {
                 return bsl::errc_failure;
             }

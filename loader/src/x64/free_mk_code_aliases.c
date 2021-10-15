@@ -25,7 +25,6 @@
  */
 
 #include <code_aliases_t.h>
-#include <constants.h>
 #include <platform.h>
 #include <types.h>
 
@@ -35,19 +34,21 @@
  *     using the alloc_and_copy_mk_code_aliases function.
  *
  * <!-- inputs/outputs -->
- *   @param a the code_aliases_t to free.
+ *   @param pmut_a the code_aliases_t to free.
  */
 void
-free_mk_code_aliases(struct code_aliases_t *const a)
+free_mk_code_aliases(struct code_aliases_t *const pmut_a) NOEXCEPT
 {
-    platform_free(a->demote, HYPERVISOR_PAGE_SIZE);
-    platform_free(a->promote, HYPERVISOR_PAGE_SIZE);
-    platform_free(a->esr_default, HYPERVISOR_PAGE_SIZE);
-    platform_free(a->esr_df, HYPERVISOR_PAGE_SIZE);
-    platform_free(a->esr_gpf, HYPERVISOR_PAGE_SIZE);
-    platform_free(a->esr_nmi, HYPERVISOR_PAGE_SIZE);
-    platform_free(a->esr_pf, HYPERVISOR_PAGE_SIZE);
-    platform_free(a->serial_write_c, HYPERVISOR_PAGE_SIZE);
-    platform_free(a->serial_write_hex, HYPERVISOR_PAGE_SIZE);
-    platform_memset(a, 0, sizeof(struct code_aliases_t));
+    platform_expects(NULLPTR != pmut_a);
+
+    platform_free(pmut_a->demote, HYPERVISOR_PAGE_SIZE);
+    platform_free(pmut_a->promote, HYPERVISOR_PAGE_SIZE);
+    platform_free(pmut_a->esr_default, HYPERVISOR_PAGE_SIZE);
+    platform_free(pmut_a->esr_df, HYPERVISOR_PAGE_SIZE);
+    platform_free(pmut_a->esr_gpf, HYPERVISOR_PAGE_SIZE);
+    platform_free(pmut_a->esr_nmi, HYPERVISOR_PAGE_SIZE);
+    platform_free(pmut_a->esr_pf, HYPERVISOR_PAGE_SIZE);
+    platform_free(pmut_a->serial_write_c, HYPERVISOR_PAGE_SIZE);
+    platform_free(pmut_a->serial_write_hex, HYPERVISOR_PAGE_SIZE);
+    platform_memset(pmut_a, ((uint8_t)0), sizeof(struct code_aliases_t));
 }

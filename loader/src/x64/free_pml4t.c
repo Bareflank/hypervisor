@@ -24,7 +24,6 @@
  * SOFTWARE.
  */
 
-#include <debug.h>
 #include <free_pdpt.h>
 #include <pdpt_t.h>
 #include <platform.h>
@@ -37,18 +36,22 @@
  *     tables.
  *
  * <!-- inputs/outputs -->
- *   @param pml4t the pml4t_t to free
+ *   @param pmut_pml4t the pml4t_t to free
  */
 void
-free_pml4t(struct pml4t_t *const pml4t)
+free_pml4t(struct pml4t_t *const pmut_pml4t) NOEXCEPT
 {
-    uint64_t i;
+    uint64_t mut_i;
 
-    for (i = ((uint64_t)0); i < LOADER_NUM_PML4T_ENTRIES; ++i) {
-        struct pdpt_t *const pdpt = pml4t->tables[i];
-        if (((void *)0) != pdpt) {
-            free_pdpt(pdpt);
-            platform_free(pdpt, sizeof(struct pdpt_t));
+    for (mut_i = ((uint64_t)0); mut_i < LOADER_NUM_PML4T_ENTRIES; ++mut_i) {
+        struct pdpt_t *const pmut_pdpt = pmut_pml4t->tables[mut_i];
+        if (NULLPTR != pmut_pdpt) {
+            free_pdpt(pmut_pdpt);
+            platform_free(pmut_pdpt, sizeof(struct pdpt_t));
+            pmut_pml4t->tables[mut_i] = NULLPTR;
+        }
+        else {
+            bf_touch();
         }
     }
 }

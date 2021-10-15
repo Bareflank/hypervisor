@@ -30,6 +30,7 @@
 
 #include <bsl/char_type.hpp>
 #include <bsl/cstr_type.hpp>
+#include <bsl/expects.hpp>
 #include <bsl/is_constant_evaluated.hpp>
 #include <bsl/safe_integral.hpp>
 
@@ -47,6 +48,9 @@ namespace syscall
     constexpr void
     bf_debug_op_out(bsl::safe_u64 const &val1, bsl::safe_u64 const &val2) noexcept
     {
+        bsl::expects(val1.is_valid_and_checked());
+        bsl::expects(val2.is_valid_and_checked());
+
         if (bsl::is_constant_evaluated()) {
             return;
         }
@@ -65,6 +69,8 @@ namespace syscall
     constexpr void
     bf_debug_op_dump_vm(bsl::safe_u16 const &vmid) noexcept
     {
+        bsl::expects(vmid.is_valid_and_checked());
+
         if (bsl::is_constant_evaluated()) {
             return;
         }
@@ -83,6 +89,8 @@ namespace syscall
     constexpr void
     bf_debug_op_dump_vp(bsl::safe_u16 const &vpid) noexcept
     {
+        bsl::expects(vpid.is_valid_and_checked());
+
         if (bsl::is_constant_evaluated()) {
             return;
         }
@@ -101,6 +109,8 @@ namespace syscall
     constexpr void
     bf_debug_op_dump_vs(bsl::safe_u16 const &vsid) noexcept
     {
+        bsl::expects(vsid.is_valid_and_checked());
+
         if (bsl::is_constant_evaluated()) {
             return;
         }
@@ -119,6 +129,8 @@ namespace syscall
     constexpr void
     bf_debug_op_dump_vmexit_log(bsl::safe_u16 const &ppid) noexcept
     {
+        bsl::expects(ppid.is_valid_and_checked());
+
         if (bsl::is_constant_evaluated()) {
             return;
         }
@@ -172,6 +184,8 @@ namespace syscall
     constexpr void
     bf_debug_op_dump_ext(bsl::safe_u16 const &extid) noexcept
     {
+        bsl::expects(extid.is_valid_and_checked());
+
         if (bsl::is_constant_evaluated()) {
             return;
         }

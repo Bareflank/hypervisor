@@ -35,8 +35,8 @@
  * <!-- inputs/outputs -->
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-send_command_stop(void)
+NODISCARD int64_t
+send_command_stop(void) NOEXCEPT
 {
     return LOADER_SUCCESS;
 }

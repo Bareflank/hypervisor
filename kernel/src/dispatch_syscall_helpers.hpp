@@ -357,15 +357,15 @@ namespace mk
     {
         auto const assigned_vmid{vp_pool.assigned_vm(vpid)};
         if (bsl::unlikely(assigned_vmid != vmid)) {
-            bsl::error() << "vp "                              // --
-                         << bsl::hex(vpid)                     // --
-                         << " is assigned to vm "              // --
-                         << bsl::hex(assigned_vmid)            // --
-                         << " which is not the current vm "    // --
-                         << bsl::hex(vmid)                     // --
-                         << " and therefore cannot be used"    // --
-                         << bsl::endl                          // --
-                         << bsl::here();                       // --
+            bsl::error() << "vp "                                // --
+                         << bsl::hex(vpid)                       // --
+                         << " is assigned to vm "                // --
+                         << bsl::hex(assigned_vmid)              // --
+                         << " which is not the requested vm "    // --
+                         << bsl::hex(vmid)                       // --
+                         << " and therefore cannot be used"      // --
+                         << bsl::endl                            // --
+                         << bsl::here();                         // --
 
             return false;
         }
@@ -393,15 +393,15 @@ namespace mk
     {
         auto const assigned_vpid{vs_pool.assigned_vp(vsid)};
         if (bsl::unlikely(assigned_vpid != vpid)) {
-            bsl::error() << "vs "                              // --
-                         << bsl::hex(vsid)                     // --
-                         << " is assigned to vp "              // --
-                         << bsl::hex(assigned_vpid)            // --
-                         << " which is not the current vp "    // --
-                         << bsl::hex(vpid)                     // --
-                         << " and therefore cannot be used"    // --
-                         << bsl::endl                          // --
-                         << bsl::here();                       // --
+            bsl::error() << "vs "                                // --
+                         << bsl::hex(vsid)                       // --
+                         << " is assigned to vp "                // --
+                         << bsl::hex(assigned_vpid)              // --
+                         << " which is not the requested vp "    // --
+                         << bsl::hex(vpid)                       // --
+                         << " and therefore cannot be used"      // --
+                         << bsl::endl                            // --
+                         << bsl::here();                         // --
 
             return false;
         }

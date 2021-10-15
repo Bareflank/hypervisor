@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
+#include <alloc_mk_stack.h>
 #include <debug.h>
 #include <platform.h>
 #include <span_t.h>
@@ -38,15 +38,15 @@
  *     a default number of pages.
  *
  * <!-- inputs/outputs -->
- *   @param stack the span_t to store the stack addr/size.
+ *   @param pmut_stack the span_t to store the stack addr/size.
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-alloc_mk_stack(struct span_t *const stack)
+NODISCARD int64_t
+alloc_mk_stack(struct span_t *const pmut_stack) NOEXCEPT
 {
-    stack->size = HYPERVISOR_MK_STACK_SIZE;
-    stack->addr = (uint8_t *)platform_alloc(stack->size);
-    if (((void *)0) == stack->addr) {
+    pmut_stack->size = HYPERVISOR_MK_STACK_SIZE;
+    pmut_stack->addr = (uint8_t *)platform_alloc(pmut_stack->size);
+    if (NULLPTR == pmut_stack->addr) {
         bferror("platform_alloc failed");
         goto platform_alloc_failed;
     }
@@ -55,6 +55,6 @@ alloc_mk_stack(struct span_t *const stack)
 
 platform_alloc_failed:
 
-    platform_memset(stack, 0, sizeof(struct span_t));
+    platform_memset(pmut_stack, ((uint8_t)0), sizeof(struct span_t));
     return LOADER_FAILURE;
 }

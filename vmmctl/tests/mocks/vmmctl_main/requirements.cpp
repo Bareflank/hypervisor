@@ -42,12 +42,12 @@ main() noexcept -> bsl::exit_code
 {
     bsl::ut_scenario{"verify noexcept"} = []() noexcept {
         bsl::ut_given{} = []() noexcept {
-            vmmctl::vmmctl_main ctl{};
+            vmmctl::vmmctl_main mut_ctl{};
             bsl::array const argv{"success"};
             bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
             bsl::ut_then{} = []() noexcept {
                 static_assert(noexcept(vmmctl::vmmctl_main{}));
-                static_assert(noexcept(ctl.process(mut_args)));
+                static_assert(noexcept(mut_ctl.process(mut_args, {})));
             };
         };
     };

@@ -30,21 +30,30 @@
 #include <pte_t.h>
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
 /** @brief defines total number of entries in the PT */
 #define LOADER_NUM_PT_ENTRIES ((uint64_t)512)
 
-/**
- * <!-- description -->
- *   @brief Defines the layout of a page table (pt).
- */
-struct pt_t
-{
-    /** @brief stores the entries for this page table */
-    struct pte_t entires[LOADER_NUM_PT_ENTRIES];
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the layout of a page table (pt).
+     */
+    struct pt_t
+    {
+        /** @brief stores the entries for this page table */
+        struct pte_t entires[LOADER_NUM_PT_ENTRIES];
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

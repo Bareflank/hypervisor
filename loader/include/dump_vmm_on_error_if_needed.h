@@ -27,12 +27,22 @@
 #ifndef DUMP_VMM_ON_ERROR_IF_NEEDED_H
 #define DUMP_VMM_ON_ERROR_IF_NEEDED_H
 
-/**
- * <!-- description -->
- *   @brief Dumps the contents of the ring buffer in the event of the
- *     VMM failing to boot. This is only needed on platforms that do not
- *     have a separate dump capability like UEFI
- */
-void dump_vmm_on_error_if_needed(void);
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+    /**
+     * <!-- description -->
+     *   @brief Dumps the contents of the ring buffer in the event of the
+     *     VMM failing to boot. This is only needed on platforms that do not
+     *     have a separate dump capability like UEFI
+     */
+    void dump_vmm_on_error_if_needed(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

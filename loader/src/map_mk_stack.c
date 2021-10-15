@@ -24,12 +24,12 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
 #include <map_4k_page_rw.h>
 #include <platform.h>
 #include <root_page_table_t.h>
 #include <span_t.h>
+#include <types.h>
 
 /**
  * <!-- description -->
@@ -41,25 +41,30 @@
  *     being mapped
  *   @param virt provide the virtual address that the stack
  *     should be mapped to.
- *   @param rpt the root page table to map the stack into
+ *   @param pmut_rpt the root page table to map the stack into
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_mk_stack(struct span_t const *const stack, uint64_t const virt, root_page_table_t *const rpt)
+NODISCARD int64_t
+map_mk_stack(
+    struct span_t const *const stack,
+    uint64_t const virt,
+    root_page_table_t *const pmut_rpt) NOEXCEPT
 {
-    uint64_t off;
+    uint64_t mut_i;
 
-    for (off = ((uint64_t)0); off < stack->size; off += HYPERVISOR_PAGE_SIZE) {
-        uint64_t phys = platform_virt_to_phys(stack->addr + off);
+    for (mut_i = ((uint64_t)0); mut_i < stack->size; mut_i += HYPERVISOR_PAGE_SIZE) {
+        uint64_t const phys = platform_virt_to_phys(stack->addr + mut_i);
         if (((uint64_t)0) == phys) {
             bferror("platform_virt_to_phys failed");
             return LOADER_FAILURE;
         }
 
-        if (map_4k_page_rw((void *)(virt + off), phys, rpt)) {
+        if (map_4k_page_rw((void *)(virt + mut_i), phys, pmut_rpt)) {
             bferror("map_4k_page_rw failed");
             return LOADER_FAILURE;
         }
+
+        bf_touch();
     }
 
     return LOADER_SUCCESS;

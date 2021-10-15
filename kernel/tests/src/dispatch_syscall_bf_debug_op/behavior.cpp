@@ -619,6 +619,40 @@ namespace mk
             };
         };
 
+        bsl::ut_scenario{"WRITE_STR_IDX_VAL nullptr"} = [&]() noexcept {
+            bsl::ut_given_at_runtime{} = [&]() noexcept {
+                tls_t mut_tls{};
+                page_pool_t const page_pool{};
+                huge_pool_t const huge_pool{};
+                intrinsic_t const intrinsic{};
+                vm_pool_t const vm_pool{};
+                vp_pool_t const vp_pool{};
+                vs_pool_t const vs_pool{};
+                ext_pool_t const ext_pool{};
+                vmexit_log_t const log{};
+                constexpr auto syscall{syscall::BF_DEBUG_OP_WRITE_STR_IDX_VAL};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_tls.ext_syscall = syscall.get();
+                    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+                    mut_tls.ext_reg0 = {};
+                    mut_tls.ext_reg1 = {};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            mk::dispatch_syscall_bf_debug_op(
+                                mut_tls,
+                                page_pool,
+                                huge_pool,
+                                intrinsic,
+                                vm_pool,
+                                vp_pool,
+                                vs_pool,
+                                ext_pool,
+                                log) != syscall::BF_STATUS_SUCCESS);
+                    };
+                };
+            };
+        };
+
         bsl::ut_scenario{"WRITE_STR_IDX_VAL invalid size"} = [&]() noexcept {
             bsl::ut_given_at_runtime{} = [&]() noexcept {
                 tls_t mut_tls{};

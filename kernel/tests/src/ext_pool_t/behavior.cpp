@@ -50,35 +50,35 @@ namespace mk
     {
         bsl::ut_scenario{"initialize"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 huge_pool_t mut_huge_pool{};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(
-                        ext_pool.initialize(mut_tls, mut_page_pool, mut_huge_pool, {}, {}));
+                        mut_ext_pool.initialize(mut_tls, mut_page_pool, mut_huge_pool, {}, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"initialize with an elf file"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 huge_pool_t mut_huge_pool{};
                 bfelf::elf64_ehdr_t const file{};
                 loader::ext_elf_files_t const elf_files{&file, &file};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(
-                        ext_pool.initialize(mut_tls, mut_page_pool, mut_huge_pool, {}, elf_files));
+                    bsl::ut_check(mut_ext_pool.initialize(
+                        mut_tls, mut_page_pool, mut_huge_pool, {}, elf_files));
                 };
             };
         };
 
         bsl::ut_scenario{"initialize failure"} = [&]() noexcept {
             bsl::ut_given_at_runtime{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 huge_pool_t mut_huge_pool{};
@@ -87,7 +87,7 @@ namespace mk
                 bsl::ut_when{} = [&]() noexcept {
                     mut_tls.test_ret = bsl::errc_failure;
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!ext_pool.initialize(
+                        bsl::ut_check(!mut_ext_pool.initialize(
                             mut_tls, mut_page_pool, mut_huge_pool, {}, elf_files));
                     };
                 };
@@ -96,17 +96,17 @@ namespace mk
 
         bsl::ut_scenario{"release"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 huge_pool_t mut_huge_pool{};
                 bfelf::elf64_ehdr_t const file{};
                 loader::ext_elf_files_t const elf_files{&file, &file};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_required_step(
-                        ext_pool.initialize(mut_tls, mut_page_pool, mut_huge_pool, {}, elf_files));
+                    bsl::ut_required_step(mut_ext_pool.initialize(
+                        mut_tls, mut_page_pool, mut_huge_pool, {}, elf_files));
                     bsl::ut_then{} = [&]() noexcept {
-                        ext_pool.release(mut_tls, mut_page_pool, mut_huge_pool);
+                        mut_ext_pool.release(mut_tls, mut_page_pool, mut_huge_pool);
                     };
                 };
             };
@@ -114,36 +114,36 @@ namespace mk
 
         bsl::ut_scenario{"release without initialize"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 huge_pool_t mut_huge_pool{};
                 bsl::ut_then{} = [&]() noexcept {
-                    ext_pool.release(mut_tls, mut_page_pool, mut_huge_pool);
+                    mut_ext_pool.release(mut_tls, mut_page_pool, mut_huge_pool);
                 };
             };
         };
 
         bsl::ut_scenario{"signal_vm_created"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(ext_pool.signal_vm_created(mut_tls, mut_page_pool, {}));
+                    bsl::ut_check(mut_ext_pool.signal_vm_created(mut_tls, mut_page_pool, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"signal_vm_created fails"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::ut_then{} = [&]() noexcept {
                     mut_tls.test_ret = bsl::errc_failure;
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!ext_pool.signal_vm_created(mut_tls, mut_page_pool, {}));
+                        bsl::ut_check(!mut_ext_pool.signal_vm_created(mut_tls, mut_page_pool, {}));
                     };
                 };
             };
@@ -151,46 +151,46 @@ namespace mk
 
         bsl::ut_scenario{"signal_vm_destroyed"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::ut_then{} = [&]() noexcept {
-                    ext_pool.signal_vm_destroyed(mut_tls, mut_page_pool, {});
+                    mut_ext_pool.signal_vm_destroyed(mut_tls, mut_page_pool, {});
                 };
             };
         };
 
         bsl::ut_scenario{"signal_vm_active"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
-                    ext_pool.signal_vm_active(mut_tls, mut_intrinsic, {});
+                    mut_ext_pool.signal_vm_active(mut_tls, mut_intrinsic, {});
                 };
             };
         };
 
         bsl::ut_scenario{"start"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(ext_pool.start(mut_tls, mut_intrinsic));
+                    bsl::ut_check(mut_ext_pool.start(mut_tls, mut_intrinsic));
                 };
             };
         };
 
         bsl::ut_scenario{"start fails"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
                     mut_tls.test_ret = bsl::errc_failure;
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!ext_pool.start(mut_tls, mut_intrinsic));
+                        bsl::ut_check(!mut_ext_pool.start(mut_tls, mut_intrinsic));
                     };
                 };
             };
@@ -198,24 +198,24 @@ namespace mk
 
         bsl::ut_scenario{"bootstrap"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(ext_pool.bootstrap(mut_tls, mut_intrinsic));
+                    bsl::ut_check(mut_ext_pool.bootstrap(mut_tls, mut_intrinsic));
                 };
             };
         };
 
         bsl::ut_scenario{"bootstrap fails"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
                     mut_tls.test_ret = bsl::errc_failure;
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(!ext_pool.bootstrap(mut_tls, mut_intrinsic));
+                        bsl::ut_check(!mut_ext_pool.bootstrap(mut_tls, mut_intrinsic));
                     };
                 };
             };
@@ -223,10 +223,10 @@ namespace mk
 
         bsl::ut_scenario{"dump"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                ext_pool_t ext_pool{};
+                ext_pool_t mut_ext_pool{};
                 tls_t mut_tls{};
                 bsl::ut_then{} = [&]() noexcept {
-                    ext_pool.dump(mut_tls, {});
+                    mut_ext_pool.dump(mut_tls, {});
                 };
             };
         };

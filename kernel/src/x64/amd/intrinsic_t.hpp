@@ -71,7 +71,11 @@ namespace mk
             bsl::expects(addr.is_valid_and_checked());
             bsl::expects(addr.is_pos());
             bsl::expects(asid.is_valid_and_checked());
-            bsl::expects(asid.is_pos());
+
+            if (bsl::unlikely(asid.is_zero())) {
+                bsl::alert() << "unable to flush the tlb for an ASID of 0\n" << bsl::here();
+                return;
+            }
 
             if (syscall::BF_INVALID_ID == asid) {
                 return intrinsic_invlpg(addr.get());

@@ -38,8 +38,12 @@
  *   @brief Disables Hardware Virtualization Extensions
  */
 void
-disable_hve(void)
+disable_hve(void) NOEXCEPT
 {
-    intrinsic_vmxoff();
+    if (intrinsic_vmxoff()) {
+        bferror("failed to disable VMX");
+        return;
+    }
+
     intrinsic_lcr4(intrinsic_scr4() & ~CR4_VMXE);
 }

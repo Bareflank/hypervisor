@@ -31,16 +31,26 @@
 #include <root_page_table_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function maps the microkernel's ELF file into the
- *     microkernel's root page tables.
- *
- * <!-- inputs/outputs -->
- *   @param mk_elf_file a pointer to the mk_elf_file to map
- *   @param rpt the root page table to map the ELF file into
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t map_mk_elf_file(struct elf_file_t const *const mk_elf_file, root_page_table_t *const rpt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function maps the microkernel's ELF file into the
+     *     microkernel's root page tables.
+     *
+     * <!-- inputs/outputs -->
+     *   @param mk_elf_file a pointer to the mk_elf_file to map
+     *   @param pmut_rpt the root page table to map the ELF file into
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t map_mk_elf_file(
+        struct elf_file_t const *const mk_elf_file, root_page_table_t *const pmut_rpt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

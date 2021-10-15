@@ -38,12 +38,12 @@
  *   @param state the state_save_t to free.
  */
 void
-free_root_vp_state(struct state_save_t **const state)
+free_root_vp_state(struct state_save_t **const state) NOEXCEPT
 {
-    if (((void *)0) == *state) {
+    if (NULLPTR == *state) {
         return;
     }
 
     platform_free(*state, HYPERVISOR_PAGE_SIZE);
-    *state = ((void *)0);
+    *state = NULLPTR;
 }

@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-#include <debug.h>
 #include <global_descriptor_table_register_t.h>
+#include <platform.h>
 #include <types.h>
 
 /** @brief defines the first set of bits associated with the limit field */
@@ -51,47 +51,33 @@
  *
  * <!-- inputs/outputs -->
  *   @param gdtr a pointer to the gdtr that stores the GDT to get from
- *   @param idx the index of the descriptor in the provided GDT to get from
- *   @param limit a pointer to store the the resulting limit to
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+ *   @param selector the selector of the descriptor in the provided GDT
+ *     to get from
+ *   @param pmut_limit a pointer to store the the resulting limit to
  */
-int64_t
+void
 get_gdt_descriptor_limit(
     struct global_descriptor_table_register_t const *const gdtr,
     uint16_t const selector,
-    uint32_t *const limit)
+    uint32_t *const pmut_limit) NOEXCEPT
 {
-    uint64_t bytes64;
-    uint64_t idx64 = ((uint64_t)selector) >> ((uint64_t)3);
+    uint64_t const idx64 = ((uint64_t)selector) >> ((uint64_t)3);
 
-    if (((void *)0) == gdtr) {
-        bferror("invalid argument: gdtr == NULL");
-        return LOADER_FAILURE;
-    }
-
-    bytes64 = ((uint64_t)gdtr->limit) + ((uint64_t)1);
-
-    if (((void *)0) == limit) {
-        bferror("invalid argument: limit == NULL");
-        return LOADER_FAILURE;
-    }
+    platform_expects(NULLPTR != gdtr);
+    platform_expects(NULLPTR != pmut_limit);
 
     if (((uint64_t)0) == idx64) {
-        *limit = ((uint32_t)0);
-        return LOADER_SUCCESS;
+        *pmut_limit = ((uint32_t)0);
+        return;
     }
 
-    if (idx64 >= (bytes64 / sizeof(uint64_t))) {
-        bferror("invalid argument: index into GDT is out of range");
-        return LOADER_FAILURE;
+    *pmut_limit = (uint32_t)((gdtr->base[idx64] & LIMIT_MASK1) >> LIMIT_SHIFT1) |
+                  (uint32_t)((gdtr->base[idx64] & LIMIT_MASK2) >> LIMIT_SHIFT2);
+
+    if (((uint64_t)0) != (gdtr->base[idx64] & GRANULARITY_BIT)) {
+        *pmut_limit = (uint32_t)((((uint64_t)*pmut_limit) << LIMIT_SHIFTG) | LIMIT_MASKG);
     }
-
-    *limit = (uint32_t)((gdtr->base[idx64] & LIMIT_MASK1) >> LIMIT_SHIFT1) |
-             (uint32_t)((gdtr->base[idx64] & LIMIT_MASK2) >> LIMIT_SHIFT2);
-
-    if ((gdtr->base[idx64] & GRANULARITY_BIT) != 0) {
-        *limit = (uint32_t)((((uint64_t)*limit) << LIMIT_SHIFTG) | LIMIT_MASKG);
+    else {
+        bf_touch();
     }
-
-    return LOADER_SUCCESS;
 }

@@ -33,24 +33,33 @@
 #include <state_save_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief The function's main purpose is to set up the state for the
- *     microkernel.
- *
- * <!-- inputs/outputs -->
- *   @param rpt the mkcrokernel's root page table
- *   @param mk_elf_file the microkernel's ELF file
- *   @param mk_stack the microkernel's stack
- *   @param mk_stack_virt the microkernel's virtual address of the stack
- *   @param state where to save the newly set up state to
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t alloc_and_copy_mk_state(
-    root_page_table_t const *const rpt,
-    struct elf_file_t const *const mk_elf_file,
-    struct span_t const *const mk_stack,
-    uint64_t const mk_stack_virt,
-    struct state_save_t **const state);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief The function's main purpose is to set up the state for the
+     *     microkernel.
+     *
+     * <!-- inputs/outputs -->
+     *   @param rpt the mkcrokernel's root page table
+     *   @param mk_elf_file the microkernel's ELF file
+     *   @param mk_stack the microkernel's stack
+     *   @param mk_stack_virt the microkernel's virtual address of the stack
+     *   @param pmut_state where to save the newly set up state to
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t alloc_and_copy_mk_state(
+        root_page_table_t const *const rpt,
+        struct elf_file_t const *const mk_elf_file,
+        struct span_t const *const mk_stack,
+        uint64_t const mk_stack_virt,
+        struct state_save_t **const pmut_state) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

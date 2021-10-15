@@ -28,15 +28,25 @@
 #define INTRINSIC_SGDT_H
 
 #include <global_descriptor_table_register_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Executes the SGDT instruction given a pointer to a
- *     global_descriptor_table_register_t.
- *
- * <!-- inputs/outputs -->
- *   @param gdtr a pointer to a global_descriptor_table_register_t
- */
-void intrinsic_sgdt(struct global_descriptor_table_register_t *const gdtr);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Executes the SGDT instruction given a pointer to a
+     *     global_descriptor_table_register_t.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_gdtr a pointer to a global_descriptor_table_register_t
+     */
+    void intrinsic_sgdt(struct global_descriptor_table_register_t *const pmut_gdtr) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

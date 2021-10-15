@@ -24,8 +24,9 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <disable_hve.h>
+#include <global_descriptor_table_register_t.h>
+#include <interrupt_descriptor_table_register_t.h>
 #include <platform.h>
 #include <state_save_t.h>
 #include <types.h>
@@ -36,23 +37,25 @@
  *     using the alloc_and_copy_mk_state function.
  *
  * <!-- inputs/outputs -->
- *   @param state the state_save_t to free.
+ *   @param pmut_state the state_save_t to free.
  */
 void
-free_mk_state(struct state_save_t **const state)
+free_mk_state(struct state_save_t **const pmut_state) NOEXCEPT
 {
-    if (((void *)0) == *state) {
+    platform_expects(NULLPTR != pmut_state);
+
+    if (NULLPTR == *pmut_state) {
         return;
     }
 
-    platform_free((*state)->idtr.base, HYPERVISOR_PAGE_SIZE);
-    platform_free((*state)->gdtr.base, HYPERVISOR_PAGE_SIZE);
-    platform_free((*state)->ist, HYPERVISOR_PAGE_SIZE);
-    platform_free((*state)->tss, HYPERVISOR_PAGE_SIZE);
+    platform_free((*pmut_state)->idtr.base, HYPERVISOR_PAGE_SIZE);
+    platform_free((*pmut_state)->gdtr.base, HYPERVISOR_PAGE_SIZE);
+    platform_free((*pmut_state)->ist, HYPERVISOR_PAGE_SIZE);
+    platform_free((*pmut_state)->tss, HYPERVISOR_PAGE_SIZE);
 
     disable_hve();
-    platform_free((*state)->hve_page, HYPERVISOR_PAGE_SIZE);
+    platform_free((*pmut_state)->hve_page, HYPERVISOR_PAGE_SIZE);
 
-    platform_free(*state, HYPERVISOR_PAGE_SIZE);
-    *state = ((void *)0);
+    platform_free(*pmut_state, HYPERVISOR_PAGE_SIZE);
+    *pmut_state = NULLPTR;
 }

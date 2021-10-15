@@ -27,15 +27,16 @@
 #include <alloc_and_copy_mk_code_aliases.h>
 #include <alloc_mk_debug_ring.h>
 #include <debug.h>
+#include <g_mut_mk_code_aliases.h>
+#include <g_mut_vmm_status.h>
+#include <g_pmut_mut_mk_debug_ring.h>
+#include <loader_fini.h>
+#include <types.h>
+
+#ifdef DEBUG_LOADER
 #include <dump_mk_code_aliases.h>
 #include <dump_mk_debug_ring.h>
-#include <free_mk_code_aliases.h>
-#include <free_mk_debug_ring.h>
-#include <g_mk_code_aliases.h>
-#include <g_mk_debug_ring.h>
-#include <g_vmm_status.h>
-#include <platform.h>
-#include <types.h>
+#endif
 
 /**
  * <!-- description -->
@@ -47,34 +48,34 @@
  * <!-- inputs/outputs -->
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-loader_init(void)
+NODISCARD int64_t
+loader_init(void) NOEXCEPT
 {
-    if (VMM_STATUS_CORRUPT == g_vmm_status) {
+    if (VMM_STATUS_CORRUPT == g_mut_vmm_status) {
         bferror("Unable to init, previous VMM failed to properly stop");
         return LOADER_FAILURE;
     }
 
-    if (alloc_mk_debug_ring(&g_mk_debug_ring)) {
+    if (alloc_mk_debug_ring(&g_pmut_mut_mk_debug_ring)) {
         bferror("alloc_mk_debug_ring failed");
         goto alloc_mk_debug_ring_failed;
     }
 
-    if (alloc_and_copy_mk_code_aliases(&g_mk_code_aliases)) {
+    if (alloc_and_copy_mk_code_aliases(&g_mut_mk_code_aliases)) {
         bferror("alloc_and_copy_mk_code_aliases failed");
         goto alloc_and_copy_mk_code_aliases_failed;
     }
 
 #ifdef DEBUG_LOADER
-    dump_mk_debug_ring(g_mk_debug_ring);
-    dump_mk_code_aliases(&g_mk_code_aliases);
+    dump_mk_debug_ring(g_pmut_mut_mk_debug_ring);
+    dump_mk_code_aliases(&g_mut_mk_code_aliases);
 #endif
 
     return LOADER_SUCCESS;
 
 alloc_and_copy_mk_code_aliases_failed:
-    free_mk_debug_ring(&g_mk_debug_ring);
 alloc_mk_debug_ring_failed:
 
+    (void)loader_fini();
     return LOADER_FAILURE;
 }

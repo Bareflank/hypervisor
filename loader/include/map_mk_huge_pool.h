@@ -31,18 +31,27 @@
 #include <root_page_table_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function maps the microkernel's huge pool into the
- *     microkernel's root page tables.
- *
- * <!-- inputs/outputs -->
- *   @param huge_pool a pointer to a mutable_span_t that stores the huge pool
- *     being mapped
- *   @param rpt the root page table to map the huge pool into
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t
-map_mk_huge_pool(struct mutable_span_t const *const huge_pool, root_page_table_t *const rpt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function maps the microkernel's huge pool into the
+     *     microkernel's root page tables.
+     *
+     * <!-- inputs/outputs -->
+     *   @param huge_pool a pointer to a mutable_span_t that stores the huge pool
+     *     being mapped
+     *   @param pmut_rpt the root page table to map the huge pool into
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t map_mk_huge_pool(
+        struct mutable_span_t const *const huge_pool, root_page_table_t *const pmut_rpt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

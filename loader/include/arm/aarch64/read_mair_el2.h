@@ -30,13 +30,22 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Returns the value of MAIR_EL2
- *
- * <!-- inputs/outputs -->
- *   @return Returns the value of MAIR_EL2
- */
-uint64_t read_mair_el2();
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Returns the value of MAIR_EL2
+     *
+     * <!-- inputs/outputs -->
+     *   @return Returns the value of MAIR_EL2
+     */
+    NODISCARD uint64_t read_mair_el2() NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

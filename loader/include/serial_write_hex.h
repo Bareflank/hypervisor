@@ -29,13 +29,22 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Writes a hexidecimal number "val" to the serial device.
- *
- * <!-- inputs/outputs -->
- *   @param val the hexidecimal number to write
- */
-void serial_write_hex(uint64_t const val);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Writes a hexidecimal number "val" to the serial device.
+     *
+     * <!-- inputs/outputs -->
+     *   @param val the hexidecimal number to write
+     */
+    void serial_write_hex(uint64_t const val) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

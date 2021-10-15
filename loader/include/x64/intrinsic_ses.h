@@ -29,13 +29,22 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Reads the ES segment register and returns the result.
- *
- * <!-- inputs/outputs -->
- *   @return Reads the ES segment register and returns the result.
- */
-uint16_t intrinsic_ses(void);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Reads the ES segment register and returns the result.
+     *
+     * <!-- inputs/outputs -->
+     *   @return Reads the ES segment register and returns the result.
+     */
+    NODISCARD uint16_t intrinsic_ses(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

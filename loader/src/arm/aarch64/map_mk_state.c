@@ -45,8 +45,8 @@
  *   @param rpt the root page table to map the state into
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_mk_state(struct state_save_t const *const state, root_page_table_t *const rpt)
+NODISCARD int64_t
+map_mk_state(struct state_save_t const *const state, root_page_table_t *const rpt) NOEXCEPT
 {
     uint64_t uart0_addr = 0;
     bfelf_elf64_word const rwnc = bfelf_pf_w | bfelf_pf_r | bfelf_pf_nc;

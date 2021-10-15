@@ -38,6 +38,7 @@
 #include <root_page_table_t.h>
 #include <serial_write_c.h>
 #include <serial_write_hex.h>
+#include <types.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4152)
@@ -52,13 +53,14 @@
  * <!-- inputs/outputs -->
  *   @param a a pointer to a code_aliases_t that stores the aliases
  *     being mapped
- *   @param rpt the root page table to map the code aliases into
+ *   @param pmut_rpt the root page table to map the code aliases into
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_mk_code_aliases(struct code_aliases_t const *const a, root_page_table_t *const rpt)
+NODISCARD int64_t
+map_mk_code_aliases(
+    struct code_aliases_t const *const a, root_page_table_t *const pmut_rpt) NOEXCEPT
 {
-    uint64_t phys;
+    uint64_t mut_phys;
 
     /**
      * NOTE:
@@ -69,101 +71,101 @@ map_mk_code_aliases(struct code_aliases_t const *const a, root_page_table_t *con
      *   which on some platforms is garbage.
      */
 
-    phys = platform_virt_to_phys(a->demote);
-    if (((uint64_t)0) == phys) {
+    mut_phys = platform_virt_to_phys(a->demote);
+    if (((uint64_t)0) == mut_phys) {
         bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(demote, phys, rpt)) {
+    if (map_4k_page_rx((void *)&demote, mut_phys, pmut_rpt)) {
+        bferror("map_4k_page_rx1 failed");
+        return LOADER_FAILURE;
+    }
+
+    mut_phys = platform_virt_to_phys(a->promote);
+    if (((uint64_t)0) == mut_phys) {
+        bferror("platform_virt_to_phys failed");
+        return LOADER_FAILURE;
+    }
+
+    if (map_4k_page_rx((void *)&promote, mut_phys, pmut_rpt)) {
+        bferror("map_4k_page_rx2 failed");
+        return LOADER_FAILURE;
+    }
+
+    mut_phys = platform_virt_to_phys(a->esr_default);
+    if (((uint64_t)0) == mut_phys) {
+        bferror("platform_virt_to_phys failed");
+        return LOADER_FAILURE;
+    }
+
+    if (map_4k_page_rx((void *)&esr_default, mut_phys, pmut_rpt)) {
+        bferror("map_4k_page_rx3 failed");
+        return LOADER_FAILURE;
+    }
+
+    mut_phys = platform_virt_to_phys(a->esr_df);
+    if (((uint64_t)0) == mut_phys) {
+        bferror("platform_virt_to_phys failed");
+        return LOADER_FAILURE;
+    }
+
+    if (map_4k_page_rx((void *)&esr_df, mut_phys, pmut_rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
 
-    phys = platform_virt_to_phys(a->promote);
-    if (((uint64_t)0) == phys) {
+    mut_phys = platform_virt_to_phys(a->esr_gpf);
+    if (((uint64_t)0) == mut_phys) {
         bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(promote, phys, rpt)) {
+    if (map_4k_page_rx((void *)&esr_gpf, mut_phys, pmut_rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
 
-    phys = platform_virt_to_phys(a->esr_default);
-    if (((uint64_t)0) == phys) {
+    mut_phys = platform_virt_to_phys(a->esr_nmi);
+    if (((uint64_t)0) == mut_phys) {
         bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(esr_default, phys, rpt)) {
+    if (map_4k_page_rx((void *)&esr_nmi, mut_phys, pmut_rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
 
-    phys = platform_virt_to_phys(a->esr_df);
-    if (((uint64_t)0) == phys) {
+    mut_phys = platform_virt_to_phys(a->esr_pf);
+    if (((uint64_t)0) == mut_phys) {
         bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(esr_df, phys, rpt)) {
+    if (map_4k_page_rx((void *)&esr_pf, mut_phys, pmut_rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
 
-    phys = platform_virt_to_phys(a->esr_gpf);
-    if (((uint64_t)0) == phys) {
+    mut_phys = platform_virt_to_phys(a->serial_write_c);
+    if (((uint64_t)0) == mut_phys) {
         bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(esr_gpf, phys, rpt)) {
+    if (map_4k_page_rx((void *)&serial_write_c, mut_phys, pmut_rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }
 
-    phys = platform_virt_to_phys(a->esr_nmi);
-    if (((uint64_t)0) == phys) {
+    mut_phys = platform_virt_to_phys(a->serial_write_hex);
+    if (((uint64_t)0) == mut_phys) {
         bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rx(esr_nmi, phys, rpt)) {
-        bferror("map_4k_page_rx failed");
-        return LOADER_FAILURE;
-    }
-
-    phys = platform_virt_to_phys(a->esr_pf);
-    if (((uint64_t)0) == phys) {
-        bferror("platform_virt_to_phys failed");
-        return LOADER_FAILURE;
-    }
-
-    if (map_4k_page_rx(esr_pf, phys, rpt)) {
-        bferror("map_4k_page_rx failed");
-        return LOADER_FAILURE;
-    }
-
-    phys = platform_virt_to_phys(a->serial_write_c);
-    if (((uint64_t)0) == phys) {
-        bferror("platform_virt_to_phys failed");
-        return LOADER_FAILURE;
-    }
-
-    if (map_4k_page_rx(serial_write_c, phys, rpt)) {
-        bferror("map_4k_page_rx failed");
-        return LOADER_FAILURE;
-    }
-
-    phys = platform_virt_to_phys(a->serial_write_hex);
-    if (((uint64_t)0) == phys) {
-        bferror("platform_virt_to_phys failed");
-        return LOADER_FAILURE;
-    }
-
-    if (map_4k_page_rx(serial_write_hex, phys, rpt)) {
+    if (map_4k_page_rx((void *)&serial_write_hex, mut_phys, pmut_rpt)) {
         bferror("map_4k_page_rx failed");
         return LOADER_FAILURE;
     }

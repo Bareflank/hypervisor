@@ -27,7 +27,19 @@
 #ifndef ROOT_PAGE_TABLE_T_H
 #define ROOT_PAGE_TABLE_T_H
 
-/** @brief defines the type for the root page tables for this arch */
-typedef struct pml4t_t root_page_table_t;
+#include <pml4t_t.h>
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /** @brief defines the type for the root page tables for this arch */
+    typedef struct pml4t_t root_page_table_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

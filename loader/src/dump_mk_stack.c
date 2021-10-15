@@ -25,6 +25,8 @@
  */
 
 #include <debug.h>
+#include <dump_mk_stack.h>
+#include <platform.h>
 #include <span_t.h>
 #include <types.h>
 
@@ -37,12 +39,9 @@
  *   @param cpu the CPU that this mk stack belongs to
  */
 void
-dump_mk_stack(struct span_t *const stack, uint32_t const cpu)
+dump_mk_stack(struct span_t const *const stack, uint32_t const cpu) NOEXCEPT
 {
-    if (((void *)0) == stack) {
-        bferror("stack is NULL");
-        return;
-    }
+    platform_expects(NULLPTR != stack);
 
     bfdebug_d32("mk stack on cpu", cpu);
     bfdebug_ptr(" - addr", stack->addr);

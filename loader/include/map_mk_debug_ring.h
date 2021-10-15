@@ -29,19 +29,29 @@
 
 #include <debug_ring_t.h>
 #include <root_page_table_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function maps the microkernel's debug_ring into the
- *     microkernel's root page tables.
- *
- * <!-- inputs/outputs -->
- *   @param debug_ring a pointer to a debug_ring_t that stores the debug_ring
- *     being mapped
- *   @param rpt the root page table to map the debug_ring into
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t
-map_mk_debug_ring(struct debug_ring_t const *const debug_ring, root_page_table_t *const rpt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function maps the microkernel's debug_ring into the
+     *     microkernel's root page tables.
+     *
+     * <!-- inputs/outputs -->
+     *   @param debug_ring a pointer to a debug_ring_t that stores the debug_ring
+     *     being mapped
+     *   @param pmut_rpt the root page table to map the debug_ring into
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t map_mk_debug_ring(
+        struct debug_ring_t const *const debug_ring, root_page_table_t *const pmut_rpt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

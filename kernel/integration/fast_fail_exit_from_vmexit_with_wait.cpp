@@ -101,10 +101,10 @@ namespace syscall
     ///     called on each PP while the hypervisor is being bootstrapped.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param ppid the physical process to bootstrap
+    ///   @param ppid0 the physical process to bootstrap
     ///
     extern "C" void
-    bootstrap_entry(bsl::safe_u16::value_type const ppid) noexcept
+    bootstrap_entry(bsl::safe_u16::value_type const ppid0) noexcept
     {
         /// NOTE:
         /// - Call into the bootstrap handler. This entry point serves as a
@@ -120,7 +120,7 @@ namespace syscall
             g_mut_intrinsic,                  // --
             g_mut_vp_pool,                    // --
             g_mut_vs_pool,                    // --
-            bsl::to_u16(ppid))};
+            bsl::to_u16(ppid0))};
 
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();

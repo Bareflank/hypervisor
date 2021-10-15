@@ -29,27 +29,37 @@
 
 #include <elf_file_t.h>
 #include <span_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief When the start VMM function is executed, the user must provide
- *     the address and size of the extension ELF files to be loaded and
- *     executed. This ELF files exist in user-space memory and cannot be
- *     directly accessed. As a result, we must copy the arrays from user
- *     space into arrays in the kernel where the loader exists. This
- *     function performs this copy by first allocating arrays the size
- *     of the ELF files being copied and then copies the contents to these
- *     newly allocated arrays. For this reason, once this ELF files are no
- *     longer needed, you must free the ELF files as memory was previously
- *     allocated.
- *
- * <!-- inputs/outputs -->
- *   @param ext_elf_files_from_user the ELF files to copy
- *   @param copied_ext_elf_files where to copy the ELF files too
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t alloc_and_copy_ext_elf_files_from_user(
-    struct span_t const *const ext_elf_files_from_user,
-    struct elf_file_t *const copied_ext_elf_files);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief When the start VMM function is executed, the user must provide
+     *     the address and size of the extension ELF files to be loaded and
+     *     executed. This ELF files exist in user-space memory and cannot be
+     *     directly accessed. As a result, we must copy the arrays from user
+     *     space into arrays in the kernel where the loader exists. This
+     *     function performs this copy by first allocating arrays the size
+     *     of the ELF files being copied and then copies the contents to these
+     *     newly allocated arrays. For this reason, once this ELF files are no
+     *     longer needed, you must free the ELF files as memory was previously
+     *     allocated.
+     *
+     * <!-- inputs/outputs -->
+     *   @param ext_elf_files_from_user the ELF files to copy
+     *   @param pmut_copied_ext_elf_files where to copy the ELF files too
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t alloc_and_copy_ext_elf_files_from_user(
+        struct span_t const *const ext_elf_files_from_user,
+        struct elf_file_t *const pmut_copied_ext_elf_files) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

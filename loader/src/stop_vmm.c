@@ -24,9 +24,7 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
-#include <platform.h>
 #include <stop_and_free_the_vmm.h>
 #include <stop_vmm_args_t.h>
 #include <types.h>
@@ -39,8 +37,8 @@
  *   @param args the arguments to verify
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-static int64_t
-verify_stop_vmm_args(struct stop_vmm_args_t const *const args)
+NODISCARD static int64_t
+verify_stop_vmm_args(struct stop_vmm_args_t const *const args) NOEXCEPT
 {
     if (((uint64_t)1) != args->ver) {
         bferror("IOCTL ABI version not supported");
@@ -60,10 +58,10 @@ verify_stop_vmm_args(struct stop_vmm_args_t const *const args)
  *   @param args arguments from the ioctl
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-stop_vmm(struct stop_vmm_args_t const *const args)
+NODISCARD int64_t
+stop_vmm(struct stop_vmm_args_t const *const args) NOEXCEPT
 {
-    if (((void *)0) == args) {
+    if (NULLPTR == args) {
         bferror("args was NULL");
         return LOADER_FAILURE;
     }

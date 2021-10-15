@@ -131,7 +131,7 @@ namespace mk
                     bsl::print() << bsl::cyn << bsl::fmt{"04x", rec->vsid};
                     bsl::print() << bsl::rst << ", ";
                     bsl::print() << bsl::blu << "REASON:";
-                    bsl::print() << bsl::cyn << bsl::fmt{">2d", rec->exit_reason};
+                    bsl::print() << bsl::cyn << bsl::fmt{">3d", rec->exit_reason};
                     bsl::print() << bsl::rst << "                                ";
                     bsl::print() << bsl::ylw << "                               |";
                     bsl::print() << bsl::rst << bsl::endl;

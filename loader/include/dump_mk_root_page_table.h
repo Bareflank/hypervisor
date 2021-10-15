@@ -30,13 +30,22 @@
 #include <root_page_table_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Outputs the address of a provided mk root page table.
- *
- * <!-- inputs/outputs -->
- *   @param rpt the mk root page table to output
- */
-void dump_mk_root_page_table(root_page_table_t *const rpt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Outputs the address of a provided mk root page table.
+     *
+     * <!-- inputs/outputs -->
+     *   @param rpt the mk root page table to output
+     */
+    void dump_mk_root_page_table(root_page_table_t const *const rpt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

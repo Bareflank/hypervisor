@@ -29,21 +29,31 @@
 
 #include <bfelf/bfelf_elf64_ehdr_t.h>
 #include <stdint.h>
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #pragma pack(push, 1)
 
-/**
- * <!-- description -->
- *   @brief Defines the address and size of an ELF file.
- */
-struct elf_file_t
-{
-    /** @brief stores a pointer to the array */
-    struct bfelf_elf64_ehdr_t *addr;
-    /** @brief stores the size in bytes of the array */
-    uint64_t size;
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the address and size of an ELF file.
+     */
+    struct elf_file_t
+    {
+        /** @brief stores a pointer to the array */
+        struct bfelf_elf64_ehdr_t const *addr;
+        /** @brief stores the size in bytes of the array */
+        uint64_t size;
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -31,17 +31,27 @@
 #include <pml4t_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Given a pml4t and a virtual address, this function allocates a
- *     pdpt and adds it to the pml4t. If a pdpt has already been allocated,
- *     this function will fail.
- *
- * <!-- inputs/outputs -->
- *   @param pml4t the pml4t to add the newly allocated pdpt to
- *   @param virt the virtual address to get the PML4 offset from.
- *   @return a pointer to the newly allocated pdpt on success, ((void *)0) otherwise.
- */
-struct pdpt_t *alloc_pdpt(struct pml4t_t *const pml4t, uint64_t const virt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Given a pml4t and a virtual address, this function allocates a
+     *     pdpt and adds it to the pml4t. If a pdpt has already been allocated,
+     *     this function will fail.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_pml4t the pml4t to add the newly allocated pdpt to
+     *   @param virt the virtual address to get the PML4 offset from.
+     *   @return a pointer to the newly allocated pdpt on success, NULLPTR otherwise.
+     */
+    NODISCARD struct pdpt_t *
+    alloc_pdpt(struct pml4t_t *const pmut_pml4t, uint64_t const virt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

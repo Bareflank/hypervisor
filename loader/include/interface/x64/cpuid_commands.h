@@ -30,6 +30,11 @@
 #include <constants.h>
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /** @brief defines the value of EAX for all CPUID commands */
 #define CPUID_COMMAND_EAX ((uint32_t)0x400000FFU)
 /** @brief defines the value of ECX for the CPUID stop command */
@@ -43,5 +48,9 @@
 #define CPUID_COMMAND_RAX_SUCCESS ((uint64_t)0x0U)
 /** @brief defines the value of RAX on failure */
 #define CPUID_COMMAND_RAX_FAILURE ((uint64_t)0x1U)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

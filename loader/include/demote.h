@@ -31,20 +31,29 @@
 #include <state_save_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function executes the microkernel, demoting the current
- *     OS into a virtual machine.
- *
- * <!-- inputs/outputs -->
- *   @param mk_args_t the arguments to pass to the microkernel
- *   @param mk_state the microkernel's state save
- *   @param root_vp_state the root vp's state save
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t demote(
-    struct mk_args_t const *const args,
-    struct state_save_t const *const mk_state,
-    struct state_save_t const *const root_vp_state);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function executes the microkernel, demoting the current
+     *     OS into a virtual machine.
+     *
+     * <!-- inputs/outputs -->
+     *   @param args the arguments to pass to the microkernel
+     *   @param mk_state the microkernel's state save
+     *   @param root_vp_state the root vp's state save
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t demote(
+        struct mk_args_t const *const args,
+        struct state_save_t const *const mk_state,
+        struct state_save_t const *const root_vp_state) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

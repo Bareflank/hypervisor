@@ -29,13 +29,22 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Reads the CR4 control register and returns the result.
- *
- * <!-- inputs/outputs -->
- *   @return Reads the CR4 control register and returns the result.
- */
-uint64_t intrinsic_scr4(void);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Reads the CR4 control register and returns the result.
+     *
+     * <!-- inputs/outputs -->
+     *   @return Reads the CR4 control register and returns the result.
+     */
+    NODISCARD uint64_t intrinsic_scr4(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

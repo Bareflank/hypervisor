@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-#include <debug.h>
 #include <global_descriptor_table_register_t.h>
+#include <platform.h>
 #include <types.h>
 
 /** @brief defines the first set of bits associated with the attrib field */
@@ -46,42 +46,25 @@
  *   @param gdtr a pointer to the gdtr that stores the GDT to get from
  *   @param selector the selector of the descriptor in the provided GDT
  *     to get from
- *   @param attrib a pointer to store the the resulting attrib to
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+ *   @param pmut_attrib a pointer to store the the resulting attrib to
  */
-int64_t
+void
 get_gdt_descriptor_attrib(
     struct global_descriptor_table_register_t const *const gdtr,
     uint16_t const selector,
-    uint16_t *const attrib)
+    uint16_t *const pmut_attrib) NOEXCEPT
 {
-    uint64_t bytes64;
-    uint64_t idx64 = ((uint64_t)selector) >> ((uint64_t)3);
+    uint64_t const idx64 = ((uint64_t)selector) >> ((uint64_t)3);
 
-    if (((void *)0) == gdtr) {
-        bferror("invalid argument: gdtr == NULL");
-        return LOADER_FAILURE;
-    }
-
-    bytes64 = ((uint64_t)gdtr->limit) + ((uint64_t)1);
-
-    if (((void *)0) == attrib) {
-        bferror("invalid argument: attrib == NULL");
-        return LOADER_FAILURE;
-    }
+    platform_expects(NULLPTR != gdtr);
+    platform_expects(NULLPTR != pmut_attrib);
 
     if (((uint64_t)0) == idx64) {
-        *attrib = ((uint16_t)0);
-        return LOADER_SUCCESS;
+        *pmut_attrib = ((uint16_t)0);
+        return;
     }
 
-    if (idx64 >= (bytes64 / sizeof(uint64_t))) {
-        bferror("invalid argument: index into GDT is out of range");
-        return LOADER_FAILURE;
-    }
-
-    *attrib = (uint16_t)((gdtr->base[idx64] & ATTRIB_MASK1) >> ATTRIB_SHIFT1) |
-              (uint16_t)((gdtr->base[idx64] & ATTRIB_MASK2) >> ATTRIB_SHIFT2);
-
-    return LOADER_SUCCESS;
+    *pmut_attrib = (uint16_t)(
+        ((gdtr->base[idx64] & ATTRIB_MASK1) >> ATTRIB_SHIFT1) |
+        ((gdtr->base[idx64] & ATTRIB_MASK2) >> ATTRIB_SHIFT2));
 }

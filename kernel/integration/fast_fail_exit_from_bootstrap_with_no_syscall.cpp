@@ -101,12 +101,12 @@ namespace syscall
     ///     called on each PP while the hypervisor is being bootstrapped.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param ppid the physical process to bootstrap
+    ///   @param ppid0 the physical process to bootstrap
     ///
     extern "C" void
-    bootstrap_entry(bsl::safe_u16::value_type const ppid) noexcept
+    bootstrap_entry(bsl::safe_u16::value_type const ppid0) noexcept
     {
-        bsl::discard(ppid);
+        bsl::discard(ppid0);
         bsl::error() << "extension purposely not calling exit syscall. fault expected\n";
     }
 

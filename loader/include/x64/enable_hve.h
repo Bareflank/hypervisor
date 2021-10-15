@@ -30,14 +30,23 @@
 #include <state_save_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Enables Hardware Virtualization Extensions
- *
- * <!-- inputs/outputs -->
- *   @param state the mk state save containing the HVE page
- *   @return Returns 0 on success
- */
-int64_t enable_hve(struct state_save_t *const state);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Enables Hardware Virtualization Extensions
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_state the mk state save containing the HVE page
+     *   @return Returns 0 on success
+     */
+    NODISCARD int64_t enable_hve(struct state_save_t *const pmut_state) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

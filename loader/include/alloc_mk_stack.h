@@ -28,18 +28,27 @@
 #define ALLOC_MK_STACK_H
 
 #include <span_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Allocates a chunk of memory for the stack used by the
- *     microkernel. Note that the "size" parameter is in total pages and
- *     not in bytes. If the provided size is 0, this function will allocate
- *     a default number of pages.
- *
- * <!-- inputs/outputs -->
- *   @param size the total number of pages (not bytes) to allocate
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t alloc_mk_stack(struct span_t *const stack);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+    /**
+     * <!-- description -->
+     *   @brief Allocates a chunk of memory for the stack used by the
+     *     microkernel. Note that the "size" parameter is in total pages and
+     *     not in bytes. If the provided size is 0, this function will allocate
+     *     a default number of pages.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_stack the span_t to store the stack addr/size.
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t alloc_mk_stack(struct span_t *const pmut_stack) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

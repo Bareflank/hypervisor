@@ -25,8 +25,10 @@
  */
 
 #include <debug.h>
+#include <get_mk_huge_pool_addr.h>
 #include <mutable_span_t.h>
 #include <platform.h>
+#include <types.h>
 
 /**
  * <!-- description -->
@@ -36,19 +38,21 @@
  *   @param huge_pool a pointer to a mutable_span_t that stores the huge pool
  *   @param base_virt provide the base virtual address that the huge pool
  *     was mapped to.
- *   @param addr where to store the resulting addr of the huge pool
+ *   @param pmut_addr where to store the resulting addr of the huge pool
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
+NODISCARD int64_t
 get_mk_huge_pool_addr(
-    struct mutable_span_t const *const huge_pool, uint64_t const base_virt, uint8_t **const addr)
+    struct mutable_span_t const *const huge_pool,
+    uint64_t const base_virt,
+    uint8_t **const pmut_addr) NOEXCEPT
 {
-    uint64_t phys = platform_virt_to_phys(huge_pool->addr);
+    uint64_t const phys = platform_virt_to_phys(huge_pool->addr);
     if (((uint64_t)0) == phys) {
         bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
-    *addr = ((uint8_t *)(base_virt + phys));
+    *pmut_addr = ((uint8_t *)(base_virt + phys));
     return LOADER_SUCCESS;
 }

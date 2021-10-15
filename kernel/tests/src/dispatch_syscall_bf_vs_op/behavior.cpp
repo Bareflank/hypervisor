@@ -2603,6 +2603,135 @@ namespace mk
             };
         };
 
+        bsl::ut_scenario{"RUN_CURRENT_IDX_VAL active vmid"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                intrinsic_t mut_intrinsic{};
+                vm_pool_t mut_vm_pool{};
+                vp_pool_t mut_vp_pool{};
+                vs_pool_t mut_vs_pool{};
+                ext_pool_t mut_ext_pool{};
+                ext_t mut_ext{};
+                constexpr auto syscall{syscall::BF_VS_OP_RUN_CURRENT_IDX_VAL};
+                constexpr auto online_pps{0x2_u16};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_ext.initialize({}, {}, {}, {}, {}));
+                    mut_tls.ext = &mut_ext;
+                    mut_tls.ext_vmexit = &mut_ext;
+                    mut_tls.online_pps = bsl::to_u16(online_pps).get();
+                    mut_tls.ext_syscall = syscall.get();
+                    mut_tls.ext_reg0 = bsl::to_u64(mut_ext.open_handle()).get();
+                    mut_vm_pool.initialize();
+                    mut_vp_pool.initialize();
+                    mut_vs_pool.initialize();
+                    bsl::ut_required_step(
+                        mut_vm_pool.allocate(mut_tls, mut_page_pool, mut_ext_pool));
+                    bsl::ut_required_step(mut_vp_pool.allocate(mut_tls, {}));
+                    bsl::ut_required_step(
+                        mut_vs_pool.allocate(mut_tls, mut_page_pool, mut_intrinsic, {}, {}, {}));
+                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            dispatch_syscall_bf_vs_op(
+                                mut_tls,
+                                mut_page_pool,
+                                mut_intrinsic,
+                                mut_vm_pool,
+                                mut_vp_pool,
+                                mut_vs_pool,
+                                mut_ext_pool) != syscall::BF_STATUS_SUCCESS);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"RUN_CURRENT_IDX_VAL active vpid"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                intrinsic_t mut_intrinsic{};
+                vm_pool_t mut_vm_pool{};
+                vp_pool_t mut_vp_pool{};
+                vs_pool_t mut_vs_pool{};
+                ext_pool_t mut_ext_pool{};
+                ext_t mut_ext{};
+                constexpr auto syscall{syscall::BF_VS_OP_RUN_CURRENT_IDX_VAL};
+                constexpr auto online_pps{0x2_u16};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_ext.initialize({}, {}, {}, {}, {}));
+                    mut_tls.ext = &mut_ext;
+                    mut_tls.ext_vmexit = &mut_ext;
+                    mut_tls.online_pps = bsl::to_u16(online_pps).get();
+                    mut_tls.ext_syscall = syscall.get();
+                    mut_tls.ext_reg0 = bsl::to_u64(mut_ext.open_handle()).get();
+                    mut_vm_pool.initialize();
+                    mut_vp_pool.initialize();
+                    mut_vs_pool.initialize();
+                    bsl::ut_required_step(
+                        mut_vm_pool.allocate(mut_tls, mut_page_pool, mut_ext_pool));
+                    bsl::ut_required_step(mut_vp_pool.allocate(mut_tls, {}));
+                    bsl::ut_required_step(
+                        mut_vs_pool.allocate(mut_tls, mut_page_pool, mut_intrinsic, {}, {}, {}));
+                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            dispatch_syscall_bf_vs_op(
+                                mut_tls,
+                                mut_page_pool,
+                                mut_intrinsic,
+                                mut_vm_pool,
+                                mut_vp_pool,
+                                mut_vs_pool,
+                                mut_ext_pool) != syscall::BF_STATUS_SUCCESS);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"RUN_CURRENT_IDX_VAL active vsid"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                intrinsic_t mut_intrinsic{};
+                vm_pool_t mut_vm_pool{};
+                vp_pool_t mut_vp_pool{};
+                vs_pool_t mut_vs_pool{};
+                ext_pool_t mut_ext_pool{};
+                ext_t mut_ext{};
+                constexpr auto syscall{syscall::BF_VS_OP_RUN_CURRENT_IDX_VAL};
+                constexpr auto online_pps{0x2_u16};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_ext.initialize({}, {}, {}, {}, {}));
+                    mut_tls.ext = &mut_ext;
+                    mut_tls.ext_vmexit = &mut_ext;
+                    mut_tls.online_pps = bsl::to_u16(online_pps).get();
+                    mut_tls.ext_syscall = syscall.get();
+                    mut_tls.ext_reg0 = bsl::to_u64(mut_ext.open_handle()).get();
+                    mut_vm_pool.initialize();
+                    mut_vp_pool.initialize();
+                    mut_vs_pool.initialize();
+                    bsl::ut_required_step(
+                        mut_vm_pool.allocate(mut_tls, mut_page_pool, mut_ext_pool));
+                    bsl::ut_required_step(mut_vp_pool.allocate(mut_tls, {}));
+                    bsl::ut_required_step(
+                        mut_vs_pool.allocate(mut_tls, mut_page_pool, mut_intrinsic, {}, {}, {}));
+                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            dispatch_syscall_bf_vs_op(
+                                mut_tls,
+                                mut_page_pool,
+                                mut_intrinsic,
+                                mut_vm_pool,
+                                mut_vp_pool,
+                                mut_vs_pool,
+                                mut_ext_pool) != syscall::BF_STATUS_SUCCESS);
+                    };
+                };
+            };
+        };
+
         bsl::ut_scenario{"ADVANCE_IP_AND_RUN_IDX_VAL"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
                 tls_t mut_tls{};
@@ -3437,6 +3566,51 @@ namespace mk
                                 mut_vp_pool,
                                 mut_vs_pool,
                                 mut_ext_pool) == syscall::BF_STATUS_SUCCESS);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL not active yet"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                intrinsic_t mut_intrinsic{};
+                vm_pool_t mut_vm_pool{};
+                vp_pool_t mut_vp_pool{};
+                vs_pool_t mut_vs_pool{};
+                ext_pool_t mut_ext_pool{};
+                ext_t mut_ext{};
+                constexpr auto syscall{syscall::BF_VS_OP_ADVANCE_IP_AND_RUN_CURRENT_IDX_VAL};
+                constexpr auto online_pps{0x2_u16};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_ext.initialize({}, {}, {}, {}, {}));
+                    mut_tls.ext = &mut_ext;
+                    mut_tls.ext_vmexit = &mut_ext;
+                    mut_tls.online_pps = bsl::to_u16(online_pps).get();
+                    mut_tls.ext_syscall = syscall.get();
+                    mut_tls.ext_reg0 = bsl::to_u64(mut_ext.open_handle()).get();
+                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
+                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
+                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
+                    mut_vm_pool.initialize();
+                    mut_vp_pool.initialize();
+                    mut_vs_pool.initialize();
+                    bsl::ut_required_step(
+                        mut_vm_pool.allocate(mut_tls, mut_page_pool, mut_ext_pool));
+                    bsl::ut_required_step(mut_vp_pool.allocate(mut_tls, {}));
+                    bsl::ut_required_step(
+                        mut_vs_pool.allocate(mut_tls, mut_page_pool, mut_intrinsic, {}, {}, {}));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            dispatch_syscall_bf_vs_op(
+                                mut_tls,
+                                mut_page_pool,
+                                mut_intrinsic,
+                                mut_vm_pool,
+                                mut_vp_pool,
+                                mut_vs_pool,
+                                mut_ext_pool) != syscall::BF_STATUS_SUCCESS);
                     };
                 };
             };
@@ -5100,7 +5274,7 @@ namespace mk
                                 mut_vm_pool,
                                 mut_vp_pool,
                                 mut_vs_pool,
-                                mut_ext_pool) == syscall::BF_STATUS_SUCCESS);
+                                mut_ext_pool) != syscall::BF_STATUS_SUCCESS);
                     };
                 };
             };
@@ -5128,14 +5302,14 @@ namespace mk
                     mut_vm_pool.initialize();
                     mut_vp_pool.initialize();
                     mut_vs_pool.initialize();
+                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
+                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
+                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
                     bsl::ut_required_step(
                         mut_vm_pool.allocate(mut_tls, mut_page_pool, mut_ext_pool));
                     bsl::ut_required_step(mut_vp_pool.allocate(mut_tls, {}));
                     bsl::ut_required_step(
                         mut_vs_pool.allocate(mut_tls, mut_page_pool, mut_intrinsic, {}, {}, {}));
-                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
                     mut_vm_pool.set_active(mut_tls, {});
                     mut_vp_pool.set_active(mut_tls, {});
                     mut_vs_pool.set_active(mut_tls, mut_intrinsic, {});
@@ -5179,9 +5353,6 @@ namespace mk
                     mut_tls.ext_reg1 = bsl::to_u64(vmid).get();
                     mut_tls.ext_reg2 = bsl::to_u64(vpid).get();
                     mut_tls.ext_reg3 = bsl::to_u64(vsid).get();
-                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
                     mut_vm_pool.initialize();
                     mut_vp_pool.initialize();
                     mut_vs_pool.initialize();
@@ -5230,9 +5401,6 @@ namespace mk
                     mut_tls.ext_reg1 = bsl::to_u64(vmid).get();
                     mut_tls.ext_reg2 = bsl::to_u64(vpid).get();
                     mut_tls.ext_reg3 = bsl::to_u64(vsid).get();
-                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
                     mut_vm_pool.initialize();
                     mut_vp_pool.initialize();
                     mut_vs_pool.initialize();
@@ -5282,9 +5450,6 @@ namespace mk
                         mut_tls.ext_reg1 = bsl::to_u64(vmid).get();
                         mut_tls.ext_reg2 = bsl::to_u64(vpid).get();
                         mut_tls.ext_reg3 = bsl::to_u64(vsid).get();
-                        mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
-                        mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
-                        mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
                         mut_vm_pool.initialize();
                         mut_vp_pool.initialize();
                         mut_vs_pool.initialize();
@@ -5328,9 +5493,6 @@ namespace mk
                     mut_tls.ext_reg1 = bsl::to_u64(vmid).get();
                     mut_tls.ext_reg2 = bsl::to_u64(vpid).get();
                     mut_tls.ext_reg3 = bsl::to_u64(vsid).get();
-                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
                     mut_vm_pool.initialize();
                     mut_vp_pool.initialize();
                     mut_vs_pool.initialize();
@@ -5379,9 +5541,6 @@ namespace mk
                     mut_tls.ext_reg1 = bsl::to_u64(vmid).get();
                     mut_tls.ext_reg2 = bsl::to_u64(vpid).get();
                     mut_tls.ext_reg3 = bsl::to_u64(vsid).get();
-                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
                     mut_vm_pool.initialize();
                     mut_vp_pool.initialize();
                     mut_vs_pool.initialize();
@@ -5479,9 +5638,6 @@ namespace mk
                     mut_tls.ext_reg1 = bsl::to_u64(vmid).get();
                     mut_tls.ext_reg2 = bsl::to_u64(vpid).get();
                     mut_tls.ext_reg3 = bsl::to_u64(vsid).get();
-                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
                     mut_vm_pool.initialize();
                     mut_vp_pool.initialize();
                     mut_vs_pool.initialize();
@@ -5530,9 +5686,6 @@ namespace mk
                     mut_tls.ext_reg1 = bsl::to_u64(vmid).get();
                     mut_tls.ext_reg2 = bsl::to_u64(vpid).get();
                     mut_tls.ext_reg3 = bsl::to_u64(vsid).get();
-                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
                     mut_vm_pool.initialize();
                     mut_vp_pool.initialize();
                     mut_vs_pool.initialize();
@@ -5632,9 +5785,6 @@ namespace mk
                     mut_tls.ext_reg1 = bsl::to_u64(vmid).get();
                     mut_tls.ext_reg2 = bsl::to_u64(vpid).get();
                     mut_tls.ext_reg3 = bsl::to_u64(vsid).get();
-                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
                     mut_vm_pool.initialize();
                     mut_vp_pool.initialize();
                     mut_vs_pool.initialize();
@@ -5683,9 +5833,6 @@ namespace mk
                     mut_tls.ext_reg0 = bsl::to_u64(mut_ext.open_handle()).get();
                     mut_tls.ext_reg2 = bsl::to_u64(vpid).get();
                     mut_tls.ext_reg3 = bsl::to_u64(vsid).get();
-                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
                     mut_vm_pool.initialize();
                     mut_vp_pool.initialize();
                     mut_vs_pool.initialize();
@@ -5735,9 +5882,6 @@ namespace mk
                     mut_tls.ext_syscall = syscall.get();
                     mut_tls.ext_reg0 = bsl::to_u64(mut_ext.open_handle()).get();
                     mut_tls.ext_reg3 = bsl::to_u64(vsid).get();
-                    mut_tls.active_vmid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vpid = syscall::BF_INVALID_ID.get();
-                    mut_tls.active_vsid = syscall::BF_INVALID_ID.get();
                     mut_vm_pool.initialize();
                     mut_vp_pool.initialize();
                     mut_vs_pool.initialize();

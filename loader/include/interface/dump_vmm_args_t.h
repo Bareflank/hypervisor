@@ -28,27 +28,36 @@
 #define DUMP_VMM_ARGS_T_H
 
 #include <debug_ring_t.h>
-#include <stdint.h>
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #pragma pack(push, 1)
 
 /** @brief defines the IOCTL index for dumping a VMs debug ring */
 #define LOADER_DUMP_VMM_CMD ((uint32_t)0xBF03)
 
-/**
- * <!-- description -->
- *   @brief Defines the information that a userspace application needs to
- *     provide to dump the VMM.
- */
-struct dump_vmm_args_t
-{
-    /** @brief set to HYPERVISOR_VERSION */
-    uint64_t ver;
+    /**
+     * <!-- description -->
+     *   @brief Defines the information that a userspace application needs to
+     *     provide to dump the VMM.
+     */
+    struct dump_vmm_args_t
+    {
+        /** @brief set to HYPERVISOR_VERSION */
+        uint64_t ver;
 
-    /** @brief stores the contents of the debug ring upon request */
-    struct debug_ring_t debug_ring;
-};
+        /** @brief stores the contents of the debug ring upon request */
+        struct debug_ring_t debug_ring;
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

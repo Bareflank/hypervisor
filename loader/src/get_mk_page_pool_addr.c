@@ -27,6 +27,7 @@
 #include <debug.h>
 #include <mutable_span_t.h>
 #include <platform.h>
+#include <types.h>
 
 /**
  * <!-- description -->
@@ -36,19 +37,21 @@
  *   @param page_pool a pointer to a mutable_span_t that stores the page pool
  *   @param base_virt provide the base virtual address that the page pool
  *     was mapped to.
- *   @param addr where to store the resulting addr of the page pool
+ *   @param pmut_addr where to store the resulting addr of the page pool
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
+NODISCARD int64_t
 get_mk_page_pool_addr(
-    struct mutable_span_t const *const page_pool, uint64_t const base_virt, uint8_t **const addr)
+    struct mutable_span_t const *const page_pool,
+    uint64_t const base_virt,
+    uint8_t **const pmut_addr) NOEXCEPT
 {
-    uint64_t phys = platform_virt_to_phys(page_pool->addr);
+    uint64_t const phys = platform_virt_to_phys(page_pool->addr);
     if (((uint64_t)0) == phys) {
         bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
-    *addr = ((uint8_t *)(base_virt + phys));
+    *pmut_addr = ((uint8_t *)(base_virt + phys));
     return LOADER_SUCCESS;
 }

@@ -28,15 +28,25 @@
 #define FREE_MK_ELF_FILE_H
 
 #include <elf_file_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Releases a previously allocated elf_file_t that was allocated
- *     using the alloc_and_copy_mk_elf_file function.
- *
- * <!-- inputs/outputs -->
- *   @param mk_elf_file the elf_file_t to free.
- */
-void free_mk_elf_file(struct elf_file_t *const mk_elf_file);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Releases a previously allocated elf_file_t that was allocated
+     *     using the alloc_and_copy_mk_elf_file function.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_mk_elf_file the elf_file_t to free.
+     */
+    void free_mk_elf_file(struct elf_file_t *const pmut_mk_elf_file) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -25,7 +25,9 @@
  */
 
 #include <debug_ring_t.h>
+#include <free_mk_debug_ring.h>
 #include <platform.h>
+#include <types.h>
 
 /**
  * <!-- description -->
@@ -33,11 +35,17 @@
  *     using the alloc_mk_debug_ring function.
  *
  * <!-- inputs/outputs -->
- *   @param debug_ring the debug_ring_t to free.
+ *   @param pmut_debug_ring the debug_ring_t to free.
  */
 void
-free_mk_debug_ring(struct debug_ring_t **const debug_ring)
+free_mk_debug_ring(struct debug_ring_t **const pmut_debug_ring) NOEXCEPT
 {
-    platform_free(*debug_ring, HYPERVISOR_DEBUG_RING_SIZE);
-    *debug_ring = ((void *)0);
+    platform_expects(NULLPTR != pmut_debug_ring);
+
+    if (NULLPTR == *pmut_debug_ring) {
+        return;
+    }
+
+    platform_free(*pmut_debug_ring, HYPERVISOR_DEBUG_RING_SIZE);
+    *pmut_debug_ring = NULLPTR;
 }

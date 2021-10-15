@@ -444,7 +444,7 @@ namespace syscall
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///
-    extern "C" void bf_debug_op_write_c_impl(bsl::char_type const reg0_in) noexcept;
+    extern "C" void bf_debug_op_write_c_impl(bsl::char_type const reg0_in) noexcept;    // NOLINT
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_debug_op_write_str.
@@ -453,8 +453,9 @@ namespace syscall
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
     ///
-    extern "C" void bf_debug_op_write_str_impl(
-        bsl::char_type const *const reg0_in, bsl::uintmx const reg1_in) noexcept;
+    extern "C" void bf_debug_op_write_str_impl(    // NOLINT
+        bsl::char_type const *const reg0_in,
+        bsl::uintmx const reg1_in) noexcept;    // NOLINT
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_debug_op_dump_ext.

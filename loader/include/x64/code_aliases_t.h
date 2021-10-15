@@ -27,44 +27,55 @@
 #ifndef CODE_ALIASES_T_H
 #define CODE_ALIASES_T_H
 
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
-/**
- * <!-- description -->
- *   @brief Stores pointers to memory that is allocated for executable
- *     code that is compiled into the kernel, that must be mapped into the
- *     microkernel's root page tables. Some operating systems will not
- *     provide the physical address of a page that is mapped into the
- *     executable portion of a kernel module (e.g., Linux). To overcome this
- *     the executable code is copied into an alias page. When the function
- *     is executed using the kernel module's page tables, nothing changes, but
- *     when the code is executed from the microkernel's page tables, the
- *     pages stored here provide the page that stores the executable code
- *     instead, ensuring we have a means to get a physical address of a page
- *     that has the code we want.
- */
-struct code_aliases_t
-{
-    /** @brief stores an alias page to the demote code */
-    void *demote;
-    /** @brief stores an alias page to the promote code */
-    void *promote;
-    /** @brief stores an alias page to the esr_default code */
-    void *esr_default;
-    /** @brief stores an alias page to the esr_df code */
-    void *esr_df;
-    /** @brief stores an alias page to the esr_gpf code */
-    void *esr_gpf;
-    /** @brief stores an alias page to the esr_nmi code */
-    void *esr_nmi;
-    /** @brief stores an alias page to the esr_pf code */
-    void *esr_pf;
-    /** @brief stores an alias page to the serial_write_c code */
-    void *serial_write_c;
-    /** @brief stores an alias page to the serial_write_hex code */
-    void *serial_write_hex;
-};
+    /**
+     * <!-- description -->
+     *   @brief Stores pointers to memory that is allocated for executable
+     *     code that is compiled into the kernel, that must be mapped into the
+     *     microkernel's root page tables. Some operating systems will not
+     *     provide the physical address of a page that is mapped into the
+     *     executable portion of a kernel module (e.g., Linux). To overcome this
+     *     the executable code is copied into an alias page. When the function
+     *     is executed using the kernel module's page tables, nothing changes, but
+     *     when the code is executed from the microkernel's page tables, the
+     *     pages stored here provide the page that stores the executable code
+     *     instead, ensuring we have a means to get a physical address of a page
+     *     that has the code we want.
+     */
+    struct code_aliases_t
+    {
+        /** @brief stores an alias page to the demote code */
+        void *demote;
+        /** @brief stores an alias page to the promote code */
+        void *promote;
+        /** @brief stores an alias page to the esr_default code */
+        void *esr_default;
+        /** @brief stores an alias page to the esr_df code */
+        void *esr_df;
+        /** @brief stores an alias page to the esr_gpf code */
+        void *esr_gpf;
+        /** @brief stores an alias page to the esr_nmi code */
+        void *esr_nmi;
+        /** @brief stores an alias page to the esr_pf code */
+        void *esr_pf;
+        /** @brief stores an alias page to the serial_write_c code */
+        void *serial_write_c;
+        /** @brief stores an alias page to the serial_write_hex code */
+        void *serial_write_hex;
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -803,18 +803,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
+                helpers::l3t_t mut_l3t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l3t.entries.front().alias = {};
+                        mut_l3t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -827,18 +827,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
+                helpers::l3t_t mut_l3t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l3t.entries.front().alias = {};
+                        mut_l3t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -851,18 +851,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
+                helpers::l3t_t mut_l3t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l3t.entries.front().alias = {};
+                        mut_l3t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -875,18 +875,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l2t_t l2t{};
+                helpers::l2t_t mut_l2t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l2t.entries.front().alias = {};
+                        mut_l2t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -899,18 +899,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l2t_t l2t{};
+                helpers::l2t_t mut_l2t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l2t.entries.front().alias = {};
+                        mut_l2t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -923,18 +923,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l2t_t l2t{};
+                helpers::l2t_t mut_l2t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l2t.entries.front().alias = {};
+                        mut_l2t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -947,18 +947,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l1t_t l1t{};
+                helpers::l1t_t mut_l1t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l1t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l1t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l1t.entries.front().alias = {};
+                        mut_l1t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -971,18 +971,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l1t_t l1t{};
+                helpers::l1t_t mut_l1t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l1t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l1t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l1t.entries.front().alias = {};
+                        mut_l1t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -995,18 +995,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l0t_t l0t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l0t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l0t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l0t.entries.front().alias = {};
+                        mut_l0t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -1019,18 +1019,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
+                helpers::l3t_t mut_l3t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l3t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().u = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l3t.entries.front().u = {};
+                        mut_l3t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -1043,18 +1043,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
+                helpers::l3t_t mut_l3t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l3t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().u = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l3t.entries.front().u = {};
+                        mut_l3t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -1067,18 +1067,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
+                helpers::l3t_t mut_l3t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l3t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().u = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l3t.entries.front().u = {};
+                        mut_l3t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -1091,18 +1091,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l2t_t l2t{};
+                helpers::l2t_t mut_l2t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l2t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().u = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l2t.entries.front().u = {};
+                        mut_l2t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -1115,18 +1115,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l2t_t l2t{};
+                helpers::l2t_t mut_l2t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l2t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().u = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l2t.entries.front().u = {};
+                        mut_l2t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -1139,18 +1139,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l2t_t l2t{};
+                helpers::l2t_t mut_l2t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l2t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().u = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l2t.entries.front().u = {};
+                        mut_l2t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -1163,18 +1163,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l1t_t l1t{};
+                helpers::l1t_t mut_l1t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l1t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l1t.entries.front().u = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l1t.entries.front().u = {};
+                        mut_l1t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -1187,18 +1187,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l1t_t l1t{};
+                helpers::l1t_t mut_l1t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l1t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l1t.entries.front().u = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l1t.entries.front().u = {};
+                        mut_l1t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -1211,18 +1211,18 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l0t_t l0t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
-                    l0t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l0t.entries.front().u = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             !mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l0t.entries.front().u = {};
+                        mut_l0t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2640,20 +2640,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
+                helpers::l3t_t mut_l3t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l3t.entries.front().alias = {};
+                        mut_l3t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2666,20 +2666,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
+                helpers::l3t_t mut_l3t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l3t.entries.front().alias = {};
+                        mut_l3t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2692,20 +2692,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
+                helpers::l3t_t mut_l3t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l3t.entries.front().alias = {};
+                        mut_l3t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2718,20 +2718,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l2t_t l2t{};
+                helpers::l2t_t mut_l2t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l2t.entries.front().alias = {};
+                        mut_l2t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2744,20 +2744,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l2t_t l2t{};
+                helpers::l2t_t mut_l2t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l2t.entries.front().alias = {};
+                        mut_l2t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2770,20 +2770,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l2t_t l2t{};
+                helpers::l2t_t mut_l2t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l2t.entries.front().alias = {};
+                        mut_l2t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2796,20 +2796,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l1t_t l1t{};
+                helpers::l1t_t mut_l1t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l1t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l1t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l1t.entries.front().alias = {};
+                        mut_l1t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2822,20 +2822,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l1t_t l1t{};
+                helpers::l1t_t mut_l1t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l1t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l1t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l1t.entries.front().alias = {};
+                        mut_l1t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2848,20 +2848,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l0t_t l0t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l0t.entries.front().alias = bsl::safe_u64::magic_1().get();
+                    mut_l0t.entries.front().alias = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l0t.entries.front().alias = {};
+                        mut_l0t.entries.front().alias = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2874,20 +2874,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
+                helpers::l3t_t mut_l3t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l3t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().u = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l3t.entries.front().u = {};
+                        mut_l3t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2900,20 +2900,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
+                helpers::l3t_t mut_l3t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l3t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().u = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l3t.entries.front().u = {};
+                        mut_l3t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2926,20 +2926,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
+                helpers::l3t_t mut_l3t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l3t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().u = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l3t.entries.front().u = {};
+                        mut_l3t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2952,20 +2952,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l2t_t l2t{};
+                helpers::l2t_t mut_l2t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l2t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().u = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l2t.entries.front().u = {};
+                        mut_l2t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -2978,20 +2978,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l2t_t l2t{};
+                helpers::l2t_t mut_l2t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l2t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().u = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l2t.entries.front().u = {};
+                        mut_l2t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -3004,20 +3004,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l2t_t l2t{};
+                helpers::l2t_t mut_l2t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l2t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().u = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l2e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l2t.entries.front().u = {};
+                        mut_l2t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -3030,20 +3030,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l1t_t l1t{};
+                helpers::l1t_t mut_l1t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l1t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l1t.entries.front().u = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l1t.entries.front().u = {};
+                        mut_l1t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -3056,20 +3056,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l1t_t l1t{};
+                helpers::l1t_t mut_l1t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l1t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l1t.entries.front().u = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l1e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l1t.entries.front().u = {};
+                        mut_l1t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -3082,20 +3082,20 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l0t_t l0t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l0t.entries.front().u = bsl::safe_u64::magic_1().get();
+                    mut_l0t.entries.front().u = bsl::safe_u64::magic_1().get();
                     auto const ents{mut_rpt.entries<l0e_t>(mut_tls, mut_page_pool, {})};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(nullptr == ents.l3e);
                     };
                     bsl::ut_cleanup{} = [&]() noexcept {
-                        l0t.entries.front().u = {};
+                        mut_l0t.entries.front().u = {};
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
                 };
@@ -3121,23 +3121,23 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
-                helpers::l2t_t l2t{};
-                helpers::l1t_t l1t{};
-                helpers::l0t_t l0t{};
+                helpers::l3t_t mut_l3t{};
+                helpers::l2t_t mut_l2t{};
+                helpers::l1t_t mut_l1t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys3{0x000FFFFF00003000_u64};
                 constexpr auto phys2{0x000FFFFF00002000_u64};
                 constexpr auto phys1{0x000FFFFF00001000_u64};
                 constexpr auto phys0{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys0);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l0t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    mut_l0t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
@@ -3151,23 +3151,23 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
-                helpers::l2t_t l2t{};
-                helpers::l1t_t l1t{};
-                helpers::l0t_t l0t{};
+                helpers::l3t_t mut_l3t{};
+                helpers::l2t_t mut_l2t{};
+                helpers::l1t_t mut_l1t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys3{0x000FFFFF00003000_u64};
                 constexpr auto phys2{0x000FFFFF00002000_u64};
                 constexpr auto phys1{0x000FFFFF00001000_u64};
                 constexpr auto phys0{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys0);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l1t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    mut_l1t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
@@ -3181,23 +3181,23 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
-                helpers::l2t_t l2t{};
-                helpers::l1t_t l1t{};
-                helpers::l0t_t l0t{};
+                helpers::l3t_t mut_l3t{};
+                helpers::l2t_t mut_l2t{};
+                helpers::l1t_t mut_l1t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys3{0x000FFFFF00003000_u64};
                 constexpr auto phys2{0x000FFFFF00002000_u64};
                 constexpr auto phys1{0x000FFFFF00001000_u64};
                 constexpr auto phys0{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys0);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l2t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
@@ -3211,23 +3211,23 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
-                helpers::l2t_t l2t{};
-                helpers::l1t_t l1t{};
-                helpers::l0t_t l0t{};
+                helpers::l3t_t mut_l3t{};
+                helpers::l2t_t mut_l2t{};
+                helpers::l1t_t mut_l1t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys3{0x000FFFFF00003000_u64};
                 constexpr auto phys2{0x000FFFFF00002000_u64};
                 constexpr auto phys1{0x000FFFFF00001000_u64};
                 constexpr auto phys0{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys0);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l0e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l3t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
@@ -3241,23 +3241,23 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
-                helpers::l2t_t l2t{};
-                helpers::l1t_t l1t{};
-                helpers::l0t_t l0t{};
+                helpers::l3t_t mut_l3t{};
+                helpers::l2t_t mut_l2t{};
+                helpers::l1t_t mut_l1t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys3{0x000FFFFF00003000_u64};
                 constexpr auto phys2{0x000FFFFF00002000_u64};
                 constexpr auto phys1{0x000FFFFF00001000_u64};
                 constexpr auto phys0{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys0);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l0t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    mut_l0t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
@@ -3271,23 +3271,23 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
-                helpers::l2t_t l2t{};
-                helpers::l1t_t l1t{};
-                helpers::l0t_t l0t{};
+                helpers::l3t_t mut_l3t{};
+                helpers::l2t_t mut_l2t{};
+                helpers::l1t_t mut_l1t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys3{0x000FFFFF00003000_u64};
                 constexpr auto phys2{0x000FFFFF00002000_u64};
                 constexpr auto phys1{0x000FFFFF00001000_u64};
                 constexpr auto phys0{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys0);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l1t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    mut_l1t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
@@ -3301,23 +3301,23 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
-                helpers::l2t_t l2t{};
-                helpers::l1t_t l1t{};
-                helpers::l0t_t l0t{};
+                helpers::l3t_t mut_l3t{};
+                helpers::l2t_t mut_l2t{};
+                helpers::l1t_t mut_l1t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys3{0x000FFFFF00003000_u64};
                 constexpr auto phys2{0x000FFFFF00002000_u64};
                 constexpr auto phys1{0x000FFFFF00001000_u64};
                 constexpr auto phys0{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys0);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l2t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
@@ -3331,23 +3331,23 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
-                helpers::l2t_t l2t{};
-                helpers::l1t_t l1t{};
-                helpers::l0t_t l0t{};
+                helpers::l3t_t mut_l3t{};
+                helpers::l2t_t mut_l2t{};
+                helpers::l1t_t mut_l1t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys3{0x000FFFFF00003000_u64};
                 constexpr auto phys2{0x000FFFFF00002000_u64};
                 constexpr auto phys1{0x000FFFFF00001000_u64};
                 constexpr auto phys0{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys0);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l1e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l3t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
@@ -3361,23 +3361,23 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
-                helpers::l2t_t l2t{};
-                helpers::l1t_t l1t{};
-                helpers::l0t_t l0t{};
+                helpers::l3t_t mut_l3t{};
+                helpers::l2t_t mut_l2t{};
+                helpers::l1t_t mut_l1t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys3{0x000FFFFF00003000_u64};
                 constexpr auto phys2{0x000FFFFF00002000_u64};
                 constexpr auto phys1{0x000FFFFF00001000_u64};
                 constexpr auto phys0{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys0);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l0t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    mut_l0t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
@@ -3391,23 +3391,23 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
-                helpers::l2t_t l2t{};
-                helpers::l1t_t l1t{};
-                helpers::l0t_t l0t{};
+                helpers::l3t_t mut_l3t{};
+                helpers::l2t_t mut_l2t{};
+                helpers::l1t_t mut_l1t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys3{0x000FFFFF00003000_u64};
                 constexpr auto phys2{0x000FFFFF00002000_u64};
                 constexpr auto phys1{0x000FFFFF00001000_u64};
                 constexpr auto phys0{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys0);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l1t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    mut_l1t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
@@ -3421,23 +3421,23 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
-                helpers::l2t_t l2t{};
-                helpers::l1t_t l1t{};
-                helpers::l0t_t l0t{};
+                helpers::l3t_t mut_l3t{};
+                helpers::l2t_t mut_l2t{};
+                helpers::l1t_t mut_l1t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys3{0x000FFFFF00003000_u64};
                 constexpr auto phys2{0x000FFFFF00002000_u64};
                 constexpr auto phys1{0x000FFFFF00001000_u64};
                 constexpr auto phys0{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys0);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l2t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    mut_l2t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };
@@ -3451,23 +3451,23 @@ namespace lib
                 tls_t mut_tls{};
                 page_pool_t mut_page_pool{};
                 bsl::dontcare_t mut_sys{};
-                helpers::l3t_t l3t{};
-                helpers::l2t_t l2t{};
-                helpers::l1t_t l1t{};
-                helpers::l0t_t l0t{};
+                helpers::l3t_t mut_l3t{};
+                helpers::l2t_t mut_l2t{};
+                helpers::l1t_t mut_l1t{};
+                helpers::l0t_t mut_l0t{};
                 constexpr auto phys3{0x000FFFFF00003000_u64};
                 constexpr auto phys2{0x000FFFFF00002000_u64};
                 constexpr auto phys1{0x000FFFFF00001000_u64};
                 constexpr auto phys0{0x000FFFFF00000000_u64};
                 bsl::ut_when{} = [&]() noexcept {
-                    mut_page_pool.set_allocate<helpers::l3t_t>(&l3t, phys3);
-                    mut_page_pool.set_allocate<helpers::l2t_t>(&l2t, phys2);
-                    mut_page_pool.set_allocate<helpers::l1t_t>(&l1t, phys1);
-                    mut_page_pool.set_allocate<helpers::l0t_t>(&l0t, phys0);
+                    mut_page_pool.set_allocate<helpers::l3t_t>(&mut_l3t, phys3);
+                    mut_page_pool.set_allocate<helpers::l2t_t>(&mut_l2t, phys2);
+                    mut_page_pool.set_allocate<helpers::l1t_t>(&mut_l1t, phys1);
+                    mut_page_pool.set_allocate<helpers::l0t_t>(&mut_l0t, phys0);
                     bsl::ut_required_step(mut_rpt.initialize(mut_tls, mut_page_pool));
                     bsl::ut_required_step(
                         mut_rpt.map<l2e_t>(mut_tls, mut_page_pool, {}, {}, {}, {}, mut_sys));
-                    l3t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
+                    mut_l3t.entries.front().explicit_unmap = bsl::safe_u64::magic_1().get();
                     bsl::ut_then{} = [&]() noexcept {
                         mut_rpt.release(mut_tls, mut_page_pool);
                     };

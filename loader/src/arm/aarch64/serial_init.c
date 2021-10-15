@@ -29,7 +29,7 @@
  *   @brief Initializes the serial port for use
  */
 void
-serial_init(void)
+serial_init(void) NOEXCEPT
 {
     /**
      * NOTE:

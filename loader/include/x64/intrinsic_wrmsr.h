@@ -29,15 +29,24 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Executes the WRMSR instruction given the provided MSR
- *     and value
- *
- * <!-- inputs/outputs -->
- *   @param ecx the MSR to write
- *   @param val the value to write to the MSR
- */
-void intrinsic_wrmsr(uint32_t const ecx, uint64_t const val);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Executes the WRMSR instruction given the provided MSR
+     *     and value
+     *
+     * <!-- inputs/outputs -->
+     *   @param ecx the MSR to write
+     *   @param val the value to write to the MSR
+     */
+    void intrinsic_wrmsr(uint32_t const ecx, uint64_t const val) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

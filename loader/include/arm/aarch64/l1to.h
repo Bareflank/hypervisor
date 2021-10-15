@@ -29,24 +29,33 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /** @brief defines the mask used for the L1T offset */
 #define L1T_OFFSET_MASK ((uint64_t)0x1FF)
 /** @brief defines the bit location of the L1T offset */
 #define L1T_OFFSET_SHIFT ((uint64_t)30)
 
-/**
- * <!-- description -->
- *   @brief Returns the level-1 table (L1T) offset given a
- *     virtual address.
- *
- * <!-- inputs/outputs -->
- *   @param virt the virtual address to get the L1T offset from.
- *   @return the L1T offset from the virtual address
- */
-static inline uint64_t
-l1to(uint64_t const virt)
-{
-    return ((virt >> L1T_OFFSET_SHIFT) & L1T_OFFSET_MASK);
+    /**
+     * <!-- description -->
+     *   @brief Returns the level-1 table (L1T) offset given a
+     *     virtual address.
+     *
+     * <!-- inputs/outputs -->
+     *   @param virt the virtual address to get the L1T offset from.
+     *   @return the L1T offset from the virtual address
+     */
+    NODISCARD static inline uint64_t
+    l1to(uint64_t const virt) NOEXCEPT
+    {
+        return ((virt >> L1T_OFFSET_SHIFT) & L1T_OFFSET_MASK);
+    }
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif

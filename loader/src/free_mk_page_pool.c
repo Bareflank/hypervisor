@@ -24,6 +24,7 @@
  * SOFTWARE.
  */
 
+#include <free_mk_page_pool.h>
 #include <mutable_span_t.h>
 #include <platform.h>
 #include <types.h>
@@ -34,11 +35,13 @@
  *     using the alloc_mk_page_pool function.
  *
  * <!-- inputs/outputs -->
- *   @param page_pool the mutable_span_t to free.
+ *   @param pmut_page_pool the mutable_span_t to free.
  */
 void
-free_mk_page_pool(struct mutable_span_t *const page_pool)
+free_mk_page_pool(struct mutable_span_t *const pmut_page_pool) NOEXCEPT
 {
-    platform_free(page_pool->addr, page_pool->size);
-    platform_memset(page_pool, 0, sizeof(struct mutable_span_t));
+    platform_expects(NULLPTR != pmut_page_pool);
+
+    platform_free(pmut_page_pool->addr, pmut_page_pool->size);
+    platform_memset(pmut_page_pool, ((uint8_t)0), sizeof(struct mutable_span_t));
 }

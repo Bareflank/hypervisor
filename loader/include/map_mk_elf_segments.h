@@ -31,18 +31,27 @@
 #include <root_page_table_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function maps the microkernel's ELF segments into the
- *     microkernel's root page tables.
- *
- * <!-- inputs/outputs -->
- *   @param segments a pointer to a elf_segment_t array that stores the ELF
- *     segments being mapped
- *   @param rpt the root page table to map the ELF segments into
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t
-map_mk_elf_segments(struct elf_segment_t const *const segments, root_page_table_t *const rpt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function maps the microkernel's ELF segments into the
+     *     microkernel's root page tables.
+     *
+     * <!-- inputs/outputs -->
+     *   @param segments a pointer to a elf_segment_t array that stores the ELF
+     *     segments being mapped
+     *   @param pmut_rpt the root page table to map the ELF segments into
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+    */
+    NODISCARD int64_t map_mk_elf_segments(
+        struct elf_segment_t const *const segments, root_page_table_t *const pmut_rpt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -25,7 +25,9 @@
  */
 
 #include <debug.h>
+#include <dump_mk_page_pool.h>
 #include <mutable_span_t.h>
+#include <platform.h>
 #include <types.h>
 
 /**
@@ -36,12 +38,9 @@
  *   @param page_pool the mk page pool to output
  */
 void
-dump_mk_page_pool(struct mutable_span_t *const page_pool)
+dump_mk_page_pool(struct mutable_span_t const *const page_pool) NOEXCEPT
 {
-    if (((void *)0) == page_pool) {
-        bferror("page_pool is NULL");
-        return;
-    }
+    platform_expects(NULLPTR != page_pool);
 
     bfdebug("mk page pool:");
     bfdebug_ptr(" - addr", page_pool->addr);

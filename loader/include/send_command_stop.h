@@ -29,13 +29,22 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Tells the hypervisor to stop
- *
- * <!-- inputs/outputs -->
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t send_command_stop(void);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Tells the hypervisor to stop
+     *
+     * <!-- inputs/outputs -->
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t send_command_stop(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

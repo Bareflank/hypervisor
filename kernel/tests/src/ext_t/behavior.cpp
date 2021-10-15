@@ -689,7 +689,7 @@ namespace mk
         };
 
         bsl::ut_scenario{"handle"} = [&]() noexcept {
-            bsl::ut_given_at_runtime{} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
                 auto const elf_file_buf{get_elf_file_buf()};
                 loader::ext_elf_file_t mut_file{};
                 phdr_table_t mut_phdr_table{};
@@ -704,9 +704,6 @@ namespace mk
                     load_phdr_table(mut_phdr_table, elf_file_buf);
                     bsl::ut_required_step(
                         mut_ext.initialize(mut_tls, mut_page_pool, {}, &mut_file, mut_rpt));
-                    bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(syscall::BF_INVALID_HANDLE == mut_ext.handle());
-                    };
 
                     auto const hndl{mut_ext.open_handle()};
                     bsl::ut_then{} = [&]() noexcept {
@@ -1654,6 +1651,9 @@ namespace mk
                     load_phdr_table(mut_phdr_table, elf_file_buf);
                     bsl::ut_required_step(
                         mut_ext.initialize(mut_tls, mut_page_pool, {}, &mut_file, mut_rpt));
+                    bsl::ut_then{} = [&]() noexcept {
+                        mut_ext.dump({});
+                    };
                     bsl::ut_required_step(mut_ext.open_handle());
                     bsl::ut_required_step(mut_ext.signal_vm_created(mut_tls, mut_page_pool, {}));
                     bsl::ut_required_step(mut_ext.start(mut_tls, mut_intrinsic));

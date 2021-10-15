@@ -46,22 +46,22 @@ namespace mk
     {
         bsl::ut_scenario{"success"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vmmctl::vmmctl_main ctl{};
+                vmmctl::vmmctl_main mut_ctl{};
                 bsl::array const argv{"success"};
                 bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(ctl.process(mut_args));
+                    bsl::ut_check(mut_ctl.process(mut_args, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"failure"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vmmctl::vmmctl_main ctl{};
+                vmmctl::vmmctl_main mut_ctl{};
                 bsl::array const argv{"fail"};
                 bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(!ctl.process(mut_args));
+                    bsl::ut_check(!mut_ctl.process(mut_args, {}));
                 };
             };
         };

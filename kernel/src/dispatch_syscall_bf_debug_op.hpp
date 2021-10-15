@@ -134,22 +134,29 @@ namespace mk
             }
 
             case syscall::BF_DEBUG_OP_WRITE_STR_IDX_VAL.get(): {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+                auto const *const str{reinterpret_cast<bsl::cstr_type>(mut_tls.ext_reg0)};
+                if (bsl::unlikely(nullptr == str)) {
+                    return syscall::BF_STATUS_INVALID_INPUT_REG0;
+                }
 
-                /// NOTE:
-                /// - This is the only syscall that might produce an
-                ///   exception, and that is due to the need to access user
-                ///   space memory. If this occurs, reversal is not needed.
-                /// - The function is still marked as exception unsafe, but
-                ///   in reality, if an exception fires, there is nothing to
-                ///   do, and likely will just result in corrupt debugging
-                ///   information.
+                /// TODO:
+                /// - If a bad address is given, it will segfault the kernel.
+                ///   This should be fixed to simply segfault the userspace
+                ///   application. To do that, we need to detect the page
+                ///   fault and return to userspace with the page fault
+                ///   information containing the state of the userspace ext
+                ///   and not the kernel, as the fault really came from the
+                ///   ext and not the kernel.
+                ///
+                /// - The reason this is not fixed right now is that either
+                ///   way, this will lead to something horrible happening,
+                ///   and execution will be stopped, so who segfaults is not
+                ///   that big of a deal, but for completness, this should
+                ///   be fixed in the future.
                 ///
 
-                bsl::print() << bsl::string_view{
-                    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-                    reinterpret_cast<bsl::cstr_type>(mut_tls.ext_reg0),
-                    bsl::to_umx(mut_tls.ext_reg1)};
-
+                bsl::print() << bsl::string_view{str, bsl::to_umx(mut_tls.ext_reg1)};
                 return syscall::BF_STATUS_SUCCESS;
             }
 

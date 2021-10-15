@@ -323,15 +323,15 @@ namespace lib
         ///
         /// <!-- inputs/outputs -->
         ///   @param mut_tls the current TLS block
-        ///   @param intrinsic the intrinsic_t to use
+        ///   @param mut_intrinsic the intrinsic_t to use
         ///
         constexpr void
-        activate(TLS_TYPE &mut_tls, INTRINSIC_TYPE const &intrinsic) noexcept
+        activate(TLS_TYPE &mut_tls, INTRINSIC_TYPE &mut_intrinsic) noexcept
         {
-            bsl::discard(intrinsic);
             bsl::expects(m_initialized);
 
             mut_tls.active_rpt = this;
+            mut_intrinsic.set_rpt(HYPERVISOR_PAGE_SIZE);
         }
 
         /// <!-- description -->
@@ -452,7 +452,7 @@ namespace lib
             SYS_TYPE const &sys = bsl::dontcare) noexcept -> T *
         {
             bsl::expects(m_allocations_idx < RPT_MAX_ALLOCATIONS);
-            auto *const store{m_allocations.at_if(m_allocations_idx)};
+            auto *const pmut_store{m_allocations.at_if(m_allocations_idx)};
 
             static_assert(bsl::is_pod<T>::value);
             static_assert(sizeof(T) == sizeof(basic_page_4k_t));
@@ -469,13 +469,13 @@ namespace lib
                 return nullptr;
             }
 
-            auto *const virt{mut_page_pool.template allocate<T>(tls, sys)};
-            bsl::expects(nullptr != virt);
+            auto *const pmut_virt{mut_page_pool.template allocate<T>(tls, sys)};
+            bsl::expects(nullptr != pmut_virt);
 
-            helpers::set_page_pool_storage(*store, virt, page_virt);
+            helpers::set_page_pool_storage(*pmut_store, pmut_virt, page_virt);
             ++m_allocations_idx;
 
-            return virt;
+            return pmut_virt;
         }
 
         /// <!-- description -->

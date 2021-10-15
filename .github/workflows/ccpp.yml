@@ -33,7 +33,8 @@ jobs:
       shell: bash
     - name: Validate Source Formatting
       run: |
-        sudo tar -xzvf hypervisor/utils/linux/llvm-bareflank.tar.gz -C /usr/lib/
+        wget https://github.com/Bareflank/llvm-project/releases/download/v11.0.0-bsl/llvm-bareflank.tar.gz
+        sudo tar -xzvf llvm-bareflank.tar.gz -C /usr/lib/
         export PATH="/usr/lib/llvm-bareflank/bin:$PATH"
         mkdir build && cd build
         cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=DEBUG -DENABLE_CLANG_FORMAT=ON ../hypervisor
@@ -60,7 +61,8 @@ jobs:
       shell: bash
     - name: Validate Compliance
       run: |
-        sudo tar -xzvf hypervisor/utils/linux/llvm-bareflank.tar.gz -C /usr/lib/
+        wget https://github.com/Bareflank/llvm-project/releases/download/v11.0.0-bsl/llvm-bareflank.tar.gz
+        sudo tar -xzvf llvm-bareflank.tar.gz -C /usr/lib/
         export PATH="/usr/lib/llvm-bareflank/bin:$PATH"
         mkdir build && cd build
         cmake -GNinja -DCMAKE_CXX_COMPILER="clang++" -DCMAKE_BUILD_TYPE=CLANG_TIDY -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DBSL_DEBUG_LEVEL=bsl::VVV ../hypervisor
@@ -80,7 +82,8 @@ jobs:
       shell: bash
     - name: Validate Compliance
       run: |
-        sudo tar -xzvf hypervisor/utils/linux/llvm-bareflank.tar.gz -C /usr/lib/
+        wget https://github.com/Bareflank/llvm-project/releases/download/v11.0.0-bsl/llvm-bareflank.tar.gz
+        sudo tar -xzvf llvm-bareflank.tar.gz -C /usr/lib/
         chmod +x hypervisor/utils/linux/include-what-you-use
         sudo cp hypervisor/utils/linux/include-what-you-use /usr/lib/llvm-bareflank/bin/
         export PATH="/usr/lib/llvm-bareflank/bin:$PATH"

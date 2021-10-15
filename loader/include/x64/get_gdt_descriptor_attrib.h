@@ -30,21 +30,29 @@
 #include <global_descriptor_table_register_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Sets a GDT descriptor's attrib given a GDT and a selector into
- *     the provided GDT.
- *
- * <!-- inputs/outputs -->
- *   @param gdtr a pointer to the gdtr that stores the GDT to get from
- *   @param selector the selector of the descriptor in the provided GDT
- *     to get from
- *   @param attrib a pointer to store the the resulting attrib to
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t get_gdt_descriptor_attrib(
-    struct global_descriptor_table_register_t const *const gdtr,
-    uint16_t const selector,
-    uint16_t *const attrib);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Sets a GDT descriptor's attrib given a GDT and a selector into
+     *     the provided GDT.
+     *
+     * <!-- inputs/outputs -->
+     *   @param gdtr a pointer to the gdtr that stores the GDT to get from
+     *   @param selector the selector of the descriptor in the provided GDT
+     *     to get from
+     *   @param pmut_attrib a pointer to store the the resulting attrib to
+     */
+    void get_gdt_descriptor_attrib(
+        struct global_descriptor_table_register_t const *const gdtr,
+        uint16_t const selector,
+        uint16_t *const pmut_attrib) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

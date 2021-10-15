@@ -24,7 +24,6 @@
  * SOFTWARE.
  */
 
-#include <debug.h>
 #include <pdt_t.h>
 #include <platform.h>
 #include <pt_t.h>
@@ -36,17 +35,21 @@
  *     tables.
  *
  * <!-- inputs/outputs -->
- *   @param pdt the pdt_t to free
+ *   @param pmut_pdt the pdt_t to free
  */
 void
-free_pdt(struct pdt_t *const pdt)
+free_pdt(struct pdt_t *const pmut_pdt) NOEXCEPT
 {
-    uint64_t i;
+    uint64_t mut_i;
 
-    for (i = ((uint64_t)0); i < LOADER_NUM_PDT_ENTRIES; ++i) {
-        struct pt_t *const pt = pdt->tables[i];
-        if (((void *)0) != pt) {
-            platform_free(pt, sizeof(struct pt_t));
+    for (mut_i = ((uint64_t)0); mut_i < LOADER_NUM_PDT_ENTRIES; ++mut_i) {
+        struct pt_t *const pmut_pt = pmut_pdt->tables[mut_i];
+        if (NULLPTR != pmut_pt) {
+            platform_free(pmut_pt, sizeof(struct pt_t));
+            pmut_pdt->tables[mut_i] = NULLPTR;
+        }
+        else {
+            bf_touch();
         }
     }
 }

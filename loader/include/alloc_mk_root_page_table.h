@@ -30,14 +30,23 @@
 #include <root_page_table_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function allocates the root page table
- *
- * <!-- inputs/outputs -->
- *   @param rpt where to return the resulting root page table
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t alloc_mk_root_page_table(root_page_table_t **const rpt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function allocates the root page table
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_rpt where to return the resulting root page table
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t alloc_mk_root_page_table(root_page_table_t **const pmut_rpt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

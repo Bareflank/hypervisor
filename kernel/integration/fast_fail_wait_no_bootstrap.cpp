@@ -102,10 +102,10 @@ namespace syscall
     ///     called on each PP while the hypervisor is being bootstrapped.
     ///
     /// <!-- inputs/outputs -->
-    ///   @param ppid the physical process to bootstrap
+    ///   @param ppid0 the physical process to bootstrap
     ///
     extern "C" void
-    bootstrap_entry(bsl::safe_u16::value_type const ppid) noexcept
+    bootstrap_entry(bsl::safe_u16::value_type const ppid0) noexcept
     {
         /// NOTE:
         /// - Call into the bootstrap handler. This entry point serves as a
@@ -121,7 +121,7 @@ namespace syscall
             g_mut_intrinsic,                  // --
             g_mut_vp_pool,                    // --
             g_mut_vs_pool,                    // --
-            bsl::to_u16(ppid))};
+            bsl::to_u16(ppid0))};
 
         if (bsl::unlikely(!ret)) {
             bsl::print<bsl::V>() << bsl::here();
@@ -241,22 +241,22 @@ namespace syscall
     extern "C" void
     ext_main_entry(bsl::uint32 const version) noexcept
     {
-        bsl::safe_umx hndl{};
-        bf_status_t ret{};
+        bsl::safe_umx mut_hndl{};
+        bf_status_t mut_ret{};
 
         if (bsl::unlikely(!bf_is_spec1_supported(bsl::to_u32(version)))) {
             bsl::error() << "integration test not supported\n" << bsl::here();
             return bf_control_op_exit();
         }
 
-        ret = bf_handle_op_open_handle_impl(BF_SPEC_ID1_VAL.get(), hndl.data());
-        integration::require(ret == BF_STATUS_SUCCESS);
+        mut_ret = bf_handle_op_open_handle_impl(BF_SPEC_ID1_VAL.get(), mut_hndl.data());
+        integration::require(mut_ret == BF_STATUS_SUCCESS);
 
-        ret = bf_callback_op_register_vmexit_impl(hndl.get(), &vmexit_entry);
-        integration::require(ret == BF_STATUS_SUCCESS);
+        mut_ret = bf_callback_op_register_vmexit_impl(mut_hndl.get(), &vmexit_entry);
+        integration::require(mut_ret == BF_STATUS_SUCCESS);
 
-        ret = bf_callback_op_register_fail_impl(hndl.get(), &fail_entry);
-        integration::require(ret == BF_STATUS_SUCCESS);
+        mut_ret = bf_callback_op_register_fail_impl(mut_hndl.get(), &fail_entry);
+        integration::require(mut_ret == BF_STATUS_SUCCESS);
 
         return bf_control_op_wait();
     }

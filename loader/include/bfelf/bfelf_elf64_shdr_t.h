@@ -29,35 +29,54 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
-/**
- * <!-- description -->
- *   @brief Sections provide different information from relocation
- *     instructions to strings stored in the executable.
- *
- * <!-- notes -->
- *   @note IMPORTANT: If sections are ever actually needed, the offset
- *     cannot actually be a byte array, but instead needs to be a union
- *     of the different types that the section might actually be. This
- *     is AUTOSAR compliant because the type field is the "tag", making
- *     the union a tagged union which is allowed. This will ensure that
- *     you can parse the different sections without having to do casts.
- */
-struct bfelf_elf64_shdr_t
-{
-    uint32_t sh_name;      /**< Name of section */
-    uint32_t sh_type;      /**< Type of section */
-    uint32_t sh_flags;     /**< Section attributes */
-    uint64_t sh_addr;      /**< Virtual address of section */
-    uint8_t *sh_offset;    /**< Offset of section in ELF file */
-    uint32_t sh_size;      /**< Size of section */
-    uint32_t sh_link;      /**< Section linked to this section */
-    uint32_t sh_info;      /**< Section information */
-    uint32_t sh_addralign; /**< Section alignment */
-    uint32_t sh_entsize;   /**< Size of section entries */
-};
+    /**
+     * <!-- description -->
+     *   @brief Sections provide different information from relocation
+     *     instructions to strings stored in the executable.
+     *
+     * <!-- notes -->
+     *   @note IMPORTANT: If sections are ever actually needed, the offset
+     *     cannot actually be a byte array, but instead needs to be a union
+     *     of the different types that the section might actually be. This
+     *     is AUTOSAR compliant because the type field is the "tag", making
+     *     the union a tagged union which is allowed. This will ensure that
+     *     you can parse the different sections without having to do casts.
+     */
+    struct bfelf_elf64_shdr_t
+    {
+        /** @brief Name of section */
+        uint32_t sh_name;
+        /** @brief Type of section */
+        uint32_t sh_type;
+        /** @brief Section attributes */
+        uint32_t sh_flags;
+        /** @brief Virtual address of section */
+        uint64_t sh_addr;
+        /** @brief Offset of section in ELF file */
+        uint8_t *sh_offset;
+        /** @brief Size of section */
+        uint32_t sh_size;
+        /** @brief Section linked to this section */
+        uint32_t sh_link;
+        /** @brief Section information */
+        uint32_t sh_info;
+        /** @brief Section alignment */
+        uint32_t sh_addralign;
+        /** @brief Size of section entries */
+        uint32_t sh_entsize;
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

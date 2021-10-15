@@ -92,7 +92,7 @@ setup_tss(void)
         return LOADER_SUCCESS;
     }
 
-    if (((void *)0) == g_old_gdtr.base) {
+    if (NULLPTR == g_old_gdtr.base) {
         intrinsic_sgdt(&g_old_gdtr);
         g_old_gdtr.limit += ((uint16_t)1);
     }
@@ -110,7 +110,7 @@ setup_tss(void)
      */
 
     gdtr.base = (uint64_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (((void *)0) == gdtr.base) {
+    if (NULLPTR == gdtr.base) {
         bferror("platform_alloc failed");
         goto platform_alloc_gdt_failed;
     }
@@ -131,7 +131,7 @@ setup_tss(void)
      */
 
     tss = (struct tss_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (((void *)0) == tss) {
+    if (NULLPTR == tss) {
         bferror("platform_alloc failed");
         goto platform_alloc_tss_failed;
     }
@@ -146,17 +146,12 @@ setup_tss(void)
 
     g_st->BootServices->CopyMem(gdtr.base, g_old_gdtr.base, g_old_gdtr.limit);
 
-    ret = set_gdt_descriptor(    // --
-        &gdtr,                   // --
-        g_old_gdtr.limit,        // --
-        (uint64_t)tss,           // --
-        UEFI_TR_LIMIT,           // --
+    set_gdt_descriptor(      // --
+        &gdtr,               // --
+        g_old_gdtr.limit,    // --
+        (uint64_t)tss,       // --
+        UEFI_TR_LIMIT,       // --
         UEFI_TR_ATTRIB);
-
-    if (ret) {
-        bferror("set_gdt_descriptor failed");
-        goto set_descriptor_failed;
-    }
 
     /**
      * NOTE:
@@ -171,8 +166,6 @@ setup_tss(void)
 
     return LOADER_SUCCESS;
 
-set_descriptor_failed:
-    platform_free(tss, HYPERVISOR_PAGE_SIZE);
 platform_alloc_tss_failed:
     platform_free(gdtr.base, HYPERVISOR_PAGE_SIZE);
 platform_alloc_gdt_failed:

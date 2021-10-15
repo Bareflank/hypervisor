@@ -27,16 +27,25 @@
 #ifndef DUMP_EXT_ELF_FILES_H
 #define DUMP_EXT_ELF_FILES_H
 
-#include <span_t.h>
+#include <elf_file_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Outputs the contents of a provided array of extension ELF files
- *
- * <!-- inputs/outputs -->
- *   @param files the array of extension ELF files to output
- */
-void dump_ext_elf_files(struct span_t *const files);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Outputs the contents of a provided array of extension ELF files
+     *
+     * <!-- inputs/outputs -->
+     *   @param files the array of extension ELF files to output
+     */
+    void dump_ext_elf_files(struct elf_file_t const *const files) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

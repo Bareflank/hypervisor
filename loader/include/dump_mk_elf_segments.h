@@ -30,13 +30,22 @@
 #include <elf_segment_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Outputs the contents of a provided array of mk ELF segments
- *
- * <!-- inputs/outputs -->
- *   @param segments the array of mk ELF segments to output
- */
-void dump_mk_elf_segments(struct elf_segment_t *const segments);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Outputs the contents of a provided array of mk ELF segments
+     *
+     * <!-- inputs/outputs -->
+     *   @param segments the array of mk ELF segments to output
+     */
+    void dump_mk_elf_segments(struct elf_segment_t const *const segments) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

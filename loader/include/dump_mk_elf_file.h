@@ -27,16 +27,25 @@
 #ifndef DUMP_MK_ELF_FILE_H
 #define DUMP_MK_ELF_FILE_H
 
-#include <span_t.h>
+#include <elf_file_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Outputs the contents of a provided mk elf file.
- *
- * <!-- inputs/outputs -->
- *   @param file the mk elf file to output
- */
-void dump_mk_elf_file(struct span_t *const file);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Outputs the contents of a provided mk elf file.
+     *
+     * <!-- inputs/outputs -->
+     *   @param file the mk elf file to output
+     */
+    void dump_mk_elf_file(struct elf_file_t const *const file) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

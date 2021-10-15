@@ -29,34 +29,43 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
-/**
- * <!-- description -->
- *   @brief Defines the layout of a level-2 table entry (L2TE).
- */
-struct l2te_t
-{
-    /** @brief defines the "present" field in the page */
-    uint64_t p : ((uint64_t)1);
-    /** @brief defines the "block/table" field in the page */
-    uint64_t bt : ((uint64_t)1);
-    /** @brief defines the "available to software" field in the page */
-    uint64_t available1 : ((uint64_t)10);
-    /** @brief defines the "physical address" field in the page */
-    uint64_t phys : ((uint64_t)40);
-    /** @brief defines the "available to software" field in the page */
-    uint64_t available2 : ((uint64_t)7);
-    /** @brief defines the "PXNTable" field in the page */
-    uint64_t pxntable : ((uint64_t)1);
-    /** @brief defines the "XNTable" field in the page */
-    uint64_t xntable : ((uint64_t)1);
-    /** @brief defines the "APTable" field in the page */
-    uint64_t aptable : ((uint64_t)2);
-    /** @brief defines the "NSTable" field in the page */
-    uint64_t nstable : ((uint64_t)1);
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the layout of a level-2 table entry (L2TE).
+     */
+    struct l2te_t
+    {
+        /** @brief defines the "present" field in the page */
+        uint64_t p : ((uint64_t)1);
+        /** @brief defines the "block/table" field in the page */
+        uint64_t bt : ((uint64_t)1);
+        /** @brief defines the "available to software" field in the page */
+        uint64_t available1 : ((uint64_t)10);
+        /** @brief defines the "physical address" field in the page */
+        uint64_t phys : ((uint64_t)40);
+        /** @brief defines the "available to software" field in the page */
+        uint64_t available2 : ((uint64_t)7);
+        /** @brief defines the "PXNTable" field in the page */
+        uint64_t pxntable : ((uint64_t)1);
+        /** @brief defines the "XNTable" field in the page */
+        uint64_t xntable : ((uint64_t)1);
+        /** @brief defines the "APTable" field in the page */
+        uint64_t aptable : ((uint64_t)2);
+        /** @brief defines the "NSTable" field in the page */
+        uint64_t nstable : ((uint64_t)1);
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -24,6 +24,7 @@
  * SOFTWARE.
  */
 
+#include <alloc_and_copy_mk_elf_file_from_user.h>
 #include <bfelf/bfelf_elf64_ehdr_t.h>
 #include <debug.h>
 #include <elf_file_t.h>
@@ -46,45 +47,41 @@
  *
  * <!-- inputs/outputs -->
  *   @param mk_elf_file_from_user the ELF file to copy
- *   @param copied_mk_elf_file where to copy the ELF file too
+ *   @param pmut_copied_mk_elf_file where to copy the ELF file too
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
+NODISCARD int64_t
 alloc_and_copy_mk_elf_file_from_user(
-    struct span_t const *const mk_elf_file_from_user, struct elf_file_t *const copied_mk_elf_file)
+    struct span_t const *const mk_elf_file_from_user,
+    struct elf_file_t *const pmut_copied_mk_elf_file) NOEXCEPT
 {
     uint8_t const *const src_addr = mk_elf_file_from_user->addr;
     uint64_t const dst_size = mk_elf_file_from_user->size;
 
-    struct bfelf_elf64_ehdr_t *dst_addr = (struct bfelf_elf64_ehdr_t *)platform_alloc(dst_size);
-    if (((void *)0) == dst_addr) {
+    struct bfelf_elf64_ehdr_t *const pmut_dst_addr =
+        (struct bfelf_elf64_ehdr_t *)platform_alloc(dst_size);
+    if (NULLPTR == pmut_dst_addr) {
         bferror("platform_alloc failed");
         goto platform_alloc_failed;
     }
 
-    if (platform_copy_from_user(dst_addr, src_addr, dst_size)) {
+    if (platform_copy_from_user(pmut_dst_addr, src_addr, dst_size)) {
         bferror("platform_copy_from_user failed");
         goto platform_copy_from_user_failed;
     }
 
-    if (update_elf64_ehdr(dst_addr)) {
-        bferror("update_elf64_ehdr failed");
-        goto update_elf64_ehdr_failed;
-    }
-
-    copied_mk_elf_file->addr = dst_addr;
-    copied_mk_elf_file->size = dst_size;
+    update_elf64_ehdr(pmut_dst_addr);
+    pmut_copied_mk_elf_file->addr = pmut_dst_addr;
+    pmut_copied_mk_elf_file->size = dst_size;
 
     return LOADER_SUCCESS;
 
-update_elf64_ehdr_failed:
 platform_copy_from_user_failed:
 
-    platform_free(dst_addr, dst_size);
+    platform_free(pmut_dst_addr, dst_size);
 platform_alloc_failed:
 
-    copied_mk_elf_file->addr = ((void *)0);
-    copied_mk_elf_file->size = ((uint64_t)0);
-
+    pmut_copied_mk_elf_file->addr = NULLPTR;
+    pmut_copied_mk_elf_file->size = ((uint64_t)0);
     return LOADER_FAILURE;
 }

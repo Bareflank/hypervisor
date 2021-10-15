@@ -176,7 +176,7 @@ Return Value:
             break;
         }
         case LOADER_DUMP_VMM: {
-            if (dump_vmm((struct dump_vmm_args_t const *)out)) {
+            if (dump_vmm((struct dump_vmm_args_t *)out)) {
                 bferror("dump_vmm failed");
                 WdfRequestComplete(Request, STATUS_UNSUCCESSFUL);
                 return;

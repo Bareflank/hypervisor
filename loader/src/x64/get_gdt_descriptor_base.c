@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-#include <debug.h>
 #include <global_descriptor_table_register_t.h>
+#include <platform.h>
 #include <types.h>
 
 /** @brief defines the first set of bits associated with the base field */
@@ -57,59 +57,34 @@
  *   @param gdtr a pointer to the gdtr that stores the GDT to get from
  *   @param selector the selector of the descriptor in the provided GDT
  *     to get from
- *   @param base a pointer to store the the resulting base to
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+ *   @param pmut_base a pointer to store the the resulting base to
  */
-int64_t
+void
 get_gdt_descriptor_base(
     struct global_descriptor_table_register_t const *const gdtr,
     uint16_t const selector,
-    uint64_t *const base)
+    uint64_t *const pmut_base) NOEXCEPT
 {
-    uint64_t bytes64_0;
-    uint64_t bytes64_1;
-    uint64_t idx64_0 = (((uint64_t)selector) >> ((uint64_t)3)) + ((uint64_t)0);
-    uint64_t idx64_1 = (((uint64_t)selector) >> ((uint64_t)3)) + ((uint64_t)1);
+    uint64_t const idx64_0 = (((uint64_t)selector) >> ((uint64_t)3)) + ((uint64_t)0);
+    uint64_t const idx64_1 = (((uint64_t)selector) >> ((uint64_t)3)) + ((uint64_t)1);
 
-    if (((void *)0) == gdtr) {
-        bferror("invalid argument: gdtr == NULL");
-        return LOADER_FAILURE;
-    }
-
-    bytes64_0 = ((uint64_t)gdtr->limit) + ((uint64_t)1);
-    bytes64_1 = ((uint64_t)gdtr->limit) + ((uint64_t)1) - sizeof(uint64_t);
-
-    if (((void *)0) == base) {
-        bferror("invalid argument: base == NULL");
-        return LOADER_FAILURE;
-    }
+    platform_expects(NULLPTR != gdtr);
+    platform_expects(NULLPTR != pmut_base);
 
     if (((uint64_t)0) == idx64_0) {
-        *base = ((uint64_t)0);
-        return LOADER_SUCCESS;
+        *pmut_base = ((uint64_t)0);
+        return;
     }
 
-    if (idx64_0 >= (bytes64_0 / sizeof(uint64_t))) {
-        bferror("invalid argument: index into GDT is out of range");
-        return LOADER_FAILURE;
-    }
-
-    if ((gdtr->base[idx64_0] & SYSTEM_BIT) == 0) {
-        if (idx64_1 >= (bytes64_1 / sizeof(uint64_t))) {
-            bferror("invalid argument: index into GDT is out of range");
-            return LOADER_FAILURE;
-        }
-
-        *base = ((gdtr->base[idx64_0] & BASE_MASK1) >> BASE_SHIFT1) |
-                ((gdtr->base[idx64_0] & BASE_MASK2) >> BASE_SHIFT2) |
-                ((gdtr->base[idx64_0] & BASE_MASK3) >> BASE_SHIFT3) |
-                ((gdtr->base[idx64_1] & BASE_MASK4) << BASE_SHIFT4);
+    if (((uint64_t)0) == (gdtr->base[idx64_0] & SYSTEM_BIT)) {
+        *pmut_base = ((gdtr->base[idx64_0] & BASE_MASK1) >> BASE_SHIFT1) |
+                     ((gdtr->base[idx64_0] & BASE_MASK2) >> BASE_SHIFT2) |
+                     ((gdtr->base[idx64_0] & BASE_MASK3) >> BASE_SHIFT3) |
+                     ((gdtr->base[idx64_1] & BASE_MASK4) << BASE_SHIFT4);
     }
     else {
-        *base = ((gdtr->base[idx64_0] & BASE_MASK1) >> BASE_SHIFT1) |
-                ((gdtr->base[idx64_0] & BASE_MASK2) >> BASE_SHIFT2) |
-                ((gdtr->base[idx64_0] & BASE_MASK3) >> BASE_SHIFT3);
+        *pmut_base = ((gdtr->base[idx64_0] & BASE_MASK1) >> BASE_SHIFT1) |
+                     ((gdtr->base[idx64_0] & BASE_MASK2) >> BASE_SHIFT2) |
+                     ((gdtr->base[idx64_0] & BASE_MASK3) >> BASE_SHIFT3);
     }
-
-    return LOADER_SUCCESS;
 }

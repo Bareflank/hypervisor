@@ -27,10 +27,9 @@
 #include <debug.h>
 #include <free_mk_code_aliases.h>
 #include <free_mk_debug_ring.h>
-#include <g_mk_code_aliases.h>
-#include <g_mk_debug_ring.h>
-#include <g_vmm_status.h>
-#include <platform.h>
+#include <g_mut_mk_code_aliases.h>
+#include <g_mut_vmm_status.h>
+#include <g_pmut_mut_mk_debug_ring.h>
 #include <stop_and_free_the_vmm.h>
 #include <types.h>
 
@@ -44,18 +43,18 @@
  * <!-- inputs/outputs -->
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-loader_fini(void)
+NODISCARD int64_t
+loader_fini(void) NOEXCEPT
 {
-    if (VMM_STATUS_CORRUPT == g_vmm_status) {
+    if (VMM_STATUS_CORRUPT == g_mut_vmm_status) {
         bferror("Unable to fini, a VMM failed to properly stop");
         return LOADER_FAILURE;
     }
 
     stop_and_free_the_vmm();
 
-    free_mk_code_aliases(&g_mk_code_aliases);
-    free_mk_debug_ring(&g_mk_debug_ring);
+    free_mk_code_aliases(&g_mut_mk_code_aliases);
+    free_mk_debug_ring(&g_pmut_mut_mk_debug_ring);
 
     return LOADER_SUCCESS;
 }

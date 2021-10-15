@@ -24,12 +24,12 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
 #include <map_4k_page_rw.h>
 #include <mutable_span_t.h>
 #include <platform.h>
 #include <root_page_table_t.h>
+#include <types.h>
 
 /**
  * <!-- description -->
@@ -39,39 +39,37 @@
  * <!-- inputs/outputs -->
  *   @param huge_pool a pointer to a mutable_span_t that stores the huge pool
  *     being mapped
- *   @param rpt the root page table to map the huge pool into
+ *   @param pmut_rpt the root page table to map the huge pool into
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_mk_huge_pool(struct mutable_span_t const *const huge_pool, root_page_table_t *const rpt)
+NODISCARD int64_t
+map_mk_huge_pool(
+    struct mutable_span_t const *const huge_pool, root_page_table_t *const pmut_rpt) NOEXCEPT
 {
-    uint64_t off;
-    uint64_t base_phys;
+    uint64_t mut_i;
+    uint64_t mut_base_phys;
     uint64_t const base_virt = HYPERVISOR_MK_HUGE_POOL_ADDR;
 
-    base_phys = platform_virt_to_phys(huge_pool->addr);
-    if (((uint64_t)0) == base_phys) {
+    mut_base_phys = platform_virt_to_phys(huge_pool->addr);
+    if (((uint64_t)0) == mut_base_phys) {
         bferror("platform_virt_to_phys failed");
         return LOADER_FAILURE;
     }
 
-    for (off = ((uint64_t)0); off < huge_pool->size; off += HYPERVISOR_PAGE_SIZE) {
+    for (mut_i = ((uint64_t)0); mut_i < huge_pool->size; mut_i += HYPERVISOR_PAGE_SIZE) {
 
-        uint64_t phys = platform_virt_to_phys(huge_pool->addr + off);
+        uint64_t const phys = platform_virt_to_phys(huge_pool->addr + mut_i);
         if (((uint64_t)0) == phys) {
             bferror("platform_virt_to_phys failed");
             return LOADER_FAILURE;
         }
 
-        if (phys != base_phys + off) {
-            bferror("huge pool is not physically contiguous");
-            return LOADER_FAILURE;
-        }
-
-        if (map_4k_page_rw((void *)(base_virt + phys), phys, rpt)) {
+        if (map_4k_page_rw((void *)(base_virt + phys), phys, pmut_rpt)) {
             bferror("map_4k_page_rw failed");
             return LOADER_FAILURE;
         }
+
+        bf_touch();
     }
 
     return LOADER_SUCCESS;

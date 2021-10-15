@@ -29,24 +29,33 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /** @brief defines the size of the PML4T offset */
 #define PML4T_OFFSET_MASK ((uint64_t)0x1FF)
 /** @brief defines the bit location of the PML4T offset */
 #define PML4T_OFFSET_SHIFT ((uint64_t)39)
 
-/**
- * <!-- description -->
- *   @brief Returns the page-map level-4 (PML4T) offset given a
- *     virtual address.
- *
- * <!-- inputs/outputs -->
- *   @param virt the virtual address to get the PML4T offset from.
- *   @return the PML4T offset from the virtual address
- */
-static uint64_t
-pml4to(uint64_t const virt)
-{
-    return ((virt >> PML4T_OFFSET_SHIFT) & PML4T_OFFSET_MASK);
+    /**
+     * <!-- description -->
+     *   @brief Returns the page-map level-4 (PML4T) offset given a
+     *     virtual address.
+     *
+     * <!-- inputs/outputs -->
+     *   @param virt the virtual address to get the PML4T offset from.
+     *   @return the PML4T offset from the virtual address
+     */
+    NODISCARD static uint64_t
+    pml4to(uint64_t const virt) NOEXCEPT
+    {
+        return ((virt >> PML4T_OFFSET_SHIFT) & PML4T_OFFSET_MASK);
+    }
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif

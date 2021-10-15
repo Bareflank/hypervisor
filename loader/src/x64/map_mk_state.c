@@ -25,10 +25,12 @@
  */
 
 #include <debug.h>
+#include <global_descriptor_table_register_t.h>
+#include <interrupt_descriptor_table_register_t.h>
 #include <map_4k_page_rw.h>
-#include <platform.h>
 #include <root_page_table_t.h>
 #include <state_save_t.h>
+#include <types.h>
 
 /**
  * <!-- description -->
@@ -38,42 +40,44 @@
  * <!-- inputs/outputs -->
  *   @param state a pointer to a state_save_t that stores the state
  *     being mapped
- *   @param rpt the root page table to map the state into
+ *   @param pmut_rpt the root page table to map the state into
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_mk_state(struct state_save_t const *const state, root_page_table_t *const rpt)
+NODISCARD int64_t
+map_mk_state(struct state_save_t const *const state, root_page_table_t *const pmut_rpt) NOEXCEPT
 {
-    uint64_t off;
+    uint64_t mut_i;
 
-    if (map_4k_page_rw(state, ((uint64_t)0), rpt)) {
+    if (map_4k_page_rw(state, ((uint64_t)0), pmut_rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rw(state->tss, ((uint64_t)0), rpt)) {
+    if (map_4k_page_rw(state->tss, ((uint64_t)0), pmut_rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }
 
-    for (off = ((uint64_t)0); off < HYPERVISOR_MK_STACK_SIZE; off += HYPERVISOR_PAGE_SIZE) {
-        if (map_4k_page_rw(state->ist + off, ((uint64_t)0), rpt)) {
+    for (mut_i = ((uint64_t)0); mut_i < HYPERVISOR_MK_STACK_SIZE; mut_i += HYPERVISOR_PAGE_SIZE) {
+        if (map_4k_page_rw(state->ist + mut_i, ((uint64_t)0), pmut_rpt)) {
             bferror("map_4k_page_rw failed");
             return LOADER_FAILURE;
         }
+
+        bf_touch();
     }
 
-    if (map_4k_page_rw(state->gdtr.base, ((uint64_t)0), rpt)) {
+    if (map_4k_page_rw(state->gdtr.base, ((uint64_t)0), pmut_rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rw(state->idtr.base, ((uint64_t)0), rpt)) {
+    if (map_4k_page_rw(state->idtr.base, ((uint64_t)0), pmut_rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }
 
-    if (map_4k_page_rw(state->hve_page, ((uint64_t)0), rpt)) {
+    if (map_4k_page_rw(state->hve_page, ((uint64_t)0), pmut_rpt)) {
         bferror("map_4k_page_rw failed");
         return LOADER_FAILURE;
     }

@@ -40,13 +40,13 @@
  *   @param rpt where to return the resulting root page table
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-alloc_mk_root_page_table(root_page_table_t **const rpt)
+NODISCARD int64_t
+alloc_mk_root_page_table(root_page_table_t **const rpt) NOEXCEPT
 {
     uint64_t i;
 
     *rpt = (root_page_table_t *)platform_alloc(sizeof(root_page_table_t));
-    if (((void *)0) == *rpt) {
+    if (NULLPTR == *rpt) {
         bferror("platform_alloc failed");
         return LOADER_FAILURE;
     }

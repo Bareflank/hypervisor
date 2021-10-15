@@ -32,8 +32,6 @@
 #include <exception_vectors.h>
 #include <platform.h>
 #include <promote.h>
-#include <serial_write_c.h>
-#include <serial_write_hex.h>
 #include <types.h>
 
 /**
@@ -72,8 +70,8 @@
  *     resulting aliases.
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-alloc_and_copy_mk_code_aliases(struct code_aliases_t *const a)
+NODISCARD int64_t
+alloc_and_copy_mk_code_aliases(struct code_aliases_t *const a) NOEXCEPT
 {
     (void)a;
     return LOADER_SUCCESS;

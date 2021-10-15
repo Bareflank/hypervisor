@@ -28,15 +28,25 @@
 #define FREE_L2T_H
 
 #include <l2t_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Given a l2t_t, this function will free any previously allocated
- *     tables.
- *
- * <!-- inputs/outputs -->
- *   @param l2 the l2t_t to free
- */
-void free_l2t(struct l2t_t *const l2);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Given a l2t_t, this function will free any previously allocated
+     *     tables.
+     *
+     * <!-- inputs/outputs -->
+     *   @param l2 the l2t_t to free
+     */
+    void free_l2t(struct l2t_t *const l2) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

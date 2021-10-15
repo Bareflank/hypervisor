@@ -29,10 +29,19 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Disables Hardware Virtualization Extensions
- */
-void disable_hve(void);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Disables Hardware Virtualization Extensions
+     */
+    void disable_hve(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -29,21 +29,30 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
-/**
- * <!-- description -->
- *   @brief Defines the structure of the global descriptor table register
- *     as defined by Intel and AMD
- */
-struct global_descriptor_table_register_t
-{
-    /** @brief stores the size of the gdt in bytes (minus 1) */
-    uint16_t limit;
-    /** @brief stores a pointer to the gdt */
-    uint64_t *base;
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the structure of the global descriptor table register
+     *     as defined by Intel and AMD
+     */
+    struct global_descriptor_table_register_t
+    {
+        /** @brief stores the size of the gdt in bytes (minus 1) */
+        uint16_t limit;
+        /** @brief stores a pointer to the gdt */
+        uint64_t *base;
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

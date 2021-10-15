@@ -22,6 +22,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
+#include <ioctl_t.hpp>
+#include <loader_platform_interface.hpp>
 #include <vmmctl_main.hpp>
 
 #include <bsl/arguments.hpp>
@@ -50,8 +52,13 @@ VMMCTL_MAIN(bsl::int32 const argc, bsl::cstr_type const *const argv) noexcept   
     bsl::arguments mut_args{bsl::to_umx(argc), argv};
     ++mut_args;
 
+    vmmctl::ioctl_t mut_ioctl{loader::DEVICE_NAME};
+    if (bsl::unlikely(!mut_ioctl.is_open())) {    // GRCOV_EXCLUDE_BR
+        return bsl::exit_failure;                 // GRCOV_EXCLUDE
+    }
+
     vmmctl::vmmctl_main mut_app{};
-    auto const ret{mut_app.process(mut_args)};
+    auto const ret{mut_app.process(mut_args, mut_ioctl)};
     if (bsl::unlikely(!ret)) {
         return bsl::exit_failure;
     }

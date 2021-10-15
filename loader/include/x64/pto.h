@@ -29,24 +29,33 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /** @brief defines the size of the PT offset */
 #define PT_OFFSET_MASK ((uint64_t)0x1FF)
 /** @brief defines the bit location of the PT offset */
 #define PT_OFFSET_SHIFT ((uint64_t)12)
 
-/**
- * <!-- description -->
- *   @brief Returns the page-table (PT) offset given a
- *     virtual address.
- *
- * <!-- inputs/outputs -->
- *   @param virt the virtual address to get the PT offset from.
- *   @return the PT offset from the virtual address
- */
-static inline uint64_t
-pto(uint64_t const virt)
-{
-    return ((virt >> PT_OFFSET_SHIFT) & PT_OFFSET_MASK);
+    /**
+     * <!-- description -->
+     *   @brief Returns the page-table (PT) offset given a
+     *     virtual address.
+     *
+     * <!-- inputs/outputs -->
+     *   @param virt the virtual address to get the PT offset from.
+     *   @return the PT offset from the virtual address
+     */
+    NODISCARD static inline uint64_t
+    pto(uint64_t const virt) NOEXCEPT
+    {
+        return ((virt >> PT_OFFSET_SHIFT) & PT_OFFSET_MASK);
+    }
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif

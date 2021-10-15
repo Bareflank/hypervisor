@@ -30,13 +30,22 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Returns the value of CurrentEL
- *
- * <!-- inputs/outputs -->
- *   @return Returns the value of CurrentEL
- */
-uint64_t read_currentel();
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Returns the value of CurrentEL
+     *
+     * <!-- inputs/outputs -->
+     *   @return Returns the value of CurrentEL
+     */
+    NODISCARD uint64_t read_currentel() NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -24,9 +24,15 @@
 
 #include "../../../src/vmmctl_main.hpp"
 
+#include <debug_ring_t.hpp>
+#include <dump_vmm_args_t.hpp>
+#include <ioctl_t.hpp>
+#include <loader_platform_interface.hpp>
+
 #include <bsl/arguments.hpp>
 #include <bsl/array.hpp>
 #include <bsl/convert.hpp>
+#include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/ut.hpp>
 
@@ -46,11 +52,266 @@ namespace mk
     {
         bsl::ut_scenario{"help"} = []() noexcept {
             bsl::ut_given{} = []() noexcept {
-                vmmctl::vmmctl_main ctl{};
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{};
                 bsl::array const argv{"-h"};
                 bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(ctl.process(mut_args));
+                    bsl::ut_check(mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{};
+                bsl::array const argv{"--help"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+        };
+
+        bsl::ut_scenario{"missing command"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"start", "kernel", "extension1", "extension2"};
+                bsl::arguments mut_args{{}, argv.data()};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(!mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+        };
+
+        bsl::ut_scenario{"invalid command"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"kar en tuk", "kernel", "extension1", "extension2"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(!mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+        };
+
+        bsl::ut_scenario{"start"} = []() noexcept {
+            bsl::ut_given_at_runtime{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"start", "kernel", "extension1", "extension2"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+        };
+
+        bsl::ut_scenario{"start too many extensions"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"start", "kernel", "extension1", "extension2", "extension3"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+        };
+
+        bsl::ut_scenario{"start empty kernel path"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"start", "", "extension"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(!mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+        };
+
+        bsl::ut_scenario{"start invalid kernel path"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"start", "failure", "extension"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(!mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+        };
+
+        bsl::ut_scenario{"start empty extension path"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"start", "kernel", ""};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(!mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+        };
+
+        bsl::ut_scenario{"start invalid extension path"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"start", "kernel", "failure"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(!mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+        };
+
+        bsl::ut_scenario{"start fails"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"failure"};
+                bsl::array const argv{"start", "kernel", "extension"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(!mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+        };
+
+        bsl::ut_scenario{"stop"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"stop"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+        };
+
+        bsl::ut_scenario{"stop fails"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"failure"};
+                bsl::array const argv{"stop"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                bsl::ut_then{} = [&]() noexcept {
+                    bsl::ut_check(!mut_vmmctl.process(mut_args, mut_ioctl));
+                };
+            };
+        };
+
+        bsl::ut_scenario{"dump"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"dump"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                loader::dump_vmm_args_t mut_dump_args{};
+                bsl::ut_when{} = [&]() noexcept {
+                    bsl::ut_required_step(mut_ioctl.write(loader::DUMP_VMM, &mut_dump_args));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_vmmctl.process(mut_args, mut_ioctl));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"dump invalid epos"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"dump"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                loader::dump_vmm_args_t mut_dump_args{};
+                constexpr auto invalid{0xFFFFFFFFFFFFFFFF_umx};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_dump_args.debug_ring.epos = invalid.get();
+                    bsl::ut_required_step(mut_ioctl.write(loader::DUMP_VMM, &mut_dump_args));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_vmmctl.process(mut_args, mut_ioctl));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"dump invalid spos"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"dump"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                loader::dump_vmm_args_t mut_dump_args{};
+                constexpr auto invalid{0xFFFFFFFFFFFFFFFF_umx};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_dump_args.debug_ring.spos = invalid.get();
+                    bsl::ut_required_step(mut_ioctl.write(loader::DUMP_VMM, &mut_dump_args));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_vmmctl.process(mut_args, mut_ioctl));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"nothing to dump"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"dump"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                loader::dump_vmm_args_t mut_dump_args{};
+                constexpr auto epos{5_umx};
+                constexpr auto spos{5_umx};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_dump_args.debug_ring.epos = epos.get();
+                    mut_dump_args.debug_ring.spos = spos.get();
+                    bsl::ut_required_step(mut_ioctl.write(loader::DUMP_VMM, &mut_dump_args));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_vmmctl.process(mut_args, mut_ioctl));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"dump full"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"success"};
+                bsl::array const argv{"dump"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                loader::dump_vmm_args_t mut_dump_args{};
+                constexpr auto epos{4_umx};
+                constexpr auto spos{5_umx};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_dump_args.debug_ring.epos = epos.get();
+                    mut_dump_args.debug_ring.spos = spos.get();
+                    bsl::ut_required_step(mut_ioctl.write(loader::DUMP_VMM, &mut_dump_args));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(mut_vmmctl.process(mut_args, mut_ioctl));
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"dump fails"} = []() noexcept {
+            bsl::ut_given{} = []() noexcept {
+                vmmctl::vmmctl_main mut_vmmctl{};
+                vmmctl::ioctl_t mut_ioctl{"failure"};
+                bsl::array const argv{"dump"};
+                bsl::arguments mut_args{bsl::to_umx(argv.size()), argv.data()};
+                loader::dump_vmm_args_t mut_dump_args{};
+                constexpr auto epos{5_umx};
+                constexpr auto spos{5_umx};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_dump_args.debug_ring.epos = epos.get();
+                    mut_dump_args.debug_ring.spos = spos.get();
+                    bsl::ut_required_step(mut_ioctl.write(loader::DUMP_VMM, &mut_dump_args));
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(!mut_vmmctl.process(mut_args, mut_ioctl));
+                    };
                 };
             };
         };

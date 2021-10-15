@@ -24,13 +24,13 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
 #include <esr_default.h>
 #include <esr_df.h>
 #include <esr_gpf.h>
 #include <esr_nmi.h>
 #include <esr_pf.h>
+#include <free_root_vp_state.h>
 #include <get_gdt_descriptor_attrib.h>
 #include <get_gdt_descriptor_base.h>
 #include <get_gdt_descriptor_limit.h>
@@ -64,20 +64,18 @@
  *     running OS.
  *
  * <!-- inputs/outputs -->
- *   @param state where to save the newly set up state to
+ *   @param pmut_state where to save the newly set up state to
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-alloc_and_copy_root_vp_state(struct state_save_t **const state)
+NODISCARD int64_t
+alloc_and_copy_root_vp_state(struct state_save_t **const pmut_state) NOEXCEPT
 {
-    int64_t ret;
-
     /**************************************************************************/
     /* Allocate the resulting state                                           */
     /**************************************************************************/
 
-    *state = (struct state_save_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
-    if (((void *)0) == *state) {
+    *pmut_state = (struct state_save_t *)platform_alloc(HYPERVISOR_PAGE_SIZE);
+    if (NULLPTR == *pmut_state) {
         bferror("platform_alloc failed");
         goto platform_alloc_state_failed;
     }
@@ -86,189 +84,97 @@ alloc_and_copy_root_vp_state(struct state_save_t **const state)
     /* Descriptor Table Information                                           */
     /**************************************************************************/
 
-    intrinsic_sgdt(&(*state)->gdtr);
-    intrinsic_sidt(&(*state)->idtr);
+    intrinsic_sgdt(&(*pmut_state)->gdtr);
+    intrinsic_sidt(&(*pmut_state)->idtr);
 
-    (*state)->es_selector = intrinsic_ses();
+    (*pmut_state)->es_selector = intrinsic_ses();
 
-    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->es_selector, &(*state)->es_attrib);
-    if (ret) {
-        bferror("get_gdt_descriptor_attrib failed");
-        goto set_descriptor_failed;
-    }
+    get_gdt_descriptor_attrib(
+        &(*pmut_state)->gdtr, (*pmut_state)->es_selector, &(*pmut_state)->es_attrib);
+    get_gdt_descriptor_limit(
+        &(*pmut_state)->gdtr, (*pmut_state)->es_selector, &(*pmut_state)->es_limit);
+    get_gdt_descriptor_base(
+        &(*pmut_state)->gdtr, (*pmut_state)->es_selector, &(*pmut_state)->es_base);
 
-    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->es_selector, &(*state)->es_limit);
-    if (ret) {
-        bferror("get_gdt_descriptor_limit failed");
-        goto set_descriptor_failed;
-    }
+    (*pmut_state)->cs_selector = intrinsic_scs();
 
-    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->es_selector, &(*state)->es_base);
-    if (ret) {
-        bferror("get_gdt_descriptor_base failed");
-        goto set_descriptor_failed;
-    }
+    get_gdt_descriptor_attrib(
+        &(*pmut_state)->gdtr, (*pmut_state)->cs_selector, &(*pmut_state)->cs_attrib);
+    get_gdt_descriptor_limit(
+        &(*pmut_state)->gdtr, (*pmut_state)->cs_selector, &(*pmut_state)->cs_limit);
+    get_gdt_descriptor_base(
+        &(*pmut_state)->gdtr, (*pmut_state)->cs_selector, &(*pmut_state)->cs_base);
 
-    (*state)->cs_selector = intrinsic_scs();
+    (*pmut_state)->ss_selector = intrinsic_sss();
 
-    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->cs_selector, &(*state)->cs_attrib);
-    if (ret) {
-        bferror("get_gdt_descriptor_attrib failed");
-        goto set_descriptor_failed;
-    }
+    get_gdt_descriptor_attrib(
+        &(*pmut_state)->gdtr, (*pmut_state)->ss_selector, &(*pmut_state)->ss_attrib);
+    get_gdt_descriptor_limit(
+        &(*pmut_state)->gdtr, (*pmut_state)->ss_selector, &(*pmut_state)->ss_limit);
+    get_gdt_descriptor_base(
+        &(*pmut_state)->gdtr, (*pmut_state)->ss_selector, &(*pmut_state)->ss_base);
 
-    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->cs_selector, &(*state)->cs_limit);
-    if (ret) {
-        bferror("get_gdt_descriptor_limit failed");
-        goto set_descriptor_failed;
-    }
+    (*pmut_state)->ds_selector = intrinsic_sds();
 
-    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->cs_selector, &(*state)->cs_base);
-    if (ret) {
-        bferror("get_gdt_descriptor_base failed");
-        goto set_descriptor_failed;
-    }
+    get_gdt_descriptor_attrib(
+        &(*pmut_state)->gdtr, (*pmut_state)->ds_selector, &(*pmut_state)->ds_attrib);
+    get_gdt_descriptor_limit(
+        &(*pmut_state)->gdtr, (*pmut_state)->ds_selector, &(*pmut_state)->ds_limit);
+    get_gdt_descriptor_base(
+        &(*pmut_state)->gdtr, (*pmut_state)->ds_selector, &(*pmut_state)->ds_base);
 
-    (*state)->ss_selector = intrinsic_sss();
+    (*pmut_state)->fs_selector = intrinsic_sfs();
 
-    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->ss_selector, &(*state)->ss_attrib);
-    if (ret) {
-        bferror("get_gdt_descriptor_attrib failed");
-        goto set_descriptor_failed;
-    }
+    get_gdt_descriptor_attrib(
+        &(*pmut_state)->gdtr, (*pmut_state)->fs_selector, &(*pmut_state)->fs_attrib);
+    get_gdt_descriptor_limit(
+        &(*pmut_state)->gdtr, (*pmut_state)->fs_selector, &(*pmut_state)->fs_limit);
+    get_gdt_descriptor_base(
+        &(*pmut_state)->gdtr, (*pmut_state)->fs_selector, &(*pmut_state)->fs_base);
 
-    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->ss_selector, &(*state)->ss_limit);
-    if (ret) {
-        bferror("get_gdt_descriptor_limit failed");
-        goto set_descriptor_failed;
-    }
+    (*pmut_state)->gs_selector = intrinsic_sgs();
 
-    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->ss_selector, &(*state)->ss_base);
-    if (ret) {
-        bferror("get_gdt_descriptor_base failed");
-        goto set_descriptor_failed;
-    }
+    get_gdt_descriptor_attrib(
+        &(*pmut_state)->gdtr, (*pmut_state)->gs_selector, &(*pmut_state)->gs_attrib);
+    get_gdt_descriptor_limit(
+        &(*pmut_state)->gdtr, (*pmut_state)->gs_selector, &(*pmut_state)->gs_limit);
+    get_gdt_descriptor_base(
+        &(*pmut_state)->gdtr, (*pmut_state)->gs_selector, &(*pmut_state)->gs_base);
 
-    (*state)->ds_selector = intrinsic_sds();
+    (*pmut_state)->ldtr_selector = intrinsic_sldtr();
 
-    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->ds_selector, &(*state)->ds_attrib);
-    if (ret) {
-        bferror("get_gdt_descriptor_attrib failed");
-        goto set_descriptor_failed;
-    }
+    get_gdt_descriptor_attrib(
+        &(*pmut_state)->gdtr, (*pmut_state)->ldtr_selector, &(*pmut_state)->ldtr_attrib);
+    get_gdt_descriptor_limit(
+        &(*pmut_state)->gdtr, (*pmut_state)->ldtr_selector, &(*pmut_state)->ldtr_limit);
+    get_gdt_descriptor_base(
+        &(*pmut_state)->gdtr, (*pmut_state)->ldtr_selector, &(*pmut_state)->ldtr_base);
 
-    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->ds_selector, &(*state)->ds_limit);
-    if (ret) {
-        bferror("get_gdt_descriptor_limit failed");
-        goto set_descriptor_failed;
-    }
+    (*pmut_state)->tr_selector = intrinsic_str();
 
-    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->ds_selector, &(*state)->ds_base);
-    if (ret) {
-        bferror("get_gdt_descriptor_base failed");
-        goto set_descriptor_failed;
-    }
-
-    (*state)->fs_selector = intrinsic_sfs();
-
-    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->fs_selector, &(*state)->fs_attrib);
-    if (ret) {
-        bferror("get_gdt_descriptor_attrib failed");
-        goto set_descriptor_failed;
-    }
-
-    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->fs_selector, &(*state)->fs_limit);
-    if (ret) {
-        bferror("get_gdt_descriptor_limit failed");
-        goto set_descriptor_failed;
-    }
-
-    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->fs_selector, &(*state)->fs_base);
-    if (ret) {
-        bferror("get_gdt_descriptor_base failed");
-        goto set_descriptor_failed;
-    }
-
-    (*state)->gs_selector = intrinsic_sgs();
-
-    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->gs_selector, &(*state)->gs_attrib);
-    if (ret) {
-        bferror("get_gdt_descriptor_attrib failed");
-        goto set_descriptor_failed;
-    }
-
-    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->gs_selector, &(*state)->gs_limit);
-    if (ret) {
-        bferror("get_gdt_descriptor_limit failed");
-        goto set_descriptor_failed;
-    }
-
-    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->gs_selector, &(*state)->gs_base);
-    if (ret) {
-        bferror("get_gdt_descriptor_base failed");
-        goto set_descriptor_failed;
-    }
-
-    (*state)->ldtr_selector = intrinsic_sldtr();
-
-    ret =
-        get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->ldtr_selector, &(*state)->ldtr_attrib);
-    if (ret) {
-        bferror("get_gdt_descriptor_attrib failed");
-        goto set_descriptor_failed;
-    }
-
-    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->ldtr_selector, &(*state)->ldtr_limit);
-    if (ret) {
-        bferror("get_gdt_descriptor_limit failed");
-        goto set_descriptor_failed;
-    }
-
-    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->ldtr_selector, &(*state)->ldtr_base);
-    if (ret) {
-        bferror("get_gdt_descriptor_base failed");
-        goto set_descriptor_failed;
-    }
-
-    (*state)->tr_selector = intrinsic_str();
-
-    ret = get_gdt_descriptor_attrib(&(*state)->gdtr, (*state)->tr_selector, &(*state)->tr_attrib);
-    if (ret) {
-        bferror("get_gdt_descriptor_attrib failed");
-        goto set_descriptor_failed;
-    }
-
-    ret = get_gdt_descriptor_limit(&(*state)->gdtr, (*state)->tr_selector, &(*state)->tr_limit);
-    if (ret) {
-        bferror("get_gdt_descriptor_limit failed");
-        goto set_descriptor_failed;
-    }
-
-    ret = get_gdt_descriptor_base(&(*state)->gdtr, (*state)->tr_selector, &(*state)->tr_base);
-    if (ret) {
-        bferror("get_gdt_descriptor_base failed");
-        goto set_descriptor_failed;
-    }
+    get_gdt_descriptor_attrib(
+        &(*pmut_state)->gdtr, (*pmut_state)->tr_selector, &(*pmut_state)->tr_attrib);
+    get_gdt_descriptor_limit(
+        &(*pmut_state)->gdtr, (*pmut_state)->tr_selector, &(*pmut_state)->tr_limit);
+    get_gdt_descriptor_base(
+        &(*pmut_state)->gdtr, (*pmut_state)->tr_selector, &(*pmut_state)->tr_base);
 
     /**************************************************************************/
     /* Handlers                                                               */
     /**************************************************************************/
 
-    (*state)->promote_handler = &promote;
-    (*state)->esr_default_handler = &esr_default;
-    (*state)->esr_df_handler = &esr_df;
-    (*state)->esr_gpf_handler = &esr_gpf;
-    (*state)->esr_nmi_handler = &esr_nmi;
-    (*state)->esr_pf_handler = &esr_pf;
+    (*pmut_state)->promote_handler = (void *)&promote;
+    (*pmut_state)->esr_default_handler = (void *)&esr_default;
+    (*pmut_state)->esr_df_handler = (void *)&esr_df;
+    (*pmut_state)->esr_gpf_handler = (void *)&esr_gpf;
+    (*pmut_state)->esr_nmi_handler = (void *)&esr_nmi;
+    (*pmut_state)->esr_pf_handler = (void *)&esr_pf;
 
     return LOADER_SUCCESS;
 
-set_descriptor_failed:
-
-    platform_free(*state, HYPERVISOR_PAGE_SIZE);
 platform_alloc_state_failed:
 
-    *state = ((void *)0);
+    free_root_vp_state(pmut_state);
     return LOADER_FAILURE;
 }
 

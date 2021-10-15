@@ -29,37 +29,46 @@
 
 #include <constants.h>
 #include <span_t.h>
-#include <stdint.h>
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #pragma pack(push, 1)
 
 /** @brief defines the IOCTL index for starting the VMM */
 #define LOADER_START_VMM_CMD ((uint32_t)0xBF01)
 
-/**
- * <!-- description -->
- *   @brief Defines the information that a userspace application needs to
- *     provide to start the VMM.
- */
-struct start_vmm_args_t
-{
-    /** @brief set to HYPERVISOR_VERSION */
-    uint64_t ver;
+    /**
+     * <!-- description -->
+     *   @brief Defines the information that a userspace application needs to
+     *     provide to start the VMM.
+     */
+    struct start_vmm_args_t
+    {
+        /** @brief set to HYPERVISOR_VERSION */
+        uint64_t ver;
 
-    /** @brief stores the number of pages the kernel should reserve for
+        /** @brief stores the number of pages the kernel should reserve for
      *    the microkernel's page pool. If this is set to 0, the loader
      *    will reserve the default number of pages. */
-    uint32_t num_pages_in_page_pool;
+        uint32_t num_pages_in_page_pool;
 
-    /** @brief reserved */
-    uint32_t reserved;
+        /** @brief reserved */
+        uint32_t reserved;
 
-    /** @brief stores the ELF file associated with the microkernel */
-    struct span_t mk_elf_file;
-    /** @brief stores the ELF files associated with the extensions */
-    struct span_t ext_elf_files[HYPERVISOR_MAX_EXTENSIONS];
-};
+        /** @brief stores the ELF file associated with the microkernel */
+        struct span_t mk_elf_file;
+        /** @brief stores the ELF files associated with the extensions */
+        struct span_t ext_elf_files[HYPERVISOR_MAX_EXTENSIONS];
+    };
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

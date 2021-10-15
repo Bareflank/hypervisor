@@ -27,13 +27,24 @@
 #ifndef SERIAL_WRITE_C
 #define SERIAL_WRITE_C
 
-/**
- * <!-- description -->
- *   @brief Writes a character "c" to the serial device.
- *
- * <!-- inputs/outputs -->
- *   @param c the character to write
- */
-void serial_write_c(char const c);
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Writes a character "c" to the serial device.
+     *
+     * <!-- inputs/outputs -->
+     *   @param c the character to write
+     */
+    void serial_write_c(char const c) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

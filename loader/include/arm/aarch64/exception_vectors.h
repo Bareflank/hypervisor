@@ -27,10 +27,21 @@
 #ifndef EXCEPTION_VECTORS
 #define EXCEPTION_VECTORS
 
-/**
- * <!-- description -->
- *   @brief Defines the location of the exception vectors
- */
-void exception_vectors();
+#include <types.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Defines the location of the exception vectors
+     */
+    void exception_vectors() NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

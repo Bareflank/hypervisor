@@ -29,14 +29,23 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function checks to see if the CPU is supported as well as
- *     it's system configuration.
- *
- * <!-- inputs/outputs -->
- *   @return Returns 0 on success
- */
-int64_t check_cpu_configuration(void);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function checks to see if the CPU is supported as well as
+     *     it's system configuration.
+     *
+     * <!-- inputs/outputs -->
+     *   @return Returns 0 on success
+     */
+    NODISCARD int64_t check_cpu_configuration(void) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -42,7 +42,7 @@
  *   @brief Disables Hardware Virtualization Extensions
  */
 void
-disable_hve(void)
+disable_hve(void) NOEXCEPT
 {
     intrinsic_wrmsr(MSR_VM_HSAVE_PA, ((uint64_t)0));
     intrinsic_wrmsr(MSR_EFER, intrinsic_rdmsr(MSR_EFER) & ~EFER_SVME);

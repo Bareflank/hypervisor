@@ -28,15 +28,25 @@
 #define FREE_L1T_H
 
 #include <l1t_t.h>
+#include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Given a l1t_t, this function will free any previously allocated
- *     tables.
- *
- * <!-- inputs/outputs -->
- *   @param l1 the l1t_t to free
- */
-void free_l1t(struct l1t_t *const l1);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Given a l1t_t, this function will free any previously allocated
+     *     tables.
+     *
+     * <!-- inputs/outputs -->
+     *   @param l1 the l1t_t to free
+     */
+    void free_l1t(struct l1t_t *const l1) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -30,29 +30,37 @@
 #include <global_descriptor_table_register_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Sets a GDT's descriptor given a selector into the GDT to
- *     set and the base, limit and attribute values to set the descriptor
- *     to. If the attribute flags set the global flag, the limit
- *
- * <!-- inputs/outputs -->
- *   @param gdtr a pointer to the gdtr that stores the GDT to set
- *   @param selector the selector of the descriptor in the provided GDT
- *     to get from
- *   @param base the base address to set the decriptor to in the provided GDT
- *     at the provided index
- *   @param limit the limit to set the decriptor to in the provided GDT
- *     at the provided index
- *   @param attrib the attributes to set the decriptor to in the provided GDT
- *     at the provided index
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t set_gdt_descriptor(
-    struct global_descriptor_table_register_t const *const gdtr,
-    uint16_t const selector,
-    uint64_t const base,
-    uint32_t const limit,
-    uint16_t const attrib);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Sets a GDT's descriptor given a selector into the GDT to
+     *     set and the base, limit and attribute values to set the descriptor
+     *     to. If the attribute flags set the global flag, the limit
+     *
+     * <!-- inputs/outputs -->
+     *   @param gdtr a pointer to the gdtr that stores the GDT to set
+     *   @param selector the selector of the descriptor in the provided GDT
+     *     to get from
+     *   @param base the base address to set the decriptor to in the provided GDT
+     *     at the provided index
+     *   @param limit the limit to set the decriptor to in the provided GDT
+     *     at the provided index
+     *   @param attrib the attributes to set the decriptor to in the provided GDT
+     *     at the provided index
+     */
+    void set_gdt_descriptor(
+        struct global_descriptor_table_register_t const *const gdtr,
+        uint16_t const selector,
+        uint64_t const base,
+        uint32_t const limit,
+        uint16_t const attrib) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -45,11 +45,12 @@ namespace mk
     {
         bsl::ut_scenario{"tlb_flush"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                intrinsic_t intrinsic{};
+                intrinsic_t const intrinsic{};
                 constexpr auto addr{HYPERVISOR_PAGE_SIZE};
                 constexpr auto asid{0x1_u16};
                 bsl::ut_then{} = [&]() noexcept {
                     intrinsic.tlb_flush(addr);
+                    intrinsic.tlb_flush(addr, {});
                     intrinsic.tlb_flush(addr, asid);
                 };
             };
@@ -57,25 +58,25 @@ namespace mk
 
         bsl::ut_scenario{"set_rpt"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                intrinsic_t intrinsic{};
+                intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
-                    intrinsic.set_rpt({});
+                    mut_intrinsic.set_rpt({});
                 };
             };
         };
 
         bsl::ut_scenario{"set_tp"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                intrinsic_t intrinsic{};
+                intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
-                    intrinsic.set_tp({});
+                    mut_intrinsic.set_tp({});
                 };
             };
         };
 
         bsl::ut_scenario{"tls_reg"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                intrinsic_t intrinsic{};
+                intrinsic_t const intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(intrinsic.tls_reg({}));
                 };
@@ -84,16 +85,16 @@ namespace mk
 
         bsl::ut_scenario{"set_tls_reg"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                intrinsic_t intrinsic{};
+                intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
-                    intrinsic.set_tls_reg({}, {});
+                    mut_intrinsic.set_tls_reg({}, {});
                 };
             };
         };
 
         bsl::ut_scenario{"rdmsr"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                intrinsic_t intrinsic{};
+                intrinsic_t const intrinsic{};
                 constexpr auto msr{0_u32};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(intrinsic.rdmsr(msr));
@@ -103,7 +104,7 @@ namespace mk
 
         bsl::ut_scenario{"rdmsr fails"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                intrinsic_t intrinsic{};
+                intrinsic_t const intrinsic{};
                 constexpr auto msr{1_u32};
                 bsl::ut_then{} = [&]() noexcept {
                     bsl::ut_check(intrinsic.rdmsr(msr).is_invalid());
@@ -113,29 +114,29 @@ namespace mk
 
         bsl::ut_scenario{"wrmsr"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                intrinsic_t intrinsic{};
+                intrinsic_t mut_intrinsic{};
                 constexpr auto msr{0_u32};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(intrinsic.wrmsr(msr, {}));
+                    bsl::ut_check(mut_intrinsic.wrmsr(msr, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"wrmsr fails"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                intrinsic_t intrinsic{};
+                intrinsic_t mut_intrinsic{};
                 constexpr auto msr{1_u32};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(!intrinsic.wrmsr(msr, {}));
+                    bsl::ut_check(!mut_intrinsic.wrmsr(msr, {}));
                 };
             };
         };
 
         bsl::ut_scenario{"vmrun"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
-                intrinsic_t intrinsic{};
+                intrinsic_t mut_intrinsic{};
                 bsl::ut_then{} = [&]() noexcept {
-                    bsl::ut_check(intrinsic.vmrun({}, {}, {}, {}, {}));
+                    bsl::ut_check(mut_intrinsic.vmrun({}, {}, {}, {}, {}));
                 };
             };
         };

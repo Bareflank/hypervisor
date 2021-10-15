@@ -120,13 +120,13 @@ namespace lib
 
                 bsl::ut_when{} = [&]() noexcept {
                     mut_page_pool.set_allocate(pmut_virt, phys);
-                    auto *const mut_ptr{mut_page_pool.allocate<T>({})};
+                    auto *const pmut_ptr{mut_page_pool.allocate<T>({})};
                     bsl::ut_then{} = [&]() noexcept {
-                        bsl::ut_check(mut_ptr == pmut_virt);
+                        bsl::ut_check(pmut_ptr == pmut_virt);
                         bsl::ut_check(mut_page_pool.virt_to_phys(pmut_virt) == phys);
                         bsl::ut_check(mut_page_pool.phys_to_virt<T>(phys) == pmut_virt);
                         bsl::ut_cleanup{} = [&]() noexcept {
-                            mut_page_pool.deallocate({}, mut_ptr);
+                            mut_page_pool.deallocate({}, pmut_ptr);
                         };
                     };
                 };

@@ -30,13 +30,22 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Returns the value of DAIF
- *
- * <!-- inputs/outputs -->
- *   @return Returns the value of DAIF
- */
-uint64_t read_daif();
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Returns the value of DAIF
+     *
+     * <!-- inputs/outputs -->
+     *   @return Returns the value of DAIF
+     */
+    NODISCARD uint64_t read_daif() NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

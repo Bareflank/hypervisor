@@ -30,14 +30,23 @@
 #include <span_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Outputs the contents of a provided mk stack.
- *
- * <!-- inputs/outputs -->
- *   @param stack the mk stack to output
- *   @param cpu the CPU that this mk stack belongs to
- */
-void dump_mk_stack(struct span_t *const stack, uint32_t const cpu);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Outputs the contents of a provided mk stack.
+     *
+     * <!-- inputs/outputs -->
+     *   @param stack the mk stack to output
+     *   @param cpu the CPU that this mk stack belongs to
+     */
+    void dump_mk_stack(struct span_t const *const stack, uint32_t const cpu) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

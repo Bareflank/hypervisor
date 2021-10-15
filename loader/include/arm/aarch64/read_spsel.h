@@ -30,13 +30,22 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Returns the value of SPSEL
- *
- * <!-- inputs/outputs -->
- *   @return Returns the value of SPSEL
- */
-uint64_t read_spsel();
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Returns the value of SPSEL
+     *
+     * <!-- inputs/outputs -->
+     *   @return Returns the value of SPSEL
+     */
+    NODISCARD uint64_t read_spsel() NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

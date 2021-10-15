@@ -152,6 +152,22 @@ namespace syscall
             m_hndl = {};
         }
 
+        /// <!-- description -->
+        ///   @brief Returns the handle that is used for syscalls. If this
+        ///     class has not been initialized, a default (likely 0) handle
+        ///     is returned.
+        ///
+        /// <!-- inputs/outputs -->
+        ///   @return Returns the handle that is used for syscalls. If this
+        ///     class has not been initialized, a default (likely 0) handle
+        ///     is returned.
+        ///
+        [[nodiscard]] constexpr auto
+        handle() noexcept -> bsl::safe_u64
+        {
+            return m_hndl;
+        }
+
         // ---------------------------------------------------------------------
         // TLS ops
         // ---------------------------------------------------------------------

@@ -31,17 +31,26 @@
 #include <pdt_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Given a pdpt and a virtual address, this function allocates a
- *     pdt and adds it to the pdpt. If a pdt has already been allocated,
- *     this function will fail.
- *
- * <!-- inputs/outputs -->
- *   @param pdpt the pdpt to add the newly allocated pdt to
- *   @param virt the virtual address to get the PDPT offset from.
- *   @return a pointer to the newly allocated pdt on success, ((void *)0) otherwise.
- */
-struct pdt_t *alloc_pdt(struct pdpt_t *const pdpt, uint64_t const virt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Given a pdpt and a virtual address, this function allocates a
+     *     pdt and adds it to the pdpt. If a pdt has already been allocated,
+     *     this function will fail.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_pdpt the pdpt to add the newly allocated pdt to
+     *   @param virt the virtual address to get the PDPT offset from.
+     *   @return a pointer to the newly allocated pdt on success, NULLPTR otherwise.
+     */
+    NODISCARD struct pdt_t *alloc_pdt(struct pdpt_t *const pmut_pdpt, uint64_t const virt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

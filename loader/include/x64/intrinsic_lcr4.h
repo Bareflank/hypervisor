@@ -29,13 +29,22 @@
 
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Loads the CR4 control register with the provided value.
- *
- * <!-- inputs/outputs -->
- *   @param val the value to load into CR4.
- */
-void intrinsic_lcr4(uint64_t const val);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Loads the CR4 control register with the provided value.
+     *
+     * <!-- inputs/outputs -->
+     *   @param val the value to load into CR4.
+     */
+    void intrinsic_lcr4(uint64_t const val) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

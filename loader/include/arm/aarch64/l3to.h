@@ -29,24 +29,33 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /** @brief defines the mask used for the L3T offset */
 #define L3T_OFFSET_MASK ((uint64_t)0x1FF)
 /** @brief defines the bit location of the L3T offset */
 #define L3T_OFFSET_SHIFT ((uint64_t)12)
 
-/**
- * <!-- description -->
- *   @brief Returns the level-3 table (L3T) offset given a
- *     virtual address.
- *
- * <!-- inputs/outputs -->
- *   @param virt the virtual address to get the L3T offset from.
- *   @return the L3T offset from the virtual address
- */
-static inline uint64_t
-l3to(uint64_t const virt)
-{
-    return ((virt >> L3T_OFFSET_SHIFT) & L3T_OFFSET_MASK);
+    /**
+     * <!-- description -->
+     *   @brief Returns the level-3 table (L3T) offset given a
+     *     virtual address.
+     *
+     * <!-- inputs/outputs -->
+     *   @param virt the virtual address to get the L3T offset from.
+     *   @return the L3T offset from the virtual address
+     */
+    NODISCARD static inline uint64_t
+    l3to(uint64_t const virt) NOEXCEPT
+    {
+        return ((virt >> L3T_OFFSET_SHIFT) & L3T_OFFSET_MASK);
+    }
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif

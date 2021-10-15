@@ -35,7 +35,6 @@
 #include <root_page_table_t.hpp>
 #include <tls_t.hpp>
 
-#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>
 #include <bsl/ensures.hpp>
@@ -100,7 +99,7 @@ namespace mk
         /// @brief stores the ID associated with this ext_t
         bsl::safe_u16 m_id{};
         /// @brief stores the extension's handle
-        bsl::safe_u16 m_handle{};
+        bsl::safe_u64 m_handle{};
         /// @brief stores true if start() has been executed
         bool m_has_executed_start{};
         /// @brief stores true if fail_entry() is being executed
@@ -144,6 +143,7 @@ namespace mk
             bsl::discard(system_rpt);
 
             m_id = ~i;
+            m_handle = syscall::BF_INVALID_HANDLE;
             return tls.test_ret;
         }
 
@@ -288,12 +288,12 @@ namespace mk
         [[nodiscard]] constexpr auto
         open_handle() noexcept -> bsl::safe_u64
         {
-            if (bsl::unlikely(m_handle.is_pos())) {
+            if (bsl::unlikely(m_handle.is_zero())) {
                 bsl::error() << "handle already opened\n" << bsl::here();
                 return bsl::safe_u64::failure();
             }
 
-            m_handle = m_id;
+            m_handle = {};
             return this->handle();
         }
 
@@ -303,7 +303,7 @@ namespace mk
         constexpr void
         close_handle() noexcept
         {
-            m_handle = {};
+            m_handle = syscall::BF_INVALID_HANDLE;
         }
 
         /// <!-- description -->
@@ -317,7 +317,7 @@ namespace mk
         is_handle_valid(bsl::safe_u64 const &hndl) const noexcept -> bool
         {
             bsl::expects(hndl.is_valid_and_checked());
-            return hndl == this->handle();
+            return hndl == m_handle;
         }
 
         /// <!-- description -->
@@ -330,7 +330,7 @@ namespace mk
         handle() const noexcept -> bsl::safe_u64
         {
             bsl::ensures(m_handle.is_valid_and_checked());
-            return ~bsl::to_u64(m_handle);
+            return m_handle;
         }
 
         /// <!-- description -->

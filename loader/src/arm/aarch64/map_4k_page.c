@@ -62,13 +62,14 @@
  *   @param rpt the root page table to place the resulting map
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_4k_page(uint64_t const virt, uint64_t phys, uint32_t const flags, root_page_table_t *const rpt)
+NODISCARD int64_t
+map_4k_page(
+    uint64_t const virt, uint64_t phys, uint32_t const flags, root_page_table_t *const rpt) NOEXCEPT
 {
-    struct l1t_t *l1t = ((void *)0);
-    struct l2t_t *l2t = ((void *)0);
-    struct l3t_t *l3t = ((void *)0);
-    struct l3te_t *l3te = ((void *)0);
+    struct l1t_t *l1t = NULLPTR;
+    struct l2t_t *l2t = NULLPTR;
+    struct l3t_t *l3t = NULLPTR;
+    struct l3te_t *l3te = NULLPTR;
 
     if (((uint64_t)0) == virt) {
         bferror_x64("virt is NULL", virt);
@@ -94,17 +95,17 @@ map_4k_page(uint64_t const virt, uint64_t phys, uint32_t const flags, root_page_
     }
 
     l1t = rpt->tables[l0to(virt)];
-    if (((void *)0) == l1t) {
+    if (NULLPTR == l1t) {
         l1t = alloc_l1t(rpt, virt);
     }
 
     l2t = l1t->tables[l1to(virt)];
-    if (((void *)0) == l2t) {
+    if (NULLPTR == l2t) {
         l2t = alloc_l2t(l1t, virt);
     }
 
     l3t = l2t->tables[l2to(virt)];
-    if (((void *)0) == l3t) {
+    if (NULLPTR == l3t) {
         l3t = alloc_l3t(l2t, virt);
     }
 

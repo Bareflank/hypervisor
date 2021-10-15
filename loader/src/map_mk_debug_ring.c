@@ -24,12 +24,11 @@
  * SOFTWARE.
  */
 
-#include <constants.h>
 #include <debug.h>
 #include <debug_ring_t.h>
 #include <map_4k_page_rw.h>
-#include <platform.h>
 #include <root_page_table_t.h>
+#include <types.h>
 
 /**
  * <!-- description -->
@@ -39,19 +38,22 @@
  * <!-- inputs/outputs -->
  *   @param debug_ring a pointer to a debug_ring_t that stores the debug_ring
  *     being mapped
- *   @param rpt the root page table to map the debug_ring into
+ *   @param pmut_rpt the root page table to map the debug_ring into
  *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
  */
-int64_t
-map_mk_debug_ring(struct debug_ring_t const *const debug_ring, root_page_table_t *const rpt)
+NODISCARD int64_t
+map_mk_debug_ring(
+    struct debug_ring_t const *const debug_ring, root_page_table_t *const pmut_rpt) NOEXCEPT
 {
-    uint64_t off = ((uint64_t)0);
+    uint64_t mut_i;
 
-    for (; off < HYPERVISOR_DEBUG_RING_SIZE; off += HYPERVISOR_PAGE_SIZE) {
-        if (map_4k_page_rw(((uint8_t *)debug_ring) + off, ((uint64_t)0), rpt)) {
+    for (mut_i = ((uint64_t)0); mut_i < HYPERVISOR_DEBUG_RING_SIZE; mut_i += HYPERVISOR_PAGE_SIZE) {
+        if (map_4k_page_rw(((uint8_t *)debug_ring) + mut_i, ((uint64_t)0), pmut_rpt)) {
             bferror("map_4k_page_rw failed");
             return LOADER_FAILURE;
         }
+
+        bf_touch();
     }
 
     return LOADER_SUCCESS;

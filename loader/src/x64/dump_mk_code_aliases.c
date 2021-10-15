@@ -26,6 +26,7 @@
 
 #include <code_aliases_t.h>
 #include <debug.h>
+#include <platform.h>
 #include <types.h>
 
 /**
@@ -36,12 +37,9 @@
  *   @param a the code_aliases_t to output
  */
 void
-dump_mk_code_aliases(struct code_aliases_t *const a)
+dump_mk_code_aliases(struct code_aliases_t const *const a) NOEXCEPT
 {
-    if (((void *)0) == a) {
-        bferror("a is NULL");
-        return;
-    }
+    platform_expects(NULLPTR != a);
 
     bfdebug("mk code aliases:");
     bfdebug_ptr(" - demote", a->demote);

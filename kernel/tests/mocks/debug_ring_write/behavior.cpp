@@ -47,7 +47,7 @@ namespace mk
         bsl::ut_scenario{"debug_ring_write"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
                 loader::debug_ring_t mut_ring{};
-                bsl::string_view msg{"this is a test string"};
+                bsl::string_view const msg{"this is a test string"};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_then{} = [&]() noexcept {
                         debug_ring_write(mut_ring, msg.data(), msg.size().get());
@@ -65,7 +65,7 @@ namespace mk
         bsl::ut_scenario{"debug_ring_write invalid length"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
                 loader::debug_ring_t mut_ring{};
-                bsl::string_view msg{"this is a test string"};
+                bsl::string_view const msg{"this is a test string"};
                 constexpr auto len{bsl::safe_umx::max_value()};
                 bsl::ut_when{} = [&]() noexcept {
                     bsl::ut_then{} = [&]() noexcept {

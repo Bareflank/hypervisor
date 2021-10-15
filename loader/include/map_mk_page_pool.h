@@ -31,30 +31,39 @@
 #include <root_page_table_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief This function maps the microkernel's page pool into the
- *     microkernel's root page tables.
- *
- *   @note Unlike other map functions, this function needs to set up the
- *     direct map. This is because the only part of the direct map the
- *     microkernel needs is the page pool. What this means is each page
- *     is mapped to the direct map base address (virt), with the
- *     physical address added (i.e., to get the physical address of a
- *     page from the page pool, just take it's virtual address and
- *     subtract virt). Then, the first 64 bits of the page store the
- *     address of the next page in the page pool (using the direct map
- *     address). This way, all we need to do is pass virt to the
- *     microkernel, and it will have the HEAD of a linked list of pages
- *     that can be used as a page pool.
- *
- * <!-- inputs/outputs -->
- *   @param page_pool a pointer to a mutable_span_t that stores the page pool
- *     being mapped
- *   @param rpt the root page table to map the page pool into
- *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
- */
-int64_t
-map_mk_page_pool(struct mutable_span_t const *const page_pool, root_page_table_t *const rpt);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief This function maps the microkernel's page pool into the
+     *     microkernel's root page tables.
+     *
+     *   @note Unlike other map functions, this function needs to set up the
+     *     direct map. This is because the only part of the direct map the
+     *     microkernel needs is the page pool. What this means is each page
+     *     is mapped to the direct map base address (virt), with the
+     *     physical address added (i.e., to get the physical address of a
+     *     page from the page pool, just take it's virtual address and
+     *     subtract virt). Then, the first 64 bits of the page store the
+     *     address of the next page in the page pool (using the direct map
+     *     address). This way, all we need to do is pass virt to the
+     *     microkernel, and it will have the HEAD of a linked list of pages
+     *     that can be used as a page pool.
+     *
+     * <!-- inputs/outputs -->
+     *   @param page_pool a pointer to a mutable_span_t that stores the page pool
+     *     being mapped
+     *   @param pmut_rpt the root page table to map the page pool into
+     *   @return LOADER_SUCCESS on success, LOADER_FAILURE on failure.
+     */
+    NODISCARD int64_t map_mk_page_pool(
+        struct mutable_span_t const *const page_pool, root_page_table_t *const pmut_rpt) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

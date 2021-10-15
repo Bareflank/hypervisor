@@ -29,52 +29,61 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #pragma pack(push, 1)
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4214)
 #endif
 
-/**
- * <!-- description -->
- *   @brief Defines the layout of a page-map level-4 table entry (PML4TE).
- */
-struct pml4te_t
-{
-    /** @brief defines the "present" field in the page */
-    uint64_t p : ((uint64_t)1);
-    /** @brief defines the "read/write" field in the page */
-    uint64_t rw : ((uint64_t)1);
-    /** @brief defines the "user/supervisor" field in the page */
-    uint64_t us : ((uint64_t)1);
-    /** @brief defines the "page-level writethrough" field in the page */
-    uint64_t pwt : ((uint64_t)1);
-    /** @brief defines the "page-level cache disable" field in the page */
-    uint64_t pcd : ((uint64_t)1);
-    /** @brief defines the "accessed" field in the page */
-    uint64_t a : ((uint64_t)1);
-    /** @brief defines the "dirty" field in the page (ignored) */
-    uint64_t ignored : ((uint64_t)1);
-    /** @brief defines the "page size" field in the page (must be 0) */
-    uint64_t mbz1 : ((uint64_t)1);
-    /** @brief defines the "global" field in the page (must be 0) */
-    uint64_t mbz2 : ((uint64_t)1);
-    /** @brief defines our "aliased" field in the page */
-    uint64_t alias : ((uint64_t)1);
-    /** @brief defines the "available to software" field in the page */
-    uint64_t available1 : ((uint64_t)2);
-    /** @brief defines the "physical address" field in the page */
-    uint64_t phys : ((uint64_t)40);
-    /** @brief defines the "available to software" field in the page */
-    uint64_t available2 : ((uint64_t)11);
-    /** @brief defines the "no-execute" field in the page */
-    uint64_t nx : ((uint64_t)1);
-};
+    /**
+     * <!-- description -->
+     *   @brief Defines the layout of a page-map level-4 table entry (PML4TE).
+     */
+    struct pml4te_t
+    {
+        /** @brief defines the "present" field in the page */
+        uint64_t p : ((uint64_t)1);
+        /** @brief defines the "read/write" field in the page */
+        uint64_t rw : ((uint64_t)1);
+        /** @brief defines the "user/supervisor" field in the page */
+        uint64_t us : ((uint64_t)1);
+        /** @brief defines the "page-level writethrough" field in the page */
+        uint64_t pwt : ((uint64_t)1);
+        /** @brief defines the "page-level cache disable" field in the page */
+        uint64_t pcd : ((uint64_t)1);
+        /** @brief defines the "accessed" field in the page */
+        uint64_t a : ((uint64_t)1);
+        /** @brief defines the "dirty" field in the page (ignored) */
+        uint64_t ignored : ((uint64_t)1);
+        /** @brief defines the "page size" field in the page (must be 0) */
+        uint64_t mbz1 : ((uint64_t)1);
+        /** @brief defines the "global" field in the page (must be 0) */
+        uint64_t mbz2 : ((uint64_t)1);
+        /** @brief defines our "aliased" field in the page */
+        uint64_t alias : ((uint64_t)1);
+        /** @brief defines the "available to software" field in the page */
+        uint64_t available1 : ((uint64_t)2);
+        /** @brief defines the "physical address" field in the page */
+        uint64_t phys : ((uint64_t)40);
+        /** @brief defines the "available to software" field in the page */
+        uint64_t available2 : ((uint64_t)11);
+        /** @brief defines the "no-execute" field in the page */
+        uint64_t nx : ((uint64_t)1);
+    };
 
 #ifdef _MSC_VER
 #pragma warning(default : 4214)
 #endif
 
 #pragma pack(pop)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

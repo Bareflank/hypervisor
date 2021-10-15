@@ -30,14 +30,23 @@
 #include <state_save_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Releases a previously allocated state_save_t that was allocated
- *     using the alloc_and_copy_mk_state function.
- *
- * <!-- inputs/outputs -->
- *   @param state the state_save_t to free.
- */
-void free_mk_state(struct state_save_t **const state);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Releases a previously allocated state_save_t that was allocated
+     *     using the alloc_and_copy_mk_state function.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_state the state_save_t to free.
+     */
+    void free_mk_state(struct state_save_t **const pmut_state) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
