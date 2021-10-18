@@ -57,11 +57,6 @@
 /** @brief defines the default value of CR4 */
 #define DEFAULT_CR4 ((uint64_t)0x003400E0)
 
-/** @brief defines the default value of CR0 bits that must be off */
-#define DEFAULT_CR0_OFF ((uint64_t)0xFFFFFFFFFFFFFFFF)
-/** @brief defines the default value of CR4 bits that must be off */
-#define DEFAULT_CR4_OFF ((uint64_t)0xFFFFFFFFFFFFFFFF)
-
 /** @brief defines the MSR_EFER MSR */
 #define MSR_EFER ((uint32_t)0xC0000080)
 /** @brief defines the default value of EFER */
@@ -492,28 +487,31 @@ alloc_and_copy_mk_state(
         ESR_ATTRIB);                      // --
 
     /**************************************************************************/
-    /* Control Registers                                                      */
+    /* CR0/CR4                                                                */
     /**************************************************************************/
 
-    (*pmut_state)->cr0 = (intrinsic_scr0() | DEFAULT_CR0) & DEFAULT_CR0_OFF;
-    (*pmut_state)->cr3 = platform_virt_to_phys(rpt);
-    (*pmut_state)->cr4 = (intrinsic_scr4() | DEFAULT_CR4) & DEFAULT_CR4_OFF;
+    (*pmut_state)->cr0 = (intrinsic_scr0() | DEFAULT_CR0);
+    (*pmut_state)->cr4 = (intrinsic_scr4() | DEFAULT_CR4);
 
+    /**************************************************************************/
+    /* CR3                                                                    */
+    /**************************************************************************/
+
+    (*pmut_state)->cr3 = platform_virt_to_phys(rpt);
     if (((uint64_t)0) == (*pmut_state)->cr3) {
         bferror("platform_virt_to_phys failed");
         goto platform_virt_to_phys_cr3_failed;
     }
+
+    /**************************************************************************/
+    /* XCR0                                                                   */
+    /**************************************************************************/
 
     mut_eax = CPUID_EXTENDED_STATE;
     mut_ecx = 0U;
     intrinsic_cpuid(&mut_eax, &mut_ebx, &mut_ecx, &mut_edx);
 
     (*pmut_state)->xcr0 = (((uint64_t)mut_edx) << ((uint64_t)32)) | ((uint64_t)mut_eax);
-
-    if (((uint64_t)0) == (*pmut_state)->xcr0) {
-        bferror("intrinsic_cpuid failed");
-        goto intrinsic_cpuid_xcr0_failed;
-    }
 
     /**************************************************************************/
     /* MSRs                                                                   */
@@ -526,7 +524,6 @@ alloc_and_copy_mk_state(
 
     return LOADER_SUCCESS;
 
-intrinsic_cpuid_xcr0_failed:
 platform_virt_to_phys_cr3_failed:
 platform_alloc_idt_failed:
 platform_alloc_gdt_failed:

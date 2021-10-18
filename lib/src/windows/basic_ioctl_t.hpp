@@ -46,6 +46,8 @@
 #include <bsl/safe_integral.hpp>
 #include <bsl/swap.hpp>
 #include <bsl/unlikely.hpp>
+#include <bsl/convert.hpp>
+#include <bsl/finally.hpp>
 
 namespace lib
 {
@@ -146,7 +148,7 @@ namespace lib
                 nullptr);
 
             if (bsl::unlikely(nullptr == m_hndl)) {
-                bsl::error() << "basic_ioctl_t CreateFile failed\n";
+                bsl::error() << "ioctl CreateFile failed\n";
                 return;
             }
         }
@@ -280,8 +282,7 @@ namespace lib
             DWORD bytes{};
 
             if (bsl::unlikely(nullptr == m_hndl)) {
-                bsl::error()
-                    << "basic_ioctl_t failed because the handle to the driver is invalid\n";
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
                 return bsl::safe_i64::magic_neg_1();
             }
 
@@ -316,8 +317,7 @@ namespace lib
             bsl::expects(nullptr != pmut_data);
 
             if (bsl::unlikely(nullptr == m_hndl)) {
-                bsl::error()
-                    << "basic_ioctl_t failed because the handle to the driver is invalid\n";
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
                 return bsl::safe_i64::magic_neg_1();
             }
 
@@ -358,8 +358,7 @@ namespace lib
             bsl::expects(nullptr != data);
 
             if (bsl::unlikely(nullptr == m_hndl)) {
-                bsl::error()
-                    << "basic_ioctl_t failed because the handle to the driver is invalid\n";
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
                 return bsl::safe_i64::magic_neg_1();
             }
 
@@ -399,8 +398,7 @@ namespace lib
             bsl::expects(data.is_valid_and_checked());
 
             if (bsl::unlikely(nullptr == m_hndl)) {
-                bsl::error()
-                    << "basic_ioctl_t failed because the handle to the driver is invalid\n";
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
                 return bsl::safe_i64::magic_neg_1();
             }
 
@@ -438,8 +436,7 @@ namespace lib
             bsl::expects(nullptr != pmut_data);
 
             if (bsl::unlikely(nullptr == m_hndl)) {
-                bsl::error()
-                    << "basic_ioctl_t failed because the handle to the driver is invalid\n";
+                bsl::error() << "ioctl failed because the handle to the driver is invalid\n";
                 return bsl::safe_i64::magic_neg_1();
             }
 

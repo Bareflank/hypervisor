@@ -213,7 +213,6 @@ start_vmm_per_cpu(uint32_t const cpu) NOEXCEPT
     platform_mark_gdt_readonly();
 
     if (mut_ret) {
-        platform_dump_vmm();
         bferror("demote failed");
         goto demote_failed;
     }

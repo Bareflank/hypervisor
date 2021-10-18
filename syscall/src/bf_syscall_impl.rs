@@ -1,4 +1,3 @@
-use crate::types::BfCharT;
 /// @copyright
 /// Copyright (C) 2020 Assured Information Security, Inc.
 ///
@@ -22,14 +21,12 @@ use crate::types::BfCharT;
 /// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
-use crate::types::BfCptrT;
-use crate::types::BfCstrT;
+
+// -------------------------------------------------------------------------
+// TLS ops
+// -------------------------------------------------------------------------
 
 extern "C" {
-
-    // -------------------------------------------------------------------------
-    // TLS ops
-    // -------------------------------------------------------------------------
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_tls_rax.
@@ -333,6 +330,11 @@ extern "C" {
     ///
     pub fn bf_control_op_wait_impl();
 
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_control_op_again.
+    ///
+    pub fn bf_control_op_again_impl();
+
     // -------------------------------------------------------------------------
     // bf_handle_ops
     // -------------------------------------------------------------------------
@@ -407,15 +409,20 @@ extern "C" {
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///
-    pub fn bf_debug_op_write_c_impl(reg0_in: BfCharT);
+    pub fn bf_debug_op_write_c_impl(reg0_in: bsl::CharT); // NOLINT
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_debug_op_write_str.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
     ///
-    pub fn bf_debug_op_write_str_impl(reg0_in: BfCstrT);
+    pub fn bf_debug_op_write_str_impl(
+        // NOLINT
+        reg0_in: bsl::CStrT,
+        reg1_in: u64,
+    ); // NOLINT
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_debug_op_dump_ext.
@@ -447,7 +454,7 @@ extern "C" {
     ///   @param reg1_in n/a
     ///   @return n/a
     ///
-    pub fn bf_callback_op_register_bootstrap_impl(reg0_in: u64, reg1_in: BfCptrT) -> u64;
+    pub fn bf_callback_op_register_bootstrap_impl(reg0_in: u64, reg1_in: bsl::CPtrT) -> u64;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_callback_op_register_vmexit.
@@ -457,7 +464,7 @@ extern "C" {
     ///   @param reg1_in n/a
     ///   @return n/a
     ///
-    pub fn bf_callback_op_register_vmexit_impl(reg0_in: u64, reg1_in: BfCptrT) -> u64;
+    pub fn bf_callback_op_register_vmexit_impl(reg0_in: u64, reg1_in: bsl::CPtrT) -> u64;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_callback_op_register_fail.
@@ -467,7 +474,7 @@ extern "C" {
     ///   @param reg1_in n/a
     ///   @return n/a
     ///
-    pub fn bf_callback_op_register_fail_impl(reg0_in: u64, reg1_in: BfCptrT) -> u64;
+    pub fn bf_callback_op_register_fail_impl(reg0_in: u64, reg1_in: bsl::CPtrT) -> u64;
 
     // -------------------------------------------------------------------------
     // bf_vm_ops
@@ -507,7 +514,7 @@ extern "C" {
         reg0_in: u64,
         reg1_in: u16,
         reg2_in: u64,
-        reg0_out: *mut BfCptrT,
+        reg0_out: *mut bsl::CPtrT,
     ) -> u64;
 
     /// <!-- description -->
@@ -519,7 +526,7 @@ extern "C" {
     ///   @param reg2_in n/a
     ///   @return n/a
     ///
-    pub fn bf_vm_op_unmap_direct_impl(reg0_in: u64, reg1_in: u16, reg2_in: u64) -> u64;
+    pub fn bf_vm_op_unmap_direct_impl(reg0_in: u64, reg1_in: u16, reg2_in: bsl::CPtrT) -> u64;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_vm_op_unmap_direct_broadcast.
@@ -530,7 +537,21 @@ extern "C" {
     ///   @param reg2_in n/a
     ///   @return n/a
     ///
-    pub fn bf_vm_op_unmap_direct_broadcast_impl(reg0_in: u64, reg1_in: u16, reg2_in: u64) -> u64;
+    pub fn bf_vm_op_unmap_direct_broadcast_impl(
+        reg0_in: u64,
+        reg1_in: u16,
+        reg2_in: bsl::CPtrT,
+    ) -> u64;
+
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_vm_op_tlb_flush.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
+    ///   @return n/a
+    ///
+    pub fn bf_vm_op_tlb_flush_impl(reg0_in: u64, reg1_in: u16) -> u64;
 
     // -------------------------------------------------------------------------
     // bf_vp_ops
@@ -542,16 +563,10 @@ extern "C" {
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
     ///   @param reg0_out n/a
     ///   @return n/a
     ///
-    pub fn bf_vp_op_create_vp_impl(
-        reg0_in: u64,
-        reg1_in: u16,
-        reg2_in: u16,
-        reg0_out: *mut u16,
-    ) -> u64;
+    pub fn bf_vp_op_create_vp_impl(reg0_in: u64, reg1_in: u16, reg0_out: *mut u16) -> u64;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_vp_op_destroy_vp.
@@ -614,12 +629,7 @@ extern "C" {
     ///   @param reg0_out n/a
     ///   @return n/a
     ///
-    pub fn bf_vs_op_read_impl(
-        reg0_in: u64,
-        reg1_in: u16,
-        reg2_in: u64,
-        reg0_out: *const u64,
-    ) -> u64;
+    pub fn bf_vs_op_read_impl(reg0_in: u64, reg1_in: u16, reg2_in: u64, reg0_out: *mut u64) -> u64;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_vs_op_write.
@@ -655,14 +665,21 @@ extern "C" {
     pub fn bf_vs_op_run_current_impl(reg0_in: u64) -> u64;
 
     /// <!-- description -->
-    ///   @brief Implements the ABI for bf_vs_op_advance_ip.
+    ///   @brief Implements the ABI for bf_vs_op_advance_ip_and_run.
     ///
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
+    ///   @param reg2_in n/a
+    ///   @param reg3_in n/a
     ///   @return n/a
     ///
-    pub fn bf_vs_op_advance_ip_impl(reg0_in: u64, reg1_in: u16) -> u64;
+    pub fn bf_vs_op_advance_ip_and_run_impl(
+        reg0_in: u64,
+        reg1_in: u16,
+        reg2_in: u16,
+        reg3_in: u16,
+    ) -> u64;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_vs_op_advance_ip_and_run_current.
@@ -704,6 +721,46 @@ extern "C" {
     ///
     pub fn bf_vs_op_migrate_impl(reg0_in: u64, reg1_in: u16, reg2_in: u16) -> u64;
 
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_vs_op_set_active.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
+    ///   @param reg2_in n/a
+    ///   @param reg3_in n/a
+    ///   @return n/a
+    ///
+    pub fn bf_vs_op_set_active_impl(reg0_in: u64, reg1_in: u16, reg2_in: u16, reg3_in: u16) -> u64;
+
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_vs_op_advance_ip_and_set_active.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
+    ///   @param reg2_in n/a
+    ///   @param reg3_in n/a
+    ///   @return n/a
+    ///
+    pub fn bf_vs_op_advance_ip_and_set_active_impl(
+        reg0_in: u64,
+        reg1_in: u16,
+        reg2_in: u16,
+        reg3_in: u16,
+    ) -> u64;
+
+    /// <!-- description -->
+    ///   @brief Implements the ABI for bf_vs_op_tlb_flush.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param reg0_in n/a
+    ///   @param reg1_in n/a
+    ///   @param reg2_in n/a
+    ///   @return n/a
+    ///
+    pub fn bf_vs_op_tlb_flush_impl(reg0_in: u64, reg1_in: u16, reg2_in: u64) -> u64;
+
     // -------------------------------------------------------------------------
     // bf_intrinsic_ops
     // -------------------------------------------------------------------------
@@ -717,7 +774,7 @@ extern "C" {
     ///   @param reg0_out n/a
     ///   @return n/a
     ///
-    pub fn bf_intrinsic_op_rdmsr_impl(reg0_in: u64, reg1_in: u32, reg0_out: *const u64) -> u64;
+    pub fn bf_intrinsic_op_rdmsr_impl(reg0_in: u64, reg1_in: u32, reg0_out: *mut u64) -> u64;
 
     /// <!-- description -->
     ///   @brief Implements the ABI for bf_intrinsic_op_wrmsr.
@@ -730,45 +787,6 @@ extern "C" {
     ///
     pub fn bf_intrinsic_op_wrmsr_impl(reg0_in: u64, reg1_in: u32, reg2_in: u64) -> u64;
 
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_intrinsic_op_invlpga.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @return n/a
-    ///
-    pub fn bf_intrinsic_op_invlpga_impl(reg0_in: u64, reg1_in: u64, reg2_in: u64) -> u64;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_intrinsic_op_invept.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @return n/a
-    ///
-    pub fn bf_intrinsic_op_invept_impl(reg0_in: u64, reg1_in: u64, reg2_in: u64) -> u64;
-
-    /// <!-- description -->
-    ///   @brief Implements the ABI for bf_intrinsic_op_invvpid.
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param reg0_in n/a
-    ///   @param reg1_in n/a
-    ///   @param reg2_in n/a
-    ///   @param reg3_in n/a
-    ///   @return n/a
-    ///
-    pub fn bf_intrinsic_op_invvpid_impl(
-        reg0_in: u64,
-        reg1_in: u64,
-        reg2_in: u16,
-        reg3_in: u64,
-    ) -> u64;
-
     // -------------------------------------------------------------------------
     // bf_mem_ops
     // -------------------------------------------------------------------------
@@ -779,13 +797,13 @@ extern "C" {
     /// <!-- inputs/outputs -->
     ///   @param reg0_in n/a
     ///   @param reg0_out n/a
-    ///   @param reg1_out n/a
+    ///   @param pmut_reg1_out n/a
     ///   @return n/a
     ///
     pub fn bf_mem_op_alloc_page_impl(
         reg0_in: u64,
-        reg0_out: *mut BfCptrT,
-        reg1_out: *const u64,
+        reg0_out: *mut bsl::CPtrT,
+        pmut_reg1_out: *mut u64,
     ) -> u64;
 
     /// <!-- description -->
@@ -795,13 +813,14 @@ extern "C" {
     ///   @param reg0_in n/a
     ///   @param reg1_in n/a
     ///   @param reg0_out n/a
-    ///   @param reg1_out n/a
+    ///   @param pmut_reg1_out n/a
     ///   @return n/a
     ///
     pub fn bf_mem_op_alloc_huge_impl(
         reg0_in: u64,
         reg1_in: u64,
-        reg0_out: *mut BfCptrT,
-        reg1_out: *const u64,
+        reg0_out: *mut bsl::CPtrT,
+        pmut_reg1_out: *mut u64,
     ) -> u64;
+
 }

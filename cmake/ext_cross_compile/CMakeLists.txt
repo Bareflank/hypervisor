@@ -28,8 +28,9 @@ add_subdirectory(../../loader loader)
 add_subdirectory(../../runtime runtime)
 add_subdirectory(../../syscall syscall)
 add_subdirectory(../../lib lib)
-add_subdirectory(../../kernel/integration integration)
 
-if(DEFINED HYPERVISOR_EXTENSIONS_DIR)
-    add_subdirectory(${HYPERVISOR_EXTENSIONS_DIR} extension)
+if(BUILD_TESTS AND NOT HYPERVISOR_BUILD_TESTS_OVERRIDE)
+    add_subdirectory(../../kernel/integration integration)
 endif()
+
+add_subdirectory(${HYPERVISOR_EXTENSIONS_DIR} extension)

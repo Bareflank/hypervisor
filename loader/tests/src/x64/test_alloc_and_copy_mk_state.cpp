@@ -294,33 +294,6 @@ namespace loader
             };
         };
 
-        bsl::ut_scenario{"intrinsic_cpuid fails"} = [&]() noexcept {
-            bsl::ut_given{} = [&]() noexcept {
-                root_page_table_t const rpt{};
-                elf_file_t mut_mk_elf_file{};
-                span_t const mk_stack{};
-                bsl::safe_u64 const mk_stack_virt{};
-                state_save_t *pmut_mut_state{};
-                bfelf_elf64_ehdr_t const ehdr{};
-                bsl::ut_when{} = [&]() noexcept {
-                    mut_mk_elf_file.addr = &ehdr;
-                    helpers::g_mut_intrinsic_cpuid = -1;
-                    bsl::ut_then{} = [&]() noexcept {
-                        helpers::ut_fails(func(
-                            &rpt,
-                            &mut_mk_elf_file,
-                            &mk_stack,
-                            mk_stack_virt.get(),
-                            &pmut_mut_state));
-                    };
-                    bsl::ut_cleanup{} = [&]() noexcept {
-                        free_mk_state(&pmut_mut_state);
-                        helpers::reset_x64();
-                    };
-                };
-            };
-        };
-
         return helpers::fini();
     }
 }

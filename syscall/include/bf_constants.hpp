@@ -73,8 +73,6 @@ namespace syscall
 
     /// @brief Defines an invalid ID for an extension, VM, VP and VS
     constexpr auto BF_INVALID_ID{0xFFFF_u16};
-    /// @brief Defines an ID for any extension, VM, VP and VS
-    constexpr auto BF_ANY_ID{0xFFFE_u16};
 
     /// @brief Defines the bootstrap physical processor ID
     constexpr auto BF_BS_PPID{0x0_u16};

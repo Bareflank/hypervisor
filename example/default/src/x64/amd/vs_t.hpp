@@ -141,9 +141,7 @@ namespace example
             bsl::safe_u16 const &vpid,
             bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
         {
-            auto const vsid{this->id()};
-
-            bsl::expects(vsid != syscall::BF_INVALID_ID);
+            bsl::expects(this->id() != syscall::BF_INVALID_ID);
             bsl::expects(allocated_status_t::deallocated == m_allocated);
 
             bsl::expects(vpid.is_valid_and_checked());
@@ -178,7 +176,7 @@ namespace example
             m_assigned_ppid = ~ppid;
             m_allocated = allocated_status_t::allocated;
 
-            return vsid;
+            return this->id();
         }
 
         /// <!-- description -->

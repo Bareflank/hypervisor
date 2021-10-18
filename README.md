@@ -1,7 +1,7 @@
 ![Bareflank](https://github.com/Bareflank/hypervisor/raw/master/.github/images/hypervisor_logo.png)
 
 ## Description
-The Bareflank Hypervisor is an open source hypervisor Software Development Toolkit (SDK), led by Assured Information Security, Inc. (AIS), that provides the tools needed to rapidly prototype and create your own hypervisor on 64bit versions of Intel, AMD and ARMv8 CPUs (RISC-V and PowerPC also planned). The Bareflank SDK is intended for instructional/research purposes as it only provides enough virtualization support to start/stop a hypervisor. Bareflank can also be used as the foundation to create your own, fully functional hypervisor as it uses the MIT license, includes 100% unit test coverage and compliance for AUTOSAR and ASIL/D. If you are looking for a complete hypervisor (and not an SDK), please see [MicroV](https://github.com/Bareflank/microv). If you are looking for a minimal SDK for education or to perform research, this is the project for you. If you are simply looking for a reference hypervisor, please see [SimpleVisor](https://github.com/ionescu007/SimpleVisor).
+The Bareflank Hypervisor is an open source hypervisor Software Development Toolkit (SDK) for Rust and C++, led by Assured Information Security, Inc. (AIS), that provides the tools needed to rapidly prototype and create your own hypervisor on 64bit versions of Intel and AMD (ARMv8 CPUs, RISC-V and PowerPC also planned). The Bareflank SDK is intended for instructional/research purposes as it only provides enough virtualization support to start/stop a hypervisor. Bareflank can also be used as the foundation to create your own, fully functional hypervisor as it uses the MIT license, includes 100% unit test coverage and compliance for AUTOSAR. If you are looking for a complete hypervisor (and not an SDK), please see [MicroV](https://github.com/Bareflank/microv). If you are looking for a minimal SDK for education or to perform research, this is the project for you. If you are simply looking for a reference hypervisor, please see [SimpleVisor](https://github.com/ionescu007/SimpleVisor).
 
 Bareflank uses a layered, modular approach, that lets you pick just how much complexity you need in your project when creating your own custom hypervisor:
 - [BSL](https://github.com/Bareflank/bsl): provides a header-only, AUTOSAR
@@ -12,7 +12,7 @@ Bareflank uses a layered, modular approach, that lets you pick just how much com
   implementation of the LLVM Clang-Tidy static analysis tool to ensure
   compliance with AUTOSAR.
 - [PAL](https://github.com/Bareflank/pal): provides auto-generated intrinsics
-  APIs for Intel, AMD and ARM on any combination of OS.
+  APIs for Intel, AMD and ARM on any combination of OS and language.
 - [hypervisor](https://github.com/Bareflank/hypervisor): provides the base SDK
   including the loader, the Bareflank microkernel and support applications.
   Although this repo is labeled "hypervisor", this repo only provides the base
@@ -24,7 +24,8 @@ Bareflank uses a layered, modular approach, that lets you pick just how much com
 - [MicroV](https://github.com/Bareflank/microv): This is the project led by
   Assured Information Security, Inc. (AIS) the provides a fully functional
   hypervisor that uses the Bareflank SDK as it's foundation. If you are looking
-  for an actual hypervisor, this is the project you are looking for.
+  for an actual hypervisor and not an SDK, this is the project you are looking
+  for.
 
 ## **Quick start**
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/bareflank/hypervisor?color=brightgreen)
@@ -240,12 +241,9 @@ Finally, we will configure the project, telling the build system how to find our
 cd ~/working/build
 cmake \
   ../hypervisor \
-  -DHYPERVISOR_EXTENSIONS=example_default \
   -DHYPERVISOR_EXTENSIONS_DIR=$PWD/../extension \
   -DFETCHCONTENT_SOURCE_DIR_BSL=$PWD/../bsl
 ```
-
-The `HYPERVISOR_EXTENSIONS` variable tells CMake what the name of the resulting binary is that represents your extension. Specifically, in your extension's CMakeLists.txt, there will be a call to `install()` like `install(TARGETS example_default DESTINATION bin)`. You set `HYPERVISOR_EXTENSIONS` to the value after `TARGETS`. In the case above, since we copied the default example, we set `HYPERVISOR_EXTENSIONS` to `example_default`.
 
 `HYPERVISOR_EXTENSIONS_DIR` defines the location of your extension. Note that the path must be an absolute path, which is why we used the absolute path of the build folder as a starting point and then worked out the location of the extension folder from there.
 
@@ -253,52 +251,13 @@ The `HYPERVISOR_EXTENSIONS` variable tells CMake what the name of the resulting 
 
 The rest of the usage instructions above can be used to start/stop your custom hypervisor. For more information about what ABIs the microkernel provides your extension with, please see the [Microkernel Syscall Specification](https://github.com/Bareflank/hypervisor/blob/master/docs/Microkernel%20Syscall%20Specification.md) in the docs folder. We also provide an example implementation of this ABI as a set of C++ APIs that you can use if you would like. This example set of APIs can be seen in the [syscall/include/mk_interface.hpp](https://github.com/Bareflank/hypervisor/blob/master/syscall/include/mk_interface.hpp) file.
 
-## **Raspberry Pi 4**
-Yes, ARMv8 is supported by Bareflank. Specifically, Bareflank aims to support
-systems that adhere to the [ServerReady](https://developer.arm.com/architectures/platform-design/server-systems)
-specification using UEFI. To get the Raspberry Pi 4 to run Bareflank, you will
-need the following:
-- A [Raspberry Pi 4](https://www.raspberrypi.org/products/raspberry-pi-4-desktop-kit/).
-  Other kits exist, but it is important that you have most of the things that
-  come with this kit.
-- An SD card loaded with [UEFI](https://github.com/pftf/RPi4). The SD card
-  will only be used to boot UEFI.
-- A USB 3.0 USB stick. Make sure it is low profile as all of the USB devices
-  that will be plugged in get cramped and wide USB sticks will not fit.
-- A compatible keyboard and mouse. Not all keyboards seem to work. Likely a
-  keyboard and mouse that is well supported by Linux will work fine, which
-  does not include Corsair devices. Or, just buy the kit above which works
-  great.
-- A [USB serial cable](https://www.amazon.com/ADAFRUIT-Industries-954-Serial-Raspberry/dp/B00DJUHGHI/ref=sr_1_3?dchild=1&keywords=raspberry+pi+4+serial+cable&qid=1622228033&sr=8-3)
-  Do not use the voltage line (the red cable, meaning only use the black, green
-  and white cables). If you use the voltage line, the Raspberry Pi 4 will be
-  powered from this USB cable, which causes all sorts of instability issues
-  including crashing and certain devices not powering on during reboots.
-  Instead, use the power cable that comes in the kit above, and only use the
-  USB cable for serial.
-- A [power cable switch](https://www.amazon.com/iUniker-Raspberry-Switch-Supply-Type-C/dp/B07V8G2SYZ/ref=sr_1_5?dchild=1&keywords=raspberry+pi+4+power+cable&qid=1622228153&sr=8-5)
-  is a nice optional feature. Each time you make a mod to the hypervisor you
-  will need to reboot, and this will prevent you from having to unplug the
-  Raspberry Pi 4 all the time as it doesn't have a power or reset switch.
-- Ubuntu Server 21.04 or higher. This is important. No other versions of Linux
-  seem to work. Most versions of Linux for the Raspberry Pi 4 as pre-build
-  images. These images are not compliant with the ServerReady spec and therefore
-  do not support UEFI. Ubuntu 21.04 Sever Edition has an ISO version for ARM
-  that installs fine on the Raspberry Pi 4. Install Ubuntu onto the USB stick.
-  UEFI will make the USB stick FS0, allowing you to use the commands in the
-  UEFI section of this readme to compile and test.
-- Late Launch is not supported, meaning you must use UEFI.
-
-It is possible that the microkernel is missing APIs for configuring certain
-features on the ARMv8 CPU. If this is the case, please feel free to propose
-whatever changes are needed to support your research.
-
 ## **Resources**
 [![Join the chat](https://img.shields.io/badge/chat-on%20Slack-brightgreen.svg)](https://bareflank.herokuapp.com/)
 
 The Bareflank hypervisor provides a ton of useful resources to learn how to use the library including:
--   **Documentation**: <https://github.com/Bareflank/hypervisor/tree/master/docs>
+-   **Specification**: <https://github.com/Bareflank/hypervisor/blob/master/docs/Microkernel%20Syscall%20Specification.md>
 -   **Examples**: <https://github.com/Bareflank/hypervisor/tree/master/example>
+-   **Integration Tests**: <https://github.com/Bareflank/hypervisor/tree/master/kernel/integration>
 
 If you have any questions, bugs, or feature requests, please feel free to ask on any of the following:
 -   **Slack**: <https://bareflank.herokuapp.com/>

@@ -104,14 +104,6 @@ else()
 endif()
 
 bf_add_config(
-    CONFIG_NAME HYPERVISOR_EXTENSIONS
-    CONFIG_TYPE STRING
-    DEFAULT_VAL "example_default"
-    DESCRIPTION "Define the extension list used by the build system"
-    SKIP_VALIDATION
-)
-
-bf_add_config(
     CONFIG_NAME HYPERVISOR_EXTENSIONS_DIR
     CONFIG_TYPE STRING
     DEFAULT_VAL "${CMAKE_SOURCE_DIR}/example/default"

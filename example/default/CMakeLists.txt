@@ -130,7 +130,9 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
     if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
         list(APPEND HEADERS
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/dispatch_vmexit.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/gs_initialize.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/gs_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/tls_initialize.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/tls_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/amd/vs_t.hpp
         )
@@ -141,7 +143,9 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/dispatch_vmexit_nmi_window.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/dispatch_vmexit_nmi.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/dispatch_vmexit.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/gs_initialize.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/gs_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/tls_initialize.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/tls_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/vs_t.hpp
         )

@@ -26,6 +26,8 @@
 
 #include <bsl/debug.hpp>
 
+#pragma clang diagnostic ignored "-Wreserved-identifier"
+
 namespace mk
 {
     /// <!-- description -->

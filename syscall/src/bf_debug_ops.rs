@@ -21,8 +21,6 @@
 /// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
-use crate::types::BfCharT;
-use crate::types::BfCstrT;
 
 /// <!-- description -->
 ///   @brief This syscall tells the microkernel to output reg0 and reg1 to
@@ -33,32 +31,9 @@ use crate::types::BfCstrT;
 ///   @param val1 The first value to output to the microkernel's console
 ///   @param val2 The second value to output to the microkernel's console
 ///
-pub fn bf_debug_op_out(val1: u64, val2: u64) {
+pub fn bf_debug_op_out(val1: bsl::SafeU64, val2: bsl::SafeU64) {
     unsafe {
-        crate::bf_syscall_impl::bf_debug_op_out_impl(val1, val2);
-    }
-}
-
-#[cfg(test)]
-mod test_bf_debug_op_out {
-    static mut VAL1: u64 = 0;
-    static mut VAL2: u64 = 0;
-
-    #[no_mangle]
-    fn bf_debug_op_out_impl(val1: u64, val2: u64) {
-        unsafe {
-            VAL1 = val1;
-            VAL2 = val2;
-        }
-    }
-
-    #[test]
-    fn test_bf_debug_op_out() {
-        super::bf_debug_op_out(23, 42);
-        unsafe {
-            assert!(VAL1 == 23);
-            assert!(VAL2 == 42);
-        }
+        crate::bf_debug_op_out_impl(val1.get(), val2.get());
     }
 }
 
@@ -70,29 +45,9 @@ mod test_bf_debug_op_out {
 /// <!-- inputs/outputs -->
 ///   @param vmid The ID of the VM whose state is to be outputted
 ///
-pub fn bf_debug_op_dump_vm(vmid: u16) {
+pub fn bf_debug_op_dump_vm(vmid: bsl::SafeU16) {
     unsafe {
-        crate::bf_syscall_impl::bf_debug_op_dump_vm_impl(vmid);
-    }
-}
-
-#[cfg(test)]
-mod test_bf_debug_op_dump_vm {
-    static mut ID: u64 = 0;
-
-    #[no_mangle]
-    fn bf_debug_op_dump_vm_impl(vmid: u64) {
-        unsafe {
-            ID = vmid;
-        }
-    }
-
-    #[test]
-    fn test_bf_debug_op_dump_vm() {
-        super::bf_debug_op_dump_vm(42);
-        unsafe {
-            assert!(ID == 42);
-        }
+        crate::bf_debug_op_dump_vm_impl(vmid.get());
     }
 }
 
@@ -104,29 +59,9 @@ mod test_bf_debug_op_dump_vm {
 /// <!-- inputs/outputs -->
 ///   @param vpid The ID of the VP whose state is to be outputted
 ///
-pub fn bf_debug_op_dump_vp(vpid: u16) {
+pub fn bf_debug_op_dump_vp(vpid: bsl::SafeU16) {
     unsafe {
-        crate::bf_syscall_impl::bf_debug_op_dump_vp_impl(vpid);
-    }
-}
-
-#[cfg(test)]
-mod test_bf_debug_op_dump_vp {
-    static mut ID: u64 = 0;
-
-    #[no_mangle]
-    fn bf_debug_op_dump_vp_impl(vpid: u64) {
-        unsafe {
-            ID = vpid;
-        }
-    }
-
-    #[test]
-    fn test_bf_debug_op_dump_vp() {
-        super::bf_debug_op_dump_vp(42);
-        unsafe {
-            assert!(ID == 42);
-        }
+        crate::bf_debug_op_dump_vp_impl(vpid.get());
     }
 }
 
@@ -138,29 +73,9 @@ mod test_bf_debug_op_dump_vp {
 /// <!-- inputs/outputs -->
 ///   @param vsid The ID of the VS whose state is to be outputted
 ///
-pub fn bf_debug_op_dump_vs(vsid: u16) {
+pub fn bf_debug_op_dump_vs(vsid: bsl::SafeU16) {
     unsafe {
-        crate::bf_syscall_impl::bf_debug_op_dump_vs_impl(vsid);
-    }
-}
-
-#[cfg(test)]
-mod test_bf_debug_op_dump_vs {
-    static mut ID: u64 = 0;
-
-    #[no_mangle]
-    fn bf_debug_op_dump_vs_impl(vsid: u64) {
-        unsafe {
-            ID = vsid;
-        }
-    }
-
-    #[test]
-    fn test_bf_debug_op_dump_vs() {
-        super::bf_debug_op_dump_vs(42);
-        unsafe {
-            assert!(ID == 42);
-        }
+        crate::bf_debug_op_dump_vs_impl(vsid.get());
     }
 }
 
@@ -172,29 +87,9 @@ mod test_bf_debug_op_dump_vs {
 /// <!-- inputs/outputs -->
 ///   @param ppid The PPID of the PP to dump the log from
 ///
-pub fn bf_debug_op_dump_vmexit_log(ppid: u16) {
+pub fn bf_debug_op_dump_vmexit_log(ppid: bsl::SafeU16) {
     unsafe {
-        crate::bf_syscall_impl::bf_debug_op_dump_vmexit_log_impl(ppid);
-    }
-}
-
-#[cfg(test)]
-mod test_bf_debug_op_dump_vmexit_log {
-    static mut ID: u64 = 0;
-
-    #[no_mangle]
-    fn bf_debug_op_dump_vmexit_log_impl(ppid: u64) {
-        unsafe {
-            ID = ppid;
-        }
-    }
-
-    #[test]
-    fn test_bf_debug_op_dump_vmexit_log() {
-        super::bf_debug_op_dump_vmexit_log(42);
-        unsafe {
-            assert!(ID == 42);
-        }
+        crate::bf_debug_op_dump_vmexit_log_impl(ppid.get());
     }
 }
 
@@ -205,29 +100,9 @@ mod test_bf_debug_op_dump_vmexit_log {
 /// <!-- inputs/outputs -->
 ///   @param c The character to output
 ///
-pub fn bf_debug_op_write_c(c: BfCharT) {
+pub fn bf_debug_op_write_c(c: bsl::CharT) {
     unsafe {
-        crate::bf_syscall_impl::bf_debug_op_write_c_impl(c);
-    }
-}
-
-#[cfg(test)]
-mod test_bf_debug_op_write_c {
-    static mut C: super::BfCharT = 0;
-
-    #[no_mangle]
-    fn bf_debug_op_write_c_impl(c: super::BfCharT) {
-        unsafe {
-            C = c;
-        }
-    }
-
-    #[test]
-    fn test_bf_debug_op_write_c() {
-        super::bf_debug_op_write_c(42);
-        unsafe {
-            assert!(C == 42);
-        }
+        crate::bf_debug_op_write_c_impl(c);
     }
 }
 
@@ -238,15 +113,10 @@ mod test_bf_debug_op_write_c {
 /// <!-- inputs/outputs -->
 ///   @param str The virtual address of a null terminated string to output
 ///
-pub fn bf_debug_op_write_str(str: BfCstrT) {
+pub fn bf_debug_op_write_str(str: bsl::CStrT, len: u64) {
     unsafe {
-        crate::bf_syscall_impl::bf_debug_op_write_str_impl(str);
+        crate::bf_debug_op_write_str_impl(str, len);
     }
-}
-
-#[cfg(test)]
-mod test_bf_debug_op_write_str {
-    // TODO
 }
 
 /// <!-- description -->
@@ -257,29 +127,9 @@ mod test_bf_debug_op_write_str {
 /// <!-- inputs/outputs -->
 ///   @param extid The EXTID of the extensions's state to output
 ///
-pub fn bf_debug_op_dump_ext(extid: u16) {
+pub fn bf_debug_op_dump_ext(extid: bsl::SafeU16) {
     unsafe {
-        crate::bf_syscall_impl::bf_debug_op_dump_ext_impl(extid);
-    }
-}
-
-#[cfg(test)]
-mod test_bf_debug_op_dump_ext {
-    static mut ID: u64 = 0;
-
-    #[no_mangle]
-    fn bf_debug_op_dump_ext_impl(extid: u64) {
-        unsafe {
-            ID = extid;
-        }
-    }
-
-    #[test]
-    fn test_bf_debug_op_dump_ext() {
-        super::bf_debug_op_dump_ext(42);
-        unsafe {
-            assert!(ID == 42);
-        }
+        crate::bf_debug_op_dump_ext_impl(extid.get());
     }
 }
 
@@ -290,27 +140,7 @@ mod test_bf_debug_op_dump_ext {
 ///
 pub fn bf_debug_op_dump_page_pool() {
     unsafe {
-        crate::bf_syscall_impl::bf_debug_op_dump_page_pool_impl();
-    }
-}
-
-#[cfg(test)]
-mod test_bf_debug_op_dump_page_pool {
-    static mut EXECUTED: bool = false;
-
-    #[no_mangle]
-    fn bf_debug_op_dump_page_pool_impl() {
-        unsafe {
-            EXECUTED = true;
-        }
-    }
-
-    #[test]
-    fn test_bf_debug_op_dump_page_pool() {
-        super::bf_debug_op_dump_page_pool();
-        unsafe {
-            assert!(EXECUTED);
-        }
+        crate::bf_debug_op_dump_page_pool_impl();
     }
 }
 
@@ -321,26 +151,6 @@ mod test_bf_debug_op_dump_page_pool {
 ///
 pub fn bf_debug_op_dump_huge_pool() {
     unsafe {
-        crate::bf_syscall_impl::bf_debug_op_dump_huge_pool_impl();
-    }
-}
-
-#[cfg(test)]
-mod test_bf_debug_op_dump_huge_pool {
-    static mut EXECUTED: bool = false;
-
-    #[no_mangle]
-    fn bf_debug_op_dump_huge_pool_impl() {
-        unsafe {
-            EXECUTED = true;
-        }
-    }
-
-    #[test]
-    fn test_bf_debug_op_dump_huge_pool() {
-        super::bf_debug_op_dump_huge_pool();
-        unsafe {
-            assert!(EXECUTED);
-        }
+        crate::bf_debug_op_dump_huge_pool_impl();
     }
 }

@@ -71,7 +71,7 @@ namespace lib
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg)
             m_hndl = bsl::to_i32(open(name.data(), O_RDWR));
             if (bsl::unlikely(IOCTL_INVALID_HNDL == m_hndl)) {
-                bsl::error() << "basic_ioctl_t open failed\n";
+                bsl::error() << "ioctl open failed\n";
                 return;
             }
 
