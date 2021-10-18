@@ -106,17 +106,17 @@ check_for_intel(void) NOEXCEPT
     intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
 
     if (CPUID_VENDOR_EBX != ebx) {
-        bferror_x32("cpu is vendor is not GenuineIntel", ebx);
+        bferror_x32("cpu vendor is not GenuineIntel", ebx);
         return LOADER_FAILURE;
     }
 
     if (CPUID_VENDOR_ECX != ecx) {
-        bferror_x32("cpu is vendor is not GenuineIntel", ecx);
+        bferror_x32("cpu vendor is not GenuineIntel", ecx);
         return LOADER_FAILURE;
     }
 
     if (CPUID_VENDOR_EDX != edx) {
-        bferror_x32("cpu is vendor is not GenuineIntel", edx);
+        bferror_x32("cpu vendor is not GenuineIntel", edx);
         return LOADER_FAILURE;
     }
 
