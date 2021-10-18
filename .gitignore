@@ -77,6 +77,8 @@ loader/**/*.mod.cmd
 loader/**/*.o
 loader/**/*.o.cmd
 loader/**/*.cmd
+loader/**/*.dwo
+loader/linux/Makefile
 
 # Windows Loader
 loader/windows/x64/

@@ -84,17 +84,17 @@ check_for_amd(void) NOEXCEPT
     intrinsic_cpuid(&eax, &ebx, &ecx, &edx);
 
     if (CPUID_VENDOR_EBX != ebx) {
-        bferror_x32("cpu is vendor is not AuthenticAMD", ebx);
+        bferror_x32("cpu vendor is not AuthenticAMD", ebx);
         return LOADER_FAILURE;
     }
 
     if (CPUID_VENDOR_ECX != ecx) {
-        bferror_x32("cpu is vendor is not AuthenticAMD", ecx);
+        bferror_x32("cpu vendor is not AuthenticAMD", ecx);
         return LOADER_FAILURE;
     }
 
     if (CPUID_VENDOR_EDX != edx) {
-        bferror_x32("cpu is vendor is not AuthenticAMD", edx);
+        bferror_x32("cpu vendor is not AuthenticAMD", edx);
         return LOADER_FAILURE;
     }
 

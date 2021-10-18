@@ -20,6 +20,12 @@
 # SOFTWARE.
 
 if(HYPERVISOR_BUILD_LOADER AND NOT HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
+    configure_file(
+        ${hypervisor_SOURCE_DIR}/loader/linux/Makefile.in
+        ${hypervisor_SOURCE_DIR}/loader/linux/Makefile
+        @ONLY
+    )
+
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         add_custom_target(loader_build
             COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/linux make CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'
