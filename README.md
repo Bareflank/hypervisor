@@ -251,6 +251,8 @@ cmake \
 
 The rest of the usage instructions above can be used to start/stop your custom hypervisor. For more information about what ABIs the microkernel provides your extension with, please see the [Microkernel Syscall Specification](https://github.com/Bareflank/hypervisor/blob/master/docs/Microkernel%20Syscall%20Specification.md) in the docs folder. We also provide an example implementation of this ABI as a set of C++ APIs that you can use if you would like. This example set of APIs can be seen in the [syscall/include/mk_interface.hpp](https://github.com/Bareflank/hypervisor/blob/master/syscall/include/mk_interface.hpp) file.
 
+To use the Rust example, you will have to install Rust and switch to the nightly channel. 
+
 ## **Resources**
 [![Join the chat](https://img.shields.io/badge/chat-on%20Slack-brightgreen.svg)](https://bareflank.herokuapp.com/)
 
