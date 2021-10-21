@@ -42,7 +42,6 @@ hypervisor_silence(ENABLE_COLOR)
 hypervisor_silence(BSL_DEBUG_LEVEL)
 hypervisor_silence(BSL_PAGE_SIZE)
 
-hypervisor_silence(HYPERVISOR_EXTENSIONS)
 hypervisor_silence(HYPERVISOR_EXTENSIONS_DIR)
 hypervisor_silence(HYPERVISOR_TARGET_ARCH)
 hypervisor_silence(HYPERVISOR_CXX_LINKER)

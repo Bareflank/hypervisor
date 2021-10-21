@@ -41,6 +41,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/target/loader_load.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/target/loader_unload.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/target/loader_clean.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/target/loader_quick.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/target/rust_clean.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/target/rust_fmt.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/target/copy_to_efi_partition.cmake)
 
 include(${CMAKE_CURRENT_LIST_DIR}/write_constants.cmake)

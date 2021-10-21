@@ -1225,7 +1225,12 @@ namespace syscall
         }
 
         /// <!-- description -->
-        ///   @brief TODO
+        ///   @brief Executes a VS given the ID of the VM, VP and VS to
+        ///     execute. The VS must be assigned to the provided VP and the
+        ///     provided VP must be assigned to the provided VM. The VP and VS
+        ///     must not be executing on any other PP, and the VS must be
+        ///     assigned to the PP this syscall is executed on. Upon success,
+        ///     this syscall will not return.
         ///
         /// <!-- inputs/outputs -->
         ///   @param vmid The ID of the VM to run
@@ -1289,7 +1294,12 @@ namespace syscall
         }
 
         /// <!-- description -->
-        ///   @brief TODO
+        ///   @brief Advances the IP and executes a VS given the ID of the VM,
+        ///     VP and VS to execute. The VS must be assigned to the provided
+        ///     VP and the provided VP must be assigned to the provided VM.
+        ///     The VP and VS must not be executing on any other PP, and the
+        ///     VS must be assigned to the PP this syscall is executed on.
+        ///     Upon success, this syscall will not return.
         ///
         /// <!-- inputs/outputs -->
         ///   @param vmid The ID of the VM to advance the IP for
@@ -1329,7 +1339,9 @@ namespace syscall
         }
 
         /// <!-- description -->
-        ///   @brief TODO
+        ///   @brief bf_vs_op_advance_ip_and_run_current tells the microkernel
+        ///     to advance the IP of and execute the currently active VS, VP
+        ///     and VM.
         ///
         /// <!-- inputs/outputs -->
         ///   @return Returns bsl::errc_success on success, bsl::errc_failure
@@ -1418,7 +1430,8 @@ namespace syscall
         }
 
         /// <!-- description -->
-        ///   @brief TODO
+        ///   @brief Migrates a VS to the provided PP. The VS must not be
+        ///     active.
         ///
         /// <!-- inputs/outputs -->
         ///   @param vsid The ID of the VS to migrate

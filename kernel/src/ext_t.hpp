@@ -686,6 +686,14 @@ namespace mk
                 return bsl::errc_failure;
             }
 
+            if (bsl::safe_u64::magic_0() == phdr->p_filesz) {
+                return bsl::errc_success;
+            }
+
+            if (bsl::safe_u64::magic_0() == phdr->p_memsz) {
+                return bsl::errc_success;
+            }
+
             /// NOTE:
             /// - Since the validation code above ensures that the TLB block
             ///   in the phdr is no larger than a page, dst_idx cannot

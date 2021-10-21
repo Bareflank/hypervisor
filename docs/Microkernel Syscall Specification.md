@@ -7,6 +7,8 @@
   - [1.4. Constants, Structures, Enumerations, and Bit Fields](#14-constants-structures-enumerations-and-bit-fields)
     - [1.4.1. Handle Type](#141-handle-type)
     - [1.4.2. Register Type](#142-register-type)
+      - [1.4.2.1. AMD](#1421-amd)
+      - [1.4.2.2. Intel](#1422-intel)
     - [1.4.3. Exit Type](#143-exit-type)
     - [1.4.4. Bootstrap Callback Handler Type](#144-bootstrap-callback-handler-type)
     - [1.4.5. VMExit Callback Handler Type](#145-vmexit-callback-handler-type)
@@ -40,7 +42,7 @@
   - [2.9. Control Syscalls](#29-control-syscalls)
     - [2.9.1. bf_control_op_exit, OP=0x0, IDX=0x0](#291-bf_control_op_exit-op0x0-idx0x0)
     - [2.9.2. bf_control_op_wait, OP=0x0, IDX=0x1](#292-bf_control_op_wait-op0x0-idx0x1)
-    - [2.9.2. bf_control_op_again, OP=0x0, IDX=0x2](#292-bf_control_op_again-op0x0-idx0x2)
+    - [2.9.3. bf_control_op_again, OP=0x0, IDX=0x2](#293-bf_control_op_again-op0x0-idx0x2)
   - [2.10. Handle Syscalls](#210-handle-syscalls)
     - [2.10.1. bf_handle_op_open_handle, OP=0x1, IDX=0x0](#2101-bf_handle_op_open_handle-op0x1-idx0x0)
     - [2.10.2. bf_handle_op_close_handle, OP=0x1, IDX=0x1](#2102-bf_handle_op_close_handle-op0x1-idx0x1)
@@ -60,43 +62,41 @@
     - [2.12.2. bf_callback_op_register_vmexit, OP=0x3, IDX=0x1](#2122-bf_callback_op_register_vmexit-op0x3-idx0x1)
     - [2.12.3. bf_callback_op_register_fail, OP=0x3, IDX=0x2](#2123-bf_callback_op_register_fail-op0x3-idx0x2)
   - [2.13. Virtual Machine Syscalls](#213-virtual-machine-syscalls)
-    - [2.13.2. bf_vm_op_create_vm, OP=0x4, IDX=0x0](#2132-bf_vm_op_create_vm-op0x4-idx0x0)
-    - [2.13.3. bf_vm_op_destroy_vm, OP=0x4, IDX=0x1](#2133-bf_vm_op_destroy_vm-op0x4-idx0x1)
+    - [2.13.1. bf_vm_op_create_vm, OP=0x4, IDX=0x0](#2131-bf_vm_op_create_vm-op0x4-idx0x0)
+    - [2.13.2. bf_vm_op_destroy_vm, OP=0x4, IDX=0x1](#2132-bf_vm_op_destroy_vm-op0x4-idx0x1)
     - [2.13.3. bf_vm_op_map_direct, OP=0x4, IDX=0x2](#2133-bf_vm_op_map_direct-op0x4-idx0x2)
-    - [2.13.3. bf_vm_op_unmap_direct, OP=0x4, IDX=0x3](#2133-bf_vm_op_unmap_direct-op0x4-idx0x3)
-    - [2.13.3. bf_vm_op_unmap_direct_broadcast, OP=0x4, IDX=0x4](#2133-bf_vm_op_unmap_direct_broadcast-op0x4-idx0x4)
-    - [2.15.3. bf_vm_op_tlb_flush, OP=0x4, IDX=0x5](#2153-bf_vm_op_tlb_flush-op0x4-idx0x5)
+    - [2.13.4. bf_vm_op_unmap_direct, OP=0x4, IDX=0x3](#2134-bf_vm_op_unmap_direct-op0x4-idx0x3)
+    - [2.13.5. bf_vm_op_unmap_direct_broadcast, OP=0x4, IDX=0x4](#2135-bf_vm_op_unmap_direct_broadcast-op0x4-idx0x4)
+    - [2.13.6. bf_vm_op_tlb_flush, OP=0x4, IDX=0x5](#2136-bf_vm_op_tlb_flush-op0x4-idx0x5)
   - [2.14. Virtual Processor Syscalls](#214-virtual-processor-syscalls)
-    - [2.14.2. bf_vp_op_create_vp, OP=0x5, IDX=0x0](#2142-bf_vp_op_create_vp-op0x5-idx0x0)
-    - [2.14.3. bf_vp_op_destroy_vp, OP=0x5, IDX=0x1](#2143-bf_vp_op_destroy_vp-op0x5-idx0x1)
-  - [2.14.5. Virtual Processor State Syscalls](#2145-virtual-processor-state-syscalls)
-    - [2.14.7. bf_vs_op_create_vs, OP=0x6, IDX=0x0](#2147-bf_vs_op_create_vs-op0x6-idx0x0)
-    - [2.14.8. bf_vs_op_destroy_vs, OP=0x6, IDX=0x1](#2148-bf_vs_op_destroy_vs-op0x6-idx0x1)
-    - [2.14.9. bf_vs_op_init_as_root, OP=0x6, IDX=0x2](#2149-bf_vs_op_init_as_root-op0x6-idx0x2)
-    - [2.14.10. bf_vs_op_read, OP=0x6, IDX=0x3](#21410-bf_vs_op_read-op0x6-idx0x3)
-    - [2.14.11. bf_vs_op_write, OP=0x6, IDX=0x4](#21411-bf_vs_op_write-op0x6-idx0x4)
-    - [2.14.12. bf_vs_op_run, OP=0x6, IDX=0x5](#21412-bf_vs_op_run-op0x6-idx0x5)
-    - [2.14.13. bf_vs_op_run_current, OP=0x6, IDX=0x6](#21413-bf_vs_op_run_current-op0x6-idx0x6)
-    - [2.14.14. bf_vs_op_advance_ip_and_run_impl, OP=0x6, IDX=0x7](#21414-bf_vs_op_advance_ip_and_run_impl-op0x6-idx0x7)
-    - [2.14.15. bf_vs_op_advance_ip_and_run_current, OP=0x6, IDX=0x8](#21415-bf_vs_op_advance_ip_and_run_current-op0x6-idx0x8)
-    - [2.14.16. bf_vs_op_promote, OP=0x6, IDX=0x9](#21416-bf_vs_op_promote-op0x6-idx0x9)
-    - [2.14.17. bf_vs_op_clear, OP=0x6, IDX=0xA](#21417-bf_vs_op_clear-op0x6-idx0xa)
-    - [2.14.17. bf_vs_op_migrate, OP=0x6, IDX=0xB](#21417-bf_vs_op_migrate-op0x6-idx0xb)
-    - [2.14.17. bf_vs_op_set_active, OP=0x6, IDX=0xC](#21417-bf_vs_op_set_active-op0x6-idx0xc)
-    - [2.14.17. bf_vs_op_advance_ip_and_set_active, OP=0x6, IDX=0xD](#21417-bf_vs_op_advance_ip_and_set_active-op0x6-idx0xd)
-    - [2.15.3. bf_vs_op_tlb_flush, OP=0x6, IDX=0xE](#2153-bf_vs_op_tlb_flush-op0x6-idx0xe)
-  - [2.15. Intrinsic Syscalls](#215-intrinsic-syscalls)
-    - [2.15.1. bf_intrinsic_op_rdmsr, OP=0x7, IDX=0x0](#2151-bf_intrinsic_op_rdmsr-op0x7-idx0x0)
-    - [2.15.2. bf_intrinsic_op_wrmsr, OP=0x7, IDX=0x1](#2152-bf_intrinsic_op_wrmsr-op0x7-idx0x1)
-  - [2.16. Mem Syscalls](#216-mem-syscalls)
-    - [2.16.1. bf_mem_op_alloc_page, OP=0x8, IDX=0x0](#2161-bf_mem_op_alloc_page-op0x8-idx0x0)
-    - [2.16.2. bf_mem_op_free_page, OP=0x8, IDX=0x1](#2162-bf_mem_op_free_page-op0x8-idx0x1)
-    - [2.16.3. bf_mem_op_alloc_huge, OP=0x8, IDX=0x2](#2163-bf_mem_op_alloc_huge-op0x8-idx0x2)
-    - [2.16.4. bf_mem_op_free_huge, OP=0x8, IDX=0x3](#2164-bf_mem_op_free_huge-op0x8-idx0x3)
+    - [2.14.1. bf_vp_op_create_vp, OP=0x5, IDX=0x0](#2141-bf_vp_op_create_vp-op0x5-idx0x0)
+    - [2.14.2. bf_vp_op_destroy_vp, OP=0x5, IDX=0x1](#2142-bf_vp_op_destroy_vp-op0x5-idx0x1)
+  - [2.15. Virtual Processor State Syscalls](#215-virtual-processor-state-syscalls)
+    - [2.15.1. bf_vs_op_create_vs, OP=0x6, IDX=0x0](#2151-bf_vs_op_create_vs-op0x6-idx0x0)
+    - [2.15.2. bf_vs_op_destroy_vs, OP=0x6, IDX=0x1](#2152-bf_vs_op_destroy_vs-op0x6-idx0x1)
+    - [2.15.3. bf_vs_op_init_as_root, OP=0x6, IDX=0x2](#2153-bf_vs_op_init_as_root-op0x6-idx0x2)
+    - [2.15.4. bf_vs_op_read, OP=0x6, IDX=0x3](#2154-bf_vs_op_read-op0x6-idx0x3)
+    - [2.15.5. bf_vs_op_write, OP=0x6, IDX=0x4](#2155-bf_vs_op_write-op0x6-idx0x4)
+    - [2.15.6. bf_vs_op_run, OP=0x6, IDX=0x5](#2156-bf_vs_op_run-op0x6-idx0x5)
+    - [2.15.7. bf_vs_op_run_current, OP=0x6, IDX=0x6](#2157-bf_vs_op_run_current-op0x6-idx0x6)
+    - [2.15.8. bf_vs_op_advance_ip_and_run_impl, OP=0x6, IDX=0x7](#2158-bf_vs_op_advance_ip_and_run_impl-op0x6-idx0x7)
+    - [2.15.9. bf_vs_op_advance_ip_and_run_current, OP=0x6, IDX=0x8](#2159-bf_vs_op_advance_ip_and_run_current-op0x6-idx0x8)
+    - [2.15.10. bf_vs_op_promote, OP=0x6, IDX=0x9](#21510-bf_vs_op_promote-op0x6-idx0x9)
+    - [2.15.11. bf_vs_op_clear, OP=0x6, IDX=0xA](#21511-bf_vs_op_clear-op0x6-idx0xa)
+    - [2.15.12. bf_vs_op_migrate, OP=0x6, IDX=0xB](#21512-bf_vs_op_migrate-op0x6-idx0xb)
+    - [2.15.13. bf_vs_op_set_active, OP=0x6, IDX=0xC](#21513-bf_vs_op_set_active-op0x6-idx0xc)
+    - [2.15.14. bf_vs_op_advance_ip_and_set_active, OP=0x6, IDX=0xD](#21514-bf_vs_op_advance_ip_and_set_active-op0x6-idx0xd)
+    - [2.15.15. bf_vs_op_tlb_flush, OP=0x6, IDX=0xE](#21515-bf_vs_op_tlb_flush-op0x6-idx0xe)
+  - [2.16. Intrinsic Syscalls](#216-intrinsic-syscalls)
+    - [2.16.1. bf_intrinsic_op_rdmsr, OP=0x7, IDX=0x0](#2161-bf_intrinsic_op_rdmsr-op0x7-idx0x0)
+    - [2.16.2. bf_intrinsic_op_wrmsr, OP=0x7, IDX=0x1](#2162-bf_intrinsic_op_wrmsr-op0x7-idx0x1)
+  - [2.17. Mem Syscalls](#217-mem-syscalls)
+    - [2.17.1. bf_mem_op_alloc_page, OP=0x8, IDX=0x0](#2171-bf_mem_op_alloc_page-op0x8-idx0x0)
+    - [2.17.2. bf_mem_op_free_page, OP=0x8, IDX=0x1](#2172-bf_mem_op_free_page-op0x8-idx0x1)
+    - [2.17.3. bf_mem_op_alloc_huge, OP=0x8, IDX=0x2](#2173-bf_mem_op_alloc_huge-op0x8-idx0x2)
+    - [2.17.4. bf_mem_op_free_huge, OP=0x8, IDX=0x3](#2174-bf_mem_op_free_huge-op0x8-idx0x3)
 
 # 1. Introduction
-
-TBD
 
 This specification is specific to 64bit Intel and AMD processors conforming to the amd64 specification. Future revisions of this specification may include ARM64 conforming to the aarch64 specification as well.
 
@@ -149,11 +149,303 @@ The bf_handle_t structure is an opaque structure containing the handle used by m
 
 Defines which register a syscall is requesting.
 
+#### 1.4.2.1. AMD
+
 **enum, uint64_t: bf_reg_t**
 | Name | Value | Description |
 | :--- | :---- | :---------- |
+| bf_reg_t_unsupported | 0 | defines the unsupported register |
+| bf_reg_t_rbx | 1 | defines the rbx register |
+| bf_reg_t_rcx | 2 | defines the rcx register |
+| bf_reg_t_rdx | 3 | defines the rdx register |
+| bf_reg_t_rbp | 4 | defines the rbp register |
+| bf_reg_t_rsi | 5 | defines the rsi register |
+| bf_reg_t_rdi | 6 | defines the rdi register |
+| bf_reg_t_r8 | 7 | defines the r8 register |
+| bf_reg_t_r9 | 8 | defines the r9 register |
+| bf_reg_t_r10 | 9 | defines the r10 register |
+| bf_reg_t_r11 | 10 | defines the r11 register |
+| bf_reg_t_r12 | 11 | defines the r12 register |
+| bf_reg_t_r13 | 12 | defines the r13 register |
+| bf_reg_t_r14 | 13 | defines the r14 register |
+| bf_reg_t_r15 | 14 | defines the r15 register |
+| bf_reg_t_intercept_cr_read | 15 | defines the intercept_cr_read register |
+| bf_reg_t_intercept_cr_write | 16 | defines the intercept_cr_write register |
+| bf_reg_t_intercept_dr_read | 17 | defines the intercept_dr_read register |
+| bf_reg_t_intercept_dr_write | 18 | defines the intercept_dr_write register |
+| bf_reg_t_intercept_exception | 19 | defines the intercept_exception register |
+| bf_reg_t_intercept_instruction1 | 20 | defines the intercept_instruction1 register |
+| bf_reg_t_intercept_instruction2 | 21 | defines the intercept_instruction2 register |
+| bf_reg_t_intercept_instruction3 | 22 | defines the intercept_instruction3 register |
+| bf_reg_t_pause_filter_threshold | 23 | defines the pause_filter_threshold register |
+| bf_reg_t_pause_filter_count | 24 | defines the pause_filter_count register |
+| bf_reg_t_iopm_base_pa | 25 | defines the iopm_base_pa register |
+| bf_reg_t_msrpm_base_pa | 26 | defines the msrpm_base_pa register |
+| bf_reg_t_tsc_offset | 27 | defines the tsc_offset register |
+| bf_reg_t_guest_asid | 28 | defines the guest_asid register |
+| bf_reg_t_tlb_control | 29 | defines the tlb_control register |
+| bf_reg_t_virtual_interrupt_a | 30 | defines the virtual_interrupt_a register |
+| bf_reg_t_virtual_interrupt_b | 31 | defines the virtual_interrupt_b register |
+| bf_reg_t_exitcode | 32 | defines the exitcode register |
+| bf_reg_t_exitinfo1 | 33 | defines the exitinfo1 register |
+| bf_reg_t_exitinfo2 | 34 | defines the exitinfo2 register |
+| bf_reg_t_exitininfo | 35 | defines the exitininfo register |
+| bf_reg_t_ctls1 | 36 | defines the ctls1 register |
+| bf_reg_t_avic_apic_bar | 37 | defines the avic_apic_bar register |
+| bf_reg_t_guest_pa_of_ghcb | 38 | defines the guest_pa_of_ghcb register |
+| bf_reg_t_eventinj | 39 | defines the eventinj register |
+| bf_reg_t_n_cr3 | 40 | defines the n_cr3 register |
+| bf_reg_t_ctls2 | 41 | defines the ctls2 register |
+| bf_reg_t_vmcb_clean_bits | 42 | defines the vmcb_clean_bits register |
+| bf_reg_t_nrip | 43 | defines the nrip register |
+| bf_reg_t_number_of_bytes_fetched | 44 | defines the number_of_bytes_fetched register |
+| bf_reg_t_avic_apic_backing_page_ptr | 45 | defines the avic_apic_backing_page_ptr register |
+| bf_reg_t_avic_logical_table_ptr | 46 | defines the avic_logical_table_ptr register |
+| bf_reg_t_avic_physical_table_ptr | 47 | defines the avic_physical_table_ptr register |
+| bf_reg_t_vmsa_ptr | 48 | defines the vmsa_ptr register |
+| bf_reg_t_es_selector | 49 | defines the es_selector register |
+| bf_reg_t_es_attrib | 50 | defines the es_attrib register |
+| bf_reg_t_es_limit | 51 | defines the es_limit register |
+| bf_reg_t_es_base | 52 | defines the es_base register |
+| bf_reg_t_cs_selector | 53 | defines the cs_selector register |
+| bf_reg_t_cs_attrib | 54 | defines the cs_attrib register |
+| bf_reg_t_cs_limit | 55 | defines the cs_limit register |
+| bf_reg_t_cs_base | 56 | defines the cs_base register |
+| bf_reg_t_ss_selector | 57 | defines the ss_selector register |
+| bf_reg_t_ss_attrib | 58 | defines the ss_attrib register |
+| bf_reg_t_ss_limit | 59 | defines the ss_limit register |
+| bf_reg_t_ss_base | 60 | defines the ss_base register |
+| bf_reg_t_ds_selector | 61 | defines the ds_selector register |
+| bf_reg_t_ds_attrib | 62 | defines the ds_attrib register |
+| bf_reg_t_ds_limit | 63 | defines the ds_limit register |
+| bf_reg_t_ds_base | 64 | defines the ds_base register |
+| bf_reg_t_fs_selector | 65 | defines the fs_selector register |
+| bf_reg_t_fs_attrib | 66 | defines the fs_attrib register |
+| bf_reg_t_fs_limit | 67 | defines the fs_limit register |
+| bf_reg_t_fs_base | 68 | defines the fs_base register |
+| bf_reg_t_gs_selector | 69 | defines the gs_selector register |
+| bf_reg_t_gs_attrib | 70 | defines the gs_attrib register |
+| bf_reg_t_gs_limit | 71 | defines the gs_limit register |
+| bf_reg_t_gs_base | 72 | defines the gs_base register |
+| bf_reg_t_gdtr_selector | 73 | defines the gdtr_selector register |
+| bf_reg_t_gdtr_attrib | 74 | defines the gdtr_attrib register |
+| bf_reg_t_gdtr_limit | 75 | defines the gdtr_limit register |
+| bf_reg_t_gdtr_base | 76 | defines the gdtr_base register |
+| bf_reg_t_ldtr_selector | 77 | defines the ldtr_selector register |
+| bf_reg_t_ldtr_attrib | 78 | defines the ldtr_attrib register |
+| bf_reg_t_ldtr_limit | 79 | defines the ldtr_limit register |
+| bf_reg_t_ldtr_base | 80 | defines the ldtr_base register |
+| bf_reg_t_idtr_selector | 81 | defines the idtr_selector register |
+| bf_reg_t_idtr_attrib | 82 | defines the idtr_attrib register |
+| bf_reg_t_idtr_limit | 83 | defines the idtr_limit register |
+| bf_reg_t_idtr_base | 84 | defines the idtr_base register |
+| bf_reg_t_tr_selector | 85 | defines the tr_selector register |
+| bf_reg_t_tr_attrib | 86 | defines the tr_attrib register |
+| bf_reg_t_tr_limit | 87 | defines the tr_limit register |
+| bf_reg_t_tr_base | 88 | defines the tr_base register |
+| bf_reg_t_cpl | 89 | defines the cpl register |
+| bf_reg_t_efer | 90 | defines the efer register |
+| bf_reg_t_cr4 | 91 | defines the cr4 register |
+| bf_reg_t_cr3 | 92 | defines the cr3 register |
+| bf_reg_t_cr0 | 93 | defines the cr0 register |
+| bf_reg_t_dr7 | 94 | defines the dr7 register |
+| bf_reg_t_dr6 | 95 | defines the dr6 register |
+| bf_reg_t_rflags | 96 | defines the rflags register |
+| bf_reg_t_rip | 97 | defines the rip register |
+| bf_reg_t_rsp | 98 | defines the rsp register |
+| bf_reg_t_rax | 99 | defines the rax register |
+| bf_reg_t_star | 100 | defines the star register |
+| bf_reg_t_lstar | 101 | defines the lstar register |
+| bf_reg_t_cstar | 102 | defines the cstar register |
+| bf_reg_t_fmask | 103 | defines the fmask register |
+| bf_reg_t_kernel_gs_base | 104 | defines the kernel_gs_base register |
+| bf_reg_t_sysenter_cs | 105 | defines the sysenter_cs register |
+| bf_reg_t_sysenter_esp | 106 | defines the sysenter_esp register |
+| bf_reg_t_sysenter_eip | 107 | defines the sysenter_eip register |
+| bf_reg_t_cr2 | 108 | defines the cr2 register |
+| bf_reg_t_pat | 109 | defines the pat register |
+| bf_reg_t_dbgctl | 110 | defines the dbgctl register |
+| bf_reg_t_br_from | 111 | defines the br_from register |
+| bf_reg_t_br_to | 112 | defines the br_to register |
+| bf_reg_t_lastexcpfrom | 113 | defines the lastexcpfrom register |
+| bf_reg_t_lastexcpto | 114 | defines the lastexcpto register |
+| bf_reg_t_cr8 | 115 | defines the cr8 register |
+| bf_reg_t_dr0 | 116 | defines the dr0 register |
+| bf_reg_t_dr1 | 117 | defines the dr1 register |
+| bf_reg_t_dr2 | 118 | defines the dr2 register |
+| bf_reg_t_dr3 | 119 | defines the dr3 register |
+| bf_reg_t_xcr0 | 120 | defines the xcr0 register |
+| bf_reg_t_invalid | 121 | defines the invalid register |
 
-TBD
+#### 1.4.2.2. Intel
+
+**enum, uint64_t: bf_reg_t**
+| Name | Value | Description |
+| :--- | :---- | :---------- |
+| BF_REG_T_UNSUPPORTED | 0 | defines the unsupported register |
+| BF_REG_T_RAX | 1 | defines the rax register |
+| BF_REG_T_RBX | 2 | defines the rbx register |
+| BF_REG_T_RCX | 3 | defines the rcx register |
+| BF_REG_T_RDX | 4 | defines the rdx register |
+| BF_REG_T_RBP | 5 | defines the rbp register |
+| BF_REG_T_RSI | 6 | defines the rsi register |
+| BF_REG_T_RDI | 7 | defines the rdi register |
+| BF_REG_T_R8 | 8 | defines the r8 register |
+| BF_REG_T_R9 | 9 | defines the r9 register |
+| BF_REG_T_R10 | 10 | defines the r10 register |
+| BF_REG_T_R11 | 11 | defines the r11 register |
+| BF_REG_T_R12 | 12 | defines the r12 register |
+| BF_REG_T_R13 | 13 | defines the r13 register |
+| BF_REG_T_R14 | 14 | defines the r14 register |
+| BF_REG_T_R15 | 15 | defines the r15 register |
+| BF_REG_T_CR2 | 16 | defines the cr2 register |
+| BF_REG_T_DR6 | 17 | defines the dr6 register |
+| BF_REG_T_STAR | 18 | defines the star register |
+| BF_REG_T_LSTAR | 19 | defines the lstar register |
+| BF_REG_T_CSTAR | 20 | defines the cstar register |
+| BF_REG_T_FMASK | 21 | defines the fmask register |
+| BF_REG_T_KERNEL_GS_BASE | 22 | defines the kernel_gs_base register |
+| BF_REG_T_VIRTUAL_PROCESSOR_IDENTIFIER | 23 | defines the virtual_processor_identifier register |
+| BF_REG_T_POSTED_INTERRUPT_NOTIFICATION_VECTOR | 24 | defines the posted_interrupt_notification_vector register |
+| BF_REG_T_EPTP_INDEX | 25 | defines the eptp_index register |
+| BF_REG_T_ES_SELECTOR | 26 | defines the es_selector register |
+| BF_REG_T_CS_SELECTOR | 27 | defines the cs_selector register |
+| BF_REG_T_SS_SELECTOR | 28 | defines the ss_selector register |
+| BF_REG_T_DS_SELECTOR | 29 | defines the ds_selector register |
+| BF_REG_T_FS_SELECTOR | 30 | defines the fs_selector register |
+| BF_REG_T_GS_SELECTOR | 31 | defines the gs_selector register |
+| BF_REG_T_LDTR_SELECTOR | 32 | defines the ldtr_selector register |
+| BF_REG_T_TR_SELECTOR | 33 | defines the tr_selector register |
+| BF_REG_T_INTERRUPT_STATUS | 34 | defines the interrupt_status register |
+| BF_REG_T_PML_INDEX | 35 | defines the pml_index register |
+| BF_REG_T_ADDRESS_OF_IO_BITMAP_A | 36 | defines the address_of_io_bitmap_a register |
+| BF_REG_T_ADDRESS_OF_IO_BITMAP_B | 37 | defines the address_of_io_bitmap_b register |
+| BF_REG_T_ADDRESS_OF_MSR_BITMAPS | 38 | defines the address_of_msr_bitmaps register |
+| BF_REG_T_VMEXIT_MSR_STORE_ADDRESS | 39 | defines the vmexit_msr_store_address register |
+| BF_REG_T_VMEXIT_MSR_LOAD_ADDRESS | 40 | defines the vmexit_msr_load_address register |
+| BF_REG_T_VMENTRY_MSR_LOAD_ADDRESS | 41 | defines the vmentry_msr_load_address register |
+| BF_REG_T_EXECUTIVE_VMCS_POINTER | 42 | defines the executive_vmcs_pointer register |
+| BF_REG_T_PML_ADDRESS | 43 | defines the pml_address register |
+| BF_REG_T_TSC_OFFSET | 44 | defines the tsc_offset register |
+| BF_REG_T_VIRTUAL_APIC_ADDRESS | 45 | defines the virtual_apic_address register |
+| BF_REG_T_APIC_ACCESS_ADDRESS | 46 | defines the apic_access_address register |
+| BF_REG_T_POSTED_INTERRUPT_DESCRIPTOR_ADDRESS | 47 | defines the posted_interrupt_descriptor_address register |
+| BF_REG_T_VM_FUNCTION_CONTROLS | 48 | defines the vm_function_controls register |
+| BF_REG_T_EPT_POINTER | 49 | defines the ept_pointer register |
+| BF_REG_T_EOI_EXIT_BITMAP0 | 50 | defines the eoi_exit_bitmap0 register |
+| BF_REG_T_EOI_EXIT_BITMAP1 | 51 | defines the eoi_exit_bitmap1 register |
+| BF_REG_T_EOI_EXIT_BITMAP2 | 52 | defines the eoi_exit_bitmap2 register |
+| BF_REG_T_EOI_EXIT_BITMAP3 | 53 | defines the eoi_exit_bitmap3 register |
+| BF_REG_T_EPTP_LIST_ADDRESS | 54 | defines the eptp_list_address register |
+| BF_REG_T_VMREAD_BITMAP_ADDRESS | 55 | defines the vmread_bitmap_address register |
+| BF_REG_T_VMWRITE_BITMAP_ADDRESS | 56 | defines the vmwrite_bitmap_address register |
+| BF_REG_T_VIRT_EXCEPTION_INFORMATION_ADDRESS | 57 | defines the virt_exception_information_address register |
+| BF_REG_T_XSS_EXITING_BITMAP | 58 | defines the xss_exiting_bitmap register |
+| BF_REG_T_ENCLS_EXITING_BITMAP | 59 | defines the encls_exiting_bitmap register |
+| BF_REG_T_SUB_PAGE_PERMISSION_TABLE_POINTER | 60 | defines the sub_page_permission_table_pointer register |
+| BF_REG_T_TSC_MULTIPLIER | 61 | defines the tsc_multiplier register |
+| BF_REG_T_PHYSICAL_ADDRESS | 62 | defines the physical_address register |
+| BF_REG_T_VMCS_LINK_POINTER | 63 | defines the vmcs_link_pointer register |
+| BF_REG_T_DEBUGCTL | 64 | defines the debugctl register |
+| BF_REG_T_PAT | 65 | defines the pat register |
+| BF_REG_T_EFER | 66 | defines the efer register |
+| BF_REG_T_PERF_GLOBAL_CTRL | 67 | defines the perf_global_ctrl register |
+| BF_REG_T_PDPTE0 | 68 | defines the pdpte0 register |
+| BF_REG_T_PDPTE1 | 69 | defines the pdpte1 register |
+| BF_REG_T_PDPTE2 | 70 | defines the pdpte2 register |
+| BF_REG_T_PDPTE3 | 71 | defines the pdpte3 register |
+| BF_REG_T_BNDCFGS | 72 | defines the bndcfgs register |
+| BF_REG_T_RTIT_CTL | 73 | defines the rtit_ctl register |
+| BF_REG_T_PIN_BASED_VM_EXECUTION_CTLS | 74 | defines the pin_based_vm_execution_ctls register |
+| BF_REG_T_PRIMARY_PROC_BASED_VM_EXECUTION_CTLS | 75 | defines the primary_proc_based_vm_execution_ctls register |
+| BF_REG_T_EXCEPTION_BITMAP | 76 | defines the exception_bitmap register |
+| BF_REG_T_PAGE_FAULT_ERROR_CODE_MASK | 77 | defines the page_fault_error_code_mask register |
+| BF_REG_T_PAGE_FAULT_ERROR_CODE_MATCH | 78 | defines the page_fault_error_code_match register |
+| BF_REG_T_CR3_TARGET_COUNT | 79 | defines the cr3_target_count register |
+| BF_REG_T_VMEXIT_CTLS | 80 | defines the vmexit_ctls register |
+| BF_REG_T_VMEXIT_MSR_STORE_COUNT | 81 | defines the vmexit_msr_store_count register |
+| BF_REG_T_VMEXIT_MSR_LOAD_COUNT | 82 | defines the vmexit_msr_load_count register |
+| BF_REG_T_VMENTRY_CTLS | 83 | defines the vmentry_ctls register |
+| BF_REG_T_VMENTRY_MSR_LOAD_COUNT | 84 | defines the vmentry_msr_load_count register |
+| BF_REG_T_VMENTRY_INTERRUPT_INFORMATION_FIELD | 85 | defines the vmentry_interrupt_information_field register |
+| BF_REG_T_VMENTRY_EXCEPTION_ERROR_CODE | 86 | defines the vmentry_exception_error_code register |
+| BF_REG_T_VMENTRY_INSTRUCTION_LENGTH | 87 | defines the vmentry_instruction_length register |
+| BF_REG_T_TPR_THRESHOLD | 88 | defines the tpr_threshold register |
+| BF_REG_T_SECONDARY_PROC_BASED_VM_EXECUTION_CTLS | 89 | defines the secondary_proc_based_vm_execution_ctls register |
+| BF_REG_T_PLE_GAP | 90 | defines the ple_gap register |
+| BF_REG_T_PLE_WINDOW | 91 | defines the ple_window register |
+| BF_REG_T_VM_INSTRUCTION_ERROR | 92 | defines the vm_instruction_error register |
+| BF_REG_T_EXIT_REASON | 93 | defines the exit_reason register |
+| BF_REG_T_VMEXIT_INTERRUPTION_INFORMATION | 94 | defines the vmexit_interruption_information register |
+| BF_REG_T_VMEXIT_INTERRUPTION_ERROR_CODE | 95 | defines the vmexit_interruption_error_code register |
+| BF_REG_T_IDT_VECTORING_INFORMATION_FIELD | 96 | defines the idt_vectoring_information_field register |
+| BF_REG_T_IDT_VECTORING_ERROR_CODE | 97 | defines the idt_vectoring_error_code register |
+| BF_REG_T_VMEXIT_INSTRUCTION_LENGTH | 98 | defines the vmexit_instruction_length register |
+| BF_REG_T_VMEXIT_INSTRUCTION_INFORMATION | 99 | defines the vmexit_instruction_information register |
+| BF_REG_T_ES_LIMIT | 100 | defines the es_limit register |
+| BF_REG_T_CS_LIMIT | 101 | defines the cs_limit register |
+| BF_REG_T_SS_LIMIT | 102 | defines the ss_limit register |
+| BF_REG_T_DS_LIMIT | 103 | defines the ds_limit register |
+| BF_REG_T_FS_LIMIT | 104 | defines the fs_limit register |
+| BF_REG_T_GS_LIMIT | 105 | defines the gs_limit register |
+| BF_REG_T_LDTR_LIMIT | 106 | defines the ldtr_limit register |
+| BF_REG_T_TR_LIMIT | 107 | defines the tr_limit register |
+| BF_REG_T_GDTR_LIMIT | 108 | defines the gdtr_limit register |
+| BF_REG_T_IDTR_LIMIT | 109 | defines the idtr_limit register |
+| BF_REG_T_ES_ATTRIB | 110 | defines the es_attrib register |
+| BF_REG_T_CS_ATTRIB | 111 | defines the cs_attrib register |
+| BF_REG_T_SS_ATTRIB | 112 | defines the ss_attrib register |
+| BF_REG_T_DS_ATTRIB | 113 | defines the ds_attrib register |
+| BF_REG_T_FS_ATTRIB | 114 | defines the fs_attrib register |
+| BF_REG_T_GS_ATTRIB | 115 | defines the gs_attrib register |
+| BF_REG_T_LDTR_ATTRIB | 116 | defines the ldtr_attrib register |
+| BF_REG_T_TR_ATTRIB | 117 | defines the tr_attrib register |
+| BF_REG_T_INTERRUPTIBILITY_STATE | 118 | defines the interruptibility_state register |
+| BF_REG_T_ACTIVITY_STATE | 119 | defines the activity_state register |
+| BF_REG_T_SMBASE | 120 | defines the smbase register |
+| BF_REG_T_SYSENTER_CS | 121 | defines the sysenter_cs register |
+| BF_REG_T_VMX_PREEMPTION_TIMER_VALUE | 122 | defines the vmx_preemption_timer_value register |
+| BF_REG_T_CR0_GUEST_HOST_MASK | 123 | defines the cr0_guest_host_mask register |
+| BF_REG_T_CR4_GUEST_HOST_MASK | 124 | defines the cr4_guest_host_mask register |
+| BF_REG_T_CR0_READ_SHADOW | 125 | defines the cr0_read_shadow register |
+| BF_REG_T_CR4_READ_SHADOW | 126 | defines the cr4_read_shadow register |
+| BF_REG_T_CR3_TARGET_VALUE0 | 127 | defines the cr3_target_value0 register |
+| BF_REG_T_CR3_TARGET_VALUE1 | 128 | defines the cr3_target_value1 register |
+| BF_REG_T_CR3_TARGET_VALUE2 | 129 | defines the cr3_target_value2 register |
+| BF_REG_T_CR3_TARGET_VALUE3 | 130 | defines the cr3_target_value3 register |
+| BF_REG_T_EXIT_QUALIFICATION | 131 | defines the exit_qualification register |
+| BF_REG_T_IO_RCX | 132 | defines the io_rcx register |
+| BF_REG_T_IO_RSI | 133 | defines the io_rsi register |
+| BF_REG_T_IO_RDI | 134 | defines the io_rdi register |
+| BF_REG_T_IO_RIP | 135 | defines the io_rip register |
+| BF_REG_T_LINEAR_ADDRESS | 136 | defines the linear_address register |
+| BF_REG_T_CR0 | 137 | defines the cr0 register |
+| BF_REG_T_CR3 | 138 | defines the cr3 register |
+| BF_REG_T_CR4 | 139 | defines the cr4 register |
+| BF_REG_T_ES_BASE | 140 | defines the es_base register |
+| BF_REG_T_CS_BASE | 141 | defines the cs_base register |
+| BF_REG_T_SS_BASE | 142 | defines the ss_base register |
+| BF_REG_T_DS_BASE | 143 | defines the ds_base register |
+| BF_REG_T_FS_BASE | 144 | defines the fs_base register |
+| BF_REG_T_GS_BASE | 145 | defines the gs_base register |
+| BF_REG_T_LDTR_BASE | 146 | defines the ldtr_base register |
+| BF_REG_T_TR_BASE | 147 | defines the tr_base register |
+| BF_REG_T_GDTR_BASE | 148 | defines the gdtr_base register |
+| BF_REG_T_IDTR_BASE | 149 | defines the idtr_base register |
+| BF_REG_T_DR7 | 150 | defines the dr7 register |
+| BF_REG_T_RSP | 151 | defines the rsp register |
+| BF_REG_T_RIP | 152 | defines the rip register |
+| BF_REG_T_RFLAGS | 153 | defines the rflags register |
+| BF_REG_T_PENDING_DEBUG_EXCEPTIONS | 154 | defines the pending_debug_exceptions register |
+| BF_REG_T_SYSENTER_ESP | 155 | defines the sysenter_esp register |
+| BF_REG_T_SYSENTER_EIP | 156 | defines the sysenter_eip register |
+| BF_REG_T_CR8 | 157 | defines the cr8 register |
+| BF_REG_T_DR0 | 158 | defines the dr0 register |
+| BF_REG_T_DR1 | 159 | defines the dr1 register |
+| BF_REG_T_DR2 | 160 | defines the dr2 register |
+| BF_REG_T_DR3 | 161 | defines the dr3 register |
+| BF_REG_T_XCR0 | 162 | defines the xcr0 register |
+| BF_REG_T_INVALID | 163 | defines the invalid register |
 
 ### 1.4.3. Exit Type
 
@@ -614,7 +906,7 @@ This syscall tells the microkernel that the extension would like to wait for a c
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the index for bf_control_op_wait |
 
-### 2.9.2. bf_control_op_again, OP=0x0, IDX=0x2
+### 2.9.3. bf_control_op_again, OP=0x0, IDX=0x2
 
 This syscall tells the microkernel that the extension would like to try again from a fast fail callback. This syscall is a blocking syscall that never returns and should be used to return from the fail_entry function.
 
@@ -851,7 +1143,7 @@ A Virtual Machine or VM virtually represents a physical computer. Although the m
 
 One important resource within the microkernel that changes when a VM changes is the direct map each extension is given. When a VM changes, the direct map an extension uses to access physical memory also changes.
 
-### 2.13.2. bf_vm_op_create_vm, OP=0x4, IDX=0x0
+### 2.13.1. bf_vm_op_create_vm, OP=0x4, IDX=0x0
 
 This syscall tells the microkernel to create a VM and return its ID.
 
@@ -871,7 +1163,7 @@ This syscall tells the microkernel to create a VM and return its ID.
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the index for bf_vm_op_create_vm |
 
-### 2.13.3. bf_vm_op_destroy_vm, OP=0x4, IDX=0x1
+### 2.13.2. bf_vm_op_destroy_vm, OP=0x4, IDX=0x1
 
 This syscall tells the microkernel to destroy a VM given an ID.
 
@@ -911,7 +1203,7 @@ This syscall tells the microkernel to map a physical address into the VM's direc
 | :---- | :---------- |
 | 0x0000000000000002 | Defines the index for bf_vm_op_map_direct |
 
-### 2.13.3. bf_vm_op_unmap_direct, OP=0x4, IDX=0x3
+### 2.13.4. bf_vm_op_unmap_direct, OP=0x4, IDX=0x3
 
 This syscall tells the microkernel to unmap a previously mapped virtual address in the direct map. Unlike bf_vm_op_unmap_direct_broadcast, this syscall does not flush the TLB on any other PP, meaning this unmap is local to the PP the call is made on. Attempting to unmap a virtual address from the direct map that has been accessed on any other PP other than the PP this syscall is executed on will result in undefined behavior. This syscall is designed to support mapping and then immediately unmapping a physical address on a single PP during a single VMExit. It can also be used to map on a PP and then use unmap on the same PP during multiple VMExits, but special care must be taken to ensure no other PP can access the map, otherwise UB will occur.
 
@@ -929,7 +1221,7 @@ This syscall tells the microkernel to unmap a previously mapped virtual address 
 | :---- | :---------- |
 | 0x0000000000000003 | Defines the index for bf_vm_op_unmap_direct |
 
-### 2.13.3. bf_vm_op_unmap_direct_broadcast, OP=0x4, IDX=0x4
+### 2.13.5. bf_vm_op_unmap_direct_broadcast, OP=0x4, IDX=0x4
 
 This syscall tells the microkernel to unmap a previously mapped virtual address in the direct map. Unlike bf_vm_op_unmap_direct, this syscall performs a broadcast TLB flush which means it can be safely used on all direct mapped addresses. The downside of using this function is that it can be a lot slower than bf_vm_op_unmap_direct, especially on systems with a lot of PPs.
 
@@ -947,7 +1239,7 @@ This syscall tells the microkernel to unmap a previously mapped virtual address 
 | :---- | :---------- |
 | 0x0000000000000004 | Defines the index for bf_vm_op_unmap_direct_broadcast |
 
-### 2.15.3. bf_vm_op_tlb_flush, OP=0x4, IDX=0x5
+### 2.13.6. bf_vm_op_tlb_flush, OP=0x4, IDX=0x5
 
 Given the ID of a VM, invalidates the VM's TLB on the PP that this is executed on.
 
@@ -965,11 +1257,9 @@ Given the ID of a VM, invalidates the VM's TLB on the PP that this is executed o
 
 ## 2.14. Virtual Processor Syscalls
 
-A Virtual Processor or VP virtually represents a PP. Although the microkernel has an internal representation of a VP, it doesn't understand what a VP is outside of resource management, and it is up to the extension to define what a VM is and how it should operate.
+A Virtual Processor or VP virtually represents a PP. Although the microkernel has an internal representation of a VP, it doesn't understand what a VP is outside of resource management, and it is up to the extension to define what a VP is and how it should operate.
 
-Once a VP is run, it is assigned to the VM it was run on, and cannot be run on any other VM for the remainder of it's lifetime. A VP is also assigned to a specific PP (physical processor). Unlike the assigned VM, the assigned PP can be changed by migrating the VP to another PP.
-
-### 2.14.2. bf_vp_op_create_vp, OP=0x5, IDX=0x0
+### 2.14.1. bf_vp_op_create_vp, OP=0x5, IDX=0x0
 
 This syscall tells the microkernel to create a VP given the ID of the VM the VP will be assigned to. Upon success, this syscall returns the ID of the newly created VP.
 
@@ -991,7 +1281,7 @@ This syscall tells the microkernel to create a VP given the ID of the VM the VP 
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the index for bf_vp_op_create_vp |
 
-### 2.14.3. bf_vp_op_destroy_vp, OP=0x5, IDX=0x1
+### 2.14.2. bf_vp_op_destroy_vp, OP=0x5, IDX=0x1
 
 This syscall tells the microkernel to destroy a VP given an ID.
 
@@ -1007,11 +1297,11 @@ This syscall tells the microkernel to destroy a VP given an ID.
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the index for bf_vp_op_destroy_vp |
 
-## 2.14.5. Virtual Processor State Syscalls
+## 2.15. Virtual Processor State Syscalls
 
-TODO
+A Virtual Processor State or VS virtually represents a PP's state. Most operations performed by an extension will be through a VS. When a VS is created, it is assigned to a VP and PP. To change the PP, a VS must be migrated.
 
-### 2.14.7. bf_vs_op_create_vs, OP=0x6, IDX=0x0
+### 2.15.1. bf_vs_op_create_vs, OP=0x6, IDX=0x0
 
 This syscall tells the microkernel to create a VS given the IDs of the VP and PP the VS will be assigned to. Upon success, this syscall returns the ID of the newly created VS.
 
@@ -1035,7 +1325,7 @@ This syscall tells the microkernel to create a VS given the IDs of the VP and PP
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the index for bf_vs_op_create_vs |
 
-### 2.14.8. bf_vs_op_destroy_vs, OP=0x6, IDX=0x1
+### 2.15.2. bf_vs_op_destroy_vs, OP=0x6, IDX=0x1
 
 This syscall tells the microkernel to destroy a VS given an ID.
 
@@ -1051,7 +1341,7 @@ This syscall tells the microkernel to destroy a VS given an ID.
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the index for bf_vs_op_destroy_vs |
 
-### 2.14.9. bf_vs_op_init_as_root, OP=0x6, IDX=0x2
+### 2.15.3. bf_vs_op_init_as_root, OP=0x6, IDX=0x2
 
 This syscall tells the microkernel to initialize a VS using the root VP state provided by the loader using the current PPID.
 
@@ -1067,7 +1357,7 @@ This syscall tells the microkernel to initialize a VS using the root VP state pr
 | :---- | :---------- |
 | 0x0000000000000002 | Defines the index for bf_vs_op_init_as_root |
 
-### 2.14.10. bf_vs_op_read, OP=0x6, IDX=0x3
+### 2.15.4. bf_vs_op_read, OP=0x6, IDX=0x3
 
 Reads a CPU register from the VS given a bf_reg_t. Note that the bf_reg_t is architecture-specific.
 
@@ -1089,7 +1379,7 @@ Reads a CPU register from the VS given a bf_reg_t. Note that the bf_reg_t is arc
 | :---- | :---------- |
 | 0x0000000000000003 | Defines the index for bf_vs_op_read |
 
-### 2.14.11. bf_vs_op_write, OP=0x6, IDX=0x4
+### 2.15.5. bf_vs_op_write, OP=0x6, IDX=0x4
 
 Writes to a CPU register in the VS given a bf_reg_t and the value to write. Note that the bf_reg_t is architecture-specific.
 
@@ -1107,9 +1397,9 @@ Writes to a CPU register in the VS given a bf_reg_t and the value to write. Note
 | :---- | :---------- |
 | 0x0000000000000004 | Defines the index for bf_vs_op_write |
 
-### 2.14.12. bf_vs_op_run, OP=0x6, IDX=0x5
+### 2.15.6. bf_vs_op_run, OP=0x6, IDX=0x5
 
-TODO
+Executes a VS given the ID of the VM, VP and VS to execute. The VS must be assigned to the provided VP and the provided VP must be assigned to the provided VM. The VP and VS must not be executing on any other PP, and the VS must be assigned to the PP this syscall is executed on. Upon success, this syscall will not return.
 
 **Input:**
 | Register Name | Bits | Description |
@@ -1127,7 +1417,7 @@ TODO
 | :---- | :---------- |
 | 0x0000000000000005 | Defines the index for bf_vs_op_run |
 
-### 2.14.13. bf_vs_op_run_current, OP=0x6, IDX=0x6
+### 2.15.7. bf_vs_op_run_current, OP=0x6, IDX=0x6
 
 bf_vs_op_run_current tells the microkernel to execute the currently active VS, VP and VM.
 
@@ -1141,9 +1431,9 @@ bf_vs_op_run_current tells the microkernel to execute the currently active VS, V
 | :---- | :---------- |
 | 0x0000000000000006 | Defines the index for bf_vs_op_run_current |
 
-### 2.14.14. bf_vs_op_advance_ip_and_run_impl, OP=0x6, IDX=0x7
+### 2.15.8. bf_vs_op_advance_ip_and_run_impl, OP=0x6, IDX=0x7
 
-TODO
+Advances the IP and executes a VS given the ID of the VM, VP and VS to execute. The VS must be assigned to the provided VP and the provided VP must be assigned to the provided VM. The VP and VS must not be executing on any other PP, and the VS must be assigned to the PP this syscall is executed on. Upon success, this syscall will not return.
 
 **Input:**
 | Register Name | Bits | Description |
@@ -1157,9 +1447,9 @@ TODO
 | :---- | :---------- |
 | 0x0000000000000007 | Defines the index for bf_vs_op_advance_ip_and_run_impl |
 
-### 2.14.15. bf_vs_op_advance_ip_and_run_current, OP=0x6, IDX=0x8
+### 2.15.9. bf_vs_op_advance_ip_and_run_current, OP=0x6, IDX=0x8
 
-TODO
+bf_vs_op_advance_ip_and_run_current tells the microkernel to advance the IP of and execute the currently active VS, VP and VM.
 
 **Input:**
 | Register Name | Bits | Description |
@@ -1171,7 +1461,7 @@ TODO
 | :---- | :---------- |
 | 0x0000000000000008 | Defines the index for bf_vs_op_advance_ip_and_run_current |
 
-### 2.14.16. bf_vs_op_promote, OP=0x6, IDX=0x9
+### 2.15.10. bf_vs_op_promote, OP=0x6, IDX=0x9
 
 bf_vs_op_promote tells the microkernel to promote the requested VS. bf_vs_op_promote will stop the hypervisor on the physical processor and replace its state with the state in the given VS. Note that this syscall only returns on error.
 
@@ -1187,7 +1477,7 @@ bf_vs_op_promote tells the microkernel to promote the requested VS. bf_vs_op_pro
 | :---- | :---------- |
 | 0x0000000000000009 | Defines the index for bf_vs_op_promote |
 
-### 2.14.17. bf_vs_op_clear, OP=0x6, IDX=0xA
+### 2.15.11. bf_vs_op_clear, OP=0x6, IDX=0xA
 
 bf_vs_op_clear tells the microkernel to clear the VS's hardware cache, if one exists. How this is used depends entirely on the hardware and is associated with AMD's VMCB Clean Bits, and Intel's VMClear instruction. See the associated documentation for more details. On AMD, this ABI clears the entire VMCB. For more fine grained control, use the write ABIs to manually modify the VMCB.
 
@@ -1203,9 +1493,9 @@ bf_vs_op_clear tells the microkernel to clear the VS's hardware cache, if one ex
 | :---- | :---------- |
 | 0x000000000000000A | Defines the index for bf_vs_op_clear |
 
-### 2.14.17. bf_vs_op_migrate, OP=0x6, IDX=0xB
+### 2.15.12. bf_vs_op_migrate, OP=0x6, IDX=0xB
 
-TODO
+Migrates a VS to the provided PP. The VS must not be active.
 
 **Input:**
 | Register Name | Bits | Description |
@@ -1221,7 +1511,7 @@ TODO
 | :---- | :---------- |
 | 0x000000000000000B | Defines the index for bf_vs_op_migrate |
 
-### 2.14.17. bf_vs_op_set_active, OP=0x6, IDX=0xC
+### 2.15.13. bf_vs_op_set_active, OP=0x6, IDX=0xC
 
 Sets the active VM, VP and VS to the provided VM, VP and VS.
 
@@ -1241,7 +1531,7 @@ Sets the active VM, VP and VS to the provided VM, VP and VS.
 | :---- | :---------- |
 | 0x000000000000000C | Defines the index for bf_vs_op_set_active |
 
-### 2.14.17. bf_vs_op_advance_ip_and_set_active, OP=0x6, IDX=0xD
+### 2.15.14. bf_vs_op_advance_ip_and_set_active, OP=0x6, IDX=0xD
 
 Advances the IP of the current VS and then sets the active VM, VP and VS to the provided VM, VP and VS.
 
@@ -1261,7 +1551,7 @@ Advances the IP of the current VS and then sets the active VM, VP and VS to the 
 | :---- | :---------- |
 | 0x000000000000000D | Defines the index for bf_vs_op_advance_ip_and_set_active |
 
-### 2.15.3. bf_vs_op_tlb_flush, OP=0x6, IDX=0xE
+### 2.15.15. bf_vs_op_tlb_flush, OP=0x6, IDX=0xE
 
 Given the ID of a VS, invalidates a TLB entry for a given GLA on the PP that this is executed on.
 
@@ -1278,9 +1568,9 @@ Given the ID of a VS, invalidates a TLB entry for a given GLA on the PP that thi
 | :---- | :---------- |
 | 0x000000000000000E | Defines the index for bf_vs_op_tlb_flush |
 
-## 2.15. Intrinsic Syscalls
+## 2.16. Intrinsic Syscalls
 
-### 2.15.1. bf_intrinsic_op_rdmsr, OP=0x7, IDX=0x0
+### 2.16.1. bf_intrinsic_op_rdmsr, OP=0x7, IDX=0x0
 
 Reads an MSR directly from the CPU given the address of the MSR to read. Note that this is specific to Intel/AMD only. Also note that not all MSRs can be written to, and which MSRs that can be written to is up to the microkernel's internal policy as well as which architecture the hypervisor is running on.
 
@@ -1301,7 +1591,7 @@ Reads an MSR directly from the CPU given the address of the MSR to read. Note th
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the index for bf_intrinsic_op_rdmsr |
 
-### 2.15.2. bf_intrinsic_op_wrmsr, OP=0x7, IDX=0x1
+### 2.16.2. bf_intrinsic_op_wrmsr, OP=0x7, IDX=0x1
 
 Writes to an MSR directly from the CPU given the address of the MSR to write and the value to write. Note that this is specific to Intel/AMD only. Also note that not all MSRs can be written to, and which MSRs that can be written to is up to the microkernel's internal policy as well as which architecture the hypervisor is running on.
 
@@ -1318,7 +1608,7 @@ Writes to an MSR directly from the CPU given the address of the MSR to write and
 | :---- | :---------- |
 | 0x0000000000000001 | Defines the index for bf_intrinsic_op_wrmsr |
 
-## 2.16. Mem Syscalls
+## 2.17. Mem Syscalls
 
 Each extension has access to several different memory pools:
 - The page pool (used for allocating pages)
@@ -1335,7 +1625,7 @@ Thread-Local Storage (TLS) memory (typically allocated using `thread_local`) pro
 
 The direct map provides an extension with a means to access any physical address by accessing the direct map region of the virtual address space (depends on the hypervisor's configuration). By default, on Intel/AMD with 4-level paging, this region starts at 0x0000600000000000, but it can be changed using CMake. An extension can access any physical address by simply adding 0x0000600000000000 to the physical address and dereferencing the resulting value. When a VM is destroyed, all physical memory maps associated with that VM will be removed. The direct map is also where page and huge page allocations are mapped, providing an extension with a simple means for performing a virtual address to physical address (and vice versa) translations.
 
-### 2.16.1. bf_mem_op_alloc_page, OP=0x8, IDX=0x0
+### 2.17.1. bf_mem_op_alloc_page, OP=0x8, IDX=0x0
 
 bf_mem_op_alloc_page allocates a page, and maps this page into the direct map of the VM.
 
@@ -1355,7 +1645,7 @@ bf_mem_op_alloc_page allocates a page, and maps this page into the direct map of
 | :---- | :---------- |
 | 0x0000000000000000 | Defines the index for bf_mem_op_alloc_page |
 
-### 2.16.2. bf_mem_op_free_page, OP=0x8, IDX=0x1
+### 2.17.2. bf_mem_op_free_page, OP=0x8, IDX=0x1
 
 Frees a page previously allocated by bf_mem_op_alloc_page. This operation is optional and not all microkernels may implement it.
 
@@ -1375,7 +1665,7 @@ Frees a page previously allocated by bf_mem_op_alloc_page. This operation is opt
 | 0x0000000000000001 | Defines the index for bf_mem_op_free_page |
 
 
-### 2.16.3. bf_mem_op_alloc_huge, OP=0x8, IDX=0x2
+### 2.17.3. bf_mem_op_alloc_huge, OP=0x8, IDX=0x2
 
 bf_mem_op_alloc_huge allocates a physically contiguous block of memory. When allocating a page, the extension should keep in mind the following:
 - The total memory available to allocate from this pool is extremely limited. This should only be used when absolutely needed, and extensions should not expect more than 1 MB (might be less) of total memory available.
@@ -1398,7 +1688,7 @@ bf_mem_op_alloc_huge allocates a physically contiguous block of memory. When all
 | :---- | :---------- |
 | 0x0000000000000002 | Defines the index for bf_mem_op_alloc_huge |
 
-### 2.16.4. bf_mem_op_free_huge, OP=0x8, IDX=0x3
+### 2.17.4. bf_mem_op_free_huge, OP=0x8, IDX=0x3
 
 Frees memory previously allocated by bf_mem_op_alloc_huge. This operation is optional and not all microkernels may implement it.
 

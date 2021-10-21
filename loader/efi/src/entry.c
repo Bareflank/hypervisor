@@ -243,7 +243,7 @@ load_images_and_start(void)
         return status;
     }
 
-    status = read_file(volume_protocol, L"bareflank_extension0", &(start_args.ext_elf_files[0]));
+    status = read_file(volume_protocol, L"bareflank_extension", &(start_args.ext_elf_files[0]));
     if (EFI_ERROR(status)) {
         bferror_x64("open_extensions failed", status);
         return status;

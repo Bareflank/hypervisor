@@ -1,0 +1,22 @@
+[package]
+name = "rust"
+version = "1.0.0"
+edition = "2018"
+
+[lib]
+path = "lib.rs"
+crate-type = ["staticlib"]
+
+[features]
+default = ["GenuineIntel","debug_level_v"]
+debug_level_v = []
+debug_level_vv = []
+debug_level_vvv = []
+disable_color = []
+release_mode = []
+AuthenticAMD = []
+GenuineIntel = []
+
+[dependencies]
+bsl = { path = "C:/working/bsl" }
+syscall = { path = "C:/working/hypervisor/syscall" }

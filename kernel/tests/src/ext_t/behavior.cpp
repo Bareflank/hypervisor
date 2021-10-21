@@ -509,6 +509,60 @@ namespace mk
             };
         };
 
+        bsl::ut_scenario{"initialize tls file size is 0"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                auto const elf_file_buf{get_elf_file_buf()};
+                loader::ext_elf_file_t mut_file{};
+                phdr_table_t mut_phdr_table{};
+                ext_t mut_ext{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                huge_pool_t mut_huge_pool{};
+                root_page_table_t mut_rpt{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_tls.online_pps = NUM_ONLINE_PPS.get();
+                    load_elf_file(mut_file, mut_phdr_table);
+                    load_phdr_table(mut_phdr_table, elf_file_buf);
+                    mut_phdr_table.at_if(PHDR_PT_TLS_IDX)->p_filesz = {};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            mut_ext.initialize(mut_tls, mut_page_pool, {}, &mut_file, mut_rpt));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_ext.release(mut_tls, mut_page_pool, mut_huge_pool);
+                        clr_elf_file_buf(elf_file_buf);
+                    };
+                };
+            };
+        };
+
+        bsl::ut_scenario{"initialize tls mem size is 0"} = [&]() noexcept {
+            bsl::ut_given{} = [&]() noexcept {
+                auto const elf_file_buf{get_elf_file_buf()};
+                loader::ext_elf_file_t mut_file{};
+                phdr_table_t mut_phdr_table{};
+                ext_t mut_ext{};
+                tls_t mut_tls{};
+                page_pool_t mut_page_pool{};
+                huge_pool_t mut_huge_pool{};
+                root_page_table_t mut_rpt{};
+                bsl::ut_when{} = [&]() noexcept {
+                    mut_tls.online_pps = NUM_ONLINE_PPS.get();
+                    load_elf_file(mut_file, mut_phdr_table);
+                    load_phdr_table(mut_phdr_table, elf_file_buf);
+                    mut_phdr_table.at_if(PHDR_PT_TLS_IDX)->p_memsz = {};
+                    bsl::ut_then{} = [&]() noexcept {
+                        bsl::ut_check(
+                            mut_ext.initialize(mut_tls, mut_page_pool, {}, &mut_file, mut_rpt));
+                    };
+                    bsl::ut_cleanup{} = [&]() noexcept {
+                        mut_ext.release(mut_tls, mut_page_pool, mut_huge_pool);
+                        clr_elf_file_buf(elf_file_buf);
+                    };
+                };
+            };
+        };
+
         bsl::ut_scenario{"initialize allocate stack fails"} = [&]() noexcept {
             bsl::ut_given{} = [&]() noexcept {
                 auto const elf_file_buf{get_elf_file_buf()};

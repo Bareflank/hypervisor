@@ -41,21 +41,6 @@
 namespace example
 {
     /// <!-- description -->
-    ///   @brief Returns the masked version of the VMCS control fields
-    ///
-    /// <!-- inputs/outputs -->
-    ///   @param val the value of the control fields read from the MSRs
-    ///   @return The masked version of the control fields.
-    ///
-    [[nodiscard]] constexpr auto
-    ctls_mask(bsl::safe_u64 const &val) noexcept -> bsl::safe_u64
-    {
-        constexpr auto mask{0x00000000FFFFFFFF_u64};
-        constexpr auto shift{32_u64};
-        return ((val & mask) & (val >> shift)).checked();
-    };
-
-    /// <!-- description -->
     ///   @brief Defines the extension's notion of a VS
     ///
     class vs_t final
@@ -157,9 +142,8 @@ namespace example
             bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
         {
             syscall::bf_reg_t mut_idx{};
-            auto const vsid{this->id()};
 
-            bsl::expects(vsid != syscall::BF_INVALID_ID);
+            bsl::expects(this->id() != syscall::BF_INVALID_ID);
             bsl::expects(allocated_status_t::deallocated == m_allocated);
 
             bsl::expects(vpid.is_valid_and_checked());
@@ -167,17 +151,16 @@ namespace example
             bsl::expects(ppid.is_valid_and_checked());
             bsl::expects(ppid != syscall::BF_INVALID_ID);
 
-            bsl::discard(gs);
             bsl::discard(tls);
             bsl::discard(intrinsic);
 
-            auto const vmcs_vpid_val{bsl::safe_u64::magic_1()};
+            constexpr auto vmcs_vpid_val{0x1_u64};
             constexpr auto vmcs_vpid_idx{syscall::bf_reg_t::bf_reg_t_virtual_processor_identifier};
-            bsl::expects(mut_sys.bf_vs_op_write(vsid, vmcs_vpid_idx, vmcs_vpid_val));
+            bsl::expects(mut_sys.bf_vs_op_write(this->id(), vmcs_vpid_idx, vmcs_vpid_val));
 
             constexpr auto vmcs_link_ptr_val{0xFFFFFFFFFFFFFFFF_u64};
             constexpr auto vmcs_link_ptr_idx{syscall::bf_reg_t::bf_reg_t_vmcs_link_pointer};
-            bsl::expects(mut_sys.bf_vs_op_write(vsid, vmcs_link_ptr_idx, vmcs_link_ptr_val));
+            bsl::expects(mut_sys.bf_vs_op_write(this->id(), vmcs_link_ptr_idx, vmcs_link_ptr_val));
 
             bsl::safe_u64 mut_pin_ctls{};
             bsl::safe_u64 mut_proc_ctls{};
@@ -208,22 +191,25 @@ namespace example
             mut_proc2_ctls |= enable_uwait;
 
             mut_idx = syscall::bf_reg_t::bf_reg_t_pin_based_vm_execution_ctls;
-            bsl::expects(mut_sys.bf_vs_op_write(vsid, mut_idx, mut_pin_ctls));
+            bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, mut_pin_ctls));
 
             mut_idx = syscall::bf_reg_t::bf_reg_t_primary_proc_based_vm_execution_ctls;
-            bsl::expects(mut_sys.bf_vs_op_write(vsid, mut_idx, mut_proc_ctls));
+            bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, mut_proc_ctls));
 
             mut_idx = syscall::bf_reg_t::bf_reg_t_vmexit_ctls;
-            bsl::expects(mut_sys.bf_vs_op_write(vsid, mut_idx, mut_exit_ctls));
+            bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, mut_exit_ctls));
 
             mut_idx = syscall::bf_reg_t::bf_reg_t_vmentry_ctls;
-            bsl::expects(mut_sys.bf_vs_op_write(vsid, mut_idx, mut_entry_ctls));
+            bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, mut_entry_ctls));
 
             mut_idx = syscall::bf_reg_t::bf_reg_t_secondary_proc_based_vm_execution_ctls;
-            bsl::expects(mut_sys.bf_vs_op_write(vsid, mut_idx, mut_proc2_ctls));
+            bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, mut_proc2_ctls));
 
-            if (mut_sys.is_vs_a_root_vs(vsid)) {
-                bsl::expects(mut_sys.bf_vs_op_init_as_root(vsid));
+            mut_idx = syscall::bf_reg_t::bf_reg_t_address_of_msr_bitmaps;
+            bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, gs.msr_bitmap_phys));
+
+            if (mut_sys.is_vs_a_root_vs(this->id())) {
+                bsl::expects(mut_sys.bf_vs_op_init_as_root(this->id()));
             }
             else {
                 bsl::touch();
@@ -233,7 +219,7 @@ namespace example
             m_assigned_ppid = ~ppid;
             m_allocated = allocated_status_t::allocated;
 
-            return vsid;
+            return this->id();
         }
 
         /// <!-- description -->

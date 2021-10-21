@@ -56,7 +56,7 @@
 void
 platform_expects(int const test) NOEXCEPT
 {
-    NT_ASSERT(!test);
+    NT_ASSERT(test);
 }
 
 /**
@@ -73,7 +73,7 @@ platform_expects(int const test) NOEXCEPT
 void
 platform_ensures(int const test) NOEXCEPT
 {
-    NT_ASSERT(!test);
+    NT_ASSERT(test);
 }
 
 /**

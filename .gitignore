@@ -54,9 +54,11 @@
 
 # Rust
 *.lock
-cmake/rust/constants.rs
-example/default_rust/src/target/
-syscall/tests/target/
+syscall/constants.rs
+syscall/Cargo.toml
+syscall/target
+example/default_rust/Cargo.toml
+example/default_rust/target
 
 # Others
 .vscode/

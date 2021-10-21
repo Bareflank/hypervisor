@@ -43,8 +43,8 @@
 #define CPUID_LEAF_FEATURE ((uint32_t)0x1)
 /** @brief define the CPUID feature bit for XSAVE */
 #define CPUID_FEATURE_ECX_XSAVE (((uint32_t)1) << ((uint32_t)26))
-/** @brief define the CPUID feature bit for OSXSAVE */
-#define CPUID_FEATURE_ECX_OSXSAVE (((uint32_t)1) << ((uint32_t)27))
+/** @brief define the CPUID feature bit for AVX */
+#define CPUID_FEATURE_ECX_AVX (((uint32_t)1) << ((uint32_t)28))
 
 /** @brief defines the CPUID leaf for feature information */
 #define CPUID_LEAF_EXT_FEATURE ((uint32_t)0x80000001)
@@ -197,8 +197,8 @@ check_for_xsave(void) NOEXCEPT
         return LOADER_FAILURE;
     }
 
-    if ((ecx & CPUID_FEATURE_ECX_OSXSAVE) == 0U) {
-        bferror_x32("cpu does not support CR4.OSXSAVE", ecx);
+    if ((ecx & CPUID_FEATURE_ECX_AVX) == 0U) {
+        bferror_x32("cpu does not support AVX", ecx);
         return LOADER_FAILURE;
     }
 

@@ -22,7 +22,12 @@
 cmake_minimum_required(VERSION 3.13)
 project(hypervisor C CXX ASM)
 
+if(${CMAKE_VERSION} GREATER_EQUAL "3.20")
+    cmake_policy(SET CMP0115 OLD)
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/init_build.cmake)
+add_subdirectory(syscall)
 
 if(NOT CMAKE_BUILD_TYPE STREQUAL CODECOV)
     if(HYPERVISOR_BUILD_LOADER)

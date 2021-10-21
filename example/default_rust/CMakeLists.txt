@@ -43,6 +43,85 @@ include(ExternalProject)
 # ------------------------------------------------------------------------------
 
 # NOTE:
+# - Autogenerate the Cargo.toml with the configuration from CMake so that
+#   both projects match.
+#
+
+if(NOT EXISTS ${CMAKE_BINARY_DIR}/rust_files.txt)
+
+    # --------------------------------------------------------------------------
+    # Rebuild Flag
+    # --------------------------------------------------------------------------
+
+    set(HYPERVISOR_CONSTANTS ${CMAKE_BINARY_DIR}/rust_files.txt)
+    file(WRITE ${CMAKE_BINARY_DIR}/rust_files.txt "touched\n")
+
+    # --------------------------------------------------------------------------
+    # Cargo.toml
+    # --------------------------------------------------------------------------
+
+    set(HYPERVISOR_CARGO_TOML ${CMAKE_CURRENT_LIST_DIR}/Cargo.toml)
+
+    file(WRITE ${HYPERVISOR_CARGO_TOML} "[package]\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "name = \"rust\"\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "version = \"1.0.0\"\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "edition = \"2018\"\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "[lib]\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "path = \"src/lib.rs\"\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "crate-type = [\"staticlib\"]\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "[features]\n")
+
+    set(SYSCALL_DEFAULT_FEATURES "[\"custom_print_thread_id\"")
+
+    if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
+        set(SYSCALL_DEFAULT_FEATURES "${SYSCALL_DEFAULT_FEATURES},\"AuthenticAMD\"")
+    endif()
+
+    if(HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
+        set(SYSCALL_DEFAULT_FEATURES "${SYSCALL_DEFAULT_FEATURES},\"GenuineIntel\"")
+    endif()
+
+    if(NOT ENABLE_COLOR)
+        set(SYSCALL_DEFAULT_FEATURES "${SYSCALL_DEFAULT_FEATURES},\"disable_color\"")
+    endif()
+
+    if(BSL_DEBUG_LEVEL STREQUAL "bsl::V")
+        set(SYSCALL_DEFAULT_FEATURES "${SYSCALL_DEFAULT_FEATURES},\"debug_level_v\"")
+    endif()
+
+    if(BSL_DEBUG_LEVEL STREQUAL "bsl::VV")
+        set(SYSCALL_DEFAULT_FEATURES "${SYSCALL_DEFAULT_FEATURES},\"debug_level_v\",\"debug_level_vv\"")
+    endif()
+
+    if(BSL_DEBUG_LEVEL STREQUAL "bsl::VVV")
+        set(SYSCALL_DEFAULT_FEATURES "${SYSCALL_DEFAULT_FEATURES},\"debug_level_v\",\"debug_level_vv\",\"debug_level_vvv\"")
+    endif()
+
+    if(CMAKE_BUILD_TYPE STREQUAL RELEASE OR CMAKE_BUILD_TYPE STREQUAL MINSIZEREL)
+        set(SYSCALL_DEFAULT_FEATURES "${SYSCALL_DEFAULT_FEATURES},\"release_mode\"]")
+    else()
+        set(SYSCALL_DEFAULT_FEATURES "${SYSCALL_DEFAULT_FEATURES}]")
+    endif()
+
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "default = ${SYSCALL_DEFAULT_FEATURES}\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "debug_level_v = []\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "debug_level_vv = []\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "debug_level_vvv = []\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "disable_color = []\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "release_mode = []\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "AuthenticAMD = []\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "GenuineIntel = []\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "custom_print_thread_id = []\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "\n")
+
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "[dependencies]\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "bsl = { path = \"${bsl_SOURCE_DIR}\", features = ${SYSCALL_DEFAULT_FEATURES} }\n")
+    file(APPEND ${HYPERVISOR_CARGO_TOML} "syscall = { path = \"${hypervisor_SOURCE_DIR}/syscall\", features = ${SYSCALL_DEFAULT_FEATURES} }\n")
+endif()
+
+# NOTE:
 # - CMake cannot build Rust code, so we need to use cargo for that. To get
 #   the build system to do this, we will use external project add, and provide
 #   it with the instructions to compile our rust code.
@@ -68,12 +147,13 @@ ExternalProject_Add(
     TMP_DIR             ${CMAKE_BINARY_DIR}/rust_compile/tmp
     BINARY_DIR          ${CMAKE_BINARY_DIR}/rust_compile/build
     LOG_DIR             ${CMAKE_BINARY_DIR}/rust_compile/logs
-    SOURCE_DIR          ${CMAKE_CURRENT_LIST_DIR}/src
+    SOURCE_DIR          ${CMAKE_CURRENT_LIST_DIR}
     UPDATE_COMMAND      cmake -E echo -- Checking for changes
-    CONFIGURE_COMMAND   cmake -E chdir ${CMAKE_CURRENT_LIST_DIR}/src rustup override set nightly > log.txt 2> log.txt
-    BUILD_COMMAND       cmake -E chdir ${CMAKE_CURRENT_LIST_DIR}/src cargo build -Z build-std=core ${CARGO_MODE_ARG}
-    BUILD_BYPRODUCTS    ${CMAKE_CURRENT_LIST_DIR}/src/target/x86_64-unknown-none/${CARGO_MODE}/librust.a
-    INSTALL_COMMAND     cmake -E echo -- Checking for changes
+    CONFIGURE_COMMAND   cmake -E chdir ${CMAKE_CURRENT_LIST_DIR} rustup override set nightly
+    BUILD_COMMAND       cmake -E chdir ${CMAKE_CURRENT_LIST_DIR} cargo build -Z build-std=core ${CARGO_MODE_ARG}
+    BUILD_BYPRODUCTS    ${CMAKE_CURRENT_LIST_DIR}/target/x86_64-unknown-none/${CARGO_MODE}/librust.a
+    INSTALL_COMMAND     cmake -E echo -- Skip
+    LOG_CONFIGURE       ON
 )
 
 # NOTE:
@@ -89,14 +169,22 @@ add_library(rust STATIC IMPORTED)
 #
 
 set_target_properties(rust
-    PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/src/target/x86_64-unknown-none/${CARGO_MODE}/librust.a
+    PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/target/x86_64-unknown-none/${CARGO_MODE}/librust.a
 )
 
 # ------------------------------------------------------------------------------
 # Executable
 # ------------------------------------------------------------------------------
 
-add_executable(example_default_rust empty.cpp)
+add_executable(extension_bin empty.cpp)
+
+# ------------------------------------------------------------------------------
+# Source Files
+# ------------------------------------------------------------------------------
+
+if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
+    target_sources(extension_bin PRIVATE src/x64/intrinsic_cpuid_impl.S)
+endif()
 
 # ------------------------------------------------------------------------------
 # Libraries
@@ -112,7 +200,7 @@ add_executable(example_default_rust empty.cpp)
 #   old implementation, or write your own.
 #
 
-target_link_libraries(example_default_rust PRIVATE
+target_link_libraries(extension_bin PRIVATE
     runtime
     syscall
     rust
@@ -125,7 +213,7 @@ target_link_libraries(example_default_rust PRIVATE
 #   we don't do this, we could end up with order issues in parallel builds.
 #
 
-add_dependencies(example_default_rust rust_compile)
+add_dependencies(extension_bin rust_compile)
 
 # ------------------------------------------------------------------------------
 # Strip
@@ -138,5 +226,5 @@ add_dependencies(example_default_rust rust_compile)
 #
 
 if(CMAKE_BUILD_TYPE STREQUAL RELEASE OR CMAKE_BUILD_TYPE STREQUAL MINSIZEREL)
-    add_custom_command(TARGET example_default_rust POST_BUILD COMMAND ${CMAKE_STRIP} example_default_rust)
+    add_custom_command(TARGET extension_bin POST_BUILD COMMAND ${CMAKE_STRIP} extension_bin)
 endif()

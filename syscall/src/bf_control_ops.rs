@@ -32,26 +32,6 @@ pub fn bf_control_op_exit() {
     }
 }
 
-#[cfg(test)]
-mod test_bf_control_op_exit {
-    static mut EXECUTED: bool = false;
-
-    #[no_mangle]
-    fn bf_control_op_exit_impl() {
-        unsafe {
-            EXECUTED = true;
-        }
-    }
-
-    #[test]
-    fn test_bf_control_op_exit() {
-        super::bf_control_op_exit();
-        unsafe {
-            assert!(EXECUTED);
-        }
-    }
-}
-
 /// <!-- description -->
 ///   @brief This syscall tells the microkernel that the extension would
 ///     like to wait for a callback. This is a blocking syscall that never
@@ -64,22 +44,14 @@ pub fn bf_control_op_wait() {
     }
 }
 
-#[cfg(test)]
-mod test_bf_control_op_wait {
-    static mut EXECUTED: bool = false;
-
-    #[no_mangle]
-    fn bf_control_op_wait_impl() {
-        unsafe {
-            EXECUTED = true;
-        }
-    }
-
-    #[test]
-    fn test_bf_control_op_wait() {
-        super::bf_control_op_wait();
-        unsafe {
-            assert!(EXECUTED);
-        }
+/// <!-- description -->
+///   @brief This syscall tells the microkernel that the extension would
+///     like to try again from a fast fail callback. This syscall is a
+///     blocking syscall that never returns and should be used to return
+///     from the fail_entry function.
+///
+pub fn bf_control_op_again() {
+    unsafe {
+        crate::bf_syscall_impl::bf_control_op_again_impl();
     }
 }

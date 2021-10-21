@@ -148,12 +148,12 @@ nmis_complete:
 
 resume:
     vmresume
-    jmp intrinsic_vmexit
+    jmp intrinsic_vmexit_failure
     int 3
 
 launch:
     vmlaunch
-    jmp intrinsic_vmexit
+    jmp intrinsic_vmexit_failure
     int 3
 
     .size intrinsic_vmrun, .-intrinsic_vmrun
@@ -292,6 +292,143 @@ intrinsic_vmexit:
 
     mov rax, 0x4402
     vmread rax, rax
+
+    ret
+    int 3
+
+
+
+    .globl  intrinsic_vmexit_failure
+    .type   intrinsic_vmexit_failure, @function
+intrinsic_vmexit_failure:
+
+    push 0x40002
+    popf
+
+    /**************************************************************************/
+    /* General Purpose Register State                                         */
+    /**************************************************************************/
+
+    mov fs:[0x870], r15
+    mov fs:[0x868], r14
+    mov fs:[0x860], r13
+    mov fs:[0x858], r12
+    mov fs:[0x850], r11
+    mov fs:[0x848], r10
+    mov fs:[0x840], r9
+    mov fs:[0x838], r8
+    mov fs:[0x830], rdi
+    mov fs:[0x828], rsi
+    mov fs:[0x820], rbp
+    mov fs:[0x818], rdx
+    mov fs:[0x810], rcx
+    mov fs:[0x808], rbx
+    mov fs:[0x800], rax
+
+    pop r15
+
+    /**************************************************************************/
+    /* Signal VMLaunch/VMResume Success                                       */
+    /**************************************************************************/
+
+    mov rax, 0x1
+    mov [r15 + 0x000], rax
+
+    /**************************************************************************/
+    /* NMIs                                                                   */
+    /**************************************************************************/
+
+    mov rax, 0x1
+    mov gs:[0x258], rax
+
+    /**************************************************************************/
+    /* MSRs                                                                   */
+    /**************************************************************************/
+
+    mov edi, 0xC0000102
+    call intrinsic_rdmsr_unsafe
+    mov [r15 + 0x080], rax
+    mov rsi, [r15 + 0x0D0]
+    call intrinsic_wrmsr_unsafe
+
+    mov edi, 0xC0000084
+    call intrinsic_rdmsr_unsafe
+    mov [r15 + 0x078], rax
+    mov rsi, [r15 + 0x0C8]
+    call intrinsic_wrmsr_unsafe
+
+    mov edi, 0xC0000083
+    call intrinsic_rdmsr_unsafe
+    mov [r15 + 0x070], rax
+    mov rsi, [r15 + 0x0C0]
+    call intrinsic_wrmsr_unsafe
+
+    mov edi, 0xC0000082
+    call intrinsic_rdmsr_unsafe
+    mov [r15 + 0x068], rax
+    mov rsi, [r15 + 0x0B8]
+    call intrinsic_wrmsr_unsafe
+
+    mov edi, 0xC0000081
+    call intrinsic_rdmsr_unsafe
+    mov [r15 + 0x060], rax
+    mov rsi, [r15 + 0x0B0]
+    call intrinsic_wrmsr_unsafe
+
+    /**************************************************************************/
+    /* Missing Registers                                                      */
+    /**************************************************************************/
+
+    xor ecx, ecx
+    xgetbv
+    mov [r15 + 0x088], eax
+    mov [r15 + 0x08C], edx
+    mov eax, [r15 + 0x0D8]
+    mov edx, [r15 + 0x0DC]
+    xsetbv
+
+    xor rcx, rcx
+
+    mov rax, dr6
+    mov [r15 + 0x038], rax
+    mov dr6, rcx
+
+    mov rax, dr3
+    mov [r15 + 0x030], rax
+    mov dr3, rcx
+
+    mov rax, dr2
+    mov [r15 + 0x028], rax
+    mov dr2, rcx
+
+    mov rax, dr1
+    mov [r15 + 0x020], rax
+    mov dr1, rcx
+
+    mov rax, dr0
+    mov [r15 + 0x018], rax
+    mov dr0, rcx
+
+    mov rax, cr8
+    mov [r15 + 0x010], rax
+    mov cr8, rcx
+
+    mov rax, cr2
+    mov [r15 + 0x008], rax
+    mov cr2, rcx
+
+    /**************************************************************************/
+    /* Done                                                                   */
+    /**************************************************************************/
+
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbp
+    pop rbx
+
+    mov rax, 0xFFFFFFFFFFFFFFFF
 
     ret
     int 3
