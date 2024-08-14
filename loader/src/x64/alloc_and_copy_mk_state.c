@@ -160,7 +160,7 @@
 #define MK_MSR_STAR ((uint64_t)0x001B001000000000)
 
 /** @brief defines the FMASK MSR used by the microkernel */
-#define MK_MSR_FMASK ((uint64_t)0xFFFFFFFFFFFBFFFD)
+#define MK_MSR_FMASK ((uint64_t)0x00000000FFFBFFFD)
 
 /** @brief defines the CPUID leaf for extended state enumeration */
 #define CPUID_EXTENDED_STATE ((uint32_t)0xD)
