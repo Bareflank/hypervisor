@@ -115,7 +115,7 @@ namespace mk
     ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     ///     otherwise
     ///
-    [[nodiscard]] extern "C" auto
+    extern "C" [[nodiscard]] auto
     dispatch_syscall_trampoline(tls_t *const pmut_tls) noexcept -> bsl::uint64
     {
         bsl::expects(nullptr != pmut_tls);
@@ -145,7 +145,7 @@ namespace mk
     ///   @return Returns bsl::errc_success on success, bsl::errc_failure
     ///     otherwise
     ///
-    [[nodiscard]] extern "C" auto
+    extern "C" [[nodiscard]] auto
     mk_main(loader::mk_args_t *const pmut_args, tls_t *const pmut_tls) noexcept -> bsl::errc_type
     {
         bsl::expects(nullptr != pmut_tls);
